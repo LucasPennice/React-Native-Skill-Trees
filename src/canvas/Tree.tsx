@@ -35,10 +35,10 @@ function Tree({ tree, parentNodeInfo, selectedNode, rootCoordinates }: TreeProps
                         parentNodeInfo ? parentNodeInfo.coordinates : defaultParentInfo.coordinates,
                         currentNodeCoordintes
                     )}
-                    color="lightblue"
+                    color="#5356573D"
                     style="stroke"
                     strokeCap={"round"}
-                    strokeWidth={2}>
+                    strokeWidth={3}>
                     <Blur blur={pathBlur} />
                 </Path>
             )}
@@ -62,11 +62,23 @@ function Tree({ tree, parentNodeInfo, selectedNode, rootCoordinates }: TreeProps
 
                 return (
                     <Group origin={{ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y }} transform={groupTransform}>
-                        <Path path={getPathForCircle(cx, cy, CIRCLE_SIZE, 4)} style="stroke" strokeWidth={4} color="black">
-                            <Shadow dx={0} dy={0} blur={3} color="black" />
+                        <Path path={getPathForCircle(cx, cy, CIRCLE_SIZE, 4)} style="stroke" strokeWidth={4} color="#F2F3F8">
+                            <Shadow dx={0} dy={0} blur={3} color="#535657" />
                         </Path>
-                        <Path path={getPathForCircle(cx, cy, CIRCLE_SIZE, 4)} style="stroke" strokeWidth={4} color="green" end={0.5} />
-                        <Circle cx={cx} cy={cy} r={CIRCLE_SIZE} color="#4070F5"></Circle>
+                        <Path
+                            path={getPathForCircle(cx, cy, CIRCLE_SIZE, 4)}
+                            style="stroke"
+                            strokeCap={"round"}
+                            strokeWidth={4}
+                            color="green"
+                            end={pathTrim}>
+                            <LinearGradient
+                                start={vec(cx - CIRCLE_SIZE, cy - CIRCLE_SIZE)}
+                                end={vec(cx + CIRCLE_SIZE, cy + CIRCLE_SIZE)}
+                                colors={["#A5BDFF", "#4070F5"]}
+                            />
+                        </Path>
+                        <Circle cx={cx} cy={cy} r={CIRCLE_SIZE} color="white"></Circle>
                         <Blur blur={circleBlur} />
                     </Group>
                 );

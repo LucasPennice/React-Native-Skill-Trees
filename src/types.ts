@@ -9,6 +9,8 @@ export interface TreeNode<T> {
     isRoot?: boolean;
 }
 
+export const MENU_DAMPENING = { damping: 20, stiffness: 300 };
+
 export const treeMock: TreeNode<Book> = {
     isRoot: true,
     node: { id: `${Math.random() * 1000000}`, name: "Harry Potter 1" },
