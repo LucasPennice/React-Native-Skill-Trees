@@ -1,5 +1,5 @@
 import { createBezierPathBetweenPoints, getChildCoordinatesFromParentInfo } from "./functions";
-import { Blur, Box, Circle, Group, LinearGradient, Path, vec, rect, rrect } from "@shopify/react-native-skia";
+import { Blur, Box, Circle, Group, LinearGradient, Path, vec, rect, rrect, Paint, Shadow } from "@shopify/react-native-skia";
 import { Book, TreeNode } from "../types";
 import { CIRCLE_SIZE } from "./parameters";
 import { circlePositionsInCanvas } from "./CanvasTest";
@@ -25,11 +25,7 @@ function Tree({ tree, parentNodeInfo, selectedNode, rootCoordinates }: TreeProps
 
     let newParentNodeInfo = { coordinates: currentNodeCoordintes, numberOfChildren: tree.children ? tree.children.length : 0 };
 
-    const { circleBlur, pathBlur, innerCircleRadius, outerCircleRadius, pathTrim, scale } = useHandleTreeAnimations(
-        selectedNode,
-        tree,
-        currentNodeCoordintes
-    );
+    const { circleBlur, pathBlur, pathTrim, groupTransform } = useHandleTreeAnimations(selectedNode, tree, currentNodeCoordintes);
 
     return (
         <>
@@ -65,15 +61,11 @@ function Tree({ tree, parentNodeInfo, selectedNode, rootCoordinates }: TreeProps
                 const cy = currentNodeCoordintes.y - CIRCLE_SIZE / 2;
 
                 return (
-                    <Group origin={{ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y }} transform={scale}>
-                        <Path path={getPathForCircle(cx, cy, CIRCLE_SIZE)} style="stroke" strokeWidth={8} color="black" />
-                        <Path
-                            path={getPathForCircle(currentNodeCoordintes.x, currentNodeCoordintes.y, CIRCLE_SIZE * 1.2)}
-                            style="stroke"
-                            strokeWidth={15}
-                            color="black"
-                            end={pathTrim}
-                        />
+                    <Group origin={{ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y }} transform={groupTransform}>
+                        <Path path={getPathForCircle(cx, cy, CIRCLE_SIZE, 4)} style="stroke" strokeWidth={4} color="black">
+                            <Shadow dx={0} dy={0} blur={3} color="black" />
+                        </Path>
+                        <Path path={getPathForCircle(cx, cy, CIRCLE_SIZE, 4)} style="stroke" strokeWidth={4} color="green" end={0.5} />
                         <Circle cx={cx} cy={cy} r={CIRCLE_SIZE} color="#4070F5"></Circle>
                         <Blur blur={circleBlur} />
                     </Group>
@@ -84,6 +76,7 @@ function Tree({ tree, parentNodeInfo, selectedNode, rootCoordinates }: TreeProps
 }
 export default Tree;
 
-function getPathForCircle(cx: number, cy: number, r: number) {
-    return `M ${cx} ${cy} m ${-r}, 0 a ${r},${r} 0 1,0 ${r * 2},0 a ${r},${r} 0 1,0 ${-(r * 2)},0`;
+function getPathForCircle(cx: number, cy: number, r: number, strokeWidth: number) {
+    const radius = r + strokeWidth / 2;
+    return `M ${cx - strokeWidth / 2} ${cy} m ${-r}, 0 a ${radius},${radius} 0 1,0 ${radius * 2},0 a ${radius},${radius} 0 1,0 ${-(radius * 2)},0`;
 }
