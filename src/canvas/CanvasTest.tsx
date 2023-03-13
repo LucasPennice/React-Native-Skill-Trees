@@ -61,7 +61,7 @@ function CanvasTest() {
     return (
         <ScrollView showsVerticalScrollIndicator={false} ref={verticalScrollViewRef}>
             <ScrollView ref={horizontalScrollViewRef} horizontal showsHorizontalScrollIndicator={false} style={{ position: "relative" }}>
-                <Canvas onTouch={touchHandler} style={{ width: CANVAS_SIZE.width, height: CANVAS_SIZE.height, backgroundColor: "rgba(0,0,0,1)" }}>
+                <Canvas onTouch={touchHandler} style={{ width: CANVAS_SIZE.width, height: CANVAS_SIZE.height, backgroundColor: "#F2F3F8" }}>
                     <Tree selectedNode={selectedNode} tree={treeMock} rootCoordinates={TREE_ROOT_COORDINATES} />
                 </Canvas>
                 {selectedNode && foundNodeCoordinates && (

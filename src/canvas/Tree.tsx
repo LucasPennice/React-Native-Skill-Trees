@@ -1,10 +1,10 @@
 import { createBezierPathBetweenPoints, getChildCoordinatesFromParentInfo } from "./functions";
-import { useSharedValue, withRepeat, withSpring, withTiming } from "react-native-reanimated";
-import { Blur, Canvas, Circle, mix, Path, TouchInfo, useSharedValueEffect, useTouchHandler, useValue } from "@shopify/react-native-skia";
+import { Blur, Box, Circle, Group, LinearGradient, Path, vec, rect, rrect } from "@shopify/react-native-skia";
 import { Book, TreeNode } from "../types";
 import { CIRCLE_SIZE } from "./parameters";
-import { useEffect } from "react";
 import { circlePositionsInCanvas } from "./CanvasTest";
+import useHandleTreeAnimations from "./useHandleTreeAnimations";
+import { current } from "@reduxjs/toolkit";
 
 type TreeProps = {
     tree: TreeNode<Book>;
@@ -25,34 +25,11 @@ function Tree({ tree, parentNodeInfo, selectedNode, rootCoordinates }: TreeProps
 
     let newParentNodeInfo = { coordinates: currentNodeCoordintes, numberOfChildren: tree.children ? tree.children.length : 0 };
 
-    const scale = useValue(CIRCLE_SIZE);
-    const blur = useValue(0);
-    const pathBlur = useValue(0);
-    const isActive = useSharedValue(0);
-    const isBlurred = useSharedValue(0);
-    const isPathBlurred = useSharedValue(0);
-
-    useEffect(() => {
-        const shouldActivate = selectedNode === tree.node.id;
-        const shouldBlur = selectedNode !== tree.node.id && selectedNode !== null;
-        const shouldBlurPath = selectedNode !== null;
-
-        isActive.value = withSpring(shouldActivate ? 1 : 0, { damping: 18, stiffness: 300 });
-        isBlurred.value = withTiming(shouldBlur ? 1 : 0, { duration: 0.15 });
-        isPathBlurred.value = withTiming(shouldBlurPath ? 1 : 0, { duration: 150 });
-    }, [isActive, isPathBlurred, isBlurred, selectedNode]);
-
-    useSharedValueEffect(() => {
-        scale.current = mix(isActive.value, CIRCLE_SIZE, CIRCLE_SIZE_SELECTED);
-    }, isActive);
-
-    useSharedValueEffect(() => {
-        blur.current = mix(isBlurred.value, 0, 4);
-    }, isBlurred);
-
-    useSharedValueEffect(() => {
-        pathBlur.current = mix(isPathBlurred.value, 0, 4);
-    }, isPathBlurred);
+    const { circleBlur, pathBlur, innerCircleRadius, outerCircleRadius, pathTrim, scale } = useHandleTreeAnimations(
+        selectedNode,
+        tree,
+        currentNodeCoordintes
+    );
 
     return (
         <>
@@ -84,15 +61,29 @@ function Tree({ tree, parentNodeInfo, selectedNode, rootCoordinates }: TreeProps
             {(() => {
                 circlePositionsInCanvas.push({ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y - CIRCLE_SIZE / 2, id: tree.node.id });
 
+                const cx = currentNodeCoordintes.x;
+                const cy = currentNodeCoordintes.y - CIRCLE_SIZE / 2;
+
                 return (
-                    <>
-                        <Circle cx={currentNodeCoordintes.x} cy={currentNodeCoordintes.y - CIRCLE_SIZE / 2} r={scale} color="cyan">
-                            <Blur blur={blur} />
-                        </Circle>
-                    </>
+                    <Group origin={{ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y }} transform={scale}>
+                        <Path path={getPathForCircle(cx, cy, CIRCLE_SIZE)} style="stroke" strokeWidth={8} color="black" />
+                        <Path
+                            path={getPathForCircle(currentNodeCoordintes.x, currentNodeCoordintes.y, CIRCLE_SIZE * 1.2)}
+                            style="stroke"
+                            strokeWidth={15}
+                            color="black"
+                            end={pathTrim}
+                        />
+                        <Circle cx={cx} cy={cy} r={CIRCLE_SIZE} color="#4070F5"></Circle>
+                        <Blur blur={circleBlur} />
+                    </Group>
                 );
             })()}
         </>
     );
 }
 export default Tree;
+
+function getPathForCircle(cx: number, cy: number, r: number) {
+    return `M ${cx} ${cy} m ${-r}, 0 a ${r},${r} 0 1,0 ${r * 2},0 a ${r},${r} 0 1,0 ${-(r * 2)},0`;
+}
