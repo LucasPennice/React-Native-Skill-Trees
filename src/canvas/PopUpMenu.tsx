@@ -4,8 +4,8 @@ import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "./useCanvasTouchHandler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED } from "./Tree";
 import { circlePositionsInCanvas } from "./CanvasTest";
-import { CIRCLE_SIZE } from "./parameters";
-import { MENU_DAMPENING } from "../types";
+import { MENU_DAMPENING, treeMock } from "../types";
+import { findTreeNodeById } from "../treeFunctions";
 
 type Props = {
     selectedNode: string | null;
@@ -84,7 +84,7 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                         padding: 20,
                     },
                 ]}>
-                <Text style={{ color: "white", fontSize: 23 }}>Soy el menu!</Text>
+                <Text style={{ color: "white", fontSize: 23 }}>{findTreeNodeById(treeMock, selectedNode).name ?? "noname"}</Text>
             </Animated.View>
             {/* This is the triangle of the menu */}
             <Animated.View

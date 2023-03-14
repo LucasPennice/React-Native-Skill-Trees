@@ -13,31 +13,26 @@ export const MENU_DAMPENING = { damping: 20, stiffness: 300 };
 
 export const treeMock: TreeNode<Book> = {
     isRoot: true,
-    node: { id: `${Math.random() * 1000000}`, name: "Harry Potter 1" },
+    node: { id: `Harry Potter 1`, name: "Harry Potter 1" },
     children: [
         {
-            node: { id: `${Math.random() * 1000000}`, name: "Harry Potter 2" },
+            node: { id: `Harry Potter 2`, name: "Harry Potter 2" },
             children: [
                 {
-                    node: { id: `${Math.random() * 1000000}`, name: "Harry Potter 3" },
+                    node: { id: `Harry Potter 3`, name: "Harry Potter 3" },
                     children: [
-                        { node: { id: `${Math.random() * 1000000}`, name: "Harry Potter 41" } },
-                        { node: { id: `${Math.random() * 1000000}`, name: "Harry Potter 42" } },
-                        { node: { id: `${Math.random() * 1000000}`, name: "Harry Potter 43" } },
-                        { node: { id: `${Math.random() * 1000000}`, name: "Harry Potter 44" } },
-                        { node: { id: `${Math.random() * 1000000}`, name: "Harry Potter 45" } },
-                        {
-                            node: { id: `${Math.random() * 1000000}`, name: "Harry Potter 46" },
-                        },
+                        { node: { id: `Harry Potter 41`, name: "Harry Potter 41" } },
+                        { node: { id: `Harry Potter 42`, name: "Harry Potter 42" } },
+                        { node: { id: `Harry Potter 43`, name: "Harry Potter 43" } },
                     ],
                 },
             ],
         },
         {
-            node: { id: `${Math.random() * 1000000}`, name: "Harry Potter 2.5" },
+            node: { id: "Harry Potter 2.5", name: "Harry Potter 2.5" },
             children: [
                 {
-                    node: { id: `${Math.random() * 1000000}`, name: "Harry Potter 2.5 child" },
+                    node: { id: "Harry Potter 2.5 child", name: "Harry Potter 2.5 child" },
                 },
             ],
         },

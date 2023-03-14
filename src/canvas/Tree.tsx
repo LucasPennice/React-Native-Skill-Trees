@@ -1,10 +1,10 @@
 import { createBezierPathBetweenPoints, getChildCoordinatesFromParentInfo } from "./functions";
-import { Blur, Box, Circle, Group, LinearGradient, Path, vec, rect, rrect, Paint, Shadow } from "@shopify/react-native-skia";
-import { Book, TreeNode } from "../types";
+import { Blur, Box, Circle, Group, LinearGradient, Path, vec, rect, rrect, Paint, Shadow, Text, useFont } from "@shopify/react-native-skia";
+import { Book, treeMock, TreeNode } from "../types";
 import { CIRCLE_SIZE } from "./parameters";
 import { circlePositionsInCanvas } from "./CanvasTest";
 import useHandleTreeAnimations from "./useHandleTreeAnimations";
-import { current } from "@reduxjs/toolkit";
+import { findDistanceBetweenNodesById } from "../treeFunctions";
 
 type TreeProps = {
     tree: TreeNode<Book>;
@@ -25,7 +25,11 @@ function Tree({ tree, parentNodeInfo, selectedNode, rootCoordinates }: TreeProps
 
     let newParentNodeInfo = { coordinates: currentNodeCoordintes, numberOfChildren: tree.children ? tree.children.length : 0 };
 
-    const { circleBlur, pathBlur, pathTrim, groupTransform } = useHandleTreeAnimations(selectedNode, tree, currentNodeCoordintes);
+    const { circleBlurOnInactive, circleOpacity, connectingPathTrim, groupTransform, pathBlurOnInactive, pathTrim } = useHandleTreeAnimations(
+        selectedNode,
+        tree,
+        findDistanceBetweenNodesById(treeMock, tree.node.id)
+    );
 
     return (
         <>
@@ -38,8 +42,9 @@ function Tree({ tree, parentNodeInfo, selectedNode, rootCoordinates }: TreeProps
                     color="#5356573D"
                     style="stroke"
                     strokeCap={"round"}
-                    strokeWidth={3}>
-                    <Blur blur={pathBlur} />
+                    strokeWidth={3}
+                    end={connectingPathTrim}>
+                    <Blur blur={pathBlurOnInactive} />
                 </Path>
             )}
             {/* Recursive fucntion that renders the rest of the tree */}
@@ -61,7 +66,7 @@ function Tree({ tree, parentNodeInfo, selectedNode, rootCoordinates }: TreeProps
                 const cy = currentNodeCoordintes.y - CIRCLE_SIZE / 2;
 
                 return (
-                    <Group origin={{ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y }} transform={groupTransform}>
+                    <Group origin={{ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y }} transform={groupTransform} opacity={circleOpacity}>
                         <Path path={getPathForCircle(cx, cy, CIRCLE_SIZE, 4)} style="stroke" strokeWidth={4} color="#F2F3F8">
                             <Shadow dx={0} dy={0} blur={3} color="#535657" />
                         </Path>
@@ -79,7 +84,7 @@ function Tree({ tree, parentNodeInfo, selectedNode, rootCoordinates }: TreeProps
                             />
                         </Path>
                         <Circle cx={cx} cy={cy} r={CIRCLE_SIZE} color="white"></Circle>
-                        <Blur blur={circleBlur} />
+                        <Blur blur={circleBlurOnInactive} />
                     </Group>
                 );
             })()}

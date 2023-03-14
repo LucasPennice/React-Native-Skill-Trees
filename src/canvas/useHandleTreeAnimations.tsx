@@ -1,23 +1,29 @@
-import { Easing, useDerivedValue, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
-import { mix, useSharedValueEffect, useValue, clamp, useComputedValue } from "@shopify/react-native-skia";
-import { CIRCLE_SIZE } from "./parameters";
+import { Easing, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
+import { mix, useSharedValueEffect, useValue, useComputedValue } from "@shopify/react-native-skia";
 import { useEffect } from "react";
-import { CIRCLE_SIZE_SELECTED } from "./Tree";
 import { Book, TreeNode } from "../types";
 
-const useHandleTreeAnimations = (selectedNode: string | null, tree: TreeNode<Book>, currentNodeCoordintes: { x: number; y: number }) => {
-    const circleBlur = useValue(0);
-    const pathBlur = useValue(0);
-    const shouldTransform = useValue(0);
+const useHandleTreeAnimations = (selectedNode: string | null, tree: TreeNode<Book>, treeLevel: number) => {
+    const { circleOpacity, connectingPathTrim } = useInitialAnimations(treeLevel);
+
+    const { circleBlurOnInactive, pathBlurOnInactive } = useAnimationsForUnselected(selectedNode, tree.node.id);
+
+    const { pathTrim, groupTransform } = useAnimationsOnSelect(selectedNode, tree.node.id);
+
+    return { circleBlurOnInactive, pathBlurOnInactive, pathTrim, groupTransform, connectingPathTrim, circleOpacity };
+};
+
+export default useHandleTreeAnimations;
+
+function useAnimationsOnSelect(selectedNode: string, treeId: string) {
     const pathTrim = useValue(0);
-    //
-    const isActive = useSharedValue(0);
+    const shouldTransform = useValue(0);
+
     const isBorderTraced = useSharedValue(0);
-    const isBlurred = useSharedValue(0);
-    const isPathBlurred = useSharedValue(0);
+    const isActive = useSharedValue(0);
 
     useEffect(() => {
-        const shouldActivate = selectedNode === tree.node.id;
+        const shouldActivate = selectedNode === treeId;
 
         isActive.value = withSpring(shouldActivate ? 1 : 0, { damping: 18, stiffness: 300 });
 
@@ -25,19 +31,34 @@ const useHandleTreeAnimations = (selectedNode: string | null, tree: TreeNode<Boo
     }, [selectedNode]);
 
     useSharedValueEffect(() => {
+        pathTrim.current = isBorderTraced.value;
+    }, isBorderTraced);
+
+    useSharedValueEffect(() => {
         shouldTransform.current = mix(isActive.value, 0, 1);
     }, isActive);
 
-    // Handles circle blur 👇
+    const groupTransform = useComputedValue(() => [{ scale: mix(shouldTransform.current, 1, 3) }], [shouldTransform]);
+
+    return { pathTrim, groupTransform };
+}
+
+//Animations for components that are not selected
+function useAnimationsForUnselected(selectedNode: string, treeId: string) {
+    const circleBlurOnInactive = useValue(0);
+    const pathBlurOnInactive = useValue(0);
+    //
+    const isBlurred = useSharedValue(0);
+    const isPathBlurred = useSharedValue(0);
 
     useEffect(() => {
-        const shouldBlur = selectedNode !== tree.node.id && selectedNode !== null;
+        const shouldBlur = selectedNode !== treeId && selectedNode !== null;
 
         isBlurred.value = withTiming(shouldBlur ? 1 : 0, { duration: 0.15 });
     }, [selectedNode]);
 
     useSharedValueEffect(() => {
-        circleBlur.current = mix(isBlurred.value, 0, 10);
+        circleBlurOnInactive.current = mix(isBlurred.value, 0, 10);
     }, isBlurred);
 
     //Handles path blur 👇
@@ -48,18 +69,59 @@ const useHandleTreeAnimations = (selectedNode: string | null, tree: TreeNode<Boo
     }, [selectedNode]);
 
     useSharedValueEffect(() => {
-        pathBlur.current = mix(isPathBlurred.value, 0, 10);
+        pathBlurOnInactive.current = mix(isPathBlurred.value, 0, 10);
     }, isPathBlurred);
 
-    //Handles path trim 👇
+    return { circleBlurOnInactive, pathBlurOnInactive };
+}
+
+function useInitialAnimations(treeLevel: number) {
+    const PATH_INITIAL_ANIMATION_DURATION = 500;
+    const CIRCLE_INITIAL_ANIMATION_DURATION = 200;
+
+    const pathAnimationActivator = useSharedValue(0);
+    const circleAnimationActivator = useSharedValue(0);
+
+    //Value for the path connecting two circles
+    const connectingPathTrim = useValue(0);
+    const circleOpacity = useValue(0);
+
+    const animationFns = {
+        initial: {
+            pathDelay: (treeLevel: number) => {
+                const treeDistance = treeLevel - 1;
+
+                return CIRCLE_INITIAL_ANIMATION_DURATION * (treeDistance + 1) + treeDistance * PATH_INITIAL_ANIMATION_DURATION;
+            },
+            circleDelay: (treeLevel: number) => {
+                return CIRCLE_INITIAL_ANIMATION_DURATION * treeLevel + treeLevel * PATH_INITIAL_ANIMATION_DURATION;
+            },
+        },
+    };
+
+    // Handles initial path animation 👇
+    useEffect(() => {
+        pathAnimationActivator.value = withDelay(
+            animationFns.initial.pathDelay(treeLevel),
+            withTiming(1, { duration: PATH_INITIAL_ANIMATION_DURATION, easing: Easing.bezier(0.83, 0, 0.17, 1) })
+        );
+    });
+
     useSharedValueEffect(() => {
-        pathTrim.current = isBorderTraced.value;
-    }, isBorderTraced);
+        connectingPathTrim.current = mix(pathAnimationActivator.value, 0, 1);
+    }, pathAnimationActivator);
 
-    const groupTransform = useComputedValue(() => [{ scale: mix(shouldTransform.current, 1, 3) }], [shouldTransform]);
-    //
+    // Handles initial circle animation 👇
+    useEffect(() => {
+        circleAnimationActivator.value = withDelay(
+            animationFns.initial.circleDelay(treeLevel),
+            withTiming(1, { duration: CIRCLE_INITIAL_ANIMATION_DURATION, easing: Easing.bezier(0.83, 0, 0.17, 1) })
+        );
+    });
 
-    return { circleBlur, pathBlur, pathTrim, groupTransform };
-};
+    useSharedValueEffect(() => {
+        circleOpacity.current = mix(circleAnimationActivator.value, 0, 1);
+    }, circleAnimationActivator);
 
-export default useHandleTreeAnimations;
+    return { connectingPathTrim, circleOpacity };
+}
