@@ -1,3 +1,5 @@
+import { StyleProp, ViewStyle } from "react-native/types";
+
 export type Book = {
     name: string;
     id: string;
@@ -7,6 +9,7 @@ export interface TreeNode<T> {
     node: T;
     children?: TreeNode<T>[];
     isRoot?: boolean;
+    isCompleted?: boolean;
 }
 
 export const MENU_DAMPENING = { damping: 20, stiffness: 300 };
@@ -38,3 +41,57 @@ export const treeMock: TreeNode<Book> = {
         },
     ],
 };
+
+export const mockSkillTreeArray: TreeNode<Book>[] = [
+    {
+        isRoot: true,
+        node: { id: `Coding`, name: "Coding" },
+        children: [
+            {
+                node: { id: `Management`, name: "Management" },
+                children: [
+                    {
+                        node: { id: `Lead Gen`, name: "Lead Gen" },
+                        children: [
+                            {
+                                node: { id: `Strategy`, name: "Strategy" },
+                                children: [{ node: { id: "Cashflow Management", name: "Cashflow Management" } }],
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                node: { id: "English", name: "English" },
+                children: [
+                    {
+                        node: {
+                            id: "Public Speaking",
+                            name: "Public Speaking",
+                        },
+                        children: [{ node: { name: "Sales", id: "Sales" }, children: [{ node: { id: "Leadership", name: "Leadership" } }] }],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        isRoot: true,
+        node: { id: `People Management`, name: "People Management" },
+        children: [
+            {
+                node: { id: `Confidence`, name: "Confidence" },
+            },
+            {
+                node: { id: "Energy Investments", name: "Energy Investments" },
+                children: [
+                    {
+                        node: { id: `Copywriting`, name: "Copywriting" },
+                    },
+                ],
+            },
+        ],
+    },
+];
+
+export const centerFlex: StyleProp<ViewStyle> = { display: "flex", justifyContent: "center", alignItems: "center" };

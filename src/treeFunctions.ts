@@ -1,6 +1,8 @@
-import { Book, treeMock, TreeNode } from "./types";
+import { Book, TreeNode } from "./types";
 
-export function findTreeHeight(rootNode: TreeNode<Book>) {
+export function findTreeHeight(rootNode: TreeNode<Book> | undefined) {
+    if (!rootNode) return undefined;
+
     if (!rootNode.node) return 0;
 
     let maxHeight = 0;
@@ -16,7 +18,9 @@ export function findTreeHeight(rootNode: TreeNode<Book>) {
     return maxHeight + 1;
 }
 
-export function findTreeNodeById(rootNode: TreeNode<Book>, id: string): Book | undefined {
+export function findTreeNodeById(rootNode: TreeNode<Book> | undefined, id: string): Book | undefined {
+    if (!rootNode) return undefined;
+
     if (rootNode.node.id === id) return rootNode.node;
     if (!rootNode.node) return undefined;
     if (!rootNode.children) return undefined;
@@ -28,7 +32,9 @@ export function findTreeNodeById(rootNode: TreeNode<Book>, id: string): Book | u
     return arr.find((c) => c !== undefined);
 }
 
-export function findDistanceBetweenNodesById(rootNode: TreeNode<Book>, id: string): number {
+export function findDistanceBetweenNodesById(rootNode: TreeNode<Book> | undefined, id: string): number {
+    if (!rootNode) return undefined;
+
     //Base case 👇
 
     if (rootNode.node.id === id) return 1;

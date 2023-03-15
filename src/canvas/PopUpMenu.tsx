@@ -3,9 +3,11 @@ import { Dimensions, Text } from "react-native";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "./useCanvasTouchHandler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED } from "./Tree";
-import { MENU_DAMPENING, treeMock } from "../types";
+import { MENU_DAMPENING } from "../types";
 import { findTreeNodeById } from "../treeFunctions";
 import { CirclePositionInCanvas } from "./CanvasTest";
+import { selectCurrentTree } from "../currentTreeSlice";
+import { useAppSelector } from "../reduxHooks";
 
 type Props = {
     selectedNode: string | null;
@@ -14,7 +16,7 @@ type Props = {
 };
 
 function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: Props) {
-    if (!selectedNode || !foundNodeCoordinates) return undefined;
+    const { value: currentTree } = useAppSelector(selectCurrentTree);
 
     const { height, width } = Dimensions.get("window");
 
@@ -86,7 +88,7 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                         padding: 20,
                     },
                 ]}>
-                <Text style={{ color: "white", fontSize: 23 }}>{findTreeNodeById(treeMock, selectedNode).name ?? "noname"}</Text>
+                <Text style={{ color: "white", fontSize: 23 }}>{findTreeNodeById(currentTree, selectedNode).name ?? "noname"}</Text>
             </Animated.View>
             {/* This is the triangle of the menu */}
             <Animated.View

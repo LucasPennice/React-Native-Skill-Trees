@@ -76,7 +76,7 @@ function useAnimationsForUnselected(selectedNode: string, treeId: string) {
 }
 
 function useInitialAnimations(treeLevel: number) {
-    const PATH_INITIAL_ANIMATION_DURATION = 500;
+    const PATH_INITIAL_ANIMATION_DURATION = 200;
     const CIRCLE_INITIAL_ANIMATION_DURATION = 200;
 
     const pathAnimationActivator = useSharedValue(0);
