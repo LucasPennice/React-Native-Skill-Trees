@@ -18,14 +18,14 @@ export function didTapCircle(touchInfo: TouchInfo) {
     };
 }
 
+export const DISTANCE_BETWEEN_CHILDREN = 100;
+export const DISTANCE_BETWEEN_GENERATIONS = 150;
+
 export function getChildCoordinatesFromParentInfo(parentNodeInfo: {
     coordinates: { x: number; y: number };
     numberOfChildren: number;
     currentChildIndex: number;
 }) {
-    const DISTANCE_BETWEEN_CHILDREN = 70;
-    const DISTANCE_BETWEEN_GENERATIONS = 100;
-
     const distanceLeftShift = getDistanceLeftShift();
 
     const y = parentNodeInfo.coordinates.y + DISTANCE_BETWEEN_GENERATIONS;

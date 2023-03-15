@@ -2,14 +2,15 @@ import { useTouchHandler } from "@shopify/react-native-skia";
 import { useRef } from "react";
 import { findTreeNodeById } from "../treeFunctions";
 import { treeMock } from "../types";
-import { circlePositionsInCanvas } from "./CanvasTest";
 import { didTapCircle } from "./functions";
 import { Dimensions, ScrollView } from "react-native";
 import { CIRCLE_SIZE_SELECTED } from "./Tree";
+import { CirclePositionInCanvas } from "./CanvasTest";
 
 type Props = {
     selectedNodeState: [null | string, React.Dispatch<React.SetStateAction<string | null>>];
     setSelectedNodeHistory: React.Dispatch<React.SetStateAction<(string | null)[]>>;
+    circlePositionsInCanvas: CirclePositionInCanvas[];
 };
 
 export const DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL = CIRCLE_SIZE_SELECTED + 20;
@@ -18,6 +19,7 @@ const useCanvasTouchHandler = (props: Props) => {
     const {
         selectedNodeState: [selectedNode, setSelectedNode],
         setSelectedNodeHistory,
+        circlePositionsInCanvas,
     } = props;
 
     const { height } = Dimensions.get("window");
@@ -57,10 +59,10 @@ const useCanvasTouchHandler = (props: Props) => {
                 return setSelectedNode(null);
             },
         },
-        [selectedNode]
+        [selectedNode, circlePositionsInCanvas]
     );
 
-    return { touchHandler, horizontalScrollViewRef, verticalScrollViewRef, scrollToCoordinates };
+    return { touchHandler, horizontalScrollViewRef, verticalScrollViewRef };
 };
 
 export default useCanvasTouchHandler;

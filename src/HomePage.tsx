@@ -5,8 +5,10 @@ import { useAppDispatch, useAppSelector } from "./reduxHooks";
 import MyComponent from "./Test";
 
 function HomePage() {
-    const isLogged = useAppSelector((state) => state.login.isLogged);
-    const dispatch = useAppDispatch();
+    // const isLogged = useAppSelector((state) => state.coordinatesInCanvas);
+
+    // console.log(isLogged);
+    // const dispatch = useAppDispatch();
 
     return (
         <View style={{}}>

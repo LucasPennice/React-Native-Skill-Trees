@@ -3,17 +3,19 @@ import { Dimensions, Text } from "react-native";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "./useCanvasTouchHandler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED } from "./Tree";
-import { circlePositionsInCanvas } from "./CanvasTest";
 import { MENU_DAMPENING, treeMock } from "../types";
 import { findTreeNodeById } from "../treeFunctions";
+import { CirclePositionInCanvas } from "./CanvasTest";
 
 type Props = {
     selectedNode: string | null;
     selectedNodeHistory: (string | null)[];
-    foundNodeCoordinates: typeof circlePositionsInCanvas[0];
+    foundNodeCoordinates: CirclePositionInCanvas;
 };
 
 function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: Props) {
+    if (!selectedNode || !foundNodeCoordinates) return undefined;
+
     const { height, width } = Dimensions.get("window");
 
     const isOpen = useSharedValue(false);

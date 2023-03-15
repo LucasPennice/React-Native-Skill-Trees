@@ -44,5 +44,3 @@ export function findDistanceBetweenNodesById(rootNode: TreeNode<Book>, id: strin
 
     return Math.max(...result);
 }
-
-console.log(findDistanceBetweenNodesById(treeMock, "Harry Potter 1"));

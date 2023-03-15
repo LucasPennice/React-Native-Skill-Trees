@@ -1,26 +1,33 @@
 import { createBezierPathBetweenPoints, getChildCoordinatesFromParentInfo } from "./functions";
-import { Blur, Box, Circle, Group, LinearGradient, Path, vec, rect, rrect, Paint, Shadow, Text, useFont } from "@shopify/react-native-skia";
+import { Blur, Circle, Group, LinearGradient, Path, vec, Shadow } from "@shopify/react-native-skia";
 import { Book, treeMock, TreeNode } from "../types";
 import { CIRCLE_SIZE } from "./parameters";
-import { circlePositionsInCanvas } from "./CanvasTest";
+import { CirclePositionInCanvas } from "./CanvasTest";
 import useHandleTreeAnimations from "./useHandleTreeAnimations";
 import { findDistanceBetweenNodesById } from "../treeFunctions";
+import { useEffect } from "react";
 
 type TreeProps = {
     tree: TreeNode<Book>;
     parentNodeInfo?: { coordinates: { x: number; y: number }; numberOfChildren: number; currentChildIndex: number };
-    selectedNode: string | null;
+    stateProps: {
+        selectedNode: string | null;
+        popCoordinateToArray: (coordinate: CirclePositionInCanvas) => void;
+    };
     rootCoordinates?: { width: number; height: number };
 };
 
 export const CIRCLE_SIZE_SELECTED = CIRCLE_SIZE * 3;
 
-function Tree({ tree, parentNodeInfo, selectedNode, rootCoordinates }: TreeProps) {
+function Tree({ tree, parentNodeInfo, stateProps, rootCoordinates }: TreeProps) {
     const defaultParentInfo = parentNodeInfo ?? {
         coordinates: { x: rootCoordinates.width, y: rootCoordinates.height },
         numberOfChildren: 1,
         currentChildIndex: 0,
     };
+
+    const { popCoordinateToArray, selectedNode } = stateProps;
+
     const currentNodeCoordintes = getChildCoordinatesFromParentInfo(parentNodeInfo ?? defaultParentInfo);
 
     let newParentNodeInfo = { coordinates: currentNodeCoordintes, numberOfChildren: tree.children ? tree.children.length : 0 };
@@ -55,12 +62,14 @@ function Tree({ tree, parentNodeInfo, selectedNode, rootCoordinates }: TreeProps
                             key={idx}
                             tree={element}
                             parentNodeInfo={{ ...newParentNodeInfo, currentChildIndex: idx }}
-                            selectedNode={selectedNode}
+                            stateProps={{ selectedNode, popCoordinateToArray }}
                         />
                     );
                 })}
             {(() => {
-                circlePositionsInCanvas.push({ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y - CIRCLE_SIZE / 2, id: tree.node.id });
+                useEffect(() => {
+                    popCoordinateToArray({ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y - CIRCLE_SIZE / 2, id: tree.node.id });
+                }, []);
 
                 const cx = currentNodeCoordintes.x;
                 const cy = currentNodeCoordintes.y - CIRCLE_SIZE / 2;
