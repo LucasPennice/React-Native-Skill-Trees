@@ -70,3 +70,51 @@ export function createBezierPathBetweenPoints(p1: { x: number; y: number }, p2: 
 export function getDeltaX() {
     const treeHeight = findTreeHeight(treeMock);
 }
+
+export const LETTER_SIZE_AT_10 = {
+    A: 6.67,
+    B: 6.67,
+    C: 7.23,
+    D: 7.23,
+    E: 6.67,
+    F: 6.11,
+    G: 7.78,
+    H: 7.23,
+    I: 2.78,
+    J: 5,
+    K: 6.67,
+    L: 5.56,
+    M: 8.34,
+    N: 7.23,
+    O: 7.78,
+    P: 6.67,
+    Q: 7.78,
+    R: 7.23,
+    S: 6.67,
+    T: 6.11,
+    U: 7.23,
+    V: 6.67,
+    W: 9.45,
+    X: 6.67,
+    Y: 6.67,
+    Z: 6.11,
+    AT: 10.16,
+    DOT: 2.78,
+    SPACE: 5.56,
+};
+
+export function getSymbolWidthForCurrentFontSize(symbol: string, fontSize: number) {
+    let currentSymbol = "";
+    if (symbol === "@") currentSymbol = "AT";
+    if (symbol === ".") currentSymbol = "DOT";
+    if (symbol === " ") currentSymbol = "SPACE";
+    if (symbol !== "@" && symbol !== "." && symbol !== " ") currentSymbol = symbol.toUpperCase();
+    //@ts-ignore
+    const letterSizeAtFont10: number = LETTER_SIZE_AT_10[currentSymbol];
+    const letterSizeAtCurrentFont = (letterSizeAtFont10 / 10) * fontSize;
+    return letterSizeAtCurrentFont;
+}
+
+export function getHeightForFont(fontSize: number) {
+    return (fontSize * 125.5) / 110;
+}

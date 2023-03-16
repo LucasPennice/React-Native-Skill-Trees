@@ -6,15 +6,17 @@ import useCanvasTouchHandler from "./useCanvasTouchHandler";
 import PopUpMenu from "./PopUpMenu";
 import Tree, { CIRCLE_SIZE_SELECTED } from "./Tree";
 import { findTreeHeight } from "../treeFunctions";
-import { NAV_HEGIHT } from "../HomePage";
+import { NAV_HEGIHT } from "../pages/HomePage";
 import { useAppSelector } from "../reduxHooks";
 import { selectCanvasDisplaySettings } from "../canvasDisplaySettingsSlice";
 import { selectCurrentTree } from "../currentTreeSlice";
+import { selectScreenDimentions } from "../screenDimentionsSlice";
 
 export type CirclePositionInCanvas = { x: number; y: number; id: string };
 
 function CanvasTest() {
-    const { height, width } = Dimensions.get("window");
+    const { height, width } = useAppSelector(selectScreenDimentions);
+
     const { value: currentTree } = useAppSelector(selectCurrentTree);
 
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
@@ -91,7 +93,7 @@ function CanvasTest() {
 function calculateDimentionsAndRootCoordinates() {
     const { value: currentTree } = useAppSelector(selectCurrentTree);
 
-    const { height, width } = Dimensions.get("window");
+    const { height, width } = useAppSelector(selectScreenDimentions);
 
     const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;
 

@@ -3,19 +3,55 @@ import { mix, useSharedValueEffect, useValue, useComputedValue } from "@shopify/
 import { useEffect } from "react";
 import { Book, TreeNode } from "../types";
 
-const useHandleTreeAnimations = (selectedNode: string | null, tree: TreeNode<Book>, treeLevel: number) => {
+const PATH_INITIAL_ANIMATION_DURATION = 200;
+const CIRCLE_INITIAL_ANIMATION_DURATION = 200;
+
+const animationFns = {
+    initial: {
+        pathDelay: (treeLevel: number) => {
+            const treeDistance = treeLevel - 1;
+
+            return CIRCLE_INITIAL_ANIMATION_DURATION * (treeDistance + 1) + treeDistance * PATH_INITIAL_ANIMATION_DURATION;
+        },
+        circleDelay: (treeLevel: number) => {
+            return CIRCLE_INITIAL_ANIMATION_DURATION * treeLevel + treeLevel * PATH_INITIAL_ANIMATION_DURATION;
+        },
+    },
+};
+
+const useHandleTreeAnimations = (selectedNode: string | null, showLabel: boolean, tree: TreeNode<Book>, treeLevel: number) => {
     const { circleOpacity, connectingPathTrim } = useInitialAnimations(treeLevel);
+
+    const { labelOpacity } = useSettingsAnimations(showLabel);
 
     const { circleBlurOnInactive, pathBlurOnInactive } = useAnimationsForUnselected(selectedNode, tree.node.id);
 
-    const { pathTrim, groupTransform } = useAnimationsOnSelect(selectedNode, tree.node.id);
+    const { pathTrim, groupTransform } = useAnimationsOnSelect(selectedNode, tree);
 
-    return { circleBlurOnInactive, pathBlurOnInactive, pathTrim, groupTransform, connectingPathTrim, circleOpacity };
+    return { circleBlurOnInactive, pathBlurOnInactive, pathTrim, groupTransform, connectingPathTrim, circleOpacity, labelOpacity };
 };
 
 export default useHandleTreeAnimations;
 
-function useAnimationsOnSelect(selectedNode: string, treeId: string) {
+function useSettingsAnimations(showLabel: boolean) {
+    const labelOpacity = useValue(0);
+
+    const isLabel = useSharedValue(0);
+
+    useEffect(() => {
+        isLabel.value = withSpring(showLabel ? 1 : 0, { damping: 18, stiffness: 300 });
+    }, [showLabel]);
+
+    useSharedValueEffect(() => {
+        labelOpacity.current = mix(isLabel.value, 0, 1);
+    }, isLabel);
+
+    return { labelOpacity };
+}
+
+function useAnimationsOnSelect(selectedNode: string, tree: TreeNode<Book>) {
+    const treeId = tree.node.id;
+
     const pathTrim = useValue(0);
     const shouldTransform = useValue(0);
 
@@ -25,9 +61,11 @@ function useAnimationsOnSelect(selectedNode: string, treeId: string) {
     useEffect(() => {
         const shouldActivate = selectedNode === treeId;
 
+        const handleTraceBorder = tree.node.isCompleted === true ? tree.node.isCompleted : shouldActivate;
+
         isActive.value = withSpring(shouldActivate ? 1 : 0, { damping: 18, stiffness: 300 });
 
-        isBorderTraced.value = withTiming(shouldActivate ? 1 : 0, { duration: 300, easing: Easing.sin });
+        isBorderTraced.value = withTiming(handleTraceBorder ? 1 : 0, { duration: 300, easing: Easing.sin });
     }, [selectedNode]);
 
     useSharedValueEffect(() => {
@@ -76,28 +114,12 @@ function useAnimationsForUnselected(selectedNode: string, treeId: string) {
 }
 
 function useInitialAnimations(treeLevel: number) {
-    const PATH_INITIAL_ANIMATION_DURATION = 200;
-    const CIRCLE_INITIAL_ANIMATION_DURATION = 200;
-
     const pathAnimationActivator = useSharedValue(0);
     const circleAnimationActivator = useSharedValue(0);
 
     //Value for the path connecting two circles
     const connectingPathTrim = useValue(0);
     const circleOpacity = useValue(0);
-
-    const animationFns = {
-        initial: {
-            pathDelay: (treeLevel: number) => {
-                const treeDistance = treeLevel - 1;
-
-                return CIRCLE_INITIAL_ANIMATION_DURATION * (treeDistance + 1) + treeDistance * PATH_INITIAL_ANIMATION_DURATION;
-            },
-            circleDelay: (treeLevel: number) => {
-                return CIRCLE_INITIAL_ANIMATION_DURATION * treeLevel + treeLevel * PATH_INITIAL_ANIMATION_DURATION;
-            },
-        },
-    };
 
     // Handles initial path animation 👇
     useEffect(() => {

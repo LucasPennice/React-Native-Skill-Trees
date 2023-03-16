@@ -3,20 +3,20 @@ import { StyleProp, ViewStyle } from "react-native/types";
 export type Book = {
     name: string;
     id: string;
+    parentId?: string;
+    isRoot?: boolean;
+    isCompleted?: boolean;
 };
 
 export interface TreeNode<T> {
     node: T;
     children?: TreeNode<T>[];
-    isRoot?: boolean;
-    isCompleted?: boolean;
 }
 
 export const MENU_DAMPENING = { damping: 20, stiffness: 300 };
 
 export const treeMock: TreeNode<Book> = {
-    isRoot: true,
-    node: { id: `Harry Potter 1`, name: "Harry Potter 1" },
+    node: { id: `Harry Potter 1`, name: "Harry Potter 1", isRoot: true },
     children: [
         {
             node: { id: `Harry Potter 2`, name: "Harry Potter 2" },
@@ -44,17 +44,18 @@ export const treeMock: TreeNode<Book> = {
 
 export const mockSkillTreeArray: TreeNode<Book>[] = [
     {
-        isRoot: true,
-        node: { id: `Coding`, name: "Coding" },
+        node: { id: `Coding`, name: "Coding", isRoot: true, isCompleted: true },
         children: [
             {
-                node: { id: `Management`, name: "Management" },
+                node: { id: `Management`, name: "Management", parentId: "Coding" },
+
                 children: [
                     {
-                        node: { id: `Lead Gen`, name: "Lead Gen" },
+                        node: { id: `Lead Gen`, name: "Lead Gen", parentId: "Management" },
+
                         children: [
                             {
-                                node: { id: `Strategy`, name: "Strategy" },
+                                node: { id: `Strategy`, name: "Strategy", parentId: "Lead Gen" },
                                 children: [{ node: { id: "Cashflow Management", name: "Cashflow Management" } }],
                             },
                         ],
@@ -62,31 +63,38 @@ export const mockSkillTreeArray: TreeNode<Book>[] = [
                 ],
             },
             {
-                node: { id: "English", name: "English" },
+                node: { id: "English", name: "English", parentId: "Coding" },
+
                 children: [
                     {
                         node: {
+                            isCompleted: true,
+                            parentId: "English",
                             id: "Public Speaking",
                             name: "Public Speaking",
                         },
-                        children: [{ node: { name: "Sales", id: "Sales" }, children: [{ node: { id: "Leadership", name: "Leadership" } }] }],
+                        children: [
+                            {
+                                node: { name: "Sales", id: "Sales", parentId: "Public Speaking" },
+                                children: [{ node: { id: "Leadership", name: "Leadership" } }],
+                            },
+                        ],
                     },
                 ],
             },
         ],
     },
     {
-        isRoot: true,
-        node: { id: `People Management`, name: "People Management" },
+        node: { id: `People Management`, name: "People Management", isRoot: true, isCompleted: true },
         children: [
             {
-                node: { id: `Confidence`, name: "Confidence" },
+                node: { id: `Confidence`, name: "Confidence", parentId: "People Management" },
             },
             {
-                node: { id: "Energy Investments", name: "Energy Investments" },
+                node: { id: "Energy Investments", name: "Energy Investments", parentId: "People Management", isCompleted: true },
                 children: [
                     {
-                        node: { id: `Copywriting`, name: "Copywriting" },
+                        node: { id: `Copywriting`, name: "Copywriting", parentId: "Energy Investments" },
                     },
                 ],
             },

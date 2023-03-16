@@ -1,4 +1,4 @@
-import { Book, TreeNode } from "./types";
+import { Book, mockSkillTreeArray, TreeNode } from "./types";
 
 export function findTreeHeight(rootNode: TreeNode<Book> | undefined) {
     if (!rootNode) return undefined;
@@ -50,3 +50,54 @@ export function findDistanceBetweenNodesById(rootNode: TreeNode<Book> | undefine
 
     return Math.max(...result);
 }
+
+export function quantityOfCompletedNodes(rootNode: TreeNode<Book> | undefined) {
+    if (!rootNode) return undefined;
+
+    //Base case 👇
+
+    if (!rootNode.children && rootNode.node.isCompleted) return 1;
+    if (!rootNode.children && !rootNode.node.isCompleted) return 0;
+
+    //Recursive case 👇
+
+    let result = rootNode.node.isCompleted ? 1 : 0;
+
+    for (let i = 0; i < rootNode.children.length; i++) {
+        result = result + quantityOfCompletedNodes(rootNode.children[i]);
+    }
+
+    return result;
+}
+
+export function quantiyOfNodes(rootNode: TreeNode<Book> | undefined) {
+    if (!rootNode) return undefined;
+
+    //Base case 👇
+
+    if (!rootNode.children) return 1;
+
+    //Recursive case 👇
+
+    let result = 1;
+
+    for (let i = 0; i < rootNode.children.length; i++) {
+        result = result + quantiyOfNodes(rootNode.children[i]);
+    }
+
+    return result;
+}
+
+export function findParentOfNode(rootNode: TreeNode<Book> | undefined, id: string): Book | undefined {
+    const node = findTreeNodeById(rootNode, id);
+
+    if (!node || !node.parentId) return undefined;
+
+    const parentNode = findTreeNodeById(rootNode, node.parentId);
+
+    if (!parentNode) return undefined;
+
+    return parentNode;
+}
+
+console.log(findParentOfNode(mockSkillTreeArray[0], "Lead Gen"));

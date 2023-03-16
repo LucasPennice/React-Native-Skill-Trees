@@ -29,10 +29,13 @@ export const canvasDisplaySettingsSlice = createSlice({
             state.treeSelectorOpen = !state.treeSelectorOpen;
             state.menuOpen = false;
         },
+        hideLabel: (state) => {
+            state.showLabel = false;
+        },
     },
 });
 
-export const { toggleShowLabel, toggleSettingsMenuOpen, toggleTreeSelector } = canvasDisplaySettingsSlice.actions;
+export const { toggleShowLabel, toggleSettingsMenuOpen, toggleTreeSelector, hideLabel } = canvasDisplaySettingsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectCanvasDisplaySettings = (state: RootState) => state.canvasDisplaySettings;
