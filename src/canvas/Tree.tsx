@@ -50,7 +50,7 @@ function Tree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTree }: 
 
         if (!parentNode) return false;
 
-        if (parentNode.isCompleted !== true) return false;
+        if (parentNode.node.isCompleted !== true) return false;
 
         return true;
     })();
@@ -87,7 +87,7 @@ function Tree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTree }: 
             {(() => {
                 useEffect(() => {
                     popCoordinateToArray({ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y - CIRCLE_SIZE / 2, id: tree.node.id });
-                }, []);
+                }, [wholeTree]);
 
                 const labelMarginTop = 40;
 

@@ -30,7 +30,7 @@ export class ProgressWheelParams {
 }
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
-const progressWheelProps = new ProgressWheelParams("#5DD39E", "#5356573D", 40, 6);
+const progressWheelProps = new ProgressWheelParams("#5DD39E", "#5356573D", 30, 6);
 
 function ProgressIndicator() {
     const { value: currentTree } = useAppSelector(selectCurrentTree);
@@ -50,7 +50,6 @@ function ProgressIndicator() {
     }, [currentTree]);
 
     const animatedProps = useAnimatedProps(() => {
-        console.log(completedPercentage.value);
         const result = progressWheelProps.circumference - (progressWheelProps.circumference * completedPercentage.value) / 100;
 
         return { strokeDashoffset: withSpring(result, { overshootClamping: true, damping: 65 }) };

@@ -1,5 +1,6 @@
 import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "./reduxStore";
+import { deleteNodeWithNoChildren as deleteNodeWithNoChildrenFn } from "./treeFunctions";
 import { Book, TreeNode } from "./types";
 
 // Define a type for the slice state
@@ -22,10 +23,14 @@ export const currentTreeSlice = createSlice({
         unselectTree: (state) => {
             state.value = undefined;
         },
+        markNodeAsComplete: (state, action: PayloadAction<TreeNode<Book>["node"]["id"]>) => {},
+        deleteNodeWithNoChildren: (state, action: PayloadAction<TreeNode<Book>>) => {
+            state.value = deleteNodeWithNoChildrenFn(state.value, action.payload);
+        },
     },
 });
 
-export const { changeTree, unselectTree } = currentTreeSlice.actions;
+export const { changeTree, unselectTree, deleteNodeWithNoChildren } = currentTreeSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectCurrentTree = (state: RootState) => state.currentTree;

@@ -1,3 +1,5 @@
+import { selectCanvasDisplaySettings } from "./canvasDisplaySettingsSlice";
+import { useAppSelector } from "./reduxHooks";
 import { Book, mockSkillTreeArray, TreeNode } from "./types";
 
 export function findTreeHeight(rootNode: TreeNode<Book> | undefined) {
@@ -18,10 +20,10 @@ export function findTreeHeight(rootNode: TreeNode<Book> | undefined) {
     return maxHeight + 1;
 }
 
-export function findTreeNodeById(rootNode: TreeNode<Book> | undefined, id: string): Book | undefined {
+export function findTreeNodeById(rootNode: TreeNode<Book> | undefined, id: string): TreeNode<Book> | undefined {
     if (!rootNode) return undefined;
 
-    if (rootNode.node.id === id) return rootNode.node;
+    if (rootNode.node.id === id) return rootNode;
     if (!rootNode.node) return undefined;
     if (!rootNode.children) return undefined;
 
@@ -88,16 +90,93 @@ export function quantiyOfNodes(rootNode: TreeNode<Book> | undefined) {
     return result;
 }
 
-export function findParentOfNode(rootNode: TreeNode<Book> | undefined, id: string): Book | undefined {
-    const node = findTreeNodeById(rootNode, id);
+export function findParentOfNode(rootNode: TreeNode<Book> | undefined, id: string): TreeNode<Book> | undefined {
+    const { node } = findTreeNodeById(rootNode, id);
 
     if (!node || !node.parentId) return undefined;
 
     const parentNode = findTreeNodeById(rootNode, node.parentId);
 
-    if (!parentNode) return undefined;
+    if (!parentNode.node) return undefined;
 
     return parentNode;
 }
 
-console.log(findParentOfNode(mockSkillTreeArray[0], "Lead Gen"));
+export function deleteNodeWithNoChildren(rootNode: TreeNode<Book> | undefined, nodeToDelete: TreeNode<Book>) {
+    if (!rootNode) return undefined;
+
+    //Base case 👇
+
+    if (rootNode.node.id === nodeToDelete.node.id) return undefined;
+    if (!rootNode.children) return rootNode;
+
+    //Recursive case 👇
+
+    let result: TreeNode<Book> = { node: rootNode.node, children: [] };
+
+    if (rootNode.treeId) result.treeId = rootNode.treeId;
+    if (rootNode.treeName) result.treeName = rootNode.treeName;
+
+    for (let i = 0; i < rootNode.children.length; i++) {
+        const currentChildren = rootNode.children[i];
+
+        if (currentChildren.node.id !== nodeToDelete.node.id) {
+            result.children.push(deleteNodeWithNoChildren(currentChildren, nodeToDelete));
+        }
+    }
+
+    if (result.children.length === 0) delete result["children"];
+
+    return result;
+}
+
+export function deleteNodeOfTreeAndHoistChildren(rootNode: TreeNode<Book> | undefined, id: string): TreeNode<Book> {
+    let result = { ...rootNode };
+
+    const nodeToDelete = findTreeNodeById(rootNode, id);
+
+    // No children case 👇
+
+    if (!nodeToDelete.children) result = deleteNodeWithNoChildren(rootNode, nodeToDelete);
+
+    // One children case 👇
+
+    if (nodeToDelete.children.length === 1) {
+    }
+
+    // Multiple Children Case 👇
+
+    if (nodeToDelete.children.length > 1) {
+    }
+
+    return result;
+}
+
+export const MOCK2: TreeNode<Book> = {
+    treeId: "HPTREE",
+    treeName: "HPTREE",
+    node: { id: `Harry Potter 1`, name: "Harry Potter 1", isRoot: true },
+    children: [
+        {
+            node: { id: `Harry Potter 2`, name: "Harry Potter 2" },
+            children: [
+                {
+                    node: { id: `Harry Potter 3`, name: "Harry Potter 3" },
+                    children: [
+                        { node: { id: `Harry Potter 41`, name: "Harry Potter 41" } },
+                        { node: { id: `Harry Potter 42`, name: "Harry Potter 42" } },
+                        { node: { id: `Harry Potter 43`, name: "Harry Potter 43" } },
+                    ],
+                },
+            ],
+        },
+        {
+            node: { id: "Harry Potter 2.5", name: "Harry Potter 2.5" },
+            children: [
+                {
+                    node: { id: "Harry Potter 2.5 child", name: "Harry Potter 2.5 child" },
+                },
+            ],
+        },
+    ],
+};

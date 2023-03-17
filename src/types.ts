@@ -9,6 +9,8 @@ export type Book = {
 };
 
 export interface TreeNode<T> {
+    treeId?: string;
+    treeName?: string;
     node: T;
     children?: TreeNode<T>[];
 }
@@ -16,6 +18,8 @@ export interface TreeNode<T> {
 export const MENU_DAMPENING = { damping: 20, stiffness: 300 };
 
 export const treeMock: TreeNode<Book> = {
+    treeId: "HPTREE",
+    treeName: "HPTREE",
     node: { id: `Harry Potter 1`, name: "Harry Potter 1", isRoot: true },
     children: [
         {
@@ -44,6 +48,8 @@ export const treeMock: TreeNode<Book> = {
 
 export const mockSkillTreeArray: TreeNode<Book>[] = [
     {
+        treeId: "IQ Skills",
+        treeName: "IQ Skills",
         node: { id: `Coding`, name: "Coding", isRoot: true, isCompleted: true },
         children: [
             {
@@ -85,6 +91,8 @@ export const mockSkillTreeArray: TreeNode<Book>[] = [
         ],
     },
     {
+        treeId: "EQ Skills",
+        treeName: "EQ Skills",
         node: { id: `People Management`, name: "People Management", isRoot: true, isCompleted: true },
         children: [
             {

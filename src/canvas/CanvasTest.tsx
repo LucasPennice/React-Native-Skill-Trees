@@ -69,7 +69,11 @@ function CanvasTest() {
 
     return (
         <ScrollView showsVerticalScrollIndicator={false} ref={verticalScrollViewRef} style={{ height: height - NAV_HEGIHT }}>
+            {/* onScroll={() => setSelectedNode(null)}
+            scrollEventThrottle={100}> */}
             <ScrollView ref={horizontalScrollViewRef} horizontal showsHorizontalScrollIndicator={false} style={{ position: "relative" }}>
+                {/* onScroll={() => setSelectedNode(null)}
+                scrollEventThrottle={100}> */}
                 {currentTree !== undefined && (
                     <Canvas
                         onTouch={touchHandler}

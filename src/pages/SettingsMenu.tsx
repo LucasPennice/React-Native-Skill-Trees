@@ -12,7 +12,7 @@ function SettingsMenu() {
     const { menuOpen, showLabel, treeSelectorOpen } = useAppSelector(selectCanvasDisplaySettings);
 
     //The ammount of different settings the user can choose in the menu
-    const QTY_OF_SETTINGS = 2;
+    const QTY_OF_SETTINGS = 3;
 
     const animatedMenuStyles = useAnimatedStyle(() => {
         return {
@@ -48,6 +48,11 @@ function SettingsMenu() {
                             style={{ backgroundColor: "white", opacity: showLabel ? 1 : 0.5, width: SETTING_BUTTON_WIDTH }}
                             onPress={() => dispatch(toggleTreeSelector())}>
                             <Text>Change Tree</Text>
+                        </Pressable>
+                        <Pressable
+                            style={{ backgroundColor: "white", opacity: showLabel ? 1 : 0.5, width: SETTING_BUTTON_WIDTH }}
+                            onPress={() => dispatch(toggleTreeSelector())}>
+                            <Text>Center</Text>
                         </Pressable>
                     </Animated.View>
                 )}
