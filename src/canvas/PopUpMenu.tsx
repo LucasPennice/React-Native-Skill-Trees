@@ -1,12 +1,12 @@
-import { useEffect } from "react";
-import { Button, Dimensions, Text } from "react-native";
+import { useEffect, useState } from "react";
+import { Button, Dimensions, Text, TextInput } from "react-native";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "./useCanvasTouchHandler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED } from "./Tree";
 import { MENU_DAMPENING } from "../types";
 import { findTreeNodeById } from "../treeFunctions";
 import { CirclePositionInCanvas } from "./CanvasTest";
-import { deleteNodeWithNoChildren, selectCurrentTree } from "../currentTreeSlice";
+import { deleteNodeWithNoChildren, editNodeProperty, selectCurrentTree } from "../currentTreeSlice";
 import { useAppDispatch, useAppSelector } from "../reduxHooks";
 import { selectScreenDimentions } from "../screenDimentionsSlice";
 import { toggleChildrenHoistSelector } from "../canvasDisplaySettingsSlice";
@@ -18,15 +18,19 @@ type Props = {
 };
 
 function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: Props) {
+    //Redux store state
     const { value: currentTree } = useAppSelector(selectCurrentTree);
     const { height, width } = useAppSelector(selectScreenDimentions);
     const dispatch = useAppDispatch();
+    //
+    const currentNode = findTreeNodeById(currentTree, selectedNode);
+    //Local State
+    const [text, onChangeText] = useState(currentNode ? currentNode.node.name : "Name");
 
     const MENU_HEIGHT = height / 2;
+    const MENU_WIDTH = width - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL - CIRCLE_SIZE_SELECTED - 30;
 
     const { animatedMenuStyles, triangleAnimatedStyles } = useHandlePopMenuAnimations(foundNodeCoordinates, selectedNode, selectedNodeHistory);
-
-    const currentNode = findTreeNodeById(currentTree, selectedNode);
 
     if (!currentNode) return;
 
@@ -38,14 +42,32 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                     {
                         position: "absolute",
                         height: MENU_HEIGHT,
-                        width: width - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL - CIRCLE_SIZE_SELECTED - 30,
-                        backgroundColor: "gray",
+                        width: MENU_WIDTH,
+                        backgroundColor: "lightgray",
                         borderRadius: 20,
                         padding: 20,
                     },
                 ]}>
+                <TextInput
+                    value={text}
+                    onChangeText={onChangeText}
+                    style={{ fontSize: 24, width: MENU_WIDTH - 40, fontWeight: "bold", letterSpacing: 1, color: "white" }}
+                    multiline
+                    blurOnSubmit
+                    //@ts-ignore
+                    enterKeyHint="done"
+                    onBlur={() => dispatch(editNodeProperty({ targetNode: currentNode, newProperties: { name: text } }))}
+                />
                 {!currentNode.children && <Button title={"Delete Node"} onPress={() => dispatch(deleteNodeWithNoChildren(currentNode))} />}
                 {currentNode.children && <Button title={"Delete Node"} onPress={() => dispatch(toggleChildrenHoistSelector(currentNode.children))} />}
+                <Button
+                    title={`${currentNode.node.isCompleted ? "Deactivate" : "Activate"}`}
+                    onPress={() =>
+                        dispatch(
+                            editNodeProperty({ targetNode: currentNode, newProperties: { isCompleted: currentNode.node.isCompleted ? false : true } })
+                        )
+                    }
+                />
             </Animated.View>
             {/* This is the triangle of the menu */}
             <Animated.View
@@ -62,7 +84,7 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                         borderBottomWidth: 10,
                         borderLeftColor: "transparent",
                         borderRightColor: "transparent",
-                        borderBottomColor: "gray",
+                        borderBottomColor: "lightgray",
                     },
                 ]}
             />

@@ -8,8 +8,6 @@ export function didTapCircle(touchInfo: TouchInfo) {
         const isTouchInsideCircleXRange =
             touchInfo.x >= circle.x - CIRCLE_SIZE / 2 - TOUCH_BUFFER && touchInfo.x <= circle.x + CIRCLE_SIZE / 2 + TOUCH_BUFFER;
 
-        console.log(touchInfo.x, circle.id, circle.x);
-
         const isTouchInsideCircleYRange =
             touchInfo.y >= circle.y - CIRCLE_SIZE / 2 - TOUCH_BUFFER && touchInfo.y <= circle.y + CIRCLE_SIZE / 2 + TOUCH_BUFFER;
 

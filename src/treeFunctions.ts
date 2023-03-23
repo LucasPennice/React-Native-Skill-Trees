@@ -1,4 +1,5 @@
 import { selectCanvasDisplaySettings } from "./canvasDisplaySettingsSlice";
+import { ModifiableNodeProperties } from "./currentTreeSlice";
 import { useAppSelector } from "./reduxHooks";
 import { Book, mockSkillTreeArray, TreeNode } from "./types";
 
@@ -188,6 +189,38 @@ export function deleteNodeWithChildren(rootNode: TreeNode<Book> | undefined, nod
 
         return result;
     }
+}
+
+export function editNodeProperty(rootNode: TreeNode<Book> | undefined, targetNode: TreeNode<Book>, newProperties: ModifiableNodeProperties) {
+    if (!rootNode) return undefined;
+
+    //Base Case 👇
+
+    if (rootNode.node.id === targetNode.node.id) {
+        const result = { ...rootNode };
+
+        const keysToEdit = Object.keys(newProperties);
+
+        keysToEdit.forEach((key) => (result.node[key] = newProperties[key]));
+
+        return result;
+    }
+
+    if (!rootNode.children) return rootNode;
+
+    //Recursive Case 👇
+
+    let result: TreeNode<Book> = { ...rootNode, children: [] };
+
+    for (let idx = 0; idx < rootNode.children.length; idx++) {
+        const element = rootNode.children[idx];
+
+        result.children.push(editNodeProperty(element, targetNode, newProperties));
+    }
+
+    if (result.children.length === 0) delete result["children"];
+
+    return result;
 }
 
 export const MOCK2: TreeNode<Book> = {
