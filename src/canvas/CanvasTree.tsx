@@ -1,6 +1,6 @@
 import { createBezierPathBetweenPoints, getChildCoordinatesFromParentInfo, getHeightForFont } from "./functions";
 import { Blur, Circle, Group, LinearGradient, Path, vec, Shadow, useFont, Text, RoundedRect } from "@shopify/react-native-skia";
-import { Book, Tree } from "../types";
+import { Skill, Tree } from "../types";
 import { CIRCLE_SIZE } from "./parameters";
 import { CirclePositionInCanvas } from "./CanvasTest";
 import useHandleTreeAnimations from "./useHandleTreeAnimations";
@@ -8,8 +8,8 @@ import { findDistanceBetweenNodesById, findParentOfNode } from "../treeFunctions
 import { useEffect } from "react";
 
 type TreeProps = {
-    tree: Tree<Book>;
-    wholeTree: Tree<Book>;
+    tree: Tree<Skill>;
+    wholeTree: Tree<Skill>;
     parentNodeInfo?: { coordinates: { x: number; y: number }; numberOfChildren: number; currentChildIndex: number };
     stateProps: {
         selectedNode: string | null;

@@ -1,7 +1,7 @@
 import { Easing, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import { mix, useSharedValueEffect, useValue, useComputedValue } from "@shopify/react-native-skia";
 import { useEffect } from "react";
-import { Book, Tree } from "../types";
+import { Skill, Tree } from "../types";
 
 const PATH_INITIAL_ANIMATION_DURATION = 200;
 const CIRCLE_INITIAL_ANIMATION_DURATION = 200;
@@ -19,7 +19,7 @@ const animationFns = {
     },
 };
 
-const useHandleTreeAnimations = (selectedNode: string | null, showLabel: boolean, tree: Tree<Book>, treeLevel: number) => {
+const useHandleTreeAnimations = (selectedNode: string | null, showLabel: boolean, tree: Tree<Skill>, treeLevel: number) => {
     const { circleOpacity, connectingPathTrim } = useInitialAnimations(treeLevel);
 
     const { labelOpacity } = useSettingsAnimations(showLabel);
@@ -49,7 +49,7 @@ function useSettingsAnimations(showLabel: boolean) {
     return { labelOpacity };
 }
 
-function useAnimationsOnSelect(selectedNode: string, tree: Tree<Book>) {
+function useAnimationsOnSelect(selectedNode: string, tree: Tree<Skill>) {
     const treeId = tree.node.id;
 
     const pathTrim = useValue(0);

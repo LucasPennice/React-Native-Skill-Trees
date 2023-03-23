@@ -10,7 +10,7 @@ import { useAppSelector } from "../reduxHooks";
 import { selectCanvasDisplaySettings } from "../canvasDisplaySettingsSlice";
 import { selectCurrentTree } from "../currentTreeSlice";
 import { selectScreenDimentions } from "../screenDimentionsSlice";
-import { Book, Tree } from "../types";
+import { Skill, Tree } from "../types";
 import CanvasTree, { CIRCLE_SIZE_SELECTED } from "./CanvasTree";
 
 export type CirclePositionInCanvas = { x: number; y: number; id: string };
@@ -95,7 +95,7 @@ function CanvasTest() {
     );
 }
 
-function calculateDimentionsAndRootCoordinates(currentTree: Tree<Book>) {
+function calculateDimentionsAndRootCoordinates(currentTree: Tree<Skill>) {
     const { height, width } = useAppSelector(selectScreenDimentions);
 
     const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;

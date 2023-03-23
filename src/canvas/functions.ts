@@ -1,6 +1,6 @@
 import { TouchInfo } from "@shopify/react-native-skia";
 import { findParentOfNode, findTreeHeight } from "../treeFunctions";
-import { Book, treeMock, Tree } from "../types";
+import { Skill, treeMock, Tree } from "../types";
 import { CIRCLE_SIZE, TOUCH_BUFFER } from "./parameters";
 
 export function didTapCircle(touchInfo: TouchInfo) {

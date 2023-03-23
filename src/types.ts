@@ -1,6 +1,6 @@
 import { StyleProp, ViewStyle } from "react-native/types";
 
-export type Book = {
+export type Skill = {
     name: string;
     id: string;
     parentId?: string;
@@ -17,7 +17,7 @@ export interface Tree<T> {
 
 export const MENU_DAMPENING = { damping: 20, stiffness: 300 };
 
-export const treeMock: Tree<Book> = {
+export const treeMock: Tree<Skill> = {
     treeId: "HPTREE",
     treeName: "HPTREE",
     node: { id: `Harry Potter 1`, name: "Harry Potter 1", isRoot: true },
@@ -46,7 +46,7 @@ export const treeMock: Tree<Book> = {
     ],
 };
 
-export const mockSkillTreeArray: Tree<Book>[] = [
+export const mockSkillTreeArray: Tree<Skill>[] = [
     {
         treeId: "IQ Skills",
         treeName: "IQ Skills",
