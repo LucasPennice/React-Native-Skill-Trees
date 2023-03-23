@@ -40,6 +40,9 @@ const useCanvasTouchHandler = (props: Props) => {
     const touchHandler = useTouchHandler(
         {
             onEnd: (touchInfo) => {
+                console.log("the positions in canvas are");
+                circlePositionsInCanvas.forEach((p) => console.log(p.id, p.x));
+                console.log("....");
                 const circleTapped = circlePositionsInCanvas.find(didTapCircle(touchInfo));
 
                 if (circleTapped === undefined) {

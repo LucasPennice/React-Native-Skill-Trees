@@ -1,20 +1,19 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "./reduxStore";
+import { Book, TreeNode } from "./types";
 
 // Define a type for the slice state
 type CanvasDisplaySettings = {
     showLabel: boolean;
-    menuOpen: boolean;
-    treeSelectorOpen: boolean;
-    childrenHoistSelectorOpen: boolean;
+    openMenu: "treeSelector" | "treeSettings" | "childrenHoistSelector" | null;
+    candidatesToHoist: TreeNode<Book>[] | null;
 };
 
 // Define the initial state using that type
 const initialState: CanvasDisplaySettings = {
     showLabel: false,
-    menuOpen: false,
-    treeSelectorOpen: false,
-    childrenHoistSelectorOpen: false,
+    openMenu: null,
+    candidatesToHoist: null,
 };
 
 export const canvasDisplaySettingsSlice = createSlice({
@@ -25,19 +24,30 @@ export const canvasDisplaySettingsSlice = createSlice({
             state.showLabel = !state.showLabel;
         },
         toggleSettingsMenuOpen: (state) => {
-            state.menuOpen = !state.menuOpen;
-            state.treeSelectorOpen = false;
-            state.childrenHoistSelectorOpen = false;
+            if (state.openMenu === "treeSettings") {
+                state.openMenu = null;
+            } else {
+                state.openMenu = "treeSettings";
+            }
         },
         toggleTreeSelector: (state) => {
-            state.treeSelectorOpen = !state.treeSelectorOpen;
-            state.menuOpen = false;
-            state.childrenHoistSelectorOpen = false;
+            if (state.openMenu === "treeSelector") {
+                state.openMenu = null;
+            } else {
+                state.openMenu = "treeSelector";
+            }
         },
-        toggleChildrenHoistSelector: (state) => {
-            state.childrenHoistSelectorOpen = !state.childrenHoistSelectorOpen;
-            state.menuOpen = false;
-            state.childrenHoistSelectorOpen = false;
+        toggleChildrenHoistSelector: (state, action?: PayloadAction<TreeNode<Book>[]>) => {
+            if (state.openMenu === "childrenHoistSelector") {
+                state.openMenu = null;
+                state.candidatesToHoist = null;
+            } else {
+                state.openMenu = "childrenHoistSelector";
+                state.candidatesToHoist = action.payload;
+            }
+        },
+        closeAllMenues: (state) => {
+            state.openMenu = null;
         },
         hideLabel: (state) => {
             state.showLabel = false;
@@ -45,7 +55,7 @@ export const canvasDisplaySettingsSlice = createSlice({
     },
 });
 
-export const { toggleShowLabel, toggleSettingsMenuOpen, toggleTreeSelector, hideLabel, toggleChildrenHoistSelector } =
+export const { toggleShowLabel, toggleSettingsMenuOpen, toggleTreeSelector, closeAllMenues, hideLabel, toggleChildrenHoistSelector } =
     canvasDisplaySettingsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type

@@ -9,6 +9,7 @@ import { CirclePositionInCanvas } from "./CanvasTest";
 import { deleteNodeWithNoChildren, selectCurrentTree } from "../currentTreeSlice";
 import { useAppDispatch, useAppSelector } from "../reduxHooks";
 import { selectScreenDimentions } from "../screenDimentionsSlice";
+import { toggleChildrenHoistSelector } from "../canvasDisplaySettingsSlice";
 
 type Props = {
     selectedNode: string | null;
@@ -44,6 +45,7 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                     },
                 ]}>
                 {!currentNode.children && <Button title={"Delete Node"} onPress={() => dispatch(deleteNodeWithNoChildren(currentNode))} />}
+                {currentNode.children && <Button title={"Delete Node"} onPress={() => dispatch(toggleChildrenHoistSelector(currentNode.children))} />}
             </Animated.View>
             {/* This is the triangle of the menu */}
             <Animated.View

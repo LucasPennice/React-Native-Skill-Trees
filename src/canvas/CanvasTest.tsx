@@ -11,6 +11,7 @@ import { useAppSelector } from "../reduxHooks";
 import { selectCanvasDisplaySettings } from "../canvasDisplaySettingsSlice";
 import { selectCurrentTree } from "../currentTreeSlice";
 import { selectScreenDimentions } from "../screenDimentionsSlice";
+import { Book, TreeNode } from "../types";
 
 export type CirclePositionInCanvas = { x: number; y: number; id: string };
 
@@ -42,7 +43,7 @@ function CanvasTest() {
         tree: currentTree,
     });
 
-    const canvasDimentions = calculateDimentionsAndRootCoordinates();
+    const canvasDimentions = calculateDimentionsAndRootCoordinates(currentTree);
     const { rootX, rootY } = canvasDimentions;
 
     useEffect(() => {
@@ -94,9 +95,7 @@ function CanvasTest() {
     );
 }
 
-function calculateDimentionsAndRootCoordinates() {
-    const { value: currentTree } = useAppSelector(selectCurrentTree);
-
+function calculateDimentionsAndRootCoordinates(currentTree: TreeNode<Book>) {
     const { height, width } = useAppSelector(selectScreenDimentions);
 
     const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;

@@ -62,7 +62,7 @@ export const mockSkillTreeArray: TreeNode<Book>[] = [
                         children: [
                             {
                                 node: { id: `Strategy`, name: "Strategy", parentId: "Lead Gen" },
-                                children: [{ node: { id: "Cashflow Management", name: "Cashflow Management" } }],
+                                children: [{ node: { id: "Cashflow Management", name: "Cashflow Management", parentId: "Strategy" } }],
                             },
                         ],
                     },
@@ -82,7 +82,7 @@ export const mockSkillTreeArray: TreeNode<Book>[] = [
                         children: [
                             {
                                 node: { name: "Sales", id: "Sales", parentId: "Public Speaking" },
-                                children: [{ node: { id: "Leadership", name: "Leadership" } }],
+                                children: [{ node: { id: "Leadership", name: "Leadership", parentId: "Sales" } }],
                             },
                         ],
                     },

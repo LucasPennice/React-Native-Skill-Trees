@@ -40,6 +40,10 @@ function Tree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTree }: 
 
     let newParentNodeInfo = { coordinates: currentNodeCoordintes, numberOfChildren: tree.children ? tree.children.length : 0 };
 
+    useEffect(() => {
+        popCoordinateToArray({ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y - CIRCLE_SIZE / 2, id: tree.node.id });
+    }, [wholeTree]);
+
     const { circleBlurOnInactive, circleOpacity, connectingPathTrim, groupTransform, pathBlurOnInactive, pathTrim, labelOpacity } =
         useHandleTreeAnimations(selectedNode, showLabel, tree, findDistanceBetweenNodesById(wholeTree, tree.node.id));
 
@@ -85,10 +89,6 @@ function Tree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTree }: 
                     );
                 })}
             {(() => {
-                useEffect(() => {
-                    popCoordinateToArray({ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y - CIRCLE_SIZE / 2, id: tree.node.id });
-                }, [wholeTree]);
-
                 const labelMarginTop = 40;
 
                 return (

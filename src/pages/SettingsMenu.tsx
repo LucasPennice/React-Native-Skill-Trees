@@ -7,9 +7,10 @@ const SETTING_BUTTON_WIDTH = 70;
 
 function SettingsMenu() {
     const dispatch = useAppDispatch();
-    const { height, width } = Dimensions.get("window");
 
-    const { menuOpen, showLabel, treeSelectorOpen } = useAppSelector(selectCanvasDisplaySettings);
+    const { openMenu, showLabel } = useAppSelector(selectCanvasDisplaySettings);
+
+    const menuOpen = openMenu === "treeSettings";
 
     //The ammount of different settings the user can choose in the menu
     const QTY_OF_SETTINGS = 3;

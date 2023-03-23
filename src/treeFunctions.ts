@@ -91,13 +91,17 @@ export function quantiyOfNodes(rootNode: TreeNode<Book> | undefined) {
 }
 
 export function findParentOfNode(rootNode: TreeNode<Book> | undefined, id: string): TreeNode<Book> | undefined {
-    const { node } = findTreeNodeById(rootNode, id);
+    const foundNode = findTreeNodeById(rootNode, id);
+
+    if (!foundNode) return undefined;
+
+    const { node } = foundNode;
 
     if (!node || !node.parentId) return undefined;
 
     const parentNode = findTreeNodeById(rootNode, node.parentId);
 
-    if (!parentNode.node) return undefined;
+    if (!parentNode || !parentNode.node) return undefined;
 
     return parentNode;
 }
@@ -130,26 +134,60 @@ export function deleteNodeWithNoChildren(rootNode: TreeNode<Book> | undefined, n
     return result;
 }
 
-export function deleteNodeOfTreeAndHoistChildren(rootNode: TreeNode<Book> | undefined, id: string): TreeNode<Book> {
-    let result = { ...rootNode };
+export function deleteNodeWithChildren(rootNode: TreeNode<Book> | undefined, nodeToDelete: TreeNode<Book>, childrenToHoist: TreeNode<Book>) {
+    if (!rootNode) return undefined;
 
-    const nodeToDelete = findTreeNodeById(rootNode, id);
+    // //Base case 👇
 
-    // No children case 👇
+    if (!rootNode.children) return rootNode;
 
-    if (!nodeToDelete.children) result = deleteNodeWithNoChildren(rootNode, nodeToDelete);
+    if (rootNode.node.id === nodeToDelete.node.id) return returnHoistedNode(rootNode, childrenToHoist);
 
-    // One children case 👇
+    //Recursive case 👇
 
-    if (nodeToDelete.children.length === 1) {
+    let result: TreeNode<Book> = { node: rootNode.node, children: [] };
+
+    if (rootNode.treeId) result.treeId = rootNode.treeId;
+    if (rootNode.treeName) result.treeName = rootNode.treeName;
+
+    for (let i = 0; i < rootNode.children.length; i++) {
+        const currentChildren = rootNode.children[i];
+
+        if (currentChildren.node.id !== nodeToDelete.node.id) {
+            result.children.push(deleteNodeWithChildren(currentChildren, nodeToDelete, childrenToHoist));
+        } else {
+            const newNode = returnHoistedNode(currentChildren, childrenToHoist);
+
+            console.log(JSON.stringify(newNode));
+
+            result.children.push(newNode);
+        }
     }
 
-    // Multiple Children Case 👇
-
-    if (nodeToDelete.children.length > 1) {
-    }
+    if (result.children.length === 0) delete result["children"];
 
     return result;
+
+    function returnHoistedNode(parentNode: TreeNode<Book>, childrenToHoist: TreeNode<Book>) {
+        const result = { ...parentNode };
+
+        result.node = { ...childrenToHoist.node };
+
+        if (nodeToDelete.node.parentId) result.node.parentId = nodeToDelete.node.parentId;
+
+        result.node.isRoot = parentNode.node.isRoot;
+
+        if (childrenToHoist.children) result.children.push(...childrenToHoist.children);
+
+        //Update the parentId of the hoisted nodes' children
+        if (result.children) {
+            result.children.forEach((e) => (e.node.parentId = result.node.id));
+        }
+
+        result.children = result.children.filter((c) => c.node.id !== childrenToHoist.node.id);
+
+        return result;
+    }
 }
 
 export const MOCK2: TreeNode<Book> = {

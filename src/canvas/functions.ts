@@ -1,12 +1,15 @@
 import { TouchInfo } from "@shopify/react-native-skia";
-import { findTreeHeight } from "../treeFunctions";
-import { treeMock } from "../types";
+import { findParentOfNode, findTreeHeight } from "../treeFunctions";
+import { Book, treeMock, TreeNode } from "../types";
 import { CIRCLE_SIZE, TOUCH_BUFFER } from "./parameters";
 
 export function didTapCircle(touchInfo: TouchInfo) {
     return (circle: { x: number; y: number; id: string }) => {
         const isTouchInsideCircleXRange =
             touchInfo.x >= circle.x - CIRCLE_SIZE / 2 - TOUCH_BUFFER && touchInfo.x <= circle.x + CIRCLE_SIZE / 2 + TOUCH_BUFFER;
+
+        console.log(touchInfo.x, circle.id, circle.x);
+
         const isTouchInsideCircleYRange =
             touchInfo.y >= circle.y - CIRCLE_SIZE / 2 - TOUCH_BUFFER && touchInfo.y <= circle.y + CIRCLE_SIZE / 2 + TOUCH_BUFFER;
 
