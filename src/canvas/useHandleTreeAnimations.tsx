@@ -24,7 +24,7 @@ const useHandleTreeAnimations = (selectedNode: string | null, showLabel: boolean
 
     const { labelOpacity } = useSettingsAnimations(showLabel);
 
-    const { circleBlurOnInactive, pathBlurOnInactive } = useAnimationsForUnselected(selectedNode, tree.node.id);
+    const { circleBlurOnInactive, pathBlurOnInactive } = useAnimationsForUnselected(selectedNode, tree.data.id);
 
     const { pathTrim, groupTransform } = useAnimationsOnSelect(selectedNode, tree);
 
@@ -50,7 +50,7 @@ function useSettingsAnimations(showLabel: boolean) {
 }
 
 function useAnimationsOnSelect(selectedNode: string, tree: Tree<Skill>) {
-    const treeId = tree.node.id;
+    const treeId = tree.data.id;
 
     const pathTrim = useValue(0);
     const shouldTransform = useValue(0);
@@ -61,7 +61,7 @@ function useAnimationsOnSelect(selectedNode: string, tree: Tree<Skill>) {
     useEffect(() => {
         const shouldActivate = selectedNode === treeId;
 
-        const handleTraceBorder = tree.node.isCompleted === true ? tree.node.isCompleted : shouldActivate;
+        const handleTraceBorder = tree.data.isCompleted === true ? tree.data.isCompleted : shouldActivate;
 
         isActive.value = withSpring(shouldActivate ? 1 : 0, { damping: 18, stiffness: 300 });
 

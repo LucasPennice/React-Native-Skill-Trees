@@ -25,7 +25,7 @@ function ChildrenHoistSelectorModal() {
                         {candidatesToHoist !== null &&
                             currentTree &&
                             candidatesToHoist.map((children, idx) => {
-                                const nodeToDelete = findParentOfNode(currentTree, children.node.id);
+                                const nodeToDelete = findParentOfNode(currentTree, children.data.id);
 
                                 return (
                                     <Pressable
@@ -42,7 +42,7 @@ function ChildrenHoistSelectorModal() {
                                             dispatch(deleteNodeWithChildren({ childrenToHoist: children, nodeToDelete }));
                                             dispatch(closeAllMenues());
                                         }}>
-                                        <Text>{children.node.name}</Text>
+                                        <Text>{children.data.name}</Text>
                                     </Pressable>
                                 );
                             })}

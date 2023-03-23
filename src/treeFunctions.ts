@@ -6,7 +6,7 @@ import { Skill, mockSkillTreeArray, Tree } from "./types";
 export function findTreeHeight(rootNode: Tree<Skill> | undefined) {
     if (!rootNode) return undefined;
 
-    if (!rootNode.node) return 0;
+    if (!rootNode.data) return 0;
 
     let maxHeight = 0;
 
@@ -24,8 +24,8 @@ export function findTreeHeight(rootNode: Tree<Skill> | undefined) {
 export function findTreeNodeById(rootNode: Tree<Skill> | undefined, id: string): Tree<Skill> | undefined {
     if (!rootNode) return undefined;
 
-    if (rootNode.node.id === id) return rootNode;
-    if (!rootNode.node) return undefined;
+    if (rootNode.data.id === id) return rootNode;
+    if (!rootNode.data) return undefined;
     if (!rootNode.children) return undefined;
 
     let arr = rootNode.children.map((item) => {
@@ -40,7 +40,7 @@ export function findDistanceBetweenNodesById(rootNode: Tree<Skill> | undefined, 
 
     //Base case 👇
 
-    if (rootNode.node.id === id) return 1;
+    if (rootNode.data.id === id) return 1;
     if (!rootNode.children) return 0;
 
     //Recursive case 👇
@@ -59,12 +59,12 @@ export function quantityOfCompletedNodes(rootNode: Tree<Skill> | undefined) {
 
     //Base case 👇
 
-    if (!rootNode.children && rootNode.node.isCompleted) return 1;
-    if (!rootNode.children && !rootNode.node.isCompleted) return 0;
+    if (!rootNode.children && rootNode.data.isCompleted) return 1;
+    if (!rootNode.children && !rootNode.data.isCompleted) return 0;
 
     //Recursive case 👇
 
-    let result = rootNode.node.isCompleted ? 1 : 0;
+    let result = rootNode.data.isCompleted ? 1 : 0;
 
     for (let i = 0; i < rootNode.children.length; i++) {
         result = result + quantityOfCompletedNodes(rootNode.children[i]);
@@ -96,13 +96,13 @@ export function findParentOfNode(rootNode: Tree<Skill> | undefined, id: string):
 
     if (!foundNode) return undefined;
 
-    const { node } = foundNode;
+    const { data } = foundNode;
 
-    if (!node || !node.parentId) return undefined;
+    if (!data || !data.parentId) return undefined;
 
-    const parentNode = findTreeNodeById(rootNode, node.parentId);
+    const parentNode = findTreeNodeById(rootNode, data.parentId);
 
-    if (!parentNode || !parentNode.node) return undefined;
+    if (!parentNode || !parentNode.data) return undefined;
 
     return parentNode;
 }
@@ -112,12 +112,12 @@ export function deleteNodeWithNoChildren(rootNode: Tree<Skill> | undefined, node
 
     //Base case 👇
 
-    if (rootNode.node.id === nodeToDelete.node.id) return undefined;
+    if (rootNode.data.id === nodeToDelete.data.id) return undefined;
     if (!rootNode.children) return rootNode;
 
     //Recursive case 👇
 
-    let result: Tree<Skill> = { node: rootNode.node, children: [] };
+    let result: Tree<Skill> = { data: rootNode.data, children: [] };
 
     if (rootNode.treeId) result.treeId = rootNode.treeId;
     if (rootNode.treeName) result.treeName = rootNode.treeName;
@@ -125,7 +125,7 @@ export function deleteNodeWithNoChildren(rootNode: Tree<Skill> | undefined, node
     for (let i = 0; i < rootNode.children.length; i++) {
         const currentChildren = rootNode.children[i];
 
-        if (currentChildren.node.id !== nodeToDelete.node.id) {
+        if (currentChildren.data.id !== nodeToDelete.data.id) {
             result.children.push(deleteNodeWithNoChildren(currentChildren, nodeToDelete));
         }
     }
@@ -142,11 +142,11 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
 
     if (!rootNode.children) return rootNode;
 
-    if (rootNode.node.id === nodeToDelete.node.id) return returnHoistedNode(rootNode, childrenToHoist);
+    if (rootNode.data.id === nodeToDelete.data.id) return returnHoistedNode(rootNode, childrenToHoist);
 
     //Recursive case 👇
 
-    let result: Tree<Skill> = { node: rootNode.node, children: [] };
+    let result: Tree<Skill> = { data: rootNode.data, children: [] };
 
     if (rootNode.treeId) result.treeId = rootNode.treeId;
     if (rootNode.treeName) result.treeName = rootNode.treeName;
@@ -154,7 +154,7 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
     for (let i = 0; i < rootNode.children.length; i++) {
         const currentChildren = rootNode.children[i];
 
-        if (currentChildren.node.id !== nodeToDelete.node.id) {
+        if (currentChildren.data.id !== nodeToDelete.data.id) {
             result.children.push(deleteNodeWithChildren(currentChildren, nodeToDelete, childrenToHoist));
         } else {
             const newNode = returnHoistedNode(currentChildren, childrenToHoist);
@@ -170,20 +170,20 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
     function returnHoistedNode(parentNode: Tree<Skill>, childrenToHoist: Tree<Skill>) {
         const result = { ...parentNode };
 
-        result.node = { ...childrenToHoist.node };
+        result.data = { ...childrenToHoist.data };
 
-        if (nodeToDelete.node.parentId) result.node.parentId = nodeToDelete.node.parentId;
+        if (nodeToDelete.data.parentId) result.data.parentId = nodeToDelete.data.parentId;
 
-        result.node.isRoot = parentNode.node.isRoot;
+        result.data.isRoot = parentNode.data.isRoot;
 
         if (childrenToHoist.children) result.children.push(...childrenToHoist.children);
 
         //Update the parentId of the hoisted nodes' children
         if (result.children) {
-            result.children.forEach((e) => (e.node.parentId = result.node.id));
+            result.children.forEach((e) => (e.data.parentId = result.data.id));
         }
 
-        result.children = result.children.filter((c) => c.node.id !== childrenToHoist.node.id);
+        result.children = result.children.filter((c) => c.data.id !== childrenToHoist.data.id);
 
         if (result.children.length === 0) delete result["children"];
 
@@ -196,12 +196,12 @@ export function editNodeProperty(rootNode: Tree<Skill> | undefined, targetNode: 
 
     //Base Case 👇
 
-    if (rootNode.node.id === targetNode.node.id) {
+    if (rootNode.data.id === targetNode.data.id) {
         const result = { ...rootNode };
 
         const keysToEdit = Object.keys(newProperties);
 
-        keysToEdit.forEach((key) => (result.node[key] = newProperties[key]));
+        keysToEdit.forEach((key) => (result.data[key] = newProperties[key]));
 
         return result;
     }
@@ -226,26 +226,26 @@ export function editNodeProperty(rootNode: Tree<Skill> | undefined, targetNode: 
 export const MOCK2: Tree<Skill> = {
     treeId: "HPTREE",
     treeName: "HPTREE",
-    node: { id: `Harry Potter 1`, name: "Harry Potter 1", isRoot: true },
+    data: { id: `Harry Potter 1`, name: "Harry Potter 1", isRoot: true },
     children: [
         {
-            node: { id: `Harry Potter 2`, name: "Harry Potter 2" },
+            data: { id: `Harry Potter 2`, name: "Harry Potter 2" },
             children: [
                 {
-                    node: { id: `Harry Potter 3`, name: "Harry Potter 3" },
+                    data: { id: `Harry Potter 3`, name: "Harry Potter 3" },
                     children: [
-                        { node: { id: `Harry Potter 41`, name: "Harry Potter 41" } },
-                        { node: { id: `Harry Potter 42`, name: "Harry Potter 42" } },
-                        { node: { id: `Harry Potter 43`, name: "Harry Potter 43" } },
+                        { data: { id: `Harry Potter 41`, name: "Harry Potter 41" } },
+                        { data: { id: `Harry Potter 42`, name: "Harry Potter 42" } },
+                        { data: { id: `Harry Potter 43`, name: "Harry Potter 43" } },
                     ],
                 },
             ],
         },
         {
-            node: { id: "Harry Potter 2.5", name: "Harry Potter 2.5" },
+            data: { id: "Harry Potter 2.5", name: "Harry Potter 2.5" },
             children: [
                 {
-                    node: { id: "Harry Potter 2.5 child", name: "Harry Potter 2.5 child" },
+                    data: { id: "Harry Potter 2.5 child", name: "Harry Potter 2.5 child" },
                 },
             ],
         },

@@ -11,7 +11,7 @@ export type Skill = {
 export interface Tree<T> {
     treeId?: string;
     treeName?: string;
-    node: T;
+    data: T;
     children?: Tree<T>[];
 }
 
@@ -20,26 +20,26 @@ export const MENU_DAMPENING = { damping: 20, stiffness: 300 };
 export const treeMock: Tree<Skill> = {
     treeId: "HPTREE",
     treeName: "HPTREE",
-    node: { id: `Harry Potter 1`, name: "Harry Potter 1", isRoot: true },
+    data: { id: `Harry Potter 1`, name: "Harry Potter 1", isRoot: true },
     children: [
         {
-            node: { id: `Harry Potter 2`, name: "Harry Potter 2" },
+            data: { id: `Harry Potter 2`, name: "Harry Potter 2" },
             children: [
                 {
-                    node: { id: `Harry Potter 3`, name: "Harry Potter 3" },
+                    data: { id: `Harry Potter 3`, name: "Harry Potter 3" },
                     children: [
-                        { node: { id: `Harry Potter 41`, name: "Harry Potter 41" } },
-                        { node: { id: `Harry Potter 42`, name: "Harry Potter 42" } },
-                        { node: { id: `Harry Potter 43`, name: "Harry Potter 43" } },
+                        { data: { id: `Harry Potter 41`, name: "Harry Potter 41" } },
+                        { data: { id: `Harry Potter 42`, name: "Harry Potter 42" } },
+                        { data: { id: `Harry Potter 43`, name: "Harry Potter 43" } },
                     ],
                 },
             ],
         },
         {
-            node: { id: "Harry Potter 2.5", name: "Harry Potter 2.5" },
+            data: { id: "Harry Potter 2.5", name: "Harry Potter 2.5" },
             children: [
                 {
-                    node: { id: "Harry Potter 2.5 child", name: "Harry Potter 2.5 child" },
+                    data: { id: "Harry Potter 2.5 child", name: "Harry Potter 2.5 child" },
                 },
             ],
         },
@@ -50,30 +50,30 @@ export const mockSkillTreeArray: Tree<Skill>[] = [
     {
         treeId: "IQ Skills",
         treeName: "IQ Skills",
-        node: { id: `Coding`, name: "Coding", isRoot: true, isCompleted: true },
+        data: { id: `Coding`, name: "Coding", isRoot: true, isCompleted: true },
         children: [
             {
-                node: { id: `Management`, name: "Management", parentId: "Coding" },
+                data: { id: `Management`, name: "Management", parentId: "Coding" },
 
                 children: [
                     {
-                        node: { id: `Lead Gen`, name: "Lead Gen", parentId: "Management" },
+                        data: { id: `Lead Gen`, name: "Lead Gen", parentId: "Management" },
 
                         children: [
                             {
-                                node: { id: `Strategy`, name: "Strategy", parentId: "Lead Gen" },
-                                children: [{ node: { id: "Cashflow Management", name: "Cashflow Management", parentId: "Strategy" } }],
+                                data: { id: `Strategy`, name: "Strategy", parentId: "Lead Gen" },
+                                children: [{ data: { id: "Cashflow Management", name: "Cashflow Management", parentId: "Strategy" } }],
                             },
                         ],
                     },
                 ],
             },
             {
-                node: { id: "English", name: "English", parentId: "Coding" },
+                data: { id: "English", name: "English", parentId: "Coding" },
 
                 children: [
                     {
-                        node: {
+                        data: {
                             isCompleted: true,
                             parentId: "English",
                             id: "Public Speaking",
@@ -81,8 +81,8 @@ export const mockSkillTreeArray: Tree<Skill>[] = [
                         },
                         children: [
                             {
-                                node: { name: "Sales", id: "Sales", parentId: "Public Speaking" },
-                                children: [{ node: { id: "Leadership", name: "Leadership", parentId: "Sales" } }],
+                                data: { name: "Sales", id: "Sales", parentId: "Public Speaking" },
+                                children: [{ data: { id: "Leadership", name: "Leadership", parentId: "Sales" } }],
                             },
                         ],
                     },
@@ -93,16 +93,16 @@ export const mockSkillTreeArray: Tree<Skill>[] = [
     {
         treeId: "EQ Skills",
         treeName: "EQ Skills",
-        node: { id: `People Management`, name: "People Management", isRoot: true, isCompleted: true },
+        data: { id: `People Management`, name: "People Management", isRoot: true, isCompleted: true },
         children: [
             {
-                node: { id: `Confidence`, name: "Confidence", parentId: "People Management" },
+                data: { id: `Confidence`, name: "Confidence", parentId: "People Management" },
             },
             {
-                node: { id: "Energy Investments", name: "Energy Investments", parentId: "People Management", isCompleted: true },
+                data: { id: "Energy Investments", name: "Energy Investments", parentId: "People Management", isCompleted: true },
                 children: [
                     {
-                        node: { id: `Copywriting`, name: "Copywriting", parentId: "Energy Investments" },
+                        data: { id: `Copywriting`, name: "Copywriting", parentId: "Energy Investments" },
                     },
                 ],
             },

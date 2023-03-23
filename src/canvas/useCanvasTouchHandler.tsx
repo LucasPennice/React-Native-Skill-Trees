@@ -50,7 +50,7 @@ const useCanvasTouchHandler = (props: Props) => {
                     return setSelectedNode(null);
                 }
 
-                const { node: nodeInTree } = findTreeNodeById(tree, circleTapped.id);
+                const { data: nodeInTree } = findTreeNodeById(tree, circleTapped.id);
 
                 if (nodeInTree === undefined) return;
 

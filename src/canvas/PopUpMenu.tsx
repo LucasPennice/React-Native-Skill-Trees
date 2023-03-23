@@ -25,7 +25,7 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
     //
     const currentNode = findTreeNodeById(currentTree, selectedNode);
     //Local State
-    const [text, onChangeText] = useState(currentNode ? currentNode.node.name : "Name");
+    const [text, onChangeText] = useState(currentNode ? currentNode.data.name : "Name");
 
     const MENU_HEIGHT = height / 2;
     const MENU_WIDTH = width - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL - CIRCLE_SIZE_SELECTED - 30;
@@ -61,10 +61,10 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                 {!currentNode.children && <Button title={"Delete Node"} onPress={() => dispatch(deleteNodeWithNoChildren(currentNode))} />}
                 {currentNode.children && <Button title={"Delete Node"} onPress={() => dispatch(toggleChildrenHoistSelector(currentNode.children))} />}
                 <Button
-                    title={`${currentNode.node.isCompleted ? "Deactivate" : "Activate"}`}
+                    title={`${currentNode.data.isCompleted ? "Deactivate" : "Activate"}`}
                     onPress={() =>
                         dispatch(
-                            editNodeProperty({ targetNode: currentNode, newProperties: { isCompleted: currentNode.node.isCompleted ? false : true } })
+                            editNodeProperty({ targetNode: currentNode, newProperties: { isCompleted: currentNode.data.isCompleted ? false : true } })
                         )
                     }
                 />

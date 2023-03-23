@@ -41,27 +41,27 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
     let newParentNodeInfo = { coordinates: currentNodeCoordintes, numberOfChildren: tree.children ? tree.children.length : 0 };
 
     useEffect(() => {
-        popCoordinateToArray({ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y - CIRCLE_SIZE / 2, id: tree.node.id });
+        popCoordinateToArray({ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y - CIRCLE_SIZE / 2, id: tree.data.id });
     }, [wholeTree]);
 
     const { circleBlurOnInactive, circleOpacity, connectingPathTrim, groupTransform, pathBlurOnInactive, pathTrim, labelOpacity } =
-        useHandleTreeAnimations(selectedNode, showLabel, tree, findDistanceBetweenNodesById(wholeTree, tree.node.id));
+        useHandleTreeAnimations(selectedNode, showLabel, tree, findDistanceBetweenNodesById(wholeTree, tree.data.id));
 
     const nodeAndParentCompleted = (() => {
-        if (tree.node.isCompleted !== true) return false;
+        if (tree.data.isCompleted !== true) return false;
 
-        const parentNode = findParentOfNode(wholeTree, tree.node.id);
+        const parentNode = findParentOfNode(wholeTree, tree.data.id);
 
         if (!parentNode) return false;
 
-        if (parentNode.node.isCompleted !== true) return false;
+        if (parentNode.data.isCompleted !== true) return false;
 
         return true;
     })();
 
     return (
         <>
-            {!tree.node.isRoot && (
+            {!tree.data.isRoot && (
                 <Path
                     path={createBezierPathBetweenPoints(
                         parentNodeInfo ? parentNodeInfo.coordinates : defaultParentInfo.coordinates,
@@ -96,7 +96,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                         {labelFont &&
                             showLabel &&
                             (() => {
-                                const text = tree.node.name;
+                                const text = tree.data.name;
                                 const wordArr = text.split(" ");
 
                                 const distanceBetweenWords = 14;
@@ -116,7 +116,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                                             <LinearGradient
                                                 start={vec(rectX - rectangleDimentions.width / 2, rectX + rectangleDimentions.width / 2)}
                                                 end={vec(rectY - rectangleDimentions.height / 2, rectY + rectangleDimentions.height / 2)}
-                                                colors={tree.node.isCompleted ? ["#5DD39E", "#BCE784"] : ["#A5BDFF", "#4070F5"]}
+                                                colors={tree.data.isCompleted ? ["#5DD39E", "#BCE784"] : ["#A5BDFF", "#4070F5"]}
                                             />
                                         </RoundedRect>
                                         {wordArr.map((word, idx) => {
@@ -155,14 +155,14 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                                 <LinearGradient
                                     start={vec(cx - CIRCLE_SIZE, cy - CIRCLE_SIZE)}
                                     end={vec(cx + CIRCLE_SIZE, cy + CIRCLE_SIZE)}
-                                    colors={tree.node.isCompleted ? ["#5DD39E", "#BCE784"] : ["#A5BDFF", "#4070F5"]}
+                                    colors={tree.data.isCompleted ? ["#5DD39E", "#BCE784"] : ["#A5BDFF", "#4070F5"]}
                                 />
                             </Path>
                             <Circle cx={cx} cy={cy} r={CIRCLE_SIZE} color="white"></Circle>
                             {/* Letter inside the node */}
                             {nodeLetterFont &&
                                 (() => {
-                                    const letterToRender = tree.node.name[0];
+                                    const letterToRender = tree.data.name[0];
 
                                     const textWidth = nodeLetterFont.getTextWidth(letterToRender);
 
@@ -174,7 +174,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                                             <LinearGradient
                                                 start={vec(textX, textX + textWidth)}
                                                 end={vec(textY, textY + 20)}
-                                                colors={tree.node.isCompleted ? ["#5DD39E", "#BCE784"] : ["#A5BDFF", "#4070F5"]}
+                                                colors={tree.data.isCompleted ? ["#5DD39E", "#BCE784"] : ["#A5BDFF", "#4070F5"]}
                                             />
                                         </Text>
                                     );
