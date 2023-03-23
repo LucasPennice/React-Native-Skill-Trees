@@ -158,8 +158,6 @@ export function deleteNodeWithChildren(rootNode: TreeNode<Book> | undefined, nod
         } else {
             const newNode = returnHoistedNode(currentChildren, childrenToHoist);
 
-            console.log(JSON.stringify(newNode));
-
             result.children.push(newNode);
         }
     }
@@ -185,6 +183,8 @@ export function deleteNodeWithChildren(rootNode: TreeNode<Book> | undefined, nod
         }
 
         result.children = result.children.filter((c) => c.node.id !== childrenToHoist.node.id);
+
+        if (result.children.length === 0) delete result["children"];
 
         return result;
     }
