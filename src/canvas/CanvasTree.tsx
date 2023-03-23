@@ -1,6 +1,6 @@
 import { createBezierPathBetweenPoints, getChildCoordinatesFromParentInfo, getHeightForFont } from "./functions";
 import { Blur, Circle, Group, LinearGradient, Path, vec, Shadow, useFont, Text, RoundedRect } from "@shopify/react-native-skia";
-import { Book, TreeNode } from "../types";
+import { Book, Tree } from "../types";
 import { CIRCLE_SIZE } from "./parameters";
 import { CirclePositionInCanvas } from "./CanvasTest";
 import useHandleTreeAnimations from "./useHandleTreeAnimations";
@@ -8,8 +8,8 @@ import { findDistanceBetweenNodesById, findParentOfNode } from "../treeFunctions
 import { useEffect } from "react";
 
 type TreeProps = {
-    tree: TreeNode<Book>;
-    wholeTree: TreeNode<Book>;
+    tree: Tree<Book>;
+    wholeTree: Tree<Book>;
     parentNodeInfo?: { coordinates: { x: number; y: number }; numberOfChildren: number; currentChildIndex: number };
     stateProps: {
         selectedNode: string | null;
@@ -21,7 +21,7 @@ type TreeProps = {
 
 export const CIRCLE_SIZE_SELECTED = CIRCLE_SIZE * 3;
 
-function Tree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTree }: TreeProps) {
+function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTree }: TreeProps) {
     const labelFont = useFont(require("../../assets/Poppins-Regular.otf"), 12);
     const nodeLetterFont = useFont(require("../../assets/Poppins-Regular.otf"), 20);
 
@@ -79,7 +79,7 @@ function Tree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTree }: 
             {tree.children &&
                 tree.children.map((element, idx) => {
                     return (
-                        <Tree
+                        <CanvasTree
                             key={idx}
                             tree={element}
                             wholeTree={wholeTree}
@@ -188,7 +188,7 @@ function Tree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTree }: 
         </>
     );
 }
-export default Tree;
+export default CanvasTree;
 
 function getPathForCircle(cx: number, cy: number, r: number, strokeWidth: number) {
     const radius = r + strokeWidth / 2;

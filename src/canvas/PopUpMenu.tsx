@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, Dimensions, Text, TextInput } from "react-native";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "./useCanvasTouchHandler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
-import { CIRCLE_SIZE_SELECTED } from "./Tree";
+import { CIRCLE_SIZE_SELECTED } from "./CanvasTree";
 import { MENU_DAMPENING } from "../types";
 import { findTreeNodeById } from "../treeFunctions";
 import { CirclePositionInCanvas } from "./CanvasTest";

@@ -1,9 +1,9 @@
 import { selectCanvasDisplaySettings } from "./canvasDisplaySettingsSlice";
 import { ModifiableNodeProperties } from "./currentTreeSlice";
 import { useAppSelector } from "./reduxHooks";
-import { Book, mockSkillTreeArray, TreeNode } from "./types";
+import { Book, mockSkillTreeArray, Tree } from "./types";
 
-export function findTreeHeight(rootNode: TreeNode<Book> | undefined) {
+export function findTreeHeight(rootNode: Tree<Book> | undefined) {
     if (!rootNode) return undefined;
 
     if (!rootNode.node) return 0;
@@ -21,7 +21,7 @@ export function findTreeHeight(rootNode: TreeNode<Book> | undefined) {
     return maxHeight + 1;
 }
 
-export function findTreeNodeById(rootNode: TreeNode<Book> | undefined, id: string): TreeNode<Book> | undefined {
+export function findTreeNodeById(rootNode: Tree<Book> | undefined, id: string): Tree<Book> | undefined {
     if (!rootNode) return undefined;
 
     if (rootNode.node.id === id) return rootNode;
@@ -35,7 +35,7 @@ export function findTreeNodeById(rootNode: TreeNode<Book> | undefined, id: strin
     return arr.find((c) => c !== undefined);
 }
 
-export function findDistanceBetweenNodesById(rootNode: TreeNode<Book> | undefined, id: string): number {
+export function findDistanceBetweenNodesById(rootNode: Tree<Book> | undefined, id: string): number {
     if (!rootNode) return undefined;
 
     //Base case 👇
@@ -54,7 +54,7 @@ export function findDistanceBetweenNodesById(rootNode: TreeNode<Book> | undefine
     return Math.max(...result);
 }
 
-export function quantityOfCompletedNodes(rootNode: TreeNode<Book> | undefined) {
+export function quantityOfCompletedNodes(rootNode: Tree<Book> | undefined) {
     if (!rootNode) return undefined;
 
     //Base case 👇
@@ -73,7 +73,7 @@ export function quantityOfCompletedNodes(rootNode: TreeNode<Book> | undefined) {
     return result;
 }
 
-export function quantiyOfNodes(rootNode: TreeNode<Book> | undefined) {
+export function quantiyOfNodes(rootNode: Tree<Book> | undefined) {
     if (!rootNode) return undefined;
 
     //Base case 👇
@@ -91,7 +91,7 @@ export function quantiyOfNodes(rootNode: TreeNode<Book> | undefined) {
     return result;
 }
 
-export function findParentOfNode(rootNode: TreeNode<Book> | undefined, id: string): TreeNode<Book> | undefined {
+export function findParentOfNode(rootNode: Tree<Book> | undefined, id: string): Tree<Book> | undefined {
     const foundNode = findTreeNodeById(rootNode, id);
 
     if (!foundNode) return undefined;
@@ -107,7 +107,7 @@ export function findParentOfNode(rootNode: TreeNode<Book> | undefined, id: strin
     return parentNode;
 }
 
-export function deleteNodeWithNoChildren(rootNode: TreeNode<Book> | undefined, nodeToDelete: TreeNode<Book>) {
+export function deleteNodeWithNoChildren(rootNode: Tree<Book> | undefined, nodeToDelete: Tree<Book>) {
     if (!rootNode) return undefined;
 
     //Base case 👇
@@ -117,7 +117,7 @@ export function deleteNodeWithNoChildren(rootNode: TreeNode<Book> | undefined, n
 
     //Recursive case 👇
 
-    let result: TreeNode<Book> = { node: rootNode.node, children: [] };
+    let result: Tree<Book> = { node: rootNode.node, children: [] };
 
     if (rootNode.treeId) result.treeId = rootNode.treeId;
     if (rootNode.treeName) result.treeName = rootNode.treeName;
@@ -135,7 +135,7 @@ export function deleteNodeWithNoChildren(rootNode: TreeNode<Book> | undefined, n
     return result;
 }
 
-export function deleteNodeWithChildren(rootNode: TreeNode<Book> | undefined, nodeToDelete: TreeNode<Book>, childrenToHoist: TreeNode<Book>) {
+export function deleteNodeWithChildren(rootNode: Tree<Book> | undefined, nodeToDelete: Tree<Book>, childrenToHoist: Tree<Book>) {
     if (!rootNode) return undefined;
 
     // //Base case 👇
@@ -146,7 +146,7 @@ export function deleteNodeWithChildren(rootNode: TreeNode<Book> | undefined, nod
 
     //Recursive case 👇
 
-    let result: TreeNode<Book> = { node: rootNode.node, children: [] };
+    let result: Tree<Book> = { node: rootNode.node, children: [] };
 
     if (rootNode.treeId) result.treeId = rootNode.treeId;
     if (rootNode.treeName) result.treeName = rootNode.treeName;
@@ -167,7 +167,7 @@ export function deleteNodeWithChildren(rootNode: TreeNode<Book> | undefined, nod
 
     return result;
 
-    function returnHoistedNode(parentNode: TreeNode<Book>, childrenToHoist: TreeNode<Book>) {
+    function returnHoistedNode(parentNode: Tree<Book>, childrenToHoist: Tree<Book>) {
         const result = { ...parentNode };
 
         result.node = { ...childrenToHoist.node };
@@ -191,7 +191,7 @@ export function deleteNodeWithChildren(rootNode: TreeNode<Book> | undefined, nod
     }
 }
 
-export function editNodeProperty(rootNode: TreeNode<Book> | undefined, targetNode: TreeNode<Book>, newProperties: ModifiableNodeProperties) {
+export function editNodeProperty(rootNode: Tree<Book> | undefined, targetNode: Tree<Book>, newProperties: ModifiableNodeProperties) {
     if (!rootNode) return undefined;
 
     //Base Case 👇
@@ -210,7 +210,7 @@ export function editNodeProperty(rootNode: TreeNode<Book> | undefined, targetNod
 
     //Recursive Case 👇
 
-    let result: TreeNode<Book> = { ...rootNode, children: [] };
+    let result: Tree<Book> = { ...rootNode, children: [] };
 
     for (let idx = 0; idx < rootNode.children.length; idx++) {
         const element = rootNode.children[idx];
@@ -223,7 +223,7 @@ export function editNodeProperty(rootNode: TreeNode<Book> | undefined, targetNod
     return result;
 }
 
-export const MOCK2: TreeNode<Book> = {
+export const MOCK2: Tree<Book> = {
     treeId: "HPTREE",
     treeName: "HPTREE",
     node: { id: `Harry Potter 1`, name: "Harry Potter 1", isRoot: true },

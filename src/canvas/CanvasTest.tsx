@@ -4,14 +4,14 @@ import { Dimensions, ScrollView } from "react-native";
 import { DISTANCE_BETWEEN_GENERATIONS, getDeltaX } from "./functions";
 import useCanvasTouchHandler from "./useCanvasTouchHandler";
 import PopUpMenu from "./PopUpMenu";
-import Tree, { CIRCLE_SIZE_SELECTED } from "./Tree";
 import { findTreeHeight } from "../treeFunctions";
 import { NAV_HEGIHT } from "../pages/HomePage";
 import { useAppSelector } from "../reduxHooks";
 import { selectCanvasDisplaySettings } from "../canvasDisplaySettingsSlice";
 import { selectCurrentTree } from "../currentTreeSlice";
 import { selectScreenDimentions } from "../screenDimentionsSlice";
-import { Book, TreeNode } from "../types";
+import { Book, Tree } from "../types";
+import CanvasTree, { CIRCLE_SIZE_SELECTED } from "./CanvasTree";
 
 export type CirclePositionInCanvas = { x: number; y: number; id: string };
 
@@ -79,7 +79,7 @@ function CanvasTest() {
                     <Canvas
                         onTouch={touchHandler}
                         style={{ width: canvasDimentions.width, height: canvasDimentions.height, backgroundColor: "#F2F3F8" }}>
-                        <Tree
+                        <CanvasTree
                             stateProps={{ selectedNode, popCoordinateToArray, showLabel }}
                             tree={currentTree}
                             wholeTree={currentTree}
@@ -95,7 +95,7 @@ function CanvasTest() {
     );
 }
 
-function calculateDimentionsAndRootCoordinates(currentTree: TreeNode<Book>) {
+function calculateDimentionsAndRootCoordinates(currentTree: Tree<Book>) {
     const { height, width } = useAppSelector(selectScreenDimentions);
 
     const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;

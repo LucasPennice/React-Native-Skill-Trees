@@ -5,11 +5,11 @@ import {
     deleteNodeWithChildren as deleteNodeWithChildrenFn,
     editNodeProperty as editNodePropertyFn,
 } from "./treeFunctions";
-import { Book, TreeNode } from "./types";
+import { Book, Tree } from "./types";
 
 // Define a type for the slice state
 type CurrentTreeSlice = {
-    value: TreeNode<Book> | undefined;
+    value: Tree<Book> | undefined;
 };
 
 // Define the initial state using that type
@@ -23,19 +23,19 @@ export const currentTreeSlice = createSlice({
     name: "currentTree",
     initialState,
     reducers: {
-        changeTree: (state, action: PayloadAction<TreeNode<Book>>) => {
+        changeTree: (state, action: PayloadAction<Tree<Book>>) => {
             state.value = action.payload;
         },
         unselectTree: (state) => {
             state.value = undefined;
         },
-        editNodeProperty: (state, action: PayloadAction<{ targetNode: TreeNode<Book>; newProperties: ModifiableNodeProperties }>) => {
+        editNodeProperty: (state, action: PayloadAction<{ targetNode: Tree<Book>; newProperties: ModifiableNodeProperties }>) => {
             state.value = editNodePropertyFn(state.value, action.payload.targetNode, action.payload.newProperties);
         },
-        deleteNodeWithNoChildren: (state, action: PayloadAction<TreeNode<Book>>) => {
+        deleteNodeWithNoChildren: (state, action: PayloadAction<Tree<Book>>) => {
             state.value = deleteNodeWithNoChildrenFn(state.value, action.payload);
         },
-        deleteNodeWithChildren: (state, action: PayloadAction<{ nodeToDelete: TreeNode<Book>; childrenToHoist: TreeNode<Book> }>) => {
+        deleteNodeWithChildren: (state, action: PayloadAction<{ nodeToDelete: Tree<Book>; childrenToHoist: Tree<Book> }>) => {
             state.value = deleteNodeWithChildrenFn(state.value, action.payload.nodeToDelete, action.payload.childrenToHoist);
         },
     },

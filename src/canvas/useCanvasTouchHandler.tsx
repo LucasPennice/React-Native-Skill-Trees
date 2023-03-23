@@ -1,17 +1,17 @@
 import { useTouchHandler } from "@shopify/react-native-skia";
 import { useRef } from "react";
 import { findTreeNodeById } from "../treeFunctions";
-import { Book, treeMock, TreeNode } from "../types";
+import { Book, treeMock, Tree } from "../types";
 import { didTapCircle } from "./functions";
 import { Dimensions, ScrollView } from "react-native";
-import { CIRCLE_SIZE_SELECTED } from "./Tree";
+import { CIRCLE_SIZE_SELECTED } from "./CanvasTree";
 import { CirclePositionInCanvas } from "./CanvasTest";
 
 type Props = {
     selectedNodeState: [null | string, React.Dispatch<React.SetStateAction<string | null>>];
     setSelectedNodeHistory: React.Dispatch<React.SetStateAction<(string | null)[]>>;
     circlePositionsInCanvas: CirclePositionInCanvas[];
-    tree: TreeNode<Book>;
+    tree: Tree<Book>;
 };
 
 export const DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL = CIRCLE_SIZE_SELECTED + 20;

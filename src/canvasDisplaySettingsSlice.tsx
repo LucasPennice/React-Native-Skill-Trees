@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "./reduxStore";
-import { Book, TreeNode } from "./types";
+import { Book, Tree } from "./types";
 
 // Define a type for the slice state
 type CanvasDisplaySettings = {
     showLabel: boolean;
     openMenu: "treeSelector" | "treeSettings" | "childrenHoistSelector" | null;
-    candidatesToHoist: TreeNode<Book>[] | null;
+    candidatesToHoist: Tree<Book>[] | null;
 };
 
 // Define the initial state using that type
@@ -37,7 +37,7 @@ export const canvasDisplaySettingsSlice = createSlice({
                 state.openMenu = "treeSelector";
             }
         },
-        toggleChildrenHoistSelector: (state, action?: PayloadAction<TreeNode<Book>[]>) => {
+        toggleChildrenHoistSelector: (state, action?: PayloadAction<Tree<Book>[]>) => {
             if (state.openMenu === "childrenHoistSelector") {
                 state.openMenu = null;
                 state.candidatesToHoist = null;
