@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "./reduxStore";
-import { Skill, Tree } from "./types";
+import { Skill, Tree } from "../types";
 
 // Define a type for the slice state
 type CanvasDisplaySettings = {

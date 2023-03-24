@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { Button, Dimensions, Text, TextInput } from "react-native";
-import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "./useCanvasTouchHandler";
+import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
-import { CIRCLE_SIZE_SELECTED } from "./CanvasTree";
-import { MENU_DAMPENING } from "../types";
+import { CIRCLE_SIZE_SELECTED } from "../canvas/CanvasTree";
+import { MENU_DAMPENING } from "../../../types";
 import { findTreeNodeById } from "../treeFunctions";
-import { CirclePositionInCanvas } from "./CanvasTest";
-import { deleteNodeWithNoChildren, editNodeProperty, selectCurrentTree } from "../currentTreeSlice";
-import { useAppDispatch, useAppSelector } from "../reduxHooks";
-import { selectScreenDimentions } from "../screenDimentionsSlice";
-import { toggleChildrenHoistSelector } from "../canvasDisplaySettingsSlice";
+import { CirclePositionInCanvas } from "../canvas/TreeView";
+import { deleteNodeWithNoChildren, editNodeProperty, selectCurrentTree } from "../../../redux/currentTreeSlice";
+import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
+import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { toggleChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
 
 type Props = {
     selectedNode: string | null;

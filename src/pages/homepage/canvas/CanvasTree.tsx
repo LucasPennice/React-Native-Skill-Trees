@@ -1,9 +1,9 @@
 import { createBezierPathBetweenPoints, getChildCoordinatesFromParentInfo, getHeightForFont } from "./functions";
 import { Blur, Circle, Group, LinearGradient, Path, vec, Shadow, useFont, Text, RoundedRect } from "@shopify/react-native-skia";
-import { Skill, Tree } from "../types";
+import { Skill, Tree } from "../../../types";
 import { CIRCLE_SIZE } from "./parameters";
-import { CirclePositionInCanvas } from "./CanvasTest";
-import useHandleTreeAnimations from "./useHandleTreeAnimations";
+import { CirclePositionInCanvas } from "./TreeView";
+import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 import { findDistanceBetweenNodesById, findParentOfNode } from "../treeFunctions";
 import { useEffect } from "react";
 
@@ -22,8 +22,8 @@ type TreeProps = {
 export const CIRCLE_SIZE_SELECTED = CIRCLE_SIZE * 3;
 
 function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTree }: TreeProps) {
-    const labelFont = useFont(require("../../assets/Poppins-Regular.otf"), 12);
-    const nodeLetterFont = useFont(require("../../assets/Poppins-Regular.otf"), 20);
+    const labelFont = useFont(require("../../../../assets/Poppins-Regular.otf"), 12);
+    const nodeLetterFont = useFont(require("../../../../assets/Poppins-Regular.otf"), 20);
 
     const defaultParentInfo = parentNodeInfo ?? {
         coordinates: { x: rootCoordinates.width, y: rootCoordinates.height },
@@ -61,7 +61,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
 
     return (
         <>
-            {!tree.data.isRoot && (
+            {!tree.isRoot && (
                 <Path
                     path={createBezierPathBetweenPoints(
                         parentNodeInfo ? parentNodeInfo.coordinates : defaultParentInfo.coordinates,

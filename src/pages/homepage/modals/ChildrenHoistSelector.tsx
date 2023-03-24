@@ -1,9 +1,9 @@
 import { Button, Modal, Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
-import { closeAllMenues, selectCanvasDisplaySettings, toggleChildrenHoistSelector } from "../canvasDisplaySettingsSlice";
-import { deleteNodeWithChildren, selectCurrentTree } from "../currentTreeSlice";
-import { useAppDispatch, useAppSelector } from "../reduxHooks";
-import { findParentOfNode } from "../treeFunctions";
-import { centerFlex } from "../types";
+import { closeAllMenues, selectCanvasDisplaySettings, toggleChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
+import { deleteNodeWithChildren, selectCurrentTree } from "../../../redux/currentTreeSlice";
+import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
+import { findParentOfNode, findTreeNodeById } from "../treeFunctions";
+import { centerFlex } from "../../../types";
 
 function ChildrenHoistSelectorModal() {
     const { openMenu, candidatesToHoist } = useAppSelector(selectCanvasDisplaySettings);
@@ -25,7 +25,9 @@ function ChildrenHoistSelectorModal() {
                         {candidatesToHoist !== null &&
                             currentTree &&
                             candidatesToHoist.map((children, idx) => {
-                                const nodeToDelete = findParentOfNode(currentTree, children.data.id);
+                                const nodeToDelete = findTreeNodeById(currentTree, children.parentId);
+
+                                console.log("Result is ->", nodeToDelete);
 
                                 return (
                                     <Pressable
@@ -43,6 +45,7 @@ function ChildrenHoistSelectorModal() {
                                             dispatch(closeAllMenues());
                                         }}>
                                         <Text>{children.data.name}</Text>
+                                        {children.parentId && <Text>{children.parentId}</Text>}
                                     </Pressable>
                                 );
                             })}

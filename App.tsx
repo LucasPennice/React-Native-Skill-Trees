@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Dimensions, SafeAreaView, View } from "react-native";
 import { Provider } from "react-redux";
-import HomePage from "./src/pages/HomePage";
-import { useAppDispatch, useAppSelector } from "./src/reduxHooks";
-import { store } from "./src/reduxStore";
-import { selectScreenDimentions, updateDimentions } from "./src/screenDimentionsSlice";
+import HomePage from "./src/pages/homepage/HomePage";
+import { useAppDispatch, useAppSelector } from "./src/redux/reduxHooks";
+import { store } from "./src/redux/reduxStore";
+import { selectScreenDimentions, updateDimentions } from "./src/redux/screenDimentionsSlice";
 
 export default function App() {
     return (

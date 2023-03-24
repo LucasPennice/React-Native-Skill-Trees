@@ -1,8 +1,8 @@
 import Color, { Circle, Circle as SvgCircle, Svg } from "react-native-svg";
 import Animated, { useAnimatedProps, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { quantityOfCompletedNodes, quantiyOfNodes } from "../treeFunctions";
-import { selectCurrentTree } from "../currentTreeSlice";
-import { useAppSelector } from "../reduxHooks";
+import { selectCurrentTree } from "../../../redux/currentTreeSlice";
+import { useAppSelector } from "../../../redux/reduxHooks";
 import { useEffect } from "react";
 import { View } from "react-native";
 

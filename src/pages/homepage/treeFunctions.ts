@@ -1,7 +1,7 @@
-import { selectCanvasDisplaySettings } from "./canvasDisplaySettingsSlice";
-import { ModifiableNodeProperties } from "./currentTreeSlice";
-import { useAppSelector } from "./reduxHooks";
-import { Skill, mockSkillTreeArray, Tree } from "./types";
+import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
+import { ModifiableNodeProperties } from "../../redux/currentTreeSlice";
+import { useAppSelector } from "../../redux/reduxHooks";
+import { Skill, mockSkillTreeArray, Tree } from "../../types";
 
 export function findTreeHeight(rootNode: Tree<Skill> | undefined) {
     if (!rootNode) return undefined;
@@ -25,14 +25,20 @@ export function findTreeNodeById(rootNode: Tree<Skill> | undefined, id: string):
     if (!rootNode) return undefined;
 
     if (rootNode.data.id === id) return rootNode;
-    if (!rootNode.data) return undefined;
+
     if (!rootNode.children) return undefined;
 
-    let arr = rootNode.children.map((item) => {
-        return findTreeNodeById(item, id);
-    });
+    let result = undefined;
 
-    return arr.find((c) => c !== undefined);
+    for (let idx = 0; idx < rootNode.children.length; idx++) {
+        const element = rootNode.children[idx];
+
+        const foundNode = findTreeNodeById(element, id);
+
+        if (foundNode !== undefined) result = foundNode;
+    }
+
+    return result;
 }
 
 export function findDistanceBetweenNodesById(rootNode: Tree<Skill> | undefined, id: string): number {
@@ -92,15 +98,17 @@ export function quantiyOfNodes(rootNode: Tree<Skill> | undefined) {
 }
 
 export function findParentOfNode(rootNode: Tree<Skill> | undefined, id: string): Tree<Skill> | undefined {
+    if (!rootNode) return undefined;
+
     const foundNode = findTreeNodeById(rootNode, id);
 
     if (!foundNode) return undefined;
 
-    const { data } = foundNode;
+    const { data, parentId } = foundNode;
 
-    if (!data || !data.parentId) return undefined;
+    if (!data || !parentId) return undefined;
 
-    const parentNode = findTreeNodeById(rootNode, data.parentId);
+    const parentNode = findTreeNodeById(rootNode, parentId);
 
     if (!parentNode || !parentNode.data) return undefined;
 
@@ -117,7 +125,7 @@ export function deleteNodeWithNoChildren(rootNode: Tree<Skill> | undefined, node
 
     //Recursive case 👇
 
-    let result: Tree<Skill> = { data: rootNode.data, children: [] };
+    let result: Tree<Skill> = { ...rootNode, children: [] };
 
     if (rootNode.treeId) result.treeId = rootNode.treeId;
     if (rootNode.treeName) result.treeName = rootNode.treeName;
@@ -146,7 +154,7 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
 
     //Recursive case 👇
 
-    let result: Tree<Skill> = { data: rootNode.data, children: [] };
+    let result: Tree<Skill> = { ...rootNode, children: [] };
 
     if (rootNode.treeId) result.treeId = rootNode.treeId;
     if (rootNode.treeName) result.treeName = rootNode.treeName;
@@ -172,15 +180,15 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
 
         result.data = { ...childrenToHoist.data };
 
-        if (nodeToDelete.data.parentId) result.data.parentId = nodeToDelete.data.parentId;
+        if (nodeToDelete.parentId) result.parentId = nodeToDelete.parentId;
 
-        result.data.isRoot = parentNode.data.isRoot;
+        result.isRoot = parentNode.isRoot;
 
         if (childrenToHoist.children) result.children.push(...childrenToHoist.children);
 
         //Update the parentId of the hoisted nodes' children
         if (result.children) {
-            result.children.forEach((e) => (e.data.parentId = result.data.id));
+            result.children.forEach((e) => (e.parentId = result.data.id));
         }
 
         result.children = result.children.filter((c) => c.data.id !== childrenToHoist.data.id);
@@ -222,32 +230,3 @@ export function editNodeProperty(rootNode: Tree<Skill> | undefined, targetNode: 
 
     return result;
 }
-
-export const MOCK2: Tree<Skill> = {
-    treeId: "HPTREE",
-    treeName: "HPTREE",
-    data: { id: `Harry Potter 1`, name: "Harry Potter 1", isRoot: true },
-    children: [
-        {
-            data: { id: `Harry Potter 2`, name: "Harry Potter 2" },
-            children: [
-                {
-                    data: { id: `Harry Potter 3`, name: "Harry Potter 3" },
-                    children: [
-                        { data: { id: `Harry Potter 41`, name: "Harry Potter 41" } },
-                        { data: { id: `Harry Potter 42`, name: "Harry Potter 42" } },
-                        { data: { id: `Harry Potter 43`, name: "Harry Potter 43" } },
-                    ],
-                },
-            ],
-        },
-        {
-            data: { id: "Harry Potter 2.5", name: "Harry Potter 2.5" },
-            children: [
-                {
-                    data: { id: "Harry Potter 2.5 child", name: "Harry Potter 2.5 child" },
-                },
-            ],
-        },
-    ],
-};

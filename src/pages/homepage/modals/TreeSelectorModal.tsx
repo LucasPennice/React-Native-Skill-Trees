@@ -1,8 +1,8 @@
 import { Button, Modal, View } from "react-native";
-import { hideLabel, selectCanvasDisplaySettings, toggleTreeSelector } from "../canvasDisplaySettingsSlice";
-import { changeTree, unselectTree } from "../currentTreeSlice";
-import { useAppDispatch, useAppSelector } from "../reduxHooks";
-import { centerFlex, mockSkillTreeArray } from "../types";
+import { hideLabel, selectCanvasDisplaySettings, toggleTreeSelector } from "../../../redux/canvasDisplaySettingsSlice";
+import { changeTree, unselectTree } from "../../../redux/currentTreeSlice";
+import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
+import { centerFlex, mockSkillTreeArray } from "../../../types";
 
 function TreeSelectorModal() {
     const { openMenu } = useAppSelector(selectCanvasDisplaySettings);

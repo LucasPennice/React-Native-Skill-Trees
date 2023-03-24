@@ -1,17 +1,17 @@
 import { View } from "react-native";
-import CanvasTest from "../canvas/CanvasTest";
-import ChildrenHoistSelectorModal from "./ChildrenHoistSelector";
-import ProgressIndicator from "./ProgressIndicator";
-import SettingsMenu from "./SettingsMenu";
-import TreeName from "./TreeName";
-import TreeSelectorModal from "./TreeSelectorModal";
+import TreeView from "./canvas/TreeView";
+import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
+import ProgressIndicator from "./components/ProgressIndicator";
+import SettingsMenu from "./components/SettingsMenu";
+import TreeName from "./components/TreeName";
+import TreeSelectorModal from "./modals/TreeSelectorModal";
 
 export const NAV_HEGIHT = 75;
 
 function HomePage() {
     return (
         <View style={{ position: "relative" }}>
-            <CanvasTest />
+            <TreeView />
             <ProgressIndicator />
             <TreeName />
             <SettingsMenu />

@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
-import { selectCurrentTree } from "../currentTreeSlice";
-import { useAppSelector } from "../reduxHooks";
+import { selectCurrentTree } from "../../../redux/currentTreeSlice";
+import { useAppSelector } from "../../../redux/reduxHooks";
 
 function TreeName() {
     const { value: currentTree } = useAppSelector(selectCurrentTree);

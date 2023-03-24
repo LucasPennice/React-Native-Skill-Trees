@@ -1,7 +1,7 @@
 import { Easing, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import { mix, useSharedValueEffect, useValue, useComputedValue } from "@shopify/react-native-skia";
 import { useEffect } from "react";
-import { Skill, Tree } from "../types";
+import { Skill, Tree } from "../../../../types";
 
 const PATH_INITIAL_ANIMATION_DURATION = 200;
 const CIRCLE_INITIAL_ANIMATION_DURATION = 200;

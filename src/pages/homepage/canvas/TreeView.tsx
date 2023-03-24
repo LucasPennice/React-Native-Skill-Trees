@@ -1,24 +1,26 @@
 import { Canvas } from "@shopify/react-native-skia";
 import { useEffect, useState } from "react";
 import { Dimensions, ScrollView } from "react-native";
-import { DISTANCE_BETWEEN_GENERATIONS, getDeltaX } from "./functions";
-import useCanvasTouchHandler from "./useCanvasTouchHandler";
-import PopUpMenu from "./PopUpMenu";
+import { DISTANCE_BETWEEN_GENERATIONS } from "./functions";
+import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
+import PopUpMenu from "../components/PopUpMenu";
 import { findTreeHeight } from "../treeFunctions";
-import { NAV_HEGIHT } from "../pages/HomePage";
-import { useAppSelector } from "../reduxHooks";
-import { selectCanvasDisplaySettings } from "../canvasDisplaySettingsSlice";
-import { selectCurrentTree } from "../currentTreeSlice";
-import { selectScreenDimentions } from "../screenDimentionsSlice";
-import { Skill, Tree } from "../types";
+import { NAV_HEGIHT } from "../HomePage";
+import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
+import { selectCurrentTree } from "../../../redux/currentTreeSlice";
+import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { Skill, Tree } from "../../../types";
 import CanvasTree, { CIRCLE_SIZE_SELECTED } from "./CanvasTree";
+import { useAppSelector } from "../../../redux/reduxHooks";
 
 export type CirclePositionInCanvas = { x: number; y: number; id: string };
 
-function CanvasTest() {
+function TreeView() {
     const { height, width } = useAppSelector(selectScreenDimentions);
 
     const { value: currentTree } = useAppSelector(selectCurrentTree);
+
+    const testCirlcePositions = getCirclePositions(currentTree);
 
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
 
@@ -33,8 +35,6 @@ function CanvasTest() {
     }, [currentTree]);
 
     const popCoordinateToArray = (coordinate: CirclePositionInCanvas) => setCirclePositionsInCanvas((p) => [...p, coordinate]);
-
-    let deltaX = getDeltaX();
 
     const { touchHandler, horizontalScrollViewRef, verticalScrollViewRef } = useCanvasTouchHandler({
         selectedNodeState: [selectedNode, setSelectedNode],
@@ -70,11 +70,7 @@ function CanvasTest() {
 
     return (
         <ScrollView showsVerticalScrollIndicator={false} ref={verticalScrollViewRef} style={{ height: height - NAV_HEGIHT }}>
-            {/* onScroll={() => setSelectedNode(null)}
-            scrollEventThrottle={100}> */}
             <ScrollView ref={horizontalScrollViewRef} horizontal showsHorizontalScrollIndicator={false} style={{ position: "relative" }}>
-                {/* onScroll={() => setSelectedNode(null)}
-                scrollEventThrottle={100}> */}
                 {currentTree !== undefined && (
                     <Canvas
                         onTouch={touchHandler}
@@ -115,4 +111,10 @@ function calculateDimentionsAndRootCoordinates(currentTree: Tree<Skill>) {
     };
 }
 
-export default CanvasTest;
+export default TreeView;
+
+function getCirclePositions(currentTree: Tree<Skill>) {
+    console.log(currentTree.treeName);
+
+    return 0;
+}

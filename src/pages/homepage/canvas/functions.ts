@@ -1,6 +1,4 @@
 import { TouchInfo } from "@shopify/react-native-skia";
-import { findParentOfNode, findTreeHeight } from "../treeFunctions";
-import { Skill, treeMock, Tree } from "../types";
 import { CIRCLE_SIZE, TOUCH_BUFFER } from "./parameters";
 
 export function didTapCircle(touchInfo: TouchInfo) {
@@ -66,10 +64,6 @@ export function createBezierPathBetweenPoints(p1: { x: number; y: number }, p2: 
     // construct the command to draw a quadratic curve
     var curve = "M" + p1.x + " " + p1.y + " Q " + c1x + " " + c1y + " " + p2.x + " " + p2.y;
     return curve;
-}
-
-export function getDeltaX() {
-    const treeHeight = findTreeHeight(treeMock);
 }
 
 export const LETTER_SIZE_AT_10 = {

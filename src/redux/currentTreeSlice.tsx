@@ -4,8 +4,8 @@ import {
     deleteNodeWithNoChildren as deleteNodeWithNoChildrenFn,
     deleteNodeWithChildren as deleteNodeWithChildrenFn,
     editNodeProperty as editNodePropertyFn,
-} from "./treeFunctions";
-import { Skill, Tree } from "./types";
+} from "../pages/homepage/treeFunctions";
+import { Skill, Tree } from "../types";
 
 // Define a type for the slice state
 type CurrentTreeSlice = {

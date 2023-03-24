@@ -1,7 +1,7 @@
 import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { useAnimatedStyle, withDelay, withSpring } from "react-native-reanimated";
-import { selectCanvasDisplaySettings, toggleSettingsMenuOpen, toggleShowLabel, toggleTreeSelector } from "../canvasDisplaySettingsSlice";
-import { useAppDispatch, useAppSelector } from "../reduxHooks";
+import { selectCanvasDisplaySettings, toggleSettingsMenuOpen, toggleShowLabel, toggleTreeSelector } from "../../../redux/canvasDisplaySettingsSlice";
+import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 
 const SETTING_BUTTON_WIDTH = 70;
 
