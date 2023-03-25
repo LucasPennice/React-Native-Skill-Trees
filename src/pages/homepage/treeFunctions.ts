@@ -235,3 +235,7 @@ export function editNodeProperty(rootNode: Tree<Skill> | undefined, targetNode: 
 
     return result;
 }
+
+export function getRootNodeDefaultPosition(id: string) {
+    return { x: 0, y: 0, id, level: 0, parentId: null };
+}

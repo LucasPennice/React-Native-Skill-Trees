@@ -4,7 +4,7 @@ export const CIRCLE_SIZE_SELECTED = CIRCLE_SIZE * 3;
 //Added range to detect a touch on a circle on every side
 export const TOUCH_BUFFER = 15;
 
-export const DISTANCE_BETWEEN_CHILDREN = 130;
+export const DISTANCE_BETWEEN_CHILDREN = 90;
 export const DISTANCE_BETWEEN_GENERATIONS = 100;
 
 export const PATH_INITIAL_ANIMATION_DURATION = 150;

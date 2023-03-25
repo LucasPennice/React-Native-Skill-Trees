@@ -42,6 +42,28 @@ export const mockSkillTreeArray: Tree<Skill>[] = [
                             },
                         ],
                     },
+                    {
+                        data: { id: `Messi`, name: "Messi" },
+                        parentId: "Management",
+                    },
+                ],
+            },
+            {
+                parentId: "Coding",
+                data: { id: `Voice Influx`, name: "Voice Influx" },
+                children: [
+                    {
+                        data: { id: `Cadence`, name: "Cadence" },
+                        parentId: "Voice Influx",
+                    },
+                    {
+                        data: { id: `Sexo`, name: "Sexo" },
+                        parentId: "Voice Influx",
+                    },
+                    {
+                        data: { id: `Fernandez`, name: "Fernandez" },
+                        parentId: "Voice Influx",
+                    },
                 ],
             },
             {
