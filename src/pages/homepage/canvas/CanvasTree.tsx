@@ -1,7 +1,7 @@
 import { createBezierPathBetweenPoints, getChildCoordinatesFromParentInfo, getHeightForFont } from "./functions";
 import { Blur, Circle, Group, LinearGradient, Path, vec, Shadow, useFont, Text, RoundedRect } from "@shopify/react-native-skia";
 import { Skill, Tree } from "../../../types";
-import { CIRCLE_SIZE } from "./parameters";
+import { CIRCLE_SIZE, colors } from "./parameters";
 import { CirclePositionInCanvas } from "./TreeView";
 import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 import { findDistanceBetweenNodesById, findParentOfNode } from "../treeFunctions";
@@ -19,14 +19,12 @@ type TreeProps = {
     rootCoordinates?: { width: number; height: number };
 };
 
-export const CIRCLE_SIZE_SELECTED = CIRCLE_SIZE * 3;
-
 function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTree }: TreeProps) {
     const labelFont = useFont(require("../../../../assets/Poppins-Regular.otf"), 12);
     const nodeLetterFont = useFont(require("../../../../assets/Poppins-Regular.otf"), 20);
 
     const defaultParentInfo = parentNodeInfo ?? {
-        coordinates: { x: rootCoordinates.width, y: rootCoordinates.height },
+        coordinates: { x: rootCoordinates!.width, y: rootCoordinates!.height },
         numberOfChildren: 1,
         currentChildIndex: 0,
     };
@@ -45,7 +43,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
     }, [wholeTree]);
 
     const { circleBlurOnInactive, circleOpacity, connectingPathTrim, groupTransform, pathBlurOnInactive, pathTrim, labelOpacity } =
-        useHandleTreeAnimations(selectedNode, showLabel, tree, findDistanceBetweenNodesById(wholeTree, tree.data.id));
+        useHandleTreeAnimations(selectedNode, showLabel, tree, findDistanceBetweenNodesById(wholeTree, tree.data.id) ?? 0);
 
     const nodeAndParentCompleted = (() => {
         if (tree.data.isCompleted !== true) return false;
@@ -67,7 +65,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                         parentNodeInfo ? parentNodeInfo.coordinates : defaultParentInfo.coordinates,
                         currentNodeCoordintes
                     )}
-                    color={nodeAndParentCompleted ? "#5DD39E" : "#5356573D"}
+                    color={nodeAndParentCompleted ? `${colors.accent}3D` : colors.line}
                     style="stroke"
                     strokeCap={"round"}
                     strokeWidth={3}
@@ -112,13 +110,14 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                                 const rectY = cy + labelMarginTop - fontSize / 4 - verticalPadding;
                                 return (
                                     <Group opacity={labelOpacity}>
-                                        <RoundedRect r={5} height={rectangleDimentions.height} width={rectangleDimentions.width} x={rectX} y={rectY}>
-                                            <LinearGradient
-                                                start={vec(rectX - rectangleDimentions.width / 2, rectX + rectangleDimentions.width / 2)}
-                                                end={vec(rectY - rectangleDimentions.height / 2, rectY + rectangleDimentions.height / 2)}
-                                                colors={tree.data.isCompleted ? ["#5DD39E", "#BCE784"] : ["#A5BDFF", "#4070F5"]}
-                                            />
-                                        </RoundedRect>
+                                        <RoundedRect
+                                            r={5}
+                                            height={rectangleDimentions.height}
+                                            width={rectangleDimentions.width}
+                                            x={rectX}
+                                            y={rectY}
+                                            color={tree.data.isCompleted ? colors.accent : colors.unmarkedText}
+                                        />
                                         {wordArr.map((word, idx) => {
                                             const wordWidth = labelFont.getTextWidth(word);
 
@@ -139,7 +138,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                                         if (w.length > largestLetterWord.length) largestLetterWord = w;
                                     });
 
-                                    const longerWordWidth = labelFont.getTextWidth(largestLetterWord);
+                                    const longerWordWidth = labelFont!.getTextWidth(largestLetterWord);
 
                                     return {
                                         width: longerWordWidth + 2 * horizontalPadding,
@@ -148,17 +147,16 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                                 }
                             })()}
                         <Group origin={{ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y }} transform={groupTransform} opacity={circleOpacity}>
-                            <Path path={getPathForCircle(cx, cy, CIRCLE_SIZE, 4)} style="stroke" strokeWidth={4} color="#F2F3F8">
-                                <Shadow dx={0} dy={0} blur={3} color="#535657" />
-                            </Path>
-                            <Path path={getPathForCircle(cx, cy, CIRCLE_SIZE, 4)} style="stroke" strokeCap={"round"} strokeWidth={4} end={pathTrim}>
-                                <LinearGradient
-                                    start={vec(cx - CIRCLE_SIZE, cy - CIRCLE_SIZE)}
-                                    end={vec(cx + CIRCLE_SIZE, cy + CIRCLE_SIZE)}
-                                    colors={tree.data.isCompleted ? ["#5DD39E", "#BCE784"] : ["#A5BDFF", "#4070F5"]}
-                                />
-                            </Path>
-                            <Circle cx={cx} cy={cy} r={CIRCLE_SIZE} color="white"></Circle>
+                            <Path path={getPathForCircle(cx, cy, CIRCLE_SIZE, 2)} style="stroke" strokeWidth={2} color={colors.line} />
+                            <Path
+                                path={getPathForCircle(cx, cy, CIRCLE_SIZE, 2)}
+                                style="stroke"
+                                strokeCap={"round"}
+                                strokeWidth={2}
+                                end={pathTrim}
+                                color={colors.accent}
+                            />
+                            <Circle cx={cx} cy={cy} r={CIRCLE_SIZE} color={colors.background}></Circle>
                             {/* Letter inside the node */}
                             {nodeLetterFont &&
                                 (() => {
@@ -167,19 +165,20 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                                     const textWidth = nodeLetterFont.getTextWidth(letterToRender);
 
                                     const textX = cx - textWidth / 2;
-                                    const textY = cy + getHeightForFont(20) / 4;
+                                    const textY = cy + getHeightForFont(20) / 4 + 1;
 
                                     return (
-                                        <Text x={textX} y={textY} text={letterToRender} font={nodeLetterFont}>
-                                            <LinearGradient
-                                                start={vec(textX, textX + textWidth)}
-                                                end={vec(textY, textY + 20)}
-                                                colors={tree.data.isCompleted ? ["#5DD39E", "#BCE784"] : ["#A5BDFF", "#4070F5"]}
-                                            />
-                                        </Text>
+                                        <Text
+                                            x={textX}
+                                            y={textY}
+                                            text={letterToRender}
+                                            font={nodeLetterFont}
+                                            color={
+                                                tree.data.isCompleted ? colors.accent : tree.data.id === selectedNode ? "white" : colors.unmarkedText
+                                            }
+                                        />
                                     );
                                 })()}
-
                             <Blur blur={circleBlurOnInactive} />
                         </Group>
                     </>

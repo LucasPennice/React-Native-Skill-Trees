@@ -5,7 +5,7 @@ import { useAppSelector } from "../../../redux/reduxHooks";
 function TreeName() {
     const { value: currentTree } = useAppSelector(selectCurrentTree);
 
-    if (!currentTree) return;
+    if (!currentTree) return <></>;
 
     return (
         <View

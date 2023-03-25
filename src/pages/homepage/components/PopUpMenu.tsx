@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { Button, Dimensions, Text, TextInput } from "react-native";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
-import { CIRCLE_SIZE_SELECTED } from "../canvas/CanvasTree";
 import { MENU_DAMPENING } from "../../../types";
 import { findTreeNodeById } from "../treeFunctions";
 import { CirclePositionInCanvas } from "../canvas/TreeView";
 import { deleteNodeWithNoChildren, editNodeProperty, selectCurrentTree } from "../../../redux/currentTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { toggleChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
+import { openChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
+import { CIRCLE_SIZE_SELECTED } from "../canvas/parameters";
 
 type Props = {
     selectedNode: string | null;
@@ -32,7 +32,7 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
 
     const { animatedMenuStyles, triangleAnimatedStyles } = useHandlePopMenuAnimations(foundNodeCoordinates, selectedNode, selectedNodeHistory);
 
-    if (!currentNode) return;
+    if (!currentNode) return <></>;
 
     return (
         <>
@@ -59,7 +59,7 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                     onBlur={() => dispatch(editNodeProperty({ targetNode: currentNode, newProperties: { name: text } }))}
                 />
                 {!currentNode.children && <Button title={"Delete Node"} onPress={() => dispatch(deleteNodeWithNoChildren(currentNode))} />}
-                {currentNode.children && <Button title={"Delete Node"} onPress={() => dispatch(toggleChildrenHoistSelector(currentNode.children))} />}
+                {currentNode.children && <Button title={"Delete Node"} onPress={() => dispatch(openChildrenHoistSelector(currentNode.children!))} />}
                 <Button
                     title={`${currentNode.data.isCompleted ? "Deactivate" : "Activate"}`}
                     onPress={() =>
@@ -94,7 +94,11 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
 
 export default PopUpMenu;
 
-function useHandlePopMenuAnimations(foundNodeCoordinates: CirclePositionInCanvas, selectedNode: string, selectedNodeHistory: string[]) {
+function useHandlePopMenuAnimations(
+    foundNodeCoordinates: CirclePositionInCanvas,
+    selectedNode: string | null,
+    selectedNodeHistory: (string | null)[]
+) {
     const isOpen = useSharedValue(false);
 
     useEffect(() => {

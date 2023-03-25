@@ -4,14 +4,14 @@ import { findTreeNodeById } from "../../treeFunctions";
 import { Skill, Tree } from "../../../../types";
 import { didTapCircle } from "../functions";
 import { Dimensions, ScrollView } from "react-native";
-import { CIRCLE_SIZE_SELECTED } from "../CanvasTree";
 import { CirclePositionInCanvas } from "../TreeView";
+import { CIRCLE_SIZE_SELECTED } from "../parameters";
 
 type Props = {
     selectedNodeState: [null | string, React.Dispatch<React.SetStateAction<string | null>>];
     setSelectedNodeHistory: React.Dispatch<React.SetStateAction<(string | null)[]>>;
     circlePositionsInCanvas: CirclePositionInCanvas[];
-    tree: Tree<Skill>;
+    tree?: Tree<Skill>;
 };
 
 export const DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL = CIRCLE_SIZE_SELECTED + 20;
@@ -40,9 +40,6 @@ const useCanvasTouchHandler = (props: Props) => {
     const touchHandler = useTouchHandler(
         {
             onEnd: (touchInfo) => {
-                // console.log("the positions in canvas are");
-                // circlePositionsInCanvas.forEach((p) => console.log(p.id, p.x));
-                // console.log("....");
                 const circleTapped = circlePositionsInCanvas.find(didTapCircle(touchInfo));
 
                 if (circleTapped === undefined) {
@@ -50,9 +47,11 @@ const useCanvasTouchHandler = (props: Props) => {
                     return setSelectedNode(null);
                 }
 
-                const { data: nodeInTree } = findTreeNodeById(tree, circleTapped.id);
+                const foundNode = findTreeNodeById(tree, circleTapped.id);
 
-                if (nodeInTree === undefined) return;
+                if (foundNode === undefined) return;
+
+                const { data: nodeInTree } = foundNode;
 
                 if (selectedNode != nodeInTree.id) {
                     scrollToCoordinates(circleTapped.x - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL, circleTapped.y - height / 2);

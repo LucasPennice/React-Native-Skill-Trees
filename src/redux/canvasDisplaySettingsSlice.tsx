@@ -37,14 +37,13 @@ export const canvasDisplaySettingsSlice = createSlice({
                 state.openMenu = "treeSelector";
             }
         },
-        toggleChildrenHoistSelector: (state, action?: PayloadAction<Tree<Skill>[]>) => {
-            if (state.openMenu === "childrenHoistSelector") {
-                state.openMenu = null;
-                state.candidatesToHoist = null;
-            } else {
-                state.openMenu = "childrenHoistSelector";
-                state.candidatesToHoist = action.payload;
-            }
+        closeChildrenHoistSelector: (state) => {
+            state.openMenu = null;
+            state.candidatesToHoist = null;
+        },
+        openChildrenHoistSelector: (state, action: PayloadAction<Tree<Skill>[]>) => {
+            state.openMenu = "childrenHoistSelector";
+            state.candidatesToHoist = action.payload;
         },
         closeAllMenues: (state) => {
             state.openMenu = null;
@@ -55,8 +54,15 @@ export const canvasDisplaySettingsSlice = createSlice({
     },
 });
 
-export const { toggleShowLabel, toggleSettingsMenuOpen, toggleTreeSelector, closeAllMenues, hideLabel, toggleChildrenHoistSelector } =
-    canvasDisplaySettingsSlice.actions;
+export const {
+    toggleShowLabel,
+    toggleSettingsMenuOpen,
+    toggleTreeSelector,
+    closeAllMenues,
+    hideLabel,
+    closeChildrenHoistSelector,
+    openChildrenHoistSelector,
+} = canvasDisplaySettingsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectCanvasDisplaySettings = (state: RootState) => state.canvasDisplaySettings;

@@ -1,8 +1,8 @@
 import { Button, Modal, Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
-import { closeAllMenues, selectCanvasDisplaySettings, toggleChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
+import { closeAllMenues, selectCanvasDisplaySettings, closeChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
 import { deleteNodeWithChildren, selectCurrentTree } from "../../../redux/currentTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { findParentOfNode, findTreeNodeById } from "../treeFunctions";
+import { findTreeNodeById } from "../treeFunctions";
 import { centerFlex } from "../../../types";
 
 function ChildrenHoistSelectorModal() {
@@ -16,18 +16,18 @@ function ChildrenHoistSelectorModal() {
             animationType="slide"
             transparent={true}
             visible={openMenu == "childrenHoistSelector"}
-            onRequestClose={() => dispatch(toggleChildrenHoistSelector())}>
+            onRequestClose={() => dispatch(closeChildrenHoistSelector())}>
             <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
                 <View style={[centerFlex, { flex: 1 }]}>
                     <Text>Click the children that will now become the parent</Text>
-                    <Button onPress={() => dispatch(toggleChildrenHoistSelector())} title="cancel!" />
+                    <Button onPress={() => dispatch(closeChildrenHoistSelector())} title="cancel!" />
                     <ScrollView style={[{ flex: 1, width: "100%", marginTop: 20 }]}>
                         {candidatesToHoist !== null &&
                             currentTree &&
                             candidatesToHoist.map((children, idx) => {
-                                const nodeToDelete = findTreeNodeById(currentTree, children.parentId);
+                                const nodeToDelete = findTreeNodeById(currentTree, children.parentId ?? null);
 
-                                console.log("Result is ->", nodeToDelete);
+                                if (!nodeToDelete) return <></>;
 
                                 return (
                                     <Pressable

@@ -1,10 +1,8 @@
-import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { ModifiableNodeProperties } from "../../redux/currentTreeSlice";
-import { useAppSelector } from "../../redux/reduxHooks";
-import { Skill, mockSkillTreeArray, Tree } from "../../types";
+import { Skill, Tree } from "../../types";
 
-export function findTreeHeight(rootNode: Tree<Skill> | undefined) {
-    if (!rootNode) return undefined;
+export function findTreeHeight(rootNode?: Tree<Skill>) {
+    if (!rootNode) return 0;
 
     if (!rootNode.data) return 0;
 
@@ -14,15 +12,16 @@ export function findTreeHeight(rootNode: Tree<Skill> | undefined) {
 
     for (let child of rootNode.children) {
         let childHeight = findTreeHeight(child);
-        if (childHeight > maxHeight) {
+        if (childHeight && childHeight > maxHeight) {
             maxHeight = childHeight;
         }
     }
     return maxHeight + 1;
 }
 
-export function findTreeNodeById(rootNode: Tree<Skill> | undefined, id: string): Tree<Skill> | undefined {
+export function findTreeNodeById(rootNode: Tree<Skill> | undefined, id: string | null): Tree<Skill> | undefined {
     if (!rootNode) return undefined;
+    if (!id) return undefined;
 
     if (rootNode.data.id === id) return rootNode;
 
@@ -41,7 +40,7 @@ export function findTreeNodeById(rootNode: Tree<Skill> | undefined, id: string):
     return result;
 }
 
-export function findDistanceBetweenNodesById(rootNode: Tree<Skill> | undefined, id: string): number {
+export function findDistanceBetweenNodesById(rootNode: Tree<Skill> | undefined, id: string): number | undefined {
     if (!rootNode) return undefined;
 
     //Base case 👇
@@ -52,7 +51,7 @@ export function findDistanceBetweenNodesById(rootNode: Tree<Skill> | undefined, 
     //Recursive case 👇
 
     let result = rootNode.children.map((element) => {
-        if (Boolean(findTreeNodeById(element, id))) return 1 + findDistanceBetweenNodesById(element, id);
+        if (Boolean(findTreeNodeById(element, id))) return 1 + (findDistanceBetweenNodesById(element, id) ?? 0);
 
         return 0;
     });
@@ -67,13 +66,14 @@ export function quantityOfCompletedNodes(rootNode: Tree<Skill> | undefined) {
 
     if (!rootNode.children && rootNode.data.isCompleted) return 1;
     if (!rootNode.children && !rootNode.data.isCompleted) return 0;
+    if (!rootNode.children) return 0;
 
     //Recursive case 👇
 
     let result = rootNode.data.isCompleted ? 1 : 0;
 
     for (let i = 0; i < rootNode.children.length; i++) {
-        result = result + quantityOfCompletedNodes(rootNode.children[i]);
+        result = result + (quantityOfCompletedNodes(rootNode.children[i]) ?? 0);
     }
 
     return result;
@@ -91,7 +91,7 @@ export function quantiyOfNodes(rootNode: Tree<Skill> | undefined) {
     let result = 1;
 
     for (let i = 0; i < rootNode.children.length; i++) {
-        result = result + quantiyOfNodes(rootNode.children[i]);
+        result = result + (quantiyOfNodes(rootNode.children[i]) ?? 0);
     }
 
     return result;
@@ -134,11 +134,12 @@ export function deleteNodeWithNoChildren(rootNode: Tree<Skill> | undefined, node
         const currentChildren = rootNode.children[i];
 
         if (currentChildren.data.id !== nodeToDelete.data.id) {
-            result.children.push(deleteNodeWithNoChildren(currentChildren, nodeToDelete));
+            const d = deleteNodeWithNoChildren(currentChildren, nodeToDelete);
+            if (d) result.children!.push(d);
         }
     }
 
-    if (result.children.length === 0) delete result["children"];
+    if (result.children!.length === 0) delete result["children"];
 
     return result;
 }
@@ -163,15 +164,16 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
         const currentChildren = rootNode.children[i];
 
         if (currentChildren.data.id !== nodeToDelete.data.id) {
-            result.children.push(deleteNodeWithChildren(currentChildren, nodeToDelete, childrenToHoist));
+            const d = deleteNodeWithChildren(currentChildren, nodeToDelete, childrenToHoist);
+            if (d) result.children!.push(d);
         } else {
             const newNode = returnHoistedNode(currentChildren, childrenToHoist);
 
-            result.children.push(newNode);
+            result.children!.push(newNode);
         }
     }
 
-    if (result.children.length === 0) delete result["children"];
+    if (result.children!.length === 0) delete result["children"];
 
     return result;
 
@@ -184,14 +186,14 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
 
         result.isRoot = parentNode.isRoot;
 
-        if (childrenToHoist.children) result.children.push(...childrenToHoist.children);
+        if (childrenToHoist.children && result.children) result.children.push(...childrenToHoist.children);
 
         //Update the parentId of the hoisted nodes' children
         if (result.children) {
             result.children.forEach((e) => (e.parentId = result.data.id));
         }
 
-        result.children = result.children.filter((c) => c.data.id !== childrenToHoist.data.id);
+        result.children = result.children!.filter((c) => c.data.id !== childrenToHoist.data.id);
 
         if (result.children.length === 0) delete result["children"];
 
@@ -209,6 +211,7 @@ export function editNodeProperty(rootNode: Tree<Skill> | undefined, targetNode: 
 
         const keysToEdit = Object.keys(newProperties);
 
+        //@ts-ignore
         keysToEdit.forEach((key) => (result.data[key] = newProperties[key]));
 
         return result;
@@ -223,10 +226,12 @@ export function editNodeProperty(rootNode: Tree<Skill> | undefined, targetNode: 
     for (let idx = 0; idx < rootNode.children.length; idx++) {
         const element = rootNode.children[idx];
 
-        result.children.push(editNodeProperty(element, targetNode, newProperties));
+        const d = editNodeProperty(element, targetNode, newProperties);
+
+        if (d) result.children!.push(d);
     }
 
-    if (result.children.length === 0) delete result["children"];
+    if (result.children!.length === 0) delete result["children"];
 
     return result;
 }

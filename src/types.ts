@@ -6,6 +6,8 @@ export type Skill = {
     isCompleted?: boolean;
 };
 
+export type SelectedNode = string | null;
+
 export interface Tree<T> {
     isRoot?: boolean;
     parentId: string | undefined;

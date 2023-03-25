@@ -1,5 +1,5 @@
 import { TouchInfo } from "@shopify/react-native-skia";
-import { CIRCLE_SIZE, TOUCH_BUFFER } from "./parameters";
+import { CIRCLE_SIZE, DISTANCE_BETWEEN_CHILDREN, DISTANCE_BETWEEN_GENERATIONS, LETTER_SIZE_AT_10, TOUCH_BUFFER } from "./parameters";
 
 export function didTapCircle(touchInfo: TouchInfo) {
     return (circle: { x: number; y: number; id: string }) => {
@@ -16,9 +16,6 @@ export function didTapCircle(touchInfo: TouchInfo) {
         return true;
     };
 }
-
-export const DISTANCE_BETWEEN_CHILDREN = 100;
-export const DISTANCE_BETWEEN_GENERATIONS = 150;
 
 export function getChildCoordinatesFromParentInfo(parentNodeInfo: {
     coordinates: { x: number; y: number };
@@ -65,38 +62,6 @@ export function createBezierPathBetweenPoints(p1: { x: number; y: number }, p2: 
     var curve = "M" + p1.x + " " + p1.y + " Q " + c1x + " " + c1y + " " + p2.x + " " + p2.y;
     return curve;
 }
-
-export const LETTER_SIZE_AT_10 = {
-    A: 6.67,
-    B: 6.67,
-    C: 7.23,
-    D: 7.23,
-    E: 6.67,
-    F: 6.11,
-    G: 7.78,
-    H: 7.23,
-    I: 2.78,
-    J: 5,
-    K: 6.67,
-    L: 5.56,
-    M: 8.34,
-    N: 7.23,
-    O: 7.78,
-    P: 6.67,
-    Q: 7.78,
-    R: 7.23,
-    S: 6.67,
-    T: 6.11,
-    U: 7.23,
-    V: 6.67,
-    W: 9.45,
-    X: 6.67,
-    Y: 6.67,
-    Z: 6.11,
-    AT: 10.16,
-    DOT: 2.78,
-    SPACE: 5.56,
-};
 
 export function getSymbolWidthForCurrentFontSize(symbol: string, fontSize: number) {
     let currentSymbol = "";

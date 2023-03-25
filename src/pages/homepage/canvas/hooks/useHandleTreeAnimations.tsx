@@ -2,9 +2,7 @@ import { Easing, useSharedValue, withDelay, withSpring, withTiming } from "react
 import { mix, useSharedValueEffect, useValue, useComputedValue } from "@shopify/react-native-skia";
 import { useEffect } from "react";
 import { Skill, Tree } from "../../../../types";
-
-const PATH_INITIAL_ANIMATION_DURATION = 200;
-const CIRCLE_INITIAL_ANIMATION_DURATION = 200;
+import { CIRCLE_INITIAL_ANIMATION_DURATION, PATH_INITIAL_ANIMATION_DURATION } from "../parameters";
 
 const animationFns = {
     initial: {
@@ -49,7 +47,7 @@ function useSettingsAnimations(showLabel: boolean) {
     return { labelOpacity };
 }
 
-function useAnimationsOnSelect(selectedNode: string, tree: Tree<Skill>) {
+function useAnimationsOnSelect(selectedNode: string | null, tree: Tree<Skill>) {
     const treeId = tree.data.id;
 
     const pathTrim = useValue(0);
@@ -82,7 +80,7 @@ function useAnimationsOnSelect(selectedNode: string, tree: Tree<Skill>) {
 }
 
 //Animations for components that are not selected
-function useAnimationsForUnselected(selectedNode: string, treeId: string) {
+function useAnimationsForUnselected(selectedNode: string | null, treeId: string) {
     const circleBlurOnInactive = useValue(0);
     const pathBlurOnInactive = useValue(0);
     //
