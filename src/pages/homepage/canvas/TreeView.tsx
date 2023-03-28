@@ -11,7 +11,7 @@ import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { Skill, Tree } from "../../../types";
 import CanvasTree from "./CanvasTree";
 import { useAppSelector } from "../../../redux/reduxHooks";
-import { CIRCLE_SIZE_SELECTED, colors, DISTANCE_BETWEEN_CHILDREN, DISTANCE_BETWEEN_GENERATIONS } from "./parameters";
+import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, colors, DISTANCE_BETWEEN_CHILDREN, DISTANCE_BETWEEN_GENERATIONS } from "./parameters";
 
 export type CirclePositionInCanvas = { x: number; y: number; id: string };
 export type CirclePositionInCanvasWithLevel = { x: number; y: number; id: string; level: number; parentId: string | null };
@@ -22,6 +22,13 @@ function TreeView() {
     const { value: currentTree } = useAppSelector(selectCurrentTree);
 
     const testCirlcePositions = getCirclePositions(currentTree);
+
+    const canvasDimentions = calculateDimentionsAndRootCoordinates(testCirlcePositions);
+    const { rootX: positionHorizontalPadding, rootY: positionVerticalPadding } = canvasDimentions;
+
+    const circlePositionsCenteredInCanvas = testCirlcePositions.map((p) => {
+        return { ...p, y: p.y + positionVerticalPadding, x: p.x + positionHorizontalPadding };
+    });
 
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
 
@@ -43,9 +50,6 @@ function TreeView() {
         circlePositionsInCanvas,
         tree: currentTree,
     });
-
-    const canvasDimentions = calculateDimentionsAndRootCoordinates(currentTree);
-    const { rootX, rootY } = canvasDimentions;
 
     useEffect(() => {
         if (!verticalScrollViewRef.current) return;
@@ -77,10 +81,10 @@ function TreeView() {
                         onTouch={touchHandler}
                         style={{ width: canvasDimentions.width, height: canvasDimentions.height, backgroundColor: colors.background }}>
                         <CanvasTree
-                            stateProps={{ selectedNode, popCoordinateToArray, showLabel }}
+                            stateProps={{ selectedNode, popCoordinateToArray, showLabel, testCirlcePositions: circlePositionsCenteredInCanvas }}
                             tree={currentTree}
                             wholeTree={currentTree}
-                            rootCoordinates={{ width: rootX, height: rootY }}
+                            rootCoordinates={{ width: positionHorizontalPadding, height: positionVerticalPadding }}
                         />
                     </Canvas>
                 )}
@@ -92,20 +96,23 @@ function TreeView() {
     );
 }
 
-function calculateDimentionsAndRootCoordinates(currentTree?: Tree<Skill>) {
+function calculateDimentionsAndRootCoordinates(coordinates: CirclePositionInCanvasWithLevel[]) {
     const { height, width } = useAppSelector(selectScreenDimentions);
 
     const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;
 
-    if (currentTree === undefined) return { width, height, rootY: 0, rootX: 0 };
+    if (coordinates.length === 0) return { width, height, rootY: 0, rootX: 0 };
 
-    const treeHeight = (findTreeHeight(currentTree) - 1) * DISTANCE_BETWEEN_GENERATIONS;
+    const treeDepth = Math.max(...coordinates.map((t) => t.level));
+
+    const treeHeight = (treeDepth - 1) * DISTANCE_BETWEEN_GENERATIONS;
+    const treeWidth = getTreeWidth(coordinates);
 
     const canvasHorizontalPadding = 2 * (width - 10 - (CIRCLE_SIZE_SELECTED * 3) / 4);
     const canvasVerticalPadding = HEIGHT_WITHOUT_NAV;
 
     return {
-        width: width * 2 + canvasHorizontalPadding,
+        width: treeWidth + canvasHorizontalPadding,
         height: treeHeight + canvasVerticalPadding,
         rootY: HEIGHT_WITHOUT_NAV / 2 - DISTANCE_BETWEEN_GENERATIONS,
         rootX: width,
@@ -114,7 +121,7 @@ function calculateDimentionsAndRootCoordinates(currentTree?: Tree<Skill>) {
 
 export default TreeView;
 
-function getCirclePositions(currentTree?: Tree<Skill>): CirclePositionInCanvas[] {
+function getCirclePositions(currentTree?: Tree<Skill>): CirclePositionInCanvasWithLevel[] {
     if (!currentTree) return [];
 
     let tentativeCoordinates = getNodesTentativeCoordinates(currentTree);
@@ -131,7 +138,7 @@ function getNodesFinalCoordinates(tentativeCoordinates: CirclePositionInCanvasWi
 
     const maxLevel = Math.max(...result.map((c) => c.level));
 
-    for (let idx = 1; idx < maxLevel; idx++) {
+    for (let idx = 1; idx < maxLevel + 1; idx++) {
         const nodesInLevel = result.filter((n) => n.level === idx);
 
         let maxOverlapDistance = 0;
@@ -147,13 +154,22 @@ function getNodesFinalCoordinates(tentativeCoordinates: CirclePositionInCanvasWi
             const checkingForOverlapOnShallowerLevel = overlapLevel === undefined || overlapLevel === element.level;
 
             //This means that there is overlap
-            if (distanceBetweenNodes <= 0 && checkingForOverlapOnShallowerLevel) {
-                if (Math.abs(distanceBetweenNodes) > maxOverlapDistance) maxOverlapDistance = Math.abs(distanceBetweenNodes);
+            if (distanceBetweenNodes < DISTANCE_BETWEEN_CHILDREN && checkingForOverlapOnShallowerLevel) {
+                let tentativeOverlapDistance = 0;
+
+                if (distanceBetweenNodes <= 0) {
+                    tentativeOverlapDistance = Math.abs(distanceBetweenNodes) + DISTANCE_BETWEEN_CHILDREN;
+                } else {
+                    tentativeOverlapDistance = DISTANCE_BETWEEN_CHILDREN;
+                }
+
+                if (tentativeOverlapDistance > maxOverlapDistance) maxOverlapDistance = tentativeOverlapDistance;
+
                 overlapLevel = element.level;
             }
-
-            if (overlapLevel !== undefined) result = spaceNodesOfLevelAndBelow(overlapLevel - 1, maxOverlapDistance, result);
         }
+
+        if (overlapLevel !== undefined) result = spaceNodesOfLevelAndBelow(overlapLevel - 1, maxOverlapDistance, result);
     }
 
     return result;
@@ -216,13 +232,14 @@ function getNodesFinalCoordinates(tentativeCoordinates: CirclePositionInCanvasWi
                     const elementsOnEachHalf = coordinatesOfParents.length / 2;
 
                     if (isOnfirstHalf) {
-                        result.push({ ...parent, x: parent.x - ((elementsOnEachHalf + 1 - idx * 2) / 2) * distance - DISTANCE_BETWEEN_CHILDREN });
+                        result.push({ ...parent, x: parent.x - ((elementsOnEachHalf + 1 - idx * 2) / 2) * distance });
                     } else {
                         const idxSinceMiddle = idx - elementsOnEachHalf;
-                        result.push({ ...parent, x: parent.x + ((idxSinceMiddle * 2 + 1) / 2) * distance + DISTANCE_BETWEEN_CHILDREN });
+                        result.push({ ...parent, x: parent.x + ((idxSinceMiddle * 2 + 1) / 2) * distance });
                     }
                 });
             } else {
+                console.log("soy impar y tengo que separar alos padres en", distance);
                 coordinatesOfParents.forEach((parent, idx) => {
                     //If the current parent belongs to the first half of parents then we subtract to X in order to space it
                     //otherwise we add to X
@@ -236,16 +253,17 @@ function getNodesFinalCoordinates(tentativeCoordinates: CirclePositionInCanvasWi
                         if (isOnfirstHalf) {
                             result.push({
                                 ...parent,
-                                x: parent.x - (elementsOnEachHalf - idx) * distance - DISTANCE_BETWEEN_CHILDREN,
+                                x: parent.x - (elementsOnEachHalf - idx) * distance,
                             });
                         } else {
                             const idxSinceMiddle = idx - elementsOnEachHalf - 1;
-                            result.push({ ...parent, x: parent.x + (idxSinceMiddle * 2 + 1) * distance + DISTANCE_BETWEEN_CHILDREN });
+                            result.push({ ...parent, x: parent.x + (idxSinceMiddle * 2 + 1) * distance });
                         }
                     }
                 });
             }
 
+            console.log(result);
             return result;
         }
     }
@@ -321,4 +339,22 @@ function returnCoordinatesBasedOnParent(
     }
 
     return { x, y, id: nodeId, level: parentNodeInfo.coordinates.level + 1, parentId: parentNodeInfo.id };
+}
+
+function getTreeWidth(coordinates: CirclePositionInCanvasWithLevel[]) {
+    let minCoordinate: number | undefined = undefined,
+        maxCoordinate: number | undefined = undefined;
+
+    coordinates.forEach((c) => {
+        if (minCoordinate === undefined || c.x < minCoordinate) {
+            minCoordinate = c.x;
+        }
+        if (maxCoordinate === undefined || c.x > maxCoordinate) {
+            maxCoordinate = c.x;
+        }
+    });
+
+    console.log("En iq tree sumar 3 cirlce sizes y en eq 2 circle sizes, adaptar la fn getTreeWidth");
+
+    return Math.abs(maxCoordinate! - minCoordinate!);
 }

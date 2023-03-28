@@ -2,7 +2,7 @@ import { createBezierPathBetweenPoints, getChildCoordinatesFromParentInfo, getHe
 import { Blur, Circle, Group, LinearGradient, Path, vec, Shadow, useFont, Text, RoundedRect } from "@shopify/react-native-skia";
 import { Skill, Tree } from "../../../types";
 import { CIRCLE_SIZE, colors } from "./parameters";
-import { CirclePositionInCanvas } from "./TreeView";
+import { CirclePositionInCanvas, CirclePositionInCanvasWithLevel } from "./TreeView";
 import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 import { findDistanceBetweenNodesById, findParentOfNode } from "../treeFunctions";
 import { useEffect } from "react";
@@ -15,6 +15,7 @@ type TreeProps = {
         selectedNode: string | null;
         popCoordinateToArray: (coordinate: CirclePositionInCanvas) => void;
         showLabel: boolean;
+        testCirlcePositions: CirclePositionInCanvasWithLevel[];
     };
     rootCoordinates?: { width: number; height: number };
 };
@@ -29,12 +30,13 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
         currentChildIndex: 0,
     };
 
-    const { popCoordinateToArray, selectedNode, showLabel } = stateProps;
+    const { popCoordinateToArray, selectedNode, showLabel, testCirlcePositions } = stateProps;
 
-    const currentNodeCoordintes = getChildCoordinatesFromParentInfo(parentNodeInfo ?? defaultParentInfo);
+    // const currentNodeCoordintes = getChildCoordinatesFromParentInfo(parentNodeInfo ?? defaultParentInfo);
+    const currentNodeCoordintes = testCirlcePositions.find((c) => c.id === tree.data.id)!;
 
     const cx = currentNodeCoordintes.x;
-    const cy = currentNodeCoordintes.y - CIRCLE_SIZE / 2;
+    const cy = currentNodeCoordintes.y;
 
     let newParentNodeInfo = { coordinates: currentNodeCoordintes, numberOfChildren: tree.children ? tree.children.length : 0 };
 
@@ -82,7 +84,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                             tree={element}
                             wholeTree={wholeTree}
                             parentNodeInfo={{ ...newParentNodeInfo, currentChildIndex: idx }}
-                            stateProps={{ selectedNode, popCoordinateToArray, showLabel }}
+                            stateProps={{ selectedNode, popCoordinateToArray, showLabel, testCirlcePositions }}
                         />
                     );
                 })}
