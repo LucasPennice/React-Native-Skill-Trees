@@ -1,5 +1,5 @@
 import { createBezierPathBetweenPoints, getChildCoordinatesFromParentInfo, getHeightForFont } from "./functions";
-import { Blur, Circle, Group, LinearGradient, Path, vec, Shadow, useFont, Text, RoundedRect } from "@shopify/react-native-skia";
+import { Blur, Circle, Group, LinearGradient, Path, vec, Shadow, useFont, Text, RoundedRect, OpacityMatrix } from "@shopify/react-native-skia";
 import { Skill, Tree } from "../../../types";
 import { CIRCLE_SIZE, colors } from "./parameters";
 import { CirclePositionInCanvas, CirclePositionInCanvasWithLevel } from "./TreeView";
@@ -13,9 +13,8 @@ type TreeProps = {
     parentNodeInfo?: { coordinates: { x: number; y: number }; numberOfChildren: number; currentChildIndex: number };
     stateProps: {
         selectedNode: string | null;
-        popCoordinateToArray: (coordinate: CirclePositionInCanvas) => void;
         showLabel: boolean;
-        testCirlcePositions: CirclePositionInCanvasWithLevel[];
+        circlePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     };
     rootCoordinates?: { width: number; height: number };
 };
@@ -30,19 +29,15 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
         currentChildIndex: 0,
     };
 
-    const { popCoordinateToArray, selectedNode, showLabel, testCirlcePositions } = stateProps;
+    const { selectedNode, showLabel, circlePositionsInCanvas } = stateProps;
 
     // const currentNodeCoordintes = getChildCoordinatesFromParentInfo(parentNodeInfo ?? defaultParentInfo);
-    const currentNodeCoordintes = testCirlcePositions.find((c) => c.id === tree.data.id)!;
+    const currentNodeCoordintes = circlePositionsInCanvas.find((c) => c.id === tree.data.id)!;
 
     const cx = currentNodeCoordintes.x;
     const cy = currentNodeCoordintes.y;
 
     let newParentNodeInfo = { coordinates: currentNodeCoordintes, numberOfChildren: tree.children ? tree.children.length : 0 };
-
-    useEffect(() => {
-        popCoordinateToArray({ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y - CIRCLE_SIZE / 2, id: tree.data.id });
-    }, [wholeTree]);
 
     const { circleBlurOnInactive, circleOpacity, connectingPathTrim, groupTransform, pathBlurOnInactive, pathTrim, labelOpacity } =
         useHandleTreeAnimations(selectedNode, showLabel, tree, findDistanceBetweenNodesById(wholeTree, tree.data.id) ?? 0);
@@ -84,7 +79,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                             tree={element}
                             wholeTree={wholeTree}
                             parentNodeInfo={{ ...newParentNodeInfo, currentChildIndex: idx }}
-                            stateProps={{ selectedNode, popCoordinateToArray, showLabel, testCirlcePositions }}
+                            stateProps={{ selectedNode, showLabel, circlePositionsInCanvas }}
                         />
                     );
                 })}

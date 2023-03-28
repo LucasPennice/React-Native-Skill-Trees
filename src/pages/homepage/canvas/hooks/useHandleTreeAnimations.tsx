@@ -90,7 +90,7 @@ function useAnimationsForUnselected(selectedNode: string | null, treeId: string)
     useEffect(() => {
         const shouldBlur = selectedNode !== treeId && selectedNode !== null;
 
-        isBlurred.value = withTiming(shouldBlur ? 1 : 0, { duration: 0.15 });
+        isBlurred.value = withTiming(shouldBlur ? 1 : 0, { duration: 0.3 });
     }, [selectedNode]);
 
     useSharedValueEffect(() => {

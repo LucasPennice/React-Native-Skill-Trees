@@ -9,39 +9,37 @@ import { selectCurrentTree } from "../../../redux/currentTreeSlice";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import CanvasTree from "./CanvasTree";
 import { useAppSelector } from "../../../redux/reduxHooks";
-import { CIRCLE_SIZE_SELECTED, colors, DISTANCE_BETWEEN_GENERATIONS } from "./parameters";
+import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, colors, DISTANCE_BETWEEN_GENERATIONS } from "./parameters";
 import { getCirclePositions, getTreeWidth } from "./coordinateFunctions";
 
 export type CirclePositionInCanvas = { x: number; y: number; id: string };
 export type CirclePositionInCanvasWithLevel = { x: number; y: number; id: string; level: number; parentId: string | null };
 
 function TreeView() {
-    const { height, width } = useAppSelector(selectScreenDimentions);
+    const { height } = useAppSelector(selectScreenDimentions);
 
     const { value: currentTree } = useAppSelector(selectCurrentTree);
 
-    const testCirlcePositions = getCirclePositions(currentTree);
+    const circlePositions = getCirclePositions(currentTree);
 
-    const canvasDimentions = calculateDimentionsAndRootCoordinates(testCirlcePositions);
-    const { rootX: positionHorizontalPadding, rootY: positionVerticalPadding } = canvasDimentions;
+    const canvasDimentions = calculateDimentionsAndRootCoordinates(circlePositions);
 
-    const circlePositionsCenteredInCanvas = testCirlcePositions.map((p) => {
-        return { ...p, y: p.y + positionVerticalPadding, x: p.x + positionHorizontalPadding };
+    const { canvasHeight, canvasWidth, horizontalMargin, verticalMargin } = canvasDimentions;
+
+    //These sets of coordinates are centered in the canvas opposite to being rendered on the top left corner of the canvas
+    const circlePositionsInCanvas = circlePositions.map((p) => {
+        return { ...p, y: p.y + verticalMargin, x: p.x + horizontalMargin };
     });
 
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
 
     const [selectedNode, setSelectedNode] = useState<null | string>(null);
     const [selectedNodeHistory, setSelectedNodeHistory] = useState<(null | string)[]>([null]);
-    const [circlePositionsInCanvas, setCirclePositionsInCanvas] = useState<CirclePositionInCanvas[]>([]);
 
     useEffect(() => {
-        setCirclePositionsInCanvas([]);
         setSelectedNode(null);
         setSelectedNodeHistory([]);
     }, [currentTree]);
-
-    const popCoordinateToArray = (coordinate: CirclePositionInCanvas) => setCirclePositionsInCanvas((p) => [...p, coordinate]);
 
     const { touchHandler, horizontalScrollViewRef, verticalScrollViewRef } = useCanvasTouchHandler({
         selectedNodeState: [selectedNode, setSelectedNode],
@@ -54,11 +52,11 @@ function TreeView() {
         if (!verticalScrollViewRef.current) return;
         if (!horizontalScrollViewRef.current) return;
 
-        const x = 200;
+        const x = horizontalMargin / 2;
 
         const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;
 
-        const y = 0.5 * (canvasDimentions.height - HEIGHT_WITHOUT_NAV);
+        const y = 0.5 * (canvasHeight - HEIGHT_WITHOUT_NAV);
 
         let timerId = setTimeout(() => {
             horizontalScrollViewRef.current!.scrollTo({ x, y, animated: true });
@@ -76,14 +74,12 @@ function TreeView() {
         <ScrollView showsVerticalScrollIndicator={false} ref={verticalScrollViewRef} style={{ height: height - NAV_HEGIHT }}>
             <ScrollView ref={horizontalScrollViewRef} horizontal showsHorizontalScrollIndicator={false} style={{ position: "relative" }}>
                 {currentTree !== undefined && (
-                    <Canvas
-                        onTouch={touchHandler}
-                        style={{ width: canvasDimentions.width, height: canvasDimentions.height, backgroundColor: colors.background }}>
+                    <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}>
                         <CanvasTree
-                            stateProps={{ selectedNode, popCoordinateToArray, showLabel, testCirlcePositions: circlePositionsCenteredInCanvas }}
+                            stateProps={{ selectedNode, showLabel, circlePositionsInCanvas }}
                             tree={currentTree}
                             wholeTree={currentTree}
-                            rootCoordinates={{ width: positionHorizontalPadding, height: positionVerticalPadding }}
+                            rootCoordinates={{ width: horizontalMargin, height: verticalMargin }}
                         />
                     </Canvas>
                 )}
@@ -100,21 +96,18 @@ function calculateDimentionsAndRootCoordinates(coordinates: CirclePositionInCanv
 
     const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;
 
-    if (coordinates.length === 0) return { width, height, rootY: 0, rootX: 0 };
+    if (coordinates.length === 0) return { canvasWidth: width, canvasHeight: height, horizontalMargin: 0, verticalMargin: 0 };
 
     const treeDepth = Math.max(...coordinates.map((t) => t.level));
 
-    const treeHeight = (treeDepth - 1) * DISTANCE_BETWEEN_GENERATIONS;
+    const treeHeight = treeDepth * DISTANCE_BETWEEN_GENERATIONS + treeDepth * CIRCLE_SIZE;
     const treeWidth = getTreeWidth(coordinates);
 
-    const canvasHorizontalPadding = 2 * (width - 10 - (CIRCLE_SIZE_SELECTED * 3) / 4);
-    const canvasVerticalPadding = HEIGHT_WITHOUT_NAV;
-
     return {
-        width: treeWidth + canvasHorizontalPadding,
-        height: treeHeight + canvasVerticalPadding,
-        rootY: HEIGHT_WITHOUT_NAV / 2 - DISTANCE_BETWEEN_GENERATIONS,
-        rootX: width,
+        canvasWidth: treeWidth + 2 * width,
+        canvasHeight: treeHeight + HEIGHT_WITHOUT_NAV,
+        verticalMargin: HEIGHT_WITHOUT_NAV / 2,
+        horizontalMargin: width,
     };
 }
 

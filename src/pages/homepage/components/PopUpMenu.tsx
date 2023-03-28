@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Dimensions, Text, TextInput } from "react-native";
+import { Button, Dimensions, Pressable, Text, TextInput, View } from "react-native";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import { MENU_DAMPENING } from "../../../types";
@@ -9,7 +9,7 @@ import { deleteNodeWithNoChildren, editNodeProperty, selectCurrentTree } from ".
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { openChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
-import { CIRCLE_SIZE_SELECTED } from "../canvas/parameters";
+import { CIRCLE_SIZE_SELECTED, colors } from "../canvas/parameters";
 
 type Props = {
     selectedNode: string | null;
@@ -43,31 +43,48 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                         position: "absolute",
                         height: MENU_HEIGHT,
                         width: MENU_WIDTH,
-                        backgroundColor: "lightgray",
+                        backgroundColor: colors.line,
                         borderRadius: 20,
                         padding: 20,
                     },
                 ]}>
-                <TextInput
-                    value={text}
-                    onChangeText={onChangeText}
-                    style={{ fontSize: 24, width: MENU_WIDTH - 40, fontWeight: "bold", letterSpacing: 1, color: "white" }}
-                    multiline
-                    blurOnSubmit
-                    //@ts-ignore
-                    enterKeyHint="done"
-                    onBlur={() => dispatch(editNodeProperty({ targetNode: currentNode, newProperties: { name: text } }))}
-                />
-                {!currentNode.children && <Button title={"Delete Node"} onPress={() => dispatch(deleteNodeWithNoChildren(currentNode))} />}
-                {currentNode.children && <Button title={"Delete Node"} onPress={() => dispatch(openChildrenHoistSelector(currentNode.children!))} />}
-                <Button
-                    title={`${currentNode.data.isCompleted ? "Deactivate" : "Activate"}`}
+                <View style={{ display: "flex", flexDirection: "row" }}>
+                    <TextInput
+                        value={text}
+                        onChangeText={onChangeText}
+                        style={{ fontSize: 24, width: MENU_WIDTH - 40, fontWeight: "bold", letterSpacing: 1, color: "white", paddingRight: 25 }}
+                        multiline
+                        blurOnSubmit
+                        //@ts-ignore
+                        enterKeyHint="done"
+                        onBlur={() => dispatch(editNodeProperty({ targetNode: currentNode, newProperties: { name: text } }))}
+                    />
+                    <Text style={{ color: "white", fontSize: 28, transform: [{ translateX: -20 }], opacity: 0.6 }}>✎</Text>
+                </View>
+                {!currentNode.children && (
+                    <Pressable style={{ marginTop: 20, paddingVertical: 15 }} onPress={() => dispatch(deleteNodeWithNoChildren(currentNode))}>
+                        <Text style={{ fontSize: 20, color: "white" }}>Delete Node</Text>
+                    </Pressable>
+                )}
+
+                {currentNode.children && (
+                    <Pressable
+                        style={{ marginTop: 20, paddingVertical: 15 }}
+                        onPress={() => dispatch(openChildrenHoistSelector(currentNode.children!))}>
+                        <Text style={{ fontSize: 20, color: "white" }}>Delete Node</Text>
+                    </Pressable>
+                )}
+                <Pressable
+                    style={{ paddingVertical: 15 }}
                     onPress={() =>
                         dispatch(
                             editNodeProperty({ targetNode: currentNode, newProperties: { isCompleted: currentNode.data.isCompleted ? false : true } })
                         )
-                    }
-                />
+                    }>
+                    <Text style={{ fontSize: 20, color: "white" }}>{`${
+                        currentNode.data.isCompleted ? "Mark as Incomplete" : "Mark as Complete"
+                    }`}</Text>
+                </Pressable>
             </Animated.View>
             {/* This is the triangle of the menu */}
             <Animated.View
@@ -84,7 +101,7 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                         borderBottomWidth: 10,
                         borderLeftColor: "transparent",
                         borderRightColor: "transparent",
-                        borderBottomColor: "lightgray",
+                        borderBottomColor: colors.line,
                     },
                 ]}
             />

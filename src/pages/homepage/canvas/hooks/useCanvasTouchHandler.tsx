@@ -4,13 +4,13 @@ import { findTreeNodeById } from "../../treeFunctions";
 import { Skill, Tree } from "../../../../types";
 import { didTapCircle } from "../functions";
 import { Dimensions, ScrollView } from "react-native";
-import { CirclePositionInCanvas } from "../TreeView";
+import { CirclePositionInCanvas, CirclePositionInCanvasWithLevel } from "../TreeView";
 import { CIRCLE_SIZE_SELECTED } from "../parameters";
 
 type Props = {
     selectedNodeState: [null | string, React.Dispatch<React.SetStateAction<string | null>>];
     setSelectedNodeHistory: React.Dispatch<React.SetStateAction<(string | null)[]>>;
-    circlePositionsInCanvas: CirclePositionInCanvas[];
+    circlePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     tree?: Tree<Skill>;
 };
 

@@ -238,5 +238,5 @@ export function getTreeWidth(coordinates: CirclePositionInCanvasWithLevel[]) {
 
     console.log("En iq tree sumar 3 cirlce sizes y en eq 2 circle sizes, adaptar la fn getTreeWidth");
 
-    return Math.abs(maxCoordinate! - minCoordinate!);
+    return Math.abs(maxCoordinate! - minCoordinate!) + 25;
 }
