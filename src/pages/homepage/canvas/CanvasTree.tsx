@@ -6,6 +6,7 @@ import { CirclePositionInCanvas, CirclePositionInCanvasWithLevel } from "./TreeV
 import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 import { findDistanceBetweenNodesById, findParentOfNode } from "../treeFunctions";
 import { useEffect } from "react";
+import AppText from "../../../AppText";
 
 type TreeProps = {
     tree: Tree<Skill>;
@@ -20,8 +21,8 @@ type TreeProps = {
 };
 
 function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTree }: TreeProps) {
-    const labelFont = useFont(require("../../../../assets/Poppins-Regular.otf"), 12);
-    const nodeLetterFont = useFont(require("../../../../assets/Poppins-Regular.otf"), 20);
+    const labelFont = useFont(require("../../../../assets/Helvetica.ttf"), 12);
+    const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 20);
 
     const defaultParentInfo = parentNodeInfo ?? {
         coordinates: { x: rootCoordinates!.width, y: rootCoordinates!.height },

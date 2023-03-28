@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { openChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
 import { CIRCLE_SIZE_SELECTED, colors } from "../canvas/parameters";
+import AppText from "../../../AppText";
 
 type Props = {
     selectedNode: string | null;
@@ -59,11 +60,11 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                         enterKeyHint="done"
                         onBlur={() => dispatch(editNodeProperty({ targetNode: currentNode, newProperties: { name: text } }))}
                     />
-                    <Text style={{ color: "white", fontSize: 28, transform: [{ translateX: -20 }], opacity: 0.6 }}>✎</Text>
+                    <AppText style={{ color: "white", fontSize: 28, transform: [{ translateX: -20 }], opacity: 0.6 }}>✎</AppText>
                 </View>
                 {!currentNode.children && (
                     <Pressable style={{ marginTop: 20, paddingVertical: 15 }} onPress={() => dispatch(deleteNodeWithNoChildren(currentNode))}>
-                        <Text style={{ fontSize: 20, color: "white" }}>Delete Node</Text>
+                        <AppText style={{ fontSize: 20, color: "white" }}>Delete Node</AppText>
                     </Pressable>
                 )}
 
@@ -71,7 +72,7 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                     <Pressable
                         style={{ marginTop: 20, paddingVertical: 15 }}
                         onPress={() => dispatch(openChildrenHoistSelector(currentNode.children!))}>
-                        <Text style={{ fontSize: 20, color: "white" }}>Delete Node</Text>
+                        <AppText style={{ fontSize: 20, color: "white" }}>Delete Node</AppText>
                     </Pressable>
                 )}
                 <Pressable
@@ -81,9 +82,9 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                             editNodeProperty({ targetNode: currentNode, newProperties: { isCompleted: currentNode.data.isCompleted ? false : true } })
                         )
                     }>
-                    <Text style={{ fontSize: 20, color: "white" }}>{`${
+                    <AppText style={{ fontSize: 20, color: "white" }}>{`${
                         currentNode.data.isCompleted ? "Mark as Incomplete" : "Mark as Complete"
-                    }`}</Text>
+                    }`}</AppText>
                 </Pressable>
             </Animated.View>
             {/* This is the triangle of the menu */}

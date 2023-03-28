@@ -13,6 +13,7 @@ export interface Tree<T> {
     parentId: string | undefined;
     treeId?: string;
     treeName?: string;
+    accentColor?: string;
     data: T;
     children?: Tree<T>[];
 }

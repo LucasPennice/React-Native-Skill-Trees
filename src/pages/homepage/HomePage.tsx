@@ -1,10 +1,10 @@
 import { View } from "react-native";
 import TreeView from "./canvas/TreeView";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
-import ProgressIndicator from "./components/ProgressIndicator";
+import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
 import SettingsMenu from "./components/SettingsMenu";
-import TreeName from "./components/TreeName";
 import TreeSelectorModal from "./modals/TreeSelectorModal";
+import ChooseTree from "./ChooseTree";
 
 export const NAV_HEGIHT = 75;
 
@@ -12,8 +12,8 @@ function HomePage() {
     return (
         <View style={{ position: "relative" }}>
             <TreeView />
-            <ProgressIndicator />
-            <TreeName />
+            <ProgressIndicatorAndName />
+            <ChooseTree />
             <SettingsMenu />
 
             <TreeSelectorModal />

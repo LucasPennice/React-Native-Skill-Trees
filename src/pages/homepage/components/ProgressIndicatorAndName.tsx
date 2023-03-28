@@ -4,7 +4,10 @@ import { quantityOfCompletedNodes, quantiyOfNodes } from "../treeFunctions";
 import { selectCurrentTree } from "../../../redux/currentTreeSlice";
 import { useAppSelector } from "../../../redux/reduxHooks";
 import { useEffect } from "react";
-import { View } from "react-native";
+import { Text, View } from "react-native";
+import { colors } from "../canvas/parameters";
+import AppText from "../../../AppText";
+import { centerFlex } from "../../../types";
 
 export class ProgressWheelParams {
     size = 65;
@@ -30,9 +33,9 @@ export class ProgressWheelParams {
 }
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
-const progressWheelProps = new ProgressWheelParams("#5DD39E", "#5356573D", 30, 6);
+const progressWheelProps = new ProgressWheelParams(colors.accent, colors.background, 30, 6);
 
-function ProgressIndicator() {
+function ProgressIndicatorAndName() {
     const { value: currentTree } = useAppSelector(selectCurrentTree);
 
     const completedPercentage = useSharedValue(0);
@@ -55,25 +58,25 @@ function ProgressIndicator() {
         return { strokeDashoffset: withSpring(result, { overshootClamping: true, damping: 65 }) };
     }, [completedPercentage.value]);
 
+    if (!currentTree) return <></>;
+
     return (
         <View
-            style={{
-                position: "absolute",
-                top: 20,
-                left: 20,
-                backgroundColor: "white",
-                padding: 10,
-                borderRadius: 10,
-                shadowColor: "#000",
-                shadowOffset: {
-                    width: 0,
-                    height: 2,
+            style={[
+                centerFlex,
+                {
+                    position: "absolute",
+                    top: 10,
+                    left: 10,
+                    backgroundColor: colors.line,
+                    height: 50,
+                    paddingHorizontal: 10,
+                    borderRadius: 10,
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: 15,
                 },
-                shadowOpacity: 0.25,
-                shadowRadius: 3.84,
-
-                elevation: 5,
-            }}>
+            ]}>
             <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
                 <Circle
                     strokeWidth={progressWheelProps.strokeWidth}
@@ -93,8 +96,10 @@ function ProgressIndicator() {
                     animatedProps={animatedProps}
                 />
             </Svg>
+
+            <AppText style={{ fontSize: 24, fontFamily: "helveticaBold" }}>{currentTree.treeName ?? "Tree Name"}</AppText>
         </View>
     );
 }
 
-export default ProgressIndicator;
+export default ProgressIndicatorAndName;

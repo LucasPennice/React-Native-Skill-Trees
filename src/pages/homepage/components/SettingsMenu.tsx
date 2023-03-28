@@ -1,5 +1,6 @@
 import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { useAnimatedStyle, withDelay, withSpring } from "react-native-reanimated";
+import AppText from "../../../AppText";
 import { selectCanvasDisplaySettings, toggleSettingsMenuOpen, toggleShowLabel, toggleTreeSelector } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 
@@ -36,24 +37,24 @@ function SettingsMenu() {
                 <Pressable
                     style={{ backgroundColor: "white", opacity: showLabel ? 1 : 0.5, width: SETTING_BUTTON_WIDTH }}
                     onPress={() => dispatch(toggleSettingsMenuOpen())}>
-                    <Text>Open</Text>
+                    <AppText>Open</AppText>
                 </Pressable>
                 {menuOpen && (
                     <Animated.View style={[animatedButtonContainer, { display: "flex", flexDirection: "row", gap: 20 }]}>
                         <Pressable
                             style={{ backgroundColor: "white", opacity: showLabel ? 1 : 0.5, width: SETTING_BUTTON_WIDTH }}
                             onPress={() => dispatch(toggleShowLabel())}>
-                            <Text>Show Label</Text>
+                            <AppText>Show Label</AppText>
                         </Pressable>
                         <Pressable
                             style={{ backgroundColor: "white", opacity: showLabel ? 1 : 0.5, width: SETTING_BUTTON_WIDTH }}
                             onPress={() => dispatch(toggleTreeSelector())}>
-                            <Text>Change Tree</Text>
+                            <AppText>Change Tree</AppText>
                         </Pressable>
                         <Pressable
                             style={{ backgroundColor: "white", opacity: showLabel ? 1 : 0.5, width: SETTING_BUTTON_WIDTH }}
                             onPress={() => dispatch(toggleTreeSelector())}>
-                            <Text>Center</Text>
+                            <AppText>Center</AppText>
                         </Pressable>
                     </Animated.View>
                 )}

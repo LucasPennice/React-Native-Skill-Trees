@@ -4,6 +4,8 @@ import { deleteNodeWithChildren, selectCurrentTree } from "../../../redux/curren
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { findTreeNodeById } from "../treeFunctions";
 import { centerFlex } from "../../../types";
+import { colors } from "../canvas/parameters";
+import AppText from "../../../AppText";
 
 function ChildrenHoistSelectorModal() {
     const { openMenu, candidatesToHoist } = useAppSelector(selectCanvasDisplaySettings);
@@ -17,10 +19,18 @@ function ChildrenHoistSelectorModal() {
             transparent={true}
             visible={openMenu == "childrenHoistSelector"}
             onRequestClose={() => dispatch(closeChildrenHoistSelector())}>
-            <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: colors.line }}>
                 <View style={[centerFlex, { flex: 1 }]}>
-                    <Text>Click the children that will now become the parent</Text>
-                    <Button onPress={() => dispatch(closeChildrenHoistSelector())} title="cancel!" />
+                    <View style={[centerFlex, { flexDirection: "row", margin: 10, gap: 10 }]}>
+                        <AppText style={{ fontSize: 20, color: "white", flex: 1 }}>
+                            The skill that you click will take the place of the deleted skill
+                        </AppText>
+                        <Pressable
+                            onPress={() => dispatch(closeChildrenHoistSelector())}
+                            style={[centerFlex, { paddingVertical: 15, borderRadius: 10 }]}>
+                            <AppText style={{ fontSize: 20, color: `${colors.accent}9D` }}>Close</AppText>
+                        </Pressable>
+                    </View>
                     <ScrollView style={[{ flex: 1, width: "100%", marginTop: 20 }]}>
                         {candidatesToHoist !== null &&
                             currentTree &&
@@ -32,20 +42,30 @@ function ChildrenHoistSelectorModal() {
                                 return (
                                     <Pressable
                                         key={idx}
-                                        style={{
-                                            paddingHorizontal: 20,
-                                            paddingVertical: 40,
-                                            marginHorizontal: 20,
-                                            marginBottom: 20,
-                                            borderRadius: 12,
-                                            backgroundColor: "lightgray",
-                                        }}
+                                        style={[
+                                            centerFlex,
+                                            {
+                                                paddingHorizontal: 20,
+                                                paddingVertical: 25,
+                                                marginHorizontal: 10,
+                                                marginBottom: 20,
+                                                borderRadius: 12,
+                                                backgroundColor: colors.background,
+                                                flexDirection: "row",
+                                            },
+                                        ]}
                                         onPress={() => {
                                             dispatch(deleteNodeWithChildren({ childrenToHoist: children, nodeToDelete }));
                                             dispatch(closeAllMenues());
                                         }}>
-                                        <Text>{children.data.name}</Text>
-                                        {children.parentId && <Text>{children.parentId}</Text>}
+                                        <View
+                                            style={[
+                                                centerFlex,
+                                                { borderColor: colors.accent, borderWidth: 4, width: 60, aspectRatio: 1, borderRadius: 60 },
+                                            ]}>
+                                            <AppText style={{ fontSize: 30, color: "white" }}>{children.data.name[0]}</AppText>
+                                        </View>
+                                        <AppText style={{ color: "white", flex: 1, textAlign: "center", fontSize: 24 }}>{children.data.name}</AppText>
                                     </Pressable>
                                 );
                             })}
