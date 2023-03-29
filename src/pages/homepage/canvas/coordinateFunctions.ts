@@ -121,7 +121,6 @@ export function getNodesFinalCoordinates(tentativeCoordinates: CirclePositionInC
                     }
                 });
             } else {
-                console.log("soy impar y tengo que separar alos padres en", distance);
                 coordinatesOfParents.forEach((parent, idx) => {
                     //If the current parent belongs to the first half of parents then we subtract to X in order to space it
                     //otherwise we add to X
@@ -145,7 +144,6 @@ export function getNodesFinalCoordinates(tentativeCoordinates: CirclePositionInC
                 });
             }
 
-            console.log(result);
             return result;
         }
     }

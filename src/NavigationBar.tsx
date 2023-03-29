@@ -68,7 +68,6 @@ function NavigationBar() {
                     <Pressable
                         key={idx}
                         onPress={() => {
-                            console.log(r);
                             // @ts-ignore
                             nav.navigate(r);
                         }}
