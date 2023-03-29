@@ -154,7 +154,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                                 end={pathTrim}
                                 color={colors.accent}
                             />
-                            <Circle cx={cx} cy={cy} r={CIRCLE_SIZE} color={colors.background}></Circle>
+                            <Circle cx={cx} cy={cy} r={CIRCLE_SIZE} color={colors.background} />
                             {/* Letter inside the node */}
                             {nodeLetterFont &&
                                 (() => {

@@ -1,7 +1,8 @@
 import { Pressable, View } from "react-native";
 import AppText from "../../AppText";
 import { toggleTreeSelector } from "../../redux/canvasDisplaySettingsSlice";
-import { useAppDispatch } from "../../redux/reduxHooks";
+import { selectCurrentTree } from "../../redux/currentTreeSlice";
+import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { centerFlex } from "../../types";
 import { colors } from "./canvas/parameters";
 

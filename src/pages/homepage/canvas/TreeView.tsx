@@ -1,6 +1,6 @@
 import { Canvas } from "@shopify/react-native-skia";
 import { useEffect, useState } from "react";
-import { ScrollView } from "react-native";
+import { ScrollView, View } from "react-native";
 import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
 import PopUpMenu from "../components/PopUpMenu";
 import { NAV_HEGIHT } from "../HomePage";
@@ -11,12 +11,14 @@ import CanvasTree from "./CanvasTree";
 import { useAppSelector } from "../../../redux/reduxHooks";
 import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, colors, DISTANCE_BETWEEN_GENERATIONS } from "./parameters";
 import { getCirclePositions, getTreeWidth } from "./coordinateFunctions";
+import AppText from "../../../AppText";
+import { centerFlex } from "../../../types";
 
 export type CirclePositionInCanvas = { x: number; y: number; id: string };
 export type CirclePositionInCanvasWithLevel = { x: number; y: number; id: string; level: number; parentId: string | null };
 
 function TreeView() {
-    const { height } = useAppSelector(selectScreenDimentions);
+    const { height, width } = useAppSelector(selectScreenDimentions);
 
     const { value: currentTree } = useAppSelector(selectCurrentTree);
 
@@ -83,6 +85,13 @@ function TreeView() {
                         />
                     </Canvas>
                 )}
+
+                {!currentTree && (
+                    <View style={[centerFlex, { width, height }]}>
+                        <AppText style={{ color: "white", fontSize: 24 }}>Pick a tree dipshit</AppText>
+                    </View>
+                )}
+
                 {selectedNode && foundNodeCoordinates && currentTree && (
                     <PopUpMenu foundNodeCoordinates={foundNodeCoordinates} selectedNode={selectedNode} selectedNodeHistory={selectedNodeHistory} />
                 )}

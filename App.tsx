@@ -8,13 +8,20 @@ import { store } from "./src/redux/reduxStore";
 import { selectScreenDimentions, updateDimentions } from "./src/redux/screenDimentionsSlice";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
+import NavigationBar from "./src/NavigationBar";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import MyTrees from "./src/pages/myTrees/MyTrees";
+import Settings from "./src/pages/settings/Settings";
 
 export default function App() {
     return (
         <Provider store={store}>
-            <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-                <AppWithReduxContext />
-            </SafeAreaView>
+            <NavigationContainer>
+                <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+                    <AppWithReduxContext />
+                </SafeAreaView>
+            </NavigationContainer>
         </Provider>
     );
 }
@@ -37,6 +44,8 @@ function AppWithReduxContext() {
         return null;
     }
 
+    const Stack = createNativeStackNavigator();
+
     return (
         <View
             style={{ flex: 1 }}
@@ -45,7 +54,12 @@ function AppWithReduxContext() {
                 var { x, y, width, height } = event.nativeEvent.layout;
                 dispatch(updateDimentions({ width, height }));
             }}>
-            <HomePage />
+            <Stack.Navigator initialRouteName={"Home"} screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="Home" component={HomePage} />
+                <Stack.Screen name="My Trees" component={MyTrees} />
+                <Stack.Screen name="Settings" component={Settings} />
+            </Stack.Navigator>
+            <NavigationBar />
         </View>
     );
 }
