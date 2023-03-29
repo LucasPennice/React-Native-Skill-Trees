@@ -116,3 +116,11 @@ export const mockSkillTreeArray: Tree<Skill>[] = [
 ];
 
 export const centerFlex: StyleProp<ViewStyle> = { display: "flex", justifyContent: "center", alignItems: "center" };
+
+export type DnDZone = {
+    type: "PARENT" | "CHILDREN" | "BROTHER";
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+};

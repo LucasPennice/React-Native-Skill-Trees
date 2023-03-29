@@ -1,5 +1,6 @@
 import { ModifiableNodeProperties } from "../../redux/currentTreeSlice";
 import { Skill, Tree } from "../../types";
+import { CirclePositionInCanvasWithLevel } from "./canvas/TreeView";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
     if (!rootNode) return 0;
@@ -238,4 +239,21 @@ export function editNodeProperty(rootNode: Tree<Skill> | undefined, targetNode: 
 
 export function getRootNodeDefaultPosition(id: string) {
     return { x: 0, y: 0, id, level: 0, parentId: null };
+}
+
+export function returnCoordinatesByLevel(coordinates: CirclePositionInCanvasWithLevel[]) {
+    const coordinatesByLevel = {};
+
+    coordinates.forEach((c, idx) => {
+        //@ts-ignore
+        if (coordinatesByLevel[c.level]) {
+            //@ts-ignore
+            coordinatesByLevel[c.level] = [...coordinatesByLevel[c.level], c];
+        } else {
+            //@ts-ignore
+            coordinatesByLevel[c.level] = [c];
+        }
+    });
+
+    return coordinatesByLevel;
 }

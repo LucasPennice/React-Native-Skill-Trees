@@ -9,10 +9,12 @@ import { selectCurrentTree } from "../../../redux/currentTreeSlice";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import CanvasTree from "./CanvasTree";
 import { useAppSelector } from "../../../redux/reduxHooks";
-import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, colors, DISTANCE_BETWEEN_GENERATIONS } from "./parameters";
+import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, colors, DISTANCE_BETWEEN_CHILDREN, DISTANCE_BETWEEN_GENERATIONS } from "./parameters";
 import { getCirclePositions, getTreeWidth } from "./coordinateFunctions";
 import AppText from "../../../AppText";
-import { centerFlex } from "../../../types";
+import { centerFlex, DnDZone } from "../../../types";
+import DragAndDropZones from "./DragAndDropZones";
+import { returnCoordinatesByLevel } from "../treeFunctions";
 
 export type CirclePositionInCanvas = { x: number; y: number; id: string };
 export type CirclePositionInCanvasWithLevel = { x: number; y: number; id: string; level: number; parentId: string | null };
@@ -30,8 +32,10 @@ function TreeView() {
 
     //These sets of coordinates are centered in the canvas opposite to being rendered on the top left corner of the canvas
     const circlePositionsInCanvas = circlePositions.map((p) => {
-        return { ...p, y: p.y + verticalMargin, x: p.x + horizontalMargin };
+        return { ...p, y: p.y + verticalMargin, x: p.x + horizontalMargin } as CirclePositionInCanvasWithLevel;
     });
+
+    const dragAndDropZones = calculateDragAndDropZones(circlePositionsInCanvas);
 
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
 
@@ -77,6 +81,7 @@ function TreeView() {
             <ScrollView ref={horizontalScrollViewRef} horizontal showsHorizontalScrollIndicator={false} style={{ position: "relative" }}>
                 {currentTree !== undefined && (
                     <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}>
+                        <DragAndDropZones data={dragAndDropZones} />
                         <CanvasTree
                             stateProps={{ selectedNode, showLabel, circlePositionsInCanvas }}
                             tree={currentTree}
@@ -88,7 +93,7 @@ function TreeView() {
 
                 {!currentTree && (
                     <View style={[centerFlex, { width, height }]}>
-                        <AppText style={{ color: "white", fontSize: 24 }}>Pick a tree dipshit</AppText>
+                        <AppText style={{ color: "white", fontSize: 24 }}>Pick a tree</AppText>
                     </View>
                 )}
 
@@ -118,6 +123,81 @@ function calculateDimentionsAndRootCoordinates(coordinates: CirclePositionInCanv
         verticalMargin: HEIGHT_WITHOUT_NAV / 2,
         horizontalMargin: width,
     };
+}
+
+function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositionInCanvasWithLevel[]) {
+    const result: DnDZone[] = [];
+
+    const coordinatesByLevel = returnCoordinatesByLevel(circlePositionsInCanvas);
+
+    console.log(coordinatesByLevel);
+
+    for (let idx = 0; idx < circlePositionsInCanvas.length; idx++) {
+        const pos = circlePositionsInCanvas[idx];
+
+        const isRoot = pos.level === 0;
+
+        const height = DISTANCE_BETWEEN_GENERATIONS - 3 * CIRCLE_SIZE;
+        const width = 4 * CIRCLE_SIZE;
+        result.push({ height, width, x: pos.x - width / 2, y: pos.y - height - 1.5 * CIRCLE_SIZE, type: "PARENT" });
+
+        if (!isRoot) {
+            const minWidth = DISTANCE_BETWEEN_CHILDREN / 2;
+            const height = 3 * CIRCLE_SIZE;
+            const width = isNotFirstNode(pos) ? getLevelNodeDistance(pos) - 1 * CIRCLE_SIZE + CIRCLE_SIZE : minWidth;
+            result.push({ height, width, x: pos.x - width, y: pos.y - height / 2, type: "BROTHER" });
+
+            if (isLastNodeOfCluster(pos)) {
+                result.push({
+                    height,
+                    width: minWidth,
+                    x: pos.x,
+                    y: pos.y - height / 2,
+                    type: "BROTHER",
+                });
+            }
+        }
+
+        if (doesntHaveChildren(pos)) {
+            const height = DISTANCE_BETWEEN_GENERATIONS;
+            result.push({ height, width: 4 * CIRCLE_SIZE, x: pos.x - 2 * CIRCLE_SIZE, y: pos.y + 1.5 * CIRCLE_SIZE, type: "CHILDREN" });
+        }
+    }
+
+    return result;
+
+    function getLevelNodeDistance(pos: CirclePositionInCanvasWithLevel) {
+        //@ts-ignore
+        const levelCoordinates = coordinatesByLevel[pos.level] as CirclePositionInCanvasWithLevel[];
+
+        if (levelCoordinates.length === 1) return DISTANCE_BETWEEN_CHILDREN;
+
+        return Math.abs(levelCoordinates[1].x - levelCoordinates[0].x);
+    }
+
+    function isLastNodeOfCluster(pos: CirclePositionInCanvasWithLevel) {
+        //@ts-ignore
+        const levelCoordinates = coordinatesByLevel[pos.level] as CirclePositionInCanvasWithLevel[];
+
+        const foo = levelCoordinates.filter((x) => x.parentId === pos.parentId);
+
+        return foo[foo.length - 1].id === pos.id;
+    }
+
+    function doesntHaveChildren(pos: CirclePositionInCanvasWithLevel) {
+        const foo = circlePositionsInCanvas.find((x) => x.parentId === pos.id);
+
+        return foo === undefined;
+    }
+
+    function isNotFirstNode(pos: CirclePositionInCanvasWithLevel) {
+        //@ts-ignore
+        const levelCoordinates = coordinatesByLevel[pos.level] as CirclePositionInCanvasWithLevel[];
+
+        const foo = levelCoordinates.filter((x) => x.parentId === pos.parentId);
+
+        return foo[0].id !== pos.id && foo.length > 1;
+    }
 }
 
 export default TreeView;
