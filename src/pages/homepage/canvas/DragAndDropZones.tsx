@@ -23,7 +23,8 @@ function DragAndDropZones({ data }: { data: DnDZone[] }) {
                         width={z.width}
                         x={z.x}
                         y={z.y}
-                        color={getColor(z.type)}>
+                        color={getColor(z.type)}
+                        opacity={0.7}>
                         <DashPathEffect intervals={[10, 10]} />
                     </RoundedRect>
                 );

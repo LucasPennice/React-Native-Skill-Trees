@@ -1,5 +1,5 @@
 import { useTouchHandler } from "@shopify/react-native-skia";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { findTreeNodeById } from "../../treeFunctions";
 import { Skill, Tree } from "../../../../types";
 import { didTapCircle } from "../functions";

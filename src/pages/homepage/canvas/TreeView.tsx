@@ -1,4 +1,4 @@
-import { Canvas } from "@shopify/react-native-skia";
+import { Canvas, Circle, Group, Path } from "@shopify/react-native-skia";
 import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
@@ -19,7 +19,7 @@ import { returnCoordinatesByLevel } from "../treeFunctions";
 export type CirclePositionInCanvas = { x: number; y: number; id: string };
 export type CirclePositionInCanvasWithLevel = { x: number; y: number; id: string; level: number; parentId: string | null };
 
-function TreeView() {
+function TreeView({ foo }: { foo: { x: number; y: number } }) {
     const { height, width } = useAppSelector(selectScreenDimentions);
 
     const { value: currentTree } = useAppSelector(selectCurrentTree);
@@ -94,6 +94,7 @@ function TreeView() {
                 {!currentTree && (
                     <View style={[centerFlex, { width, height }]}>
                         <AppText style={{ color: "white", fontSize: 24 }}>Pick a tree</AppText>
+                        <AppText style={{ color: "white", fontSize: 24 }}>{JSON.stringify(foo)}</AppText>
                     </View>
                 )}
 
@@ -129,8 +130,6 @@ function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositionInCanv
     const result: DnDZone[] = [];
 
     const coordinatesByLevel = returnCoordinatesByLevel(circlePositionsInCanvas);
-
-    console.log(coordinatesByLevel);
 
     for (let idx = 0; idx < circlePositionsInCanvas.length; idx++) {
         const pos = circlePositionsInCanvas[idx];
