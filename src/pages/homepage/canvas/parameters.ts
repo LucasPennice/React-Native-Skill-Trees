@@ -10,6 +10,8 @@ export const DISTANCE_BETWEEN_GENERATIONS = 100;
 export const PATH_INITIAL_ANIMATION_DURATION = 150;
 export const CIRCLE_INITIAL_ANIMATION_DURATION = 150;
 
+export const NAV_HEGIHT = 65;
+
 export const LETTER_SIZE_AT_10 = {
     A: 6.67,
     B: 6.67,

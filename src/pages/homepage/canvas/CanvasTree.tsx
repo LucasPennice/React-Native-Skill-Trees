@@ -1,8 +1,7 @@
 import { createBezierPathBetweenPoints, getChildCoordinatesFromParentInfo, getHeightForFont } from "./functions";
 import { Blur, Circle, Group, LinearGradient, Path, vec, Shadow, useFont, Text, RoundedRect, OpacityMatrix } from "@shopify/react-native-skia";
-import { Skill, Tree } from "../../../types";
+import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../types";
 import { CIRCLE_SIZE, colors } from "./parameters";
-import { CirclePositionInCanvas, CirclePositionInCanvasWithLevel } from "./TreeView";
 import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 import { findDistanceBetweenNodesById, findParentOfNode } from "../treeFunctions";
 import { useEffect } from "react";

@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "./reduxStore";
 
 // Define a type for the slice state
-type ScreenDimentions = {
+export type ScreenDimentions = {
     width: number;
     height: number;
 };

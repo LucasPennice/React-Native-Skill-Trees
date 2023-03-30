@@ -1,7 +1,7 @@
-import { Skill, Tree } from "../../../types";
-import { getRootNodeDefaultPosition } from "../treeFunctions";
-import { DISTANCE_BETWEEN_CHILDREN, DISTANCE_BETWEEN_GENERATIONS } from "./parameters";
-import { CirclePositionInCanvasWithLevel } from "./TreeView";
+import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree } from "../../../types";
+import { getRootNodeDefaultPosition, returnCoordinatesByLevel } from "../treeFunctions";
+import { CIRCLE_SIZE, DISTANCE_BETWEEN_CHILDREN, DISTANCE_BETWEEN_GENERATIONS, NAV_HEGIHT } from "./parameters";
 
 export function getCirclePositions(currentTree?: Tree<Skill>): CirclePositionInCanvasWithLevel[] {
     if (!currentTree) return [];
@@ -237,4 +237,97 @@ export function getTreeWidth(coordinates: CirclePositionInCanvasWithLevel[]) {
     console.log("En iq tree sumar 3 cirlce sizes y en eq 2 circle sizes, adaptar la fn getTreeWidth");
 
     return Math.abs(maxCoordinate! - minCoordinate!) + 25;
+}
+
+export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositionInCanvasWithLevel[]) {
+    const result: DnDZone[] = [];
+
+    const coordinatesByLevel = returnCoordinatesByLevel(circlePositionsInCanvas);
+
+    for (let idx = 0; idx < circlePositionsInCanvas.length; idx++) {
+        const pos = circlePositionsInCanvas[idx];
+
+        const isRoot = pos.level === 0;
+
+        const height = DISTANCE_BETWEEN_GENERATIONS - 3 * CIRCLE_SIZE;
+        const width = 4 * CIRCLE_SIZE;
+        result.push({ height, width, x: pos.x - width / 2, y: pos.y - height - 1.5 * CIRCLE_SIZE, type: "PARENT" });
+
+        if (!isRoot) {
+            const minWidth = DISTANCE_BETWEEN_CHILDREN / 2;
+            const height = 3 * CIRCLE_SIZE;
+            const width = isNotFirstNode(pos) ? getLevelNodeDistance(pos) - 1 * CIRCLE_SIZE + CIRCLE_SIZE : minWidth;
+            result.push({ height, width, x: pos.x - width, y: pos.y - height / 2, type: "BROTHER" });
+
+            if (isLastNodeOfCluster(pos)) {
+                result.push({
+                    height,
+                    width: minWidth,
+                    x: pos.x,
+                    y: pos.y - height / 2,
+                    type: "BROTHER",
+                });
+            }
+        }
+
+        if (doesntHaveChildren(pos)) {
+            const height = DISTANCE_BETWEEN_GENERATIONS;
+            result.push({ height, width: 4 * CIRCLE_SIZE, x: pos.x - 2 * CIRCLE_SIZE, y: pos.y + 1.5 * CIRCLE_SIZE, type: "CHILDREN" });
+        }
+    }
+
+    return result;
+
+    function getLevelNodeDistance(pos: CirclePositionInCanvasWithLevel) {
+        //@ts-ignore
+        const levelCoordinates = coordinatesByLevel[pos.level] as CirclePositionInCanvasWithLevel[];
+
+        if (levelCoordinates.length === 1) return DISTANCE_BETWEEN_CHILDREN;
+
+        return Math.abs(levelCoordinates[1].x - levelCoordinates[0].x);
+    }
+
+    function isLastNodeOfCluster(pos: CirclePositionInCanvasWithLevel) {
+        //@ts-ignore
+        const levelCoordinates = coordinatesByLevel[pos.level] as CirclePositionInCanvasWithLevel[];
+
+        const foo = levelCoordinates.filter((x) => x.parentId === pos.parentId);
+
+        return foo[foo.length - 1].id === pos.id;
+    }
+
+    function doesntHaveChildren(pos: CirclePositionInCanvasWithLevel) {
+        const foo = circlePositionsInCanvas.find((x) => x.parentId === pos.id);
+
+        return foo === undefined;
+    }
+
+    function isNotFirstNode(pos: CirclePositionInCanvasWithLevel) {
+        //@ts-ignore
+        const levelCoordinates = coordinatesByLevel[pos.level] as CirclePositionInCanvasWithLevel[];
+
+        const foo = levelCoordinates.filter((x) => x.parentId === pos.parentId);
+
+        return foo[0].id !== pos.id && foo.length > 1;
+    }
+}
+
+export function calculateDimentionsAndRootCoordinates(coordinates: CirclePositionInCanvasWithLevel[], screenDimentions: ScreenDimentions) {
+    const { height, width } = screenDimentions;
+
+    const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;
+
+    if (coordinates.length === 0) return { canvasWidth: width, canvasHeight: height, horizontalMargin: 0, verticalMargin: 0 };
+
+    const treeDepth = Math.max(...coordinates.map((t) => t.level));
+
+    const treeHeight = treeDepth * DISTANCE_BETWEEN_GENERATIONS + treeDepth * CIRCLE_SIZE;
+    const treeWidth = getTreeWidth(coordinates);
+
+    return {
+        canvasWidth: treeWidth + 2 * width,
+        canvasHeight: treeHeight + HEIGHT_WITHOUT_NAV,
+        verticalMargin: HEIGHT_WITHOUT_NAV / 2,
+        horizontalMargin: width,
+    };
 }

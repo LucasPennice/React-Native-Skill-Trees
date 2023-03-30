@@ -124,3 +124,6 @@ export type DnDZone = {
     width: number;
     height: number;
 };
+
+export type CirclePositionInCanvas = { x: number; y: number; id: string };
+export type CirclePositionInCanvasWithLevel = { x: number; y: number; id: string; level: number; parentId: string | null };

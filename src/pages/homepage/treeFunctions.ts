@@ -1,6 +1,5 @@
 import { ModifiableNodeProperties } from "../../redux/currentTreeSlice";
-import { Skill, Tree } from "../../types";
-import { CirclePositionInCanvasWithLevel } from "./canvas/TreeView";
+import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../types";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
     if (!rootNode) return 0;

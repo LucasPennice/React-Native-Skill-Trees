@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 import { Dimensions, Pressable, View } from "react-native";
 import Animated, { useAnimatedStyle, withSpring } from "react-native-reanimated";
 import AppText from "./AppText";
-import { colors } from "./pages/homepage/canvas/parameters";
-import { NAV_HEGIHT } from "./pages/homepage/HomePage";
+import { colors, NAV_HEGIHT } from "./pages/homepage/canvas/parameters";
 import { centerFlex, MENU_DAMPENING } from "./types";
 
 function NavigationBar() {

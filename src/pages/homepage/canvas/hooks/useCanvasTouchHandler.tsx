@@ -1,10 +1,9 @@
 import { useTouchHandler } from "@shopify/react-native-skia";
 import { useRef, useState } from "react";
 import { findTreeNodeById } from "../../treeFunctions";
-import { Skill, Tree } from "../../../../types";
+import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../../types";
 import { didTapCircle } from "../functions";
 import { Dimensions, ScrollView } from "react-native";
-import { CirclePositionInCanvas, CirclePositionInCanvasWithLevel } from "../TreeView";
 import { CIRCLE_SIZE_SELECTED } from "../parameters";
 
 type Props = {
