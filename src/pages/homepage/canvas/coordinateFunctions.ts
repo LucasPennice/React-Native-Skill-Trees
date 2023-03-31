@@ -1,5 +1,5 @@
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree } from "../../../types";
+import { CanvasDimentions, CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree } from "../../../types";
 import { getRootNodeDefaultPosition, returnCoordinatesByLevel } from "../treeFunctions";
 import { CIRCLE_SIZE, DISTANCE_BETWEEN_CHILDREN, DISTANCE_BETWEEN_GENERATIONS, NAV_HEGIHT } from "./parameters";
 
@@ -234,7 +234,7 @@ export function getTreeWidth(coordinates: CirclePositionInCanvasWithLevel[]) {
         }
     });
 
-    console.log("En iq tree sumar 3 cirlce sizes y en eq 2 circle sizes, adaptar la fn getTreeWidth");
+    // console.log("En iq tree sumar 3 cirlce sizes y en eq 2 circle sizes, adaptar la fn getTreeWidth");
 
     return Math.abs(maxCoordinate! - minCoordinate!) + 25;
 }
@@ -312,7 +312,10 @@ export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositio
     }
 }
 
-export function calculateDimentionsAndRootCoordinates(coordinates: CirclePositionInCanvasWithLevel[], screenDimentions: ScreenDimentions) {
+export function calculateDimentionsAndRootCoordinates(
+    coordinates: CirclePositionInCanvasWithLevel[],
+    screenDimentions: ScreenDimentions
+): CanvasDimentions {
     const { height, width } = screenDimentions;
 
     const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;
@@ -330,4 +333,12 @@ export function calculateDimentionsAndRootCoordinates(coordinates: CirclePositio
         verticalMargin: HEIGHT_WITHOUT_NAV / 2,
         horizontalMargin: width,
     };
+}
+
+export function centerNodesInCanvas(circlePositions: CirclePositionInCanvasWithLevel[], canvasDimentions: CanvasDimentions) {
+    const { horizontalMargin, verticalMargin } = canvasDimentions;
+
+    return circlePositions.map((p) => {
+        return { ...p, y: p.y + verticalMargin, x: p.x + horizontalMargin } as CirclePositionInCanvasWithLevel;
+    });
 }

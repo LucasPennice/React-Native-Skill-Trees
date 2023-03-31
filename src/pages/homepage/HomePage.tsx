@@ -1,21 +1,26 @@
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import TreeView from "./canvas/TreeView";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
 import SettingsMenu from "./components/SettingsMenu";
 import TreeSelectorModal from "./modals/TreeSelectorModal";
 import ChooseTree from "./ChooseTree";
-import { CIRCLE_SIZE, colors, DISTANCE_BETWEEN_GENERATIONS } from "./canvas/parameters";
+import { CIRCLE_SIZE, colors } from "./canvas/parameters";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectCurrentTree } from "../../redux/currentTreeSlice";
-import { GestureDetector, Gesture, PanGesture } from "react-native-gesture-handler";
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { GestureDetector, PanGesture } from "react-native-gesture-handler";
+import Animated from "react-native-reanimated";
 import AppText from "../../AppText";
-import { centerFlex, CirclePositionInCanvasWithLevel } from "../../types";
+import { CanvasDimentions, centerFlex, CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree } from "../../types";
 import { useEffect, useState } from "react";
 import useHandleNewNode from "./canvas/hooks/useHandleNewNode";
-import { calculateDimentionsAndRootCoordinates, calculateDragAndDropZones, getCirclePositions, getTreeWidth } from "./canvas/coordinateFunctions";
-import { ScreenDimentions, selectScreenDimentions } from "../../redux/screenDimentionsSlice";
+import {
+    calculateDimentionsAndRootCoordinates,
+    calculateDragAndDropZones,
+    centerNodesInCanvas,
+    getCirclePositions,
+} from "./canvas/coordinateFunctions";
+import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 import useCanvasTouchHandler from "./canvas/hooks/useCanvasTouchHandler";
 
 function HomePage() {
@@ -25,12 +30,11 @@ function HomePage() {
     //Local State
     const [selectedNode, setSelectedNode] = useState<null | string>(null);
     const [selectedNodeHistory, setSelectedNodeHistory] = useState<(null | string)[]>([null]);
+    const [scrollOffset, setScrollOffset] = useState({ x: 0, y: 0 });
     //Derived State
     const circlePositions = getCirclePositions(currentTree);
     const canvasDimentions = calculateDimentionsAndRootCoordinates(circlePositions, screenDimentions);
-    const circlePositionsInCanvas = circlePositions.map((p) => {
-        return { ...p, y: p.y + verticalMargin, x: p.x + horizontalMargin } as CirclePositionInCanvasWithLevel;
-    });
+    const circlePositionsInCanvas = centerNodesInCanvas(circlePositions, canvasDimentions);
     const dragAndDropZones = calculateDragAndDropZones(circlePositionsInCanvas);
     //Hooks
     const handleNewNode = useHandleNewNode();
@@ -45,13 +49,29 @@ function HomePage() {
 
     const { canvasHeight, canvasWidth, horizontalMargin, verticalMargin } = canvasDimentions;
 
-    const hoveringOverTriangle = getOveringOverTriangle(handleNewNode.dragAndDropNodeCoord);
-    // const tentativeModifiedTree = getTentativeModifiedTree(hoveringOverTriangle);
+    const dragAndDropNodeCanvasCoordinates = getOveringOverTriangle(handleNewNode.dragAndDropNodeCoord, scrollOffset);
+    const rectangleUnderDragAndDropNode = getRectangleUnderDragAndDropNode(dragAndDropZones, dragAndDropNodeCanvasCoordinates);
+    const tentativeModifiedTree = getTentativeModifiedTree(rectangleUnderDragAndDropNode, currentTree);
 
     useEffect(() => {
         setSelectedNode(null);
         setSelectedNodeHistory([]);
     }, [currentTree]);
+
+    const updateScrollOffset = (scrollViewType: "horizontal" | "vertical", newValue: number) => {
+        if (scrollViewType === "horizontal") {
+            setScrollOffset((p) => {
+                return { ...p, x: newValue };
+            });
+        } else {
+            setScrollOffset((p) => {
+                return { ...p, y: newValue };
+            });
+        }
+    };
+    // useEffect(() => {
+    //     console.log(canvasTouchHandler.scrollOffset);
+    // }, [canvasTouchHandler.scrollOffset.x, canvasTouchHandler.scrollOffset.y]);
 
     //Para evitar tantos rerenders de tree view
     //Le voy a pasar un prop que sea que sea sobre que rectangulo esta el new node (o directamente el arbol al q animar y a la goma)
@@ -66,9 +86,11 @@ function HomePage() {
                 dragAndDropZones={dragAndDropZones}
                 canvasDimentions={canvasDimentions}
                 circlePositionsInCanvas={circlePositionsInCanvas}
+                // SEPARAR EL TOUCH HANDLER PORQUE RERENDERIZA MUCHO TREEVIEW
                 canvasTouchHandler={canvasTouchHandler}
                 selectedNode={selectedNode}
                 selectedNodeHistory={selectedNodeHistory}
+                updateScrollOffset={updateScrollOffset}
             />
             <DragAndDropNewNode handleNewNode={handleNewNode} />
             <ProgressIndicatorAndName />
@@ -81,8 +103,35 @@ function HomePage() {
     );
 }
 
-function getOveringOverTriangle(dragAndDropNodeCoord: { x: number; y: number }) {
-    console.log(dragAndDropNodeCoord);
+function getTentativeModifiedTree(rectangleUnderDragAndDropNode: DnDZone | undefined, currentTree: Tree<Skill> | undefined) {
+    if (!currentTree) return undefined;
+    if (!rectangleUnderDragAndDropNode) return undefined;
+
+    console.log(rectangleUnderDragAndDropNode);
+}
+
+function getOveringOverTriangle(dragAndDropNodeCoord: { x: number; y: number }, scrollOffset: { x: number; y: number }) {
+    return { x: dragAndDropNodeCoord.x + scrollOffset.x, y: dragAndDropNodeCoord.y + scrollOffset.y };
+}
+
+function getRectangleUnderDragAndDropNode(
+    dragAndDropZones: DnDZone[],
+    dragAndDropNodeCanvasCoordinates: {
+        x: number;
+        y: number;
+    }
+) {
+    const x = dragAndDropNodeCanvasCoordinates.x + CIRCLE_SIZE;
+    const y = dragAndDropNodeCanvasCoordinates.y + CIRCLE_SIZE;
+
+    const result = dragAndDropZones.find((rec) => {
+        const inXBounds = x >= rec.x && x <= rec.x + rec.width;
+        const inYBounds = y >= rec.y && y <= rec.y + rec.height;
+
+        return inXBounds && inYBounds;
+    });
+
+    return result;
 }
 
 function DragAndDropNewNode({

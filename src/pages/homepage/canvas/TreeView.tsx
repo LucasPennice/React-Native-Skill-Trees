@@ -9,20 +9,18 @@ import CanvasTree from "./CanvasTree";
 import { useAppSelector } from "../../../redux/reduxHooks";
 import { colors, NAV_HEGIHT } from "./parameters";
 import AppText from "../../../AppText";
-import { centerFlex, CirclePositionInCanvasWithLevel, DnDZone } from "../../../types";
+import { CanvasDimentions, centerFlex, CirclePositionInCanvasWithLevel, DnDZone } from "../../../types";
 import DragAndDropZones from "./DragAndDropZones";
+import { CanvasTouchHandler } from "./hooks/useCanvasTouchHandler";
 
 type TreeViewProps = {
     dragAndDropZones: DnDZone[];
-    canvasDimentions: { canvasWidth: number; canvasHeight: number; horizontalMargin: number; verticalMargin: number };
+    canvasDimentions: CanvasDimentions;
     circlePositionsInCanvas: CirclePositionInCanvasWithLevel[];
-    canvasTouchHandler: {
-        touchHandler: TouchHandler;
-        horizontalScrollViewRef: React.MutableRefObject<ScrollView | null>;
-        verticalScrollViewRef: React.MutableRefObject<ScrollView | null>;
-    };
+    canvasTouchHandler: CanvasTouchHandler;
     selectedNode: string | null;
     selectedNodeHistory: (string | null)[];
+    updateScrollOffset: (scrollViewType: "horizontal" | "vertical", newValue: number) => void;
 };
 
 function TreeView({
@@ -32,6 +30,7 @@ function TreeView({
     canvasTouchHandler,
     selectedNode,
     selectedNodeHistory,
+    updateScrollOffset,
 }: TreeViewProps) {
     //Redux State
     const { height, width } = useAppSelector(selectScreenDimentions);
@@ -42,7 +41,6 @@ function TreeView({
     const { canvasHeight, canvasWidth, horizontalMargin, verticalMargin } = canvasDimentions;
     const foundNodeCoordinates = circlePositionsInCanvas.find((c) => c.id === selectedNode);
     //
-
     useEffect(() => {
         if (!verticalScrollViewRef.current) return;
         if (!horizontalScrollViewRef.current) return;
@@ -64,8 +62,21 @@ function TreeView({
     }, [verticalScrollViewRef, horizontalScrollViewRef, currentTree]);
 
     return (
-        <ScrollView showsVerticalScrollIndicator={false} ref={verticalScrollViewRef} style={{ height: height - NAV_HEGIHT }}>
-            <ScrollView ref={horizontalScrollViewRef} horizontal showsHorizontalScrollIndicator={false} style={{ position: "relative" }}>
+        <ScrollView
+            showsVerticalScrollIndicator={false}
+            ref={verticalScrollViewRef}
+            style={{ height: height - NAV_HEGIHT }}
+            bounces={false}
+            onMomentumScrollEnd={(e) => updateScrollOffset("vertical", e.nativeEvent.contentOffset.y)}
+            onScrollEndDrag={(e) => updateScrollOffset("vertical", e.nativeEvent.contentOffset.y)}>
+            <ScrollView
+                bounces={false}
+                ref={horizontalScrollViewRef}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ position: "relative" }}
+                onScrollEndDrag={(e) => updateScrollOffset("horizontal", e.nativeEvent.contentOffset.x)}
+                onMomentumScrollEnd={(e) => updateScrollOffset("horizontal", e.nativeEvent.contentOffset.x)}>
                 {currentTree !== undefined && (
                     <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}>
                         <DragAndDropZones data={dragAndDropZones} />

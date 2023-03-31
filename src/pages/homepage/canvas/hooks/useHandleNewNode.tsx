@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import AppText from "../../../../AppText";
-import { centerFlex } from "../../../../types";
-import { CIRCLE_SIZE, colors } from "../parameters";
 
 function useHandleNewNode() {
     const [foo, setFoo] = useState({ x: 0, y: 0 });
