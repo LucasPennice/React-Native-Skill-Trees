@@ -1,9 +1,11 @@
-import { createBezierPathBetweenPoints, getChildCoordinatesFromParentInfo, getHeightForFont } from "./functions";
-import { Blur, Circle, Group, LinearGradient, Path, vec, Shadow, useFont, Text, RoundedRect, OpacityMatrix } from "@shopify/react-native-skia";
+import { createBezierPathBetweenPoints } from "./functions";
+import { Blur, Path, useSpring } from "@shopify/react-native-skia";
 import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../types";
-import { CIRCLE_SIZE, colors } from "./parameters";
+import { colors } from "./parameters";
 import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 import { findDistanceBetweenNodesById, findParentOfNode } from "../treeFunctions";
+import Label from "./Label";
+import Node from "./Node";
 
 type TreeProps = {
     tree: Tree<Skill>;
@@ -18,21 +20,15 @@ type TreeProps = {
     rootCoordinates?: { width: number; height: number };
 };
 
-function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTree }: TreeProps) {
-    //Hooks
-    const labelFont = useFont(require("../../../../assets/Helvetica.ttf"), 12);
-    const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 20);
+function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, wholeTree }: TreeProps) {
     //Props
     const { selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas } = stateProps;
 
-    const defaultParentInfo = parentNodeInfo ?? {
-        coordinates: { x: rootCoordinates!.width, y: rootCoordinates!.height },
-        numberOfChildren: 1,
-        currentChildIndex: 0,
-    };
+    const defaultParentInfo = parentNodeInfo ?? { coordinates: { x: rC!.width, y: rC!.height }, numberOfChildren: 1, currentChildIndex: 0 };
 
     const previewMode = tentativeCirlcePositionsInCanvas.length !== 0;
 
+    //Coordinates calculation
     const currentNodeTentativeCoordinates = tentativeCirlcePositionsInCanvas.find((c) => c.id === tree.data.id);
 
     const currentNodeParentTentativeCoordinates = tentativeCirlcePositionsInCanvas.find((c) => {
@@ -47,6 +43,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
 
     const cx = currentNodeTentativeCoordinates ? currentNodeTentativeCoordinates.x : currentNodeCoordintes.x;
     const cy = currentNodeTentativeCoordinates ? currentNodeTentativeCoordinates.y : currentNodeCoordintes.y;
+    // --
 
     let newParentNodeInfo = { coordinates: { ...currentNodeCoordintes, x: cx, y: cy }, numberOfChildren: tree.children ? tree.children.length : 0 };
 
@@ -91,110 +88,20 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                         />
                     );
                 })}
-            {(() => {
-                const labelMarginTop = 40;
 
-                return (
-                    <>
-                        {labelFont &&
-                            showLabel &&
-                            (() => {
-                                const text = tree.data.name;
-                                const wordArr = text.split(" ");
+            {showLabel && <Label tree={tree} coord={{ cx, cy }} labelOpacity={labelOpacity} pathBlurOnInactive={pathBlurOnInactive} />}
 
-                                const distanceBetweenWords = 14;
-                                const fontSize = 12;
-                                const horizontalPadding = 10;
-                                const verticalPadding = 5;
-
-                                const textHeight = wordArr.length * fontSize + (wordArr.length - 1) * (distanceBetweenWords - fontSize);
-
-                                const rectangleDimentions = calculateRectangleDimentions(wordArr);
-
-                                const rectX = cx - rectangleDimentions.width / 2 + 2;
-                                const rectY = cy + labelMarginTop - fontSize / 4 - verticalPadding;
-                                return (
-                                    <Group opacity={labelOpacity}>
-                                        <RoundedRect
-                                            r={5}
-                                            height={rectangleDimentions.height}
-                                            width={rectangleDimentions.width}
-                                            x={rectX}
-                                            y={rectY}
-                                            color={tree.data.isCompleted ? colors.accent : colors.unmarkedText}
-                                        />
-                                        {wordArr.map((word, idx) => {
-                                            const wordWidth = labelFont.getTextWidth(word);
-
-                                            const textX = cx - wordWidth / 2;
-                                            const textY = cy + fontSize / 2 + idx * distanceBetweenWords + labelMarginTop;
-
-                                            return <Text key={idx} x={textX} y={textY} text={word} color="white" font={labelFont} />;
-                                        })}
-
-                                        <Blur blur={pathBlurOnInactive} />
-                                    </Group>
-                                );
-
-                                function calculateRectangleDimentions(wordArr: string[]) {
-                                    let largestLetterWord = "";
-
-                                    wordArr.forEach((w) => {
-                                        if (w.length > largestLetterWord.length) largestLetterWord = w;
-                                    });
-
-                                    const longerWordWidth = labelFont!.getTextWidth(largestLetterWord);
-
-                                    return {
-                                        width: longerWordWidth + 2 * horizontalPadding,
-                                        height: textHeight + 2 * verticalPadding,
-                                    };
-                                }
-                            })()}
-                        <Group origin={{ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y }} transform={groupTransform} opacity={circleOpacity}>
-                            <Path path={getPathForCircle(cx, cy, CIRCLE_SIZE, 2)} style="stroke" strokeWidth={2} color={colors.line} />
-                            <Path
-                                path={getPathForCircle(cx, cy, CIRCLE_SIZE, 2)}
-                                style="stroke"
-                                strokeCap={"round"}
-                                strokeWidth={2}
-                                end={pathTrim}
-                                color={colors.accent}
-                            />
-                            <Circle cx={cx} cy={cy} r={CIRCLE_SIZE} color={colors.background} />
-                            {/* Letter inside the node */}
-                            {nodeLetterFont &&
-                                (() => {
-                                    const letterToRender = tree.data.name[0];
-
-                                    const textWidth = nodeLetterFont.getTextWidth(letterToRender);
-
-                                    const textX = cx - textWidth / 2;
-                                    const textY = cy + getHeightForFont(20) / 4 + 1;
-
-                                    return (
-                                        <Text
-                                            x={textX}
-                                            y={textY}
-                                            text={letterToRender}
-                                            font={nodeLetterFont}
-                                            color={
-                                                tree.data.isCompleted ? colors.accent : tree.data.id === selectedNode ? "white" : colors.unmarkedText
-                                            }
-                                        />
-                                    );
-                                })()}
-                            <Blur blur={circleBlurOnInactive} />
-                        </Group>
-                    </>
-                );
-            })()}
+            <Node
+                circleBlurOnInactive={circleBlurOnInactive}
+                circleOpacity={circleOpacity}
+                tree={tree}
+                coord={{ cx, cy }}
+                currentNodeCoordintes={currentNodeCoordintes}
+                groupTransform={groupTransform}
+                pathTrim={pathTrim}
+                selectedNode={selectedNode}
+            />
         </>
     );
 }
 export default CanvasTree;
-
-function getPathForCircle(cx: number, cy: number, r: number, strokeWidth: number) {
-    const radius = r + strokeWidth / 2;
-    return `M ${cx - strokeWidth / 2} ${cy} m ${-r}, 0 a ${radius},${radius} 0 1,0 ${radius * 2},0 a ${radius},${radius} 0 1,0 ${-(radius * 2)},0`;
-}
