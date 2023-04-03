@@ -19,8 +19,11 @@ type TreeProps = {
 };
 
 function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTree }: TreeProps) {
+    //Hooks
     const labelFont = useFont(require("../../../../assets/Helvetica.ttf"), 12);
     const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 20);
+    //Props
+    const { selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas } = stateProps;
 
     const defaultParentInfo = parentNodeInfo ?? {
         coordinates: { x: rootCoordinates!.width, y: rootCoordinates!.height },
@@ -28,15 +31,24 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
         currentChildIndex: 0,
     };
 
-    const { selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas } = stateProps;
+    const previewMode = tentativeCirlcePositionsInCanvas.length !== 0;
 
     const currentNodeTentativeCoordinates = tentativeCirlcePositionsInCanvas.find((c) => c.id === tree.data.id);
+
+    const currentNodeParentTentativeCoordinates = tentativeCirlcePositionsInCanvas.find((c) => {
+        if (!currentNodeTentativeCoordinates) return false;
+        return c.id === currentNodeTentativeCoordinates.parentId;
+    });
+
     const currentNodeCoordintes = circlePositionsInCanvas.find((c) => c.id === tree.data.id)!;
+
+    const pathInitialPoint =
+        previewMode && currentNodeParentTentativeCoordinates ? currentNodeParentTentativeCoordinates : defaultParentInfo.coordinates;
 
     const cx = currentNodeTentativeCoordinates ? currentNodeTentativeCoordinates.x : currentNodeCoordintes.x;
     const cy = currentNodeTentativeCoordinates ? currentNodeTentativeCoordinates.y : currentNodeCoordintes.y;
 
-    let newParentNodeInfo = { coordinates: currentNodeCoordintes, numberOfChildren: tree.children ? tree.children.length : 0 };
+    let newParentNodeInfo = { coordinates: { ...currentNodeCoordintes, x: cx, y: cy }, numberOfChildren: tree.children ? tree.children.length : 0 };
 
     const { circleBlurOnInactive, circleOpacity, connectingPathTrim, groupTransform, pathBlurOnInactive, pathTrim, labelOpacity } =
         useHandleTreeAnimations(selectedNode, showLabel, tree, findDistanceBetweenNodesById(wholeTree, tree.data.id) ?? 0);
@@ -57,10 +69,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
         <>
             {!tree.isRoot && (
                 <Path
-                    path={createBezierPathBetweenPoints(
-                        parentNodeInfo ? parentNodeInfo.coordinates : defaultParentInfo.coordinates,
-                        currentNodeCoordintes
-                    )}
+                    path={createBezierPathBetweenPoints(pathInitialPoint, { x: cx, y: cy })}
                     color={nodeAndParentCompleted ? `${colors.accent}3D` : colors.line}
                     style="stroke"
                     strokeCap={"round"}
