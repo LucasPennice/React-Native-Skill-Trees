@@ -1,7 +1,20 @@
 import { getHeightForFont } from "./functions";
-import { Blur, Circle, Group, Path, useFont, Text, useSpring, SkFont, SkiaMutableValue, SkiaValue } from "@shopify/react-native-skia";
+import {
+    Blur,
+    Circle,
+    Group,
+    Path,
+    useFont,
+    Text,
+    useSpring,
+    SkFont,
+    SkiaMutableValue,
+    SkiaValue,
+    useComputedValue,
+    Skia,
+} from "@shopify/react-native-skia";
 import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../types";
-import { CIRCLE_SIZE, colors } from "./parameters";
+import { CANVAS_SPRING, CIRCLE_SIZE, colors } from "./parameters";
 
 function Node({
     coord,
@@ -26,20 +39,24 @@ function Node({
 
     const { cx, cy } = coord;
 
-    const x = useSpring(cx);
-    const y = useSpring(cy);
+    const x = useSpring(cx, CANVAS_SPRING);
+    const y = useSpring(cy, CANVAS_SPRING);
+
+    const path = useComputedValue(() => {
+        const strokeWidth = 2;
+        const radius = CIRCLE_SIZE + strokeWidth / 2;
+        const p = Skia.Path.Make();
+
+        p.moveTo(x.current, y.current);
+        p.addCircle(x.current, y.current, radius);
+
+        return p;
+    }, [x, y]);
 
     return (
         <Group origin={{ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y }} transform={groupTransform} opacity={circleOpacity}>
-            <Path transform={[]} path={getPathForCircle(cx, cy, CIRCLE_SIZE, 2)} style="stroke" strokeWidth={2} color={colors.line} />
-            <Path
-                path={getPathForCircle(cx, cy, CIRCLE_SIZE, 2)}
-                style="stroke"
-                strokeCap={"round"}
-                strokeWidth={2}
-                end={pathTrim}
-                color={colors.accent}
-            />
+            <Path path={path} style="stroke" strokeWidth={2} color={colors.line} />
+            <Path path={path} style="stroke" strokeCap={"round"} strokeWidth={2} end={pathTrim} color={colors.accent} />
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
             {/* Letter inside the node */}
 
@@ -66,8 +83,8 @@ function NodeLetter({
 
     const textWidth = nodeLetterFont.getTextWidth(letterToRender);
 
-    const textX = useSpring(cx - textWidth / 2);
-    const textY = useSpring(cy + getHeightForFont(20) / 4 + 1);
+    const textX = useSpring(cx - textWidth / 2, CANVAS_SPRING);
+    const textY = useSpring(cy + getHeightForFont(20) / 4 + 1, CANVAS_SPRING);
 
     return (
         <Text
