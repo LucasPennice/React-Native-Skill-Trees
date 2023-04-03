@@ -139,3 +139,5 @@ export type CanvasDimentions = {
     horizontalMargin: number;
     verticalMargin: number;
 };
+
+export const mockNewNodeData: Skill = { id: "Cock", name: "ReCock", isCompleted: false };

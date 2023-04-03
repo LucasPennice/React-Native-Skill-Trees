@@ -98,8 +98,3 @@ function NodeLetter({
 }
 
 export default Node;
-
-function getPathForCircle(cx: number, cy: number, r: number, strokeWidth: number) {
-    const radius = r + strokeWidth / 2;
-    return `M ${cx - strokeWidth / 2} ${cy} m ${-r}, 0 a ${radius},${radius} 0 1,0 ${radius * 2},0 a ${radius},${radius} 0 1,0 ${-(radius * 2)},0`;
-}

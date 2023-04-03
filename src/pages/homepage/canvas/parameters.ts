@@ -14,6 +14,9 @@ export const NAV_HEGIHT = 65;
 
 export const CANVAS_SPRING = { damping: 29 };
 
+//This is related to the canvas bezier curve for rendering paths
+export const MAX_OFFSET = 25;
+
 export const LETTER_SIZE_AT_10 = {
     A: 6.67,
     B: 6.67,

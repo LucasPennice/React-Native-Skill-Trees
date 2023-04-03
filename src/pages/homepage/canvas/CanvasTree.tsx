@@ -1,7 +1,6 @@
-import { createBezierPathBetweenPoints } from "./functions";
 import { Blur, Path, Skia, useComputedValue, useSpring } from "@shopify/react-native-skia";
 import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../types";
-import { CANVAS_SPRING, colors } from "./parameters";
+import { CANVAS_SPRING, colors, MAX_OFFSET } from "./parameters";
 import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 import { findDistanceBetweenNodesById, findParentOfNode } from "../treeFunctions";
 import Label from "./Label";
@@ -73,20 +72,17 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
 
         p.moveTo(p1x.current, p1y.current);
 
-        if (Math.abs(p1x.current - p2x.current) < 0.5) {
-            p.lineTo(p2x.current, p2y.current);
-            return p;
-        }
-
         // mid-point of line:
-        var mpx = (p2x.current + p1x.current) * 0.49;
-        var mpy = (p2y.current + p1y.current) * 0.49;
+        var mpx = (p2x.current + p1x.current) * 0.5;
+        var mpy = (p2y.current + p1y.current) * 0.5;
 
         // angle of perpendicular to line:
         var theta = Math.atan2(p2y.current - p1y.current, p2x.current - p1x.current) - Math.PI / 2;
 
+        let deltaX = p2x.current - p1x.current;
+
         // distance of control point from mid-point of line:
-        var offset = p2x.current < p1x.current ? -20 : 20;
+        var offset = deltaX > MAX_OFFSET ? MAX_OFFSET : deltaX < -MAX_OFFSET ? -MAX_OFFSET : deltaX;
 
         // location of control point:
         var c1x = mpx + offset * 1.5 * Math.cos(theta);
