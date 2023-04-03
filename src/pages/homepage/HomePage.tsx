@@ -22,6 +22,8 @@ import {
 } from "./canvas/coordinateFunctions";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 import useCanvasTouchHandler from "./canvas/hooks/useCanvasTouchHandler";
+import AddNode from "./AddNode";
+import NewNodeModal from "./modals/NewNodeModal";
 
 function HomePage() {
     //Redux State
@@ -86,10 +88,12 @@ function HomePage() {
             <DragAndDropNewNode handleNewNode={handleNewNode} />
             <ProgressIndicatorAndName />
             <ChooseTree />
+            <AddNode />
             {currentTree !== undefined && <SettingsMenu />}
 
             <TreeSelectorModal />
             <ChildrenHoistSelectorModal />
+            <NewNodeModal />
         </View>
     );
 }

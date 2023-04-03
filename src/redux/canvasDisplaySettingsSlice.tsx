@@ -5,7 +5,7 @@ import { Skill, Tree } from "../types";
 // Define a type for the slice state
 type CanvasDisplaySettings = {
     showLabel: boolean;
-    openMenu: "treeSelector" | "treeSettings" | "childrenHoistSelector" | null;
+    openMenu: "treeSelector" | "treeSettings" | "childrenHoistSelector" | "newNode" | null;
     candidatesToHoist: Tree<Skill>[] | null;
 };
 
@@ -45,6 +45,13 @@ export const canvasDisplaySettingsSlice = createSlice({
             state.openMenu = "childrenHoistSelector";
             state.candidatesToHoist = action.payload;
         },
+        toggleNewNode: (state) => {
+            if (state.openMenu === "newNode") {
+                state.openMenu = null;
+            } else {
+                state.openMenu = "newNode";
+            }
+        },
         closeAllMenues: (state) => {
             state.openMenu = null;
         },
@@ -62,6 +69,7 @@ export const {
     hideLabel,
     closeChildrenHoistSelector,
     openChildrenHoistSelector,
+    toggleNewNode,
 } = canvasDisplaySettingsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type

@@ -1,4 +1,4 @@
-import { Canvas, Circle, Group, Path, runTiming, Skia, Text, TouchHandler, useFont, useValue } from "@shopify/react-native-skia";
+import { Canvas, Circle, Group, Path, runTiming, SkFont, Skia, Text, TouchHandler, useFont, useValue } from "@shopify/react-native-skia";
 import { useEffect } from "react";
 import { ScrollView, View } from "react-native";
 import PopUpMenu from "../components/PopUpMenu";
@@ -44,6 +44,8 @@ function TreeView({
     const { canvasHeight, canvasWidth, horizontalMargin, verticalMargin } = canvasDimentions;
     const foundNodeCoordinates = circlePositionsInCanvas.find((c) => c.id === selectedNode);
     //
+    const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 20);
+
     useEffect(() => {
         if (!verticalScrollViewRef.current) return;
         if (!horizontalScrollViewRef.current) return;
@@ -88,8 +90,10 @@ function TreeView({
                 onMomentumScrollEnd={(e) => updateScrollOffset("horizontal", e.nativeEvent.contentOffset.x)}>
                 {currentTree !== undefined && (
                     <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}>
-                        <DragAndDropZones data={dragAndDropZones} />
-                        {previewNode && <PreviewNode previewNode={previewNode} previewNodeParent={previewNodeParent} />}
+                        {/* <DragAndDropZones data={dragAndDropZones} /> */}
+                        {previewNode && (
+                            <PreviewNode previewNode={previewNode} previewNodeParent={previewNodeParent} nodeLetterFont={nodeLetterFont} />
+                        )}
                         <CanvasTree
                             stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
                             tree={currentTree}
@@ -118,12 +122,12 @@ export default TreeView;
 function PreviewNode({
     previewNode,
     previewNodeParent,
+    nodeLetterFont,
 }: {
     previewNode: CirclePositionInCanvasWithLevel;
     previewNodeParent: CirclePositionInCanvasWithLevel | undefined;
+    nodeLetterFont: SkFont | null;
 }) {
-    const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 20);
-
     const p1x = previewNode.x;
     const p1y = previewNode.y;
 

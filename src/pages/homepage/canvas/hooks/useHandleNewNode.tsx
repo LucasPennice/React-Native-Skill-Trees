@@ -8,7 +8,7 @@ import { CIRCLE_SIZE } from "../parameters";
 function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZones: DnDZone[], currentTree: Tree<Skill> | undefined) {
     const [dndZoneHoveringOver, setDndZoneHoveringOver] = useState<DnDZone | undefined>(undefined);
 
-    const startingPosition = { x: 0, y: 0 };
+    const startingPosition = { x: 50, y: 100 };
 
     const position = useSharedValue(startingPosition);
 
@@ -53,6 +53,7 @@ function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZon
         })
         .onEnd((e) => {
             position.value = startingPosition;
+            runOnJS(setDndZoneHoveringOver)(undefined);
         })
         .activateAfterLongPress(0);
 
