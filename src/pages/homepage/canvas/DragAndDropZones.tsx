@@ -6,7 +6,9 @@ function DragAndDropZones({ data }: { data: DnDZone[] }) {
     const getColor = (type: DnDZone["type"]) => {
         if (type === "PARENT") return colors.blue;
 
-        if (type === "BROTHER") return colors.green;
+        if (type === "LEFT_BROTHER") return colors.green;
+
+        if (type === "RIGHT_BROTHER") return colors.pink;
 
         return colors.yellow;
     };

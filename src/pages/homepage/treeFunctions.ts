@@ -1,5 +1,5 @@
 import { ModifiableNodeProperties } from "../../redux/currentTreeSlice";
-import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../types";
+import { CirclePositionInCanvasWithLevel, ModifiableProperties, Skill, Tree } from "../../types";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
     if (!rootNode) return 0;
@@ -201,7 +201,7 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
     }
 }
 
-export function editNodeProperty(rootNode: Tree<Skill> | undefined, targetNode: Tree<Skill>, newProperties: ModifiableNodeProperties) {
+export function editTreeProperties(rootNode: Tree<Skill> | undefined, targetNode: Tree<Skill>, newProperties: ModifiableProperties<Tree<Skill>>) {
     if (!rootNode) return undefined;
 
     //Base Case 👇
@@ -212,7 +212,7 @@ export function editNodeProperty(rootNode: Tree<Skill> | undefined, targetNode: 
         const keysToEdit = Object.keys(newProperties);
 
         //@ts-ignore
-        keysToEdit.forEach((key) => (result.data[key] = newProperties[key]));
+        keysToEdit.forEach((key) => (result[key] = newProperties[key]));
 
         return result;
     }
@@ -226,7 +226,7 @@ export function editNodeProperty(rootNode: Tree<Skill> | undefined, targetNode: 
     for (let idx = 0; idx < rootNode.children.length; idx++) {
         const element = rootNode.children[idx];
 
-        const d = editNodeProperty(element, targetNode, newProperties);
+        const d = editTreeProperties(element, targetNode, newProperties);
 
         if (d) result.children!.push(d);
     }

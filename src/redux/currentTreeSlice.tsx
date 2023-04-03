@@ -3,9 +3,9 @@ import type { RootState } from "./reduxStore";
 import {
     deleteNodeWithNoChildren as deleteNodeWithNoChildrenFn,
     deleteNodeWithChildren as deleteNodeWithChildrenFn,
-    editNodeProperty as editNodePropertyFn,
+    editTreeProperties as editTreePropertiesFn,
 } from "../pages/homepage/treeFunctions";
-import { Skill, Tree } from "../types";
+import { ModifiableProperties, Skill, Tree } from "../types";
 
 // Define a type for the slice state
 type CurrentTreeSlice = {
@@ -29,8 +29,8 @@ export const currentTreeSlice = createSlice({
         unselectTree: (state) => {
             state.value = undefined;
         },
-        editNodeProperty: (state, action: PayloadAction<{ targetNode: Tree<Skill>; newProperties: ModifiableNodeProperties }>) => {
-            state.value = editNodePropertyFn(state.value, action.payload.targetNode, action.payload.newProperties);
+        editNodeProperty: (state, action: PayloadAction<{ targetNode: Tree<Skill>; newProperties: Tree<Skill> }>) => {
+            state.value = editTreePropertiesFn(state.value, action.payload.targetNode, action.payload.newProperties);
         },
         deleteNodeWithNoChildren: (state, action: PayloadAction<Tree<Skill>>) => {
             state.value = deleteNodeWithNoChildrenFn(state.value, action.payload);

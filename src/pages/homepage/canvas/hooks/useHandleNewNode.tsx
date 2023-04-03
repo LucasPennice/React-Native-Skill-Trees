@@ -1,11 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { DnDZone, Skill, Tree } from "../../../../types";
+import { useAppSelector } from "../../../../redux/reduxHooks";
+import { selectScreenDimentions } from "../../../../redux/screenDimentionsSlice";
+import { DnDZone, ModifiableProperties, Skill, Tree } from "../../../../types";
+import { editTreeProperties, findParentOfNode, findTreeNodeById } from "../../treeFunctions";
 import { CIRCLE_SIZE } from "../parameters";
 
 function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZones: DnDZone[], currentTree: Tree<Skill> | undefined) {
     const [dndZoneHoveringOver, setDndZoneHoveringOver] = useState<DnDZone | undefined>(undefined);
+
+    const screenDimentions = useAppSelector(selectScreenDimentions);
 
     const startingPosition = { x: 0, y: 0 };
 
@@ -73,14 +78,58 @@ function getTentativeModifiedTree(dndZoneHoveringOver: DnDZone | undefined, curr
     if (!currentTree) return undefined;
     if (!dndZoneHoveringOver) return undefined;
 
+    const mockNewNodeData: Skill = { id: "Cock", name: "ReCock", isCompleted: false };
+
     //Tengo 3 casos
 
-    //Parent
+    const targetNode = findTreeNodeById(currentTree, dndZoneHoveringOver.ofNode);
 
-    //Children
-    //Brother
+    if (!targetNode) throw "couldnt find targetNode on getTentativeModifiedTree";
 
-    console.log(dndZoneHoveringOver);
+    if (dndZoneHoveringOver.type === "PARENT") {
+        const oldParent: Tree<Skill> = { ...targetNode, isRoot: false, parentId: mockNewNodeData.id };
+
+        delete oldParent["treeId"];
+        delete oldParent["treeName"];
+        delete oldParent["accentColor"];
+
+        const newProperties: ModifiableProperties<Tree<Skill>> = { ...targetNode, data: mockNewNodeData, children: [oldParent] };
+
+        return editTreeProperties(currentTree, targetNode, newProperties);
+    }
+
+    const newChild: Tree<Skill> = { data: mockNewNodeData, parentId: targetNode.data.id };
+
+    if (dndZoneHoveringOver.type === "ONLY_CHILDREN") {
+        const newProperties: ModifiableProperties<Tree<Skill>> = { ...targetNode, data: mockNewNodeData, children: [newChild] };
+
+        return editTreeProperties(currentTree, targetNode, newProperties);
+    }
+
+    //From now on we are in the "BROTHERS" cases
+
+    const parentOfTargetNode = findParentOfNode(currentTree, targetNode.data.id);
+
+    if (!parentOfTargetNode) throw "couldnt find parentOfTargetNode on getTentativeModifiedTree";
+    if (!parentOfTargetNode.children) throw "parentOfTargetNode.children is undefined on getTentativeModifiedTree";
+
+    const newChildren: Tree<Skill>[] = [];
+
+    for (let i = 0; i < parentOfTargetNode.children.length; i++) {
+        const element = parentOfTargetNode.children[i];
+
+        if (dndZoneHoveringOver.type === "LEFT_BROTHER" && element.data.id === targetNode.data.id)
+            newChildren.push({ data: mockNewNodeData, parentId: targetNode.parentId });
+
+        newChildren.push(element);
+
+        if (dndZoneHoveringOver.type === "RIGHT_BROTHER" && element.data.id === targetNode.data.id)
+            newChildren.push({ data: mockNewNodeData, parentId: targetNode.parentId });
+    }
+
+    const newProperties: ModifiableProperties<Tree<Skill>> = { ...parentOfTargetNode, children: newChildren };
+
+    return editTreeProperties(currentTree, parentOfTargetNode, newProperties);
 }
 
 function getDragAndDropCanvasCoordinates(dragAndDropNodeCoord: { x: number; y: number }, scrollOffset: { x: number; y: number }) {

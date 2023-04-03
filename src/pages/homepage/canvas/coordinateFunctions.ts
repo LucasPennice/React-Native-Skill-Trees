@@ -251,13 +251,13 @@ export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositio
 
         const height = DISTANCE_BETWEEN_GENERATIONS - 3 * CIRCLE_SIZE;
         const width = 4 * CIRCLE_SIZE;
-        result.push({ height, width, x: pos.x - width / 2, y: pos.y - height - 1.5 * CIRCLE_SIZE, type: "PARENT" });
+        result.push({ height, width, x: pos.x - width / 2, y: pos.y - height - 1.5 * CIRCLE_SIZE, type: "PARENT", ofNode: pos.id });
 
         if (!isRoot) {
             const minWidth = DISTANCE_BETWEEN_CHILDREN / 2;
             const height = 3 * CIRCLE_SIZE;
             const width = isNotFirstNode(pos) ? getLevelNodeDistance(pos) - 1 * CIRCLE_SIZE + CIRCLE_SIZE : minWidth;
-            result.push({ height, width, x: pos.x - width, y: pos.y - height / 2, type: "BROTHER" });
+            result.push({ height, width, x: pos.x - width, y: pos.y - height / 2, type: "LEFT_BROTHER", ofNode: pos.id });
 
             if (isLastNodeOfCluster(pos)) {
                 result.push({
@@ -265,14 +265,22 @@ export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositio
                     width: minWidth,
                     x: pos.x,
                     y: pos.y - height / 2,
-                    type: "BROTHER",
+                    type: "RIGHT_BROTHER",
+                    ofNode: pos.id,
                 });
             }
         }
 
         if (doesntHaveChildren(pos)) {
             const height = DISTANCE_BETWEEN_GENERATIONS;
-            result.push({ height, width: 4 * CIRCLE_SIZE, x: pos.x - 2 * CIRCLE_SIZE, y: pos.y + 1.5 * CIRCLE_SIZE, type: "CHILDREN" });
+            result.push({
+                height,
+                width: 4 * CIRCLE_SIZE,
+                x: pos.x - 2 * CIRCLE_SIZE,
+                y: pos.y + 1.5 * CIRCLE_SIZE,
+                type: "ONLY_CHILDREN",
+                ofNode: pos.id,
+            });
         }
     }
 

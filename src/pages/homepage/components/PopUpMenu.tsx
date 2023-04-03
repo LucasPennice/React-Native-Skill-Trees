@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { Button, Dimensions, Pressable, Text, TextInput, View } from "react-native";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
-import { MENU_DAMPENING } from "../../../types";
+import { CirclePositionInCanvas, MENU_DAMPENING } from "../../../types";
 import { findTreeNodeById } from "../treeFunctions";
-import { CirclePositionInCanvas } from "../canvas/TreeView";
 import { deleteNodeWithNoChildren, editNodeProperty, selectCurrentTree } from "../../../redux/currentTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
@@ -58,7 +57,11 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                         blurOnSubmit
                         //@ts-ignore
                         enterKeyHint="done"
-                        onBlur={() => dispatch(editNodeProperty({ targetNode: currentNode, newProperties: { name: text } }))}
+                        onBlur={() => {
+                            const newProperties = { ...currentNode, data: { ...currentNode.data, name: text } };
+
+                            dispatch(editNodeProperty({ targetNode: currentNode, newProperties }));
+                        }}
                     />
                     <AppText style={{ color: "white", fontSize: 28, transform: [{ translateX: -20 }], opacity: 0.6 }}>✎</AppText>
                 </View>
@@ -77,11 +80,14 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                 )}
                 <Pressable
                     style={{ paddingVertical: 15 }}
-                    onPress={() =>
-                        dispatch(
-                            editNodeProperty({ targetNode: currentNode, newProperties: { isCompleted: currentNode.data.isCompleted ? false : true } })
-                        )
-                    }>
+                    onPress={() => {
+                        const newProperties = {
+                            ...currentNode,
+                            data: { ...currentNode.data, isCompleted: currentNode.data.isCompleted ? false : true },
+                        };
+
+                        dispatch(editNodeProperty({ targetNode: currentNode, newProperties }));
+                    }}>
                     <AppText style={{ fontSize: 20, color: "white" }}>{`${
                         currentNode.data.isCompleted ? "Mark as Incomplete" : "Mark as Complete"
                     }`}</AppText>

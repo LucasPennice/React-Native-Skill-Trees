@@ -18,6 +18,10 @@ export interface Tree<T> {
     children?: Tree<T>[];
 }
 
+export type ModifiableProperties<T> = {
+    [Property in keyof T]: T[Property];
+};
+
 export const MENU_DAMPENING = { damping: 20, stiffness: 300 };
 
 export const mockSkillTreeArray: Tree<Skill>[] = [
@@ -118,7 +122,8 @@ export const mockSkillTreeArray: Tree<Skill>[] = [
 export const centerFlex: StyleProp<ViewStyle> = { display: "flex", justifyContent: "center", alignItems: "center" };
 
 export type DnDZone = {
-    type: "PARENT" | "CHILDREN" | "BROTHER";
+    type: "PARENT" | "ONLY_CHILDREN" | "LEFT_BROTHER" | "RIGHT_BROTHER";
+    ofNode: string;
     x: number;
     y: number;
     width: number;

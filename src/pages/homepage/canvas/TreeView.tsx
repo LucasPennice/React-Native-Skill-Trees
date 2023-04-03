@@ -17,6 +17,7 @@ type TreeViewProps = {
     dragAndDropZones: DnDZone[];
     canvasDimentions: CanvasDimentions;
     circlePositionsInCanvas: CirclePositionInCanvasWithLevel[];
+    tentativeCirlcePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     canvasTouchHandler: CanvasTouchHandler;
     selectedNode: string | null;
     selectedNodeHistory: (string | null)[];
@@ -26,6 +27,7 @@ type TreeViewProps = {
 function TreeView({
     canvasDimentions,
     dragAndDropZones,
+    tentativeCirlcePositionsInCanvas,
     circlePositionsInCanvas,
     canvasTouchHandler,
     selectedNode,
@@ -81,7 +83,7 @@ function TreeView({
                     <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}>
                         <DragAndDropZones data={dragAndDropZones} />
                         <CanvasTree
-                            stateProps={{ selectedNode, showLabel, circlePositionsInCanvas }}
+                            stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
                             tree={currentTree}
                             wholeTree={currentTree}
                             rootCoordinates={{ width: horizontalMargin, height: verticalMargin }}

@@ -4,8 +4,6 @@ import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../types";
 import { CIRCLE_SIZE, colors } from "./parameters";
 import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 import { findDistanceBetweenNodesById, findParentOfNode } from "../treeFunctions";
-import { useEffect } from "react";
-import AppText from "../../../AppText";
 
 type TreeProps = {
     tree: Tree<Skill>;
@@ -15,6 +13,7 @@ type TreeProps = {
         selectedNode: string | null;
         showLabel: boolean;
         circlePositionsInCanvas: CirclePositionInCanvasWithLevel[];
+        tentativeCirlcePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     };
     rootCoordinates?: { width: number; height: number };
 };
@@ -29,13 +28,13 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
         currentChildIndex: 0,
     };
 
-    const { selectedNode, showLabel, circlePositionsInCanvas } = stateProps;
+    const { selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas } = stateProps;
 
-    // const currentNodeCoordintes = getChildCoordinatesFromParentInfo(parentNodeInfo ?? defaultParentInfo);
+    const currentNodeTentativeCoordinates = tentativeCirlcePositionsInCanvas.find((c) => c.id === tree.data.id);
     const currentNodeCoordintes = circlePositionsInCanvas.find((c) => c.id === tree.data.id)!;
 
-    const cx = currentNodeCoordintes.x;
-    const cy = currentNodeCoordintes.y;
+    const cx = currentNodeTentativeCoordinates ? currentNodeTentativeCoordinates.x : currentNodeCoordintes.x;
+    const cy = currentNodeTentativeCoordinates ? currentNodeTentativeCoordinates.y : currentNodeCoordintes.y;
 
     let newParentNodeInfo = { coordinates: currentNodeCoordintes, numberOfChildren: tree.children ? tree.children.length : 0 };
 
@@ -79,7 +78,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates, wholeTr
                             tree={element}
                             wholeTree={wholeTree}
                             parentNodeInfo={{ ...newParentNodeInfo, currentChildIndex: idx }}
-                            stateProps={{ selectedNode, showLabel, circlePositionsInCanvas }}
+                            stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
                         />
                     );
                 })}
