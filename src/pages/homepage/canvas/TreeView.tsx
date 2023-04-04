@@ -39,7 +39,7 @@ function TreeView({
     //Redux State
     const { height, width } = useAppSelector(selectScreenDimentions);
     const { value: currentTree } = useAppSelector(selectCurrentTree);
-    const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
+    const { showLabel, showDragAndDropGuides } = useAppSelector(selectCanvasDisplaySettings);
     const newNode = useAppSelector(selectNewNode);
     //Derived State
     const { horizontalScrollViewRef, touchHandler, verticalScrollViewRef } = canvasTouchHandler;
@@ -90,7 +90,7 @@ function TreeView({
                 onMomentumScrollEnd={(e) => updateScrollOffset("horizontal", e.nativeEvent.contentOffset.x)}>
                 {currentTree !== undefined && (
                     <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}>
-                        {/* <DragAndDropZones data={dragAndDropZones} /> */}
+                        {showDragAndDropGuides && <DragAndDropZones data={dragAndDropZones} />}
                         {previewNode && (
                             <PreviewNode
                                 previewNode={previewNode}

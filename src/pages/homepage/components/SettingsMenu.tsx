@@ -1,15 +1,23 @@
 import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { useAnimatedStyle, withDelay, withSpring } from "react-native-reanimated";
 import AppText from "../../../AppText";
-import { selectCanvasDisplaySettings, toggleSettingsMenuOpen, toggleShowLabel, toggleTreeSelector } from "../../../redux/canvasDisplaySettingsSlice";
+import {
+    selectCanvasDisplaySettings,
+    toggleSettingsMenuOpen,
+    toggleShowDnDGuides,
+    toggleShowLabel,
+    toggleTreeSelector,
+} from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
+import { centerFlex } from "../../../types";
+import { colors } from "../canvas/parameters";
 
 const SETTING_BUTTON_WIDTH = 70;
 
 function SettingsMenu() {
     const dispatch = useAppDispatch();
 
-    const { openMenu, showLabel } = useAppSelector(selectCanvasDisplaySettings);
+    const { openMenu, showLabel, showDragAndDropGuides } = useAppSelector(selectCanvasDisplaySettings);
 
     const menuOpen = openMenu === "treeSettings";
 
@@ -20,7 +28,7 @@ function SettingsMenu() {
         return {
             width: withSpring(menuOpen ? (QTY_OF_SETTINGS + 1) * SETTING_BUTTON_WIDTH + QTY_OF_SETTINGS * 20 + 20 : SETTING_BUTTON_WIDTH + 20, {
                 damping: 27,
-                stiffness: 300,
+                stiffness: 400,
             }),
         };
     }, [menuOpen]);
@@ -34,29 +42,28 @@ function SettingsMenu() {
     return (
         <View style={{ position: "absolute", bottom: 10, left: 10 }}>
             <Animated.View style={[animatedMenuStyles, styles.menu]}>
-                <Pressable
-                    style={{ backgroundColor: "white", opacity: showLabel ? 1 : 0.5, width: SETTING_BUTTON_WIDTH }}
-                    onPress={() => dispatch(toggleSettingsMenuOpen())}>
-                    <AppText>Open</AppText>
+                <Pressable style={[centerFlex, { width: SETTING_BUTTON_WIDTH, height: 50 }]} onPress={() => dispatch(toggleSettingsMenuOpen())}>
+                    <AppText style={{ color: colors.background, fontFamily: "helveticaBold" }}>{menuOpen ? "Close" : "Settings"}</AppText>
                 </Pressable>
                 {menuOpen && (
-                    <Animated.View style={[animatedButtonContainer, { display: "flex", flexDirection: "row", gap: 20 }]}>
-                        <Pressable
-                            style={{ backgroundColor: "white", opacity: showLabel ? 1 : 0.5, width: SETTING_BUTTON_WIDTH }}
-                            onPress={() => dispatch(toggleShowLabel())}>
-                            <AppText>Show Label</AppText>
-                        </Pressable>
-                        <Pressable
-                            style={{ backgroundColor: "white", opacity: showLabel ? 1 : 0.5, width: SETTING_BUTTON_WIDTH }}
-                            onPress={() => dispatch(toggleTreeSelector())}>
-                            <AppText>Change Tree</AppText>
-                        </Pressable>
-                        <Pressable
-                            style={{ backgroundColor: "white", opacity: showLabel ? 1 : 0.5, width: SETTING_BUTTON_WIDTH }}
-                            onPress={() => dispatch(toggleTreeSelector())}>
-                            <AppText>Center</AppText>
-                        </Pressable>
-                    </Animated.View>
+                    <>
+                        <Animated.View style={[animatedButtonContainer, centerFlex, { display: "flex", flexDirection: "row", gap: 15 }]}>
+                            <Pressable
+                                style={[centerFlex, { width: 1.3 * SETTING_BUTTON_WIDTH, height: 50, paddingHorizontal: 10 }]}
+                                onPress={() => dispatch(toggleShowLabel())}>
+                                <AppText style={{ color: colors.background, fontFamily: "helveticaBold" }}>Label {showLabel ? `✓` : `⤫`}</AppText>
+                            </Pressable>
+                        </Animated.View>
+                        <Animated.View style={[animatedButtonContainer, centerFlex, { display: "flex", flexDirection: "row", gap: 15 }]}>
+                            <Pressable
+                                style={[centerFlex, { width: 2 * SETTING_BUTTON_WIDTH, height: 50, paddingHorizontal: 10 }]}
+                                onPress={() => dispatch(toggleShowDnDGuides())}>
+                                <AppText style={{ color: colors.background, fontFamily: "helveticaBold" }}>
+                                    Drag and Drop Guides {showDragAndDropGuides ? `✓` : `⤫`}
+                                </AppText>
+                            </Pressable>
+                        </Animated.View>
+                    </>
                 )}
             </Animated.View>
         </View>
@@ -68,22 +75,13 @@ export default SettingsMenu;
 const styles = StyleSheet.create({
     menu: {
         position: "relative",
-        height: 65,
+        height: 50,
         display: "flex",
         flexDirection: "row",
+        alignItems: "center",
         justifyContent: "flex-start",
-        gap: 20,
-        backgroundColor: "white",
-        padding: 10,
+        backgroundColor: colors.line,
+        paddingHorizontal: 10,
         borderRadius: 10,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-
-        elevation: 5,
     },
 });
