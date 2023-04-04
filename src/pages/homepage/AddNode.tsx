@@ -14,10 +14,6 @@ function AddNode() {
 
     const dispatch = useAppDispatch();
 
-    useEffect(() => {
-        console.log(newNode);
-    }, [newNode]);
-
     if (!currentTree) return <></>;
 
     if (newNode.id !== "" && newNode.name !== "")
