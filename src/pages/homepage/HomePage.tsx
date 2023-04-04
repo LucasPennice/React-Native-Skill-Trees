@@ -6,10 +6,10 @@ import SettingsMenu from "./components/SettingsMenu";
 import TreeSelectorModal from "./modals/TreeSelectorModal";
 import ChooseTree from "./ChooseTree";
 import { CIRCLE_SIZE, colors } from "./canvas/parameters";
-import { useAppSelector } from "../../redux/reduxHooks";
+import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCurrentTree } from "../../redux/currentTreeSlice";
 import { GestureDetector, PanGesture } from "react-native-gesture-handler";
-import Animated from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from "react-native-reanimated";
 import AppText from "../../AppText";
 import { centerFlex } from "../../types";
 import { useEffect, useState } from "react";
@@ -24,11 +24,13 @@ import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 import useCanvasTouchHandler from "./canvas/hooks/useCanvasTouchHandler";
 import AddNode from "./AddNode";
 import NewNodeModal from "./modals/NewNodeModal";
+import { clearNewNodeState, selectNewNode } from "../../redux/newNodeSlice";
 
 function HomePage() {
     //Redux State
     const { value: currentTree } = useAppSelector(selectCurrentTree);
     const screenDimentions = useAppSelector(selectScreenDimentions);
+    const dispatch = useAppDispatch();
     //Local State
     const [selectedNode, setSelectedNode] = useState<null | string>(null);
     const [selectedNodeHistory, setSelectedNodeHistory] = useState<(null | string)[]>([null]);
@@ -57,6 +59,7 @@ function HomePage() {
     useEffect(() => {
         setSelectedNode(null);
         setSelectedNodeHistory([]);
+        dispatch(clearNewNodeState());
     }, [currentTree]);
 
     const updateScrollOffset = (scrollViewType: "horizontal" | "vertical", newValue: number) => {
@@ -101,25 +104,59 @@ function HomePage() {
 function DragAndDropNewNode({ handleNewNode }: { handleNewNode: { panGesture: PanGesture; animatedStyle: { left: number; top: number } } }) {
     const { animatedStyle, panGesture } = handleNewNode;
 
+    const newNode = useAppSelector(selectNewNode);
+    const { value: currentTree } = useAppSelector(selectCurrentTree);
+
+    const isOpen = useSharedValue(false);
+
+    useEffect(() => {
+        isOpen.value = !(newNode.id === "" || newNode.name === "" || currentTree === undefined);
+    }, [newNode.id, newNode.name, currentTree]);
+
+    const hideShow = useAnimatedStyle(() => {
+        return { transform: [{ translateX: withTiming(isOpen.value ? 0 : -65) }] };
+    }, [isOpen]);
+    const hideShowOpacity = useAnimatedStyle(() => {
+        return { opacity: withDelay(150, withTiming(isOpen.value ? 1 : 0)) };
+    }, [isOpen]);
+
     return (
-        <GestureDetector gesture={panGesture}>
+        <>
             <Animated.View
                 style={[
-                    animatedStyle,
-                    centerFlex,
+                    hideShow,
                     {
+                        backgroundColor: colors.line,
                         position: "absolute",
-                        width: 2 * CIRCLE_SIZE,
-                        height: 2 * CIRCLE_SIZE,
-                        backgroundColor: colors.background,
-                        borderWidth: 2,
-                        borderRadius: CIRCLE_SIZE,
-                        borderColor: colors.accent,
+                        left: 0,
+                        top: 80,
+                        height: 65,
+                        width: 65,
+                        borderBottomEndRadius: 10,
+                        borderTopEndRadius: 10,
                     },
-                ]}>
-                <AppText style={{ fontSize: 22, color: "white", transform: [{ translateY: -2 }] }}>+</AppText>
-            </Animated.View>
-        </GestureDetector>
+                ]}
+            />
+            <GestureDetector gesture={panGesture}>
+                <Animated.View
+                    style={[
+                        animatedStyle,
+                        hideShowOpacity,
+                        centerFlex,
+                        {
+                            position: "absolute",
+                            width: 3 * CIRCLE_SIZE,
+                            height: 3 * CIRCLE_SIZE,
+                            backgroundColor: colors.background,
+                            borderWidth: 2,
+                            borderRadius: 1.5 * CIRCLE_SIZE,
+                            borderColor: colors.accent,
+                        },
+                    ]}>
+                    <AppText style={{ fontSize: 22, color: colors.line }}>{newNode.name ? newNode.name[0] : "+"}</AppText>
+                </Animated.View>
+            </GestureDetector>
+        </>
     );
 }
 

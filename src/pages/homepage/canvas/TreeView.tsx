@@ -9,10 +9,11 @@ import CanvasTree from "./CanvasTree";
 import { useAppSelector } from "../../../redux/reduxHooks";
 import { CIRCLE_SIZE, colors, DISTANCE_BETWEEN_GENERATIONS, MAX_OFFSET, NAV_HEGIHT } from "./parameters";
 import AppText from "../../../AppText";
-import { CanvasDimentions, centerFlex, CirclePositionInCanvasWithLevel, DnDZone, mockNewNodeData } from "../../../types";
+import { CanvasDimentions, centerFlex, CirclePositionInCanvasWithLevel, DnDZone, Skill } from "../../../types";
 import DragAndDropZones from "./DragAndDropZones";
 import { CanvasTouchHandler } from "./hooks/useCanvasTouchHandler";
 import { getHeightForFont } from "./functions";
+import { selectNewNode } from "../../../redux/newNodeSlice";
 
 type TreeViewProps = {
     dragAndDropZones: DnDZone[];
@@ -39,6 +40,7 @@ function TreeView({
     const { height, width } = useAppSelector(selectScreenDimentions);
     const { value: currentTree } = useAppSelector(selectCurrentTree);
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
+    const newNode = useAppSelector(selectNewNode);
     //Derived State
     const { horizontalScrollViewRef, touchHandler, verticalScrollViewRef } = canvasTouchHandler;
     const { canvasHeight, canvasWidth, horizontalMargin, verticalMargin } = canvasDimentions;
@@ -66,9 +68,7 @@ function TreeView({
         };
     }, [verticalScrollViewRef, horizontalScrollViewRef, currentTree]);
 
-    const previewNode = tentativeCirlcePositionsInCanvas.length
-        ? tentativeCirlcePositionsInCanvas.find((t) => t.id === mockNewNodeData.id)
-        : undefined;
+    const previewNode = tentativeCirlcePositionsInCanvas.length ? tentativeCirlcePositionsInCanvas.find((t) => t.id === newNode.id) : undefined;
 
     const previewNodeParent = previewNode ? tentativeCirlcePositionsInCanvas.find((t) => t.id === previewNode.parentId) : undefined;
 
@@ -92,7 +92,12 @@ function TreeView({
                     <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}>
                         {/* <DragAndDropZones data={dragAndDropZones} /> */}
                         {previewNode && (
-                            <PreviewNode previewNode={previewNode} previewNodeParent={previewNodeParent} nodeLetterFont={nodeLetterFont} />
+                            <PreviewNode
+                                previewNode={previewNode}
+                                previewNodeParent={previewNodeParent}
+                                nodeLetterFont={nodeLetterFont}
+                                newNode={newNode}
+                            />
                         )}
                         <CanvasTree
                             stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
@@ -123,10 +128,12 @@ function PreviewNode({
     previewNode,
     previewNodeParent,
     nodeLetterFont,
+    newNode,
 }: {
     previewNode: CirclePositionInCanvasWithLevel;
     previewNodeParent: CirclePositionInCanvasWithLevel | undefined;
     nodeLetterFont: SkFont | null;
+    newNode: Skill;
 }) {
     const p1x = previewNode.x;
     const p1y = previewNode.y;
@@ -165,7 +172,7 @@ function PreviewNode({
 
     const { x, y } = previewNode;
 
-    const letterToRender = mockNewNodeData.name[0];
+    const letterToRender = newNode.name[0];
 
     const position = useValue(0);
     const changePosition = () => runTiming(position, 1, { duration: 250 });
@@ -189,7 +196,7 @@ function PreviewNode({
             <Path path={c} style="stroke" strokeWidth={2} color={colors.line} />
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
 
-            <Text x={textX} y={textY} text={mockNewNodeData.name[0]} font={nodeLetterFont} color={colors.unmarkedText} />
+            <Text x={textX} y={textY} text={newNode.name[0]} font={nodeLetterFont} color={colors.unmarkedText} />
         </Group>
     );
 }

@@ -1,18 +1,24 @@
 import { useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { DnDZone, mockNewNodeData, ModifiableProperties, Skill, Tree } from "../../../../types";
+import { changeTree } from "../../../../redux/currentTreeSlice";
+import { clearNewNodeState, selectNewNode } from "../../../../redux/newNodeSlice";
+import { useAppDispatch, useAppSelector } from "../../../../redux/reduxHooks";
+import { DnDZone, ModifiableProperties, Skill, Tree } from "../../../../types";
 import { editTreeProperties, findParentOfNode, findTreeNodeById } from "../../treeFunctions";
 import { CIRCLE_SIZE } from "../parameters";
 
 function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZones: DnDZone[], currentTree: Tree<Skill> | undefined) {
     const [dndZoneHoveringOver, setDndZoneHoveringOver] = useState<DnDZone | undefined>(undefined);
 
-    const startingPosition = { x: 50, y: 100 };
+    const startingPosition = { x: 10, y: 90 };
+
+    const dispatch = useAppDispatch();
+    const newNode = useAppSelector(selectNewNode);
 
     const position = useSharedValue(startingPosition);
 
-    const tentativeModifiedTree = getTentativeModifiedTree(dndZoneHoveringOver, currentTree);
+    const tentativeModifiedTree = getTentativeModifiedTree(dndZoneHoveringOver, currentTree, newNode);
 
     const handleHoverCalculations = (hoverCoord: { x: number; y: number }) => {
         //There are no state-sync issues as long as scrollOffset and dragAndDropZones remain as state variables or derived state variables
@@ -42,6 +48,14 @@ function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZon
         });
     };
 
+    const handleOnLiftFinger = () => {
+        if (dndZoneHoveringOver && tentativeModifiedTree) {
+            dispatch(changeTree(tentativeModifiedTree));
+        }
+        setDndZoneHoveringOver(undefined);
+        dispatch(clearNewNodeState());
+    };
+
     const panGesture = Gesture.Pan()
         .onUpdate((e) => {
             position.value = { x: e.translationX + startingPosition.x, y: e.translationY + startingPosition.y };
@@ -53,7 +67,7 @@ function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZon
         })
         .onEnd((e) => {
             position.value = startingPosition;
-            runOnJS(setDndZoneHoveringOver)(undefined);
+            runOnJS(handleOnLiftFinger)();
         })
         .activateAfterLongPress(0);
 
@@ -71,7 +85,7 @@ function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZon
 
 export default useHandleNewNode;
 
-function getTentativeModifiedTree(dndZoneHoveringOver: DnDZone | undefined, currentTree: Tree<Skill> | undefined) {
+function getTentativeModifiedTree(dndZoneHoveringOver: DnDZone | undefined, currentTree: Tree<Skill> | undefined, newNode: Skill) {
     if (!currentTree) return undefined;
     if (!dndZoneHoveringOver) return undefined;
 
@@ -82,18 +96,18 @@ function getTentativeModifiedTree(dndZoneHoveringOver: DnDZone | undefined, curr
     if (!targetNode) throw "couldnt find targetNode on getTentativeModifiedTree";
 
     if (dndZoneHoveringOver.type === "PARENT") {
-        const oldParent: Tree<Skill> = { ...targetNode, isRoot: false, parentId: mockNewNodeData.id };
+        const oldParent: Tree<Skill> = { ...targetNode, isRoot: false, parentId: newNode.id };
 
         delete oldParent["treeId"];
         delete oldParent["treeName"];
         delete oldParent["accentColor"];
 
-        const newProperties: ModifiableProperties<Tree<Skill>> = { ...targetNode, data: mockNewNodeData, children: [oldParent] };
+        const newProperties: ModifiableProperties<Tree<Skill>> = { ...targetNode, data: newNode, children: [oldParent] };
 
         return editTreeProperties(currentTree, targetNode, newProperties);
     }
 
-    const newChild: Tree<Skill> = { data: mockNewNodeData, parentId: targetNode.data.id };
+    const newChild: Tree<Skill> = { data: newNode, parentId: targetNode.data.id };
 
     if (dndZoneHoveringOver.type === "ONLY_CHILDREN") {
         const newProperties: ModifiableProperties<Tree<Skill>> = { ...targetNode, children: [newChild] };
@@ -114,12 +128,12 @@ function getTentativeModifiedTree(dndZoneHoveringOver: DnDZone | undefined, curr
         const element = parentOfTargetNode.children[i];
 
         if (dndZoneHoveringOver.type === "LEFT_BROTHER" && element.data.id === targetNode.data.id)
-            newChildren.push({ data: mockNewNodeData, parentId: targetNode.parentId });
+            newChildren.push({ data: newNode, parentId: targetNode.parentId });
 
         newChildren.push(element);
 
         if (dndZoneHoveringOver.type === "RIGHT_BROTHER" && element.data.id === targetNode.data.id)
-            newChildren.push({ data: mockNewNodeData, parentId: targetNode.parentId });
+            newChildren.push({ data: newNode, parentId: targetNode.parentId });
     }
 
     const newProperties: ModifiableProperties<Tree<Skill>> = { ...parentOfTargetNode, children: newChildren };

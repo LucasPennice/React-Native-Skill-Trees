@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import canvasDisplaySettingsReducer from "./canvasDisplaySettingsSlice";
 import currentTreeReducer from "./currentTreeSlice";
 import loginReducer from "./loginSlice";
+import newNodeReducer from "./newNodeSlice";
 import screenDimentionsReducer from "./screenDimentionsSlice";
 
 export const store = configureStore({
@@ -10,6 +11,7 @@ export const store = configureStore({
         canvasDisplaySettings: canvasDisplaySettingsReducer,
         currentTree: currentTreeReducer,
         screenDimentions: screenDimentionsReducer,
+        newNode: newNodeReducer,
     },
 });
 

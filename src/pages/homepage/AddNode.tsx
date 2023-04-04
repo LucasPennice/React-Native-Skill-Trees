@@ -1,17 +1,47 @@
+import { useEffect } from "react";
 import { Pressable, View } from "react-native";
 import AppText from "../../AppText";
 import { toggleNewNode, toggleTreeSelector } from "../../redux/canvasDisplaySettingsSlice";
 import { selectCurrentTree } from "../../redux/currentTreeSlice";
+import { clearNewNodeState, selectNewNode } from "../../redux/newNodeSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { centerFlex } from "../../types";
 import { colors } from "./canvas/parameters";
 
 function AddNode() {
     const { value: currentTree } = useAppSelector(selectCurrentTree);
+    const newNode = useAppSelector(selectNewNode);
 
     const dispatch = useAppDispatch();
 
+    useEffect(() => {
+        console.log(newNode);
+    }, [newNode]);
+
     if (!currentTree) return <></>;
+
+    if (newNode.id !== "" && newNode.name !== "")
+        return (
+            <Pressable
+                onPress={() => dispatch(clearNewNodeState())}
+                style={[
+                    centerFlex,
+                    {
+                        position: "absolute",
+                        top: 70,
+                        right: 10,
+                        backgroundColor: colors.line,
+                        height: 50,
+                        paddingHorizontal: 10,
+                        borderRadius: 10,
+                        display: "flex",
+                        flexDirection: "row",
+                        gap: 15,
+                    },
+                ]}>
+                <AppText style={{ fontSize: 15, fontFamily: "helveticaBold", color: colors.red }}>Cancel</AppText>
+            </Pressable>
+        );
 
     return (
         <Pressable
