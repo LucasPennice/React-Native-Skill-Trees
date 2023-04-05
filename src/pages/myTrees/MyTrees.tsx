@@ -6,11 +6,12 @@ import { colors } from "../homepage/canvas/parameters";
 import { ProgressWheelParams } from "../homepage/components/ProgressIndicatorAndName";
 import { quantityOfCompletedNodes, quantiyOfNodes } from "../homepage/treeFunctions";
 
-const progressWheelProps = new ProgressWheelParams(colors.orange, colors.background, 45, 10);
+const progressWheelProps = new ProgressWheelParams(colors.orange, `${colors.orange}1D`, 50, 8);
 
 function MyTrees() {
     return (
-        <ScrollView style={{ backgroundColor: colors.background, flex: 1, padding: 20 }}>
+        <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 0 }}>
+            <AppText style={{ color: "white", fontSize: 32, fontFamily: "helveticaBold", marginBottom: 20 }}>My Trees</AppText>
             {mockSkillTreeArray.map((element, idx) => {
                 const completedNodesQty = quantityOfCompletedNodes(element);
                 const nodesQty = quantiyOfNodes(element);
@@ -31,52 +32,39 @@ function MyTrees() {
                             {
                                 flexDirection: "row",
                                 justifyContent: "space-between",
-                                backgroundColor: colors.line,
+                                backgroundColor: colors.darkGray,
                                 marginBottom: 30,
-                                height: 120,
+                                height: 100,
                                 borderRadius: 10,
                                 paddingHorizontal: 20,
                             },
                         ]}>
-                        <View style={{ display: "flex", flexDirection: "row", gap: 30 }}>
-                            <View>
-                                <AppText style={{ color: colors.background, fontSize: 20, fontFamily: "helveticaBold" }}>
-                                    {element.treeName ?? "tree"}
-                                </AppText>
-                                <AppText style={{ color: "gray", fontSize: 22 }}>
-                                    {completedNodesQty} / {nodesQty}
-                                </AppText>
-                            </View>
-                            <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
-                                <Circle
-                                    strokeWidth={progressWheelProps.strokeWidth}
-                                    cx={progressWheelProps.centerCoordinate}
-                                    cy={progressWheelProps.centerCoordinate}
-                                    r={progressWheelProps.radius}
-                                    stroke={progressWheelProps.backgroundStroke}
-                                />
-                                <Circle
-                                    strokeWidth={progressWheelProps.strokeWidth}
-                                    cx={progressWheelProps.centerCoordinate}
-                                    cy={progressWheelProps.centerCoordinate}
-                                    r={progressWheelProps.radius}
-                                    stroke={progressWheelProps.progressStroke}
-                                    strokeDasharray={progressWheelProps.circumference}
-                                    strokeLinecap="round"
-                                    strokeDashoffset={result}
-                                />
-                            </Svg>
+                        <View>
+                            <AppText style={{ color: "white", fontSize: 20, fontFamily: "helveticaBold" }}>{element.treeName ?? "tree"}</AppText>
+                            <AppText style={{ color: "#FFFFFF5D", fontSize: 20 }}>{completedPercentage.toFixed(0)}% Complete</AppText>
+                            <AppText style={{ color: "#FFFFFF5D", fontSize: 20 }}>
+                                {completedNodesQty} skills of {nodesQty}
+                            </AppText>
                         </View>
-                        <View style={[centerFlex, { gap: 10 }]}>
-                            <TouchableHighlight
-                                style={[centerFlex, { paddingVertical: 10, borderRadius: 10, backgroundColor: colors.background, width: 75 }]}>
-                                <AppText style={{ fontSize: 15, color: `${colors.green}` }}>Edit</AppText>
-                            </TouchableHighlight>
-                            <TouchableHighlight
-                                style={[centerFlex, { paddingVertical: 10, borderRadius: 10, backgroundColor: colors.background, width: 75 }]}>
-                                <AppText style={{ fontSize: 15, color: `${colors.accent}` }}>Delete</AppText>
-                            </TouchableHighlight>
-                        </View>
+                        <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
+                            <Circle
+                                strokeWidth={progressWheelProps.strokeWidth}
+                                cx={progressWheelProps.centerCoordinate}
+                                cy={progressWheelProps.centerCoordinate}
+                                r={progressWheelProps.radius}
+                                stroke={progressWheelProps.backgroundStroke}
+                            />
+                            <Circle
+                                strokeWidth={progressWheelProps.strokeWidth}
+                                cx={progressWheelProps.centerCoordinate}
+                                cy={progressWheelProps.centerCoordinate}
+                                r={progressWheelProps.radius}
+                                stroke={progressWheelProps.progressStroke}
+                                strokeDasharray={progressWheelProps.circumference}
+                                strokeLinecap="round"
+                                strokeDashoffset={result}
+                            />
+                        </Svg>
                     </View>
                 );
             })}

@@ -1,4 +1,5 @@
 import { StyleProp, ViewStyle } from "react-native/types";
+import { colors } from "./pages/homepage/canvas/parameters";
 
 export type Skill = {
     name: string;
@@ -30,6 +31,7 @@ export const mockSkillTreeArray: Tree<Skill>[] = [
         treeName: "IQ Skills",
         isRoot: true,
         parentId: undefined,
+        accentColor: colors.green,
         data: { id: `Coding`, name: "Coding", isCompleted: true },
         children: [
             {
@@ -99,6 +101,7 @@ export const mockSkillTreeArray: Tree<Skill>[] = [
         treeName: "EQ Skills",
         isRoot: true,
         parentId: undefined,
+        accentColor: colors.blue,
         data: { id: `People Management`, name: "People Management", isCompleted: true },
         children: [
             {
