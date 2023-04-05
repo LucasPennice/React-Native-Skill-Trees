@@ -33,10 +33,13 @@ export class ProgressWheelParams {
 }
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
-const progressWheelProps = new ProgressWheelParams(colors.accent, colors.background, 30, 6);
 
 function ProgressIndicatorAndName() {
     const { value: currentTree } = useAppSelector(selectCurrentTree);
+
+    const treeAccentColor = currentTree && currentTree.accentColor ? currentTree.accentColor : colors.accent;
+
+    const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}1D`, 30, 6);
 
     const completedPercentage = useSharedValue(0);
 
@@ -68,7 +71,7 @@ function ProgressIndicatorAndName() {
                     position: "absolute",
                     top: 10,
                     left: 10,
-                    backgroundColor: colors.line,
+                    backgroundColor: colors.darkGray,
                     height: 50,
                     paddingHorizontal: 10,
                     borderRadius: 10,
@@ -97,7 +100,7 @@ function ProgressIndicatorAndName() {
                 />
             </Svg>
 
-            <AppText style={{ fontSize: 24, fontFamily: "helveticaBold" }}>{currentTree.treeName ?? "Tree Name"}</AppText>
+            <AppText style={{ fontSize: 20, color: colors.unmarkedText }}>{currentTree.treeName ?? "Tree Name"}</AppText>
         </View>
     );
 }

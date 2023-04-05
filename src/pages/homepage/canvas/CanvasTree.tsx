@@ -17,9 +17,10 @@ type TreeProps = {
         tentativeCirlcePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     };
     rootCoordinates?: { width: number; height: number };
+    treeAccentColor: string;
 };
 
-function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, wholeTree }: TreeProps) {
+function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, wholeTree, treeAccentColor }: TreeProps) {
     //Props
     const { selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas } = stateProps;
 
@@ -98,7 +99,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
             {!tree.isRoot && (
                 <Path
                     path={path}
-                    color={nodeAndParentCompleted ? `${colors.accent}3D` : colors.line}
+                    color={nodeAndParentCompleted ? `${treeAccentColor}3D` : colors.line}
                     style="stroke"
                     strokeCap={"round"}
                     strokeWidth={3}
@@ -114,18 +115,28 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
                             key={idx}
                             tree={element}
                             wholeTree={wholeTree}
+                            treeAccentColor={treeAccentColor}
                             parentNodeInfo={{ ...newParentNodeInfo, currentChildIndex: idx }}
                             stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
                         />
                     );
                 })}
 
-            {showLabel && <Label tree={tree} coord={{ cx, cy }} labelOpacity={labelOpacity} pathBlurOnInactive={pathBlurOnInactive} />}
+            {showLabel && (
+                <Label
+                    treeAccentColor={treeAccentColor}
+                    tree={tree}
+                    coord={{ cx, cy }}
+                    labelOpacity={labelOpacity}
+                    pathBlurOnInactive={pathBlurOnInactive}
+                />
+            )}
 
             <Node
                 circleBlurOnInactive={circleBlurOnInactive}
                 circleOpacity={circleOpacity}
                 tree={tree}
+                treeAccentColor={treeAccentColor}
                 coord={{ cx, cy }}
                 currentNodeCoordintes={currentNodeCoordintes}
                 groupTransform={groupTransform}

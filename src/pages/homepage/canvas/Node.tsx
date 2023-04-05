@@ -25,6 +25,7 @@ function Node({
     circleOpacity,
     groupTransform,
     pathTrim,
+    treeAccentColor,
 }: {
     tree: Tree<Skill>;
     coord: { cx: number; cy: number };
@@ -34,6 +35,7 @@ function Node({
     circleOpacity: SkiaMutableValue<number>;
     pathTrim: SkiaMutableValue<number>;
     circleBlurOnInactive: SkiaMutableValue<number>;
+    treeAccentColor: string;
 }) {
     const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 20);
 
@@ -56,11 +58,19 @@ function Node({
     return (
         <Group origin={{ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y }} transform={groupTransform} opacity={circleOpacity}>
             <Path path={path} style="stroke" strokeWidth={2} color={colors.line} />
-            <Path path={path} style="stroke" strokeCap={"round"} strokeWidth={2} end={pathTrim} color={colors.accent} />
+            <Path path={path} style="stroke" strokeCap={"round"} strokeWidth={2} end={pathTrim} color={treeAccentColor} />
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
             {/* Letter inside the node */}
 
-            {nodeLetterFont && <NodeLetter tree={tree} coord={{ cx, cy }} nodeLetterFont={nodeLetterFont} selectedNode={selectedNode} />}
+            {nodeLetterFont && (
+                <NodeLetter
+                    treeAccentColor={treeAccentColor}
+                    tree={tree}
+                    coord={{ cx, cy }}
+                    nodeLetterFont={nodeLetterFont}
+                    selectedNode={selectedNode}
+                />
+            )}
             <Blur blur={circleBlurOnInactive} />
         </Group>
     );
@@ -71,11 +81,13 @@ function NodeLetter({
     nodeLetterFont,
     tree,
     selectedNode,
+    treeAccentColor,
 }: {
     nodeLetterFont: SkFont;
     tree: Tree<Skill>;
     coord: { cx: number; cy: number };
     selectedNode: string | null;
+    treeAccentColor: string;
 }) {
     const { cx, cy } = coord;
 
@@ -92,7 +104,7 @@ function NodeLetter({
             y={textY}
             text={letterToRender}
             font={nodeLetterFont}
-            color={tree.data.isCompleted ? colors.accent : tree.data.id === selectedNode ? "white" : colors.unmarkedText}
+            color={tree.data.isCompleted ? treeAccentColor : tree.data.id === selectedNode ? "white" : colors.unmarkedText}
         />
     );
 }

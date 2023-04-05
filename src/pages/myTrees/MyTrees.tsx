@@ -1,18 +1,24 @@
-import { ScrollView, TouchableHighlight, View } from "react-native";
+import { Pressable, ScrollView, TouchableHighlight, View } from "react-native";
 import { Circle, Svg } from "react-native-svg";
 import AppText from "../../AppText";
 import { centerFlex, mockSkillTreeArray } from "../../types";
 import { colors } from "../homepage/canvas/parameters";
 import { ProgressWheelParams } from "../homepage/components/ProgressIndicatorAndName";
 import { quantityOfCompletedNodes, quantiyOfNodes } from "../homepage/treeFunctions";
+import { useAppDispatch } from "../../redux/reduxHooks";
+import { changeTree } from "../../redux/currentTreeSlice";
 
-const progressWheelProps = new ProgressWheelParams(colors.orange, `${colors.orange}1D`, 50, 8);
+function MyTrees({ navigation }: { navigation: any }) {
+    const dispatch = useAppDispatch();
 
-function MyTrees() {
     return (
-        <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 0 }}>
+        <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 10 }}>
             <AppText style={{ color: "white", fontSize: 32, fontFamily: "helveticaBold", marginBottom: 20 }}>My Trees</AppText>
             {mockSkillTreeArray.map((element, idx) => {
+                const treeAccentColor = element && element.accentColor ? element.accentColor : colors.accent;
+
+                const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}1D`, 50, 8);
+
                 const completedNodesQty = quantityOfCompletedNodes(element);
                 const nodesQty = quantiyOfNodes(element);
 
@@ -25,7 +31,11 @@ function MyTrees() {
                 const result = progressWheelProps.circumference - (progressWheelProps.circumference * completedPercentage) / 100;
 
                 return (
-                    <View
+                    <Pressable
+                        onPress={() => {
+                            dispatch(changeTree(element));
+                            navigation.navigate("Home");
+                        }}
                         key={idx}
                         style={[
                             centerFlex,
@@ -65,7 +75,7 @@ function MyTrees() {
                                 strokeDashoffset={result}
                             />
                         </Svg>
-                    </View>
+                    </Pressable>
                 );
             })}
         </ScrollView>

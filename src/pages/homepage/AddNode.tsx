@@ -24,7 +24,7 @@ function AddNode() {
                     centerFlex,
                     {
                         position: "absolute",
-                        top: 70,
+                        top: 10,
                         right: 10,
                         backgroundColor: colors.line,
                         height: 50,
@@ -46,9 +46,9 @@ function AddNode() {
                 centerFlex,
                 {
                     position: "absolute",
-                    top: 70,
+                    top: 10,
                     right: 10,
-                    backgroundColor: colors.line,
+                    backgroundColor: colors.darkGray,
                     height: 50,
                     paddingHorizontal: 10,
                     borderRadius: 10,
@@ -57,7 +57,7 @@ function AddNode() {
                     gap: 15,
                 },
             ]}>
-            <AppText style={{ fontSize: 15, fontFamily: "helveticaBold" }}>Add Node</AppText>
+            <AppText style={{ fontSize: 15, color: colors.unmarkedText }}>Add Node</AppText>
         </Pressable>
     );
 }

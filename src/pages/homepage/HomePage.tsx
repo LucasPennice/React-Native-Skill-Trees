@@ -3,8 +3,6 @@ import TreeView from "./canvas/TreeView";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
 import SettingsMenu from "./components/SettingsMenu";
-import TreeSelectorModal from "./modals/TreeSelectorModal";
-import ChooseTree from "./ChooseTree";
 import { CIRCLE_SIZE, colors } from "./canvas/parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCurrentTree } from "../../redux/currentTreeSlice";
@@ -90,11 +88,9 @@ function HomePage() {
             />
             <DragAndDropNewNode handleNewNode={handleNewNode} />
             <ProgressIndicatorAndName />
-            <ChooseTree />
             <AddNode />
             {currentTree !== undefined && <SettingsMenu />}
 
-            <TreeSelectorModal />
             <ChildrenHoistSelectorModal />
             <NewNodeModal />
         </View>

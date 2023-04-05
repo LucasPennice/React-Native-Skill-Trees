@@ -9,8 +9,10 @@ function Label({
     tree,
     labelOpacity,
     pathBlurOnInactive,
+    treeAccentColor,
 }: {
     tree: Tree<Skill>;
+    treeAccentColor: string;
     coord: { cx: number; cy: number };
     labelOpacity: SkiaMutableValue<number>;
     pathBlurOnInactive: SkiaMutableValue<number>;
@@ -44,7 +46,7 @@ function Label({
                 width={rectangleDimentions.width}
                 x={rectX}
                 y={rectY}
-                color={tree.data.isCompleted ? colors.accent : colors.unmarkedText}
+                color={tree.data.isCompleted ? treeAccentColor : colors.unmarkedText}
             />
             {wordArr.map((word, idx) => {
                 const wordWidth = labelFont.getTextWidth(word);

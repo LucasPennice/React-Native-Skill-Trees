@@ -72,6 +72,8 @@ function TreeView({
 
     const previewNodeParent = previewNode ? tentativeCirlcePositionsInCanvas.find((t) => t.id === previewNode.parentId) : undefined;
 
+    const treeAccentColor = currentTree && currentTree.accentColor ? currentTree.accentColor : colors.accent;
+
     return (
         <ScrollView
             showsVerticalScrollIndicator={false}
@@ -103,6 +105,7 @@ function TreeView({
                             stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
                             tree={currentTree}
                             wholeTree={currentTree}
+                            treeAccentColor={treeAccentColor}
                             rootCoordinates={{ width: horizontalMargin, height: verticalMargin }}
                         />
                     </Canvas>
