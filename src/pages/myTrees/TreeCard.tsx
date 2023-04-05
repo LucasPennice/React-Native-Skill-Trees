@@ -33,7 +33,6 @@ function TreeCard({ element, changeTreeAndNavigateHome }: { element: Tree<Skill>
     const longPressGesture = Gesture.LongPress()
         .minDuration(500)
         .onBegin(() => {
-            console.log("empezando");
             scale.value = withTiming(1.05, { duration: 500 });
         })
         .onStart(() => {

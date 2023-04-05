@@ -12,6 +12,7 @@ import ColorSelector from "../../../ColorsSelector";
 function AddTreeModal() {
     //Local State
     const [treeName, setTreeName] = useState("");
+    const [selectedColor, setSelectedColor] = useState("");
 
     //Redux State
     const { open } = useAppSelector(selectAddTree);
@@ -29,7 +30,7 @@ function AddTreeModal() {
                     Completed skills and progress bars will show with this color
                 </AppText>
                 <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }}>Scroll to see more colors</AppText>
-                <ColorSelector colorsArray={possibleTreeColors} />
+                <ColorSelector colorsArray={possibleTreeColors} state={[selectedColor, setSelectedColor]} />
                 <AppText style={{ color: colors.unmarkedText, marginTop: 10 }}>Enter the name of the first skill your tree will have</AppText>
                 <AppText style={{ color: colors.unmarkedText }}>Every other skill will stem from it</AppText>
                 <AppTextInput
@@ -50,3 +51,5 @@ function AddTreeModal() {
 }
 
 export default AddTreeModal;
+
+function RadioInput() {}
