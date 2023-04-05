@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { SafeAreaView, View } from "react-native";
+import { SafeAreaView, TouchableOpacity, View } from "react-native";
 import { Provider } from "react-redux";
 import { colors } from "./src/pages/homepage/canvas/parameters";
 import HomePage from "./src/pages/homepage/HomePage";
@@ -14,6 +14,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import MyTrees from "./src/pages/myTrees/MyTrees";
 import Settings from "./src/pages/settings/Settings";
 import AppText from "./src/AppText";
+import { open } from "./src/redux/addTreeSlice";
 
 export default function App() {
     return (
@@ -69,9 +70,9 @@ function AppWithReduxContext() {
                     component={MyTrees}
                     options={{
                         headerRight: (props) => (
-                            <View style={{}}>
+                            <TouchableOpacity onPress={() => dispatch(open())} style={{ paddingVertical: 10, paddingLeft: 15 }}>
                                 <AppText style={{ color: props.tintColor, fontSize: 16 }}>+ Add Tree</AppText>
-                            </View>
+                            </TouchableOpacity>
                         ),
                     }}
                 />

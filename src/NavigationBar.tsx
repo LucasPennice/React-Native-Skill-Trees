@@ -55,7 +55,7 @@ function NavigationBar() {
                     {
                         width: width / navData.routeNames.length,
                         position: "absolute",
-                        backgroundColor: colors.unmarkedText,
+                        backgroundColor: colors.darkGray,
                         height: 40,
                         top: 13,
                         borderRadius: 10,
@@ -76,7 +76,7 @@ function NavigationBar() {
                             result[idx] = e.nativeEvent.layout.width;
                             setRouteNameLength(result);
                         }}>
-                        <AppText style={{ color: navData.routeIdx === idx ? colors.accent : "white", fontSize: 16 }}>{r}</AppText>
+                        <AppText style={{ color: colors.unmarkedText, fontSize: 16 }}>{r}</AppText>
                     </Pressable>
                 );
             })}
