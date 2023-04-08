@@ -6,9 +6,15 @@ import { quantityOfCompletedNodes, quantiyOfNodes } from "../homepage/treeFuncti
 import AppText from "../../AppText";
 import { Circle, Svg } from "react-native-svg";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
+import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
+import { useAppDispatch } from "../../redux/reduxHooks";
+import { setTree } from "../../redux/treeOptionsSlice";
 
 function TreeCard({ element, changeTreeAndNavigateHome }: { element: Tree<Skill>; changeTreeAndNavigateHome: () => void }) {
+    //Redux Related
+    const dispatch = useAppDispatch();
+    const dispatchSetTree = () => dispatch(setTree(element));
+    //
     const treeAccentColor = element && element.accentColor ? element.accentColor : colors.accent;
 
     const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}1D`, 50, 8);
@@ -33,11 +39,10 @@ function TreeCard({ element, changeTreeAndNavigateHome }: { element: Tree<Skill>
     const longPressGesture = Gesture.LongPress()
         .minDuration(500)
         .onBegin(() => {
-            scale.value = withTiming(1.05, { duration: 500 });
+            scale.value = withTiming(1.05, { duration: 500, easing: Easing.bezier(0.33, 1, 0.68, 1) });
         })
         .onStart(() => {
-            //Here's where the action will trigger
-            console.log("lol");
+            runOnJS(dispatchSetTree)();
             scale.value = withSpring(1);
         });
 

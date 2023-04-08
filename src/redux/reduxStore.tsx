@@ -5,6 +5,7 @@ import loginReducer from "./loginSlice";
 import newNodeReducer from "./newNodeSlice";
 import screenDimentionsReducer from "./screenDimentionsSlice";
 import addTreeReducer from "./addTreeSlice";
+import treeOptionsReducer from "./treeOptionsSlice";
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
         screenDimentions: screenDimentionsReducer,
         newNode: newNodeReducer,
         addTree: addTreeReducer,
+        treeOptions: treeOptionsReducer,
     },
 });
 

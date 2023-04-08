@@ -7,6 +7,7 @@ import { useAppDispatch } from "../../redux/reduxHooks";
 import { changeTree } from "../../redux/currentTreeSlice";
 import AddTreeModal from "./modals/AddTreeModal";
 import TreeCard from "./TreeCard";
+import TreeOptionsModal from "./modals/TreeOptionsModal";
 
 function MyTrees({ navigation }: { navigation: any }) {
     const dispatch = useAppDispatch();
@@ -26,6 +27,7 @@ function MyTrees({ navigation }: { navigation: any }) {
                 })}
             </ScrollView>
 
+            <TreeOptionsModal />
             <AddTreeModal />
         </>
     );

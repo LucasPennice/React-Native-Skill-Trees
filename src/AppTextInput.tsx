@@ -3,6 +3,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-na
 import { centerFlex } from "./types";
 import AppText from "./AppText";
 import { colors } from "./pages/homepage/canvas/parameters";
+import { useEffect } from "react";
 
 function AppTextInput({
     textState,
@@ -15,20 +16,24 @@ function AppTextInput({
 }) {
     const [text, setText] = textState;
 
-    const textFocused = useSharedValue(false);
+    const textInputEmpty = useSharedValue(false);
+
+    useEffect(() => {
+        textInputEmpty.value = text.length !== 0;
+    }, [text]);
 
     const clearButtonStyles = useAnimatedStyle(() => {
         return {
-            right: withSpring(textFocused.value ? 0 : -35, { damping: 25, stiffness: 300 }),
-            opacity: withSpring(textFocused.value ? 1 : 0, { damping: 25, stiffness: 300 }),
+            right: withSpring(textInputEmpty.value ? 0 : -35, { damping: 25, stiffness: 300 }),
+            opacity: withSpring(textInputEmpty.value ? 1 : 0, { damping: 25, stiffness: 300 }),
         };
-    }, [textFocused]);
+    }, [textInputEmpty]);
 
     const inputStyles = useAnimatedStyle(() => {
         return {
-            marginRight: withSpring(textFocused.value ? 55 : 0, { damping: 25, stiffness: 300 }),
+            marginRight: withSpring(textInputEmpty.value ? 55 : 0, { damping: 25, stiffness: 300 }),
         };
-    }, [textFocused]);
+    }, [textInputEmpty]);
 
     return (
         <View style={[centerFlex, { flexDirection: "row", position: "relative" }, containerStyles]}>
@@ -44,8 +49,6 @@ function AppTextInput({
                     blurOnSubmit
                     //@ts-ignore
                     enterKeyHint="done"
-                    onBlur={() => (textFocused.value = false)}
-                    onFocus={() => (textFocused.value = true)}
                     onChangeText={setText}
                     placeholder={placeholder}
                     value={text}
@@ -62,12 +65,7 @@ function AppTextInput({
                 />
             </Animated.View>
             <Animated.View style={[centerFlex, clearButtonStyles, { position: "absolute", height: 60 }]}>
-                <Pressable
-                    style={[centerFlex, { flex: 1, paddingHorizontal: 10 }]}
-                    disabled={!textFocused}
-                    onPress={() => {
-                        setText("");
-                    }}>
+                <Pressable style={[centerFlex, { flex: 1, paddingHorizontal: 10 }]} onPress={() => setText("")}>
                     <AppText style={{ color: "white" }}>Clear</AppText>
                 </Pressable>
             </Animated.View>
