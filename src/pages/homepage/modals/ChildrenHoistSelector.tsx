@@ -1,9 +1,9 @@
 import { Button, Modal, Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
 import { closeAllMenues, selectCanvasDisplaySettings, closeChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
-import { deleteNodeWithChildren, selectCurrentTree } from "../../../redux/userTreesSlice";
+import { mutateUserTree, selectCurrentTree } from "../../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { findTreeNodeById } from "../treeFunctions";
-import { centerFlex } from "../../../types";
+import { deleteNodeWithNoChildren, deleteNodeWithChildren as deleteNodeWithChildrenFn, findTreeNodeById } from "../treeFunctions";
+import { Skill, Tree, centerFlex } from "../../../types";
 import { colors } from "../canvas/parameters";
 import AppText from "../../../components/AppText";
 import { Fragment } from "react";
@@ -13,6 +13,19 @@ function ChildrenHoistSelectorModal() {
     const currentTree = useAppSelector(selectCurrentTree);
 
     const dispatch = useAppDispatch();
+
+    const deleteParentAndHoistChildren = (children: Tree<Skill>) => () => {
+        console.log(children, "This is my children");
+        const nodeToDelete = findTreeNodeById(currentTree, children.parentId ?? null);
+
+        if (!nodeToDelete) return dispatch(closeChildrenHoistSelector());
+
+        const newTree = deleteNodeWithChildrenFn(currentTree, nodeToDelete, children);
+
+        dispatch(mutateUserTree(newTree));
+
+        dispatch(closeChildrenHoistSelector());
+    };
 
     return (
         <Modal
@@ -36,10 +49,6 @@ function ChildrenHoistSelectorModal() {
                         {candidatesToHoist !== null &&
                             currentTree &&
                             candidatesToHoist.map((children, idx) => {
-                                const nodeToDelete = findTreeNodeById(currentTree, children.parentId ?? null);
-
-                                if (!nodeToDelete) return <Fragment key={idx}></Fragment>;
-
                                 return (
                                     <Pressable
                                         key={idx}
@@ -55,10 +64,7 @@ function ChildrenHoistSelectorModal() {
                                                 flexDirection: "row",
                                             },
                                         ]}
-                                        onPress={() => {
-                                            dispatch(deleteNodeWithChildren({ childrenToHoist: children, nodeToDelete }));
-                                            dispatch(closeAllMenues());
-                                        }}>
+                                        onPress={deleteParentAndHoistChildren(children)}>
                                         <View
                                             style={[
                                                 centerFlex,

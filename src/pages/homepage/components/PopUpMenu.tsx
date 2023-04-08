@@ -3,8 +3,8 @@ import { Button, Dimensions, Pressable, Text, TextInput, View } from "react-nati
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import { CirclePositionInCanvas, MENU_DAMPENING } from "../../../types";
-import { findTreeNodeById } from "../treeFunctions";
-import { deleteNodeWithNoChildren, editNodeProperty, selectCurrentTree } from "../../../redux/userTreesSlice";
+import { deleteNodeWithNoChildren, editTreeProperties, findTreeNodeById } from "../treeFunctions";
+import { mutateUserTree, selectCurrentTree } from "../../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { openChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
@@ -34,6 +34,28 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
 
     if (!currentNode) return <></>;
 
+    const deleteNode = () => {
+        const result = deleteNodeWithNoChildren(currentTree, currentNode);
+        dispatch(mutateUserTree(result));
+    };
+
+    const toggleCompletionInNode = () => {
+        const newCompletedState = currentNode.data.isCompleted ? false : true;
+        const newProperties = { ...currentNode, data: { ...currentNode.data, isCompleted: newCompletedState } };
+
+        const result = editTreeProperties(currentTree, currentNode, newProperties);
+
+        dispatch(mutateUserTree(result));
+    };
+
+    const updateNodeName = () => {
+        const newProperties = { ...currentNode, data: { ...currentNode.data, name: text } };
+
+        const result = editTreeProperties(currentTree, currentNode, newProperties);
+
+        dispatch(mutateUserTree(result));
+    };
+
     return (
         <>
             <Animated.View
@@ -57,16 +79,12 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                         blurOnSubmit
                         //@ts-ignore
                         enterKeyHint="done"
-                        onBlur={() => {
-                            const newProperties = { ...currentNode, data: { ...currentNode.data, name: text } };
-
-                            dispatch(editNodeProperty({ targetNode: currentNode, newProperties }));
-                        }}
+                        onBlur={updateNodeName}
                     />
                     <AppText style={{ color: "white", fontSize: 28, transform: [{ translateX: -20 }], opacity: 0.6 }}>✎</AppText>
                 </View>
                 {!currentNode.children && (
-                    <Pressable style={{ marginTop: 20, paddingVertical: 15 }} onPress={() => dispatch(deleteNodeWithNoChildren(currentNode))}>
+                    <Pressable style={{ marginTop: 20, paddingVertical: 15 }} onPress={deleteNode}>
                         <AppText style={{ fontSize: 20, color: "white" }}>Delete Node</AppText>
                     </Pressable>
                 )}
@@ -78,16 +96,7 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                         <AppText style={{ fontSize: 20, color: "white" }}>Delete Node</AppText>
                     </Pressable>
                 )}
-                <Pressable
-                    style={{ paddingVertical: 15 }}
-                    onPress={() => {
-                        const newProperties = {
-                            ...currentNode,
-                            data: { ...currentNode.data, isCompleted: currentNode.data.isCompleted ? false : true },
-                        };
-
-                        dispatch(editNodeProperty({ targetNode: currentNode, newProperties }));
-                    }}>
+                <Pressable style={{ paddingVertical: 15 }} onPress={toggleCompletionInNode}>
                     <AppText style={{ fontSize: 20, color: "white" }}>{`${
                         currentNode.data.isCompleted ? "Mark as Incomplete" : "Mark as Complete"
                     }`}</AppText>

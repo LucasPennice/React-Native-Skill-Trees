@@ -178,7 +178,7 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
     return result;
 
     function returnHoistedNode(parentNode: Tree<Skill>, childrenToHoist: Tree<Skill>) {
-        const result = { ...parentNode };
+        let result: Tree<Skill> = { ...parentNode };
 
         result.data = { ...childrenToHoist.data };
 
@@ -186,7 +186,9 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
 
         result.isRoot = parentNode.isRoot;
 
-        if (childrenToHoist.children && result.children) result.children.push(...childrenToHoist.children);
+        if (childrenToHoist.children && result.children) {
+            result = { ...result, children: [...result.children, ...childrenToHoist.children] };
+        }
 
         //Update the parentId of the hoisted nodes' children
         if (result.children) {

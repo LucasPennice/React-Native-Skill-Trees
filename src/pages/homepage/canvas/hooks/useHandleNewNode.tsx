@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { changeTree, updateUserTrees } from "../../../../redux/userTreesSlice";
+import { mutateUserTree } from "../../../../redux/userTreesSlice";
 import { clearNewNodeState, selectNewNode } from "../../../../redux/newNodeSlice";
 import { useAppDispatch, useAppSelector } from "../../../../redux/reduxHooks";
 import { DnDZone, ModifiableProperties, Skill, Tree } from "../../../../types";
@@ -50,7 +50,7 @@ function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZon
 
     const handleOnLiftFinger = () => {
         if (dndZoneHoveringOver && tentativeModifiedTree) {
-            dispatch(updateUserTrees(tentativeModifiedTree));
+            dispatch(mutateUserTree(tentativeModifiedTree));
         }
         setDndZoneHoveringOver(undefined);
         dispatch(clearNewNodeState());
