@@ -1,4 +1,4 @@
-import { Canvas, Circle, Group, Path, runTiming, SkFont, Skia, Text, TouchHandler, useFont, useValue } from "@shopify/react-native-skia";
+import { Blur, Canvas, Circle, Group, Path, runTiming, SkFont, Skia, Text, TouchHandler, useFont, useValue } from "@shopify/react-native-skia";
 import { useEffect } from "react";
 import { ScrollView, View } from "react-native";
 import PopUpMenu from "../components/PopUpMenu";
@@ -108,6 +108,7 @@ function TreeView({
                             treeAccentColor={treeAccentColor}
                             rootCoordinates={{ width: horizontalMargin, height: verticalMargin }}
                         />
+                        <Blur blur={0} />
                     </Canvas>
                 )}
 

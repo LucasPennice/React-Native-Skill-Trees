@@ -22,9 +22,7 @@ function Node({
     selectedNode,
     currentNodeCoordintes,
     circleBlurOnInactive,
-    circleOpacity,
     groupTransform,
-    pathTrim,
     treeAccentColor,
 }: {
     tree: Tree<Skill>;
@@ -32,8 +30,6 @@ function Node({
     selectedNode: string | null;
     currentNodeCoordintes: CirclePositionInCanvasWithLevel;
     groupTransform: SkiaValue<{ scale: number }[]>;
-    circleOpacity: SkiaMutableValue<number>;
-    pathTrim: SkiaMutableValue<number>;
     circleBlurOnInactive: SkiaMutableValue<number>;
     treeAccentColor: string;
 }) {
@@ -56,9 +52,9 @@ function Node({
     }, [x, y]);
 
     return (
-        <Group origin={{ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y }} transform={groupTransform} opacity={circleOpacity}>
+        <Group origin={{ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y }} transform={groupTransform}>
             <Path path={path} style="stroke" strokeWidth={2} color={colors.line} />
-            <Path path={path} style="stroke" strokeCap={"round"} strokeWidth={2} end={pathTrim} color={treeAccentColor} />
+            <Path path={path} style="stroke" strokeCap={"round"} strokeWidth={2} color={treeAccentColor} />
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
             {/* Letter inside the node */}
 

@@ -1,10 +1,11 @@
-import { Blur, Path, Skia, useComputedValue, useSpring } from "@shopify/react-native-skia";
+import { Blur, Path, Skia, SkiaMutableValue, useComputedValue, useSpring } from "@shopify/react-native-skia";
 import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../types";
 import { CANVAS_SPRING, colors, MAX_OFFSET } from "./parameters";
 import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 import { findDistanceBetweenNodesById, findParentOfNode } from "../treeFunctions";
 import Label from "./Label";
 import Node from "./Node";
+import CanvasPath from "./CavnasPath";
 
 type TreeProps = {
     tree: Tree<Skill>;
@@ -62,51 +63,19 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
         return true;
     })();
 
-    const p1x = useSpring(cx, CANVAS_SPRING);
-    const p1y = useSpring(cy, CANVAS_SPRING);
+    const pathColor = nodeAndParentCompleted ? `${treeAccentColor}3D` : colors.line;
 
-    const p2x = useSpring(pathInitialPoint.x, CANVAS_SPRING);
-    const p2y = useSpring(pathInitialPoint.y, CANVAS_SPRING);
-
-    const path = useComputedValue(() => {
-        const p = Skia.Path.Make();
-
-        p.moveTo(p1x.current, p1y.current);
-
-        // mid-point of line:
-        var mpx = (p2x.current + p1x.current) * 0.5;
-        var mpy = (p2y.current + p1y.current) * 0.5;
-
-        // angle of perpendicular to line:
-        var theta = Math.atan2(p2y.current - p1y.current, p2x.current - p1x.current) - Math.PI / 2;
-
-        let deltaX = p2x.current - p1x.current;
-
-        // distance of control point from mid-point of line:
-        var offset = deltaX > MAX_OFFSET ? MAX_OFFSET : deltaX < -MAX_OFFSET ? -MAX_OFFSET : deltaX;
-
-        // location of control point:
-        var c1x = mpx + offset * 1.5 * Math.cos(theta);
-        var c1y = mpy + offset * 1.5 * Math.sin(theta);
-
-        p.quadTo(c1x, c1y, p2x.current, p2y.current);
-
-        return p;
-    }, [p1x, p1y, p2x, p2y]);
+    const shouldAnimate = true;
 
     return (
         <>
-            {!tree.isRoot && (
-                <Path
-                    path={path}
-                    color={nodeAndParentCompleted ? `${treeAccentColor}3D` : colors.line}
-                    style="stroke"
-                    strokeCap={"round"}
-                    strokeWidth={3}
-                    end={connectingPathTrim}>
-                    <Blur blur={pathBlurOnInactive} />
-                </Path>
-            )}
+            <CanvasPath
+                coordinates={{ cx, cy, pathInitialPoint }}
+                isRoot={Boolean(tree.isRoot)}
+                pathBlurOnInactive={pathBlurOnInactive}
+                pathColor={pathColor}
+                shouldAnimate={shouldAnimate}
+            />
             {/* Recursive fucntion that renders the rest of the tree */}
             {tree.children &&
                 tree.children.map((element, idx) => {
@@ -134,13 +103,11 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
 
             <Node
                 circleBlurOnInactive={circleBlurOnInactive}
-                circleOpacity={circleOpacity}
                 tree={tree}
                 treeAccentColor={treeAccentColor}
                 coord={{ cx, cy }}
                 currentNodeCoordintes={currentNodeCoordintes}
                 groupTransform={groupTransform}
-                pathTrim={pathTrim}
                 selectedNode={selectedNode}
             />
         </>
