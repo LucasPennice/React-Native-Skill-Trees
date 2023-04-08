@@ -40,7 +40,7 @@ function AppTextInput({
     const allowOnlyLettersInInput = (setter: (v: string) => void) => (tentativeInput: string) => {
         //@ts-ignore
         setter((prev) => {
-            let onlyContainsLettersAndNumbers = /^[A-Za-z0-9]*$/.test(tentativeInput);
+            let onlyContainsLettersAndNumbers = /^[a-zA-Z0-9_ ]*$/.test(tentativeInput);
 
             if (onlyContainsLettersAndNumbers) return tentativeInput;
             return prev;

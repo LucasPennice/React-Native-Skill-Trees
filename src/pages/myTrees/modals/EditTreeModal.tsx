@@ -7,7 +7,7 @@ import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import AppText from "../../../components/AppText";
 import ColorSelector from "../../../components/ColorsSelector";
 import { selectTreeOptions, setTree } from "../../../redux/editTreeSlice";
-import { mutateUserTree } from "../../../redux/userTreesSlice";
+import { mutateUserTree, removeUserTree } from "../../../redux/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 
 function EditTreeModal() {
@@ -29,20 +29,20 @@ function EditTreeModal() {
 
     const closeModal = () => dispatch(setTree(undefined));
 
-    const showAlert = () =>
+    const deleteTree = () => {
+        if (!tree || !tree.treeId) return;
+
+        dispatch(removeUserTree(tree.treeId));
+        closeModal();
+    };
+
+    const confirmDeleteTree = () =>
         Alert.alert(
             "Delete this tree?",
             "",
             [
-                {
-                    text: "No",
-                    style: "cancel",
-                },
-                {
-                    text: "Yes",
-                    onPress: () => Alert.alert("Delete the tree"),
-                    style: "destructive",
-                },
+                { text: "No", style: "cancel" },
+                { text: "Yes", onPress: deleteTree, style: "destructive" },
             ],
             { cancelable: true }
         );
@@ -68,7 +68,7 @@ function EditTreeModal() {
                 <ColorSelector colorsArray={possibleTreeColors} state={[selectedColor, setSelectedColor]} />
                 <TouchableOpacity
                     style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, marginBottom: 30 }}
-                    onPress={showAlert}>
+                    onPress={confirmDeleteTree}>
                     <AppText style={{ color: colors.accent, fontSize: 18 }}>Delete this tree</AppText>
                 </TouchableOpacity>
             </View>
