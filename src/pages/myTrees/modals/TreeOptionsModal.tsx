@@ -7,6 +7,8 @@ import FlingToDismissModal from "../../../FlingToDismissModal";
 import AppText from "../../../AppText";
 import ColorSelector from "../../../ColorsSelector";
 import { selectTreeOptions, setTree } from "../../../redux/treeOptionsSlice";
+import { updateUserTrees } from "../../../redux/currentTreeSlice";
+import { Skill, Tree } from "../../../types";
 
 function TreeOptionsModal() {
     //Redux State
@@ -45,11 +47,17 @@ function TreeOptionsModal() {
             { cancelable: true }
         );
 
+    const newTreeValue: Tree<Skill> | undefined = tree === undefined ? undefined : { ...tree, accentColor: selectedColor, treeName: treeName };
+
+    const updateTree = (newTreeValue: Tree<Skill> | undefined) => {
+        if (newTreeValue === undefined) return;
+
+        dispatch(updateUserTrees(newTreeValue));
+        closeModal();
+    };
+
     return (
-        <FlingToDismissModal
-            closeModal={closeModal}
-            open={open}
-            leftHeaderButton={{ onPress: () => Alert.alert("Save the new data"), title: "Save" }}>
+        <FlingToDismissModal closeModal={closeModal} open={open} leftHeaderButton={{ onPress: () => updateTree(newTreeValue), title: "Save" }}>
             <View style={{ flex: 1 }}>
                 <AppTextInput placeholder={"Tree Name"} textState={[treeName, setTreeName]} containerStyles={{ marginVertical: 20 }} />
                 <AppText style={{ color: colors.unmarkedText }}>Select an accent color for your new tree</AppText>

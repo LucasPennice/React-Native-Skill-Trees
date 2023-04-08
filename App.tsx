@@ -16,8 +16,8 @@ import Settings from "./src/pages/settings/Settings";
 import AppText from "./src/AppText";
 import { open } from "./src/redux/addTreeSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { mockSkillTreeArray } from "./src/types";
 import { populateUserTrees, selectTreeSlice } from "./src/redux/currentTreeSlice";
+import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
 
 export default function App() {
     return (
@@ -57,6 +57,10 @@ function AppWithReduxContext() {
             await SplashScreen.hideAsync();
         }
     }, [fontsLoaded]);
+
+    // AsyncStorage.setItem("@roadmaps", JSON.stringify(mockSkillTreeArray));
+
+    useKeepAsyncStorageUpdated();
 
     if (!fontsLoaded) {
         return null;
