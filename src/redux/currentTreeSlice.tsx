@@ -9,41 +9,110 @@ import { ModifiableProperties, Skill, Tree } from "../types";
 
 // Define a type for the slice state
 type CurrentTreeSlice = {
-    value: Tree<Skill> | undefined;
+    userTrees: Tree<Skill>[];
+    currentTreeId: string | undefined;
 };
 
 // Define the initial state using that type
 const initialState: CurrentTreeSlice = {
-    value: undefined,
+    userTrees: [],
+    currentTreeId: undefined,
 };
 
 export type ModifiableNodeProperties = { name?: string; isCompleted?: boolean };
+
+const getCurrentTree = (state: CurrentTreeSlice) => {
+    const { currentTreeId, userTrees } = state;
+
+    if (currentTreeId === undefined) return undefined;
+
+    const tentativeCurrentTree = userTrees.find((t) => t.treeId === currentTreeId);
+
+    if (tentativeCurrentTree !== undefined) return tentativeCurrentTree;
+
+    return undefined;
+};
 
 export const currentTreeSlice = createSlice({
     name: "currentTree",
     initialState,
     reducers: {
-        changeTree: (state, action: PayloadAction<Tree<Skill>>) => {
-            state.value = action.payload;
+        changeTree: (state, action: PayloadAction<string>) => {
+            state.currentTreeId = action.payload;
         },
         unselectTree: (state) => {
-            state.value = undefined;
+            state.currentTreeId = undefined;
         },
         editNodeProperty: (state, action: PayloadAction<{ targetNode: Tree<Skill>; newProperties: Tree<Skill> }>) => {
-            state.value = editTreePropertiesFn(state.value, action.payload.targetNode, action.payload.newProperties);
+            const currentTree = getCurrentTree(state);
+
+            const result = editTreePropertiesFn(currentTree, action.payload.targetNode, action.payload.newProperties);
+
+            if (result === undefined) throw "editNodeProperty error fn returned undefined";
+
+            state.userTrees = state.userTrees.map((tree, idx) => {
+                if (tree.treeId === result.treeId) return result;
+
+                return tree;
+            });
         },
         deleteNodeWithNoChildren: (state, action: PayloadAction<Tree<Skill>>) => {
-            state.value = deleteNodeWithNoChildrenFn(state.value, action.payload);
+            const currentTree = getCurrentTree(state);
+
+            const result = deleteNodeWithNoChildrenFn(currentTree, action.payload);
+
+            if (result === undefined) throw "deleteNodeWithNoChildrenFn error fn returned undefined";
+
+            state.userTrees = state.userTrees.map((tree, idx) => {
+                if (tree.treeId === result.treeId) return result;
+
+                return tree;
+            });
         },
         deleteNodeWithChildren: (state, action: PayloadAction<{ nodeToDelete: Tree<Skill>; childrenToHoist: Tree<Skill> }>) => {
-            state.value = deleteNodeWithChildrenFn(state.value, action.payload.nodeToDelete, action.payload.childrenToHoist);
+            const currentTree = getCurrentTree(state);
+
+            const result = deleteNodeWithChildrenFn(currentTree, action.payload.nodeToDelete, action.payload.childrenToHoist);
+
+            if (result === undefined) throw "deleteNodeWithNoChildrenFn error fn returned undefined";
+
+            state.userTrees = state.userTrees.map((tree, idx) => {
+                if (tree.treeId === result.treeId) return result;
+
+                return tree;
+            });
+        },
+        populateUserTrees: (state, action: PayloadAction<Tree<Skill>[]>) => {
+            state.userTrees = action.payload;
+        },
+        updateUserTrees: (state, action: PayloadAction<Tree<Skill>>) => {
+            const treeToUpdate = action.payload;
+
+            state.userTrees = state.userTrees.map((tree) => {
+                if (tree.treeId === treeToUpdate.treeId) return treeToUpdate;
+
+                return tree;
+            });
         },
     },
 });
 
-export const { changeTree, unselectTree, deleteNodeWithNoChildren, deleteNodeWithChildren, editNodeProperty } = currentTreeSlice.actions;
+export const { changeTree, unselectTree, deleteNodeWithNoChildren, deleteNodeWithChildren, editNodeProperty, populateUserTrees, updateUserTrees } =
+    currentTreeSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
-export const selectCurrentTree = (state: RootState) => state.currentTree;
+export function selectCurrentTree(state: RootState) {
+    const { currentTreeId, userTrees } = state.currentTree;
+
+    if (currentTreeId === undefined) return undefined;
+
+    const tentativeCurrentTree = userTrees.find((t) => t.treeId === currentTreeId);
+
+    if (tentativeCurrentTree !== undefined) return tentativeCurrentTree;
+
+    return undefined;
+}
+
+export const selectTreeSlice = (state: RootState) => state.currentTree;
 
 export default currentTreeSlice.reducer;

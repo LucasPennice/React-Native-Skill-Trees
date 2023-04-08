@@ -38,7 +38,7 @@ function TreeView({
 }: TreeViewProps) {
     //Redux State
     const { height, width } = useAppSelector(selectScreenDimentions);
-    const { value: currentTree } = useAppSelector(selectCurrentTree);
+    const currentTree = useAppSelector(selectCurrentTree);
     const { showLabel, showDragAndDropGuides } = useAppSelector(selectCanvasDisplaySettings);
     const newNode = useAppSelector(selectNewNode);
     //Derived State

@@ -26,7 +26,7 @@ import { clearNewNodeState, selectNewNode } from "../../redux/newNodeSlice";
 
 function HomePage() {
     //Redux State
-    const { value: currentTree } = useAppSelector(selectCurrentTree);
+    const currentTree = useAppSelector(selectCurrentTree);
     const screenDimentions = useAppSelector(selectScreenDimentions);
     const dispatch = useAppDispatch();
     //Local State
@@ -101,7 +101,7 @@ function DragAndDropNewNode({ handleNewNode }: { handleNewNode: { panGesture: Pa
     const { animatedStyle, panGesture } = handleNewNode;
 
     const newNode = useAppSelector(selectNewNode);
-    const { value: currentTree } = useAppSelector(selectCurrentTree);
+    const currentTree = useAppSelector(selectCurrentTree);
 
     const isOpen = useSharedValue(false);
 

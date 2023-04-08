@@ -3,26 +3,32 @@ import { Circle, Svg } from "react-native-svg";
 import AppText from "../../AppText";
 import { Skill, Tree, mockSkillTreeArray } from "../../types";
 import { colors } from "../homepage/canvas/parameters";
-import { useAppDispatch } from "../../redux/reduxHooks";
-import { changeTree } from "../../redux/currentTreeSlice";
+import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
+import { changeTree, selectTreeSlice } from "../../redux/currentTreeSlice";
 import AddTreeModal from "./modals/AddTreeModal";
 import TreeCard from "./TreeCard";
 import TreeOptionsModal from "./modals/TreeOptionsModal";
 
 function MyTrees({ navigation }: { navigation: any }) {
+    //Redux Related
+    const { userTrees } = useAppSelector(selectTreeSlice);
     const dispatch = useAppDispatch();
 
-    const factoryChangeTreeAndNavigateHome = (tree: Tree<Skill>) => () => {
-        dispatch(changeTree(tree));
+    const factoryChangeTreeAndNavigateHome = (treeId: string) => () => {
+        dispatch(changeTree(treeId));
         navigation.navigate("Home");
     };
+
+    //Hice que al inicio de la app se fije en el local storage para ver si hay arboles y que popule la sotre de rexux
+    //tengo que encontrar una manera que current tree dependa de userTrees
+    //Y que cada vez que userTrees cambie se actualice el local storage
 
     return (
         <>
             <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 10 }}>
                 <AppText style={{ color: "white", fontSize: 32, fontFamily: "helveticaBold", marginBottom: 20 }}>My Trees</AppText>
-                {mockSkillTreeArray.map((element, idx) => {
-                    const changeTreeAndNavigateHome = factoryChangeTreeAndNavigateHome(element);
+                {userTrees.map((element, idx) => {
+                    const changeTreeAndNavigateHome = factoryChangeTreeAndNavigateHome(element.treeId ?? "");
                     return <TreeCard element={element} changeTreeAndNavigateHome={changeTreeAndNavigateHome} key={idx} />;
                 })}
             </ScrollView>

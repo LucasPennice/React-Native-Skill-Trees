@@ -35,7 +35,7 @@ export class ProgressWheelParams {
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
 
 function ProgressIndicatorAndName() {
-    const { value: currentTree } = useAppSelector(selectCurrentTree);
+    const currentTree = useAppSelector(selectCurrentTree);
 
     const treeAccentColor = currentTree && currentTree.accentColor ? currentTree.accentColor : colors.accent;
 

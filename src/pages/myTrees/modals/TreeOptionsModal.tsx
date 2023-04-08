@@ -1,7 +1,5 @@
-import { Alert, Button, Modal, Pressable, SafeAreaView, ScrollView, TouchableOpacity, View } from "react-native";
-import { centerFlex } from "../../../types";
+import { Alert, TouchableOpacity, View } from "react-native";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { close, selectAddTree } from "../../../redux/addTreeSlice";
 import { colors, possibleTreeColors } from "../../homepage/canvas/parameters";
 import { useEffect, useState } from "react";
 import AppTextInput from "../../../AppTextInput";

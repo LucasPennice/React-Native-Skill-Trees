@@ -6,10 +6,11 @@ import { findTreeNodeById } from "../treeFunctions";
 import { centerFlex } from "../../../types";
 import { colors } from "../canvas/parameters";
 import AppText from "../../../AppText";
+import { Fragment } from "react";
 
 function ChildrenHoistSelectorModal() {
     const { openMenu, candidatesToHoist } = useAppSelector(selectCanvasDisplaySettings);
-    const { value: currentTree } = useAppSelector(selectCurrentTree);
+    const currentTree = useAppSelector(selectCurrentTree);
 
     const dispatch = useAppDispatch();
 
@@ -37,7 +38,7 @@ function ChildrenHoistSelectorModal() {
                             candidatesToHoist.map((children, idx) => {
                                 const nodeToDelete = findTreeNodeById(currentTree, children.parentId ?? null);
 
-                                if (!nodeToDelete) return <></>;
+                                if (!nodeToDelete) return <Fragment key={idx}></Fragment>;
 
                                 return (
                                     <Pressable

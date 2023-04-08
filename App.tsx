@@ -1,9 +1,9 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { SafeAreaView, TouchableOpacity, View } from "react-native";
 import { Provider } from "react-redux";
 import { colors } from "./src/pages/homepage/canvas/parameters";
 import HomePage from "./src/pages/homepage/HomePage";
-import { useAppDispatch } from "./src/redux/reduxHooks";
+import { useAppDispatch, useAppSelector } from "./src/redux/reduxHooks";
 import { store } from "./src/redux/reduxStore";
 import { updateDimentions } from "./src/redux/screenDimentionsSlice";
 import { useFonts } from "expo-font";
@@ -15,6 +15,9 @@ import MyTrees from "./src/pages/myTrees/MyTrees";
 import Settings from "./src/pages/settings/Settings";
 import AppText from "./src/AppText";
 import { open } from "./src/redux/addTreeSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { mockSkillTreeArray } from "./src/types";
+import { populateUserTrees, selectTreeSlice } from "./src/redux/currentTreeSlice";
 
 export default function App() {
     return (
@@ -36,7 +39,20 @@ function AppWithReduxContext() {
         helveticaBold: require("./assets/Helvetica-Bold.ttf"),
     });
 
+    const populateReduxStore = async () => {
+        try {
+            const userTrees = await AsyncStorage.getItem("@roadmaps");
+            if (userTrees !== null && userTrees !== "") {
+                dispatch(populateUserTrees(JSON.parse(userTrees)));
+            }
+        } catch (e) {
+            console.log("There has been an error getting the user's roadmaps");
+        }
+    };
+
     const onLayoutRootView = useCallback(async () => {
+        await populateReduxStore();
+
         if (fontsLoaded) {
             await SplashScreen.hideAsync();
         }

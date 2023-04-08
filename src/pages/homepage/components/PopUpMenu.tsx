@@ -19,7 +19,7 @@ type Props = {
 
 function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: Props) {
     //Redux store state
-    const { value: currentTree } = useAppSelector(selectCurrentTree);
+    const currentTree = useAppSelector(selectCurrentTree);
     const { height, width } = useAppSelector(selectScreenDimentions);
     const dispatch = useAppDispatch();
     //

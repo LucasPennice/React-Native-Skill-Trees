@@ -9,7 +9,7 @@ import { centerFlex } from "../../types";
 import { colors } from "./canvas/parameters";
 
 function AddNode() {
-    const { value: currentTree } = useAppSelector(selectCurrentTree);
+    const currentTree = useAppSelector(selectCurrentTree);
     const newNode = useAppSelector(selectNewNode);
 
     const dispatch = useAppDispatch();
