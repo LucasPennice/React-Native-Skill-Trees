@@ -1,11 +1,11 @@
 import { Button, Modal, Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
 import { closeAllMenues, selectCanvasDisplaySettings, closeChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
-import { deleteNodeWithChildren, selectCurrentTree } from "../../../redux/currentTreeSlice";
+import { deleteNodeWithChildren, selectCurrentTree } from "../../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { findTreeNodeById } from "../treeFunctions";
 import { centerFlex } from "../../../types";
 import { colors } from "../canvas/parameters";
-import AppText from "../../../AppText";
+import AppText from "../../../components/AppText";
 import { Fragment } from "react";
 
 function ChildrenHoistSelectorModal() {

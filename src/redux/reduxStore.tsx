@@ -1,11 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import canvasDisplaySettingsReducer from "./canvasDisplaySettingsSlice";
-import currentTreeReducer from "./currentTreeSlice";
+import currentTreeReducer from "./userTreesSlice";
 import loginReducer from "./loginSlice";
 import newNodeReducer from "./newNodeSlice";
 import screenDimentionsReducer from "./screenDimentionsSlice";
-import addTreeReducer from "./addTreeSlice";
-import treeOptionsReducer from "./treeOptionsSlice";
+import addTreeReducer from "./addTreeModalSlice";
+import treeOptionsReducer from "./editTreeSlice";
 
 export const store = configureStore({
     reducer: {

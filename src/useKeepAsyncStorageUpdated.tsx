@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useAppSelector } from "./redux/reduxHooks";
-import { selectTreeSlice } from "./redux/currentTreeSlice";
+import { selectTreeSlice } from "./redux/userTreesSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function useKeepAsyncStorageUpdated() {

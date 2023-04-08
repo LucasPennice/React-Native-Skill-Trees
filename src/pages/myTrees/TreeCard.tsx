@@ -3,12 +3,12 @@ import { Skill, Tree, centerFlex } from "../../types";
 import { colors } from "../homepage/canvas/parameters";
 import { ProgressWheelParams } from "../homepage/components/ProgressIndicatorAndName";
 import { quantityOfCompletedNodes, quantiyOfNodes } from "../homepage/treeFunctions";
-import AppText from "../../AppText";
+import AppText from "../../components/AppText";
 import { Circle, Svg } from "react-native-svg";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { useAppDispatch } from "../../redux/reduxHooks";
-import { setTree } from "../../redux/treeOptionsSlice";
+import { setTree } from "../../redux/editTreeSlice";
 
 function TreeCard({ element, changeTreeAndNavigateHome }: { element: Tree<Skill>; changeTreeAndNavigateHome: () => void }) {
     //Redux Related

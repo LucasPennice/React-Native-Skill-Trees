@@ -2,7 +2,7 @@ import { BlurView } from "expo-blur";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, SafeAreaView, TextInput, View, Dimensions, TouchableOpacity, TouchableHighlight } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import AppText from "../../../AppText";
+import AppText from "../../../components/AppText";
 import { selectCanvasDisplaySettings, toggleNewNode } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { centerFlex } from "../../../types";

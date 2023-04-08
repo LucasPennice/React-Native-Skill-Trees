@@ -1,8 +1,8 @@
 import { Modal, Pressable, SafeAreaView, View } from "react-native";
 import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
-import { centerFlex } from "./types";
-import { colors } from "./pages/homepage/canvas/parameters";
+import { centerFlex } from "../types";
+import { colors } from "../pages/homepage/canvas/parameters";
 import AppText from "./AppText";
 
 function FlingToDismissModal({

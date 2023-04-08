@@ -4,12 +4,12 @@ import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTo
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import { CirclePositionInCanvas, MENU_DAMPENING } from "../../../types";
 import { findTreeNodeById } from "../treeFunctions";
-import { deleteNodeWithNoChildren, editNodeProperty, selectCurrentTree } from "../../../redux/currentTreeSlice";
+import { deleteNodeWithNoChildren, editNodeProperty, selectCurrentTree } from "../../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { openChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
 import { CIRCLE_SIZE_SELECTED, colors } from "../canvas/parameters";
-import AppText from "../../../AppText";
+import AppText from "../../../components/AppText";
 
 type Props = {
     selectedNode: string | null;

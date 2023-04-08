@@ -1,10 +1,10 @@
 import { Button, Modal, Pressable, SafeAreaView, ScrollView, TouchableHighlight, View } from "react-native";
 import { Circle, Svg } from "react-native-svg";
-import AppText from "../../AppText";
+import AppText from "../../components/AppText";
 import { Skill, Tree, mockSkillTreeArray } from "../../types";
 import { colors } from "../homepage/canvas/parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { changeTree, selectTreeSlice } from "../../redux/currentTreeSlice";
+import { changeTree, selectTreeSlice } from "../../redux/userTreesSlice";
 import AddTreeModal from "./modals/AddTreeModal";
 import TreeCard from "./TreeCard";
 import TreeOptionsModal from "./modals/TreeOptionsModal";

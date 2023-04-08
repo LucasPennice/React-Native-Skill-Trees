@@ -1,6 +1,6 @@
 import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { useAnimatedStyle, withDelay, withSpring } from "react-native-reanimated";
-import AppText from "../../../AppText";
+import AppText from "../../../components/AppText";
 import {
     selectCanvasDisplaySettings,
     toggleSettingsMenuOpen,

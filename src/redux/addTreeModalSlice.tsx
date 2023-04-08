@@ -7,8 +7,8 @@ const initialState = {
     open: false,
 };
 
-export const addTreeSlice = createSlice({
-    name: "addTreeSlice",
+export const addTreeModalSlice = createSlice({
+    name: "addTreeModalSlice",
     initialState,
     reducers: {
         open: (state) => {
@@ -20,9 +20,9 @@ export const addTreeSlice = createSlice({
     },
 });
 
-export const { close, open } = addTreeSlice.actions;
+export const { close, open } = addTreeModalSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectAddTree = (state: RootState) => state.addTree;
 
-export default addTreeSlice.reducer;
+export default addTreeModalSlice.reducer;

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Pressable, ScrollView } from "react-native";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
-import { centerFlex } from "./types";
+import { centerFlex } from "../types";
 
 function ColorSelector({ colorsArray, state }: { colorsArray: string[]; state: [string, (v: string) => void] }) {
     const [selectedColor, setSelectedColor] = state;

@@ -1,12 +1,12 @@
 import Color, { Circle, Circle as SvgCircle, Svg } from "react-native-svg";
 import Animated, { useAnimatedProps, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { quantityOfCompletedNodes, quantiyOfNodes } from "../treeFunctions";
-import { selectCurrentTree } from "../../../redux/currentTreeSlice";
+import { selectCurrentTree } from "../../../redux/userTreesSlice";
 import { useAppSelector } from "../../../redux/reduxHooks";
 import { useEffect } from "react";
 import { Text, View } from "react-native";
 import { colors } from "../canvas/parameters";
-import AppText from "../../../AppText";
+import AppText from "../../../components/AppText";
 import { centerFlex } from "../../../types";
 
 export class ProgressWheelParams {

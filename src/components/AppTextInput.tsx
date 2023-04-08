@@ -1,8 +1,8 @@
 import { Pressable, TextInput, View, ViewProps } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { centerFlex } from "./types";
+import { centerFlex } from "../types";
 import AppText from "./AppText";
-import { colors } from "./pages/homepage/canvas/parameters";
+import { colors } from "../pages/homepage/canvas/parameters";
 import { useEffect } from "react";
 
 function AppTextInput({

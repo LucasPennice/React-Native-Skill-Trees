@@ -2,12 +2,12 @@ import { Alert, TouchableOpacity, View } from "react-native";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { colors, possibleTreeColors } from "../../homepage/canvas/parameters";
 import { useEffect, useState } from "react";
-import AppTextInput from "../../../AppTextInput";
-import FlingToDismissModal from "../../../FlingToDismissModal";
-import AppText from "../../../AppText";
-import ColorSelector from "../../../ColorsSelector";
-import { selectTreeOptions, setTree } from "../../../redux/treeOptionsSlice";
-import { updateUserTrees } from "../../../redux/currentTreeSlice";
+import AppTextInput from "../../../components/AppTextInput";
+import FlingToDismissModal from "../../../components/FlingToDismissModal";
+import AppText from "../../../components/AppText";
+import ColorSelector from "../../../components/ColorsSelector";
+import { selectTreeOptions, setTree } from "../../../redux/editTreeSlice";
+import { updateUserTrees } from "../../../redux/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 
 function TreeOptionsModal() {

@@ -8,15 +8,15 @@ import { store } from "./src/redux/reduxStore";
 import { updateDimentions } from "./src/redux/screenDimentionsSlice";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import NavigationBar from "./src/NavigationBar";
+import NavigationBar from "./src/components/NavigationBar";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import MyTrees from "./src/pages/myTrees/MyTrees";
 import Settings from "./src/pages/settings/Settings";
-import AppText from "./src/AppText";
-import { open } from "./src/redux/addTreeSlice";
+import AppText from "./src/components/AppText";
+import { open } from "./src/redux/addTreeModalSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { populateUserTrees, selectTreeSlice } from "./src/redux/currentTreeSlice";
+import { populateUserTrees, selectTreeSlice } from "./src/redux/userTreesSlice";
 import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
 
 export default function App() {

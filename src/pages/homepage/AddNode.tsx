@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { Pressable, View } from "react-native";
-import AppText from "../../AppText";
+import AppText from "../../components/AppText";
 import { toggleNewNode, toggleTreeSelector } from "../../redux/canvasDisplaySettingsSlice";
-import { selectCurrentTree } from "../../redux/currentTreeSlice";
+import { selectCurrentTree } from "../../redux/userTreesSlice";
 import { clearNewNodeState, selectNewNode } from "../../redux/newNodeSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { centerFlex } from "../../types";

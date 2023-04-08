@@ -1,13 +1,13 @@
 import { Button, Modal, Pressable, SafeAreaView, ScrollView, View } from "react-native";
 import { centerFlex } from "../../../types";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { close, selectAddTree } from "../../../redux/addTreeSlice";
+import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
 import { colors, possibleTreeColors } from "../../homepage/canvas/parameters";
 import { useState } from "react";
-import AppTextInput from "../../../AppTextInput";
-import FlingToDismissModal from "../../../FlingToDismissModal";
-import AppText from "../../../AppText";
-import ColorSelector from "../../../ColorsSelector";
+import AppTextInput from "../../../components/AppTextInput";
+import FlingToDismissModal from "../../../components/FlingToDismissModal";
+import AppText from "../../../components/AppText";
+import ColorSelector from "../../../components/ColorsSelector";
 
 function AddTreeModal() {
     //Local State
