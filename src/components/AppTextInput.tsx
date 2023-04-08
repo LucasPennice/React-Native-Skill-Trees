@@ -9,10 +9,12 @@ function AppTextInput({
     textState,
     placeholder,
     containerStyles,
+    onlyContainsLettersAndNumbers,
 }: {
     textState: [string, (v: string) => void];
     placeholder: string;
     containerStyles?: ViewProps["style"];
+    onlyContainsLettersAndNumbers?: boolean;
 }) {
     const [text, setText] = textState;
 
@@ -35,6 +37,22 @@ function AppTextInput({
         };
     }, [textInputEmpty]);
 
+    const allowOnlyLettersInInput = (setter: (v: string) => void) => (tentativeInput: string) => {
+        //@ts-ignore
+        setter((prev) => {
+            let onlyContainsLettersAndNumbers = /^[A-Za-z0-9]*$/.test(tentativeInput);
+
+            if (onlyContainsLettersAndNumbers) return tentativeInput;
+            return prev;
+        });
+    };
+
+    const updateText = (tentativeInput: string) => {
+        if (onlyContainsLettersAndNumbers) return allowOnlyLettersInInput(setText)(tentativeInput);
+
+        return setText(tentativeInput);
+    };
+
     return (
         <View style={[centerFlex, { flexDirection: "row", position: "relative" }, containerStyles]}>
             <Animated.View
@@ -49,7 +67,7 @@ function AppTextInput({
                     blurOnSubmit
                     //@ts-ignore
                     enterKeyHint="done"
-                    onChangeText={setText}
+                    onChangeText={updateText}
                     placeholder={placeholder}
                     value={text}
                     style={{

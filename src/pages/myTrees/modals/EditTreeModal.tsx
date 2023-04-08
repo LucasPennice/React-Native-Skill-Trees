@@ -10,7 +10,7 @@ import { selectTreeOptions, setTree } from "../../../redux/editTreeSlice";
 import { mutateUserTree } from "../../../redux/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 
-function TreeOptionsModal() {
+function EditTreeModal() {
     //Redux State
     const { tree } = useAppSelector(selectTreeOptions);
     const open = tree !== undefined;
@@ -76,4 +76,4 @@ function TreeOptionsModal() {
     );
 }
 
-export default TreeOptionsModal;
+export default EditTreeModal;

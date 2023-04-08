@@ -43,19 +43,13 @@ export const userTreesSlice = createSlice({
                 return tree;
             });
         },
-        // updateUserTrees: (state, action: PayloadAction<Tree<Skill>>) => {
-        //     const treeToUpdate = action.payload;
-
-        //     state.userTrees = state.userTrees.map((tree) => {
-        //         if (tree.treeId === treeToUpdate.treeId) return treeToUpdate;
-
-        //         return tree;
-        //     });
-        // },
+        appendToUserTree: (state, action: PayloadAction<Tree<Skill>>) => {
+            state.userTrees = [...state.userTrees, action.payload];
+        },
     },
 });
 
-export const { changeTree, unselectTree, mutateUserTree, populateUserTrees } = userTreesSlice.actions;
+export const { changeTree, unselectTree, mutateUserTree, populateUserTrees, appendToUserTree } = userTreesSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export function selectCurrentTree(state: RootState) {

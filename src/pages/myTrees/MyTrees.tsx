@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { changeTree, selectTreeSlice } from "../../redux/userTreesSlice";
 import AddTreeModal from "./modals/AddTreeModal";
 import TreeCard from "./TreeCard";
-import TreeOptionsModal from "./modals/TreeOptionsModal";
+import EditTreeModal from "./modals/EditTreeModal";
 
 function MyTrees({ navigation }: { navigation: any }) {
     //Redux Related
@@ -33,7 +33,7 @@ function MyTrees({ navigation }: { navigation: any }) {
                 })}
             </ScrollView>
 
-            <TreeOptionsModal />
+            <EditTreeModal />
             <AddTreeModal />
         </>
     );
