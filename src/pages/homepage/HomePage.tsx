@@ -54,7 +54,7 @@ function HomePage() {
     });
     //
 
-    useRunHomepageCleanup(setSelectedNode, setSelectedNodeHistory);
+    const hasTreeChanged = useRunHomepageCleanup(setSelectedNode, setSelectedNodeHistory);
 
     const updateScrollOffset = (scrollViewType: "horizontal" | "vertical", newValue: number) => {
         if (scrollViewType === "horizontal") {
@@ -81,6 +81,7 @@ function HomePage() {
                 selectedNode={selectedNode}
                 selectedNodeHistory={selectedNodeHistory}
                 updateScrollOffset={updateScrollOffset}
+                hasTreeChanged={hasTreeChanged}
             />
             <DragAndDropNewNode handleNewNode={handleNewNode} treeAccent={currentTree?.accentColor} />
             <ProgressIndicatorAndName />

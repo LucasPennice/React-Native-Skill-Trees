@@ -16,6 +16,7 @@ import { getHeightForFont } from "./functions";
 import { selectNewNode } from "../../../redux/newNodeSlice";
 import Node from "./Node";
 import CanvasPath from "./CavnasPath";
+import useCenterCameraOnTreeChange from "./hooks/useCenterCameraOnTreeChange";
 
 type TreeViewProps = {
     dragAndDropZones: DnDZone[];
@@ -26,6 +27,7 @@ type TreeViewProps = {
     selectedNode: string | null;
     selectedNodeHistory: (string | null)[];
     updateScrollOffset: (scrollViewType: "horizontal" | "vertical", newValue: number) => void;
+    hasTreeChanged: boolean;
 };
 
 function TreeView({
@@ -37,6 +39,7 @@ function TreeView({
     selectedNode,
     selectedNodeHistory,
     updateScrollOffset,
+    hasTreeChanged,
 }: TreeViewProps) {
     //Redux State
     const { height, width } = useAppSelector(selectScreenDimentions);
@@ -48,27 +51,8 @@ function TreeView({
     const { canvasHeight, canvasWidth, horizontalMargin, verticalMargin } = canvasDimentions;
     const foundNodeCoordinates = circlePositionsInCanvas.find((c) => c.id === selectedNode);
     //
-    const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 20);
 
-    useEffect(() => {
-        if (!verticalScrollViewRef.current) return;
-        if (!horizontalScrollViewRef.current) return;
-
-        const x = horizontalMargin / 2;
-
-        const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;
-
-        const y = 0.5 * (canvasHeight - HEIGHT_WITHOUT_NAV);
-
-        let timerId = setTimeout(() => {
-            horizontalScrollViewRef.current!.scrollTo({ x, y, animated: true });
-            verticalScrollViewRef.current!.scrollTo({ x, y, animated: true });
-        }, 50);
-
-        return () => {
-            clearTimeout(timerId);
-        };
-    }, [verticalScrollViewRef, horizontalScrollViewRef, currentTree]);
+    useCenterCameraOnTreeChange(canvasTouchHandler, canvasDimentions, hasTreeChanged);
 
     const previewNode = tentativeCirlcePositionsInCanvas.length ? tentativeCirlcePositionsInCanvas.find((t) => t.id === newNode.id) : undefined;
 

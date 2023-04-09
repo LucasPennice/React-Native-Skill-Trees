@@ -18,20 +18,26 @@ function useRunHomepageCleanup(setSelectedNode: (v: string | null) => void, setS
     }, [currentTree]);
 
     useEffect(() => {
-        const last = selectedTreeIdHistory.length - 1;
-
-        const currentTreeId = selectedTreeIdHistory[last];
-        const prevTreeId = selectedTreeIdHistory[last - 1];
-
         dispatch(clearNewNodeState());
 
-        const hasTreeChanged = currentTreeId !== prevTreeId;
+        const hasTreeChanged = getHasTreeChanged(selectedTreeIdHistory);
 
         if (hasTreeChanged) {
             setSelectedNode(null);
             setSelectedNodeHistory([]);
         }
     }, [selectedTreeIdHistory]);
+
+    return getHasTreeChanged(selectedTreeIdHistory);
 }
 
 export default useRunHomepageCleanup;
+
+function getHasTreeChanged(selectedTreeIdHistory: (string | null)[]) {
+    const last = selectedTreeIdHistory.length - 1;
+
+    const currentTreeId = selectedTreeIdHistory[last];
+    const prevTreeId = selectedTreeIdHistory[last - 1];
+
+    return currentTreeId !== prevTreeId;
+}
