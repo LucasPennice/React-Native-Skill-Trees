@@ -1,11 +1,11 @@
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 import TreeView from "./canvas/TreeView";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
 import SettingsMenu from "./components/SettingsMenu";
 import { CIRCLE_SIZE, colors } from "./canvas/parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { selectCurrentTree } from "../../redux/userTreesSlice";
+import { selectCurrentTree, selectTreeSlice } from "../../redux/userTreesSlice";
 import { GestureDetector, PanGesture } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from "react-native-reanimated";
 import AppText from "../../components/AppText";
@@ -22,13 +22,13 @@ import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 import useCanvasTouchHandler from "./canvas/hooks/useCanvasTouchHandler";
 import AddNode from "./AddNode";
 import NewNodeModal from "./modals/NewNodeModal";
-import { clearNewNodeState, selectNewNode } from "../../redux/newNodeSlice";
+import { selectNewNode } from "../../redux/newNodeSlice";
+import useRunHomepageCleanup from "./useRunHomepageCleanup";
 
 function HomePage() {
     //Redux State
     const currentTree = useAppSelector(selectCurrentTree);
     const screenDimentions = useAppSelector(selectScreenDimentions);
-    const dispatch = useAppDispatch();
     //Local State
     const [selectedNode, setSelectedNode] = useState<null | string>(null);
     const [selectedNodeHistory, setSelectedNodeHistory] = useState<(null | string)[]>([null]);
@@ -54,11 +54,7 @@ function HomePage() {
     });
     //
 
-    useEffect(() => {
-        setSelectedNode(null);
-        setSelectedNodeHistory([]);
-        dispatch(clearNewNodeState());
-    }, [currentTree]);
+    useRunHomepageCleanup(setSelectedNode, setSelectedNodeHistory);
 
     const updateScrollOffset = (scrollViewType: "horizontal" | "vertical", newValue: number) => {
         if (scrollViewType === "horizontal") {
