@@ -65,7 +65,9 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
 
     const pathColor = nodeAndParentCompleted ? `${treeAccentColor}3D` : colors.line;
 
-    const shouldAnimate = true;
+    const shouldAnimate = false;
+
+    //Now i want to figure out how i can toggle the animations for the rest of the tree
 
     return (
         <>
