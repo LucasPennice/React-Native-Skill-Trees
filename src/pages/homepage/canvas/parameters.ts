@@ -7,9 +7,6 @@ export const TOUCH_BUFFER = 15;
 export const DISTANCE_BETWEEN_CHILDREN = 100;
 export const DISTANCE_BETWEEN_GENERATIONS = 100;
 
-export const PATH_INITIAL_ANIMATION_DURATION = 150;
-export const CIRCLE_INITIAL_ANIMATION_DURATION = 150;
-
 export const NAV_HEGIHT = 65;
 
 export const CANVAS_SPRING = { damping: 29 };

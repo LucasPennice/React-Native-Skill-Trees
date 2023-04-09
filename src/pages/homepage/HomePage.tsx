@@ -4,8 +4,8 @@ import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
 import SettingsMenu from "./components/SettingsMenu";
 import { CIRCLE_SIZE, colors } from "./canvas/parameters";
-import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { selectCurrentTree, selectTreeSlice } from "../../redux/userTreesSlice";
+import { useAppSelector } from "../../redux/reduxHooks";
+import { selectCurrentTree } from "../../redux/userTreesSlice";
 import { GestureDetector, PanGesture } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from "react-native-reanimated";
 import AppText from "../../components/AppText";
@@ -28,7 +28,6 @@ import useRunHomepageCleanup from "./useRunHomepageCleanup";
 function HomePage() {
     //Redux State
     const currentTree = useAppSelector(selectCurrentTree);
-    const { selectedNode } = useAppSelector(selectTreeSlice);
     const screenDimentions = useAppSelector(selectScreenDimentions);
     //Local State
     const [selectedNodeHistory, setSelectedNodeHistory] = useState<(null | string)[]>([null]);
@@ -104,15 +103,24 @@ function DragAndDropNewNode({
     const isOpen = useSharedValue(false);
 
     useEffect(() => {
-        isOpen.value = !(newNode.id === "" || newNode.name === "" || currentTree === undefined);
-    }, [newNode.id, newNode.name, currentTree]);
+        const result = !(newNode.id === "" || newNode.name === "" || currentTree === undefined);
+        isOpen.value = result;
+    }, [newNode, currentTree]);
+
+    const showTool = !(newNode.id === "" || newNode.name === "" || currentTree === undefined);
 
     const hideShow = useAnimatedStyle(() => {
         return { transform: [{ translateX: withTiming(isOpen.value ? 0 : -65) }] };
     }, [isOpen]);
     const hideShowOpacity = useAnimatedStyle(() => {
-        return { opacity: withDelay(150, withTiming(isOpen.value ? 1 : 0)) };
+        return {
+            opacity: withDelay(150, withTiming(isOpen.value ? 1 : 0)),
+        };
     }, [isOpen]);
+
+    const color = newNode.isCompleted ? treeAccent ?? colors.accent : colors.unmarkedText;
+
+    if (!showTool) return <></>;
 
     return (
         <>
@@ -144,10 +152,10 @@ function DragAndDropNewNode({
                             backgroundColor: colors.background,
                             borderWidth: 2,
                             borderRadius: 1.5 * CIRCLE_SIZE,
-                            borderColor: treeAccent ?? colors.accent,
+                            borderColor: color,
                         },
                     ]}>
-                    <AppText style={{ fontSize: 22, color: treeAccent ?? colors.line }}>{newNode.name ? newNode.name[0] : "+"}</AppText>
+                    <AppText style={{ fontSize: 22, color: color }}>{newNode.name ? newNode.name[0] : "+"}</AppText>
                 </Animated.View>
             </GestureDetector>
         </>

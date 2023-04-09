@@ -50,8 +50,12 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
 
     let newParentNodeInfo = { coordinates: { ...currentNodeCoordintes, x: cx, y: cy }, numberOfChildren: tree.children ? tree.children.length : 0 };
 
-    const { circleBlurOnInactive, circleOpacity, connectingPathTrim, groupTransform, pathBlurOnInactive, pathTrim, labelOpacity } =
-        useHandleTreeAnimations(selectedNode, showLabel, tree, findDistanceBetweenNodesById(wholeTree, tree.data.id) ?? 0);
+    const { circleBlurOnInactive, groupTransform, pathBlurOnInactive, labelOpacity } = useHandleTreeAnimations(
+        selectedNode,
+        showLabel,
+        tree,
+        findDistanceBetweenNodesById(wholeTree, tree.data.id) ?? 0
+    );
 
     const nodeAndParentCompleted = (() => {
         if (tree.data.isCompleted !== true) return false;

@@ -93,7 +93,10 @@ function TreeView({
                 onScrollEndDrag={updateHorizontalScroll}
                 onMomentumScrollEnd={updateHorizontalScroll}>
                 {currentTree !== undefined && (
-                    <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}>
+                    <Canvas
+                        onTouch={touchHandler}
+                        style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}
+                        mode="continuous">
                         {showDragAndDropGuides && <DragAndDropZones data={dragAndDropZones} />}
                         {previewNode && <PreviewNode previewNode={previewNode} previewNodeParent={previewNodeParent} newNode={newNode} />}
                         <CanvasTree

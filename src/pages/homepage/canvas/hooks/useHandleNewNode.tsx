@@ -72,8 +72,8 @@ function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZon
         .activateAfterLongPress(0);
 
     const animatedStyle = useAnimatedStyle(() => ({
-        left: withSpring(position.value.x, { damping: 27, stiffness: 500 }),
-        top: withSpring(position.value.y, { damping: 27, stiffness: 500 }),
+        left: withSpring(position.value.x, { damping: 34, stiffness: 500 }),
+        top: withSpring(position.value.y, { damping: 34, stiffness: 500 }),
     }));
 
     return {

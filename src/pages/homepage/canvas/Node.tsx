@@ -179,12 +179,11 @@ function Node({
     if (!nodeLetterFont) return <></>;
 
     return (
-        <Group origin={{ x: cx, y: cy }} transform={groupTransform}>
+        <Group origin={{ x: cx, y: cy }} transform={groupTransform} opacity={circleBlurOnInactive ?? 1}>
             <DiffRect inner={animatedinnerRect} outer={animatedOuterRect} color={`${treeAccentColor}7D`} />
             {!isComplete && <Path path={path} style="stroke" strokeWidth={2} color={colors.line} />}
             <Path path={path} style="stroke" start={start} strokeCap={"round"} strokeWidth={2} color={treeAccentColor} />
             <Text x={textX} y={textY} text={letter} font={nodeLetterFont} color={color} />
-            {circleBlurOnInactive && <Blur blur={circleBlurOnInactive} />}
         </Group>
     );
 }

@@ -1,4 +1,4 @@
-import { Blur, Path, Skia, SkiaMutableValue, useComputedValue } from "@shopify/react-native-skia";
+import { Blur, OpacityMatrix, Path, Skia, SkiaMutableValue, useComputedValue } from "@shopify/react-native-skia";
 import { MAX_OFFSET } from "./parameters";
 import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 import { svgPathProperties } from "svg-path-properties";
@@ -72,11 +72,7 @@ function CanvasPath({
 
     if (isRoot) return <></>;
 
-    return (
-        <Path path={path} color={pathColor} style="stroke" strokeWidth={3}>
-            {pathBlurOnInactive && <Blur blur={pathBlurOnInactive} />}
-        </Path>
-    );
+    return <Path path={path} color={pathColor} style="stroke" strokeWidth={3} opacity={pathBlurOnInactive ?? 1} />;
 }
 
 export default CanvasPath;
