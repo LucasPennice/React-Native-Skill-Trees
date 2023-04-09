@@ -6,12 +6,14 @@ import { Skill, Tree } from "../types";
 type UserTreesSlice = {
     userTrees: Tree<Skill>[];
     currentTreeId: string | undefined;
+    selectedNode: string | null;
 };
 
 // Define the initial state using that type
 const initialState: UserTreesSlice = {
     userTrees: [],
     currentTreeId: undefined,
+    selectedNode: null,
 };
 
 export type ModifiableNodeProperties = { name?: string; isCompleted?: boolean };
@@ -51,10 +53,14 @@ export const userTreesSlice = createSlice({
 
             state.userTrees = state.userTrees.filter((t) => t.treeId !== treeToDeleteId);
         },
+        setSelectedNode: (state, action: PayloadAction<string | null>) => {
+            state.selectedNode = action.payload;
+        },
     },
 });
 
-export const { changeTree, unselectTree, mutateUserTree, populateUserTrees, appendToUserTree, removeUserTree } = userTreesSlice.actions;
+export const { changeTree, unselectTree, mutateUserTree, populateUserTrees, appendToUserTree, removeUserTree, setSelectedNode } =
+    userTreesSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export function selectCurrentTree(state: RootState) {

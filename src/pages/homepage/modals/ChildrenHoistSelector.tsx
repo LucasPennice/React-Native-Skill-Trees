@@ -1,8 +1,8 @@
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { selectCanvasDisplaySettings, closeChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
 import { mutateUserTree, selectCurrentTree } from "../../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { deleteNodeWithChildren as deleteNodeWithChildrenFn, findTreeNodeById } from "../treeFunctions";
+import { deleteNodeWithChildren as deleteNodeWithChildrenFn, findParentOfNode, findTreeNodeById } from "../treeFunctions";
 import { Skill, Tree, centerFlex } from "../../../types";
 import { colors } from "../canvas/parameters";
 import AppText from "../../../components/AppText";
@@ -30,6 +30,22 @@ function ChildrenHoistSelectorModal() {
     const closeModal = () => dispatch(closeChildrenHoistSelector());
     const open = openMenu == "childrenHoistSelector";
 
+    const confirmDeleteNode = (children: Tree<Skill>) => () => {
+        const parent = findParentOfNode(currentTree, children.data.id);
+
+        const parentName = parent ? parent.data.name : "";
+
+        return Alert.alert(
+            `Delete ${parentName} and replace it with ${children.data.name}?`,
+            "",
+            [
+                { text: "No", style: "cancel" },
+                { text: "Yes", onPress: deleteParentAndHoistChildren(children), style: "destructive" },
+            ],
+            { cancelable: true }
+        );
+    };
+
     return (
         <FlingToDismissModal closeModal={closeModal} open={open}>
             <View style={[centerFlex, { flex: 1 }]}>
@@ -39,7 +55,7 @@ function ChildrenHoistSelectorModal() {
                         candidatesToHoist.map((children, idx) => {
                             const isComplete = children.data.isCompleted ?? false;
                             return (
-                                <Pressable key={idx} style={[centerFlex, styles.pressable]} onPress={deleteParentAndHoistChildren(children)}>
+                                <Pressable key={idx} style={[centerFlex, styles.pressable]} onPress={confirmDeleteNode(children)}>
                                     <View>
                                         <AppText style={{ color: "white", fontSize: 20, fontFamily: "helveticaBold" }}>{children.data.name}</AppText>
                                         <AppText style={{ color: "#FFFFFF5D", fontSize: 20 }}>

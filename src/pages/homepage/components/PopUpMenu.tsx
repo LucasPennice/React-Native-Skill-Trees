@@ -36,6 +36,13 @@ function PopUpMenu({ selectedNodeState, foundNodeCoordinates, selectedNodeHistor
 
     const { animatedMenuStyles, triangleAnimatedStyles } = useHandlePopMenuAnimations(foundNodeCoordinates, selectedNode, selectedNodeHistory);
 
+    useEffect(() => {
+        if (selectedNode === null) return;
+
+        onChangeText(currentNode ? currentNode.data.name : "Name");
+        setMastered(currentNode && currentNode.data.isCompleted ? currentNode.data.isCompleted : false);
+    }, [selectedNode]);
+
     if (!currentNode) return <></>;
 
     const deleteNode = () => {
