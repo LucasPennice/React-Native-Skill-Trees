@@ -95,14 +95,7 @@ function TreeView({
                 {currentTree !== undefined && (
                     <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}>
                         {showDragAndDropGuides && <DragAndDropZones data={dragAndDropZones} />}
-                        {previewNode && (
-                            <PreviewNode
-                                previewNode={previewNode}
-                                previewNodeParent={previewNodeParent}
-                                nodeLetterFont={nodeLetterFont}
-                                newNode={newNode}
-                            />
-                        )}
+                        {previewNode && <PreviewNode previewNode={previewNode} previewNodeParent={previewNodeParent} newNode={newNode} />}
                         <CanvasTree
                             stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
                             tree={currentTree}
@@ -133,12 +126,10 @@ export default TreeView;
 function PreviewNode({
     previewNode,
     previewNodeParent,
-    nodeLetterFont,
     newNode,
 }: {
     previewNode: CirclePositionInCanvasWithLevel;
     previewNodeParent: CirclePositionInCanvasWithLevel | undefined;
-    nodeLetterFont: SkFont | null;
     newNode: Skill;
 }) {
     const cx = previewNode.x;
@@ -159,8 +150,6 @@ function PreviewNode({
 
         changeOpacity();
     }, [previewNode]);
-
-    if (!nodeLetterFont) return <></>;
 
     return (
         <Group opacity={opacity}>

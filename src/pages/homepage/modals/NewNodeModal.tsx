@@ -37,7 +37,7 @@ function NewNodeModal() {
 
     const addNewNode = () => {
         if (text === "") return Alert.alert("Please enter a name for the new skill");
-        dispatch(setNewNode({ name: text, isCompleted, id: makeid(24) }));
+        dispatch(setNewNode({ name: text.trim(), isCompleted, id: makeid(24) }));
         dispatch(toggleNewNode());
     };
 

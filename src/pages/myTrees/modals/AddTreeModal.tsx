@@ -36,12 +36,12 @@ function AddTreeModal() {
         if (treeName === "" || selectedColor === "" || firstSkillName === "") return Alert.alert("Please fill all of the fields");
 
         const newTree: Tree<Skill> = {
-            treeName,
+            treeName: treeName.trim(),
             accentColor: selectedColor,
             isRoot: true,
             parentId: undefined,
             treeId: makeid(24),
-            data: { id: makeid(24), name: firstSkillName, isCompleted: firstSkillComplete },
+            data: { id: makeid(24), name: firstSkillName.trim(), isCompleted: firstSkillComplete },
         };
 
         dispatch(appendToUserTree(newTree));

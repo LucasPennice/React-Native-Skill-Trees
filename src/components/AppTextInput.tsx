@@ -40,10 +40,15 @@ function AppTextInput({
     const allowOnlyLettersInInput = (setter: (v: string) => void) => (tentativeInput: string) => {
         //@ts-ignore
         setter((prev) => {
-            let onlyContainsLettersAndNumbers = /^[a-zA-Z0-9_ ]*$/.test(tentativeInput);
+            const containsSpecialCharacter = !/^[a-zA-Z0-9_ ]*$/.test(tentativeInput);
 
-            if (onlyContainsLettersAndNumbers) return tentativeInput;
-            return prev;
+            const startWithWhitespace = !/^[^\ ]/.test(tentativeInput);
+
+            const doubleWhitespace = !/^((?!\s{2}).)*$/.test(tentativeInput);
+
+            if (containsSpecialCharacter || startWithWhitespace || doubleWhitespace) return prev;
+
+            return tentativeInput;
         });
     };
 
