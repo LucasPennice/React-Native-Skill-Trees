@@ -1,12 +1,12 @@
-import { Button, Modal, Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
-import { closeAllMenues, selectCanvasDisplaySettings, closeChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { selectCanvasDisplaySettings, closeChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
 import { mutateUserTree, selectCurrentTree } from "../../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { deleteNodeWithNoChildren, deleteNodeWithChildren as deleteNodeWithChildrenFn, findTreeNodeById } from "../treeFunctions";
+import { deleteNodeWithChildren as deleteNodeWithChildrenFn, findTreeNodeById } from "../treeFunctions";
 import { Skill, Tree, centerFlex } from "../../../types";
 import { colors } from "../canvas/parameters";
 import AppText from "../../../components/AppText";
-import { Fragment } from "react";
+import FlingToDismissModal from "../../../components/FlingToDismissModal";
 
 function ChildrenHoistSelectorModal() {
     const { openMenu, candidatesToHoist } = useAppSelector(selectCanvasDisplaySettings);
@@ -27,60 +27,72 @@ function ChildrenHoistSelectorModal() {
         dispatch(closeChildrenHoistSelector());
     };
 
+    const closeModal = () => dispatch(closeChildrenHoistSelector());
+    const open = openMenu == "childrenHoistSelector";
+
     return (
-        <Modal
-            animationType="slide"
-            transparent={true}
-            visible={openMenu == "childrenHoistSelector"}
-            onRequestClose={() => dispatch(closeChildrenHoistSelector())}>
-            <SafeAreaView style={{ flex: 1, backgroundColor: colors.line }}>
-                <View style={[centerFlex, { flex: 1 }]}>
-                    <View style={[centerFlex, { flexDirection: "row", margin: 10, gap: 10 }]}>
-                        <AppText style={{ fontSize: 20, color: "white", flex: 1 }}>
-                            The skill that you click will take the place of the deleted skill
-                        </AppText>
-                        <Pressable
-                            onPress={() => dispatch(closeChildrenHoistSelector())}
-                            style={[centerFlex, { paddingVertical: 15, borderRadius: 10 }]}>
-                            <AppText style={{ fontSize: 20, color: `${colors.accent}9D` }}>Close</AppText>
-                        </Pressable>
-                    </View>
-                    <ScrollView style={[{ flex: 1, width: "100%", marginTop: 20 }]}>
-                        {candidatesToHoist !== null &&
-                            currentTree &&
-                            candidatesToHoist.map((children, idx) => {
-                                return (
-                                    <Pressable
-                                        key={idx}
+        <FlingToDismissModal closeModal={closeModal} open={open}>
+            <View style={[centerFlex, { flex: 1 }]}>
+                <ScrollView style={[{ flex: 1, width: "100%", marginTop: 20 }]}>
+                    {candidatesToHoist !== null &&
+                        currentTree &&
+                        candidatesToHoist.map((children, idx) => {
+                            const isComplete = children.data.isCompleted ?? false;
+                            return (
+                                <Pressable key={idx} style={[centerFlex, styles.pressable]} onPress={deleteParentAndHoistChildren(children)}>
+                                    <View>
+                                        <AppText style={{ color: "white", fontSize: 20, fontFamily: "helveticaBold" }}>{children.data.name}</AppText>
+                                        <AppText style={{ color: "#FFFFFF5D", fontSize: 20 }}>
+                                            {numberOfChildrenString(children.children?.length ?? 0)}
+                                        </AppText>
+                                    </View>
+                                    <View
                                         style={[
                                             centerFlex,
                                             {
-                                                paddingHorizontal: 20,
-                                                paddingVertical: 25,
-                                                marginHorizontal: 10,
-                                                marginBottom: 20,
-                                                borderRadius: 12,
-                                                backgroundColor: colors.background,
-                                                flexDirection: "row",
+                                                borderColor: isComplete ? currentTree.accentColor : colors.line,
+                                                borderWidth: 3,
+                                                width: 40,
+                                                aspectRatio: 1,
+                                                borderRadius: 60,
                                             },
-                                        ]}
-                                        onPress={deleteParentAndHoistChildren(children)}>
-                                        <View
-                                            style={[
-                                                centerFlex,
-                                                { borderColor: colors.accent, borderWidth: 4, width: 60, aspectRatio: 1, borderRadius: 60 },
-                                            ]}>
-                                            <AppText style={{ fontSize: 30, color: "white" }}>{children.data.name[0]}</AppText>
-                                        </View>
-                                        <AppText style={{ color: "white", flex: 1, textAlign: "center", fontSize: 24 }}>{children.data.name}</AppText>
-                                    </Pressable>
-                                );
-                            })}
-                    </ScrollView>
-                </View>
-            </SafeAreaView>
-        </Modal>
+                                        ]}>
+                                        <AppText
+                                            style={{
+                                                fontSize: 20,
+                                                color: isComplete ? currentTree.accentColor : "white",
+                                            }}>
+                                            {children.data.name[0]}
+                                        </AppText>
+                                    </View>
+                                </Pressable>
+                            );
+                        })}
+                </ScrollView>
+            </View>
+        </FlingToDismissModal>
     );
 }
 
+const styles = StyleSheet.create({
+    pressable: {
+        paddingHorizontal: 20,
+        paddingVertical: 25,
+        marginHorizontal: 10,
+        marginBottom: 20,
+        borderRadius: 12,
+        backgroundColor: colors.background,
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+});
+
 export default ChildrenHoistSelectorModal;
+
+function numberOfChildrenString(number: number) {
+    if (number === 0) return "No skills stem from this";
+
+    if (number === 1) return "1 Skill stem from this";
+
+    return `${number} Skills stem from this`;
+}
