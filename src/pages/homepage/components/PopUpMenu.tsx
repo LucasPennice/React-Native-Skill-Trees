@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Button, Dimensions, Pressable, Text, TextInput, View } from "react-native";
+import { Button, Dimensions, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
-import { CirclePositionInCanvas, MENU_DAMPENING } from "../../../types";
+import { CirclePositionInCanvas, MENU_DAMPENING, centerFlex } from "../../../types";
 import { deleteNodeWithNoChildren, editTreeProperties, findTreeNodeById } from "../treeFunctions";
 import { mutateUserTree, selectCurrentTree } from "../../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
@@ -11,6 +11,7 @@ import { openChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsS
 import { CIRCLE_SIZE_SELECTED, colors } from "../canvas/parameters";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
+import RadioInput from "../../../components/RadioInput";
 
 type Props = {
     selectedNode: string | null;
@@ -27,6 +28,7 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
     const currentNode = findTreeNodeById(currentTree, selectedNode);
     //Local State
     const [text, onChangeText] = useState(currentNode ? currentNode.data.name : "Name");
+    const [mastered, setMastered] = useState(currentNode && currentNode.data.isCompleted ? currentNode.data.isCompleted : false);
 
     const MENU_HEIGHT = height / 2;
     const MENU_WIDTH = width - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL - CIRCLE_SIZE_SELECTED - 30;
@@ -40,9 +42,8 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
         dispatch(mutateUserTree(result));
     };
 
-    const toggleCompletionInNode = () => {
-        const newCompletedState = currentNode.data.isCompleted ? false : true;
-        const newProperties = { ...currentNode, data: { ...currentNode.data, isCompleted: newCompletedState } };
+    const toggleCompletionInNode = (completionState: boolean) => () => {
+        const newProperties = { ...currentNode, data: { ...currentNode.data, isCompleted: !completionState } };
 
         const result = editTreeProperties(currentTree, currentNode, newProperties);
 
@@ -73,45 +74,33 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                         padding: 20,
                     },
                 ]}>
-                <AppTextInput onBlur={updateNodeName} placeholder="Skill Name" textState={[text, onChangeText]} onlyContainsLettersAndNumbers />
-                <View style={{ display: "flex", flexDirection: "row" }}>
-                    {/* <TextInput
-                        value={text}
-                        onChangeText={onChangeText}
-                        style={{
-                            fontSize: 24,
-                            width: MENU_WIDTH - 40,
-                            fontFamily: "helveticaBold",
-                            letterSpacing: 1,
-                            color: "white",
-                            paddingRight: 25,
-                        }}
-                        multiline
-                        blurOnSubmit
-                        //@ts-ignore
-                        enterKeyHint="done"
-                        onBlur={updateNodeName}
-                    /> */}
-                    {/* <AppText style={{ color: "white", fontSize: 28, transform: [{ translateX: -20 }], opacity: 0.6 }}>✎</AppText> */}
-                </View>
-                {!currentNode.children && (
-                    <Pressable style={{ marginTop: 20, paddingVertical: 15 }} onPress={deleteNode}>
-                        <AppText style={{ fontSize: 20, color: "white" }}>Delete Node</AppText>
-                    </Pressable>
-                )}
+                <AppTextInput
+                    onBlur={updateNodeName}
+                    placeholder="Skill Name"
+                    textState={[text, onChangeText]}
+                    onlyContainsLettersAndNumbers
+                    containerStyles={{ marginBottom: 20 }}
+                />
 
-                {currentNode.children && (
-                    <Pressable
-                        style={{ marginTop: 20, paddingVertical: 15 }}
-                        onPress={() => dispatch(openChildrenHoistSelector(currentNode.children!))}>
-                        <AppText style={{ fontSize: 20, color: "white" }}>Delete Node</AppText>
-                    </Pressable>
-                )}
-                <Pressable style={{ paddingVertical: 15 }} onPress={toggleCompletionInNode}>
-                    <AppText style={{ fontSize: 20, color: "white" }}>{`${
-                        currentNode.data.isCompleted ? "Mark as Incomplete" : "Mark as Complete"
-                    }`}</AppText>
-                </Pressable>
+                <RadioInput text="Mastered" state={[mastered, setMastered]} onPress={toggleCompletionInNode(mastered)} />
+
+                <View style={[centerFlex, { justifyContent: "flex-end", flex: 1 }]}>
+                    {!currentNode.children && (
+                        <TouchableOpacity
+                            style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
+                            onPress={deleteNode}>
+                            <AppText style={{ color: colors.accent, fontSize: 18 }}>Delete Node</AppText>
+                        </TouchableOpacity>
+                    )}
+
+                    {currentNode.children && (
+                        <TouchableOpacity
+                            style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
+                            onPress={() => dispatch(openChildrenHoistSelector(currentNode.children!))}>
+                            <AppText style={{ color: colors.accent, fontSize: 18 }}>Delete Node</AppText>
+                        </TouchableOpacity>
+                    )}
+                </View>
             </Animated.View>
             {/* This is the triangle of the menu */}
             <Animated.View

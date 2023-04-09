@@ -5,7 +5,7 @@ import { centerFlex } from "../types";
 import { colors } from "../pages/homepage/canvas/parameters";
 import AppText from "./AppText";
 
-function RadioInput({ state, text }: { state: [boolean, (v: boolean) => void]; text: string }) {
+function RadioInput({ state, text, onPress }: { state: [boolean, (v: boolean) => void]; text: string; onPress?: () => void }) {
     const [mastered, setMastered] = state;
 
     const isMastered = useSharedValue(false);
@@ -37,7 +37,11 @@ function RadioInput({ state, text }: { state: [boolean, (v: boolean) => void]; t
                 },
             ]}
             //@ts-ignore
-            onPress={() => setMastered((p) => !p)}>
+            onPress={() => {
+                //@ts-ignore
+                setMastered((p) => !p);
+                if (onPress) onPress();
+            }}>
             <AppText style={{ color: "white", fontSize: 18 }}>{text}</AppText>
             <Animated.View
                 style={[
