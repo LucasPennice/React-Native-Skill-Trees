@@ -46,7 +46,7 @@ function Label({
                 width={rectangleDimentions.width}
                 x={rectX}
                 y={rectY}
-                color={tree.data.isCompleted ? treeAccentColor : colors.unmarkedText}
+                color={tree.data.isCompleted ? treeAccentColor : colors.line}
             />
             {wordArr.map((word, idx) => {
                 const wordWidth = labelFont.getTextWidth(word);

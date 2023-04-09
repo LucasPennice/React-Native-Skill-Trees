@@ -39,7 +39,7 @@ function ProgressIndicatorAndName() {
 
     const treeAccentColor = currentTree && currentTree.accentColor ? currentTree.accentColor : colors.accent;
 
-    const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}1D`, 30, 6);
+    const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}3D`, 30, 6);
 
     const completedPercentage = useSharedValue(0);
 

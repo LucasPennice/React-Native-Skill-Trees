@@ -86,7 +86,7 @@ function HomePage() {
                 selectedNodeHistory={selectedNodeHistory}
                 updateScrollOffset={updateScrollOffset}
             />
-            <DragAndDropNewNode handleNewNode={handleNewNode} />
+            <DragAndDropNewNode handleNewNode={handleNewNode} treeAccent={currentTree?.accentColor} />
             <ProgressIndicatorAndName />
             <AddNode />
             {currentTree !== undefined && <SettingsMenu />}
@@ -97,7 +97,13 @@ function HomePage() {
     );
 }
 
-function DragAndDropNewNode({ handleNewNode }: { handleNewNode: { panGesture: PanGesture; animatedStyle: { left: number; top: number } } }) {
+function DragAndDropNewNode({
+    handleNewNode,
+    treeAccent,
+}: {
+    handleNewNode: { panGesture: PanGesture; animatedStyle: { left: number; top: number } };
+    treeAccent: string | undefined;
+}) {
     const { animatedStyle, panGesture } = handleNewNode;
 
     const newNode = useAppSelector(selectNewNode);
@@ -122,7 +128,7 @@ function DragAndDropNewNode({ handleNewNode }: { handleNewNode: { panGesture: Pa
                 style={[
                     hideShow,
                     {
-                        backgroundColor: colors.line,
+                        backgroundColor: colors.darkGray,
                         position: "absolute",
                         left: 0,
                         top: 80,
@@ -146,10 +152,10 @@ function DragAndDropNewNode({ handleNewNode }: { handleNewNode: { panGesture: Pa
                             backgroundColor: colors.background,
                             borderWidth: 2,
                             borderRadius: 1.5 * CIRCLE_SIZE,
-                            borderColor: colors.accent,
+                            borderColor: treeAccent ?? colors.accent,
                         },
                     ]}>
-                    <AppText style={{ fontSize: 22, color: colors.line }}>{newNode.name ? newNode.name[0] : "+"}</AppText>
+                    <AppText style={{ fontSize: 22, color: treeAccent ?? colors.line }}>{newNode.name ? newNode.name[0] : "+"}</AppText>
                 </Animated.View>
             </GestureDetector>
         </>

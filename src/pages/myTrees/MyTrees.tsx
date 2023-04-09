@@ -1,7 +1,5 @@
-import { Button, Modal, Pressable, SafeAreaView, ScrollView, TouchableHighlight, View } from "react-native";
-import { Circle, Svg } from "react-native-svg";
+import { ScrollView } from "react-native";
 import AppText from "../../components/AppText";
-import { Skill, Tree, mockSkillTreeArray } from "../../types";
 import { colors } from "../homepage/canvas/parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { changeTree, selectTreeSlice } from "../../redux/userTreesSlice";
@@ -23,8 +21,10 @@ function MyTrees({ navigation }: { navigation: any }) {
         <>
             <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 10 }}>
                 <AppText style={{ color: "white", fontSize: 32, fontFamily: "helveticaBold", marginBottom: 5 }}>My Trees</AppText>
-                <AppText style={{ color: colors.unmarkedText, marginBottom: 5, fontSize: 16 }}>Tap a roadmap to access it</AppText>
-                <AppText style={{ color: colors.unmarkedText, marginBottom: 20, fontSize: 16 }}>Long press to access it's options menu</AppText>
+                <AppText style={{ color: `${colors.unmarkedText}8D`, marginBottom: 5, fontSize: 16 }}>Tap a roadmap to access it</AppText>
+                <AppText style={{ color: `${colors.unmarkedText}8D`, marginBottom: 20, fontSize: 16 }}>
+                    Long press to access it's options menu
+                </AppText>
 
                 {userTrees.map((element, idx) => {
                     const changeTreeAndNavigateHome = factoryChangeTreeAndNavigateHome(element.treeId ?? "");

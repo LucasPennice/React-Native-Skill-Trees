@@ -17,7 +17,7 @@ function TreeCard({ element, changeTreeAndNavigateHome }: { element: Tree<Skill>
     //
     const treeAccentColor = element && element.accentColor ? element.accentColor : colors.accent;
 
-    const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}1D`, 50, 8);
+    const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}3D`, 50, 8);
 
     const completedNodesQty = quantityOfCompletedNodes(element);
     const nodesQty = quantiyOfNodes(element);

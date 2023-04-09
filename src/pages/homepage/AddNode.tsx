@@ -26,7 +26,7 @@ function AddNode() {
                         position: "absolute",
                         top: 10,
                         right: 10,
-                        backgroundColor: colors.line,
+                        backgroundColor: colors.darkGray,
                         height: 50,
                         paddingHorizontal: 10,
                         borderRadius: 10,
@@ -35,7 +35,7 @@ function AddNode() {
                         gap: 15,
                     },
                 ]}>
-                <AppText style={{ fontSize: 15, fontFamily: "helveticaBold", color: colors.red }}>Cancel</AppText>
+                <AppText style={{ fontSize: 15, fontFamily: "helvetica", color: colors.accent }}>Cancel</AppText>
             </Pressable>
         );
 

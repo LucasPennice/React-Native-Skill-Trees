@@ -1,6 +1,5 @@
 import { getHeightForFont } from "./functions";
 import { Blur, Group, Path, useFont, Text, SkiaMutableValue, SkiaValue, useComputedValue, Skia } from "@shopify/react-native-skia";
-import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../types";
 import { CIRCLE_SIZE, colors } from "./parameters";
 import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 
