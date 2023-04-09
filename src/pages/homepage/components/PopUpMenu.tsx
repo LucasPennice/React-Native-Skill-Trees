@@ -4,7 +4,7 @@ import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTo
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import { CirclePositionInCanvas, MENU_DAMPENING, centerFlex } from "../../../types";
 import { deleteNodeWithNoChildren, editTreeProperties, findTreeNodeById } from "../treeFunctions";
-import { mutateUserTree, selectCurrentTree } from "../../../redux/userTreesSlice";
+import { mutateUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { openChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
@@ -14,15 +14,14 @@ import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
 
 type Props = {
-    selectedNodeState: [string | null, (v: string | null) => void];
     selectedNodeHistory: (string | null)[];
     foundNodeCoordinates: CirclePositionInCanvas;
 };
 
-function PopUpMenu({ selectedNodeState, foundNodeCoordinates, selectedNodeHistory }: Props) {
-    const [selectedNode, setSelectedNode] = selectedNodeState;
+function PopUpMenu({ foundNodeCoordinates, selectedNodeHistory }: Props) {
     //Redux store state
     const currentTree = useAppSelector(selectCurrentTree);
+    const { selectedNode } = useAppSelector(selectTreeSlice);
     const { height, width } = useAppSelector(selectScreenDimentions);
     const dispatch = useAppDispatch();
     //
@@ -48,7 +47,7 @@ function PopUpMenu({ selectedNodeState, foundNodeCoordinates, selectedNodeHistor
     const deleteNode = () => {
         const result = deleteNodeWithNoChildren(currentTree, currentNode);
         dispatch(mutateUserTree(result));
-        setSelectedNode(null);
+        dispatch(setSelectedNode(null));
     };
 
     const toggleCompletionInNode = (completionState: boolean) => () => {

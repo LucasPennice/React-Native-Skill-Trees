@@ -1,13 +1,14 @@
 import { TouchHandler, useTouchHandler } from "@shopify/react-native-skia";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { findTreeNodeById } from "../../treeFunctions";
 import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../../types";
 import { didTapCircle } from "../functions";
 import { Dimensions, ScrollView } from "react-native";
 import { CIRCLE_SIZE_SELECTED } from "../parameters";
+import { useAppDispatch, useAppSelector } from "../../../../redux/reduxHooks";
+import { selectTreeSlice, setSelectedNode } from "../../../../redux/userTreesSlice";
 
 type Props = {
-    selectedNodeState: [null | string, React.Dispatch<React.SetStateAction<string | null>>];
     setSelectedNodeHistory: React.Dispatch<React.SetStateAction<(string | null)[]>>;
     circlePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     tree?: Tree<Skill>;
@@ -22,13 +23,11 @@ export type CanvasTouchHandler = {
 };
 
 const useCanvasTouchHandler = (props: Props) => {
-    const {
-        selectedNodeState: [selectedNode, setSelectedNode],
-        setSelectedNodeHistory,
-        circlePositionsInCanvas,
-        tree,
-    } = props;
-
+    //Redux
+    const { selectedNode } = useAppSelector(selectTreeSlice);
+    const dispatch = useAppDispatch();
+    //
+    const { setSelectedNodeHistory, circlePositionsInCanvas, tree } = props;
     const { height } = Dimensions.get("window");
     const verticalScrollViewRef = useRef<ScrollView | null>(null);
     const horizontalScrollViewRef = useRef<ScrollView | null>(null);
@@ -49,7 +48,7 @@ const useCanvasTouchHandler = (props: Props) => {
 
                 if (circleTapped === undefined) {
                     setSelectedNodeHistory((prev) => [...prev, null]);
-                    return setSelectedNode(null);
+                    return dispatch(setSelectedNode(null));
                 }
 
                 const foundNode = findTreeNodeById(tree, circleTapped.id);
@@ -61,11 +60,11 @@ const useCanvasTouchHandler = (props: Props) => {
                 if (selectedNode != nodeInTree.id) {
                     scrollToCoordinates(circleTapped.x - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL, circleTapped.y - height / 2);
                     setSelectedNodeHistory((prev) => [...prev, nodeInTree.id]);
-                    return setSelectedNode(nodeInTree.id);
+                    return dispatch(setSelectedNode(nodeInTree.id));
                 }
 
                 setSelectedNodeHistory((prev) => [...prev, null]);
-                return setSelectedNode(null);
+                return dispatch(setSelectedNode(null));
             },
         },
         [selectedNode, circlePositionsInCanvas]

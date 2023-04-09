@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { clearNewNodeState } from "../../redux/newNodeSlice";
-import { selectCurrentTree, selectTreeSlice } from "../../redux/userTreesSlice";
+import { selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../redux/userTreesSlice";
 
-function useRunHomepageCleanup(setSelectedNode: (v: string | null) => void, setSelectedNodeHistory: (v: (string | null)[]) => void) {
+function useRunHomepageCleanup(setSelectedNodeHistory: (v: (string | null)[]) => void) {
     //Redux Related
     const currentTree = useAppSelector(selectCurrentTree);
     const { currentTreeId } = useAppSelector(selectTreeSlice);
@@ -23,7 +23,7 @@ function useRunHomepageCleanup(setSelectedNode: (v: string | null) => void, setS
         const hasTreeChanged = getHasTreeChanged(selectedTreeIdHistory);
 
         if (hasTreeChanged) {
-            setSelectedNode(null);
+            dispatch(setSelectedNode(null));
             setSelectedNodeHistory([]);
         }
     }, [selectedTreeIdHistory]);

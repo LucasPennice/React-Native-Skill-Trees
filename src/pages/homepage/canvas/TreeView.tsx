@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, View } from "react-native";
 import PopUpMenu from "../components/PopUpMenu";
 import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
-import { selectCurrentTree } from "../../../redux/userTreesSlice";
+import { selectCurrentTree, selectTreeSlice } from "../../../redux/userTreesSlice";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import CanvasTree from "./CanvasTree";
 import { useAppSelector } from "../../../redux/reduxHooks";
@@ -26,7 +26,6 @@ type TreeViewProps = {
     tentativeCirlcePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     canvasTouchHandler: CanvasTouchHandler;
     selectedNodeHistory: (string | null)[];
-    selectedNodeState: [string | null, (v: string | null) => void];
     updateScrollOffset: (scrollViewType: "horizontal" | "vertical", newValue: number) => void;
     hasTreeChanged: boolean;
 };
@@ -40,13 +39,11 @@ function TreeView({
     selectedNodeHistory,
     updateScrollOffset,
     hasTreeChanged,
-    selectedNodeState,
 }: TreeViewProps) {
-    //Props
-    const [selectedNode] = selectedNodeState;
     //Redux State
     const { height, width } = useAppSelector(selectScreenDimentions);
     const currentTree = useAppSelector(selectCurrentTree);
+    const { selectedNode } = useAppSelector(selectTreeSlice);
     const { showLabel, showDragAndDropGuides } = useAppSelector(selectCanvasDisplaySettings);
     const newNode = useAppSelector(selectNewNode);
     //Derived State
@@ -118,11 +115,7 @@ function TreeView({
                 )}
 
                 {selectedNode && foundNodeCoordinates && currentTree && (
-                    <PopUpMenu
-                        foundNodeCoordinates={foundNodeCoordinates}
-                        selectedNodeState={selectedNodeState}
-                        selectedNodeHistory={selectedNodeHistory}
-                    />
+                    <PopUpMenu foundNodeCoordinates={foundNodeCoordinates} selectedNodeHistory={selectedNodeHistory} />
                 )}
             </ScrollView>
         </ScrollView>

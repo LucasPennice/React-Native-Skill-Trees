@@ -28,9 +28,9 @@ import useRunHomepageCleanup from "./useRunHomepageCleanup";
 function HomePage() {
     //Redux State
     const currentTree = useAppSelector(selectCurrentTree);
+    const { selectedNode } = useAppSelector(selectTreeSlice);
     const screenDimentions = useAppSelector(selectScreenDimentions);
     //Local State
-    const [selectedNode, setSelectedNode] = useState<null | string>(null);
     const [selectedNodeHistory, setSelectedNodeHistory] = useState<(null | string)[]>([null]);
     const [scrollOffset, setScrollOffset] = useState({ x: 0, y: 0 });
     //Derived State
@@ -46,15 +46,10 @@ function HomePage() {
     const tentativeCirclePositions = getCirclePositions(tentativeModifiedTree);
     const tentativeCirlcePositionsInCanvas = centerNodesInCanvas(tentativeCirclePositions, canvasDimentions);
 
-    const canvasTouchHandler = useCanvasTouchHandler({
-        selectedNodeState: [selectedNode, setSelectedNode],
-        setSelectedNodeHistory,
-        circlePositionsInCanvas,
-        tree: currentTree,
-    });
+    const canvasTouchHandler = useCanvasTouchHandler({ setSelectedNodeHistory, circlePositionsInCanvas, tree: currentTree });
     //
 
-    const hasTreeChanged = useRunHomepageCleanup(setSelectedNode, setSelectedNodeHistory);
+    const hasTreeChanged = useRunHomepageCleanup(setSelectedNodeHistory);
 
     const updateScrollOffset = (scrollViewType: "horizontal" | "vertical", newValue: number) => {
         if (scrollViewType === "horizontal") {
@@ -82,7 +77,6 @@ function HomePage() {
                 selectedNodeHistory={selectedNodeHistory}
                 updateScrollOffset={updateScrollOffset}
                 hasTreeChanged={hasTreeChanged}
-                selectedNodeState={[selectedNode, setSelectedNode]}
             />
             <DragAndDropNewNode handleNewNode={handleNewNode} treeAccent={currentTree?.accentColor} />
             <ProgressIndicatorAndName />

@@ -1,6 +1,6 @@
 import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { selectCanvasDisplaySettings, closeChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
-import { mutateUserTree, selectCurrentTree } from "../../../redux/userTreesSlice";
+import { mutateUserTree, selectCurrentTree, setSelectedNode } from "../../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { deleteNodeWithChildren as deleteNodeWithChildrenFn, findParentOfNode, findTreeNodeById } from "../treeFunctions";
 import { Skill, Tree, centerFlex } from "../../../types";
@@ -25,6 +25,8 @@ function ChildrenHoistSelectorModal() {
         dispatch(mutateUserTree(newTree));
 
         dispatch(closeChildrenHoistSelector());
+
+        dispatch(setSelectedNode(null));
     };
 
     const closeModal = () => dispatch(closeChildrenHoistSelector());
