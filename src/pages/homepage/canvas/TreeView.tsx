@@ -14,6 +14,8 @@ import DragAndDropZones from "./DragAndDropZones";
 import { CanvasTouchHandler } from "./hooks/useCanvasTouchHandler";
 import { getHeightForFont } from "./functions";
 import { selectNewNode } from "../../../redux/newNodeSlice";
+import Node from "./Node";
+import CanvasPath from "./CavnasPath";
 
 type TreeViewProps = {
     dragAndDropZones: DnDZone[];
@@ -93,14 +95,14 @@ function TreeView({
                 {currentTree !== undefined && (
                     <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}>
                         {showDragAndDropGuides && <DragAndDropZones data={dragAndDropZones} />}
-                        {/* {previewNode && (
+                        {previewNode && (
                             <PreviewNode
                                 previewNode={previewNode}
                                 previewNodeParent={previewNodeParent}
                                 nodeLetterFont={nodeLetterFont}
                                 newNode={newNode}
                             />
-                        )} */}
+                        )}
                         <CanvasTree
                             stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
                             tree={currentTree}
@@ -139,68 +141,31 @@ function PreviewNode({
     nodeLetterFont: SkFont | null;
     newNode: Skill;
 }) {
-    const p1x = previewNode.x;
-    const p1y = previewNode.y;
+    const cx = previewNode.x;
+    const cy = previewNode.y;
 
-    const p2x = previewNodeParent ? previewNodeParent.x : p1x;
-    const p2y = previewNodeParent ? previewNodeParent.y : p1y + DISTANCE_BETWEEN_GENERATIONS;
+    const pathInitialPointX = previewNodeParent ? previewNodeParent.x : cx;
+    const pathInitialPointY = previewNodeParent ? previewNodeParent.y : cy + DISTANCE_BETWEEN_GENERATIONS;
 
-    const p = Skia.Path.Make();
-
-    p.moveTo(p1x, p1y);
-
-    // mid-point of line:
-    var mpx = (p2x + p1x) * 0.5;
-    var mpy = (p2y + p1y) * 0.5;
-
-    // angle of perpendicular to line:
-    var theta = Math.atan2(p2y - p1y, p2x - p1x) - Math.PI / 2;
-
-    let deltaX = p2x - p1x;
-
-    // distance of control point from mid-point of line:
-    var offset = deltaX > MAX_OFFSET ? MAX_OFFSET : deltaX < -MAX_OFFSET ? -MAX_OFFSET : deltaX;
-
-    // location of control point:
-    var c1x = mpx + offset * 1.5 * Math.cos(theta);
-    var c1y = mpy + offset * 1.5 * Math.sin(theta);
-
-    p.quadTo(c1x, c1y, p2x, p2y);
-
-    const strokeWidth = 2;
-    const radius = CIRCLE_SIZE + strokeWidth / 2;
-    const c = Skia.Path.Make();
-
-    c.moveTo(p1x, p1y);
-    c.addCircle(p1x, p1y, radius);
-
-    const { x, y } = previewNode;
+    const pathCoordinates = { cx, cy, pathInitialPoint: { x: pathInitialPointX, y: pathInitialPointY } };
 
     const letterToRender = newNode.name[0];
 
-    const position = useValue(0);
-    const changePosition = () => runTiming(position, 1, { duration: 250 });
+    const opacity = useValue(0);
+    const changeOpacity = () => runTiming(opacity, 1, { duration: 250 });
 
     useEffect(() => {
-        position.current = 0;
+        opacity.current = 0;
 
-        changePosition();
-    }, [previewNode.x, previewNode.y]);
+        changeOpacity();
+    }, [previewNode]);
 
     if (!nodeLetterFont) return <></>;
 
-    const textWidth = nodeLetterFont.getTextWidth(letterToRender);
-
-    const textX = x - textWidth / 2;
-    const textY = y + getHeightForFont(20) / 4 + 1;
-
     return (
-        <Group opacity={position}>
-            <Path path={p} style="stroke" strokeWidth={3} color={colors.line} end={position} />
-            <Path path={c} style="stroke" strokeWidth={2} color={colors.line} />
-            <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
-
-            <Text x={textX} y={textY} text={newNode.name[0]} font={nodeLetterFont} color={colors.unmarkedText} />
+        <Group opacity={opacity}>
+            <CanvasPath coordinates={pathCoordinates} pathColor={colors.line} />
+            <Node treeAccentColor={colors.line} coord={{ cx, cy }} text={{ color: colors.unmarkedText, letter: letterToRender }} />
         </Group>
     );
 }

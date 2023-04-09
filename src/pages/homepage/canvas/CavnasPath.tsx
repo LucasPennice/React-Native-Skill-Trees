@@ -18,8 +18,8 @@ function CanvasPath({
 }: {
     coordinates: pathCoordinates;
     pathColor: string;
-    isRoot: boolean;
-    pathBlurOnInactive: SkiaMutableValue<number>;
+    isRoot?: boolean;
+    pathBlurOnInactive?: SkiaMutableValue<number>;
 }) {
     const { cx, cy, pathInitialPoint } = coordinates;
 
@@ -74,7 +74,7 @@ function CanvasPath({
 
     return (
         <Path path={path} color={pathColor} style="stroke" strokeWidth={3}>
-            <Blur blur={pathBlurOnInactive} />
+            {pathBlurOnInactive && <Blur blur={pathBlurOnInactive} />}
         </Path>
     );
 }

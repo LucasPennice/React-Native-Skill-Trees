@@ -1,49 +1,31 @@
 import { getHeightForFont } from "./functions";
-import {
-    Blur,
-    Circle,
-    Group,
-    Path,
-    useFont,
-    Text,
-    useSpring,
-    SkFont,
-    SkiaMutableValue,
-    SkiaValue,
-    useComputedValue,
-    Skia,
-    SkPath,
-} from "@shopify/react-native-skia";
+import { Blur, Group, Path, useFont, Text, SkiaMutableValue, SkiaValue, useComputedValue, Skia } from "@shopify/react-native-skia";
 import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../types";
-import { CANVAS_SPRING, CIRCLE_SIZE, colors } from "./parameters";
-import { cloneElement } from "react";
+import { CIRCLE_SIZE, colors } from "./parameters";
 import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 
 function Node({
     coord,
-    tree,
-    selectedNode,
-    currentNodeCoordintes,
+    isComplete,
     circleBlurOnInactive,
     groupTransform,
     treeAccentColor,
+    text,
 }: {
-    tree: Tree<Skill>;
+    isComplete?: boolean;
     coord: { cx: number; cy: number };
-    selectedNode: string | null;
-    currentNodeCoordintes: CirclePositionInCanvasWithLevel;
-    groupTransform: SkiaValue<{ scale: number }[]>;
-    circleBlurOnInactive: SkiaMutableValue<number>;
+    groupTransform?: SkiaValue<{ scale: number }[]>;
+    circleBlurOnInactive?: SkiaMutableValue<number>;
     treeAccentColor: string;
+    text: { color: string; letter: string };
 }) {
     const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 20);
 
-    const textColor = tree.data.isCompleted ? treeAccentColor : tree.data.id === selectedNode ? "white" : colors.unmarkedText;
-    const letterToRender = tree.data.name ? tree.data.name[0] : "-";
+    const { color, letter } = text;
 
     const { cx, cy } = coord;
 
-    const textWidth = nodeLetterFont ? nodeLetterFont.getTextWidth(letterToRender) : 0;
+    const textWidth = nodeLetterFont ? nodeLetterFont.getTextWidth(letter) : 0;
 
     const textPositions = { x: cx - textWidth / 2, y: cy + getHeightForFont(20) / 4 + 1 };
 
@@ -67,12 +49,11 @@ function Node({
     if (!nodeLetterFont) return <></>;
 
     return (
-        <Group origin={{ x: currentNodeCoordintes.x, y: currentNodeCoordintes.y }} transform={groupTransform}>
+        <Group origin={{ x: cx, y: cy }} transform={groupTransform}>
             <Path path={path} style="stroke" strokeWidth={2} color={colors.line} />
-            {tree.data.isCompleted && <Path path={path} style="stroke" strokeCap={"round"} strokeWidth={2} color={treeAccentColor} />}
-            {/* <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} /> */}
-            <Text x={textX} y={textY} text={letterToRender} font={nodeLetterFont} color={textColor} />
-            <Blur blur={circleBlurOnInactive} />
+            {isComplete && <Path path={path} style="stroke" strokeCap={"round"} strokeWidth={2} color={treeAccentColor} />}
+            <Text x={textX} y={textY} text={letter} font={nodeLetterFont} color={color} />
+            {circleBlurOnInactive && <Blur blur={circleBlurOnInactive} />}
         </Group>
     );
 }

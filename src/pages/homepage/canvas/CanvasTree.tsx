@@ -44,6 +44,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
 
     const cx = currentNodeTentativeCoordinates ? currentNodeTentativeCoordinates.x : currentNodeCoordintes.x;
     const cy = currentNodeTentativeCoordinates ? currentNodeTentativeCoordinates.y : currentNodeCoordintes.y;
+
     // --
 
     let newParentNodeInfo = { coordinates: { ...currentNodeCoordintes, x: cx, y: cy }, numberOfChildren: tree.children ? tree.children.length : 0 };
@@ -64,6 +65,9 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
     })();
 
     const pathColor = nodeAndParentCompleted ? `${treeAccentColor}3D` : colors.line;
+
+    const textColor = tree.data.isCompleted ? treeAccentColor : tree.data.id === selectedNode ? "white" : colors.unmarkedText;
+    const letterToRender = tree.data.name ? tree.data.name[0] : "-";
 
     return (
         <>
@@ -100,12 +104,11 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
 
             <Node
                 circleBlurOnInactive={circleBlurOnInactive}
-                tree={tree}
+                isComplete={tree.data.isCompleted}
                 treeAccentColor={treeAccentColor}
                 coord={{ cx, cy }}
-                currentNodeCoordintes={currentNodeCoordintes}
                 groupTransform={groupTransform}
-                selectedNode={selectedNode}
+                text={{ color: textColor, letter: letterToRender }}
             />
         </>
     );
