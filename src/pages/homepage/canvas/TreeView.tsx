@@ -93,14 +93,14 @@ function TreeView({
                 {currentTree !== undefined && (
                     <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}>
                         {showDragAndDropGuides && <DragAndDropZones data={dragAndDropZones} />}
-                        {previewNode && (
+                        {/* {previewNode && (
                             <PreviewNode
                                 previewNode={previewNode}
                                 previewNodeParent={previewNodeParent}
                                 nodeLetterFont={nodeLetterFont}
                                 newNode={newNode}
                             />
-                        )}
+                        )} */}
                         <CanvasTree
                             stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
                             tree={currentTree}

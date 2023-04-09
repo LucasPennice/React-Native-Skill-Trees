@@ -65,10 +65,6 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
 
     const pathColor = nodeAndParentCompleted ? `${treeAccentColor}3D` : colors.line;
 
-    const shouldAnimate = false;
-
-    //Now i want to figure out how i can toggle the animations for the rest of the tree
-
     return (
         <>
             <CanvasPath
@@ -76,7 +72,6 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
                 isRoot={Boolean(tree.isRoot)}
                 pathBlurOnInactive={pathBlurOnInactive}
                 pathColor={pathColor}
-                shouldAnimate={shouldAnimate}
             />
             {/* Recursive fucntion that renders the rest of the tree */}
             {tree.children &&

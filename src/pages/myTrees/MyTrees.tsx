@@ -19,10 +19,6 @@ function MyTrees({ navigation }: { navigation: any }) {
         navigation.navigate("Home");
     };
 
-    //Hice que al inicio de la app se fije en el local storage para ver si hay arboles y que popule la sotre de rexux
-    //tengo que encontrar una manera que current tree dependa de userTrees
-    //Y que cada vez que userTrees cambie se actualice el local storage
-
     return (
         <>
             <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 10 }}>
