@@ -19,9 +19,10 @@ type TreeProps = {
     };
     rootCoordinates?: { width: number; height: number };
     treeAccentColor: string;
+    hasTreeChanged: boolean;
 };
 
-function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, wholeTree, treeAccentColor }: TreeProps) {
+function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, wholeTree, treeAccentColor, hasTreeChanged }: TreeProps) {
     //Props
     const { selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas } = stateProps;
 
@@ -85,6 +86,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
                             key={idx}
                             tree={element}
                             wholeTree={wholeTree}
+                            hasTreeChanged={hasTreeChanged}
                             treeAccentColor={treeAccentColor}
                             parentNodeInfo={{ ...newParentNodeInfo, currentChildIndex: idx }}
                             stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}

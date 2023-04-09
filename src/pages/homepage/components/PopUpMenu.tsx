@@ -14,12 +14,13 @@ import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
 
 type Props = {
-    selectedNode: string | null;
+    selectedNodeState: [string | null, (v: string | null) => void];
     selectedNodeHistory: (string | null)[];
     foundNodeCoordinates: CirclePositionInCanvas;
 };
 
-function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: Props) {
+function PopUpMenu({ selectedNodeState, foundNodeCoordinates, selectedNodeHistory }: Props) {
+    const [selectedNode, setSelectedNode] = selectedNodeState;
     //Redux store state
     const currentTree = useAppSelector(selectCurrentTree);
     const { height, width } = useAppSelector(selectScreenDimentions);
@@ -40,6 +41,7 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
     const deleteNode = () => {
         const result = deleteNodeWithNoChildren(currentTree, currentNode);
         dispatch(mutateUserTree(result));
+        setSelectedNode(null);
     };
 
     const toggleCompletionInNode = (completionState: boolean) => () => {

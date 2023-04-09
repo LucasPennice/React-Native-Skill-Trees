@@ -73,15 +73,16 @@ function HomePage() {
     return (
         <View style={{ position: "relative", backgroundColor: colors.background }}>
             <TreeView
+                key={currentTree?.treeId}
                 dragAndDropZones={dragAndDropZones}
                 canvasDimentions={canvasDimentions}
                 circlePositionsInCanvas={circlePositionsInCanvas}
                 tentativeCirlcePositionsInCanvas={tentativeCirlcePositionsInCanvas}
                 canvasTouchHandler={canvasTouchHandler}
-                selectedNode={selectedNode}
                 selectedNodeHistory={selectedNodeHistory}
                 updateScrollOffset={updateScrollOffset}
                 hasTreeChanged={hasTreeChanged}
+                selectedNodeState={[selectedNode, setSelectedNode]}
             />
             <DragAndDropNewNode handleNewNode={handleNewNode} treeAccent={currentTree?.accentColor} />
             <ProgressIndicatorAndName />

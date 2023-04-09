@@ -26,8 +26,8 @@ function useCenterCameraOnTreeChange(canvasTouchHandler: CanvasTouchHandler, can
         const y = 0.5 * (canvasHeight - HEIGHT_WITHOUT_NAV);
 
         let timerId = setTimeout(() => {
-            horizontalScrollViewRef.current!.scrollTo({ x, y, animated: true });
-            verticalScrollViewRef.current!.scrollTo({ x, y, animated: true });
+            horizontalScrollViewRef.current!.scrollTo({ x, y, animated: false });
+            verticalScrollViewRef.current!.scrollTo({ x, y, animated: false });
         }, 50);
 
         return () => {

@@ -332,7 +332,7 @@ export function calculateDimentionsAndRootCoordinates(
 
     const treeDepth = Math.max(...coordinates.map((t) => t.level));
 
-    const treeHeight = treeDepth * DISTANCE_BETWEEN_GENERATIONS + treeDepth * CIRCLE_SIZE;
+    const treeHeight = treeDepth ? treeDepth * DISTANCE_BETWEEN_GENERATIONS + treeDepth * 2 * CIRCLE_SIZE : 2 * CIRCLE_SIZE;
     const treeWidth = getTreeWidth(coordinates);
 
     return {

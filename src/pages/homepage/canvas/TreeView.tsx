@@ -1,6 +1,6 @@
 import { Blur, Canvas, Circle, Group, Path, runTiming, SkFont, Skia, Text, TouchHandler, useFont, useValue } from "@shopify/react-native-skia";
-import { useEffect } from "react";
-import { ScrollView, View } from "react-native";
+import { useEffect, useState } from "react";
+import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, View } from "react-native";
 import PopUpMenu from "../components/PopUpMenu";
 import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
 import { selectCurrentTree } from "../../../redux/userTreesSlice";
@@ -17,6 +17,7 @@ import { selectNewNode } from "../../../redux/newNodeSlice";
 import Node from "./Node";
 import CanvasPath from "./CavnasPath";
 import useCenterCameraOnTreeChange from "./hooks/useCenterCameraOnTreeChange";
+import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 
 type TreeViewProps = {
     dragAndDropZones: DnDZone[];
@@ -24,8 +25,8 @@ type TreeViewProps = {
     circlePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     tentativeCirlcePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     canvasTouchHandler: CanvasTouchHandler;
-    selectedNode: string | null;
     selectedNodeHistory: (string | null)[];
+    selectedNodeState: [string | null, (v: string | null) => void];
     updateScrollOffset: (scrollViewType: "horizontal" | "vertical", newValue: number) => void;
     hasTreeChanged: boolean;
 };
@@ -36,11 +37,13 @@ function TreeView({
     tentativeCirlcePositionsInCanvas,
     circlePositionsInCanvas,
     canvasTouchHandler,
-    selectedNode,
     selectedNodeHistory,
     updateScrollOffset,
     hasTreeChanged,
+    selectedNodeState,
 }: TreeViewProps) {
+    //Props
+    const [selectedNode] = selectedNodeState;
     //Redux State
     const { height, width } = useAppSelector(selectScreenDimentions);
     const currentTree = useAppSelector(selectCurrentTree);
@@ -50,7 +53,8 @@ function TreeView({
     const { horizontalScrollViewRef, touchHandler, verticalScrollViewRef } = canvasTouchHandler;
     const { canvasHeight, canvasWidth, horizontalMargin, verticalMargin } = canvasDimentions;
     const foundNodeCoordinates = circlePositionsInCanvas.find((c) => c.id === selectedNode);
-    //
+    //Local State
+    const [initialBlur, setInitialBlur] = useState(10);
 
     useCenterCameraOnTreeChange(canvasTouchHandler, canvasDimentions, hasTreeChanged);
 
@@ -60,22 +64,37 @@ function TreeView({
 
     const treeAccentColor = currentTree && currentTree.accentColor ? currentTree.accentColor : colors.accent;
 
+    useEffect(() => {
+        setInitialBlur(0);
+    }, [currentTree?.treeId]);
+
+    const blur = useAnimateSkiaValue({ initialValue: 10, stateToAnimate: initialBlur });
+
+    const updateVerticalScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => updateScrollOffset("vertical", e.nativeEvent.contentOffset.y);
+    const updateHorizontalScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => updateScrollOffset("horizontal", e.nativeEvent.contentOffset.x);
+
     return (
         <ScrollView
             showsVerticalScrollIndicator={false}
             ref={verticalScrollViewRef}
             style={{ height: height - NAV_HEGIHT }}
             bounces={false}
-            onMomentumScrollEnd={(e) => updateScrollOffset("vertical", e.nativeEvent.contentOffset.y)}
-            onScrollEndDrag={(e) => updateScrollOffset("vertical", e.nativeEvent.contentOffset.y)}>
+            // Updates on the automatic scroll on tree change (because is not animated we cannot use the other two event listeners)
+            // The same goes for the horizontal scrolLView
+            onScroll={updateVerticalScroll}
+            scrollEventThrottle={0}
+            onMomentumScrollEnd={updateVerticalScroll}
+            onScrollEndDrag={updateVerticalScroll}>
             <ScrollView
                 bounces={false}
                 ref={horizontalScrollViewRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 style={{ position: "relative" }}
-                onScrollEndDrag={(e) => updateScrollOffset("horizontal", e.nativeEvent.contentOffset.x)}
-                onMomentumScrollEnd={(e) => updateScrollOffset("horizontal", e.nativeEvent.contentOffset.x)}>
+                onScroll={updateHorizontalScroll}
+                scrollEventThrottle={0}
+                onScrollEndDrag={updateHorizontalScroll}
+                onMomentumScrollEnd={updateHorizontalScroll}>
                 {currentTree !== undefined && (
                     <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}>
                         {showDragAndDropGuides && <DragAndDropZones data={dragAndDropZones} />}
@@ -84,10 +103,11 @@ function TreeView({
                             stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
                             tree={currentTree}
                             wholeTree={currentTree}
+                            hasTreeChanged={hasTreeChanged}
                             treeAccentColor={treeAccentColor}
                             rootCoordinates={{ width: horizontalMargin, height: verticalMargin }}
                         />
-                        <Blur blur={0} />
+                        <Blur blur={blur} />
                     </Canvas>
                 )}
 
@@ -98,7 +118,11 @@ function TreeView({
                 )}
 
                 {selectedNode && foundNodeCoordinates && currentTree && (
-                    <PopUpMenu foundNodeCoordinates={foundNodeCoordinates} selectedNode={selectedNode} selectedNodeHistory={selectedNodeHistory} />
+                    <PopUpMenu
+                        foundNodeCoordinates={foundNodeCoordinates}
+                        selectedNodeState={selectedNodeState}
+                        selectedNodeHistory={selectedNodeHistory}
+                    />
                 )}
             </ScrollView>
         </ScrollView>
