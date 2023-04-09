@@ -10,6 +10,7 @@ import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { openChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
 import { CIRCLE_SIZE_SELECTED, colors } from "../canvas/parameters";
 import AppText from "../../../components/AppText";
+import AppTextInput from "../../../components/AppTextInput";
 
 type Props = {
     selectedNode: string | null;
@@ -49,6 +50,8 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
     };
 
     const updateNodeName = () => {
+        if (text === "") return;
+
         const newProperties = { ...currentNode, data: { ...currentNode.data, name: text } };
 
         const result = editTreeProperties(currentTree, currentNode, newProperties);
@@ -65,23 +68,31 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                         position: "absolute",
                         height: MENU_HEIGHT,
                         width: MENU_WIDTH,
-                        backgroundColor: colors.line,
+                        backgroundColor: colors.darkGray,
                         borderRadius: 20,
                         padding: 20,
                     },
                 ]}>
+                <AppTextInput onBlur={updateNodeName} placeholder="Skill Name" textState={[text, onChangeText]} onlyContainsLettersAndNumbers />
                 <View style={{ display: "flex", flexDirection: "row" }}>
-                    <TextInput
+                    {/* <TextInput
                         value={text}
                         onChangeText={onChangeText}
-                        style={{ fontSize: 24, width: MENU_WIDTH - 40, fontWeight: "bold", letterSpacing: 1, color: "white", paddingRight: 25 }}
+                        style={{
+                            fontSize: 24,
+                            width: MENU_WIDTH - 40,
+                            fontFamily: "helveticaBold",
+                            letterSpacing: 1,
+                            color: "white",
+                            paddingRight: 25,
+                        }}
                         multiline
                         blurOnSubmit
                         //@ts-ignore
                         enterKeyHint="done"
                         onBlur={updateNodeName}
-                    />
-                    <AppText style={{ color: "white", fontSize: 28, transform: [{ translateX: -20 }], opacity: 0.6 }}>✎</AppText>
+                    /> */}
+                    {/* <AppText style={{ color: "white", fontSize: 28, transform: [{ translateX: -20 }], opacity: 0.6 }}>✎</AppText> */}
                 </View>
                 {!currentNode.children && (
                     <Pressable style={{ marginTop: 20, paddingVertical: 15 }} onPress={deleteNode}>
@@ -117,7 +128,7 @@ function PopUpMenu({ selectedNode, foundNodeCoordinates, selectedNodeHistory }: 
                         borderBottomWidth: 10,
                         borderLeftColor: "transparent",
                         borderRightColor: "transparent",
-                        borderBottomColor: colors.line,
+                        borderBottomColor: colors.darkGray,
                     },
                 ]}
             />

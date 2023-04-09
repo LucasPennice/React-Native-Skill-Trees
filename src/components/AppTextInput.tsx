@@ -10,11 +10,13 @@ function AppTextInput({
     placeholder,
     containerStyles,
     onlyContainsLettersAndNumbers,
+    onBlur,
 }: {
     textState: [string, (v: string) => void];
     placeholder: string;
     containerStyles?: ViewProps["style"];
     onlyContainsLettersAndNumbers?: boolean;
+    onBlur?: () => void;
 }) {
     const [text, setText] = textState;
 
@@ -40,15 +42,21 @@ function AppTextInput({
     const allowOnlyLettersInInput = (setter: (v: string) => void) => (tentativeInput: string) => {
         //@ts-ignore
         setter((prev) => {
-            const containsSpecialCharacter = !/^[a-zA-Z0-9_ ]*$/.test(tentativeInput);
+            let result = tentativeInput;
 
-            const startWithWhitespace = !/^[^\ ]/.test(tentativeInput);
+            if (result === "") return result;
 
-            const doubleWhitespace = !/^((?!\s{2}).)*$/.test(tentativeInput);
+            const containsSpecialCharacter = !/^[a-zA-Z0-9_ ]*$/.test(result);
+
+            const startWithWhitespace = !/^[^\ ]/.test(result);
+
+            if (startWithWhitespace && result !== "") result = result.trimStart();
+
+            const doubleWhitespace = !/^((?!\s{2}).)*$/.test(result);
 
             if (containsSpecialCharacter || startWithWhitespace || doubleWhitespace) return prev;
 
-            return tentativeInput;
+            return result;
         });
     };
 
@@ -72,14 +80,17 @@ function AppTextInput({
                     blurOnSubmit
                     //@ts-ignore
                     enterKeyHint="done"
+                    multiline
                     onChangeText={updateText}
                     placeholder={placeholder}
+                    onBlur={onBlur}
                     value={text}
                     style={{
                         backgroundColor: `${colors.line}4D`,
                         borderRadius: 15,
                         fontSize: 20,
                         paddingLeft: 20,
+                        paddingTop: 18,
                         fontFamily: "helvetica",
                         textAlign: "left",
                         color: "white",
