@@ -1,4 +1,4 @@
-import { Pressable, TextInput, View, ViewProps } from "react-native";
+import { Platform, Pressable, TextInput, View, ViewProps } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { centerFlex } from "../types";
 import AppText from "./AppText";
@@ -90,9 +90,10 @@ function AppTextInput({
                         borderRadius: 15,
                         fontSize: 20,
                         paddingLeft: 20,
-                        paddingTop: 18,
+                        paddingTop: Platform.OS === "ios" ? 18 : 13,
                         fontFamily: "helvetica",
                         textAlign: "left",
+                        textAlignVertical: "top",
                         color: "white",
                         flex: 1,
                     }}

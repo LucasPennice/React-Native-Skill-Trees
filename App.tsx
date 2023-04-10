@@ -18,6 +18,7 @@ import { open } from "./src/redux/addTreeModalSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { populateUserTrees, selectTreeSlice } from "./src/redux/userTreesSlice";
 import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function App() {
     return (
