@@ -7,14 +7,12 @@ const labelMarginTop = 40;
 function Label({
     coord,
     tree,
-    labelOpacity,
     pathBlurOnInactive,
     treeAccentColor,
 }: {
     tree: Tree<Skill>;
     treeAccentColor: string;
     coord: { cx: number; cy: number };
-    labelOpacity: SkiaMutableValue<number>;
     pathBlurOnInactive: SkiaMutableValue<number>;
 }) {
     const labelFont = useFont(require("../../../../assets/Helvetica.ttf"), 12);
@@ -39,7 +37,7 @@ function Label({
     const rectY = cy + labelMarginTop - fontSize / 4 - verticalPadding;
 
     return (
-        <Group opacity={labelOpacity}>
+        <Group opacity={pathBlurOnInactive}>
             <RoundedRect
                 r={5}
                 height={rectangleDimentions.height}
@@ -56,8 +54,6 @@ function Label({
 
                 return <Text key={idx} x={textX} y={textY} text={word} color="white" font={labelFont} />;
             })}
-
-            <Blur blur={pathBlurOnInactive} />
         </Group>
     );
 

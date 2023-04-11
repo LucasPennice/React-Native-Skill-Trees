@@ -4,32 +4,14 @@ import { useEffect } from "react";
 import { Skill, Tree } from "../../../../types";
 
 const useHandleTreeAnimations = (selectedNode: string | null, showLabel: boolean, tree: Tree<Skill>, treeLevel: number) => {
-    const { labelOpacity } = useSettingsAnimations(showLabel);
-
     const { circleBlurOnInactive, pathBlurOnInactive } = useAnimationsForUnselected(selectedNode, tree.data.id);
 
     const { groupTransform } = useAnimationsOnSelect(selectedNode, tree);
 
-    return { circleBlurOnInactive, pathBlurOnInactive, groupTransform, labelOpacity };
+    return { circleBlurOnInactive, pathBlurOnInactive, groupTransform };
 };
 
 export default useHandleTreeAnimations;
-
-function useSettingsAnimations(showLabel: boolean) {
-    const labelOpacity = useValue(0);
-
-    const isLabel = useSharedValue(0);
-
-    useEffect(() => {
-        isLabel.value = withSpring(showLabel ? 1 : 0, { damping: 18, stiffness: 300 });
-    }, [showLabel]);
-
-    useSharedValueEffect(() => {
-        labelOpacity.current = mix(isLabel.value, 0, 1);
-    }, isLabel);
-
-    return { labelOpacity };
-}
 
 function useAnimationsOnSelect(selectedNode: string | null, tree: Tree<Skill>) {
     const treeId = tree.data.id;

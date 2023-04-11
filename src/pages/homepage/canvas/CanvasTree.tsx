@@ -50,7 +50,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
 
     let newParentNodeInfo = { coordinates: { ...currentNodeCoordintes, x: cx, y: cy }, numberOfChildren: tree.children ? tree.children.length : 0 };
 
-    const { circleBlurOnInactive, groupTransform, pathBlurOnInactive, labelOpacity } = useHandleTreeAnimations(
+    const { circleBlurOnInactive, groupTransform, pathBlurOnInactive } = useHandleTreeAnimations(
         selectedNode,
         showLabel,
         tree,
@@ -98,15 +98,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
                     );
                 })}
 
-            {showLabel && (
-                <Label
-                    treeAccentColor={treeAccentColor}
-                    tree={tree}
-                    coord={{ cx, cy }}
-                    labelOpacity={labelOpacity}
-                    pathBlurOnInactive={pathBlurOnInactive}
-                />
-            )}
+            {showLabel && <Label treeAccentColor={treeAccentColor} tree={tree} coord={{ cx, cy }} pathBlurOnInactive={pathBlurOnInactive} />}
 
             <Node
                 circleBlurOnInactive={circleBlurOnInactive}
