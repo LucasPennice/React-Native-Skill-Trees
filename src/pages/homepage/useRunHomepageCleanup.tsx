@@ -5,7 +5,6 @@ import { selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../redux
 
 function useRunHomepageCleanup(setSelectedNodeHistory: (v: (string | null)[]) => void) {
     //Redux Related
-    const currentTree = useAppSelector(selectCurrentTree);
     const { currentTreeId } = useAppSelector(selectTreeSlice);
     const dispatch = useAppDispatch();
     //
@@ -15,9 +14,10 @@ function useRunHomepageCleanup(setSelectedNodeHistory: (v: (string | null)[]) =>
     useEffect(() => {
         //@ts-ignore
         setSelectedTreeIdHistory((p) => [...p, currentTreeId ? currentTreeId : null]);
-    }, [currentTree]);
+    }, [currentTreeId]);
 
     useEffect(() => {
+        console.log(111);
         dispatch(clearNewNodeState());
 
         const hasTreeChanged = getHasTreeChanged(selectedTreeIdHistory);

@@ -4,11 +4,11 @@ import { useAppSelector } from "../../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../../redux/screenDimentionsSlice";
 import { NAV_HEGIHT } from "../parameters";
 import { CanvasDimentions } from "../../../../types";
-import { selectCurrentTree } from "../../../../redux/userTreesSlice";
+import { selectCurrentTree, selectTreeSlice } from "../../../../redux/userTreesSlice";
 
 function useCenterCameraOnTreeChange(canvasTouchHandler: CanvasTouchHandler, canvasDimentions: CanvasDimentions, hasTreeChanged: boolean) {
     const { height, width } = useAppSelector(selectScreenDimentions);
-    const currentTree = useAppSelector(selectCurrentTree);
+    const { currentTreeId } = useAppSelector(selectTreeSlice);
 
     const { horizontalScrollViewRef, verticalScrollViewRef } = canvasTouchHandler;
     const { canvasHeight, horizontalMargin } = canvasDimentions;
@@ -26,14 +26,14 @@ function useCenterCameraOnTreeChange(canvasTouchHandler: CanvasTouchHandler, can
         const y = 0.5 * (canvasHeight - HEIGHT_WITHOUT_NAV);
 
         let timerId = setTimeout(() => {
-            horizontalScrollViewRef.current!.scrollTo({ x, y, animated: false });
-            verticalScrollViewRef.current!.scrollTo({ x, y, animated: false });
+            horizontalScrollViewRef.current!.scrollTo({ x, y: undefined, animated: false });
+            verticalScrollViewRef.current!.scrollTo({ x: undefined, y, animated: false });
         }, 50);
 
         return () => {
             clearTimeout(timerId);
         };
-    }, [verticalScrollViewRef, horizontalScrollViewRef, currentTree, hasTreeChanged]);
+    }, [verticalScrollViewRef, horizontalScrollViewRef, currentTreeId, hasTreeChanged]);
 }
 
 export default useCenterCameraOnTreeChange;

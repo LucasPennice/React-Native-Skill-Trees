@@ -19,7 +19,9 @@ function AddNode() {
     if (newNode.id !== "" && newNode.name !== "")
         return (
             <Pressable
-                onPress={() => dispatch(clearNewNodeState())}
+                onPress={() => {
+                    dispatch(clearNewNodeState());
+                }}
                 style={[
                     centerFlex,
                     {

@@ -100,7 +100,9 @@ function ProgressIndicatorAndName() {
                 />
             </Svg>
 
-            <AppText style={{ fontSize: 20, color: colors.unmarkedText }}>{currentTree.treeName ?? "Tree Name"}</AppText>
+            <AppText style={{ color: colors.unmarkedText }} fontSize={20}>
+                {currentTree.treeName ?? "Tree Name"}
+            </AppText>
         </View>
     );
 }

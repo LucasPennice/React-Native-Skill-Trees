@@ -5,7 +5,7 @@ import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
 import SettingsMenu from "./components/SettingsMenu";
 import { CIRCLE_SIZE, colors } from "./canvas/parameters";
 import { useAppSelector } from "../../redux/reduxHooks";
-import { selectCurrentTree } from "../../redux/userTreesSlice";
+import { selectCurrentTree, selectTreeSlice } from "../../redux/userTreesSlice";
 import { GestureDetector, PanGesture } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from "react-native-reanimated";
 import AppText from "../../components/AppText";
@@ -28,6 +28,7 @@ import useRunHomepageCleanup from "./useRunHomepageCleanup";
 function HomePage() {
     //Redux State
     const currentTree = useAppSelector(selectCurrentTree);
+    const { currentTreeId } = useAppSelector(selectTreeSlice);
     const screenDimentions = useAppSelector(selectScreenDimentions);
     //Local State
     const [selectedNodeHistory, setSelectedNodeHistory] = useState<(null | string)[]>([null]);
@@ -67,7 +68,7 @@ function HomePage() {
     return (
         <View style={{ position: "relative", backgroundColor: colors.background }}>
             <TreeView
-                key={currentTree?.treeId}
+                key={currentTreeId}
                 dragAndDropZones={dragAndDropZones}
                 canvasDimentions={canvasDimentions}
                 circlePositionsInCanvas={circlePositionsInCanvas}

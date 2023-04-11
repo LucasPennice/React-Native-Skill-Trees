@@ -43,6 +43,7 @@ function TreeView({
     //Redux State
     const { height, width } = useAppSelector(selectScreenDimentions);
     const currentTree = useAppSelector(selectCurrentTree);
+    const { currentTreeId } = useAppSelector(selectTreeSlice);
     const { selectedNode } = useAppSelector(selectTreeSlice);
     const { showLabel, showDragAndDropGuides } = useAppSelector(selectCanvasDisplaySettings);
     const newNode = useAppSelector(selectNewNode);
@@ -63,7 +64,7 @@ function TreeView({
 
     useEffect(() => {
         setInitialBlur(0);
-    }, [currentTree?.treeId]);
+    }, [currentTreeId]);
 
     const blur = useAnimateSkiaValue({ initialValue: 10, stateToAnimate: initialBlur });
 
