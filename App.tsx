@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import { Platform, SafeAreaView, TouchableOpacity, View } from "react-native";
+import { Platform, SafeAreaView, StatusBar, TouchableOpacity, View } from "react-native";
 import { Provider } from "react-redux";
 import { colors } from "./src/pages/homepage/canvas/parameters";
 import HomePage from "./src/pages/homepage/HomePage";
@@ -28,6 +28,7 @@ export default function App() {
             <Provider store={store}>
                 <NavigationContainer>
                     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+                        {Platform.OS === "android" && <StatusBar backgroundColor={colors.background} />}
                         <AppWithReduxContext />
                     </SafeAreaView>
                 </NavigationContainer>
