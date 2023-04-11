@@ -28,7 +28,7 @@ const useCanvasTouchHandler = (props: Props) => {
     const dispatch = useAppDispatch();
     //
     const { setSelectedNodeHistory, circlePositionsInCanvas, tree } = props;
-    const { height } = Dimensions.get("window");
+    const { height } = Dimensions.get("screen");
     const verticalScrollViewRef = useRef<ScrollView | null>(null);
     const horizontalScrollViewRef = useRef<ScrollView | null>(null);
 
@@ -37,8 +37,8 @@ const useCanvasTouchHandler = (props: Props) => {
 
         //This is the functions that handles the scrolling
 
-        verticalScrollViewRef.current.scrollTo({ x, y, animated: true });
-        horizontalScrollViewRef.current.scrollTo({ x, y, animated: true });
+        verticalScrollViewRef.current.scrollTo({ x: undefined, y, animated: true });
+        horizontalScrollViewRef.current.scrollTo({ x, y: undefined, animated: true });
     };
 
     const touchHandler = useTouchHandler(
@@ -61,6 +61,7 @@ const useCanvasTouchHandler = (props: Props) => {
                 const { data: nodeInTree } = foundNode;
 
                 if (selectedNode != nodeInTree.id) {
+                    console.log("LO VOY A HACEr");
                     scrollToCoordinates(circleTapped.x - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL, circleTapped.y - height / 2);
                     setSelectedNodeHistory((prev) => [...prev, nodeInTree.id]);
                     return dispatch(setSelectedNode(nodeInTree.id));

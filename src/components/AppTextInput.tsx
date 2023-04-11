@@ -35,7 +35,7 @@ function AppTextInput({
 
     const inputStyles = useAnimatedStyle(() => {
         return {
-            marginRight: withSpring(textInputEmpty.value ? 55 : 0, { damping: 25, stiffness: 300 }),
+            marginRight: withSpring(textInputEmpty.value ? 60 : 0, { damping: 25, stiffness: 300 }),
         };
     }, [textInputEmpty]);
 
