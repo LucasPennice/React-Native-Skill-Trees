@@ -1,4 +1,20 @@
-import { Blur, Canvas, Circle, Group, Path, runTiming, SkFont, Skia, Text, TouchHandler, useFont, useValue } from "@shopify/react-native-skia";
+import {
+    Blur,
+    Canvas,
+    Circle,
+    Group,
+    Path,
+    runTiming,
+    SkFont,
+    Skia,
+    SkiaMutableValue,
+    SkSize,
+    Text,
+    TouchHandler,
+    useComputedValue,
+    useFont,
+    useValue,
+} from "@shopify/react-native-skia";
 import { useEffect, useState } from "react";
 import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, View } from "react-native";
 import PopUpMenu from "../components/PopUpMenu";
@@ -96,6 +112,7 @@ function TreeView({
                 {currentTree !== undefined && (
                     <Canvas
                         onTouch={touchHandler}
+                        // onSize={sexo}
                         style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}
                         mode="continuous">
                         {showDragAndDropGuides && <DragAndDropZones data={dragAndDropZones} />}

@@ -61,7 +61,6 @@ const useCanvasTouchHandler = (props: Props) => {
                 const { data: nodeInTree } = foundNode;
 
                 if (selectedNode != nodeInTree.id) {
-                    console.log("LO VOY A HACEr");
                     scrollToCoordinates(circleTapped.x - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL, circleTapped.y - height / 2);
                     setSelectedNodeHistory((prev) => [...prev, nodeInTree.id]);
                     return dispatch(setSelectedNode(nodeInTree.id));

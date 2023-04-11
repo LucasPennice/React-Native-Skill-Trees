@@ -101,6 +101,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
             {showLabel && <Label treeAccentColor={treeAccentColor} tree={tree} coord={{ cx, cy }} pathBlurOnInactive={pathBlurOnInactive} />}
 
             <Node
+                key={tree.data.id}
                 circleBlurOnInactive={circleBlurOnInactive}
                 isComplete={tree.data.isCompleted}
                 treeAccentColor={treeAccentColor}

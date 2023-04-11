@@ -308,9 +308,7 @@ export function getTreeWidth(coordinates: CirclePositionInCanvasWithLevel[]) {
         }
     });
 
-    // console.log("En iq tree sumar 3 cirlce sizes y en eq 2 circle sizes, adaptar la fn getTreeWidth");
-
-    return Math.abs(maxCoordinate! - minCoordinate!) + 25;
+    return Math.abs(maxCoordinate! - minCoordinate!) + 2 * CIRCLE_SIZE;
 }
 
 function dnDZoneBasedOnNodeCoord(
@@ -450,7 +448,9 @@ export function calculateDimentionsAndRootCoordinates(
 export function centerNodesInCanvas(circlePositions: CirclePositionInCanvasWithLevel[], canvasDimentions: CanvasDimentions) {
     const { horizontalMargin, verticalMargin } = canvasDimentions;
 
+    const treeWidth = getTreeWidth(circlePositions);
+
     return circlePositions.map((p) => {
-        return { ...p, y: p.y + verticalMargin, x: p.x + horizontalMargin } as CirclePositionInCanvasWithLevel;
+        return { ...p, y: p.y + verticalMargin, x: p.x + treeWidth / 2 + horizontalMargin } as CirclePositionInCanvasWithLevel;
     });
 }

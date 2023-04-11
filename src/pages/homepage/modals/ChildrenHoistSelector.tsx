@@ -15,7 +15,6 @@ function ChildrenHoistSelectorModal() {
     const dispatch = useAppDispatch();
 
     const deleteParentAndHoistChildren = (children: Tree<Skill>) => () => {
-        console.log(children, "This is my children");
         const nodeToDelete = findTreeNodeById(currentTree, children.parentId ?? null);
 
         if (!nodeToDelete) return dispatch(closeChildrenHoistSelector());

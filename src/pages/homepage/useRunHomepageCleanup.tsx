@@ -17,7 +17,6 @@ function useRunHomepageCleanup(setSelectedNodeHistory: (v: (string | null)[]) =>
     }, [currentTreeId]);
 
     useEffect(() => {
-        console.log(111);
         dispatch(clearNewNodeState());
 
         const hasTreeChanged = getHasTreeChanged(selectedTreeIdHistory);

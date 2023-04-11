@@ -4,14 +4,14 @@ import { useAppSelector } from "../../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../../redux/screenDimentionsSlice";
 import { NAV_HEGIHT } from "../parameters";
 import { CanvasDimentions } from "../../../../types";
-import { selectCurrentTree, selectTreeSlice } from "../../../../redux/userTreesSlice";
+import { selectTreeSlice } from "../../../../redux/userTreesSlice";
 
 function useCenterCameraOnTreeChange(canvasTouchHandler: CanvasTouchHandler, canvasDimentions: CanvasDimentions, hasTreeChanged: boolean) {
     const { height, width } = useAppSelector(selectScreenDimentions);
     const { currentTreeId } = useAppSelector(selectTreeSlice);
 
     const { horizontalScrollViewRef, verticalScrollViewRef } = canvasTouchHandler;
-    const { canvasHeight, horizontalMargin } = canvasDimentions;
+    const { canvasHeight, horizontalMargin, canvasWidth } = canvasDimentions;
 
     useEffect(() => {
         if (!verticalScrollViewRef.current) return;
@@ -19,7 +19,7 @@ function useCenterCameraOnTreeChange(canvasTouchHandler: CanvasTouchHandler, can
 
         if (!hasTreeChanged) return;
 
-        const x = horizontalMargin / 2;
+        const x = canvasWidth / 2 - width / 2;
 
         const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;
 
