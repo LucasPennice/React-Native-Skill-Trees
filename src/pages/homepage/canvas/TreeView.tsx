@@ -113,7 +113,9 @@ function TreeView({
 
                 {!currentTree && (
                     <View style={[centerFlex, { width, height }]}>
-                        <AppText style={{ color: "white", fontSize: 24 }}>Pick a tree</AppText>
+                        <AppText style={{ color: "white" }} fontSize={24}>
+                            Pick a tree
+                        </AppText>
                     </View>
                 )}
 

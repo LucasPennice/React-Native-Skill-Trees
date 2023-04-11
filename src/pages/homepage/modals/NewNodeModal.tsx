@@ -44,7 +44,9 @@ function NewNodeModal() {
     return (
         <FlingToDismissModal closeModal={closeModal} open={openMenu == "newNode"} leftHeaderButton={{ onPress: addNewNode, title: "Add Tree" }}>
             <View style={{ flex: 1, marginTop: 20 }}>
-                <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }}>Enter the name of the new skill you'll add to the roadmap</AppText>
+                <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }} fontSize={16}>
+                    Enter the name of the new skill you'll add to the roadmap
+                </AppText>
 
                 <AppTextInput
                     placeholder={"Skill Name"}

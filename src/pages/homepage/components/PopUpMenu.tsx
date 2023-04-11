@@ -97,7 +97,9 @@ function PopUpMenu({ foundNodeCoordinates, selectedNodeHistory }: Props) {
                         <TouchableOpacity
                             style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
                             onPress={deleteNode}>
-                            <AppText style={{ color: colors.accent, fontSize: 18 }}>Delete Node</AppText>
+                            <AppText style={{ color: colors.accent }} fontSize={18}>
+                                Delete Node
+                            </AppText>
                         </TouchableOpacity>
                     )}
 
@@ -105,7 +107,9 @@ function PopUpMenu({ foundNodeCoordinates, selectedNodeHistory }: Props) {
                         <TouchableOpacity
                             style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
                             onPress={() => dispatch(openChildrenHoistSelector(currentNode.children!))}>
-                            <AppText style={{ color: colors.accent, fontSize: 18 }}>Delete Node</AppText>
+                            <AppText style={{ color: colors.accent }} fontSize={18}>
+                                Delete Node
+                            </AppText>
                         </TouchableOpacity>
                     )}
                 </View>

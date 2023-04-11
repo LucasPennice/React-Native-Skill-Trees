@@ -155,7 +155,9 @@ function DragAndDropNewNode({
                             borderColor: color,
                         },
                     ]}>
-                    <AppText style={{ fontSize: 22, color: color }}>{newNode.name ? newNode.name[0] : "+"}</AppText>
+                    <AppText style={{ color: color }} fontSize={22}>
+                        {newNode.name ? newNode.name[0] : "+"}
+                    </AppText>
                 </Animated.View>
             </GestureDetector>
         </>

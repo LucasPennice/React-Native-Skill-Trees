@@ -35,7 +35,9 @@ function AddNode() {
                         gap: 15,
                     },
                 ]}>
-                <AppText style={{ fontSize: 15, fontFamily: "helvetica", color: colors.accent }}>Cancel</AppText>
+                <AppText style={{ fontFamily: "helvetica", color: colors.accent }} fontSize={15}>
+                    Cancel
+                </AppText>
             </Pressable>
         );
 
@@ -57,7 +59,9 @@ function AddNode() {
                     gap: 15,
                 },
             ]}>
-            <AppText style={{ fontSize: 15, color: colors.unmarkedText }}>Add Node</AppText>
+            <AppText style={{ color: colors.unmarkedText }} fontSize={15}>
+                Add Node
+            </AppText>
         </Pressable>
     );
 }

@@ -60,16 +60,22 @@ function EditTreeModal() {
         <FlingToDismissModal closeModal={closeModal} open={open} leftHeaderButton={{ onPress: updateTreeNameAndColor(newTreeValue), title: "Save" }}>
             <View style={{ flex: 1 }}>
                 <AppTextInput placeholder={"Tree Name"} textState={[treeName, setTreeName]} containerStyles={{ marginVertical: 20 }} />
-                <AppText style={{ color: colors.unmarkedText }}>Select an accent color for your new tree</AppText>
-                <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }}>
+                <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
+                    Select an accent color for your new tree
+                </AppText>
+                <AppText fontSize={16} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
                     Completed skills and progress bars will show with this color
                 </AppText>
-                <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }}>Scroll to see more colors</AppText>
+                <AppText fontSize={16} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
+                    Scroll to see more colors
+                </AppText>
                 <ColorSelector colorsArray={possibleTreeColors} state={[selectedColor, setSelectedColor]} />
                 <TouchableOpacity
                     style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, marginBottom: 30 }}
                     onPress={confirmDeleteTree}>
-                    <AppText style={{ color: colors.accent, fontSize: 18 }}>Delete this tree</AppText>
+                    <AppText fontSize={16} style={{ color: colors.accent }}>
+                        Delete this tree
+                    </AppText>
                 </TouchableOpacity>
             </View>
         </FlingToDismissModal>

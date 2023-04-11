@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import { SafeAreaView, TouchableOpacity, View } from "react-native";
+import { Platform, SafeAreaView, TouchableOpacity, View } from "react-native";
 import { Provider } from "react-redux";
 import { colors } from "./src/pages/homepage/canvas/parameters";
 import HomePage from "./src/pages/homepage/HomePage";
@@ -10,6 +10,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import NavigationBar from "./src/components/NavigationBar";
 import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import MyTrees from "./src/pages/myTrees/MyTrees";
 import Settings from "./src/pages/settings/Settings";
@@ -19,16 +20,19 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { populateUserTrees, selectTreeSlice } from "./src/redux/userTreesSlice";
 import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { TransitionSpec } from "@react-navigation/stack/lib/typescript/src/types";
 
 export default function App() {
     return (
-        <Provider store={store}>
-            <NavigationContainer>
-                <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-                    <AppWithReduxContext />
-                </SafeAreaView>
-            </NavigationContainer>
-        </Provider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <Provider store={store}>
+                <NavigationContainer>
+                    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+                        <AppWithReduxContext />
+                    </SafeAreaView>
+                </NavigationContainer>
+            </Provider>
+        </GestureHandlerRootView>
     );
 }
 
@@ -67,7 +71,20 @@ function AppWithReduxContext() {
         return null;
     }
 
+    const AndroidStack = createStackNavigator();
     const Stack = createNativeStackNavigator();
+
+    const config: TransitionSpec = {
+        animation: "spring",
+        config: {
+            stiffness: 1000,
+            damping: 500,
+            mass: 3,
+            overshootClamping: true,
+            restDisplacementThreshold: 0.01,
+            restSpeedThreshold: 0.01,
+        },
+    };
 
     return (
         <View
@@ -77,28 +94,67 @@ function AppWithReduxContext() {
                 var { x, y, width, height } = event.nativeEvent.layout;
                 dispatch(updateDimentions({ width, height }));
             }}>
-            <Stack.Navigator
-                initialRouteName={"Home"}
-                screenOptions={{
-                    headerStyle: { backgroundColor: colors.background },
-                    headerTintColor: colors.accent,
-                    headerTitleStyle: { fontWeight: "bold" },
-                    title: "",
-                }}>
-                <Stack.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
-                <Stack.Screen
-                    name="My Trees"
-                    component={MyTrees}
-                    options={{
-                        headerRight: (props) => (
-                            <TouchableOpacity onPress={() => dispatch(open())} style={{ paddingVertical: 10, paddingLeft: 15 }}>
-                                <AppText style={{ color: props.tintColor, fontSize: 16 }}>+ Add Tree</AppText>
-                            </TouchableOpacity>
-                        ),
-                    }}
-                />
-                <Stack.Screen name="Settings" component={Settings} />
-            </Stack.Navigator>
+            {Platform.OS === "android" && (
+                <AndroidStack.Navigator
+                    initialRouteName={"Home"}
+                    screenOptions={{
+                        gestureEnabled: true,
+                        gestureDirection: "horizontal",
+                        cardOverlayEnabled: false,
+                        detachPreviousScreen: false,
+                        presentation: "modal",
+                        cardStyle: { backgroundColor: "transparent" },
+                        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+                        transitionSpec: Platform.OS === "android" ? { close: config, open: config } : undefined,
+                        headerStyle: { backgroundColor: colors.background, shadowColor: "rgba(0,0,0,0)" },
+                        headerTintColor: colors.accent,
+                        headerTitleStyle: { fontWeight: "bold" },
+                        title: "",
+                    }}>
+                    <Stack.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
+                    <Stack.Screen
+                        name="My Trees"
+                        component={MyTrees}
+                        options={{
+                            headerRight: (props) => (
+                                <TouchableOpacity onPress={() => dispatch(open())} style={{ paddingVertical: 10, paddingHorizontal: 15 }}>
+                                    <AppText style={{ color: props.tintColor }} fontSize={16}>
+                                        + Add Tree
+                                    </AppText>
+                                </TouchableOpacity>
+                            ),
+                        }}
+                    />
+                    <Stack.Screen name="Settings" component={Settings} />
+                </AndroidStack.Navigator>
+            )}
+            {Platform.OS !== "android" && (
+                <Stack.Navigator
+                    initialRouteName={"Home"}
+                    screenOptions={{
+                        headerStyle: { backgroundColor: colors.background },
+                        headerTintColor: colors.accent,
+                        headerTitleStyle: { fontWeight: "bold" },
+                        title: "",
+                    }}>
+                    <Stack.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
+                    <Stack.Screen
+                        name="My Trees"
+                        component={MyTrees}
+                        options={{
+                            headerRight: (props) => (
+                                <TouchableOpacity onPress={() => dispatch(open())} style={{ paddingVertical: 10, paddingLeft: 15 }}>
+                                    <AppText style={{ color: props.tintColor }} fontSize={16}>
+                                        + Add Tree
+                                    </AppText>
+                                </TouchableOpacity>
+                            ),
+                        }}
+                    />
+                    <Stack.Screen name="Settings" component={Settings} />
+                </Stack.Navigator>
+            )}
+
             <NavigationBar />
         </View>
     );

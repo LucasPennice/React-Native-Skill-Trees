@@ -1,9 +1,17 @@
-import { Text, TextProps } from "react-native";
+import { Platform, Text, TextProps } from "react-native";
 
-function AppText(props: TextProps) {
+function AppText({ style, fontSize, children }: { style: TextProps["style"]; fontSize: number; children: React.ReactNode }) {
     return (
-        <Text {...props} style={[{ fontFamily: "helvetica" }, props.style]}>
-            {props.children}
+        <Text
+            style={[
+                {
+                    fontFamily: "helvetica",
+                    fontSize,
+                    lineHeight: fontSize,
+                },
+                style,
+            ]}>
+            {children}
         </Text>
     );
 }

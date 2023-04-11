@@ -57,14 +57,22 @@ function AddTreeModal() {
                     onlyContainsLettersAndNumbers
                     containerStyles={{ marginVertical: 20 }}
                 />
-                <AppText style={{ color: colors.unmarkedText }}>Select an accent color for your new tree</AppText>
-                <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }}>
+                <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
+                    Select an accent color for your new tree
+                </AppText>
+                <AppText fontSize={16} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
                     Completed skills and progress bars will show with this color
                 </AppText>
-                <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }}>Scroll to see more colors</AppText>
+                <AppText fontSize={16} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
+                    Scroll to see more colors
+                </AppText>
                 <ColorSelector colorsArray={possibleTreeColors} state={[selectedColor, setSelectedColor]} />
-                <AppText style={{ color: colors.unmarkedText, marginTop: 10 }}>Enter the name of the first skill your tree will have</AppText>
-                <AppText style={{ color: colors.unmarkedText }}>Every other skill will stem from it</AppText>
+                <AppText fontSize={16} style={{ color: colors.unmarkedText, marginTop: 10 }}>
+                    Enter the name of the first skill your tree will have
+                </AppText>
+                <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
+                    Every other skill will stem from it
+                </AppText>
                 <AppTextInput
                     placeholder={"First Skill Name"}
                     onlyContainsLettersAndNumbers

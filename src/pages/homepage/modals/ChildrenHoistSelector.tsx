@@ -59,8 +59,10 @@ function ChildrenHoistSelectorModal() {
                             return (
                                 <Pressable key={idx} style={[centerFlex, styles.pressable]} onPress={confirmDeleteNode(children)}>
                                     <View>
-                                        <AppText style={{ color: "white", fontSize: 20, fontFamily: "helveticaBold" }}>{children.data.name}</AppText>
-                                        <AppText style={{ color: "#FFFFFF5D", fontSize: 20 }}>
+                                        <AppText style={{ color: "white", fontFamily: "helveticaBold" }} fontSize={20}>
+                                            {children.data.name}
+                                        </AppText>
+                                        <AppText style={{ color: "#FFFFFF5D" }} fontSize={20}>
                                             {numberOfChildrenString(children.children?.length ?? 0)}
                                         </AppText>
                                     </View>
@@ -75,11 +77,7 @@ function ChildrenHoistSelectorModal() {
                                                 borderRadius: 60,
                                             },
                                         ]}>
-                                        <AppText
-                                            style={{
-                                                fontSize: 20,
-                                                color: isComplete ? currentTree.accentColor : "white",
-                                            }}>
+                                        <AppText style={{ color: isComplete ? currentTree.accentColor : "white" }} fontSize={20}>
                                             {children.data.name[0]}
                                         </AppText>
                                     </View>

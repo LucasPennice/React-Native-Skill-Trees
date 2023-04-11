@@ -1,4 +1,4 @@
-import { Pressable, View } from "react-native";
+import { Platform, Pressable, View } from "react-native";
 import { Skill, Tree, centerFlex } from "../../types";
 import { colors } from "../homepage/canvas/parameters";
 import { ProgressWheelParams } from "../homepage/components/ProgressIndicatorAndName";
@@ -71,9 +71,13 @@ function TreeCard({ element, changeTreeAndNavigateHome }: { element: Tree<Skill>
                     },
                 ]}>
                 <View>
-                    <AppText style={{ color: "white", fontSize: 20, fontFamily: "helveticaBold" }}>{element.treeName ?? "tree"}</AppText>
-                    <AppText style={{ color: "#FFFFFF5D", fontSize: 20 }}>{completedPercentage.toFixed(0)}% Complete</AppText>
-                    <AppText style={{ color: "#FFFFFF5D", fontSize: 20 }}>
+                    <AppText fontSize={20} style={{ color: "white", fontFamily: "helveticaBold" }}>
+                        {element.treeName ?? "tree"}
+                    </AppText>
+                    <AppText fontSize={20} style={{ color: "#FFFFFF5D" }}>
+                        {completedPercentage.toFixed(0)}% Complete
+                    </AppText>
+                    <AppText fontSize={20} style={{ color: "#FFFFFF5D" }}>
                         {completedNodesQty} skills of {nodesQty}
                     </AppText>
                 </View>

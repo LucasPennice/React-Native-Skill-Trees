@@ -101,7 +101,9 @@ function AppTextInput({
             </Animated.View>
             <Animated.View style={[centerFlex, clearButtonStyles, { position: "absolute", height: 60 }]}>
                 <Pressable style={[centerFlex, { flex: 1, paddingHorizontal: 10 }]} onPress={() => setText("")}>
-                    <AppText style={{ color: "white" }}>Clear</AppText>
+                    <AppText style={{ color: "white" }} fontSize={16}>
+                        Clear
+                    </AppText>
                 </Pressable>
             </Animated.View>
         </View>

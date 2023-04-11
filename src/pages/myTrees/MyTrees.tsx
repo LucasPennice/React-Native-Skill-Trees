@@ -20,9 +20,13 @@ function MyTrees({ navigation }: { navigation: any }) {
     return (
         <>
             <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 10 }}>
-                <AppText style={{ color: "white", fontSize: 32, fontFamily: "helveticaBold", marginBottom: 5 }}>My Trees</AppText>
-                <AppText style={{ color: `${colors.unmarkedText}8D`, marginBottom: 5, fontSize: 16 }}>Tap a roadmap to access it</AppText>
-                <AppText style={{ color: `${colors.unmarkedText}8D`, marginBottom: 20, fontSize: 16 }}>
+                <AppText style={{ color: "white", fontFamily: "helveticaBold", marginBottom: 5 }} fontSize={32}>
+                    My Trees
+                </AppText>
+                <AppText style={{ color: `${colors.unmarkedText}8D`, marginBottom: 5 }} fontSize={16}>
+                    Tap a roadmap to access it
+                </AppText>
+                <AppText style={{ color: `${colors.unmarkedText}8D`, marginBottom: 20 }} fontSize={16}>
                     Long press to access it's options menu
                 </AppText>
 

@@ -43,7 +43,9 @@ function SettingsMenu() {
         <View style={{ position: "absolute", bottom: 10, left: 10 }}>
             <Animated.View style={[animatedMenuStyles, styles.menu]}>
                 <Pressable style={[centerFlex, { width: SETTING_BUTTON_WIDTH, height: 50 }]} onPress={() => dispatch(toggleSettingsMenuOpen())}>
-                    <AppText style={{ color: colors.background, fontFamily: "helveticaBold" }}>{menuOpen ? "Close" : "Settings"}</AppText>
+                    <AppText style={{ color: colors.background, fontFamily: "helveticaBold" }} fontSize={16}>
+                        {menuOpen ? "Close" : "Settings"}
+                    </AppText>
                 </Pressable>
                 {menuOpen && (
                     <>
@@ -51,14 +53,16 @@ function SettingsMenu() {
                             <Pressable
                                 style={[centerFlex, { width: 1.3 * SETTING_BUTTON_WIDTH, height: 50, paddingHorizontal: 10 }]}
                                 onPress={() => dispatch(toggleShowLabel())}>
-                                <AppText style={{ color: colors.background, fontFamily: "helveticaBold" }}>Label {showLabel ? `✓` : `⤫`}</AppText>
+                                <AppText style={{ color: colors.background, fontFamily: "helveticaBold" }} fontSize={16}>
+                                    Label {showLabel ? `✓` : `⤫`}
+                                </AppText>
                             </Pressable>
                         </Animated.View>
                         <Animated.View style={[animatedButtonContainer, centerFlex, { display: "flex", flexDirection: "row", gap: 15 }]}>
                             <Pressable
                                 style={[centerFlex, { width: 2 * SETTING_BUTTON_WIDTH, height: 50, paddingHorizontal: 10 }]}
                                 onPress={() => dispatch(toggleShowDnDGuides())}>
-                                <AppText style={{ color: colors.background, fontFamily: "helveticaBold" }}>
+                                <AppText style={{ color: colors.background, fontFamily: "helveticaBold" }} fontSize={16}>
                                     Drag and Drop Guides {showDragAndDropGuides ? `✓` : `⤫`}
                                 </AppText>
                             </Pressable>

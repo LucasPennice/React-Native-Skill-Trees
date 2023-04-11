@@ -76,7 +76,9 @@ function NavigationBar() {
                             result[idx] = e.nativeEvent.layout.width;
                             setRouteNameLength(result);
                         }}>
-                        <AppText style={{ color: colors.unmarkedText, fontSize: 16 }}>{r}</AppText>
+                        <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
+                            {r}
+                        </AppText>
                     </Pressable>
                 );
             })}
