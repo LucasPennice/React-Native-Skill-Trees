@@ -243,7 +243,7 @@ export function getRootNodeDefaultPosition(id: string) {
 }
 
 export function returnCoordinatesByLevel(coordinates: CirclePositionInCanvasWithLevel[]) {
-    const coordinatesByLevel = {};
+    const coordinatesByLevel: CirclePositionInCanvasWithLevel[][] = [];
 
     coordinates.forEach((c, idx) => {
         //@ts-ignore

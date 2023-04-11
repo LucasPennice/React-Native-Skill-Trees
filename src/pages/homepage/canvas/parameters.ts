@@ -11,6 +11,9 @@ export const NAV_HEGIHT = 65;
 
 export const CANVAS_SPRING = { damping: 29 };
 
+export const PARENT_DND_ZONE_DIMENTIONS = { width: 4 * CIRCLE_SIZE, height: DISTANCE_BETWEEN_GENERATIONS - 3 * CIRCLE_SIZE };
+export const ONLY_CHILDREN_DND_ZONE_DIMENTIONS = { ...PARENT_DND_ZONE_DIMENTIONS };
+
 //This is related to the canvas bezier curve for rendering paths
 export const MAX_OFFSET = 25;
 

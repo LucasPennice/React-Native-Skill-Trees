@@ -1,7 +1,14 @@
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { CanvasDimentions, CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree } from "../../../types";
 import { getRootNodeDefaultPosition, returnCoordinatesByLevel } from "../treeFunctions";
-import { CIRCLE_SIZE, DISTANCE_BETWEEN_CHILDREN, DISTANCE_BETWEEN_GENERATIONS, NAV_HEGIHT } from "./parameters";
+import {
+    CIRCLE_SIZE,
+    DISTANCE_BETWEEN_CHILDREN,
+    DISTANCE_BETWEEN_GENERATIONS,
+    NAV_HEGIHT,
+    ONLY_CHILDREN_DND_ZONE_DIMENTIONS,
+    PARENT_DND_ZONE_DIMENTIONS,
+} from "./parameters";
 
 export function getCirclePositions(currentTree?: Tree<Skill>): CirclePositionInCanvasWithLevel[] {
     if (!currentTree) return [];
@@ -10,12 +17,41 @@ export function getCirclePositions(currentTree?: Tree<Skill>): CirclePositionInC
 
     if (!Array.isArray(tentativeCoordinates)) tentativeCoordinates = [tentativeCoordinates];
 
-    const result = getNodesFinalCoordinates(tentativeCoordinates);
+    let result = getNodesCoodinatesWithNoOverlap(tentativeCoordinates);
+
+    result = separateNodesToAvoidDnDZoneOverlap(result);
 
     return result;
 }
 
-export function getNodesFinalCoordinates(tentativeCoordinates: CirclePositionInCanvasWithLevel[]) {
+function separateNodesToAvoidDnDZoneOverlap(coord: CirclePositionInCanvasWithLevel[]) {
+    let result = [...coord];
+
+    const maxLevel = Math.max(...result.map((c) => c.level));
+
+    for (let idx = 2; idx < maxLevel + 1; idx++) {
+        const level = idx;
+        //If we are on level 4, this array contains the coordinates & dimentions for a union between the parent and only child drag and drop zone (and the space in the middle)
+        let dndBoundriesForLastLevel = getDndBoundriesForLastLevel(level);
+
+        console.log("----");
+        console.log("we are at level", level);
+        console.log("coordsare", dndBoundriesForLastLevel);
+        console.log("----");
+    }
+
+    return coord;
+
+    function getDndBoundriesForLastLevel(currentLevel: number) {
+        const coordOnLastLevel = result.filter((c) => c.level === currentLevel - 1);
+
+        return coordOnLastLevel.map((c) => {
+            return {};
+        });
+    }
+}
+
+function getNodesCoodinatesWithNoOverlap(tentativeCoordinates: CirclePositionInCanvasWithLevel[]) {
     let result = [...tentativeCoordinates];
 
     const maxLevel = Math.max(...result.map((c) => c.level));
@@ -239,6 +275,71 @@ export function getTreeWidth(coordinates: CirclePositionInCanvasWithLevel[]) {
     return Math.abs(maxCoordinate! - minCoordinate!) + 25;
 }
 
+function dnDZoneBasedOnNodeCoord(
+    nodeCoord: CirclePositionInCanvasWithLevel,
+    dndType: DnDZone["type"],
+    nodeLevelCoordinates: CirclePositionInCanvasWithLevel[]
+): DnDZone {
+    if (dndType === "PARENT")
+        return {
+            x: nodeCoord.x - PARENT_DND_ZONE_DIMENTIONS.width / 2,
+            y: nodeCoord.y - PARENT_DND_ZONE_DIMENTIONS.height - 1.5 * CIRCLE_SIZE,
+            height: PARENT_DND_ZONE_DIMENTIONS.height,
+            width: PARENT_DND_ZONE_DIMENTIONS.width,
+            type: "PARENT",
+            ofNode: nodeCoord.id,
+        };
+
+    const brotherDndZoneMinWidth = DISTANCE_BETWEEN_CHILDREN / 2;
+    const brotherDndZoneHeight = 3 * CIRCLE_SIZE;
+
+    if (dndType === "LEFT_BROTHER") {
+        const width = isNotFirstNode(nodeCoord) ? getLevelNodeDistance(nodeCoord) - 1 * CIRCLE_SIZE + CIRCLE_SIZE : brotherDndZoneMinWidth;
+        return {
+            x: nodeCoord.x - width,
+            y: nodeCoord.y - brotherDndZoneHeight / 2,
+            height: brotherDndZoneHeight,
+            width,
+            type: "LEFT_BROTHER",
+            ofNode: nodeCoord.id,
+        };
+    }
+
+    if (dndType === "RIGHT_BROTHER")
+        return {
+            x: nodeCoord.x,
+            y: nodeCoord.y - brotherDndZoneHeight / 2,
+            height: brotherDndZoneHeight,
+            width: brotherDndZoneMinWidth,
+            type: "RIGHT_BROTHER",
+            ofNode: nodeCoord.id,
+        };
+
+    if (dndType === "ONLY_CHILDREN")
+        return {
+            height: ONLY_CHILDREN_DND_ZONE_DIMENTIONS.height,
+            width: ONLY_CHILDREN_DND_ZONE_DIMENTIONS.width,
+            x: nodeCoord.x - ONLY_CHILDREN_DND_ZONE_DIMENTIONS.width / 2,
+            y: nodeCoord.y + 1.5 * CIRCLE_SIZE,
+            type: "ONLY_CHILDREN",
+            ofNode: nodeCoord.id,
+        };
+
+    throw "dndType not supported in coordOfDnDZoneBasedOnNodeCoord";
+
+    function getLevelNodeDistance(pos: CirclePositionInCanvasWithLevel) {
+        if (nodeLevelCoordinates.length === 1) return DISTANCE_BETWEEN_CHILDREN;
+
+        return Math.abs(nodeLevelCoordinates[1].x - nodeLevelCoordinates[0].x);
+    }
+
+    function isNotFirstNode(pos: CirclePositionInCanvasWithLevel) {
+        const foo = nodeLevelCoordinates.filter((x) => x.parentId === pos.parentId);
+
+        return foo[0].id !== pos.id && foo.length > 1;
+    }
+}
+
 export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositionInCanvasWithLevel[]) {
     const result: DnDZone[] = [];
 
@@ -249,51 +350,26 @@ export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositio
 
         const isRoot = pos.level === 0;
 
-        const height = DISTANCE_BETWEEN_GENERATIONS - 3 * CIRCLE_SIZE;
-        const width = 4 * CIRCLE_SIZE;
-        result.push({ height, width, x: pos.x - width / 2, y: pos.y - height - 1.5 * CIRCLE_SIZE, type: "PARENT", ofNode: pos.id });
+        const parentNodeDndZone = dnDZoneBasedOnNodeCoord(pos, "PARENT", coordinatesByLevel[pos.level]);
+        result.push(parentNodeDndZone);
 
         if (!isRoot) {
-            const minWidth = DISTANCE_BETWEEN_CHILDREN / 2;
-            const height = 3 * CIRCLE_SIZE;
-            const width = isNotFirstNode(pos) ? getLevelNodeDistance(pos) - 1 * CIRCLE_SIZE + CIRCLE_SIZE : minWidth;
-            result.push({ height, width, x: pos.x - width, y: pos.y - height / 2, type: "LEFT_BROTHER", ofNode: pos.id });
+            const leftBrotherDndZone = dnDZoneBasedOnNodeCoord(pos, "LEFT_BROTHER", coordinatesByLevel[pos.level]);
+            result.push(leftBrotherDndZone);
 
             if (isLastNodeOfCluster(pos)) {
-                result.push({
-                    height,
-                    width: minWidth,
-                    x: pos.x,
-                    y: pos.y - height / 2,
-                    type: "RIGHT_BROTHER",
-                    ofNode: pos.id,
-                });
+                const rightBrotherDndZone = dnDZoneBasedOnNodeCoord(pos, "RIGHT_BROTHER", coordinatesByLevel[pos.level]);
+                result.push(rightBrotherDndZone);
             }
         }
 
         if (doesntHaveChildren(pos)) {
-            const height = DISTANCE_BETWEEN_GENERATIONS;
-            result.push({
-                height,
-                width: 4 * CIRCLE_SIZE,
-                x: pos.x - 2 * CIRCLE_SIZE,
-                y: pos.y + 1.5 * CIRCLE_SIZE,
-                type: "ONLY_CHILDREN",
-                ofNode: pos.id,
-            });
+            const onlyChildrenDndZone = dnDZoneBasedOnNodeCoord(pos, "ONLY_CHILDREN", coordinatesByLevel[pos.level]);
+            result.push(onlyChildrenDndZone);
         }
     }
 
     return result;
-
-    function getLevelNodeDistance(pos: CirclePositionInCanvasWithLevel) {
-        //@ts-ignore
-        const levelCoordinates = coordinatesByLevel[pos.level] as CirclePositionInCanvasWithLevel[];
-
-        if (levelCoordinates.length === 1) return DISTANCE_BETWEEN_CHILDREN;
-
-        return Math.abs(levelCoordinates[1].x - levelCoordinates[0].x);
-    }
 
     function isLastNodeOfCluster(pos: CirclePositionInCanvasWithLevel) {
         //@ts-ignore
@@ -308,15 +384,6 @@ export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositio
         const foo = circlePositionsInCanvas.find((x) => x.parentId === pos.id);
 
         return foo === undefined;
-    }
-
-    function isNotFirstNode(pos: CirclePositionInCanvasWithLevel) {
-        //@ts-ignore
-        const levelCoordinates = coordinatesByLevel[pos.level] as CirclePositionInCanvasWithLevel[];
-
-        const foo = levelCoordinates.filter((x) => x.parentId === pos.parentId);
-
-        return foo[0].id !== pos.id && foo.length > 1;
     }
 }
 
