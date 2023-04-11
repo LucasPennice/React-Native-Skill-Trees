@@ -2,6 +2,7 @@ import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { CanvasDimentions, CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree } from "../../../types";
 import { getRootNodeDefaultPosition, returnCoordinatesByLevel } from "../treeFunctions";
 import {
+    BROTHER_DND_ZONE_HEIGHT,
     CIRCLE_SIZE,
     DISTANCE_BETWEEN_CHILDREN,
     DISTANCE_BETWEEN_GENERATIONS,
@@ -19,7 +20,12 @@ export function getCirclePositions(currentTree?: Tree<Skill>): CirclePositionInC
 
     let result = getNodesCoodinatesWithNoOverlap(tentativeCoordinates);
 
-    result = separateNodesToAvoidDnDZoneOverlap(result);
+    let prevRes = "";
+
+    while (prevRes !== JSON.stringify(result)) {
+        prevRes = JSON.stringify(result);
+        result = separateNodesToAvoidDnDZoneOverlap(result);
+    }
 
     return result;
 }
@@ -28,26 +34,59 @@ function separateNodesToAvoidDnDZoneOverlap(coord: CirclePositionInCanvasWithLev
     let result = [...coord];
 
     const maxLevel = Math.max(...result.map((c) => c.level));
+    const coordByLevel = returnCoordinatesByLevel(coord);
 
-    for (let idx = 2; idx < maxLevel + 1; idx++) {
+    //We don't check the last level because there cant be dnd zone overlap there
+    for (let idx = 1; idx < maxLevel; idx++) {
         const level = idx;
-        //If we are on level 4, this array contains the coordinates & dimentions for a union between the parent and only child drag and drop zone (and the space in the middle)
-        let dndBoundriesForLastLevel = getDndBoundriesForLastLevel(level);
+        const coordOfLevel = coordByLevel[level];
+        const coordOfNextLevel = coordByLevel[level + 1];
 
-        console.log("----");
-        console.log("we are at level", level);
-        console.log("coordsare", dndBoundriesForLastLevel);
-        console.log("----");
+        //Loops through each of the level coordinates
+        for (let coordIdx = 0; coordIdx < coordOfLevel.length; coordIdx++) {
+            const currentCoord = coordOfLevel[coordIdx];
+
+            if (nodeDoesntHaveChildren(coord, currentCoord)) {
+                //Me fijo si overlapea la zona de este nodo con el nivel de abajo
+                const overlapWithNextLevelDndZone = getIsOverlapWithNextLevelDndZone(currentCoord, coordOfLevel, coordOfNextLevel);
+
+                if (overlapWithNextLevelDndZone.isOverlap) {
+                    result = spaceNodesOfLevelAndBelow(level, overlapWithNextLevelDndZone.overlap, result);
+                }
+            }
+        }
     }
 
-    return coord;
+    return result;
 
-    function getDndBoundriesForLastLevel(currentLevel: number) {
-        const coordOnLastLevel = result.filter((c) => c.level === currentLevel - 1);
+    function getIsOverlapWithNextLevelDndZone(
+        coord: CirclePositionInCanvasWithLevel,
+        coordOfLevel: CirclePositionInCanvasWithLevel[],
+        coordOfNextLevel: CirclePositionInCanvasWithLevel[]
+    ) {
+        const dndZone = dnDZoneBasedOnNodeCoord(coord, "ONLY_CHILDREN", coordOfLevel);
 
-        return coordOnLastLevel.map((c) => {
-            return {};
+        const effectZone: DnDZone = { ...dndZone, height: dndZone.height + BROTHER_DND_ZONE_HEIGHT + PARENT_DND_ZONE_DIMENTIONS.height };
+
+        const dndZonesOfNextLevel = coordOfNextLevel.map((n) => dnDZoneBasedOnNodeCoord(n, "PARENT", coordOfNextLevel));
+
+        let maxOverlap = 0;
+
+        dndZonesOfNextLevel.forEach((nextLevelDndZone) => {
+            //The "parent" is overlapping the "only_child" and the parent's x is larger than onlychild's x
+            let isOverlapOnRight = effectZone.x <= nextLevelDndZone.x && nextLevelDndZone.x <= effectZone.x + effectZone.width;
+            //The other option
+            let isOverlapOnLeft = nextLevelDndZone.x <= effectZone.x && effectZone.x <= nextLevelDndZone.x + nextLevelDndZone.width;
+
+            let overlapQty = 0;
+
+            if (isOverlapOnRight) overlapQty = effectZone.x + effectZone.width - nextLevelDndZone.x;
+            if (isOverlapOnLeft) overlapQty = nextLevelDndZone.x + nextLevelDndZone.width - effectZone.x;
+
+            if (overlapQty > maxOverlap) maxOverlap = overlapQty;
         });
+
+        return { isOverlap: maxOverlap != 0, overlap: maxOverlap };
     }
 }
 
@@ -91,97 +130,96 @@ function getNodesCoodinatesWithNoOverlap(tentativeCoordinates: CirclePositionInC
     }
 
     return result;
+}
+function spaceNodesOfLevelAndBelow(level: number, distance: number, coordinates: CirclePositionInCanvasWithLevel[]) {
+    if (level < 0) throw "spaceNodesOfLevelAndBelow level argument < 0";
 
-    function spaceNodesOfLevelAndBelow(level: number, distance: number, coordinates: CirclePositionInCanvasWithLevel[]) {
-        if (level < 0) throw "spaceNodesOfLevelAndBelow level argument < 0";
+    const coordinatesOfParents = coordinates.filter((c) => c.level === level);
 
-        const coordinatesOfParents = coordinates.filter((c) => c.level === level);
+    const newParentCoodinates = returnSpacedParentCoordinates(coordinatesOfParents);
 
-        const newParentCoodinates = returnSpacedParentCoordinates(coordinatesOfParents);
+    const coordinatesSortedByLevel = coordinates.sort((a, b) => a.level - b.level);
 
-        const coordinatesSortedByLevel = coordinates.sort((a, b) => a.level - b.level);
+    let result: CirclePositionInCanvasWithLevel[] = [];
 
+    for (let idx = 0; idx < coordinatesSortedByLevel.length; idx++) {
+        const c = coordinatesSortedByLevel[idx];
+
+        if (c.level < level) result.push(c);
+
+        if (c.level === level) {
+            const newParentCoordinate = newParentCoodinates.find((p) => p.id === c.id);
+
+            if (!newParentCoordinate) throw "spaceNodesOfLevelAndBelow couldn't find parent node in newCoordinate array";
+
+            result.push(newParentCoordinate);
+        }
+
+        if (c.level > level) {
+            if (!c.parentId) throw "coordinate without parent id in spaceNodesOfLevelAndBelow";
+
+            const parentCoordinate = result.find((p) => p.id === c.parentId);
+            const parentChildren = coordinatesSortedByLevel.filter((n) => n.parentId === c.parentId);
+            const parentChildrenIds = parentChildren.map((r) => r.id);
+
+            if (!parentCoordinate) throw "spaceNodesOfLevelAndBelow Couldn't find parent node in result";
+
+            const newChildCoordinate = returnCoordinatesBasedOnParent(c.id, {
+                childrenIds: parentChildrenIds,
+                coordinates: parentCoordinate,
+                id: c.parentId,
+            });
+
+            result.push(newChildCoordinate);
+        }
+    }
+
+    return result;
+
+    function returnSpacedParentCoordinates(coordinatesOfParents: CirclePositionInCanvasWithLevel[]) {
         let result: CirclePositionInCanvasWithLevel[] = [];
 
-        for (let idx = 0; idx < coordinatesSortedByLevel.length; idx++) {
-            const c = coordinatesSortedByLevel[idx];
+        if (coordinatesOfParents.length % 2 === 0) {
+            //Pair number of parents
 
-            if (c.level < level) result.push(c);
+            coordinatesOfParents.forEach((parent, idx) => {
+                //If the current parent belongs to the first half of parents then we subtract to X in order to space it
+                //otherwise we add to X
+                const isOnfirstHalf = idx < coordinatesOfParents.length / 2 - 1;
+                const elementsOnEachHalf = coordinatesOfParents.length / 2;
 
-            if (c.level === level) {
-                const newParentCoordinate = newParentCoodinates.find((p) => p.id === c.id);
+                if (isOnfirstHalf) {
+                    result.push({ ...parent, x: parent.x - ((elementsOnEachHalf + 1 - idx * 2) / 2) * distance });
+                } else {
+                    const idxSinceMiddle = idx - elementsOnEachHalf;
+                    result.push({ ...parent, x: parent.x + ((idxSinceMiddle * 2 + 1) / 2) * distance });
+                }
+            });
+        } else {
+            coordinatesOfParents.forEach((parent, idx) => {
+                //If the current parent belongs to the first half of parents then we subtract to X in order to space it
+                //otherwise we add to X
+                const isOnfirstHalf = idx < coordinatesOfParents.length / 2;
+                const elementsOnEachHalf = (coordinatesOfParents.length - 1) / 2;
 
-                if (!newParentCoordinate) throw "spaceNodesOfLevelAndBelow couldn't find parent node in newCoordinate array";
-
-                result.push(newParentCoordinate);
-            }
-
-            if (c.level > level) {
-                if (!c.parentId) throw "coordinate without parent id in spaceNodesOfLevelAndBelow";
-
-                const parentCoordinate = result.find((p) => p.id === c.parentId);
-                const parentChildren = coordinatesSortedByLevel.filter((n) => n.parentId === c.parentId);
-                const parentChildrenIds = parentChildren.map((r) => r.id);
-
-                if (!parentCoordinate) throw "spaceNodesOfLevelAndBelow Couldn't find parent node in result";
-
-                const newChildCoordinate = returnCoordinatesBasedOnParent(c.id, {
-                    childrenIds: parentChildrenIds,
-                    coordinates: parentCoordinate,
-                    id: c.parentId,
-                });
-
-                result.push(newChildCoordinate);
-            }
+                //The element in the middle stays the same
+                if (idx === (coordinatesOfParents.length - 1) / 2) {
+                    result.push({ ...parent });
+                } else {
+                    if (isOnfirstHalf) {
+                        result.push({
+                            ...parent,
+                            x: parent.x - (elementsOnEachHalf - idx) * distance,
+                        });
+                    } else {
+                        const idxSinceMiddle = idx - elementsOnEachHalf - 1;
+                        result.push({ ...parent, x: parent.x + (idxSinceMiddle * 2 + 1) * distance });
+                    }
+                }
+            });
         }
 
         return result;
-
-        function returnSpacedParentCoordinates(coordinatesOfParents: CirclePositionInCanvasWithLevel[]) {
-            let result: CirclePositionInCanvasWithLevel[] = [];
-
-            if (coordinatesOfParents.length % 2 === 0) {
-                //Pair number of parents
-
-                coordinatesOfParents.forEach((parent, idx) => {
-                    //If the current parent belongs to the first half of parents then we subtract to X in order to space it
-                    //otherwise we add to X
-                    const isOnfirstHalf = idx < coordinatesOfParents.length / 2 - 1;
-                    const elementsOnEachHalf = coordinatesOfParents.length / 2;
-
-                    if (isOnfirstHalf) {
-                        result.push({ ...parent, x: parent.x - ((elementsOnEachHalf + 1 - idx * 2) / 2) * distance });
-                    } else {
-                        const idxSinceMiddle = idx - elementsOnEachHalf;
-                        result.push({ ...parent, x: parent.x + ((idxSinceMiddle * 2 + 1) / 2) * distance });
-                    }
-                });
-            } else {
-                coordinatesOfParents.forEach((parent, idx) => {
-                    //If the current parent belongs to the first half of parents then we subtract to X in order to space it
-                    //otherwise we add to X
-                    const isOnfirstHalf = idx < coordinatesOfParents.length / 2;
-                    const elementsOnEachHalf = (coordinatesOfParents.length - 1) / 2;
-
-                    //The element in the middle stays the same
-                    if (idx === (coordinatesOfParents.length - 1) / 2) {
-                        result.push({ ...parent });
-                    } else {
-                        if (isOnfirstHalf) {
-                            result.push({
-                                ...parent,
-                                x: parent.x - (elementsOnEachHalf - idx) * distance,
-                            });
-                        } else {
-                            const idxSinceMiddle = idx - elementsOnEachHalf - 1;
-                            result.push({ ...parent, x: parent.x + (idxSinceMiddle * 2 + 1) * distance });
-                        }
-                    }
-                });
-            }
-
-            return result;
-        }
     }
 }
 
@@ -291,14 +329,13 @@ function dnDZoneBasedOnNodeCoord(
         };
 
     const brotherDndZoneMinWidth = DISTANCE_BETWEEN_CHILDREN / 2;
-    const brotherDndZoneHeight = 3 * CIRCLE_SIZE;
 
     if (dndType === "LEFT_BROTHER") {
         const width = isNotFirstNode(nodeCoord) ? getLevelNodeDistance(nodeCoord) - 1 * CIRCLE_SIZE + CIRCLE_SIZE : brotherDndZoneMinWidth;
         return {
             x: nodeCoord.x - width,
-            y: nodeCoord.y - brotherDndZoneHeight / 2,
-            height: brotherDndZoneHeight,
+            y: nodeCoord.y - BROTHER_DND_ZONE_HEIGHT / 2,
+            height: BROTHER_DND_ZONE_HEIGHT,
             width,
             type: "LEFT_BROTHER",
             ofNode: nodeCoord.id,
@@ -308,8 +345,8 @@ function dnDZoneBasedOnNodeCoord(
     if (dndType === "RIGHT_BROTHER")
         return {
             x: nodeCoord.x,
-            y: nodeCoord.y - brotherDndZoneHeight / 2,
-            height: brotherDndZoneHeight,
+            y: nodeCoord.y - BROTHER_DND_ZONE_HEIGHT / 2,
+            height: BROTHER_DND_ZONE_HEIGHT,
             width: brotherDndZoneMinWidth,
             type: "RIGHT_BROTHER",
             ofNode: nodeCoord.id,
@@ -363,7 +400,7 @@ export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositio
             }
         }
 
-        if (doesntHaveChildren(pos)) {
+        if (nodeDoesntHaveChildren(circlePositionsInCanvas, pos)) {
             const onlyChildrenDndZone = dnDZoneBasedOnNodeCoord(pos, "ONLY_CHILDREN", coordinatesByLevel[pos.level]);
             result.push(onlyChildrenDndZone);
         }
@@ -379,12 +416,12 @@ export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositio
 
         return foo[foo.length - 1].id === pos.id;
     }
+}
 
-    function doesntHaveChildren(pos: CirclePositionInCanvasWithLevel) {
-        const foo = circlePositionsInCanvas.find((x) => x.parentId === pos.id);
+function nodeDoesntHaveChildren(circlePositionsInCanvas: CirclePositionInCanvasWithLevel[], pos: CirclePositionInCanvasWithLevel) {
+    const foo = circlePositionsInCanvas.find((x) => x.parentId === pos.id);
 
-        return foo === undefined;
-    }
+    return foo === undefined;
 }
 
 export function calculateDimentionsAndRootCoordinates(
