@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { findTreeNodeById } from "../../treeFunctions";
 import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../../types";
 import { didTapCircle } from "../functions";
-import { Dimensions, ScrollView } from "react-native";
+import { Dimensions, Platform, ScrollView } from "react-native";
 import { CIRCLE_SIZE_SELECTED } from "../parameters";
 import { useAppDispatch, useAppSelector } from "../../../../redux/reduxHooks";
 import { selectTreeSlice, setSelectedNode } from "../../../../redux/userTreesSlice";
@@ -44,6 +44,9 @@ const useCanvasTouchHandler = (props: Props) => {
     const touchHandler = useTouchHandler(
         {
             onEnd: (touchInfo) => {
+                //Avoids bug on android
+                if (touchInfo.type !== 2) return;
+
                 const circleTapped = circlePositionsInCanvas.find(didTapCircle(touchInfo));
 
                 if (circleTapped === undefined) {

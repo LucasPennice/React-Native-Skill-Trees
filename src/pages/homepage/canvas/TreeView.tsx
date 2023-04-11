@@ -70,6 +70,9 @@ function TreeView({
     const updateVerticalScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => updateScrollOffset("vertical", e.nativeEvent.contentOffset.y);
     const updateHorizontalScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => updateScrollOffset("horizontal", e.nativeEvent.contentOffset.x);
 
+    // console.log(selectedNode && foundNodeCoordinates && currentTree);
+    // console.log("selectedNode", selectedNode);
+
     return (
         <ScrollView
             showsVerticalScrollIndicator={false}
