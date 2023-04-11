@@ -87,6 +87,11 @@ function Node({
     const outerRectSizeSharedValue = useSharedValue(outerRectSizeInitial);
 
     useEffect(() => {
+        outerRectXSharedValue.value = coord.cx;
+        outerRectYSharedValue.value = coord.cy;
+    }, [coord]);
+
+    useEffect(() => {
         const size = isComplete ? outerRectSizeOnComplete : outerRectSizeInitial;
         const coord = getCenteredCoordinates(size, cx, cy);
 

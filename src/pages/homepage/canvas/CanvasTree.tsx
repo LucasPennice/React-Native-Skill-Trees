@@ -77,6 +77,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
     return (
         <>
             <CanvasPath
+                key={`${tree.data.id}path`}
                 coordinates={{ cx, cy, pathInitialPoint }}
                 isRoot={Boolean(tree.isRoot)}
                 pathBlurOnInactive={pathBlurOnInactive}
@@ -87,7 +88,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
                 tree.children.map((element, idx) => {
                     return (
                         <CanvasTree
-                            key={idx}
+                            key={element.data.id}
                             tree={element}
                             wholeTree={wholeTree}
                             hasTreeChanged={hasTreeChanged}
@@ -101,7 +102,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
             {showLabel && <Label treeAccentColor={treeAccentColor} tree={tree} coord={{ cx, cy }} pathBlurOnInactive={pathBlurOnInactive} />}
 
             <Node
-                key={tree.data.id}
+                key={`${tree.data.id}node`}
                 circleBlurOnInactive={circleBlurOnInactive}
                 isComplete={tree.data.isCompleted}
                 treeAccentColor={treeAccentColor}
