@@ -41,7 +41,6 @@ type TreeViewProps = {
     circlePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     tentativeCirlcePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     canvasTouchHandler: CanvasTouchHandler;
-    selectedNodeHistory: (string | null)[];
     updateScrollOffset: (scrollViewType: "horizontal" | "vertical", newValue: number) => void;
     hasTreeChanged: boolean;
 };
@@ -52,7 +51,6 @@ function TreeView({
     tentativeCirlcePositionsInCanvas,
     circlePositionsInCanvas,
     canvasTouchHandler,
-    selectedNodeHistory,
     updateScrollOffset,
     hasTreeChanged,
 }: TreeViewProps) {
@@ -137,13 +135,13 @@ function TreeView({
                     </View>
                 )}
 
-                {selectedNode && foundNodeCoordinates && currentTree && (
-                    <PopUpMenu foundNodeCoordinates={foundNodeCoordinates} selectedNodeHistory={selectedNodeHistory} />
-                )}
+                {selectedNode && foundNodeCoordinates && currentTree && <PopUpMenu foundNodeCoordinates={foundNodeCoordinates} />}
             </ScrollView>
         </ScrollView>
     );
 }
+
+TreeView.whyDidYouRender = true;
 
 export default TreeView;
 

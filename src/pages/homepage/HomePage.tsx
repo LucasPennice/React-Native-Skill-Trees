@@ -31,7 +31,6 @@ function HomePage() {
     const { currentTreeId } = useAppSelector(selectTreeSlice);
     const screenDimentions = useAppSelector(selectScreenDimentions);
     //Local State
-    const [selectedNodeHistory, setSelectedNodeHistory] = useState<(null | string)[]>([null]);
     const [scrollOffset, setScrollOffset] = useState({ x: 0, y: 0 });
     //Derived State
     const circlePositions = getCirclePositions(currentTree);
@@ -46,10 +45,10 @@ function HomePage() {
     const tentativeCirclePositions = getCirclePositions(tentativeModifiedTree);
     const tentativeCirlcePositionsInCanvas = centerNodesInCanvas(tentativeCirclePositions, canvasDimentions);
 
-    const canvasTouchHandler = useCanvasTouchHandler({ setSelectedNodeHistory, circlePositionsInCanvas, tree: currentTree });
+    const canvasTouchHandler = useCanvasTouchHandler({ circlePositionsInCanvas, tree: currentTree });
     //
 
-    const hasTreeChanged = useRunHomepageCleanup(setSelectedNodeHistory);
+    const hasTreeChanged = useRunHomepageCleanup();
 
     const updateScrollOffset = (scrollViewType: "horizontal" | "vertical", newValue: number) => {
         if (scrollViewType === "horizontal") {
@@ -74,7 +73,6 @@ function HomePage() {
                 circlePositionsInCanvas={circlePositionsInCanvas}
                 tentativeCirlcePositionsInCanvas={tentativeCirlcePositionsInCanvas}
                 canvasTouchHandler={canvasTouchHandler}
-                selectedNodeHistory={selectedNodeHistory}
                 updateScrollOffset={updateScrollOffset}
                 hasTreeChanged={hasTreeChanged}
             />
@@ -164,5 +162,10 @@ function DragAndDropNewNode({
         </>
     );
 }
+
+HomePage.whyDidYouRender = {
+    logOnDifferentValues: true,
+    customName: "Homeapge",
+};
 
 export default HomePage;

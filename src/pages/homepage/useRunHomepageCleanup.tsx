@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { clearNewNodeState } from "../../redux/newNodeSlice";
 import { selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../redux/userTreesSlice";
 
-function useRunHomepageCleanup(setSelectedNodeHistory: (v: (string | null)[]) => void) {
+function useRunHomepageCleanup() {
     //Redux Related
     const { currentTreeId } = useAppSelector(selectTreeSlice);
     const dispatch = useAppDispatch();
@@ -23,7 +23,6 @@ function useRunHomepageCleanup(setSelectedNodeHistory: (v: (string | null)[]) =>
 
         if (hasTreeChanged) {
             dispatch(setSelectedNode(null));
-            setSelectedNodeHistory([]);
         }
     }, [selectedTreeIdHistory]);
 

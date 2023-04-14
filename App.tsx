@@ -1,3 +1,5 @@
+/// <reference types="@welldone-software/why-did-you-render" />
+import "./wdyr";
 import { useCallback, useEffect } from "react";
 import { Platform, SafeAreaView, StatusBar, TouchableOpacity, View } from "react-native";
 import { Provider } from "react-redux";

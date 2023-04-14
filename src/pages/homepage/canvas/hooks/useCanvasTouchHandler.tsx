@@ -9,7 +9,6 @@ import { useAppDispatch, useAppSelector } from "../../../../redux/reduxHooks";
 import { selectTreeSlice, setSelectedNode } from "../../../../redux/userTreesSlice";
 
 type Props = {
-    setSelectedNodeHistory: React.Dispatch<React.SetStateAction<(string | null)[]>>;
     circlePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     tree?: Tree<Skill>;
 };
@@ -27,7 +26,7 @@ const useCanvasTouchHandler = (props: Props) => {
     const { selectedNode } = useAppSelector(selectTreeSlice);
     const dispatch = useAppDispatch();
     //
-    const { setSelectedNodeHistory, circlePositionsInCanvas, tree } = props;
+    const { circlePositionsInCanvas, tree } = props;
     const { height } = Dimensions.get("screen");
     const verticalScrollViewRef = useRef<ScrollView | null>(null);
     const horizontalScrollViewRef = useRef<ScrollView | null>(null);
@@ -50,7 +49,6 @@ const useCanvasTouchHandler = (props: Props) => {
                 const circleTapped = circlePositionsInCanvas.find(didTapCircle(touchInfo));
 
                 if (circleTapped === undefined) {
-                    setSelectedNodeHistory((prev) => [...prev, null]);
                     return dispatch(setSelectedNode(null));
                 }
 
@@ -62,11 +60,9 @@ const useCanvasTouchHandler = (props: Props) => {
 
                 if (selectedNode != nodeInTree.id) {
                     scrollToCoordinates(circleTapped.x - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL, circleTapped.y - height / 2);
-                    setSelectedNodeHistory((prev) => [...prev, nodeInTree.id]);
                     return dispatch(setSelectedNode(nodeInTree.id));
                 }
 
-                setSelectedNodeHistory((prev) => [...prev, null]);
                 return dispatch(setSelectedNode(null));
             },
         },

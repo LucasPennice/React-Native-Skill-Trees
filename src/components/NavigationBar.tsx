@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Dimensions, Pressable, View } from "react-native";
 import Animated, { useAnimatedStyle, withSpring } from "react-native-reanimated";
 import AppText from "./AppText";
@@ -66,7 +66,7 @@ function NavigationBar({ data: APP_ROUTES }: { data: Routes }) {
                 ]}
             />
             {APP_ROUTES.map((appRoute, idx) => {
-                if (appRoute.hideFromNavBar) return <></>;
+                if (appRoute.hideFromNavBar) return <Fragment key={idx}></Fragment>;
 
                 return (
                     <Pressable
