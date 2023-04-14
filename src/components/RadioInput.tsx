@@ -1,11 +1,21 @@
-import { Pressable } from "react-native";
+import { Pressable, ViewProps } from "react-native";
 import { useEffect } from "react";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { centerFlex } from "../types";
 import { colors } from "../pages/homepage/canvas/parameters";
 import AppText from "./AppText";
 
-function RadioInput({ state, text, onPress }: { state: [boolean, (v: boolean) => void]; text: string; onPress?: () => void }) {
+function RadioInput({
+    state,
+    text,
+    onPress,
+    style,
+}: {
+    state: [boolean, (v: boolean) => void];
+    text: string;
+    onPress?: () => void;
+    style?: ViewProps["style"];
+}) {
     const [mastered, setMastered] = state;
 
     const isMastered = useSharedValue(false);
@@ -35,6 +45,7 @@ function RadioInput({ state, text, onPress }: { state: [boolean, (v: boolean) =>
                     height: 60,
                     marginBottom: 30,
                 },
+                style,
             ]}
             //@ts-ignore
             onPress={() => {

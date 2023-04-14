@@ -5,9 +5,12 @@ import Animated, { useAnimatedStyle, withSpring } from "react-native-reanimated"
 import AppText from "./AppText";
 import { colors, NAV_HEGIHT } from "../pages/homepage/canvas/parameters";
 import { centerFlex, MENU_DAMPENING } from "../types";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Routes, StackNavigatorParams } from "../../App";
 
-function NavigationBar() {
-    const nav = useNavigation();
+function NavigationBar({ data: APP_ROUTES }: { data: Routes }) {
+    const nav = useNavigation<NativeStackScreenProps<StackNavigatorParams>["navigation"]>();
+
     const { width } = Dimensions.get("screen");
 
     const [navData, setNavData] = useState<null | { routeIdx: number; routeNames: string[] }>(null);
@@ -62,14 +65,13 @@ function NavigationBar() {
                     },
                 ]}
             />
-            {navData.routeNames.map((r, idx) => {
+            {APP_ROUTES.map((appRoute, idx) => {
+                if (appRoute.hideFromNavBar) return <></>;
+
                 return (
                     <Pressable
                         key={idx}
-                        onPress={() => {
-                            // @ts-ignore
-                            nav.navigate(r);
-                        }}
+                        onPress={() => nav.navigate(appRoute.route)}
                         style={[centerFlex, { padding: 20 }]}
                         onLayout={(e) => {
                             const result = [...routeNameLength];
@@ -77,7 +79,7 @@ function NavigationBar() {
                             setRouteNameLength(result);
                         }}>
                         <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
-                            {r}
+                            {appRoute.title}
                         </AppText>
                     </Pressable>
                 );

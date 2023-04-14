@@ -6,8 +6,12 @@ import { changeTree, selectTreeSlice } from "../../redux/userTreesSlice";
 import AddTreeModal from "./modals/AddTreeModal";
 import TreeCard from "./TreeCard";
 import EditTreeModal from "./modals/EditTreeModal";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { StackNavigatorParams } from "../../../App";
 
-function MyTrees({ navigation }: { navigation: any }) {
+type Props = NativeStackScreenProps<StackNavigatorParams, "MyTrees">;
+
+function MyTrees({ navigation }: Props) {
     //Redux Related
     const { userTrees } = useAppSelector(selectTreeSlice);
     const dispatch = useAppDispatch();

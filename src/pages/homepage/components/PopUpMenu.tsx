@@ -12,6 +12,9 @@ import { CIRCLE_SIZE_SELECTED, colors } from "../canvas/parameters";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { StackNavigatorParams } from "../../../../App";
 
 type Props = {
     selectedNodeHistory: (string | null)[];
@@ -34,6 +37,8 @@ function PopUpMenu({ foundNodeCoordinates, selectedNodeHistory }: Props) {
     const MENU_WIDTH = width - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL - CIRCLE_SIZE_SELECTED - 30;
 
     const { animatedMenuStyles, triangleAnimatedStyles } = useHandlePopMenuAnimations(foundNodeCoordinates, selectedNode, selectedNodeHistory);
+
+    const navigation = useNavigation<NativeStackScreenProps<StackNavigatorParams>["navigation"]>();
 
     useEffect(() => {
         if (selectedNode === null) return;
@@ -68,6 +73,8 @@ function PopUpMenu({ foundNodeCoordinates, selectedNodeHistory }: Props) {
         dispatch(mutateUserTree(result));
     };
 
+    const currentSkill = findTreeNodeById(currentTree, selectedNode)?.data ?? undefined;
+
     return (
         <>
             <Animated.View
@@ -90,7 +97,15 @@ function PopUpMenu({ foundNodeCoordinates, selectedNodeHistory }: Props) {
                     containerStyles={{ marginBottom: 20 }}
                 />
 
-                <RadioInput text="Mastered" state={[mastered, setMastered]} onPress={toggleCompletionInNode(mastered)} />
+                <RadioInput text="Mastered" state={[mastered, setMastered]} onPress={toggleCompletionInNode(mastered)} style={{ marginBottom: 20 }} />
+
+                <TouchableOpacity
+                    style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
+                    onPress={() => navigation.navigate("SkillPage", currentSkill)}>
+                    <AppText style={{ color: colors.accent }} fontSize={18}>
+                        Open
+                    </AppText>
+                </TouchableOpacity>
 
                 <View style={[centerFlex, { justifyContent: "flex-end", flex: 1 }]}>
                     {!currentNode.children && (
