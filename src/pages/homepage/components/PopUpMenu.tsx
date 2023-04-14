@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Button, Dimensions, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Button, Dimensions, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import { CirclePositionInCanvas, MENU_DAMPENING, centerFlex } from "../../../types";
-import { deleteNodeWithNoChildren, editTreeProperties, findTreeNodeById } from "../treeFunctions";
-import { mutateUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../../redux/userTreesSlice";
+import { deleteNodeWithNoChildren, editTreeProperties, findTreeNodeById, quantiyOfNodes } from "../treeFunctions";
+import { mutateUserTree, removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { openChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
@@ -49,7 +49,27 @@ function PopUpMenu({ foundNodeCoordinates, selectedNodeHistory }: Props) {
 
     if (!currentNode) return <></>;
 
+    const deleteTree = () => {
+        if (!currentTree || !currentTree.treeId) return;
+
+        dispatch(removeUserTree(currentTree.treeId));
+        navigation.navigate("MyTrees");
+    };
+
+    const confirmDeleteTree = () =>
+        Alert.alert(
+            `Deleting ${currentNode.data.name} will also delete ${currentTree!.treeName ?? ""}`,
+            "Are you sure you want to continue?",
+            [
+                { text: "No", style: "cancel" },
+                { text: "Yes", onPress: deleteTree, style: "destructive" },
+            ],
+            { cancelable: true }
+        );
+
     const deleteNode = () => {
+        if (quantiyOfNodes(currentTree) === 1) return confirmDeleteTree();
+
         const result = deleteNodeWithNoChildren(currentTree, currentNode);
         dispatch(mutateUserTree(result));
         dispatch(setSelectedNode(null));
