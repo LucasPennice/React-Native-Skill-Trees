@@ -10,7 +10,7 @@ import { GestureDetector, PanGesture } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from "react-native-reanimated";
 import AppText from "../../components/AppText";
 import { centerFlex } from "../../types";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useHandleNewNode from "./canvas/hooks/useHandleNewNode";
 import {
     calculateDimentionsAndRootCoordinates,
@@ -51,6 +51,11 @@ function HomePage() {
     const hasTreeChanged = useRunHomepageCleanup();
 
     const updateScrollOffset = (scrollViewType: "horizontal" | "vertical", newValue: number) => {
+        const isXDifferent = scrollViewType === "horizontal" && scrollOffset.x !== newValue;
+        const isYDifferent = scrollViewType === "vertical" && scrollOffset.y !== newValue;
+
+        if (!isXDifferent && !isYDifferent) return;
+
         if (scrollViewType === "horizontal") {
             setScrollOffset((p) => {
                 return { ...p, x: newValue };
