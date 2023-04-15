@@ -10,7 +10,7 @@ import { GestureDetector, PanGesture } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from "react-native-reanimated";
 import AppText from "../../components/AppText";
 import { centerFlex } from "../../types";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import useHandleNewNode from "./canvas/hooks/useHandleNewNode";
 import {
     calculateDimentionsAndRootCoordinates,
@@ -39,23 +39,18 @@ function HomePage() {
     const dragAndDropZones = calculateDragAndDropZones(circlePositionsInCanvas);
     //Hooks
     const handleNewNode = useHandleNewNode(scrollOffset, dragAndDropZones, currentTree);
+    const canvasTouchHandler = useCanvasTouchHandler({ circlePositionsInCanvas, tree: currentTree });
 
     const { tentativeModifiedTree } = handleNewNode;
 
     const tentativeCirclePositions = getCirclePositions(tentativeModifiedTree);
     const tentativeCirlcePositionsInCanvas = centerNodesInCanvas(tentativeCirclePositions, canvasDimentions);
 
-    const canvasTouchHandler = useCanvasTouchHandler({ circlePositionsInCanvas, tree: currentTree });
     //
 
-    const hasTreeChanged = useRunHomepageCleanup();
+    useRunHomepageCleanup();
 
     const updateScrollOffset = (scrollViewType: "horizontal" | "vertical", newValue: number) => {
-        const isXDifferent = scrollViewType === "horizontal" && scrollOffset.x !== newValue;
-        const isYDifferent = scrollViewType === "vertical" && scrollOffset.y !== newValue;
-
-        if (!isXDifferent && !isYDifferent) return;
-
         if (scrollViewType === "horizontal") {
             setScrollOffset((p) => {
                 return { ...p, x: newValue };
@@ -67,8 +62,6 @@ function HomePage() {
         }
     };
 
-    //Hay un bug cuando se arma un arbol de 4 borrando coding del arbol de IQ ->Tiene que ver con no meter los CIRCLESIZE al tree width
-
     return (
         <View style={{ position: "relative", backgroundColor: colors.background }}>
             <TreeView
@@ -79,8 +72,8 @@ function HomePage() {
                 tentativeCirlcePositionsInCanvas={tentativeCirlcePositionsInCanvas}
                 canvasTouchHandler={canvasTouchHandler}
                 updateScrollOffset={updateScrollOffset}
-                hasTreeChanged={hasTreeChanged}
             />
+
             <DragAndDropNewNode handleNewNode={handleNewNode} treeAccent={currentTree?.accentColor} />
             <ProgressIndicatorAndName />
             <AddNode />

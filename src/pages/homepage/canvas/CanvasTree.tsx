@@ -19,10 +19,9 @@ type TreeProps = {
     };
     rootCoordinates?: { width: number; height: number };
     treeAccentColor: string;
-    hasTreeChanged: boolean;
 };
 
-function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, wholeTree, treeAccentColor, hasTreeChanged }: TreeProps) {
+function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, wholeTree, treeAccentColor }: TreeProps) {
     //Props
     const { selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas } = stateProps;
 
@@ -74,12 +73,15 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
     const textColor = tree.data.isCompleted ? treeAccentColor : tree.data.id === selectedNode ? "white" : colors.unmarkedText;
     const letterToRender = tree.data.name ? tree.data.name[0] : "-";
 
+    const isOnlyChild = getIsOnlyChild(tentativeCirlcePositionsInCanvas.length ? tentativeCirlcePositionsInCanvas : circlePositionsInCanvas);
+
     return (
         <>
             <CanvasPath
                 key={`${tree.data.id}path`}
                 coordinates={{ cx, cy, pathInitialPoint }}
                 isRoot={Boolean(tree.isRoot)}
+                // curveInwards={isOnlyChild}
                 pathBlurOnInactive={pathBlurOnInactive}
                 pathColor={pathColor}
             />
@@ -91,7 +93,6 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
                             key={element.data.id}
                             tree={element}
                             wholeTree={wholeTree}
-                            hasTreeChanged={hasTreeChanged}
                             treeAccentColor={treeAccentColor}
                             parentNodeInfo={{ ...newParentNodeInfo, currentChildIndex: idx }}
                             stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
@@ -112,5 +113,17 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
             />
         </>
     );
+
+    function getIsOnlyChild(coordinates: CirclePositionInCanvasWithLevel[]) {
+        const foo = coordinates.reduce((prev, curr) => {
+            if (curr.parentId === tree.parentId) return prev + 1;
+            return prev;
+        }, 1);
+
+        console.log(foo);
+
+        if (foo === 1) return true;
+        return false;
+    }
 }
 export default CanvasTree;

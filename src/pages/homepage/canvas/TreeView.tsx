@@ -1,20 +1,4 @@
-import {
-    Blur,
-    Canvas,
-    Circle,
-    Group,
-    Path,
-    runTiming,
-    SkFont,
-    Skia,
-    SkiaMutableValue,
-    SkSize,
-    Text,
-    TouchHandler,
-    useComputedValue,
-    useFont,
-    useValue,
-} from "@shopify/react-native-skia";
+import { Blur, Canvas, Group, runTiming, useValue } from "@shopify/react-native-skia";
 import { useEffect, useState } from "react";
 import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, View } from "react-native";
 import PopUpMenu from "../components/PopUpMenu";
@@ -28,7 +12,6 @@ import AppText from "../../../components/AppText";
 import { CanvasDimentions, centerFlex, CirclePositionInCanvasWithLevel, DnDZone, Skill } from "../../../types";
 import DragAndDropZones from "./DragAndDropZones";
 import { CanvasTouchHandler } from "./hooks/useCanvasTouchHandler";
-import { getHeightForFont } from "./functions";
 import { selectNewNode } from "../../../redux/newNodeSlice";
 import Node from "./Node";
 import CanvasPath from "./CavnasPath";
@@ -42,7 +25,6 @@ type TreeViewProps = {
     tentativeCirlcePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     canvasTouchHandler: CanvasTouchHandler;
     updateScrollOffset: (scrollViewType: "horizontal" | "vertical", newValue: number) => void;
-    hasTreeChanged: boolean;
 };
 
 function TreeView({
@@ -52,7 +34,6 @@ function TreeView({
     circlePositionsInCanvas,
     canvasTouchHandler,
     updateScrollOffset,
-    hasTreeChanged,
 }: TreeViewProps) {
     //Redux State
     const { height, width } = useAppSelector(selectScreenDimentions);
@@ -68,7 +49,7 @@ function TreeView({
     //Local State
     const [initialBlur, setInitialBlur] = useState(10);
 
-    useCenterCameraOnTreeChange(canvasTouchHandler, canvasDimentions, hasTreeChanged);
+    useCenterCameraOnTreeChange(canvasTouchHandler, canvasDimentions);
 
     const previewNode = tentativeCirlcePositionsInCanvas.length ? tentativeCirlcePositionsInCanvas.find((t) => t.id === newNode.id) : undefined;
 
@@ -110,8 +91,7 @@ function TreeView({
                 {currentTree !== undefined && (
                     <Canvas
                         onTouch={touchHandler}
-                        // onSize={sexo}
-                        style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background }}
+                        style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background, transform: [{ scale: 1 }] }}
                         mode="continuous">
                         {showDragAndDropGuides && <DragAndDropZones data={dragAndDropZones} />}
                         {previewNode && <PreviewNode previewNode={previewNode} previewNodeParent={previewNodeParent} newNode={newNode} />}
@@ -119,7 +99,6 @@ function TreeView({
                             stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
                             tree={currentTree}
                             wholeTree={currentTree}
-                            hasTreeChanged={hasTreeChanged}
                             treeAccentColor={treeAccentColor}
                             rootCoordinates={{ width: horizontalMargin, height: verticalMargin }}
                         />

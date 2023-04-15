@@ -20,7 +20,7 @@ function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZon
 
     const tentativeModifiedTree = getTentativeModifiedTree(dndZoneHoveringOver, currentTree, newNode);
 
-    const handleHoverCalculations = (hoverCoord: { x: number; y: number }) => {
+    const handleHoverCalculations = (hoverCoord: { x: number; y: number; scrollOffset: typeof scrollOffset }) => {
         //There are no state-sync issues as long as scrollOffset and dragAndDropZones remain as state variables or derived state variables
 
         const { x, y } = hoverCoord;
@@ -63,7 +63,7 @@ function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZon
             const x = Math.trunc(position.value.x);
             const y = Math.trunc(position.value.y);
 
-            runOnJS(handleHoverCalculations)({ x, y });
+            runOnJS(handleHoverCalculations)({ x, y, scrollOffset });
         })
         .onEnd((e) => {
             position.value = startingPosition;

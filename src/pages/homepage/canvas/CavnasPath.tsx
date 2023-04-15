@@ -15,9 +15,11 @@ function CanvasPath({
     pathColor,
     isRoot,
     pathBlurOnInactive,
+    curveInwards,
 }: {
     coordinates: pathCoordinates;
     pathColor: string;
+    curveInwards?: boolean;
     isRoot?: boolean;
     pathBlurOnInactive?: SkiaMutableValue<number>;
 }) {
@@ -46,8 +48,10 @@ function CanvasPath({
         var offset = deltaX > MAX_OFFSET ? MAX_OFFSET : deltaX < -MAX_OFFSET ? -MAX_OFFSET : deltaX;
 
         // location of control point:
+        const verticalOffset = curveInwards ? -1.5 : 1.5;
+
         var c1x = mpx + offset * 1.5 * Math.cos(theta);
-        var c1y = mpy + offset * 1.5 * Math.sin(theta);
+        var c1y = mpy + offset * verticalOffset * Math.sin(theta);
 
         p.quadTo(c1x, c1y, p2x.current, p2y.current);
 
