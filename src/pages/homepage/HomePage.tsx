@@ -161,9 +161,10 @@ function DragAndDropNewNode({
     );
 }
 
-HomePage.whyDidYouRender = {
-    logOnDifferentValues: true,
-    customName: "Homeapge",
-};
+HomePage.whyDidYouRender = false;
+// HomePage.whyDidYouRender = {
+//     logOnDifferentValues: true,
+//     customName: "Homeapge",
+// };
 
 export default HomePage;

@@ -5,14 +5,14 @@ export const CIRCLE_SIZE_SELECTED = CIRCLE_SIZE * 3;
 export const TOUCH_BUFFER = 15;
 
 export const DISTANCE_BETWEEN_CHILDREN = 100;
-export const DISTANCE_BETWEEN_GENERATIONS = 100;
+export const DISTANCE_BETWEEN_GENERATIONS = 25 + 50 + 3 * CIRCLE_SIZE;
 
 export const NAV_HEGIHT = 65;
 
 export const CANVAS_SPRING = { damping: 29 };
 
-export const PARENT_DND_ZONE_DIMENTIONS = { width: 4 * CIRCLE_SIZE, height: DISTANCE_BETWEEN_GENERATIONS - 3 * CIRCLE_SIZE };
-export const ONLY_CHILDREN_DND_ZONE_DIMENTIONS = { ...PARENT_DND_ZONE_DIMENTIONS };
+export const PARENT_DND_ZONE_DIMENTIONS = { width: 4 * CIRCLE_SIZE, height: 25 };
+export const ONLY_CHILDREN_DND_ZONE_DIMENTIONS = { ...PARENT_DND_ZONE_DIMENTIONS, height: 50 };
 export const BROTHER_DND_ZONE_HEIGHT = 3 * CIRCLE_SIZE;
 
 //This is related to the canvas bezier curve for rendering paths

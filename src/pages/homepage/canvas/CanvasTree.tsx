@@ -1,6 +1,6 @@
 import { Blur, Path, Skia, SkiaMutableValue, useComputedValue, useSpring } from "@shopify/react-native-skia";
 import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../types";
-import { CANVAS_SPRING, colors, MAX_OFFSET } from "./parameters";
+import { CANVAS_SPRING, colors, DISTANCE_BETWEEN_GENERATIONS, MAX_OFFSET } from "./parameters";
 import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 import { findDistanceBetweenNodesById, findParentOfNode } from "../treeFunctions";
 import Label from "./Label";
@@ -119,8 +119,6 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
             if (curr.parentId === tree.parentId) return prev + 1;
             return prev;
         }, 1);
-
-        console.log(foo);
 
         if (foo === 1) return true;
         return false;

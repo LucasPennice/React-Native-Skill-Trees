@@ -18,6 +18,18 @@ export interface Tree<T> {
     data: T;
     children?: Tree<T>[];
 }
+export interface TreeWithCoord<T> {
+    isRoot?: boolean;
+    parentId: string | undefined;
+    treeId?: string;
+    treeName?: string;
+    accentColor?: string;
+    x: number;
+    y: number;
+    level: number;
+    data: T;
+    children?: TreeWithCoord<T>[];
+}
 
 export type ModifiableProperties<T> = {
     [Property in keyof T]: T[Property];
