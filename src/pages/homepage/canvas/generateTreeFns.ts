@@ -134,9 +134,9 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
                 const nextContour = levelContours[idx + 1];
 
-                if (currentContour[1] < nextContour[0]) return maxLevelOverlap;
-
                 const currentOverlap = Math.abs(currentContour[1] - nextContour[0]);
+
+                if (currentOverlap >= 1) return maxLevelOverlap;
 
                 if (currentOverlap > maxLevelOverlap) {
                     levelTreeToShiftFromId = currentContour[2];

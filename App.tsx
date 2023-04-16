@@ -10,6 +10,7 @@ import { store } from "./src/redux/reduxStore";
 import { updateDimentions } from "./src/redux/screenDimentionsSlice";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
+import { enableScreens } from "react-native-screens";
 import NavigationBar from "./src/components/NavigationBar";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
@@ -25,7 +26,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { TransitionSpec } from "@react-navigation/stack/lib/typescript/src/types";
 import SkillPage from "./src/pages/skillPage/SkillPage";
 import { Skill } from "./src/types";
-
+enableScreens();
 export type StackNavigatorParams = {
     Home: undefined;
     MyTrees: undefined;

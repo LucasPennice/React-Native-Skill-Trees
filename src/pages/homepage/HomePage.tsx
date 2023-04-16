@@ -65,7 +65,6 @@ function HomePage() {
     return (
         <View style={{ position: "relative", backgroundColor: colors.background }}>
             <TreeView
-                key={currentTreeId}
                 dragAndDropZones={dragAndDropZones}
                 canvasDimentions={canvasDimentions}
                 circlePositionsInCanvas={circlePositionsInCanvas}

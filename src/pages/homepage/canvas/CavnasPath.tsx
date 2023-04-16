@@ -33,27 +33,19 @@ function CanvasPath({
     const path = useComputedValue(() => {
         const p = Skia.Path.Make();
 
-        p.moveTo(p1x.current, p1y.current);
+        p.moveTo(p1x.current, p1y.current - CIRCLE_SIZE);
 
         // mid-point of line:
-        var mpx = (p2x.current + p1x.current) * 0.5;
-        var mpy = (p2y.current + p1y.current) * 0.5;
+        var mp1x = (p2x.current + p1x.current) * 0.5;
 
-        // angle of perpendicular to line:
-        var theta = Math.atan2(p2y.current - p1y.current, p2x.current - p1x.current) - Math.PI / 2;
-
-        let deltaX = p2x.current - p1x.current;
-
-        // distance of control point from mid-point of line:
-        var offset = deltaX > MAX_OFFSET ? MAX_OFFSET : deltaX < -MAX_OFFSET ? -MAX_OFFSET : deltaX;
-
-        // location of control point:
-        const verticalOffset = curveInwards ? -1.5 : 1.5;
-
-        var c1x = mpx + offset * 1.5 * Math.cos(theta);
-        var c1y = mpy + offset * verticalOffset * Math.sin(theta);
-
-        p.quadTo(c1x, c1y, p2x.current, p2y.current);
+        p.cubicTo(
+            p1x.current,
+            p1y.current - 0.87 * (p1y.current - p2y.current),
+            p2x.current,
+            p2y.current - 0.43 * (p2y.current - p1y.current),
+            p2x.current,
+            p2y.current + CIRCLE_SIZE
+        );
 
         const pathString = p.toSVGString();
         const properties = new svgPathProperties(pathString);
@@ -61,16 +53,6 @@ function CanvasPath({
 
         const newLength = pathLength - CIRCLE_SIZE - 2;
 
-        const startTrim = newLength / pathLength;
-
-        //The trim is slighly larger if the path is completely vertical
-        const endTrim = 1 - (newLength - 1) / pathLength;
-
-        p.trim(startTrim, 1, true);
-
-        p.trim(0, endTrim, true);
-
-        p.simplify();
         return p;
     }, [p1x, p1y, p2x, p2y]);
 
