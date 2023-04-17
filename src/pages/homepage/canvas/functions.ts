@@ -1,5 +1,6 @@
 import { TouchInfo } from "@shopify/react-native-skia";
 import { CIRCLE_SIZE, DISTANCE_BETWEEN_CHILDREN, DISTANCE_BETWEEN_GENERATIONS, LETTER_SIZE_AT_10, TOUCH_BUFFER } from "./parameters";
+import { DnDZone } from "../../../types";
 
 export function didTapCircle(touchInfo: TouchInfo) {
     return (circle: { x: number; y: number; id: string }) => {
@@ -8,6 +9,20 @@ export function didTapCircle(touchInfo: TouchInfo) {
 
         const isTouchInsideCircleYRange =
             touchInfo.y >= circle.y - CIRCLE_SIZE / 2 - TOUCH_BUFFER && touchInfo.y <= circle.y + CIRCLE_SIZE / 2 + TOUCH_BUFFER;
+
+        const isTouchingCircle = isTouchInsideCircleXRange && isTouchInsideCircleYRange;
+
+        if (!isTouchingCircle) return false;
+
+        return true;
+    };
+}
+
+export function didTapDndZone(touchInfo: TouchInfo) {
+    return (zone: DnDZone) => {
+        const isTouchInsideCircleXRange = touchInfo.x >= zone.x && touchInfo.x <= zone.x + zone.width;
+
+        const isTouchInsideCircleYRange = touchInfo.y >= zone.y && touchInfo.y <= zone.y + zone.height;
 
         const isTouchingCircle = isTouchInsideCircleXRange && isTouchInsideCircleYRange;
 

@@ -1,122 +1,100 @@
 import { Blur, Canvas, Group, runTiming, useValue } from "@shopify/react-native-skia";
 import { useEffect, useState } from "react";
-import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, View } from "react-native";
-import PopUpMenu from "../components/PopUpMenu";
 import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
-import { selectCurrentTree, selectTreeSlice } from "../../../redux/userTreesSlice";
+import { selectTreeSlice } from "../../../redux/userTreesSlice";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import CanvasTree from "./CanvasTree";
 import { useAppSelector } from "../../../redux/reduxHooks";
-import { CIRCLE_SIZE, colors, DISTANCE_BETWEEN_GENERATIONS, MAX_OFFSET, NAV_HEGIHT } from "./parameters";
-import AppText from "../../../components/AppText";
-import { CanvasDimentions, centerFlex, CirclePositionInCanvasWithLevel, DnDZone, Skill } from "../../../types";
+import { colors, DISTANCE_BETWEEN_GENERATIONS, NAV_HEGIHT } from "./parameters";
+import { CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree, centerFlex } from "../../../types";
 import DragAndDropZones from "./DragAndDropZones";
-import { CanvasTouchHandler } from "./hooks/useCanvasTouchHandler";
+import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
 import { selectNewNode } from "../../../redux/newNodeSlice";
 import Node from "./Node";
 import CanvasPath from "./CavnasPath";
-import useCenterCameraOnTreeChange from "./hooks/useCenterCameraOnTreeChange";
 import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
+import {
+    calculateDimentionsAndRootCoordinates,
+    calculateDragAndDropZones,
+    centerNodeCoordinatesInCanvas,
+    getCirclePositions,
+} from "./coordinateFunctions";
+import { GestureDetector } from "react-native-gesture-handler";
+import Animated from "react-native-reanimated";
+import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
+import { View } from "react-native";
 
 type TreeViewProps = {
-    dragAndDropZones: DnDZone[];
-    canvasDimentions: CanvasDimentions;
-    circlePositionsInCanvas: CirclePositionInCanvasWithLevel[];
-    tentativeCirlcePositionsInCanvas: CirclePositionInCanvasWithLevel[];
-    canvasTouchHandler: CanvasTouchHandler;
-    updateScrollOffset: (scrollViewType: "horizontal" | "vertical", newValue: number) => void;
+    tree: Tree<Skill>;
+    onNodeClick?: (nodeId: string) => void;
+    showDndZones?: boolean;
+    onDndZoneClick?: (clickedZone: DnDZone) => void;
 };
 
-function TreeView({
-    canvasDimentions,
-    dragAndDropZones,
-    tentativeCirlcePositionsInCanvas,
-    circlePositionsInCanvas,
-    canvasTouchHandler,
-    updateScrollOffset,
-}: TreeViewProps) {
+function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick }: TreeViewProps) {
     //Redux State
-    const { height, width } = useAppSelector(selectScreenDimentions);
-    const currentTree = useAppSelector(selectCurrentTree);
-    const { currentTreeId } = useAppSelector(selectTreeSlice);
+    const screenDimentions = useAppSelector(selectScreenDimentions);
     const { selectedNode } = useAppSelector(selectTreeSlice);
-    const { showLabel, showDragAndDropGuides } = useAppSelector(selectCanvasDisplaySettings);
+    const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
     const newNode = useAppSelector(selectNewNode);
     //Derived State
-    const { horizontalScrollViewRef, touchHandler, verticalScrollViewRef } = canvasTouchHandler;
-    const { canvasHeight, canvasWidth, horizontalMargin, verticalMargin } = canvasDimentions;
-    const foundNodeCoordinates = circlePositionsInCanvas.find((c) => c.id === selectedNode);
+    const nodeCoordinates = getCirclePositions(tree);
+    const canvasDimentions = calculateDimentionsAndRootCoordinates(nodeCoordinates, screenDimentions);
+    const nodeCoordinatesCentered = centerNodeCoordinatesInCanvas(nodeCoordinates, canvasDimentions);
+    const dragAndDropZones = calculateDragAndDropZones(nodeCoordinatesCentered);
+    //Hooks
+    const { touchHandler } = useCanvasTouchHandler({ tree, nodeCoordinatesCentered, onNodeClick, onDndZoneClick, showDndZones, dragAndDropZones });
+    const { canvasHeight, canvasWidth } = canvasDimentions;
+    const { canvasGestures, transform } = useHandleCanvasScroll(canvasWidth, canvasHeight);
+    //
+    const foundNodeCoordinates = nodeCoordinates.find((c) => c.id === selectedNode);
     //Local State
     const [initialBlur, setInitialBlur] = useState(10);
 
-    useCenterCameraOnTreeChange(canvasTouchHandler, canvasDimentions);
+    // useCenterCameraOnTreeChange(canvasTouchHandler, canvasDimentions);
 
-    const previewNode = tentativeCirlcePositionsInCanvas.length ? tentativeCirlcePositionsInCanvas.find((t) => t.id === newNode.id) : undefined;
+    // const previewNode = tentativeCirlcePositionsInCanvas.length ? tentativeCirlcePositionsInCanvas.find((t) => t.id === newNode.id) : undefined;
 
-    const previewNodeParent = previewNode ? tentativeCirlcePositionsInCanvas.find((t) => t.id === previewNode.parentId) : undefined;
+    // const previewNodeParent = previewNode ? tentativeCirlcePositionsInCanvas.find((t) => t.id === previewNode.parentId) : undefined;
 
-    const treeAccentColor = currentTree && currentTree.accentColor ? currentTree.accentColor : colors.accent;
+    const treeAccentColor = tree.accentColor ? tree.accentColor : colors.accent;
 
-    useEffect(() => {
-        setInitialBlur(0);
-    }, [currentTreeId]);
+    // useEffect(() => {
+    //     setInitialBlur(0);
+    // }, [currentTreeId]);
 
-    const blur = useAnimateSkiaValue({ initialValue: 10, stateToAnimate: initialBlur });
-
-    const updateVerticalScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => updateScrollOffset("vertical", e.nativeEvent.contentOffset.y);
-    const updateHorizontalScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => updateScrollOffset("horizontal", e.nativeEvent.contentOffset.x);
+    const blur = useAnimateSkiaValue({ initialValue: 0, stateToAnimate: initialBlur });
 
     return (
-        <ScrollView
-            showsVerticalScrollIndicator={false}
-            ref={verticalScrollViewRef}
-            style={{ height: height - NAV_HEGIHT }}
-            bounces={false}
-            // Updates on the automatic scroll on tree change (because is not animated we cannot use the other two event listeners)
-            // The same goes for the horizontal scrolLView
-            onScroll={updateVerticalScroll}
-            scrollEventThrottle={0}
-            onMomentumScrollEnd={updateVerticalScroll}
-            onScrollEndDrag={updateVerticalScroll}>
-            <ScrollView
-                bounces={false}
-                ref={horizontalScrollViewRef}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={{ position: "relative" }}
-                onScroll={updateHorizontalScroll}
-                scrollEventThrottle={0}
-                onScrollEndDrag={updateHorizontalScroll}
-                onMomentumScrollEnd={updateHorizontalScroll}>
-                {currentTree !== undefined && (
+        <GestureDetector gesture={canvasGestures}>
+            <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
+                <Animated.View style={[transform]}>
                     <Canvas
                         onTouch={touchHandler}
-                        style={{ width: canvasWidth, height: canvasHeight, backgroundColor: colors.background, transform: [{ scale: 1 }] }}
+                        style={{
+                            width: canvasWidth,
+                            height: canvasHeight,
+                        }}
                         mode="continuous">
-                        {showDragAndDropGuides && <DragAndDropZones data={dragAndDropZones} />}
-                        {previewNode && <PreviewNode previewNode={previewNode} previewNodeParent={previewNodeParent} newNode={newNode} />}
+                        {/* {previewNode && <PreviewNode previewNode={previewNode} previewNodeParent={previewNodeParent} newNode={newNode} />} */}
                         <CanvasTree
-                            stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
-                            tree={currentTree}
-                            wholeTree={currentTree}
+                            stateProps={{
+                                selectedNode,
+                                showLabel,
+                                circlePositionsInCanvas: nodeCoordinatesCentered,
+                                tentativeCirlcePositionsInCanvas: [],
+                            }}
+                            // stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
+                            tree={tree}
+                            wholeTree={tree}
                             treeAccentColor={treeAccentColor}
-                            rootCoordinates={{ width: horizontalMargin, height: verticalMargin }}
+                            rootCoordinates={{ width: 0, height: 0 }}
                         />
-                        <Blur blur={blur} />
+                        {showDndZones && <DragAndDropZones data={dragAndDropZones} />}
                     </Canvas>
-                )}
-
-                {!currentTree && (
-                    <View style={[centerFlex, { width, height }]}>
-                        <AppText style={{ color: "white" }} fontSize={24}>
-                            Pick a tree
-                        </AppText>
-                    </View>
-                )}
-
-                {selectedNode && foundNodeCoordinates && currentTree && <PopUpMenu foundNodeCoordinates={foundNodeCoordinates} />}
-            </ScrollView>
-        </ScrollView>
+                </Animated.View>
+            </View>
+        </GestureDetector>
     );
 }
 

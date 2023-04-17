@@ -8,7 +8,7 @@ import { DnDZone, ModifiableProperties, Skill, Tree } from "../../../../types";
 import { editTreeProperties, findParentOfNode, findTreeNodeById } from "../../treeFunctions";
 import { CIRCLE_SIZE } from "../parameters";
 
-function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZones: DnDZone[], currentTree: Tree<Skill> | undefined) {
+function useHandleNewNode(dragAndDropZones: DnDZone[], currentTree: Tree<Skill> | undefined) {
     const [dndZoneHoveringOver, setDndZoneHoveringOver] = useState<DnDZone | undefined>(undefined);
 
     const startingPosition = { x: 10, y: 90 };
@@ -20,13 +20,12 @@ function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZon
 
     const tentativeModifiedTree = getTentativeModifiedTree(dndZoneHoveringOver, currentTree, newNode);
 
-    const handleHoverCalculations = (hoverCoord: { x: number; y: number; scrollOffset: typeof scrollOffset }) => {
+    const handleHoverCalculations = (hoverCoord: { x: number; y: number }) => {
         //There are no state-sync issues as long as scrollOffset and dragAndDropZones remain as state variables or derived state variables
 
         const { x, y } = hoverCoord;
 
-        const dragAndDropNodeCanvasCoordinates = getDragAndDropCanvasCoordinates({ x, y }, scrollOffset);
-        const rectangleUnderDragAndDropNode = getRectangleUnderDragAndDropNode(dragAndDropZones, dragAndDropNodeCanvasCoordinates);
+        const rectangleUnderDragAndDropNode = getRectangleUnderDragAndDropNode(dragAndDropZones, { x, y });
 
         setDndZoneHoveringOver((prev) => {
             //All of these comparisions are meant to avoid setting the state and updating the UI when the previous and new state are the same
@@ -63,7 +62,7 @@ function useHandleNewNode(scrollOffset: { x: number; y: number }, dragAndDropZon
             const x = Math.trunc(position.value.x);
             const y = Math.trunc(position.value.y);
 
-            runOnJS(handleHoverCalculations)({ x, y, scrollOffset });
+            runOnJS(handleHoverCalculations)({ x, y });
         })
         .onEnd((e) => {
             position.value = startingPosition;
@@ -139,10 +138,6 @@ function getTentativeModifiedTree(dndZoneHoveringOver: DnDZone | undefined, curr
     const newProperties: ModifiableProperties<Tree<Skill>> = { ...parentOfTargetNode, children: newChildren };
 
     return editTreeProperties(currentTree, parentOfTargetNode, newProperties);
-}
-
-function getDragAndDropCanvasCoordinates(dragAndDropNodeCoord: { x: number; y: number }, scrollOffset: { x: number; y: number }) {
-    return { x: dragAndDropNodeCoord.x + scrollOffset.x, y: dragAndDropNodeCoord.y + scrollOffset.y };
 }
 
 function getRectangleUnderDragAndDropNode(

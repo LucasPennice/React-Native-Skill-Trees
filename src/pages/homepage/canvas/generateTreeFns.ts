@@ -11,10 +11,17 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
     result = handleOverlap(result);
 
-    const sex: Coordinates[] = [];
-    treeToCoordArray(result, sex);
+    let treeCoordinates: Coordinates[] = [];
+    treeToCoordArray(result, treeCoordinates);
 
-    return sex;
+    const smallestXCoordinate = Math.min(...treeCoordinates.map((c) => c.x));
+
+    if (smallestXCoordinate < 0)
+        treeCoordinates = treeCoordinates.map((c) => {
+            return { ...c, x: c.x + Math.abs(smallestXCoordinate) };
+        });
+
+    return treeCoordinates;
 
     function firstIteration(tree: Tree<Skill>, currentTreeMod?: number, childrenIdx?: number) {
         //Base Case 👇
@@ -26,13 +33,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         const distance = findDistanceBetweenNodesById(completeTree, tree.data.id);
         const level = distance ? distance - 1 : 0;
 
-        const result: TreeWithCoord<Skill> = {
-            ...tree,
-            x,
-            y: level * DISTANCE_BETWEEN_GENERATIONS,
-            level,
-            children: undefined,
-        };
+        const result: TreeWithCoord<Skill> = { ...tree, x, y: level, level, children: undefined };
 
         if (!tree.children) return result;
 

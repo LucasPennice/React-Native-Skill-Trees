@@ -16,13 +16,13 @@ import {
 export function getCirclePositions(currentTree?: Tree<Skill>): CirclePositionInCanvasWithLevel[] {
     if (!currentTree) return [];
 
-    const foo = PlotTreeReingoldTiltfordAlgorithm(currentTree);
+    const unscaledCoordinates = PlotTreeReingoldTiltfordAlgorithm(currentTree);
 
-    const adaptedFoo = foo.map((f) => {
-        return { ...f, x: f.x * DISTANCE_BETWEEN_CHILDREN };
+    const scaledCoordinates = unscaledCoordinates.map((f) => {
+        return { ...f, x: f.x * DISTANCE_BETWEEN_CHILDREN + 2 * CIRCLE_SIZE, y: f.y * DISTANCE_BETWEEN_GENERATIONS + CIRCLE_SIZE };
     });
 
-    return adaptedFoo;
+    return scaledCoordinates;
 }
 
 export function getTreeWidth(coordinates: CirclePositionInCanvasWithLevel[]) {
@@ -39,6 +39,22 @@ export function getTreeWidth(coordinates: CirclePositionInCanvasWithLevel[]) {
     });
 
     return Math.abs(maxCoordinate! - minCoordinate!) + 2 * CIRCLE_SIZE;
+}
+
+export function getTreeHeight(coordinates: CirclePositionInCanvasWithLevel[]) {
+    let minCoordinate: number | undefined = undefined,
+        maxCoordinate: number | undefined = undefined;
+
+    coordinates.forEach((c) => {
+        if (minCoordinate === undefined || c.y < minCoordinate) {
+            minCoordinate = c.y;
+        }
+        if (maxCoordinate === undefined || c.y > maxCoordinate) {
+            maxCoordinate = c.y;
+        }
+    });
+
+    return Math.abs(maxCoordinate! - minCoordinate!) + 4 * CIRCLE_SIZE;
 }
 
 function dnDZoneBasedOnNodeCoord(
@@ -160,27 +176,55 @@ export function calculateDimentionsAndRootCoordinates(
 
     const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;
 
-    if (coordinates.length === 0) return { canvasWidth: width, canvasHeight: height, horizontalMargin: 0, verticalMargin: 0 };
+    if (coordinates.length === 0) return { canvasWidth: width, canvasHeight: height };
 
-    const treeDepth = Math.max(...coordinates.map((t) => t.level));
-
-    const treeHeight = treeDepth ? treeDepth * DISTANCE_BETWEEN_GENERATIONS + treeDepth * 2 * CIRCLE_SIZE : 2 * CIRCLE_SIZE;
+    const treeHeight = getTreeHeight(coordinates);
     const treeWidth = getTreeWidth(coordinates);
 
-    return {
-        canvasWidth: treeWidth + 2 * width,
-        canvasHeight: treeHeight + HEIGHT_WITHOUT_NAV,
-        verticalMargin: HEIGHT_WITHOUT_NAV / 2,
-        horizontalMargin: width,
-    };
+    const canvasWidth = getCanvasWidth(treeWidth, width);
+    const canvasHeight = getCanvasHeight(treeHeight, HEIGHT_WITHOUT_NAV);
+
+    return { canvasWidth, canvasHeight };
 }
 
-export function centerNodesInCanvas(circlePositions: CirclePositionInCanvasWithLevel[], canvasDimentions: CanvasDimentions) {
-    const { horizontalMargin, verticalMargin } = canvasDimentions;
+function getCanvasWidth(treeWidth: number, screenWidth: number) {
+    const horizontalPadding = 200;
 
-    const treeWidth = getTreeWidth(circlePositions);
+    const deltaWidthScreen = screenWidth - treeWidth;
 
-    return circlePositions.map((p) => {
-        return { ...p, y: p.y + verticalMargin, x: p.x + treeWidth / 2 + horizontalMargin } as CirclePositionInCanvasWithLevel;
+    if (deltaWidthScreen < 0) return treeWidth + horizontalPadding;
+
+    if (deltaWidthScreen >= 200) return screenWidth;
+
+    return treeWidth + horizontalPadding;
+}
+
+function getCanvasHeight(treeHeight: number, screenHeight: number) {
+    const verticalPadding = 200;
+
+    const deltaWidthScreen = screenHeight - treeHeight;
+
+    if (deltaWidthScreen < 0) return treeHeight + verticalPadding;
+
+    if (deltaWidthScreen >= 200) return screenHeight;
+
+    return treeHeight + verticalPadding;
+}
+
+export function centerNodeCoordinatesInCanvas(nodeCoordinates: CirclePositionInCanvasWithLevel[], canvasDimentions: CanvasDimentions) {
+    const minXCoord = Math.min(...nodeCoordinates.map((x) => x.x));
+
+    const treeWidth = getTreeWidth(nodeCoordinates);
+    const treeHeight = getTreeHeight(nodeCoordinates);
+
+    const normalizedCoordinates = nodeCoordinates.map((c) => {
+        return { ...c, x: c.x - minXCoord };
+    });
+
+    const paddingFromLeftBorder = (canvasDimentions.canvasWidth - treeWidth) / 2;
+    const paddingFromTopBorder = (canvasDimentions.canvasHeight - treeHeight) / 2;
+
+    return normalizedCoordinates.map((c) => {
+        return { ...c, x: c.x + paddingFromLeftBorder, y: c.y + paddingFromTopBorder };
     });
 }

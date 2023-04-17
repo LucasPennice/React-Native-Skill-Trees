@@ -3,21 +3,12 @@ import { DnDZone } from "../../../types";
 import { colors } from "./parameters";
 
 function DragAndDropZones({ data }: { data: DnDZone[] }) {
-    const getColor = (type: DnDZone["type"]) => {
-        if (type === "PARENT") return colors.blue;
-
-        if (type === "LEFT_BROTHER") return colors.green;
-
-        if (type === "RIGHT_BROTHER") return colors.pink;
-
-        return colors.yellow;
-    };
     return (
         <>
             {data.map((z, idx) => {
                 return (
                     <RoundedRect
-                        r={10}
+                        r={5}
                         style={"stroke"}
                         strokeWidth={1}
                         key={idx}
@@ -25,9 +16,9 @@ function DragAndDropZones({ data }: { data: DnDZone[] }) {
                         width={z.width}
                         x={z.x}
                         y={z.y}
-                        color={getColor(z.type)}
-                        opacity={0.7}>
-                        <DashPathEffect intervals={[10, 10]} />
+                        color={colors.unmarkedText}
+                        opacity={0.5}>
+                        <DashPathEffect intervals={[2, 2]} />
                     </RoundedRect>
                 );
             })}

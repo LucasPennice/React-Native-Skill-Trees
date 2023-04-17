@@ -151,8 +151,6 @@ export type CirclePositionInCanvasWithLevel = { x: number; y: number; id: string
 export type CanvasDimentions = {
     canvasWidth: number;
     canvasHeight: number;
-    horizontalMargin: number;
-    verticalMargin: number;
 };
 
 export const mockNewNodeData: Skill = { id: "Cock", name: "ReCock", isCompleted: false };
