@@ -23,6 +23,7 @@ import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
 import { View } from "react-native";
+import PopUpMenu from "../components/PopUpMenu";
 
 type TreeViewProps = {
     tree: Tree<Skill>;
@@ -42,12 +43,12 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick }: TreeViewP
     const canvasDimentions = calculateDimentionsAndRootCoordinates(nodeCoordinates, screenDimentions);
     const nodeCoordinatesCentered = centerNodeCoordinatesInCanvas(nodeCoordinates, canvasDimentions);
     const dragAndDropZones = calculateDragAndDropZones(nodeCoordinatesCentered);
+    const foundNodeCoordinates = nodeCoordinates.find((c) => c.id === selectedNode);
     //Hooks
     const { touchHandler } = useCanvasTouchHandler({ tree, nodeCoordinatesCentered, onNodeClick, onDndZoneClick, showDndZones, dragAndDropZones });
     const { canvasHeight, canvasWidth } = canvasDimentions;
-    const { canvasGestures, transform } = useHandleCanvasScroll(canvasWidth, canvasHeight);
+    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, foundNodeCoordinates);
     //
-    const foundNodeCoordinates = nodeCoordinates.find((c) => c.id === selectedNode);
     //Local State
     const [initialBlur, setInitialBlur] = useState(10);
 
@@ -66,35 +67,38 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick }: TreeViewP
     const blur = useAnimateSkiaValue({ initialValue: 0, stateToAnimate: initialBlur });
 
     return (
-        <GestureDetector gesture={canvasGestures}>
-            <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
-                <Animated.View style={[transform]}>
-                    <Canvas
-                        onTouch={touchHandler}
-                        style={{
-                            width: canvasWidth,
-                            height: canvasHeight,
-                        }}
-                        mode="continuous">
-                        {/* {previewNode && <PreviewNode previewNode={previewNode} previewNodeParent={previewNodeParent} newNode={newNode} />} */}
-                        <CanvasTree
-                            stateProps={{
-                                selectedNode,
-                                showLabel,
-                                circlePositionsInCanvas: nodeCoordinatesCentered,
-                                tentativeCirlcePositionsInCanvas: [],
+        <>
+            <GestureDetector gesture={canvasGestures}>
+                <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
+                    <Animated.View style={[transform]}>
+                        <Canvas
+                            onTouch={touchHandler}
+                            style={{
+                                width: canvasWidth,
+                                height: canvasHeight,
                             }}
-                            // stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
-                            tree={tree}
-                            wholeTree={tree}
-                            treeAccentColor={treeAccentColor}
-                            rootCoordinates={{ width: 0, height: 0 }}
-                        />
-                        {showDndZones && <DragAndDropZones data={dragAndDropZones} />}
-                    </Canvas>
-                </Animated.View>
-            </View>
-        </GestureDetector>
+                            mode="continuous">
+                            {/* {previewNode && <PreviewNode previewNode={previewNode} previewNodeParent={previewNodeParent} newNode={newNode} />} */}
+                            <CanvasTree
+                                stateProps={{
+                                    selectedNode,
+                                    showLabel,
+                                    circlePositionsInCanvas: nodeCoordinatesCentered,
+                                    tentativeCirlcePositionsInCanvas: [],
+                                }}
+                                // stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
+                                tree={tree}
+                                wholeTree={tree}
+                                treeAccentColor={treeAccentColor}
+                                rootCoordinates={{ width: 0, height: 0 }}
+                            />
+                            {showDndZones && <DragAndDropZones data={dragAndDropZones} />}
+                        </Canvas>
+                    </Animated.View>
+                </View>
+            </GestureDetector>
+            {foundNodeCoordinates && <PopUpMenu foundNodeCoordinates={foundNodeCoordinates} canvasWidth={canvasWidth} />}
+        </>
     );
 }
 

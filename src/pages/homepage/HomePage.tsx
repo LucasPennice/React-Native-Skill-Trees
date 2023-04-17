@@ -3,9 +3,9 @@ import TreeView from "./canvas/TreeView";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
 import SettingsMenu from "./components/SettingsMenu";
-import { CIRCLE_SIZE, colors } from "./canvas/parameters";
+import { colors } from "./canvas/parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../redux/userTreesSlice";
+import { selectCurrentTree, setSelectedNode } from "../../redux/userTreesSlice";
 import AddNode from "./AddNode";
 import NewNodeModal from "./modals/NewNodeModal";
 import useRunHomepageCleanup from "./useRunHomepageCleanup";
@@ -21,7 +21,12 @@ function HomePage() {
     return (
         <View style={{ position: "relative", backgroundColor: colors.background }}>
             {currentTree && (
-                <TreeView tree={currentTree} onNodeClick={(id: string) => dispatch(setSelectedNode(id))} showDndZones onDndZoneClick={console.log} />
+                <TreeView
+                    tree={currentTree}
+                    onNodeClick={(id: string) => dispatch(setSelectedNode(id))}
+                    showDndZones={false}
+                    onDndZoneClick={console.log}
+                />
             )}
 
             {/* <DragAndDropNewNode handleNewNode={handleNewNode} treeAccent={currentTree?.accentColor} /> */}

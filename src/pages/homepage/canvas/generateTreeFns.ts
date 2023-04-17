@@ -154,7 +154,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
             }
         });
 
-        return { isOverlap, overlapDistance: biggestOverlap + 1, treeToShiftFromId };
+        return { isOverlap, overlapDistance: biggestOverlap > 1 ? biggestOverlap : 1, treeToShiftFromId };
     }
 
     function getTreeContourByLevel(tree: TreeWithCoord<Skill>, result: { [key: string]: [number, number, string][] }, subTreeParentId?: string) {

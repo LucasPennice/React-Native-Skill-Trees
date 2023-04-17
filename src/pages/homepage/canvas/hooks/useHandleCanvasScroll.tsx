@@ -1,9 +1,13 @@
 import { Gesture } from "react-native-gesture-handler";
-import { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { useAppSelector } from "../../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../../redux/screenDimentionsSlice";
+import { CanvasDimentions, CirclePositionInCanvasWithLevel } from "../../../../types";
+import { CANVAS_HORIZONTAL_PADDING } from "../coordinateFunctions";
+import { CIRCLE_SIZE } from "../parameters";
 
-function useHandleCanvasScroll(canvasWidth: number, canvasHeight: number) {
+function useHandleCanvasScroll(canvasDimentions: CanvasDimentions, foundNodeCoordinates?: CirclePositionInCanvasWithLevel) {
+    const { canvasHeight, canvasWidth } = canvasDimentions;
     const screenDimentions = useAppSelector(selectScreenDimentions);
 
     const minScale = screenDimentions.width / canvasWidth;
@@ -16,6 +20,8 @@ function useHandleCanvasScroll(canvasWidth: number, canvasHeight: number) {
 
     const canvasZoom = Gesture.Pinch()
         .onUpdate((e) => {
+            if (foundNodeCoordinates) return;
+
             const newScaleValue = savedScale.value * e.scale;
             scale.value = clamp(minScale, 1.4, newScaleValue);
 
@@ -32,8 +38,9 @@ function useHandleCanvasScroll(canvasWidth: number, canvasHeight: number) {
         });
 
     const canvasPan = Gesture.Pan()
-        .onStart(() => {})
         .onUpdate((e) => {
+            if (foundNodeCoordinates) return;
+
             const newXValue = e.translationX + start.value.x;
             const newYValue = e.translationY + start.value.y;
 
@@ -66,8 +73,51 @@ function useHandleCanvasScroll(canvasWidth: number, canvasHeight: number) {
     const canvasGestures = Gesture.Simultaneous(canvasPan, canvasZoom);
 
     const transform = useAnimatedStyle(() => {
-        return { transform: [{ translateX: offset.value.x }, { translateY: offset.value.y }, { scale: scale.value }] };
-    }, [offset]);
+        if (foundNodeCoordinates) {
+            const position = whereShouldNodeBe({ foundNodeCoordinates, canvasWidth, screenWidth: screenDimentions.width });
+
+            const leftBound = (canvasWidth - screenDimentions.width) / 2;
+
+            const foundNodeTranslatedX = leftBound - foundNodeCoordinates.x;
+            const positionAdjustmentsForX = position === "LEFT_SIDE_OF_SCREEN" ? screenDimentions.width - 9.5 * CIRCLE_SIZE : 0;
+            const foundNodeTranslatedY = canvasHeight / 2 - foundNodeCoordinates.y - 8 * CIRCLE_SIZE;
+
+            return {
+                transform: [
+                    {
+                        translateX: withSpring(foundNodeTranslatedX + positionAdjustmentsForX, { damping: 32, stiffness: 350 }),
+                    },
+                    {
+                        translateY: withSpring(foundNodeTranslatedY, { damping: 32, stiffness: 350 }),
+                    },
+                    { scale: withSpring(1, { damping: 32, stiffness: 350 }) },
+                ],
+            };
+        }
+        return {
+            transform: [
+                { translateX: withSpring(offset.value.x, { damping: 32, stiffness: 500 }) },
+                { translateY: withSpring(offset.value.y, { damping: 32, stiffness: 500 }) },
+                { scale: withSpring(scale.value, { damping: 32, stiffness: 500 }) },
+            ],
+        };
+
+        function whereShouldNodeBe({
+            canvasWidth,
+            foundNodeCoordinates,
+            screenWidth,
+        }: {
+            foundNodeCoordinates: CirclePositionInCanvasWithLevel;
+            canvasWidth: number;
+            screenWidth: number;
+        }) {
+            const distanceFromRightMargin = canvasWidth - foundNodeCoordinates.x;
+
+            if (distanceFromRightMargin <= screenWidth + CANVAS_HORIZONTAL_PADDING / 2) return "LEFT_SIDE_OF_SCREEN";
+
+            return "RIGHT_SIDE_OF_SCREEN";
+        }
+    }, [offset, scale, foundNodeCoordinates]);
 
     return { transform, canvasGestures };
 }

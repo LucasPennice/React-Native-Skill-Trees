@@ -36,7 +36,7 @@ const useCanvasTouchHandler = ({ nodeCoordinatesCentered, onNodeClick, tree, dra
                 const clickedNode = nodeCoordinatesCentered.find(didTapCircle(touchInfo));
                 const clickedDndZone = dragAndDropZones.find(didTapDndZone(touchInfo));
 
-                if (onDndZoneClick && clickedDndZone) return onDndZoneClick(clickedDndZone);
+                if (onDndZoneClick && showDndZones && clickedDndZone) return onDndZoneClick(clickedDndZone);
 
                 if (clickedNode === undefined) return dispatch(setSelectedNode(null));
 

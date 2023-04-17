@@ -187,28 +187,26 @@ export function calculateDimentionsAndRootCoordinates(
     return { canvasWidth, canvasHeight };
 }
 
+export const CANVAS_HORIZONTAL_PADDING = 200;
 function getCanvasWidth(treeWidth: number, screenWidth: number) {
-    const horizontalPadding = 200;
-
     const deltaWidthScreen = screenWidth - treeWidth;
 
-    if (deltaWidthScreen < 0) return treeWidth + horizontalPadding;
+    if (deltaWidthScreen < 0) return treeWidth + CANVAS_HORIZONTAL_PADDING;
 
     if (deltaWidthScreen >= 200) return screenWidth;
 
-    return treeWidth + horizontalPadding;
+    return treeWidth + CANVAS_HORIZONTAL_PADDING;
 }
 
+export const CANVAS_VERTICAL_PADDING = 200;
 function getCanvasHeight(treeHeight: number, screenHeight: number) {
-    const verticalPadding = 200;
-
     const deltaWidthScreen = screenHeight - treeHeight;
 
-    if (deltaWidthScreen < 0) return treeHeight + verticalPadding;
+    if (deltaWidthScreen < 0) return treeHeight + CANVAS_VERTICAL_PADDING;
 
     if (deltaWidthScreen >= 200) return screenHeight;
 
-    return treeHeight + verticalPadding;
+    return treeHeight + CANVAS_VERTICAL_PADDING;
 }
 
 export function centerNodeCoordinatesInCanvas(nodeCoordinates: CirclePositionInCanvasWithLevel[], canvasDimentions: CanvasDimentions) {
