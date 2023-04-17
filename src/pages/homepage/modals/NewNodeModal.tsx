@@ -42,7 +42,7 @@ function NewNodeModal() {
     };
 
     return (
-        <FlingToDismissModal closeModal={closeModal} open={openMenu == "newNode"} leftHeaderButton={{ onPress: addNewNode, title: "Add Tree" }}>
+        <FlingToDismissModal closeModal={closeModal} open={openMenu == "newNode"} leftHeaderButton={{ onPress: addNewNode, title: "Confirm" }}>
             <View style={{ flex: 1, marginTop: 20 }}>
                 <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }} fontSize={16}>
                     Enter the name of the new skill you'll add to the roadmap

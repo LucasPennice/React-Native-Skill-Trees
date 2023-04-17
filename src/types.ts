@@ -36,6 +36,7 @@ export type ModifiableProperties<T> = {
 };
 
 export const MENU_DAMPENING = { damping: 20, stiffness: 300 };
+export const MENU_HIGH_DAMPENING = { damping: 26, stiffness: 300 };
 
 export const mockSkillTreeArray: Tree<Skill>[] = [
     {

@@ -1,12 +1,13 @@
 import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "./reduxStore";
-import { Skill, Tree } from "../types";
+import { DnDZone, Skill, Tree } from "../types";
 
 // Define a type for the slice state
 type UserTreesSlice = {
     userTrees: Tree<Skill>[];
     currentTreeId: string | undefined;
     selectedNode: string | null;
+    selectedDndZone: DnDZone | undefined;
 };
 
 // Define the initial state using that type
@@ -14,6 +15,7 @@ const initialState: UserTreesSlice = {
     userTrees: [],
     currentTreeId: undefined,
     selectedNode: null,
+    selectedDndZone: undefined,
 };
 
 export type ModifiableNodeProperties = { name?: string; isCompleted?: boolean };
@@ -56,10 +58,13 @@ export const userTreesSlice = createSlice({
         setSelectedNode: (state, action: PayloadAction<string | null>) => {
             state.selectedNode = action.payload;
         },
+        setSelectedDndZone: (state, action: PayloadAction<DnDZone | undefined>) => {
+            state.selectedDndZone = action.payload;
+        },
     },
 });
 
-export const { changeTree, unselectTree, mutateUserTree, populateUserTrees, appendToUserTree, removeUserTree, setSelectedNode } =
+export const { changeTree, unselectTree, mutateUserTree, populateUserTrees, appendToUserTree, removeUserTree, setSelectedNode, setSelectedDndZone } =
     userTreesSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type

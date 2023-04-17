@@ -12,7 +12,7 @@ type Props = {
     nodeCoordinatesCentered: CirclePositionInCanvasWithLevel[];
     tree: Tree<Skill>;
     onNodeClick?: (nodeId: string) => void;
-    onDndZoneClick?: (clickedZone: DnDZone) => void;
+    onDndZoneClick?: (clickedZone?: DnDZone) => void;
     showDndZones?: boolean;
     dragAndDropZones: DnDZone[];
 };
@@ -36,7 +36,7 @@ const useCanvasTouchHandler = ({ nodeCoordinatesCentered, onNodeClick, tree, dra
                 const clickedNode = nodeCoordinatesCentered.find(didTapCircle(touchInfo));
                 const clickedDndZone = dragAndDropZones.find(didTapDndZone(touchInfo));
 
-                if (onDndZoneClick && showDndZones && clickedDndZone) return onDndZoneClick(clickedDndZone);
+                if (onDndZoneClick && showDndZones) return onDndZoneClick(clickedDndZone);
 
                 if (clickedNode === undefined) return dispatch(setSelectedNode(null));
 

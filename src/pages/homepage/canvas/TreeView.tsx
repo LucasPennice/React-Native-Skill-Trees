@@ -10,8 +10,6 @@ import { CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree, centerFlex } fro
 import DragAndDropZones from "./DragAndDropZones";
 import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
 import { selectNewNode } from "../../../redux/newNodeSlice";
-import Node from "./Node";
-import CanvasPath from "./CavnasPath";
 import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 import {
     calculateDimentionsAndRootCoordinates,
@@ -29,13 +27,13 @@ type TreeViewProps = {
     tree: Tree<Skill>;
     onNodeClick?: (nodeId: string) => void;
     showDndZones?: boolean;
-    onDndZoneClick?: (clickedZone: DnDZone) => void;
+    onDndZoneClick?: (clickedZone?: DnDZone) => void;
 };
 
 function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick }: TreeViewProps) {
     //Redux State
     const screenDimentions = useAppSelector(selectScreenDimentions);
-    const { selectedNode } = useAppSelector(selectTreeSlice);
+    const { selectedNode, selectedDndZone } = useAppSelector(selectTreeSlice);
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
     const newNode = useAppSelector(selectNewNode);
     //Derived State
@@ -53,10 +51,6 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick }: TreeViewP
     const [initialBlur, setInitialBlur] = useState(10);
 
     // useCenterCameraOnTreeChange(canvasTouchHandler, canvasDimentions);
-
-    // const previewNode = tentativeCirlcePositionsInCanvas.length ? tentativeCirlcePositionsInCanvas.find((t) => t.id === newNode.id) : undefined;
-
-    // const previewNodeParent = previewNode ? tentativeCirlcePositionsInCanvas.find((t) => t.id === previewNode.parentId) : undefined;
 
     const treeAccentColor = tree.accentColor ? tree.accentColor : colors.accent;
 
@@ -92,7 +86,7 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick }: TreeViewP
                                 treeAccentColor={treeAccentColor}
                                 rootCoordinates={{ width: 0, height: 0 }}
                             />
-                            {showDndZones && <DragAndDropZones data={dragAndDropZones} />}
+                            {showDndZones && <DragAndDropZones data={dragAndDropZones} selectedDndZone={selectedDndZone} />}
                         </Canvas>
                     </Animated.View>
                 </View>
@@ -105,39 +99,3 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick }: TreeViewP
 TreeView.whyDidYouRender = true;
 
 export default TreeView;
-
-function PreviewNode({
-    previewNode,
-    previewNodeParent,
-    newNode,
-}: {
-    previewNode: CirclePositionInCanvasWithLevel;
-    previewNodeParent: CirclePositionInCanvasWithLevel | undefined;
-    newNode: Skill;
-}) {
-    const cx = previewNode.x;
-    const cy = previewNode.y;
-
-    const pathInitialPointX = previewNodeParent ? previewNodeParent.x : cx;
-    const pathInitialPointY = previewNodeParent ? previewNodeParent.y : cy + DISTANCE_BETWEEN_GENERATIONS;
-
-    const pathCoordinates = { cx, cy, pathInitialPoint: { x: pathInitialPointX, y: pathInitialPointY } };
-
-    const letterToRender = newNode.name[0];
-
-    const opacity = useValue(0);
-    const changeOpacity = () => runTiming(opacity, 1, { duration: 250 });
-
-    useEffect(() => {
-        opacity.current = 0;
-
-        changeOpacity();
-    }, [previewNode]);
-
-    return (
-        <Group opacity={opacity}>
-            <CanvasPath coordinates={pathCoordinates} pathColor={colors.line} />
-            <Node treeAccentColor={colors.line} coord={{ cx, cy }} text={{ color: colors.unmarkedText, letter: letterToRender }} />
-        </Group>
-    );
-}

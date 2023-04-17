@@ -72,15 +72,14 @@ function dnDZoneBasedOnNodeCoord(
             ofNode: nodeCoord.id,
         };
 
-    const brotherDndZoneMinWidth = DISTANCE_BETWEEN_CHILDREN / 2;
+    const brotherDndWidth = DISTANCE_BETWEEN_CHILDREN / 2;
 
     if (dndType === "LEFT_BROTHER") {
-        const width = isNotFirstNode(nodeCoord) ? getLevelNodeDistance(nodeCoord) - 1 * CIRCLE_SIZE + CIRCLE_SIZE : brotherDndZoneMinWidth;
         return {
-            x: nodeCoord.x - width,
+            x: nodeCoord.x - brotherDndWidth,
             y: nodeCoord.y - BROTHER_DND_ZONE_HEIGHT / 2,
             height: BROTHER_DND_ZONE_HEIGHT,
-            width,
+            width: brotherDndWidth,
             type: "LEFT_BROTHER",
             ofNode: nodeCoord.id,
         };
@@ -91,7 +90,7 @@ function dnDZoneBasedOnNodeCoord(
             x: nodeCoord.x,
             y: nodeCoord.y - BROTHER_DND_ZONE_HEIGHT / 2,
             height: BROTHER_DND_ZONE_HEIGHT,
-            width: brotherDndZoneMinWidth,
+            width: brotherDndWidth,
             type: "RIGHT_BROTHER",
             ofNode: nodeCoord.id,
         };
@@ -138,10 +137,8 @@ export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositio
             const leftBrotherDndZone = dnDZoneBasedOnNodeCoord(pos, "LEFT_BROTHER", coordinatesByLevel[pos.level]);
             result.push(leftBrotherDndZone);
 
-            if (isLastNodeOfCluster(pos)) {
-                const rightBrotherDndZone = dnDZoneBasedOnNodeCoord(pos, "RIGHT_BROTHER", coordinatesByLevel[pos.level]);
-                result.push(rightBrotherDndZone);
-            }
+            const rightBrotherDndZone = dnDZoneBasedOnNodeCoord(pos, "RIGHT_BROTHER", coordinatesByLevel[pos.level]);
+            result.push(rightBrotherDndZone);
         }
 
         if (nodeDoesntHaveChildren(circlePositionsInCanvas, pos)) {
