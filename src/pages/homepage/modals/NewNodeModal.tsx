@@ -10,7 +10,7 @@ import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
 import { makeid } from "../../myTrees/functions";
-import { setNewNode } from "../../../redux/userTreesSlice";
+import { setNewNode, setSelectedNode } from "../../../redux/userTreesSlice";
 
 function NewNodeModal() {
     const { openMenu } = useAppSelector(selectCanvasDisplaySettings);
@@ -30,6 +30,7 @@ function NewNodeModal() {
         if (text === "") return Alert.alert("Please enter a name for the new skill");
         dispatch(setNewNode({ name: text.trim(), isCompleted, id: makeid(24) }));
         dispatch(toggleNewNode());
+        dispatch(setSelectedNode(null));
     };
 
     return (

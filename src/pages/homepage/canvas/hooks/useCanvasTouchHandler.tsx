@@ -23,7 +23,7 @@ export type CanvasTouchHandler = { touchHandler: TouchHandler };
 
 const useCanvasTouchHandler = ({ nodeCoordinatesCentered, onNodeClick, tree, dragAndDropZones, onDndZoneClick, showDndZones }: Props) => {
     //Redux
-    const { selectedNode } = useAppSelector(selectTreeSlice);
+    const { selectedNode, newNode } = useAppSelector(selectTreeSlice);
     const dispatch = useAppDispatch();
     //
 
@@ -33,10 +33,14 @@ const useCanvasTouchHandler = ({ nodeCoordinatesCentered, onNodeClick, tree, dra
                 //Avoids bug on android
                 if (touchInfo.type !== 2) return;
 
-                const clickedNode = nodeCoordinatesCentered.find(didTapCircle(touchInfo));
                 const clickedDndZone = dragAndDropZones.find(didTapDndZone(touchInfo));
 
                 if (onDndZoneClick && showDndZones) return onDndZoneClick(clickedDndZone);
+
+                //Blocks the select node functionality when adding a new node
+                if (newNode) return;
+
+                const clickedNode = nodeCoordinatesCentered.find(didTapCircle(touchInfo));
 
                 if (clickedNode === undefined) return dispatch(setSelectedNode(null));
 

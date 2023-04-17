@@ -1,8 +1,7 @@
-import { Blur, Path, Skia, SkiaMutableValue, useComputedValue, useSpring } from "@shopify/react-native-skia";
 import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../types";
-import { CANVAS_SPRING, colors, DISTANCE_BETWEEN_GENERATIONS, MAX_OFFSET } from "./parameters";
+import { colors } from "./parameters";
 import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
-import { findDistanceBetweenNodesById, findParentOfNode } from "../treeFunctions";
+import { findParentOfNode } from "../treeFunctions";
 import Label from "./Label";
 import Node from "./Node";
 import CanvasPath from "./CavnasPath";
@@ -15,7 +14,6 @@ type TreeProps = {
         selectedNode: string | null;
         showLabel: boolean;
         circlePositionsInCanvas: CirclePositionInCanvasWithLevel[];
-        tentativeCirlcePositionsInCanvas: CirclePositionInCanvasWithLevel[];
     };
     rootCoordinates?: { width: number; height: number };
     treeAccentColor: string;
@@ -23,38 +21,20 @@ type TreeProps = {
 
 function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, wholeTree, treeAccentColor }: TreeProps) {
     //Props
-    const { selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas } = stateProps;
+    const { selectedNode, showLabel, circlePositionsInCanvas } = stateProps;
 
     const defaultParentInfo = parentNodeInfo ?? { coordinates: { x: rC!.width, y: rC!.height }, numberOfChildren: 1, currentChildIndex: 0 };
 
-    const previewMode = tentativeCirlcePositionsInCanvas.length !== 0;
-
-    //Coordinates calculation
-    const currentNodeTentativeCoordinates = tentativeCirlcePositionsInCanvas.find((c) => c.id === tree.data.id);
-
-    const currentNodeParentTentativeCoordinates = tentativeCirlcePositionsInCanvas.find((c) => {
-        if (!currentNodeTentativeCoordinates) return false;
-        return c.id === currentNodeTentativeCoordinates.parentId;
-    });
-
     const currentNodeCoordintes = circlePositionsInCanvas.find((c) => c.id === tree.data.id)!;
 
-    const pathInitialPoint =
-        previewMode && currentNodeParentTentativeCoordinates ? currentNodeParentTentativeCoordinates : defaultParentInfo.coordinates;
+    const pathInitialPoint = defaultParentInfo.coordinates;
 
-    const cx = currentNodeTentativeCoordinates ? currentNodeTentativeCoordinates.x : currentNodeCoordintes.x;
-    const cy = currentNodeTentativeCoordinates ? currentNodeTentativeCoordinates.y : currentNodeCoordintes.y;
-
-    // --
+    const cx = currentNodeCoordintes.x;
+    const cy = currentNodeCoordintes.y;
 
     let newParentNodeInfo = { coordinates: { ...currentNodeCoordintes, x: cx, y: cy }, numberOfChildren: tree.children ? tree.children.length : 0 };
 
-    const { circleBlurOnInactive, groupTransform, pathBlurOnInactive } = useHandleTreeAnimations(
-        selectedNode,
-        showLabel,
-        tree,
-        findDistanceBetweenNodesById(wholeTree, tree.data.id) ?? 0
-    );
+    const { circleBlurOnInactive, groupTransform, pathBlurOnInactive } = useHandleTreeAnimations(selectedNode, showLabel, tree);
 
     const nodeAndParentCompleted = (() => {
         if (tree.data.isCompleted !== true) return false;
@@ -73,15 +53,11 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
     const textColor = tree.data.isCompleted ? treeAccentColor : tree.data.id === selectedNode ? "white" : colors.unmarkedText;
     const letterToRender = tree.data.name ? tree.data.name[0] : "-";
 
-    const isOnlyChild = getIsOnlyChild(tentativeCirlcePositionsInCanvas.length ? tentativeCirlcePositionsInCanvas : circlePositionsInCanvas);
-
     return (
         <>
             <CanvasPath
-                key={`${tree.data.id}path`}
                 coordinates={{ cx, cy, pathInitialPoint }}
                 isRoot={Boolean(tree.isRoot)}
-                // curveInwards={isOnlyChild}
                 pathBlurOnInactive={pathBlurOnInactive}
                 pathColor={pathColor}
             />
@@ -95,7 +71,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
                             wholeTree={wholeTree}
                             treeAccentColor={treeAccentColor}
                             parentNodeInfo={{ ...newParentNodeInfo, currentChildIndex: idx }}
-                            stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
+                            stateProps={{ selectedNode, showLabel, circlePositionsInCanvas }}
                         />
                     );
                 })}
@@ -113,15 +89,5 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
             />
         </>
     );
-
-    function getIsOnlyChild(coordinates: CirclePositionInCanvasWithLevel[]) {
-        const foo = coordinates.reduce((prev, curr) => {
-            if (curr.parentId === tree.parentId) return prev + 1;
-            return prev;
-        }, 1);
-
-        if (foo === 1) return true;
-        return false;
-    }
 }
 export default CanvasTree;

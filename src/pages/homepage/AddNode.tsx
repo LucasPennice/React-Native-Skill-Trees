@@ -36,7 +36,7 @@ function AddNode() {
     }, [selectedDndZone, newNode]);
 
     const styles = useAnimatedStyle(() => {
-        if (mode === "CONFIRM_POSITION") return { width: withSpring(220, MENU_HIGH_DAMPENING), height: withSpring(50, MENU_HIGH_DAMPENING) };
+        if (mode === "CONFIRM_POSITION") return { width: withSpring(width - 20, MENU_HIGH_DAMPENING), height: withSpring(50, MENU_HIGH_DAMPENING) };
 
         if (mode === "SELECT_POSITION") return { width: withSpring(width - 20, MENU_HIGH_DAMPENING), height: withSpring(80, MENU_HIGH_DAMPENING) };
 
@@ -80,7 +80,8 @@ function AddNode() {
                 </Animated.View>
             )}
             {mode === "CONFIRM_POSITION" && (
-                <Animated.View style={[centerFlex, { flexDirection: "row", gap: 20 }, opacity]}>
+                <Animated.View
+                    style={[centerFlex, { flexDirection: "row", justifyContent: "space-between", flex: 1, paddingHorizontal: 10 }, opacity]}>
                     <Pressable onPress={() => dispatch(setSelectedDndZone(undefined))} style={s.button}>
                         <AppText style={{ color: colors.red }} fontSize={15}>
                             Change position

@@ -79,9 +79,7 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick }: TreeViewP
                                     selectedNode,
                                     showLabel,
                                     circlePositionsInCanvas: nodeCoordinatesCentered,
-                                    tentativeCirlcePositionsInCanvas: [],
                                 }}
-                                // stateProps={{ selectedNode, showLabel, circlePositionsInCanvas, tentativeCirlcePositionsInCanvas }}
                                 tree={tree}
                                 wholeTree={tree}
                                 treeAccentColor={treeAccentColor}

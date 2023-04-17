@@ -3,7 +3,7 @@ import { mix, useSharedValueEffect, useValue, useComputedValue } from "@shopify/
 import { useEffect } from "react";
 import { Skill, Tree } from "../../../../types";
 
-const useHandleTreeAnimations = (selectedNode: string | null, showLabel: boolean, tree: Tree<Skill>, treeLevel: number) => {
+const useHandleTreeAnimations = (selectedNode: string | null, showLabel: boolean, tree: Tree<Skill>) => {
     const { circleBlurOnInactive, pathBlurOnInactive } = useAnimationsForUnselected(selectedNode, tree.data.id);
 
     const { groupTransform } = useAnimationsOnSelect(selectedNode, tree);
