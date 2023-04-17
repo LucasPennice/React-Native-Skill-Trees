@@ -9,13 +9,14 @@ import { colors, DISTANCE_BETWEEN_GENERATIONS, NAV_HEGIHT } from "./parameters";
 import { CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree, centerFlex } from "../../../types";
 import DragAndDropZones from "./DragAndDropZones";
 import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
-import { selectNewNode } from "../../../redux/newNodeSlice";
 import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 import {
     calculateDimentionsAndRootCoordinates,
     calculateDragAndDropZones,
     centerNodeCoordinatesInCanvas,
     getCirclePositions,
+    getCoordinatesAfterNodeInsertion,
+    insertNodeBasedOnDnDZone,
 } from "./coordinateFunctions";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
@@ -35,13 +36,13 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick }: TreeViewP
     const screenDimentions = useAppSelector(selectScreenDimentions);
     const { selectedNode, selectedDndZone } = useAppSelector(selectTreeSlice);
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
-    const newNode = useAppSelector(selectNewNode);
     //Derived State
     const nodeCoordinates = getCirclePositions(tree);
     const canvasDimentions = calculateDimentionsAndRootCoordinates(nodeCoordinates, screenDimentions);
     const nodeCoordinatesCentered = centerNodeCoordinatesInCanvas(nodeCoordinates, canvasDimentions);
     const dragAndDropZones = calculateDragAndDropZones(nodeCoordinatesCentered);
     const foundNodeCoordinates = nodeCoordinates.find((c) => c.id === selectedNode);
+
     //Hooks
     const { touchHandler } = useCanvasTouchHandler({ tree, nodeCoordinatesCentered, onNodeClick, onDndZoneClick, showDndZones, dragAndDropZones });
     const { canvasHeight, canvasWidth } = canvasDimentions;

@@ -1,5 +1,5 @@
 import { ModifiableNodeProperties } from "../../redux/userTreesSlice";
-import { CirclePositionInCanvasWithLevel, ModifiableProperties, Skill, Tree } from "../../types";
+import { CirclePositionInCanvasWithLevel, DnDZone, ModifiableProperties, Skill, Tree } from "../../types";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
     if (!rootNode) return 0;

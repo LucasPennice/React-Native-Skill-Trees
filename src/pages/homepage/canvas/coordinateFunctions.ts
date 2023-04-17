@@ -1,8 +1,8 @@
 import { current } from "@reduxjs/toolkit";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { CanvasDimentions, CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree } from "../../../types";
-import { getRootNodeDefaultPosition, returnCoordinatesByLevel } from "../treeFunctions";
-import { PlotTreeReingoldTiltfordAlgorithm } from "./generateTreeFns";
+import { CanvasDimentions, CirclePositionInCanvasWithLevel, DnDZone, ModifiableProperties, Skill, Tree } from "../../../types";
+import { editTreeProperties, findParentOfNode, findTreeNodeById, getRootNodeDefaultPosition, returnCoordinatesByLevel } from "../treeFunctions";
+import { Coordinates, PlotTreeReingoldTiltfordAlgorithm } from "./generateTreeFns";
 import {
     BROTHER_DND_ZONE_HEIGHT,
     CIRCLE_SIZE,
@@ -18,9 +18,7 @@ export function getCirclePositions(currentTree?: Tree<Skill>): CirclePositionInC
 
     const unscaledCoordinates = PlotTreeReingoldTiltfordAlgorithm(currentTree);
 
-    const scaledCoordinates = unscaledCoordinates.map((f) => {
-        return { ...f, x: f.x * DISTANCE_BETWEEN_CHILDREN + 2 * CIRCLE_SIZE, y: f.y * DISTANCE_BETWEEN_GENERATIONS + CIRCLE_SIZE };
-    });
+    const scaledCoordinates = scaleCoordinatesAfterReingoldTiltford(unscaledCoordinates);
 
     return scaledCoordinates;
 }
@@ -106,18 +104,6 @@ function dnDZoneBasedOnNodeCoord(
         };
 
     throw "dndType not supported in coordOfDnDZoneBasedOnNodeCoord";
-
-    function getLevelNodeDistance(pos: CirclePositionInCanvasWithLevel) {
-        if (nodeLevelCoordinates.length === 1) return DISTANCE_BETWEEN_CHILDREN;
-
-        return Math.abs(nodeLevelCoordinates[1].x - nodeLevelCoordinates[0].x);
-    }
-
-    function isNotFirstNode(pos: CirclePositionInCanvasWithLevel) {
-        const foo = nodeLevelCoordinates.filter((x) => x.parentId === pos.parentId);
-
-        return foo[0].id !== pos.id && foo.length > 1;
-    }
 }
 
 export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositionInCanvasWithLevel[]) {
@@ -130,10 +116,10 @@ export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositio
 
         const isRoot = pos.level === 0;
 
-        const parentNodeDndZone = dnDZoneBasedOnNodeCoord(pos, "PARENT", coordinatesByLevel[pos.level]);
-        result.push(parentNodeDndZone);
-
         if (!isRoot) {
+            const parentNodeDndZone = dnDZoneBasedOnNodeCoord(pos, "PARENT", coordinatesByLevel[pos.level]);
+            result.push(parentNodeDndZone);
+
             const leftBrotherDndZone = dnDZoneBasedOnNodeCoord(pos, "LEFT_BROTHER", coordinatesByLevel[pos.level]);
             result.push(leftBrotherDndZone);
 
@@ -148,15 +134,6 @@ export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositio
     }
 
     return result;
-
-    function isLastNodeOfCluster(pos: CirclePositionInCanvasWithLevel) {
-        //@ts-ignore
-        const levelCoordinates = coordinatesByLevel[pos.level] as CirclePositionInCanvasWithLevel[];
-
-        const foo = levelCoordinates.filter((x) => x.parentId === pos.parentId);
-
-        return foo[foo.length - 1].id === pos.id;
-    }
 }
 
 function nodeDoesntHaveChildren(circlePositionsInCanvas: CirclePositionInCanvasWithLevel[], pos: CirclePositionInCanvasWithLevel) {
@@ -222,4 +199,71 @@ export function centerNodeCoordinatesInCanvas(nodeCoordinates: CirclePositionInC
     return normalizedCoordinates.map((c) => {
         return { ...c, x: c.x + paddingFromLeftBorder, y: c.y + paddingFromTopBorder };
     });
+}
+
+export function getCoordinatesAfterNodeInsertion(selectedDndZone: DnDZone, currentTree: Tree<Skill>, newNode: Skill) {
+    const newTree = insertNodeBasedOnDnDZone(selectedDndZone, currentTree, newNode);
+
+    if (!newTree) return undefined;
+
+    return getCirclePositions(newTree);
+}
+
+function scaleCoordinatesAfterReingoldTiltford(coordToScale: Coordinates[]) {
+    return coordToScale.map((f) => {
+        return { ...f, x: f.x * DISTANCE_BETWEEN_CHILDREN + 2 * CIRCLE_SIZE, y: f.y * DISTANCE_BETWEEN_GENERATIONS + CIRCLE_SIZE };
+    });
+}
+
+export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: Tree<Skill>, newNode: Skill) {
+    //Tengo 3 casos
+
+    const targetNode = findTreeNodeById(currentTree, selectedDndZone.ofNode);
+
+    if (!targetNode) throw "couldnt find targetNode on getTentativeModifiedTree";
+
+    if (selectedDndZone.type === "PARENT") {
+        const oldParent: Tree<Skill> = { ...targetNode, isRoot: false, parentId: newNode.id };
+
+        delete oldParent["treeId"];
+        delete oldParent["treeName"];
+        delete oldParent["accentColor"];
+
+        const newProperties: ModifiableProperties<Tree<Skill>> = { ...targetNode, data: newNode, children: [oldParent] };
+
+        return editTreeProperties(currentTree, targetNode, newProperties);
+    }
+
+    const newChild: Tree<Skill> = { data: newNode, parentId: targetNode.data.id };
+
+    if (selectedDndZone.type === "ONLY_CHILDREN") {
+        const newProperties: ModifiableProperties<Tree<Skill>> = { ...targetNode, children: [newChild] };
+
+        return editTreeProperties(currentTree, targetNode, newProperties);
+    }
+
+    //From now on we are in the "BROTHERS" cases
+
+    const parentOfTargetNode = findParentOfNode(currentTree, targetNode.data.id);
+
+    if (!parentOfTargetNode) throw "couldnt find parentOfTargetNode on getTentativeModifiedTree";
+    if (!parentOfTargetNode.children) throw "parentOfTargetNode.children is undefined on getTentativeModifiedTree";
+
+    const newChildren: Tree<Skill>[] = [];
+
+    for (let i = 0; i < parentOfTargetNode.children.length; i++) {
+        const element = parentOfTargetNode.children[i];
+
+        if (selectedDndZone.type === "LEFT_BROTHER" && element.data.id === targetNode.data.id)
+            newChildren.push({ data: newNode, parentId: targetNode.parentId });
+
+        newChildren.push(element);
+
+        if (selectedDndZone.type === "RIGHT_BROTHER" && element.data.id === targetNode.data.id)
+            newChildren.push({ data: newNode, parentId: targetNode.parentId });
+    }
+
+    const newProperties: ModifiableProperties<Tree<Skill>> = { ...parentOfTargetNode, children: newChildren };
+
+    return editTreeProperties(currentTree, parentOfTargetNode, newProperties);
 }

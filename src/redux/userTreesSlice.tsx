@@ -1,6 +1,7 @@
 import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "./reduxStore";
 import { DnDZone, Skill, Tree } from "../types";
+import { insertNodeBasedOnDnDZone } from "../pages/homepage/canvas/coordinateFunctions";
 
 // Define a type for the slice state
 type UserTreesSlice = {
@@ -8,6 +9,7 @@ type UserTreesSlice = {
     currentTreeId: string | undefined;
     selectedNode: string | null;
     selectedDndZone: DnDZone | undefined;
+    newNode: Skill | undefined;
 };
 
 // Define the initial state using that type
@@ -16,6 +18,7 @@ const initialState: UserTreesSlice = {
     currentTreeId: undefined,
     selectedNode: null,
     selectedDndZone: undefined,
+    newNode: undefined,
 };
 
 export type ModifiableNodeProperties = { name?: string; isCompleted?: boolean };
@@ -61,11 +64,27 @@ export const userTreesSlice = createSlice({
         setSelectedDndZone: (state, action: PayloadAction<DnDZone | undefined>) => {
             state.selectedDndZone = action.payload;
         },
+        clearNewNodeState: (state) => {
+            state.newNode = undefined;
+        },
+        setNewNode: (state, action: PayloadAction<Skill>) => {
+            state.newNode = { ...action.payload };
+        },
     },
 });
 
-export const { changeTree, unselectTree, mutateUserTree, populateUserTrees, appendToUserTree, removeUserTree, setSelectedNode, setSelectedDndZone } =
-    userTreesSlice.actions;
+export const {
+    changeTree,
+    unselectTree,
+    mutateUserTree,
+    populateUserTrees,
+    appendToUserTree,
+    removeUserTree,
+    setSelectedNode,
+    setSelectedDndZone,
+    clearNewNodeState,
+    setNewNode,
+} = userTreesSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export function selectCurrentTree(state: RootState) {
@@ -79,6 +98,15 @@ export function selectCurrentTree(state: RootState) {
 
     return undefined;
 }
+
+export const selectTentativeTree = (state: RootState) => {
+    const { selectedDndZone, newNode } = state.currentTree;
+    const currentTree = selectCurrentTree(state);
+
+    const tentativeNewTree = selectedDndZone && currentTree && newNode ? insertNodeBasedOnDnDZone(selectedDndZone, currentTree, newNode) : undefined;
+
+    return tentativeNewTree;
+};
 
 export const selectTreeSlice = (state: RootState) => state.currentTree;
 

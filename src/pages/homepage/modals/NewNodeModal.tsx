@@ -5,28 +5,19 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-na
 import AppText from "../../../components/AppText";
 import { selectCanvasDisplaySettings, toggleNewNode } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { centerFlex } from "../../../types";
 import { colors } from "../canvas/parameters";
-import { setNewNode } from "../../../redux/newNodeSlice";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
 import { makeid } from "../../myTrees/functions";
+import { setNewNode } from "../../../redux/userTreesSlice";
 
 function NewNodeModal() {
     const { openMenu } = useAppSelector(selectCanvasDisplaySettings);
     const dispatch = useAppDispatch();
 
-    const { width } = Dimensions.get("window");
-
     const [text, onChangeText] = useState("");
     const [isCompleted, setIsCompleted] = useState(false);
-
-    const selectorWidth = width / 2 - 20 - 1;
-
-    const animatedStyles = useAnimatedStyle(() => {
-        return { left: withSpring(isCompleted ? selectorWidth : 2, { damping: 27, stiffness: 400 }) };
-    });
 
     useEffect(() => {
         onChangeText("");

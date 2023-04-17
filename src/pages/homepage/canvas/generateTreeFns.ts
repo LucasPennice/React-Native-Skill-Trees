@@ -2,7 +2,7 @@ import { CirclePositionInCanvasWithLevel, Skill, Tree, TreeWithCoord } from "../
 import { findDistanceBetweenNodesById, findTreeNodeById } from "../treeFunctions";
 import { DISTANCE_BETWEEN_GENERATIONS } from "./parameters";
 
-type Coordinates = { x: number; y: number; id: string; level: number; parentId: string | null; name: string };
+export type Coordinates = { x: number; y: number; id: string; level: number; parentId: string | null; name: string };
 
 export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => {
     let result: TreeWithCoord<Skill>;
@@ -81,7 +81,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
     function handleOverlap(tree: TreeWithCoord<Skill>) {
         let overlapInTree = true;
-        let loopAvoider = 0;
+        let loopAvoider = -1;
 
         let result: TreeWithCoord<Skill> = { ...tree };
 
@@ -120,7 +120,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         const result: { [key: string]: [number, number, string][] } = {};
         getTreeContourByLevel(tree, result);
 
-        let biggestOverlap = 0;
+        let biggestOverlap = -1;
         let treeToShiftFromId = "";
         let isOverlap = false;
 
@@ -135,24 +135,28 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
                 const nextContour = levelContours[idx + 1];
 
-                const currentOverlap = Math.abs(currentContour[1] - nextContour[0]);
+                const overlapOnLevel = currentContour[1] >= nextContour[0];
 
-                if (currentOverlap >= 1) return maxLevelOverlap;
+                const currentDistanceBetweenNodes = Math.abs(currentContour[1] - nextContour[0]);
 
-                if (currentOverlap > maxLevelOverlap) {
-                    levelTreeToShiftFromId = currentContour[2];
-                    return currentOverlap;
+                if (overlapOnLevel) {
+                    if (currentDistanceBetweenNodes >= maxLevelOverlap) {
+                        levelTreeToShiftFromId = currentContour[2];
+                        return currentDistanceBetweenNodes;
+                    }
+                    return maxLevelOverlap;
                 }
 
                 return maxLevelOverlap;
             }, -1);
 
-            if (levelOverlap >= biggestOverlap) {
+            if (levelOverlap >= biggestOverlap && levelTreeToShiftFromId) {
                 isOverlap = true;
                 biggestOverlap = levelOverlap;
                 treeToShiftFromId = levelTreeToShiftFromId;
             }
         });
+        console.log("RESULT IS", { isOverlap, overlapDistance: biggestOverlap, treeToShiftFromId });
 
         return { isOverlap, overlapDistance: biggestOverlap > 1 ? biggestOverlap : 1, treeToShiftFromId };
     }
@@ -183,6 +187,8 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
     function getTreesToShift(result: TreeWithCoord<Skill>, treeToShiftFromId: string) {
         if (!result.children) return [];
+
+        console.log(JSON.stringify(result), treeToShiftFromId);
 
         const levelOneTrees = result.children;
         const levelOneTreeIds = levelOneTrees.map((t) => t.data.id);

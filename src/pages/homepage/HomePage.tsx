@@ -5,17 +5,21 @@ import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
 import SettingsMenu from "./components/SettingsMenu";
 import { colors } from "./canvas/parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { selectCurrentTree, setSelectedDndZone, setSelectedNode } from "../../redux/userTreesSlice";
+import { selectCurrentTree, selectTentativeTree, selectTreeSlice, setSelectedDndZone, setSelectedNode } from "../../redux/userTreesSlice";
 import AddNode from "./AddNode";
 import NewNodeModal from "./modals/NewNodeModal";
 import useRunHomepageCleanup from "./useRunHomepageCleanup";
 import { DnDZone } from "../../types";
+import { insertNodeBasedOnDnDZone } from "./canvas/coordinateFunctions";
 
 function HomePage() {
     //Redux State
     const currentTree = useAppSelector(selectCurrentTree);
+    const { selectedDndZone, newNode } = useAppSelector(selectTreeSlice);
+    const tentativeNewTree = useAppSelector(selectTentativeTree);
     const dispatch = useAppDispatch();
-    //
+    //Derived State
+    const shouldRenderDndZones = newNode && !selectedDndZone;
 
     useRunHomepageCleanup();
 
@@ -23,9 +27,9 @@ function HomePage() {
         <View style={{ position: "relative", backgroundColor: colors.background }}>
             {currentTree && (
                 <TreeView
-                    tree={currentTree}
+                    tree={tentativeNewTree ?? currentTree}
                     onNodeClick={(id: string) => dispatch(setSelectedNode(id))}
-                    showDndZones={true}
+                    showDndZones={shouldRenderDndZones}
                     onDndZoneClick={(clickedZone: DnDZone | undefined) => dispatch(setSelectedDndZone(clickedZone))}
                 />
             )}
