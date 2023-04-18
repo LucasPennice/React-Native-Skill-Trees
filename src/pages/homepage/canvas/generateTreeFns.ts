@@ -1,6 +1,5 @@
-import { CirclePositionInCanvasWithLevel, Skill, Tree, TreeWithCoord } from "../../../types";
-import { findDistanceBetweenNodesById, findTreeNodeById } from "../treeFunctions";
-import { DISTANCE_BETWEEN_GENERATIONS } from "./parameters";
+import { Skill, Tree, TreeWithCoord } from "../../../types";
+import { findDistanceBetweenNodesById } from "../treeFunctions";
 
 export type Coordinates = { x: number; y: number; id: string; level: number; parentId: string | null; name: string };
 
@@ -90,12 +89,12 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         const treeDepths = coordArray.map((t) => t.level);
         const treeDepth = Math.max(...treeDepths);
 
-        while (overlapInTree && loopAvoider < treeDepth) {
-            const { isOverlap, overlapDistance, treeToShiftFromId } = checkForOverlap(result);
+        while (overlapInTree && loopAvoider <= treeDepth) {
+            const overlap = checkForOverlap(result);
 
-            if (isOverlap) {
-                const treesToShift = getTreesToShift(result, treeToShiftFromId);
-                result = shiftNodeAndDescendants(result, treesToShift, overlapDistance);
+            if (overlap !== undefined) {
+                const treesToShift = getTreesToShift(result, overlap.treeToShiftFromId);
+                result = shiftNodeAndDescendants(result, treesToShift, overlap.biggestOverlap);
             } else {
                 overlapInTree = false;
             }
@@ -116,49 +115,58 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         }
     }
 
+    type OverlapCheck = undefined | { biggestOverlap: number; treeToShiftFromId: string };
+
     function checkForOverlap(tree: TreeWithCoord<Skill>) {
-        const result: { [key: string]: [number, number, string][] } = {};
-        getTreeContourByLevel(tree, result);
+        const contourByLevel: { [key: string]: [number, number, string][] } = {};
+        getTreeContourByLevel(tree, contourByLevel);
 
-        let biggestOverlap = -1;
-        let treeToShiftFromId = "";
-        let isOverlap = false;
+        let result: OverlapCheck = undefined;
 
-        const keys = Object.keys(result);
+        const treeLevels = Object.keys(contourByLevel);
 
-        keys.forEach((key) => {
-            const levelContours = result[key];
-            let levelTreeToShiftFromId = "";
+        treeLevels.forEach((key) => {
+            const levelContour = contourByLevel[key];
 
-            const levelOverlap = levelContours.reduce((maxLevelOverlap: number, currentContour, idx) => {
-                if (idx === levelContours.length - 1) return maxLevelOverlap;
+            const levelBiggestOverlap = getLevelBiggestOverlap(levelContour);
 
-                const nextContour = levelContours[idx + 1];
+            const updateBiggestTreeOverlap =
+                levelBiggestOverlap !== undefined && (result === undefined || levelBiggestOverlap.biggestOverlap >= result.biggestOverlap);
 
-                const overlapOnLevel = currentContour[1] >= nextContour[0];
-
-                const currentDistanceBetweenNodes = Math.abs(currentContour[1] - nextContour[0]);
-
-                if (overlapOnLevel) {
-                    if (currentDistanceBetweenNodes >= maxLevelOverlap) {
-                        levelTreeToShiftFromId = currentContour[2];
-                        return currentDistanceBetweenNodes;
-                    }
-                    return maxLevelOverlap;
-                }
-
-                return maxLevelOverlap;
-            }, -1);
-
-            if (levelOverlap >= biggestOverlap && levelTreeToShiftFromId) {
-                isOverlap = true;
-                biggestOverlap = levelOverlap;
-                treeToShiftFromId = levelTreeToShiftFromId;
-            }
+            if (updateBiggestTreeOverlap) result = { ...levelBiggestOverlap };
         });
-        console.log("RESULT IS", { isOverlap, overlapDistance: biggestOverlap, treeToShiftFromId });
 
-        return { isOverlap, overlapDistance: biggestOverlap > 1 ? biggestOverlap : 1, treeToShiftFromId };
+        return result as { biggestOverlap: number; treeToShiftFromId: string } | undefined;
+    }
+
+    function getLevelBiggestOverlap(levelContour: [number, number, string][]) {
+        let result: { biggestOverlap: number; treeToShiftFromId: string } | undefined = undefined;
+
+        for (let idx = 0; idx < levelContour.length; idx++) {
+            const isOnLastContour = idx === levelContour.length - 1;
+
+            //We return on the last item because we compare the current contour with the next one, and the next contour doesn't exist on this iteration
+            if (isOnLastContour) return result;
+
+            const currentContour = levelContour[idx];
+            const nextContour = levelContour[idx + 1];
+
+            //I define two nodes perfectly overlapping as poor spacing and not overlap
+            const overlapBetweenThisAndNextContour = currentContour[1] > nextContour[0];
+            const overlapDistance = Math.abs(currentContour[1] - nextContour[0]);
+
+            const overlap = overlapBetweenThisAndNextContour && (result === undefined || result.biggestOverlap < overlapDistance);
+
+            const nodeSpacing = nextContour[0] - currentContour[1];
+
+            const poorSpacing = !overlap && nodeSpacing < 1 && (result === undefined || result.biggestOverlap < nodeSpacing);
+
+            if (overlap) result = { biggestOverlap: overlapDistance, treeToShiftFromId: currentContour[2] };
+
+            if (poorSpacing) result = { biggestOverlap: 1 - nodeSpacing, treeToShiftFromId: currentContour[2] };
+        }
+
+        return result;
     }
 
     function getTreeContourByLevel(tree: TreeWithCoord<Skill>, result: { [key: string]: [number, number, string][] }, subTreeParentId?: string) {
@@ -187,8 +195,6 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
     function getTreesToShift(result: TreeWithCoord<Skill>, treeToShiftFromId: string) {
         if (!result.children) return [];
-
-        console.log(JSON.stringify(result), treeToShiftFromId);
 
         const levelOneTrees = result.children;
         const levelOneTreeIds = levelOneTrees.map((t) => t.data.id);
