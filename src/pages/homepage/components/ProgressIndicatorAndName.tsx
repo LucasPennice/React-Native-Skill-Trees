@@ -8,6 +8,8 @@ import { Text, View } from "react-native";
 import { colors } from "../canvas/parameters";
 import AppText from "../../../components/AppText";
 import { centerFlex } from "../../../types";
+import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
+import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 
 export class ProgressWheelParams {
     size = 65;
@@ -36,6 +38,7 @@ const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
 
 function ProgressIndicatorAndName() {
     const currentTree = useAppSelector(selectCurrentTree);
+    const { width } = useAppSelector(selectScreenDimentions);
 
     const treeAccentColor = currentTree && currentTree.accentColor ? currentTree.accentColor : colors.accent;
 
@@ -77,6 +80,8 @@ function ProgressIndicatorAndName() {
                     borderRadius: 10,
                     display: "flex",
                     flexDirection: "row",
+                    justifyContent: "flex-start",
+                    maxWidth: width - 130,
                     gap: 15,
                 },
             ]}>
@@ -100,7 +105,10 @@ function ProgressIndicatorAndName() {
                 />
             </Svg>
 
-            <AppText style={{ color: colors.unmarkedText }} fontSize={20}>
+            <AppText
+                textProps={{ ellipsizeMode: "tail", numberOfLines: 1 }}
+                style={{ color: colors.unmarkedText, maxWidth: width - 190 }}
+                fontSize={20}>
                 {currentTree.treeName ?? "Tree Name"}
             </AppText>
         </View>

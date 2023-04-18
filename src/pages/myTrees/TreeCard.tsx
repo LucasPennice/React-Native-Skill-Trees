@@ -7,12 +7,14 @@ import AppText from "../../components/AppText";
 import { Circle, Svg } from "react-native-svg";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
-import { useAppDispatch } from "../../redux/reduxHooks";
+import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { setTree } from "../../redux/editTreeSlice";
+import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 
 function TreeCard({ element, changeTreeAndNavigateHome }: { element: Tree<Skill>; changeTreeAndNavigateHome: () => void }) {
     //Redux Related
     const dispatch = useAppDispatch();
+    const { width } = useAppSelector(selectScreenDimentions);
     const dispatchSetTree = () => dispatch(setTree(element));
     //
     const treeAccentColor = element && element.accentColor ? element.accentColor : colors.accent;
@@ -71,7 +73,10 @@ function TreeCard({ element, changeTreeAndNavigateHome }: { element: Tree<Skill>
                     },
                 ]}>
                 <View>
-                    <AppText fontSize={20} style={{ color: "white", fontFamily: "helveticaBold" }}>
+                    <AppText
+                        textProps={{ numberOfLines: 1, ellipsizeMode: "tail" }}
+                        fontSize={20}
+                        style={{ color: "white", fontFamily: "helveticaBold", maxWidth: width - 150 }}>
                         {element.treeName ?? "tree"}
                     </AppText>
                     <AppText fontSize={20} style={{ color: "#FFFFFF5D" }}>
