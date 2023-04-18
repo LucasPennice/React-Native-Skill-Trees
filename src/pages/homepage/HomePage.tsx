@@ -33,8 +33,6 @@ function HomePage() {
                     onDndZoneClick={(clickedZone: DnDZone | undefined) => dispatch(setSelectedDndZone(clickedZone))}
                 />
             )}
-
-            {/* <DragAndDropNewNode handleNewNode={handleNewNode} treeAccent={currentTree?.accentColor} /> */}
             <ProgressIndicatorAndName />
             <AddNode />
             {currentTree !== undefined && <SettingsMenu />}
