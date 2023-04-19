@@ -11,6 +11,7 @@ import NewNodeModal from "./modals/NewNodeModal";
 import useRunHomepageCleanup from "./useRunHomepageCleanup";
 import { DnDZone } from "../../types";
 import { insertNodeBasedOnDnDZone } from "./canvas/coordinateFunctions";
+import { getPathFromRootToNode } from "./treeFunctions";
 
 function HomePage() {
     //Redux State

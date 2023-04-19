@@ -2,6 +2,7 @@ import { Skill, Tree, TreeWithCoord } from "../../../types";
 import { findDistanceBetweenNodesById } from "../treeFunctions";
 
 export type Coordinates = { x: number; y: number; id: string; level: number; parentId: string | null; name: string };
+type Contour = { leftNode: { coord: number; id: string }; rightNode: { coord: number; id: string } };
 
 export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => {
     let result: TreeWithCoord<Skill>;
@@ -9,6 +10,9 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
     result = firstIteration(completeTree);
 
     result = handleOverlap(result);
+
+    // console.log(findLowestCommonAncestorBetweenTwoNodes(result, "6dY22wGk3UokVBvqo45DEiBq", "4zcot4mPH3OMv8s5RzGSannk"));
+    // console.log(findLowestCommonAncestorBetweenTwoNodes(result, "ZrdECsSu7lR0MAfNKz5tOblT", "WPiirE7xvMqooQ75C37m9eGh"));
 
     let treeCoordinates: Coordinates[] = [];
     treeToCoordArray(result, treeCoordinates);
@@ -91,6 +95,11 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
         while (overlapInTree && loopAvoider <= treeDepth) {
             const overlap = checkForOverlap(result);
+
+            console.log(overlap);
+            //Quiero que overlap devuelva el nivel y la id a partir de la cual quiero separar (los hijos del primer nodo que tengan en comun)
+            //Esa id y sus hermanos por derecha se shiftean overlap.biggestOverlap
+            //Los nodos con niveles menores shiftean la mitad de la cantidad
 
             if (overlap !== undefined) {
                 const treesToShift = getTreesToShift(result, overlap.treeToShiftFromId);

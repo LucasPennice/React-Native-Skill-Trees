@@ -1,5 +1,5 @@
 import { ModifiableNodeProperties } from "../../redux/userTreesSlice";
-import { CirclePositionInCanvasWithLevel, DnDZone, ModifiableProperties, Skill, Tree } from "../../types";
+import { CirclePositionInCanvasWithLevel, DnDZone, ModifiableProperties, Skill, Tree, TreeWithCoord } from "../../types";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
     if (!rootNode) return 0;
@@ -246,15 +246,71 @@ export function returnCoordinatesByLevel(coordinates: CirclePositionInCanvasWith
     const coordinatesByLevel: CirclePositionInCanvasWithLevel[][] = [];
 
     coordinates.forEach((c, idx) => {
-        //@ts-ignore
         if (coordinatesByLevel[c.level]) {
-            //@ts-ignore
             coordinatesByLevel[c.level] = [...coordinatesByLevel[c.level], c];
         } else {
-            //@ts-ignore
             coordinatesByLevel[c.level] = [c];
         }
     });
 
     return coordinatesByLevel;
+}
+
+export function findLowestCommonAncestorIdOfNodes(tree: TreeWithCoord<Skill>, nodeId1: string, nodeId2: string) {
+    const path1 = returnPathFromRootToNode(tree, nodeId1);
+    const path2 = returnPathFromRootToNode(tree, nodeId2);
+
+    return findLCABetweenToPaths(path1, path2);
+
+    function findLCABetweenToPaths(path1: string[], path2: string[]) {
+        const shortestPath = path1.length > path2.length ? [...path2] : [...path1];
+        const longestPath = path1.length > path2.length ? [...path1] : [...path2];
+
+        let tentativeLCA = null;
+
+        for (let i = 0; i < shortestPath.length; i++) {
+            const id1 = shortestPath[i];
+            const id2 = longestPath[i];
+
+            if (id1 === id2) tentativeLCA = id1;
+
+            if (id1 !== id2) return tentativeLCA;
+        }
+
+        return tentativeLCA;
+    }
+}
+
+function returnPathFromRootToNode(tree: TreeWithCoord<Skill>, nodeId: string) {
+    const result: string[] = [];
+
+    getPathFromRootToNode(tree, nodeId, result);
+
+    return result;
+
+    function getPathFromRootToNode(tree: TreeWithCoord<Skill>, nodeId: string, arr: string[]) {
+        arr.push(tree.data.id);
+
+        //Base Case 👇
+        if (tree.data.id === nodeId) return true;
+
+        if (!tree.children) {
+            arr.pop();
+            return false;
+        }
+
+        //Recursive Case 👇
+
+        for (let i = 0; i < tree.children.length; i++) {
+            const element = tree.children[i];
+
+            const childHasPath = getPathFromRootToNode(element, nodeId, arr);
+
+            if (childHasPath) return true;
+        }
+
+        arr.pop();
+
+        return false;
+    }
 }
