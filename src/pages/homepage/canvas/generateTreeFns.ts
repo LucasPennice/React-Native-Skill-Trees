@@ -1,5 +1,5 @@
 import { Skill, Tree, TreeWithCoord } from "../../../types";
-import { findDistanceBetweenNodesById } from "../treeFunctions";
+import { findDistanceBetweenNodesById, findLowestCommonAncestorIdOfNodes, returnPathFromRootToNode } from "../treeFunctions";
 
 export type Coordinates = { x: number; y: number; id: string; level: number; parentId: string | null; name: string };
 type Contour = { leftNode: { coord: number; id: string }; rightNode: { coord: number; id: string } };
@@ -10,9 +10,6 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
     result = firstIteration(completeTree);
 
     result = handleOverlap(result);
-
-    // console.log(findLowestCommonAncestorBetweenTwoNodes(result, "6dY22wGk3UokVBvqo45DEiBq", "4zcot4mPH3OMv8s5RzGSannk"));
-    // console.log(findLowestCommonAncestorBetweenTwoNodes(result, "ZrdECsSu7lR0MAfNKz5tOblT", "WPiirE7xvMqooQ75C37m9eGh"));
 
     let treeCoordinates: Coordinates[] = [];
     treeToCoordArray(result, treeCoordinates);
@@ -96,14 +93,11 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         while (overlapInTree && loopAvoider <= treeDepth) {
             const overlap = checkForOverlap(result);
 
-            console.log(overlap);
-            //Quiero que overlap devuelva el nivel y la id a partir de la cual quiero separar (los hijos del primer nodo que tengan en comun)
-            //Esa id y sus hermanos por derecha se shiftean overlap.biggestOverlap
-            //Los nodos con niveles menores shiftean la mitad de la cantidad
-
             if (overlap !== undefined) {
-                const treesToShift = getTreesToShift(result, overlap.treeToShiftFromId);
-                result = shiftNodeAndDescendants(result, treesToShift, overlap.biggestOverlap);
+                console.log(overlap);
+                const treesToShift = getTreesToShift(result, overlap.nodesInConflict);
+                console.log(treesToShift);
+                result = shiftNodes(result, treesToShift, overlap.biggestOverlap);
             } else {
                 overlapInTree = false;
             }
@@ -124,10 +118,10 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         }
     }
 
-    type OverlapCheck = undefined | { biggestOverlap: number; treeToShiftFromId: string };
+    type OverlapCheck = undefined | { biggestOverlap: number; nodesInConflict: [string, string] };
 
-    function checkForOverlap(tree: TreeWithCoord<Skill>) {
-        const contourByLevel: { [key: string]: [number, number, string][] } = {};
+    function checkForOverlap(tree: TreeWithCoord<Skill>): OverlapCheck {
+        const contourByLevel: { [key: string]: Contour[] } = {};
         getTreeContourByLevel(tree, contourByLevel);
 
         let result: OverlapCheck = undefined;
@@ -145,11 +139,11 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
             if (updateBiggestTreeOverlap) result = { ...levelBiggestOverlap };
         });
 
-        return result as { biggestOverlap: number; treeToShiftFromId: string } | undefined;
+        return result as OverlapCheck;
     }
 
-    function getLevelBiggestOverlap(levelContour: [number, number, string][]) {
-        let result: { biggestOverlap: number; treeToShiftFromId: string } | undefined = undefined;
+    function getLevelBiggestOverlap(levelContour: Contour[]) {
+        let result: OverlapCheck;
 
         for (let idx = 0; idx < levelContour.length; idx++) {
             const isOnLastContour = idx === levelContour.length - 1;
@@ -161,66 +155,132 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
             const nextContour = levelContour[idx + 1];
 
             //I define two nodes perfectly overlapping as poor spacing and not overlap
-            const overlapBetweenThisAndNextContour = currentContour[1] > nextContour[0];
-            const overlapDistance = Math.abs(currentContour[1] - nextContour[0]);
+            const overlapBetweenThisAndNextContour = currentContour.rightNode.coord > nextContour.leftNode.coord;
+            const overlapDistance = Math.abs(currentContour.rightNode.coord - nextContour.leftNode.coord);
 
             const overlap = overlapBetweenThisAndNextContour && (result === undefined || result.biggestOverlap < overlapDistance);
 
-            const nodeSpacing = nextContour[0] - currentContour[1];
+            const nodeSpacing = nextContour.leftNode.coord - currentContour.rightNode.coord;
 
             const poorSpacing = !overlap && nodeSpacing < 1 && (result === undefined || result.biggestOverlap < nodeSpacing);
 
-            if (overlap) result = { biggestOverlap: overlapDistance, treeToShiftFromId: currentContour[2] };
+            if (overlap) result = { biggestOverlap: overlapDistance, nodesInConflict: [currentContour.rightNode.id, nextContour.leftNode.id] };
 
-            if (poorSpacing) result = { biggestOverlap: 1 - nodeSpacing, treeToShiftFromId: currentContour[2] };
+            if (poorSpacing) result = { biggestOverlap: 1 - nodeSpacing, nodesInConflict: [currentContour.rightNode.id, nextContour.leftNode.id] };
         }
 
         return result;
     }
 
-    function getTreeContourByLevel(tree: TreeWithCoord<Skill>, result: { [key: string]: [number, number, string][] }, subTreeParentId?: string) {
+    function getTreeContourByLevel(tree: TreeWithCoord<Skill>, result: { [key: string]: Contour[] }) {
         //Base Case 👇
 
         if (!tree.children) return;
 
         //Recursive Case 👇
 
-        const leftMostX = tree.children[0].x;
-        const rightMostX = tree.children[tree.children.length - 1].x;
+        const leftmostNode = tree.children[0];
+        const rightmostNode = tree.children[tree.children.length - 1];
 
         const key = `${tree.level}`;
 
-        const foo = tree.level === 1 ? tree.data.id : subTreeParentId ?? "";
+        const contourToAppend: Contour = {
+            leftNode: { coord: leftmostNode.x, id: leftmostNode.data.id },
+            rightNode: { coord: rightmostNode.x, id: rightmostNode.data.id },
+        };
 
-        if (result[key]) result[key] = [...result[key], [leftMostX, rightMostX, foo]];
-        if (!result[key]) result[key] = [[leftMostX, rightMostX, foo]];
+        if (result[key]) result[key] = [...result[key], contourToAppend];
+        if (!result[key]) result[key] = [contourToAppend];
 
         for (let i = 0; i < tree.children.length; i++) {
             const element = tree.children[i];
 
-            getTreeContourByLevel(element, result, foo);
+            getTreeContourByLevel(element, result);
         }
     }
 
-    function getTreesToShift(result: TreeWithCoord<Skill>, treeToShiftFromId: string) {
-        if (!result.children) return [];
+    function getTreesToShift(result: TreeWithCoord<Skill>, nodesInConflict: [string, string]) {
+        console.log("THE NODES IN CONFLICT ARE", nodesInConflict);
 
-        const levelOneTrees = result.children;
-        const levelOneTreeIds = levelOneTrees.map((t) => t.data.id);
+        const treesToShift: { byBiggestOverlap: string[]; byHalfOfBiggestOverlap: string[] } = { byBiggestOverlap: [], byHalfOfBiggestOverlap: [] };
 
-        const idToShiftFrom = levelOneTreeIds.findIndex((t) => t === treeToShiftFromId);
+        const pathToRightNode = returnPathFromRootToNode(result, nodesInConflict[1]);
+        const nodesInConflictLCA = findLowestCommonAncestorIdOfNodes(result, ...nodesInConflict);
 
-        if (idToShiftFrom === -1) throw "getTreesToShift error";
+        if (!nodesInConflictLCA) throw "getTreesToShift nodesInConflictLCA";
 
-        return levelOneTreeIds.filter((t, idx) => {
-            if (idx > idToShiftFrom) return t;
-        });
+        const lcaIndex = pathToRightNode.findIndex((id) => id === nodesInConflictLCA);
+
+        if (lcaIndex === -1) throw "getTreesToShift lcaIndex error";
+
+        getTreesToShiftFromNodePathInConflict(result);
+
+        console.log("AND I'LL RETURN THIS", treesToShift);
+
+        return treesToShift;
+
+        function getTreesToShiftFromNodePathInConflict(tree: TreeWithCoord<Skill>) {
+            //Base Case 👇
+            if (!tree.children) return undefined;
+            if (tree.isRoot) treesToShift.byHalfOfBiggestOverlap.push(tree.data.id);
+
+            //Recursive Case 👇
+            const currentLevel = tree.level;
+            const lcaLevel = lcaIndex;
+            const nodeInPathIndexForChildren = tree.children.findIndex((t) => t.data.id === pathToRightNode[currentLevel + 1]);
+            const areAnyOfChildrenInPath = nodeInPathIndexForChildren === -1 ? false : true;
+
+            console.log(nodeInPathIndexForChildren, pathToRightNode[currentLevel], currentLevel, pathToRightNode);
+
+            if (!areAnyOfChildrenInPath) return undefined;
+
+            for (let i = 0; i < tree.children.length; i++) {
+                const child = tree.children[i];
+
+                if (i === nodeInPathIndexForChildren) {
+                    if (currentLevel >= lcaLevel) {
+                        treesToShift.byBiggestOverlap.push(child.data.id);
+                    } else {
+                        treesToShift.byHalfOfBiggestOverlap.push(child.data.id);
+                    }
+                    if (child.data.id === pathToRightNode[pathToRightNode.length - 1])
+                        addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
+                    getTreesToShiftFromNodePathInConflict(child);
+                }
+
+                if (i > nodeInPathIndexForChildren) {
+                    if (currentLevel >= lcaLevel) {
+                        treesToShift.byBiggestOverlap.push(child.data.id);
+                        addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
+                    } else {
+                        treesToShift.byHalfOfBiggestOverlap.push(child.data.id);
+                        addEveryChildFromTreeToArray(child, treesToShift.byHalfOfBiggestOverlap);
+                    }
+                }
+            }
+        }
+
+        function addEveryChildFromTreeToArray(tree: TreeWithCoord<Skill>, arrToAdd: string[]) {
+            if (!tree.children) return;
+
+            for (let i = 0; i < tree.children.length; i++) {
+                const element = tree.children[i];
+
+                arrToAdd.push(element.data.id);
+
+                addEveryChildFromTreeToArray(element, arrToAdd);
+            }
+        }
     }
 
-    function shiftNodeAndDescendants(result: TreeWithCoord<Skill>, treesToShift: string[], overlapDistance: number, shouldShift?: boolean) {
-        const updatedShouldShift = getShouldShift();
+    function shiftNodes(
+        result: TreeWithCoord<Skill>,
+        treesToShift: { byBiggestOverlap: string[]; byHalfOfBiggestOverlap: string[] },
+        overlapDistance: number
+    ) {
+        const currentTreeShiftDistance = getCurrentTreeShiftDistance(result.data.id);
 
-        const updatedTree: TreeWithCoord<Skill> = { ...result, x: updatedShouldShift || result.isRoot ? result.x + overlapDistance : result.x };
+        const updatedTree: TreeWithCoord<Skill> = { ...result, x: result.x + currentTreeShiftDistance };
 
         //Base Case 👇
 
@@ -233,17 +293,21 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         for (let i = 0; i < result.children.length; i++) {
             const element = result.children[i];
 
-            updatedTree.children.push(shiftNodeAndDescendants(element, treesToShift, overlapDistance, updatedShouldShift));
+            updatedTree.children.push(shiftNodes(element, treesToShift, overlapDistance));
         }
 
         return updatedTree;
 
-        function getShouldShift() {
-            if (result.level === 0) return true;
+        function getCurrentTreeShiftDistance(treeId: string) {
+            const shiftByBiggestOverlap = Boolean(treesToShift.byBiggestOverlap.find((id) => id === treeId));
 
-            if (result.level === 1) return Boolean(treesToShift.find((id) => id === result.data.id));
+            if (shiftByBiggestOverlap) return overlapDistance;
 
-            return shouldShift;
+            const shiftByHalfOfBiggestOverlap = Boolean(treesToShift.byHalfOfBiggestOverlap.find((id) => id === treeId));
+
+            if (shiftByHalfOfBiggestOverlap) return overlapDistance / 2;
+
+            return 0;
         }
     }
 };

@@ -281,7 +281,7 @@ export function findLowestCommonAncestorIdOfNodes(tree: TreeWithCoord<Skill>, no
     }
 }
 
-function returnPathFromRootToNode(tree: TreeWithCoord<Skill>, nodeId: string) {
+export function returnPathFromRootToNode(tree: TreeWithCoord<Skill>, nodeId: string) {
     const result: string[] = [];
 
     getPathFromRootToNode(tree, nodeId, result);
