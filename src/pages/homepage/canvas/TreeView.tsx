@@ -23,6 +23,7 @@ import Animated from "react-native-reanimated";
 import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
 import { View } from "react-native";
 import PopUpMenu from "../components/PopUpMenu";
+import useOnCompleteSkillAnimation from "./hooks/useOnCompleteSkillAnimation";
 
 type TreeViewProps = {
     tree: Tree<Skill>;
@@ -66,11 +67,7 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick }: TreeViewP
                     <Animated.View style={[transform]}>
                         <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight }} mode="continuous">
                             <CanvasTree
-                                stateProps={{
-                                    selectedNode,
-                                    showLabel,
-                                    circlePositionsInCanvas: nodeCoordinatesCentered,
-                                }}
+                                stateProps={{ selectedNode, showLabel, circlePositionsInCanvas: nodeCoordinatesCentered }}
                                 tree={tree}
                                 wholeTree={tree}
                                 treeAccentColor={treeAccentColor}

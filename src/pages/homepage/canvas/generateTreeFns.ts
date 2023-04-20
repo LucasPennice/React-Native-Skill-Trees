@@ -94,9 +94,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
             const overlap = checkForOverlap(result);
 
             if (overlap !== undefined) {
-                console.log(overlap);
                 const treesToShift = getTreesToShift(result, overlap.nodesInConflict);
-                console.log(treesToShift);
                 result = shiftNodes(result, treesToShift, overlap.biggestOverlap);
             } else {
                 overlapInTree = false;
@@ -200,8 +198,6 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
     }
 
     function getTreesToShift(result: TreeWithCoord<Skill>, nodesInConflict: [string, string]) {
-        console.log("THE NODES IN CONFLICT ARE", nodesInConflict);
-
         const treesToShift: { byBiggestOverlap: string[]; byHalfOfBiggestOverlap: string[] } = { byBiggestOverlap: [], byHalfOfBiggestOverlap: [] };
 
         const pathToRightNode = returnPathFromRootToNode(result, nodesInConflict[1]);
@@ -215,8 +211,6 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
         getTreesToShiftFromNodePathInConflict(result);
 
-        console.log("AND I'LL RETURN THIS", treesToShift);
-
         return treesToShift;
 
         function getTreesToShiftFromNodePathInConflict(tree: TreeWithCoord<Skill>) {
@@ -229,8 +223,6 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
             const lcaLevel = lcaIndex;
             const nodeInPathIndexForChildren = tree.children.findIndex((t) => t.data.id === pathToRightNode[currentLevel + 1]);
             const areAnyOfChildrenInPath = nodeInPathIndexForChildren === -1 ? false : true;
-
-            console.log(nodeInPathIndexForChildren, pathToRightNode[currentLevel], currentLevel, pathToRightNode);
 
             if (!areAnyOfChildrenInPath) return undefined;
 

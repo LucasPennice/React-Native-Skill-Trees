@@ -1,6 +1,5 @@
 import { getHeightForFont } from "./functions";
 import {
-    Blur,
     Group,
     Path,
     useFont,
@@ -9,7 +8,6 @@ import {
     SkiaValue,
     useComputedValue,
     Skia,
-    Circle,
     DiffRect,
     rrect,
     rect,
@@ -89,6 +87,12 @@ function Node({
     useEffect(() => {
         outerRectXSharedValue.value = coord.cx;
         outerRectYSharedValue.value = coord.cy;
+        outerRectX.current = coord.cx;
+        outerRectY.current = coord.cy;
+        innerRectXSharedValue.value = coord.cx;
+        innerRectYSharedValue.value = coord.cy;
+        innerRectX.current = coord.cx;
+        innerRectY.current = coord.cy;
     }, [coord]);
 
     useEffect(() => {
@@ -194,12 +198,3 @@ function Node({
 }
 
 export default Node;
-
-function getShouldAnimate(completionHistory: boolean[]) {
-    const length = completionHistory.length - 1;
-
-    const currnetElement = completionHistory[length];
-    const prevElement = completionHistory[length - 1];
-
-    return currnetElement !== prevElement;
-}
