@@ -18,6 +18,7 @@ import { CIRCLE_SIZE, colors } from "./parameters";
 import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 import { useSharedValue, withDelay, withTiming } from "react-native-reanimated";
 import { useEffect, useState } from "react";
+import useIsFirstRender from "../../../useIsFirstRender";
 
 function Node({
     coord,
@@ -42,12 +43,11 @@ function Node({
 
     const textWidth = nodeLetterFont ? nodeLetterFont.getTextWidth(letter) : 0;
 
-    const textPositions = { x: cx - textWidth / 2, y: cy + getHeightForFont(20) / 4 + 1 };
-
     const x = useAnimateSkiaValue({ initialValue: cx, stateToAnimate: cx });
     const y = useAnimateSkiaValue({ initialValue: cy, stateToAnimate: cy });
-    const textX = useAnimateSkiaValue({ initialValue: textPositions.x, stateToAnimate: textPositions.x });
-    const textY = useAnimateSkiaValue({ initialValue: textPositions.y, stateToAnimate: textPositions.y });
+
+    const textX = useComputedValue(() => x.current - textWidth / 2, [x, textWidth]);
+    const textY = useComputedValue(() => y.current + getHeightForFont(20) / 4 + 1, [y]);
 
     const path = useComputedValue(() => {
         const strokeWidth = 2;
@@ -95,7 +95,11 @@ function Node({
         innerRectY.current = coord.cy;
     }, [coord]);
 
+    const isFirstRender = useIsFirstRender();
+
     useEffect(() => {
+        if (isFirstRender) return;
+
         const size = isComplete ? outerRectSizeOnComplete : outerRectSizeInitial;
         const coord = getCenteredCoordinates(size, cx, cy);
 
