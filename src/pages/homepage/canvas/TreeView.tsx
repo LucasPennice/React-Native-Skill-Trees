@@ -1,5 +1,5 @@
-import { Blur, Canvas, Group, runSpring, runTiming, useValue } from "@shopify/react-native-skia";
-import { useEffect, useState } from "react";
+import { Blur, Canvas, Group, SkiaDomView, runSpring, runTiming, useValue } from "@shopify/react-native-skia";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
 import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
 import { selectTreeSlice } from "../../../redux/userTreesSlice";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
@@ -9,30 +9,27 @@ import { colors, DISTANCE_BETWEEN_GENERATIONS, NAV_HEGIHT } from "./parameters";
 import { CirclePositionInCanvasWithLevel, DnDZone, MENU_DAMPENING, Skill, Tree, centerFlex } from "../../../types";
 import DragAndDropZones from "./DragAndDropZones";
 import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
-import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 import {
     calculateDimentionsAndRootCoordinates,
     calculateDragAndDropZones,
     centerNodeCoordinatesInCanvas,
     getCirclePositions,
-    getCoordinatesAfterNodeInsertion,
-    insertNodeBasedOnDnDZone,
 } from "./coordinateFunctions";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
 import { View } from "react-native";
 import PopUpMenu from "../components/PopUpMenu";
-import useOnCompleteSkillAnimation from "./hooks/useOnCompleteSkillAnimation";
 
 type TreeViewProps = {
     tree: Tree<Skill>;
     onNodeClick?: (nodeId: string) => void;
     showDndZones?: boolean;
     onDndZoneClick?: (clickedZone?: DnDZone) => void;
+    canvasRef: MutableRefObject<SkiaDomView | null>;
 };
 
-function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick }: TreeViewProps) {
+function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef }: TreeViewProps) {
     //Redux State
     const screenDimentions = useAppSelector(selectScreenDimentions);
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
@@ -52,6 +49,7 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick }: TreeViewP
 
     const treeAccentColor = tree.accentColor ? tree.accentColor : colors.accent;
 
+    //Handles the blur animation on tree change
     useEffect(() => {
         runBlurAnimation();
     }, [currentTreeId]);
@@ -65,7 +63,7 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick }: TreeViewP
             <GestureDetector gesture={canvasGestures}>
                 <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
                     <Animated.View style={[transform]}>
-                        <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight }} mode="continuous">
+                        <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight }} mode="continuous" ref={canvasRef}>
                             <CanvasTree
                                 stateProps={{ selectedNode, showLabel, circlePositionsInCanvas: nodeCoordinatesCentered }}
                                 tree={tree}

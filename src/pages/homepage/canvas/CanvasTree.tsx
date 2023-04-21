@@ -4,7 +4,7 @@ import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 import { findParentOfNode } from "../treeFunctions";
 import Label from "./Label";
 import Node from "./Node";
-import CanvasPath from "./CavnasPath";
+import CanvasPath from "./CanvasPath";
 
 type TreeProps = {
     tree: Tree<Skill>;
@@ -48,7 +48,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
         return true;
     })();
 
-    const pathColor = nodeAndParentCompleted ? `${treeAccentColor}7D` : colors.line;
+    const pathColor = nodeAndParentCompleted ? `${treeAccentColor}` : colors.line;
 
     const textColor = tree.data.isCompleted ? treeAccentColor : tree.data.id === selectedNode ? "white" : colors.unmarkedText;
     const letterToRender = tree.data.name ? tree.data.name[0] : "-";

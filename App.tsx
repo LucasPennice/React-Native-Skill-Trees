@@ -1,6 +1,6 @@
 /// <reference types="@welldone-software/why-did-you-render" />
 import "./wdyr";
-import { useCallback, useEffect } from "react";
+import { createContext, useCallback, useEffect } from "react";
 import { Platform, SafeAreaView, StatusBar, TouchableOpacity, View } from "react-native";
 import { Provider } from "react-redux";
 import { colors } from "./src/pages/homepage/canvas/parameters";
@@ -26,6 +26,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { TransitionSpec } from "@react-navigation/stack/lib/typescript/src/types";
 import SkillPage from "./src/pages/skillPage/SkillPage";
 import { Skill } from "./src/types";
+import useIsSharingAvailable from "./src/pages/homepage/useIsSharingAvailable";
 enableScreens();
 export type StackNavigatorParams = {
     Home: undefined;
@@ -45,16 +46,22 @@ export type Routes = {
     title: string;
 }[];
 
+export const IsSharingAvailableContext = createContext(false);
+
 export default function App() {
+    const isSharingAvailable = useIsSharingAvailable();
+
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <Provider store={store}>
-                <NavigationContainer>
-                    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-                        {Platform.OS === "android" && <StatusBar backgroundColor={colors.background} />}
-                        <AppWithReduxContext />
-                    </SafeAreaView>
-                </NavigationContainer>
+                <IsSharingAvailableContext.Provider value={isSharingAvailable}>
+                    <NavigationContainer>
+                        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+                            {Platform.OS === "android" && <StatusBar backgroundColor={colors.background} />}
+                            <AppWithReduxContext />
+                        </SafeAreaView>
+                    </NavigationContainer>
+                </IsSharingAvailableContext.Provider>
             </Provider>
         </GestureHandlerRootView>
     );

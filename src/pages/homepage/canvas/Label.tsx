@@ -52,7 +52,7 @@ function Label({
                 const textX = cx - wordWidth / 2;
                 const textY = cy + fontSize / 2 + idx * distanceBetweenWords + labelMarginTop;
 
-                return <Text key={idx} x={textX} y={textY} text={tree.data.id} color="white" font={labelFont} />;
+                return <Text key={idx} x={textX} y={textY} text={text} color="white" font={labelFont} />;
             })}
         </Group>
     );

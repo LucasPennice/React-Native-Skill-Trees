@@ -53,7 +53,7 @@ export const LETTER_SIZE_AT_10 = {
 export const colors = {
     background: "black",
     darkGray: "#181A1C",
-    line: "#515052",
+    line: "#515053",
     unmarkedText: "#96959B",
     red: "#FE453A",
     accent: "#1982F9",

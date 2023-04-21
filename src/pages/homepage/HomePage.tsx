@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import TreeView from "./canvas/TreeView";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
@@ -10,8 +10,12 @@ import AddNode from "./AddNode";
 import NewNodeModal from "./modals/NewNodeModal";
 import useRunHomepageCleanup from "./useRunHomepageCleanup";
 import { DnDZone } from "../../types";
-import { insertNodeBasedOnDnDZone } from "./canvas/coordinateFunctions";
-import { getPathFromRootToNode } from "./treeFunctions";
+import * as Sharing from "expo-sharing";
+import { useContext, useEffect, useRef, useState } from "react";
+import { ImageFormat, SkImage, SkiaDomView } from "@shopify/react-native-skia";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
+import { IsSharingAvailableContext } from "../../../App";
 
 function HomePage() {
     //Redux State
@@ -19,16 +23,48 @@ function HomePage() {
     const { selectedDndZone, newNode } = useAppSelector(selectTreeSlice);
     const tentativeNewTree = useAppSelector(selectTentativeTree);
     const dispatch = useAppDispatch();
+    //Hooks
+    const isSharingAvailable = useContext(IsSharingAvailableContext);
+    const canvasRef = useRef<SkiaDomView | null>(null);
+    useRunHomepageCleanup();
     //Derived State
     const shouldRenderDndZones = newNode && !selectedDndZone;
 
-    useRunHomepageCleanup();
+    //☢️ BLOQUEAR EL SHARE CUANDO SE ESTA INSERTANDO UN NUEVO NODO, VIENDO UN NODO CON SELECT NODE O CUALQUIER COSA QUE MODIFIQUE EL CANVAS
+
+    const shareCanvasScreenShot = async () => {
+        if (!canvasRef.current || !currentTree) return;
+
+        // const boundsRect = createBoundsRect(currentTree)
+
+        const image = canvasRef.current!.makeImageSnapshot();
+
+        setTimeout(async () => {
+            const encodedImage = image.encodeToBase64(ImageFormat.PNG, 99);
+
+            const data = `data:image/png;base64,${encodedImage}`;
+            const base64Code = data.split("data:image/png;base64,")[1];
+
+            const filename = FileSystem.documentDirectory + "some_unique_file_name.png";
+
+            await FileSystem.writeAsStringAsync(filename, base64Code, {
+                encoding: FileSystem.EncodingType.Base64,
+            });
+
+            await MediaLibrary.saveToLibraryAsync(filename);
+
+            Sharing.shareAsync(filename);
+        }, 1000);
+
+        function createBoundsRect() {}
+    };
 
     return (
         <View style={{ position: "relative", backgroundColor: colors.background }}>
             {currentTree && (
                 <TreeView
                     tree={tentativeNewTree ?? currentTree}
+                    canvasRef={canvasRef}
                     onNodeClick={(id: string) => dispatch(setSelectedNode(id))}
                     showDndZones={shouldRenderDndZones}
                     onDndZoneClick={(clickedZone: DnDZone | undefined) => dispatch(setSelectedDndZone(clickedZone))}
@@ -37,6 +73,12 @@ function HomePage() {
             <ProgressIndicatorAndName />
             <AddNode />
             {currentTree !== undefined && <SettingsMenu />}
+
+            {isSharingAvailable && currentTree && (
+                <Pressable
+                    onPress={shareCanvasScreenShot}
+                    style={{ position: "absolute", width: 50, height: 50, top: 70, left: 10, backgroundColor: colors.blue }}></Pressable>
+            )}
 
             <ChildrenHoistSelectorModal />
             <NewNodeModal />
