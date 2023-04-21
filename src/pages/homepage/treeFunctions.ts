@@ -1,5 +1,5 @@
 import { ModifiableNodeProperties } from "../../redux/userTreesSlice";
-import { CirclePositionInCanvasWithLevel, DnDZone, ModifiableProperties, Skill, Tree, TreeWithCoord } from "../../types";
+import { CirclePositionInCanvasWithLevel, DnDZone, ModifiableProperties, Skill, Tree } from "../../types";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
     if (!rootNode) return 0;
@@ -256,7 +256,7 @@ export function returnCoordinatesByLevel(coordinates: CirclePositionInCanvasWith
     return coordinatesByLevel;
 }
 
-export function findLowestCommonAncestorIdOfNodes(tree: TreeWithCoord<Skill>, nodeId1: string, nodeId2: string) {
+export function findLowestCommonAncestorIdOfNodes(tree: Tree<Skill>, nodeId1: string, nodeId2: string) {
     const path1 = returnPathFromRootToNode(tree, nodeId1);
     const path2 = returnPathFromRootToNode(tree, nodeId2);
 
@@ -281,14 +281,14 @@ export function findLowestCommonAncestorIdOfNodes(tree: TreeWithCoord<Skill>, no
     }
 }
 
-export function returnPathFromRootToNode(tree: TreeWithCoord<Skill>, nodeId: string) {
+export function returnPathFromRootToNode(tree: Tree<Skill>, nodeId: string) {
     const result: string[] = [];
 
     getPathFromRootToNode(tree, nodeId, result);
 
     return result;
 
-    function getPathFromRootToNode(tree: TreeWithCoord<Skill>, nodeId: string, arr: string[]) {
+    function getPathFromRootToNode(tree: Tree<Skill>, nodeId: string, arr: string[]) {
         arr.push(tree.data.id);
 
         //Base Case 👇

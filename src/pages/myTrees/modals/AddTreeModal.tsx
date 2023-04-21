@@ -41,6 +41,9 @@ function AddTreeModal() {
             isRoot: true,
             parentId: undefined,
             treeId: makeid(24),
+            level: 0,
+            x: 0,
+            y: 0,
             data: { id: makeid(24), name: firstSkillName.trim(), isCompleted: firstSkillComplete },
         };
 

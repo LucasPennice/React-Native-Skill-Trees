@@ -234,7 +234,13 @@ export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: 
         return editTreeProperties(currentTree, targetNode, newProperties);
     }
 
-    const newChild: Tree<Skill> = { data: newNode, parentId: targetNode.data.id };
+    const newChild: Tree<Skill> = {
+        data: newNode,
+        parentId: targetNode.data.id,
+        level: targetNode.level + 1,
+        x: targetNode.x,
+        y: targetNode.y + DISTANCE_BETWEEN_GENERATIONS,
+    };
 
     if (selectedDndZone.type === "ONLY_CHILDREN") {
         const newProperties: ModifiableProperties<Tree<Skill>> = { ...targetNode, children: [newChild] };
@@ -255,12 +261,24 @@ export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: 
         const element = parentOfTargetNode.children[i];
 
         if (selectedDndZone.type === "LEFT_BROTHER" && element.data.id === targetNode.data.id)
-            newChildren.push({ data: newNode, parentId: targetNode.parentId });
+            newChildren.push({
+                data: newNode,
+                parentId: targetNode.parentId,
+                level: targetNode.level,
+                x: targetNode.x - DISTANCE_BETWEEN_CHILDREN,
+                y: targetNode.y,
+            });
 
         newChildren.push(element);
 
         if (selectedDndZone.type === "RIGHT_BROTHER" && element.data.id === targetNode.data.id)
-            newChildren.push({ data: newNode, parentId: targetNode.parentId });
+            newChildren.push({
+                data: newNode,
+                parentId: targetNode.parentId,
+                level: targetNode.level,
+                x: targetNode.x + DISTANCE_BETWEEN_CHILDREN,
+                y: targetNode.y,
+            });
     }
 
     const newProperties: ModifiableProperties<Tree<Skill>> = { ...parentOfTargetNode, children: newChildren };

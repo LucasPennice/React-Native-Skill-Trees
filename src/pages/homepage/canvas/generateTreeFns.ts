@@ -1,11 +1,11 @@
-import { Skill, Tree, TreeWithCoord } from "../../../types";
+import { Skill, Tree } from "../../../types";
 import { findDistanceBetweenNodesById, findLowestCommonAncestorIdOfNodes, returnPathFromRootToNode } from "../treeFunctions";
 
 export type Coordinates = { x: number; y: number; id: string; level: number; parentId: string | null; name: string };
 type Contour = { leftNode: { coord: number; id: string }; rightNode: { coord: number; id: string } };
 
 export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => {
-    let result: TreeWithCoord<Skill>;
+    let result: Tree<Skill>;
 
     result = firstIteration(completeTree);
 
@@ -33,7 +33,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         const distance = findDistanceBetweenNodesById(completeTree, tree.data.id);
         const level = distance ? distance - 1 : 0;
 
-        const result: TreeWithCoord<Skill> = { ...tree, x, y: level, level, children: undefined };
+        const result: Tree<Skill> = { ...tree, x, y: level, level, children: undefined };
 
         if (!tree.children) return result;
 
@@ -58,7 +58,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         return result;
     }
 
-    function treeToCoordArray(tree: TreeWithCoord<Skill>, result: Coordinates[]) {
+    function treeToCoordArray(tree: Tree<Skill>, result: Coordinates[]) {
         // Recursive Case 👇
         if (tree.children) {
             for (let i = 0; i < tree.children.length; i++) {
@@ -79,11 +79,11 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         });
     }
 
-    function handleOverlap(tree: TreeWithCoord<Skill>) {
+    function handleOverlap(tree: Tree<Skill>) {
         let overlapInTree = true;
         let loopAvoider = -1;
 
-        let result: TreeWithCoord<Skill> = { ...tree };
+        let result: Tree<Skill> = { ...tree };
 
         const coordArray: Coordinates[] = [];
         treeToCoordArray(result, coordArray);
@@ -106,19 +106,19 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
         return result;
 
-        function centerRoot(tree: TreeWithCoord<Skill>) {
+        function centerRoot(tree: Tree<Skill>) {
             if (!tree.children) return tree;
 
             const leftChildrenCoord = tree.children[0].x;
             const rightChildrenCoord = tree.children[tree.children.length - 1].x;
 
-            return { ...tree, x: leftChildrenCoord + (rightChildrenCoord - leftChildrenCoord) / 2 } as TreeWithCoord<Skill>;
+            return { ...tree, x: leftChildrenCoord + (rightChildrenCoord - leftChildrenCoord) / 2 } as Tree<Skill>;
         }
     }
 
     type OverlapCheck = undefined | { biggestOverlap: number; nodesInConflict: [string, string] };
 
-    function checkForOverlap(tree: TreeWithCoord<Skill>): OverlapCheck {
+    function checkForOverlap(tree: Tree<Skill>): OverlapCheck {
         const contourByLevel: { [key: string]: Contour[] } = {};
         getTreeContourByLevel(tree, contourByLevel);
 
@@ -170,7 +170,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         return result;
     }
 
-    function getTreeContourByLevel(tree: TreeWithCoord<Skill>, result: { [key: string]: Contour[] }) {
+    function getTreeContourByLevel(tree: Tree<Skill>, result: { [key: string]: Contour[] }) {
         //Base Case 👇
 
         if (!tree.children) return;
@@ -197,7 +197,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         }
     }
 
-    function getTreesToShift(result: TreeWithCoord<Skill>, nodesInConflict: [string, string]) {
+    function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, string]) {
         const treesToShift: { byBiggestOverlap: string[]; byHalfOfBiggestOverlap: string[] } = { byBiggestOverlap: [], byHalfOfBiggestOverlap: [] };
 
         const pathToRightNode = returnPathFromRootToNode(result, nodesInConflict[1]);
@@ -213,7 +213,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
         return treesToShift;
 
-        function getTreesToShiftFromNodePathInConflict(tree: TreeWithCoord<Skill>) {
+        function getTreesToShiftFromNodePathInConflict(tree: Tree<Skill>) {
             //Base Case 👇
             if (!tree.children) return undefined;
             if (tree.isRoot) treesToShift.byHalfOfBiggestOverlap.push(tree.data.id);
@@ -252,7 +252,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
             }
         }
 
-        function addEveryChildFromTreeToArray(tree: TreeWithCoord<Skill>, arrToAdd: string[]) {
+        function addEveryChildFromTreeToArray(tree: Tree<Skill>, arrToAdd: string[]) {
             if (!tree.children) return;
 
             for (let i = 0; i < tree.children.length; i++) {
@@ -266,13 +266,13 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
     }
 
     function shiftNodes(
-        result: TreeWithCoord<Skill>,
+        result: Tree<Skill>,
         treesToShift: { byBiggestOverlap: string[]; byHalfOfBiggestOverlap: string[] },
         overlapDistance: number
     ) {
         const currentTreeShiftDistance = getCurrentTreeShiftDistance(result.data.id);
 
-        const updatedTree: TreeWithCoord<Skill> = { ...result, x: result.x + currentTreeShiftDistance };
+        const updatedTree: Tree<Skill> = { ...result, x: result.x + currentTreeShiftDistance };
 
         //Base Case 👇
 
