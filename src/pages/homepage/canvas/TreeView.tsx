@@ -25,11 +25,12 @@ type TreeViewProps = {
     tree: Tree<Skill>;
     onNodeClick?: (nodeId: string) => void;
     showDndZones?: boolean;
+    isTakingScreenshot?: boolean;
     onDndZoneClick?: (clickedZone?: DnDZone) => void;
     canvasRef: MutableRefObject<SkiaDomView | null>;
 };
 
-function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef }: TreeViewProps) {
+function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef, isTakingScreenshot }: TreeViewProps) {
     //Redux State
     const screenDimentions = useAppSelector(selectScreenDimentions);
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
@@ -44,7 +45,7 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef }
     //Hooks
     const { touchHandler } = useCanvasTouchHandler({ tree, nodeCoordinatesCentered, onNodeClick, onDndZoneClick, showDndZones, dragAndDropZones });
     const { canvasHeight, canvasWidth } = canvasDimentions;
-    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, foundNodeCoordinates);
+    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, foundNodeCoordinates, isTakingScreenshot);
     //
 
     const treeAccentColor = tree.accentColor ? tree.accentColor : colors.accent;
@@ -63,7 +64,15 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef }
             <GestureDetector gesture={canvasGestures}>
                 <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
                     <Animated.View style={[transform]}>
-                        <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight }} mode="continuous" ref={canvasRef}>
+                        <Canvas
+                            onTouch={touchHandler}
+                            style={{
+                                width: canvasWidth,
+                                height: canvasHeight,
+                                transform: [{ scale: isTakingScreenshot ? screenDimentions.width / canvasWidth : 1 }],
+                            }}
+                            mode="continuous"
+                            ref={canvasRef}>
                             <CanvasTree
                                 stateProps={{ selectedNode, showLabel, circlePositionsInCanvas: nodeCoordinatesCentered }}
                                 tree={tree}

@@ -6,7 +6,7 @@ function AppText({
     children,
     textProps,
 }: {
-    style: TextProps["style"];
+    style?: TextProps["style"];
     fontSize: number;
     children: React.ReactNode;
     textProps?: TextProps;

@@ -5,25 +5,46 @@ import { selectScreenDimentions } from "../../../../redux/screenDimentionsSlice"
 import { CanvasDimentions, CirclePositionInCanvasWithLevel } from "../../../../types";
 import { CANVAS_HORIZONTAL_PADDING } from "../coordinateFunctions";
 import { CIRCLE_SIZE } from "../parameters";
+import { useEffect } from "react";
 
-function useHandleCanvasScroll(canvasDimentions: CanvasDimentions, foundNodeCoordinates?: CirclePositionInCanvasWithLevel) {
+const DEFAULT_SCALE = 1;
+
+function useHandleCanvasScroll(
+    canvasDimentions: CanvasDimentions,
+    foundNodeCoordinates?: CirclePositionInCanvasWithLevel,
+    isTakingScreenshot?: boolean
+) {
     const { canvasHeight, canvasWidth } = canvasDimentions;
     const screenDimentions = useAppSelector(selectScreenDimentions);
 
     const minScale = screenDimentions.width / canvasWidth;
+    const MAX_SCALE = 1.4;
 
     const start = useSharedValue({ x: 0, y: 0 });
     const offset = useSharedValue({ x: 0, y: 0 });
 
-    const scale = useSharedValue(1);
-    const savedScale = useSharedValue(1);
+    const scale = useSharedValue(DEFAULT_SCALE);
+    const savedScale = useSharedValue(DEFAULT_SCALE);
+
+    useEffect(() => {
+        const currentCanvasMinScale = screenDimentions.width / canvasWidth;
+
+        //Avoids being zoomed out more than allowed when switching from a big tree to a small one
+        if (!(scale.value >= currentCanvasMinScale && scale.value <= MAX_SCALE)) {
+            scale.value = currentCanvasMinScale;
+            savedScale.value = currentCanvasMinScale;
+        }
+
+        offset.value = { x: 0, y: 0 };
+        start.value = { x: 0, y: 0 };
+    }, [canvasDimentions]);
 
     const canvasZoom = Gesture.Pinch()
         .onUpdate((e) => {
             if (foundNodeCoordinates) return;
 
             const newScaleValue = savedScale.value * e.scale;
-            scale.value = clamp(minScale, 1.4, newScaleValue);
+            scale.value = clamp(minScale, MAX_SCALE, newScaleValue);
 
             function clamp(min: number, max: number, value: number) {
                 if (value <= min) return min;
@@ -73,6 +94,15 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimentions, foundNodeCoor
     const canvasGestures = Gesture.Simultaneous(canvasPan, canvasZoom);
 
     const transform = useAnimatedStyle(() => {
+        if (isTakingScreenshot) {
+            return {
+                transform: [
+                    { translateX: withSpring(0, { damping: 32, stiffness: 350 }) },
+                    { translateY: withSpring(0, { damping: 32, stiffness: 350 }) },
+                    { scale: withSpring(DEFAULT_SCALE, { damping: 32, stiffness: 350 }) },
+                ],
+            };
+        }
         if (foundNodeCoordinates) {
             const position = whereShouldNodeBe({ foundNodeCoordinates, canvasWidth, screenWidth: screenDimentions.width });
 
@@ -90,7 +120,7 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimentions, foundNodeCoor
                     {
                         translateY: withSpring(foundNodeTranslatedY, { damping: 32, stiffness: 350 }),
                     },
-                    { scale: withSpring(1, { damping: 32, stiffness: 350 }) },
+                    { scale: withSpring(DEFAULT_SCALE, { damping: 32, stiffness: 350 }) },
                 ],
             };
         }
@@ -117,7 +147,7 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimentions, foundNodeCoor
 
             return "RIGHT_SIDE_OF_SCREEN";
         }
-    }, [offset, scale, foundNodeCoordinates]);
+    }, [offset, scale, foundNodeCoordinates, isTakingScreenshot]);
 
     return { transform, canvasGestures };
 }
