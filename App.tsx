@@ -1,35 +1,37 @@
 /// <reference types="@welldone-software/why-did-you-render" />
-import "./wdyr";
-import { createContext, useCallback, useEffect } from "react";
-import { Platform, SafeAreaView, StatusBar, TouchableOpacity, View } from "react-native";
-import { Provider } from "react-redux";
-import { useAppDispatch, useAppSelector } from "./src/redux/reduxHooks";
-import { store } from "./src/redux/reduxStore";
-import { updateDimentions } from "./src/redux/screenDimentionsSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NavigationContainer } from "@react-navigation/native";
+import { NativeStackNavigationOptions, createNativeStackNavigator } from "@react-navigation/native-stack";
+import { CardStyleInterpolators, createStackNavigator } from "@react-navigation/stack";
+import { TransitionSpec } from "@react-navigation/stack/lib/typescript/src/types";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
+import { createContext, useCallback } from "react";
+import { Platform, SafeAreaView, StatusBar, TouchableOpacity, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { enableScreens } from "react-native-screens";
+import { Provider } from "react-redux";
+import AppText from "./src/components/AppText";
 import NavigationBar from "./src/components/NavigationBar";
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
-import { NativeStackNavigationOptions, NativeStackScreenProps, createNativeStackNavigator } from "@react-navigation/native-stack";
+import Homepage from "./src/pages/homepage/Homepage";
 import MyTrees from "./src/pages/myTrees/MyTrees";
 import Settings from "./src/pages/settings/Settings";
-import AppText from "./src/components/AppText";
-import { open } from "./src/redux/addTreeModalSlice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { populateUserTrees, selectTreeSlice } from "./src/redux/userTreesSlice";
-import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { TransitionSpec } from "@react-navigation/stack/lib/typescript/src/types";
 import SkillPage from "./src/pages/skillPage/SkillPage";
+import ViewingSkillTree from "./src/pages/viewingSkillTree/ViewingSkillTree";
+import { colors } from "./src/parameters";
+import { open } from "./src/redux/addTreeModalSlice";
+import { useAppDispatch } from "./src/redux/reduxHooks";
+import { store } from "./src/redux/reduxStore";
+import { updateDimentions } from "./src/redux/screenDimentionsSlice";
+import { populateUserTrees } from "./src/redux/userTreesSlice";
 import { Skill } from "./src/types";
 import useIsSharingAvailable from "./src/useIsSharingAvailable";
-import { colors } from "./src/parameters";
-import HomePage from "./src/pages/viewingSkillTree/ViewingSkillTree";
+import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
+import "./wdyr";
 enableScreens();
 export type StackNavigatorParams = {
     Home: undefined;
+    ViewingSkillTree: undefined;
     MyTrees: undefined;
     Settings: undefined;
     SkillPage: Skill | undefined;
@@ -72,7 +74,14 @@ function AppWithReduxContext() {
 
     //This is the constant that should be edited when adding a new screen
     const APP_ROUTES: Routes = [
-        { component: HomePage, route: "Home", options: { headerShown: false }, title: "Home" },
+        { component: Homepage, route: "Home", options: { headerShown: false }, title: "Me" },
+        {
+            component: ViewingSkillTree,
+            route: "ViewingSkillTree",
+            options: { headerShown: false },
+            title: "Viewing Skill Tree",
+            hideFromNavBar: true,
+        },
         {
             component: MyTrees,
             route: "MyTrees",

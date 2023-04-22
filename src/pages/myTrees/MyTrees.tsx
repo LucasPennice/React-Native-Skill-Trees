@@ -16,9 +16,9 @@ function MyTrees({ navigation }: Props) {
     const { userTrees } = useAppSelector(selectTreeSlice);
     const dispatch = useAppDispatch();
 
-    const factoryChangeTreeAndNavigateHome = (treeId: string) => () => {
+    const factoryChangeTreeAndNavigateToViewingTree = (treeId: string) => () => {
         dispatch(changeTree(treeId));
-        navigation.navigate("Home");
+        navigation.navigate("ViewingSkillTree");
     };
 
     return (
@@ -35,8 +35,8 @@ function MyTrees({ navigation }: Props) {
                 </AppText>
 
                 {userTrees.map((element, idx) => {
-                    const changeTreeAndNavigateHome = factoryChangeTreeAndNavigateHome(element.treeId ?? "");
-                    return <TreeCard element={element} changeTreeAndNavigateHome={changeTreeAndNavigateHome} key={idx} />;
+                    const changeTreeAndNavigateToViewingTree = factoryChangeTreeAndNavigateToViewingTree(element.treeId ?? "");
+                    return <TreeCard element={element} changeTreeAndNavigateToViewingTree={changeTreeAndNavigateToViewingTree} key={idx} />;
                 })}
             </ScrollView>
 

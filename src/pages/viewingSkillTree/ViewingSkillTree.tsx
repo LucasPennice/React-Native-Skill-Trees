@@ -1,30 +1,26 @@
-import { Alert, Pressable, View } from "react-native";
-import TreeView from "./canvas/TreeView";
-import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
-import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
-import SettingsMenu from "./components/SettingsMenu";
+import { SkiaDomView } from "@shopify/react-native-skia";
+import { useContext, useRef, useState } from "react";
+import { Pressable, View } from "react-native";
+import { IsSharingAvailableContext } from "../../../App";
+import AppText from "../../components/AppText";
 import { centerFlex, colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { selectCurrentTree, selectTentativeTree, selectTreeSlice, setSelectedDndZone, setSelectedNode } from "../../redux/userTreesSlice";
-import AddNode from "./AddNode";
-import NewNodeModal from "./modals/NewNodeModal";
-import useRunHomepageCleanup from "./useRunHomepageCleanup";
-import { DnDZone, Skill, Tree } from "../../types";
-import * as Sharing from "expo-sharing";
-import { useContext, useRef, useState } from "react";
-import { ImageFormat, SkiaDomView, rect } from "@shopify/react-native-skia";
-import * as FileSystem from "expo-file-system";
-import * as MediaLibrary from "expo-media-library";
-import { IsSharingAvailableContext } from "../../../App";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { getCanvasDimensions, centerNodesInCanvas } from "./canvas/coordinateFunctions";
-import { getNodesCoordinates } from "./canvas/coordinateFunctions";
+import { selectCurrentTree, selectTentativeTree, selectTreeSlice, setSelectedDndZone, setSelectedNode } from "../../redux/userTreesSlice";
+import { DnDZone } from "../../types";
+import { shareCanvasScreenshot } from "../../useIsSharingAvailable";
+import AddNode from "./AddNode";
+import TreeView from "./canvas/TreeView";
+import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
+import SettingsMenu from "./components/SettingsMenu";
+import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
+import NewNodeModal from "./modals/NewNodeModal";
 import TakingScreenshotLoadingScreenModal from "./modals/TakingScreenshotLoadingScreenModal";
-import AppText from "../../components/AppText";
+import useRunHomepageCleanup from "./useRunHomepageCleanup";
 
-type HomepageModes = "SelectedNode" | "AddingNode" | "TakingScreenshot" | "Idle";
+type Mode = "SelectedNode" | "AddingNode" | "TakingScreenshot" | "Idle";
 
-function HomePage() {
+function ViewingSkillTree() {
     //Redux State
     const currentTree = useAppSelector(selectCurrentTree);
     const { selectedDndZone, newNode, selectedNode } = useAppSelector(selectTreeSlice);
@@ -38,93 +34,21 @@ function HomePage() {
     useRunHomepageCleanup();
     //Derived State
     const shouldRenderDndZones = newNode && !selectedDndZone;
-    const homepageMode = getHomepageMode();
-    const shouldRenderShareButton = isSharingAvailable && currentTree && homepageMode === "Idle";
+    const mode = getMode();
+    const shouldRenderShareButton = isSharingAvailable && currentTree && mode === "Idle";
 
     const onNodeClick = (id: string) => {
-        if (homepageMode !== "Idle") return;
+        if (mode !== "Idle") return;
         dispatch(setSelectedNode(id));
     };
 
     const onDndZoneClick = (clickedZone: DnDZone | undefined) => {
-        if (homepageMode !== "AddingNode") return;
+        if (mode !== "AddingNode") return;
         dispatch(setSelectedDndZone(clickedZone));
     };
 
-    const shareCanvasScreenShot = async () => {
-        try {
-            if (!canvasRef.current || !currentTree) return;
-
-            setIsTakingScreenshot(true);
-
-            const boundsRect = createBoundsRect(currentTree);
-
-            const image1 = canvasRef.current!.makeImageSnapshot(boundsRect);
-            const image2 = canvasRef.current!.makeImageSnapshot(boundsRect);
-            const image3 = canvasRef.current!.makeImageSnapshot(boundsRect);
-            const image4 = canvasRef.current!.makeImageSnapshot(boundsRect);
-            const image5 = canvasRef.current!.makeImageSnapshot(boundsRect);
-
-            const encodedImage1 = image1.encodeToBase64(ImageFormat.PNG, 99);
-            const encodedImage2 = image2.encodeToBase64(ImageFormat.PNG, 99);
-            const encodedImage3 = image3.encodeToBase64(ImageFormat.PNG, 99);
-            const encodedImage4 = image4.encodeToBase64(ImageFormat.PNG, 99);
-            const encodedImage5 = image5.encodeToBase64(ImageFormat.PNG, 99);
-
-            const encodedImages = [encodedImage1, encodedImage2, encodedImage3, encodedImage4, encodedImage5];
-
-            let tentativeBestEncodedImage: string | null = null;
-
-            for (let index = 0; index < encodedImages.length; index++) {
-                const encodedImage = encodedImages[index];
-
-                if (tentativeBestEncodedImage === null || encodedImage.length > tentativeBestEncodedImage.length) {
-                    tentativeBestEncodedImage = encodedImage;
-                }
-            }
-
-            await new Promise((resolve) =>
-                setTimeout(async () => {
-                    const data = `data:image/png;base64,${tentativeBestEncodedImage}`;
-                    const base64Code = data.split("data:image/png;base64,")[1];
-
-                    const filename = FileSystem.documentDirectory + `${currentTree.treeName ?? "yourTree"}` + ".png";
-
-                    await FileSystem.writeAsStringAsync(filename, base64Code, {
-                        encoding: FileSystem.EncodingType.Base64,
-                    });
-
-                    await MediaLibrary.saveToLibraryAsync(filename);
-
-                    await Sharing.shareAsync(filename);
-
-                    resolve("");
-                }, 1000)
-            );
-        } catch (error) {
-            Alert.alert("Could not generate image, please try again");
-        } finally {
-            setIsTakingScreenshot(false);
-        }
-
-        function createBoundsRect(tree: Tree<Skill>) {
-            const nodeCoordinates = getNodesCoordinates(tree);
-            const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
-            const centeredCoord = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
-
-            const xCoordArray = centeredCoord.map((c) => c.x);
-            const yCoordArray = centeredCoord.map((c) => c.y);
-            const maxX = Math.max(...xCoordArray);
-            const maxY = Math.max(...yCoordArray);
-
-            const result = rect(0, 0, maxX * 10, maxY * 10);
-
-            return result;
-        }
-    };
-
     return (
-        <View style={{ position: "relative", backgroundColor: colors.background }}>
+        <View style={{ position: "relative", backgroundColor: colors.background, overflow: "hidden" }}>
             {currentTree && (
                 <TreeView
                     tree={tentativeNewTree ?? currentTree}
@@ -136,12 +60,12 @@ function HomePage() {
                 />
             )}
             <ProgressIndicatorAndName />
-            {(homepageMode === "Idle" || homepageMode === "AddingNode") && <AddNode />}
+            {(mode === "Idle" || mode === "AddingNode") && <AddNode />}
             {currentTree !== undefined && <SettingsMenu />}
 
             {shouldRenderShareButton && (
                 <Pressable
-                    onPress={shareCanvasScreenShot}
+                    onPress={() => shareCanvasScreenshot(canvasRef.current, setIsTakingScreenshot, currentTree.treeName ?? "tree")}
                     style={[
                         centerFlex,
                         {
@@ -166,7 +90,7 @@ function HomePage() {
         </View>
     );
 
-    function getHomepageMode(): HomepageModes {
+    function getMode(): Mode {
         if (selectedNode !== null) return "SelectedNode";
         if (newNode !== undefined) return "AddingNode";
         if (isTakingScreenshot) return "TakingScreenshot";
@@ -174,10 +98,10 @@ function HomePage() {
     }
 }
 
-HomePage.whyDidYouRender = false;
+ViewingSkillTree.whyDidYouRender = false;
 // HomePage.whyDidYouRender = {
 //     logOnDifferentValues: true,
 //     customName: "Homeapge",
 // };
 
-export default HomePage;
+export default ViewingSkillTree;

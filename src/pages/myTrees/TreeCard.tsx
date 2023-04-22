@@ -1,17 +1,17 @@
-import { Platform, Pressable, View } from "react-native";
-import { Skill, Tree } from "../../types";
-import AppText from "../../components/AppText";
-import { Circle, Svg } from "react-native-svg";
+import { View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
-import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { setTree } from "../../redux/editTreeSlice";
-import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { ProgressWheelParams } from "../viewingSkillTree/components/ProgressIndicatorAndName";
-import { centerFlex, colors } from "../../parameters";
+import { Circle, Svg } from "react-native-svg";
+import AppText from "../../components/AppText";
 import { countCompletedNodesInTree, countNodesInTree } from "../../functions/extractInformationFromTree";
+import { centerFlex, colors } from "../../parameters";
+import { setTree } from "../../redux/editTreeSlice";
+import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
+import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { Skill, Tree } from "../../types";
+import { ProgressWheelParams } from "../viewingSkillTree/components/ProgressIndicatorAndName";
 
-function TreeCard({ element, changeTreeAndNavigateHome }: { element: Tree<Skill>; changeTreeAndNavigateHome: () => void }) {
+function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tree<Skill>; changeTreeAndNavigateToViewingTree: () => void }) {
     //Redux Related
     const dispatch = useAppDispatch();
     const { width } = useAppSelector(selectScreenDimentions);
@@ -33,7 +33,7 @@ function TreeCard({ element, changeTreeAndNavigateHome }: { element: Tree<Skill>
     const result = progressWheelProps.circumference - (progressWheelProps.circumference * completedPercentage) / 100;
 
     const tapGesture = Gesture.Tap().onEnd((e) => {
-        runOnJS(changeTreeAndNavigateHome)();
+        runOnJS(changeTreeAndNavigateToViewingTree)();
     });
 
     const scale = useSharedValue(1);
