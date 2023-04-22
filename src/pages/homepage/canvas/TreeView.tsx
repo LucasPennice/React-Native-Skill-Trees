@@ -1,11 +1,11 @@
-import { Blur, Canvas, Group, SkiaDomView, runSpring, runTiming, useValue } from "@shopify/react-native-skia";
+import { Blur, Canvas, DiffRect, Group, Rect, SkiaDomView, rect, runSpring, runTiming, useComputedValue, useValue } from "@shopify/react-native-skia";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
 import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
-import { selectTreeSlice } from "../../../redux/userTreesSlice";
+import { selectCurrentTree, selectTreeSlice } from "../../../redux/userTreesSlice";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import CanvasTree from "./CanvasTree";
 import { useAppSelector } from "../../../redux/reduxHooks";
-import { colors, DISTANCE_BETWEEN_GENERATIONS, NAV_HEGIHT } from "./parameters";
+import { colors, NAV_HEGIHT } from "./parameters";
 import { CirclePositionInCanvasWithLevel, DnDZone, MENU_DAMPENING, Skill, Tree, centerFlex } from "../../../types";
 import DragAndDropZones from "./DragAndDropZones";
 import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";

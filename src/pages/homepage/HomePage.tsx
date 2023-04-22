@@ -3,24 +3,28 @@ import TreeView from "./canvas/TreeView";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
 import SettingsMenu from "./components/SettingsMenu";
-import { colors } from "./canvas/parameters";
+import { CIRCLE_SIZE, colors } from "./canvas/parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCurrentTree, selectTentativeTree, selectTreeSlice, setSelectedDndZone, setSelectedNode } from "../../redux/userTreesSlice";
 import AddNode from "./AddNode";
 import NewNodeModal from "./modals/NewNodeModal";
 import useRunHomepageCleanup from "./useRunHomepageCleanup";
-import { DnDZone } from "../../types";
+import { DnDZone, Skill, Tree } from "../../types";
 import * as Sharing from "expo-sharing";
-import { useContext, useEffect, useRef, useState } from "react";
-import { ImageFormat, SkImage, SkiaDomView } from "@shopify/react-native-skia";
+import { useContext, useRef } from "react";
+import { ImageFormat, SkiaDomView, rect } from "@shopify/react-native-skia";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { IsSharingAvailableContext } from "../../../App";
+import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { calculateDimentionsAndRootCoordinates, centerNodeCoordinatesInCanvas } from "./canvas/coordinateFunctions";
+import { getCirclePositions } from "./canvas/coordinateFunctions";
 
 function HomePage() {
     //Redux State
     const currentTree = useAppSelector(selectCurrentTree);
-    const { selectedDndZone, newNode } = useAppSelector(selectTreeSlice);
+    const { selectedDndZone, newNode, selectedNode } = useAppSelector(selectTreeSlice);
+    const screenDimentions = useAppSelector(selectScreenDimentions);
     const tentativeNewTree = useAppSelector(selectTentativeTree);
     const dispatch = useAppDispatch();
     //Hooks
@@ -30,14 +34,16 @@ function HomePage() {
     //Derived State
     const shouldRenderDndZones = newNode && !selectedDndZone;
 
-    //☢️ BLOQUEAR EL SHARE CUANDO SE ESTA INSERTANDO UN NUEVO NODO, VIENDO UN NODO CON SELECT NODE O CUALQUIER COSA QUE MODIFIQUE EL CANVAS
+    const shouldRenderShareButton = isSharingAvailable && currentTree && !selectedDndZone && !selectedNode && !newNode;
 
     const shareCanvasScreenShot = async () => {
         if (!canvasRef.current || !currentTree) return;
 
-        // const boundsRect = createBoundsRect(currentTree)
+        const boundsRect = createBoundsRect(currentTree);
 
-        const image = canvasRef.current!.makeImageSnapshot();
+        const image = canvasRef.current!.makeImageSnapshot(boundsRect);
+
+        if (!image) return;
 
         setTimeout(async () => {
             const encodedImage = image.encodeToBase64(ImageFormat.PNG, 99);
@@ -56,7 +62,20 @@ function HomePage() {
             Sharing.shareAsync(filename);
         }, 1000);
 
-        function createBoundsRect() {}
+        function createBoundsRect(tree: Tree<Skill>) {
+            const nodeCoordinates = getCirclePositions(tree);
+            const canvasDimentions = calculateDimentionsAndRootCoordinates(nodeCoordinates, screenDimentions);
+            const centeredCoord = centerNodeCoordinatesInCanvas(nodeCoordinates, canvasDimentions);
+
+            const xCoordArray = centeredCoord.map((c) => c.x);
+            const yCoordArray = centeredCoord.map((c) => c.y);
+            const maxX = Math.max(...xCoordArray);
+            const maxY = Math.max(...yCoordArray);
+
+            const result = rect(0, 0, maxX * 10, maxY * 10);
+
+            return result;
+        }
     };
 
     return (
@@ -74,7 +93,7 @@ function HomePage() {
             <AddNode />
             {currentTree !== undefined && <SettingsMenu />}
 
-            {isSharingAvailable && currentTree && (
+            {shouldRenderShareButton && (
                 <Pressable
                     onPress={shareCanvasScreenShot}
                     style={{ position: "absolute", width: 50, height: 50, top: 70, left: 10, backgroundColor: colors.blue }}></Pressable>
