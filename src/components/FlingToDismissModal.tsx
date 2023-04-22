@@ -1,10 +1,9 @@
 import { Modal, Pressable, SafeAreaView, View } from "react-native";
 import { Directions, Gesture, GestureDetector, gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
-import { centerFlex } from "../types";
-import { colors } from "../pages/homepage/canvas/parameters";
 import AppText from "./AppText";
 import { createContext, useContext } from "react";
+import { centerFlex, colors } from "../parameters";
 
 type PropsContext = { closeModal: () => void; children: JSX.Element; leftHeaderButton: { onPress: () => void; title: string } | undefined } | null;
 

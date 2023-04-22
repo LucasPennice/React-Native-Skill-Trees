@@ -1,6 +1,5 @@
 import { ScrollView } from "react-native";
 import AppText from "../../components/AppText";
-import { colors } from "../homepage/canvas/parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { changeTree, selectTreeSlice } from "../../redux/userTreesSlice";
 import AddTreeModal from "./modals/AddTreeModal";
@@ -8,6 +7,7 @@ import TreeCard from "./TreeCard";
 import EditTreeModal from "./modals/EditTreeModal";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StackNavigatorParams } from "../../../App";
+import { colors } from "../../parameters";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "MyTrees">;
 

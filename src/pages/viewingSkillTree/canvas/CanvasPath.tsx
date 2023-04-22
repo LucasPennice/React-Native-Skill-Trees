@@ -1,8 +1,7 @@
 import { Blur, OpacityMatrix, Path, Skia, SkiaMutableValue, useComputedValue } from "@shopify/react-native-skia";
-import { MAX_OFFSET } from "./parameters";
 import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 import { svgPathProperties } from "svg-path-properties";
-import { CIRCLE_SIZE } from "./parameters";
+import { CIRCLE_SIZE } from "../../../parameters";
 
 type pathCoordinates = {
     cx: number;
@@ -15,11 +14,9 @@ function CanvasPath({
     pathColor,
     isRoot,
     pathBlurOnInactive,
-    curveInwards,
 }: {
     coordinates: pathCoordinates;
     pathColor: string;
-    curveInwards?: boolean;
     isRoot?: boolean;
     pathBlurOnInactive?: SkiaMutableValue<number>;
 }) {
@@ -50,8 +47,6 @@ function CanvasPath({
         const pathString = p.toSVGString();
         const properties = new svgPathProperties(pathString);
         const pathLength = properties.getTotalLength();
-
-        const newLength = pathLength - CIRCLE_SIZE - 2;
 
         return p;
     }, [p1x, p1y, p2x, p2y]);

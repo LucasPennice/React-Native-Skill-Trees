@@ -2,15 +2,14 @@ import { Gesture } from "react-native-gesture-handler";
 import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { useAppSelector } from "../../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../../redux/screenDimentionsSlice";
-import { CanvasDimentions, CirclePositionInCanvasWithLevel } from "../../../../types";
-import { CANVAS_HORIZONTAL_PADDING } from "../coordinateFunctions";
-import { CIRCLE_SIZE } from "../parameters";
+import { CanvasDimensions, CirclePositionInCanvasWithLevel } from "../../../../types";
+import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE } from "../../../../parameters";
 import { useEffect } from "react";
 
 const DEFAULT_SCALE = 1;
 
 function useHandleCanvasScroll(
-    canvasDimentions: CanvasDimentions,
+    canvasDimentions: CanvasDimensions,
     foundNodeCoordinates?: CirclePositionInCanvasWithLevel,
     isTakingScreenshot?: boolean
 ) {

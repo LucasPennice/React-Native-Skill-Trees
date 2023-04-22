@@ -1,15 +1,13 @@
-import Color, { Circle, Circle as SvgCircle, Svg } from "react-native-svg";
-import Animated, { useAnimatedProps, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
-import { quantityOfCompletedNodes, quantiyOfNodes } from "../treeFunctions";
+import { Circle, Circle as SvgCircle, Svg } from "react-native-svg";
+import Animated, { useAnimatedProps, useSharedValue, withSpring } from "react-native-reanimated";
 import { selectCurrentTree } from "../../../redux/userTreesSlice";
 import { useAppSelector } from "../../../redux/reduxHooks";
 import { useEffect } from "react";
 import { Text, View } from "react-native";
-import { colors } from "../canvas/parameters";
+import { centerFlex, colors } from "../../../parameters";
 import AppText from "../../../components/AppText";
-import { centerFlex } from "../../../types";
-import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { countCompletedNodesInTree, countNodesInTree } from "../../../functions/extractInformationFromTree";
 
 export class ProgressWheelParams {
     size = 65;
@@ -47,8 +45,8 @@ function ProgressIndicatorAndName() {
     const completedPercentage = useSharedValue(0);
 
     useEffect(() => {
-        const completedNodesQty = quantityOfCompletedNodes(currentTree);
-        const nodesQty = quantiyOfNodes(currentTree);
+        const completedNodesQty = countCompletedNodesInTree(currentTree);
+        const nodesQty = countNodesInTree(currentTree);
 
         if (!completedNodesQty || !nodesQty) {
             completedPercentage.value = 0;

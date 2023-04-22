@@ -3,13 +3,13 @@ import TreeView from "./canvas/TreeView";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
 import SettingsMenu from "./components/SettingsMenu";
-import { colors } from "./canvas/parameters";
+import { centerFlex, colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCurrentTree, selectTentativeTree, selectTreeSlice, setSelectedDndZone, setSelectedNode } from "../../redux/userTreesSlice";
 import AddNode from "./AddNode";
 import NewNodeModal from "./modals/NewNodeModal";
 import useRunHomepageCleanup from "./useRunHomepageCleanup";
-import { DnDZone, Skill, Tree, centerFlex } from "../../types";
+import { DnDZone, Skill, Tree } from "../../types";
 import * as Sharing from "expo-sharing";
 import { useContext, useRef, useState } from "react";
 import { ImageFormat, SkiaDomView, rect } from "@shopify/react-native-skia";
@@ -17,8 +17,8 @@ import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { IsSharingAvailableContext } from "../../../App";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { calculateDimentionsAndRootCoordinates, centerNodeCoordinatesInCanvas } from "./canvas/coordinateFunctions";
-import { getCirclePositions } from "./canvas/coordinateFunctions";
+import { getCanvasDimensions, centerNodesInCanvas } from "./canvas/coordinateFunctions";
+import { getNodesCoordinates } from "./canvas/coordinateFunctions";
 import TakingScreenshotLoadingScreenModal from "./modals/TakingScreenshotLoadingScreenModal";
 import AppText from "../../components/AppText";
 
@@ -108,9 +108,9 @@ function HomePage() {
         }
 
         function createBoundsRect(tree: Tree<Skill>) {
-            const nodeCoordinates = getCirclePositions(tree);
-            const canvasDimentions = calculateDimentionsAndRootCoordinates(nodeCoordinates, screenDimentions);
-            const centeredCoord = centerNodeCoordinatesInCanvas(nodeCoordinates, canvasDimentions);
+            const nodeCoordinates = getNodesCoordinates(tree);
+            const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
+            const centeredCoord = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
 
             const xCoordArray = centeredCoord.map((c) => c.x);
             const yCoordArray = centeredCoord.map((c) => c.y);

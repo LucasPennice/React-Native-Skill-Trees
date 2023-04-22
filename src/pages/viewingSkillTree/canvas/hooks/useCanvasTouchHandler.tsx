@@ -1,10 +1,6 @@
-import { TouchHandler, useTouchHandler, useValue } from "@shopify/react-native-skia";
-import { useRef, useState } from "react";
-import { findTreeNodeById } from "../../treeFunctions";
+import { TouchHandler, TouchInfo, useTouchHandler, useValue } from "@shopify/react-native-skia";
 import { CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree } from "../../../../types";
-import { didTapCircle, didTapDndZone } from "../functions";
-import { Dimensions, Platform, ScrollView } from "react-native";
-import { CIRCLE_SIZE_SELECTED } from "../parameters";
+import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, TOUCH_BUFFER } from "../../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../../redux/reduxHooks";
 import { selectTreeSlice, setSelectedNode } from "../../../../redux/userTreesSlice";
 
@@ -56,3 +52,33 @@ const useCanvasTouchHandler = ({ nodeCoordinatesCentered, onNodeClick, tree, dra
 };
 
 export default useCanvasTouchHandler;
+
+function didTapCircle(touchInfo: TouchInfo) {
+    return (circle: { x: number; y: number; id: string }) => {
+        const isTouchInsideCircleXRange =
+            touchInfo.x >= circle.x - CIRCLE_SIZE / 2 - TOUCH_BUFFER && touchInfo.x <= circle.x + CIRCLE_SIZE / 2 + TOUCH_BUFFER;
+
+        const isTouchInsideCircleYRange =
+            touchInfo.y >= circle.y - CIRCLE_SIZE / 2 - TOUCH_BUFFER && touchInfo.y <= circle.y + CIRCLE_SIZE / 2 + TOUCH_BUFFER;
+
+        const isTouchingCircle = isTouchInsideCircleXRange && isTouchInsideCircleYRange;
+
+        if (!isTouchingCircle) return false;
+
+        return true;
+    };
+}
+
+function didTapDndZone(touchInfo: TouchInfo) {
+    return (zone: DnDZone) => {
+        const isTouchInsideCircleXRange = touchInfo.x >= zone.x && touchInfo.x <= zone.x + zone.width;
+
+        const isTouchInsideCircleYRange = touchInfo.y >= zone.y && touchInfo.y <= zone.y + zone.height;
+
+        const isTouchingCircle = isTouchInsideCircleXRange && isTouchInsideCircleYRange;
+
+        if (!isTouchingCircle) return false;
+
+        return true;
+    };
+}

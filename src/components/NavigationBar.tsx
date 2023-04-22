@@ -3,10 +3,9 @@ import { Fragment, useState } from "react";
 import { Dimensions, Pressable, View } from "react-native";
 import Animated, { useAnimatedStyle, withSpring } from "react-native-reanimated";
 import AppText from "./AppText";
-import { colors, NAV_HEGIHT } from "../pages/homepage/canvas/parameters";
-import { centerFlex } from "../types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Routes, StackNavigatorParams } from "../../App";
+import { NAV_HEGIHT, centerFlex, colors } from "../parameters";
 
 function NavigationBar({ data: APP_ROUTES }: { data: Routes }) {
     const nav = useNavigation<NativeStackScreenProps<StackNavigatorParams>["navigation"]>();

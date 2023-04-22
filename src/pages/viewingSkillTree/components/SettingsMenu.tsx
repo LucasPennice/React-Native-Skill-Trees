@@ -9,8 +9,7 @@ import {
     toggleTreeSelector,
 } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { centerFlex } from "../../../types";
-import { colors } from "../canvas/parameters";
+import { centerFlex, colors } from "../../../parameters";
 
 const SETTING_BUTTON_WIDTH = 70;
 

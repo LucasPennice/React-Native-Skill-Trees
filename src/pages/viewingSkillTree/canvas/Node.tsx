@@ -1,4 +1,3 @@
-import { getHeightForFont } from "./functions";
 import {
     Group,
     Path,
@@ -14,7 +13,7 @@ import {
     useValue,
     useSharedValueEffect,
 } from "@shopify/react-native-skia";
-import { CIRCLE_SIZE, colors } from "./parameters";
+import { CIRCLE_SIZE, colors } from "../../../parameters";
 import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 import { useSharedValue, withDelay, withTiming } from "react-native-reanimated";
 import { useEffect, useState } from "react";
@@ -199,6 +198,10 @@ function Node({
             <Text x={textX} y={textY} text={letter} font={nodeLetterFont} color={color} />
         </Group>
     );
+
+    function getHeightForFont(fontSize: number) {
+        return (fontSize * 125.5) / 110;
+    }
 }
 
 export default Node;

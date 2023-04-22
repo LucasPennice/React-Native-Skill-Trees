@@ -5,16 +5,11 @@ import { selectCurrentTree, selectTreeSlice } from "../../../redux/userTreesSlic
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import CanvasTree from "./CanvasTree";
 import { useAppSelector } from "../../../redux/reduxHooks";
-import { colors, NAV_HEGIHT } from "./parameters";
-import { CirclePositionInCanvasWithLevel, DnDZone, MENU_DAMPENING, Skill, Tree, centerFlex } from "../../../types";
+import { centerFlex, colors, NAV_HEGIHT } from "../../../parameters";
+import { CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree } from "../../../types";
 import DragAndDropZones from "./DragAndDropZones";
 import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
-import {
-    calculateDimentionsAndRootCoordinates,
-    calculateDragAndDropZones,
-    centerNodeCoordinatesInCanvas,
-    getCirclePositions,
-} from "./coordinateFunctions";
+import { getCanvasDimensions, calculateDragAndDropZones, centerNodesInCanvas, getNodesCoordinates } from "./coordinateFunctions";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
@@ -36,9 +31,9 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef, 
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
     //Derived State
-    const nodeCoordinates = getCirclePositions(tree);
-    const canvasDimentions = calculateDimentionsAndRootCoordinates(nodeCoordinates, screenDimentions);
-    const nodeCoordinatesCentered = centerNodeCoordinatesInCanvas(nodeCoordinates, canvasDimentions);
+    const nodeCoordinates = getNodesCoordinates(tree);
+    const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
+    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
     const dragAndDropZones = calculateDragAndDropZones(nodeCoordinatesCentered);
     const foundNodeCoordinates = nodeCoordinates.find((c) => c.id === selectedNode);
 

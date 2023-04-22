@@ -11,8 +11,7 @@ import {
     setSelectedDndZone,
 } from "../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { MENU_HIGH_DAMPENING, centerFlex } from "../../types";
-import { colors } from "./canvas/parameters";
+import { MENU_HIGH_DAMPENING, centerFlex, colors } from "../../parameters";
 import Animated, { useAnimatedStyle, withSequence, withSpring, withTiming } from "react-native-reanimated";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 

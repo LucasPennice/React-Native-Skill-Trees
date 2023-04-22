@@ -1,5 +1,5 @@
-import { Skill, Tree } from "../../../types";
-import { findDistanceBetweenNodesById, findLowestCommonAncestorIdOfNodes, returnPathFromRootToNode } from "../treeFunctions";
+import { findDistanceBetweenNodesById, findLowestCommonAncestorIdOfNodes, returnPathFromRootToNode } from "./extractInformationFromTree";
+import { Skill, Tree } from "../types";
 
 export type Coordinates = { x: number; y: number; id: string; level: number; parentId: string | null; name: string };
 type Contour = { leftNode: { coord: number; id: string }; rightNode: { coord: number; id: string } };

@@ -1,8 +1,5 @@
 import { Platform, Pressable, View } from "react-native";
-import { Skill, Tree, centerFlex } from "../../types";
-import { colors } from "../homepage/canvas/parameters";
-import { ProgressWheelParams } from "../homepage/components/ProgressIndicatorAndName";
-import { quantityOfCompletedNodes, quantiyOfNodes } from "../homepage/treeFunctions";
+import { Skill, Tree } from "../../types";
 import AppText from "../../components/AppText";
 import { Circle, Svg } from "react-native-svg";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -10,6 +7,9 @@ import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withSpring
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { setTree } from "../../redux/editTreeSlice";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { ProgressWheelParams } from "../viewingSkillTree/components/ProgressIndicatorAndName";
+import { centerFlex, colors } from "../../parameters";
+import { countCompletedNodesInTree, countNodesInTree } from "../../functions/extractInformationFromTree";
 
 function TreeCard({ element, changeTreeAndNavigateHome }: { element: Tree<Skill>; changeTreeAndNavigateHome: () => void }) {
     //Redux Related
@@ -21,8 +21,8 @@ function TreeCard({ element, changeTreeAndNavigateHome }: { element: Tree<Skill>
 
     const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}3D`, 50, 8);
 
-    const completedNodesQty = quantityOfCompletedNodes(element);
-    const nodesQty = quantiyOfNodes(element);
+    const completedNodesQty = countCompletedNodesInTree(element);
+    const nodesQty = countNodesInTree(element);
 
     let completedPercentage = 0;
 

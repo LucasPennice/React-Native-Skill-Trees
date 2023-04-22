@@ -1,3 +1,5 @@
+import { StyleProp, ViewStyle } from "react-native";
+
 export const CIRCLE_SIZE = 15;
 export const CIRCLE_SIZE_SELECTED = CIRCLE_SIZE * 3;
 
@@ -10,48 +12,18 @@ export const DISTANCE_BETWEEN_GENERATIONS = 25 + 50 + 3 * CIRCLE_SIZE;
 export const NAV_HEGIHT = 65;
 
 export const CANVAS_SPRING = { damping: 29 };
+export const MENU_DAMPENING = { damping: 20, stiffness: 300 };
+export const MENU_HIGH_DAMPENING = { damping: 26, stiffness: 300 };
 
 export const PARENT_DND_ZONE_DIMENTIONS = { width: 4 * CIRCLE_SIZE, height: 25 };
 export const ONLY_CHILDREN_DND_ZONE_DIMENTIONS = { ...PARENT_DND_ZONE_DIMENTIONS, height: 50 };
 export const BROTHER_DND_ZONE_HEIGHT = 3 * CIRCLE_SIZE;
 
-//This is related to the canvas bezier curve for rendering paths
-export const MAX_OFFSET = 25;
-
-export const LETTER_SIZE_AT_10 = {
-    A: 6.67,
-    B: 6.67,
-    C: 7.23,
-    D: 7.23,
-    E: 6.67,
-    F: 6.11,
-    G: 7.78,
-    H: 7.23,
-    I: 2.78,
-    J: 5,
-    K: 6.67,
-    L: 5.56,
-    M: 8.34,
-    N: 7.23,
-    O: 7.78,
-    P: 6.67,
-    Q: 7.78,
-    R: 7.23,
-    S: 6.67,
-    T: 6.11,
-    U: 7.23,
-    V: 6.67,
-    W: 9.45,
-    X: 6.67,
-    Y: 6.67,
-    Z: 6.11,
-    AT: 10.16,
-    DOT: 2.78,
-    SPACE: 5.56,
-};
+export const CANVAS_HORIZONTAL_PADDING = 200;
+export const CANVAS_VERTICAL_PADDING = 200;
 
 export const colors = {
-    background: "black",
+    background: "#000000",
     darkGray: "#181A1C",
     line: "#515053",
     unmarkedText: "#96959B",
@@ -65,5 +37,7 @@ export const colors = {
     purple: "#BF5AF2",
     pink: "#FC385F",
 };
+
+export const centerFlex: StyleProp<ViewStyle> = { display: "flex", justifyContent: "center", alignItems: "center" };
 
 export const possibleTreeColors = ["#FE453A", "#FED739", "#FF9F23", "#50D158", "#40C8E0", "#1982F9", "#BF5AF2", "#FC385F"];

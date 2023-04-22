@@ -1,6 +1,6 @@
 import { Blur, Group, RoundedRect, SkiaMutableValue, Text, useFont } from "@shopify/react-native-skia";
 import { Skill, Tree } from "../../../types";
-import { colors } from "./parameters";
+import { colors } from "../../../parameters";
 
 const labelMarginTop = 40;
 

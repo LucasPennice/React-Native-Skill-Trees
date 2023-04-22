@@ -1,7 +1,6 @@
 import { Modal, View } from "react-native";
 import AppText from "../../../components/AppText";
-import { colors } from "../canvas/parameters";
-import { centerFlex } from "../../../types";
+import { centerFlex, colors } from "../../../parameters";
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
 function TakingScreenshotLoadingScreenModal({ open }: { open: boolean }) {

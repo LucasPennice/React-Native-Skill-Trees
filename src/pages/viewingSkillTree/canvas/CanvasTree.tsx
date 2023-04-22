@@ -1,10 +1,10 @@
 import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../types";
-import { colors } from "./parameters";
+import { colors } from "../../../parameters";
 import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
-import { findParentOfNode } from "../treeFunctions";
 import Label from "./Label";
 import Node from "./Node";
 import CanvasPath from "./CanvasPath";
+import { findParentOfNode } from "../../../functions/extractInformationFromTree";
 
 type TreeProps = {
     tree: Tree<Skill>;

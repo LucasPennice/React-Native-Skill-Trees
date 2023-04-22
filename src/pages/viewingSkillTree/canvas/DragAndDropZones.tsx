@@ -1,6 +1,6 @@
 import { DashPathEffect, Rect, RoundedRect } from "@shopify/react-native-skia";
 import { DnDZone } from "../../../types";
-import { colors } from "./parameters";
+import { colors } from "../../../parameters";
 
 function DragAndDropZones({ data, selectedDndZone }: { data: DnDZone[]; selectedDndZone?: DnDZone }) {
     const selectedZoneId = selectedDndZone ? `${selectedDndZone.ofNode}${selectedDndZone.type}` : "";

@@ -1,7 +1,7 @@
 import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "./reduxStore";
 import { DnDZone, Skill, Tree } from "../types";
-import { insertNodeBasedOnDnDZone } from "../pages/homepage/canvas/coordinateFunctions";
+import { insertNodeBasedOnDnDZone } from "../functions/mutateTree";
 
 // Define a type for the slice state
 type UserTreesSlice = {

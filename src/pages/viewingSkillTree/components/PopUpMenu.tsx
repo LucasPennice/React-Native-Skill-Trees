@@ -2,21 +2,21 @@ import { useEffect, useState } from "react";
 import { Alert, Button, Dimensions, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
-import { CirclePositionInCanvas, CirclePositionInCanvasWithLevel, MENU_DAMPENING, centerFlex } from "../../../types";
-import { deleteNodeWithNoChildren, editTreeProperties, findTreeNodeById, quantiyOfNodes } from "../treeFunctions";
+import { CirclePositionInCanvas, CirclePositionInCanvasWithLevel } from "../../../types";
 import { mutateUserTree, removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { openChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
-import { CIRCLE_SIZE_SELECTED, colors } from "../canvas/parameters";
+import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE_SELECTED, MENU_DAMPENING, centerFlex, colors } from "../../../parameters";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StackNavigatorParams } from "../../../../App";
-import { CANVAS_HORIZONTAL_PADDING } from "../canvas/coordinateFunctions";
 import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
+import { findNodeById, countNodesInTree } from "../../../functions/extractInformationFromTree";
+import { deleteNodeWithNoChildren, editTreeProperties } from "../../../functions/mutateTree";
 
 type Props = {
     foundNodeCoordinates: CirclePositionInCanvasWithLevel;
@@ -30,7 +30,7 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
     const { height, width } = useAppSelector(selectScreenDimentions);
     const dispatch = useAppDispatch();
     //
-    const currentNode = findTreeNodeById(currentTree, selectedNode);
+    const currentNode = findNodeById(currentTree, selectedNode);
     //Local State
     const [text, onChangeText] = useState(currentNode ? currentNode.data.name : "Name");
     const [mastered, setMastered] = useState(currentNode && currentNode.data.isCompleted ? currentNode.data.isCompleted : false);
@@ -70,7 +70,7 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
         );
 
     const deleteNode = () => {
-        if (quantiyOfNodes(currentTree) === 1) return confirmDeleteTree();
+        if (countNodesInTree(currentTree) === 1) return confirmDeleteTree();
 
         const result = deleteNodeWithNoChildren(currentTree, currentNode);
         dispatch(mutateUserTree(result));
@@ -95,7 +95,7 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
         dispatch(mutateUserTree(result));
     };
 
-    const currentSkill = findTreeNodeById(currentTree, selectedNode)?.data ?? undefined;
+    const currentSkill = findNodeById(currentTree, selectedNode)?.data ?? undefined;
 
     const closePopUpMenu = () => dispatch(setSelectedNode(null));
 

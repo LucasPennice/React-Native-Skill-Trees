@@ -1,8 +1,8 @@
 import { ScrollView } from "react-native";
 import AppText from "../../components/AppText";
-import { colors } from "../homepage/canvas/parameters";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StackNavigatorParams } from "../../../App";
+import { colors } from "../../parameters";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "SkillPage">;
 

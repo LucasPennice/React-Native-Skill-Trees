@@ -2,11 +2,12 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { selectCanvasDisplaySettings, closeChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
 import { mutateUserTree, selectCurrentTree, setSelectedNode } from "../../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { deleteNodeWithChildren as deleteNodeWithChildrenFn, findParentOfNode, findTreeNodeById } from "../treeFunctions";
-import { Skill, Tree, centerFlex } from "../../../types";
-import { colors } from "../canvas/parameters";
+import { Skill, Tree } from "../../../types";
+import { centerFlex, colors } from "../../../parameters";
 import AppText from "../../../components/AppText";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
+import { findNodeById, findParentOfNode } from "../../../functions/extractInformationFromTree";
+import { deleteNodeWithChildren } from "../../../functions/mutateTree";
 
 function ChildrenHoistSelectorModal() {
     const { openMenu, candidatesToHoist } = useAppSelector(selectCanvasDisplaySettings);
@@ -15,11 +16,11 @@ function ChildrenHoistSelectorModal() {
     const dispatch = useAppDispatch();
 
     const deleteParentAndHoistChildren = (children: Tree<Skill>) => () => {
-        const nodeToDelete = findTreeNodeById(currentTree, children.parentId ?? null);
+        const nodeToDelete = findNodeById(currentTree, children.parentId ?? null);
 
         if (!nodeToDelete) return dispatch(closeChildrenHoistSelector());
 
-        const newTree = deleteNodeWithChildrenFn(currentTree, nodeToDelete, children);
+        const newTree = deleteNodeWithChildren(currentTree, nodeToDelete, children);
 
         dispatch(mutateUserTree(newTree));
 

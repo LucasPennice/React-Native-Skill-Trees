@@ -1,6 +1,5 @@
 import { Alert, TouchableOpacity, View } from "react-native";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { colors, possibleTreeColors } from "../../homepage/canvas/parameters";
 import { useEffect, useState } from "react";
 import AppTextInput from "../../../components/AppTextInput";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
@@ -9,6 +8,7 @@ import ColorSelector from "../../../components/ColorsSelector";
 import { selectTreeOptions, setTree } from "../../../redux/editTreeSlice";
 import { mutateUserTree, removeUserTree } from "../../../redux/userTreesSlice";
 import { Skill, Tree } from "../../../types";
+import { colors, possibleTreeColors } from "../../../parameters";
 
 function EditTreeModal() {
     //Redux State

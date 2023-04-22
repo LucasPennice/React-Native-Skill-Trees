@@ -1,9 +1,8 @@
 import { Pressable, ViewProps } from "react-native";
 import { useEffect } from "react";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
-import { centerFlex } from "../types";
-import { colors } from "../pages/homepage/canvas/parameters";
 import AppText from "./AppText";
+import { centerFlex, colors } from "../parameters";
 
 function RadioInput({
     state,

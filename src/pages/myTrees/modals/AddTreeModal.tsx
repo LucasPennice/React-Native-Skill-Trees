@@ -1,7 +1,6 @@
 import { Alert, ScrollView, View } from "react-native";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
-import { colors, possibleTreeColors } from "../../homepage/canvas/parameters";
 import { useEffect, useState } from "react";
 import AppTextInput from "../../../components/AppTextInput";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
@@ -9,8 +8,9 @@ import AppText from "../../../components/AppText";
 import ColorSelector from "../../../components/ColorsSelector";
 import RadioInput from "../../../components/RadioInput";
 import { Skill, Tree } from "../../../types";
-import { makeid } from "../functions";
 import { appendToUserTree } from "../../../redux/userTreesSlice";
+import { makeid } from "../../../functions/misc";
+import { colors, possibleTreeColors } from "../../../parameters";
 
 function AddTreeModal() {
     //Local State

@@ -1,16 +1,14 @@
-import { BlurView } from "expo-blur";
 import { useEffect, useState } from "react";
-import { Modal, Pressable, SafeAreaView, TextInput, View, Dimensions, TouchableOpacity, TouchableHighlight, Alert } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { View, Alert } from "react-native";
 import AppText from "../../../components/AppText";
 import { selectCanvasDisplaySettings, toggleNewNode } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { colors } from "../canvas/parameters";
+import { colors } from "../../../parameters";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
-import { makeid } from "../../myTrees/functions";
 import { setNewNode, setSelectedNode } from "../../../redux/userTreesSlice";
+import { makeid } from "../../../functions/misc";
 
 function NewNodeModal() {
     const { openMenu } = useAppSelector(selectCanvasDisplaySettings);

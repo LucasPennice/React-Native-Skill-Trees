@@ -1,6 +1,6 @@
 import { ScrollView, View } from "react-native";
 import AppText from "../../components/AppText";
-import { colors } from "../homepage/canvas/parameters";
+import { colors } from "../../parameters";
 
 function Settings() {
     return (
