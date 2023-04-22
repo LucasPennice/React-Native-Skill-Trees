@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Alert, Button, Dimensions, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import { CirclePositionInCanvas, CirclePositionInCanvasWithLevel, MENU_DAMPENING, centerFlex } from "../../../types";
 import { deleteNodeWithNoChildren, editTreeProperties, findTreeNodeById, quantiyOfNodes } from "../treeFunctions";
 import { mutateUserTree, removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../../redux/userTreesSlice";
@@ -16,6 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StackNavigatorParams } from "../../../../App";
 import { CANVAS_HORIZONTAL_PADDING } from "../canvas/coordinateFunctions";
+import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
 
 type Props = {
     foundNodeCoordinates: CirclePositionInCanvasWithLevel;
@@ -34,7 +35,7 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
     const [text, onChangeText] = useState(currentNode ? currentNode.data.name : "Name");
     const [mastered, setMastered] = useState(currentNode && currentNode.data.isCompleted ? currentNode.data.isCompleted : false);
 
-    const MENU_HEIGHT = height / 2;
+    const MENU_HEIGHT = height / 1.5;
     const MENU_WIDTH = width - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL - CIRCLE_SIZE_SELECTED - 30;
 
     const { animatedMenuStyles } = useHandlePopMenuAnimations(foundNodeCoordinates, selectedNode, canvasWidth);
@@ -96,59 +97,82 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
 
     const currentSkill = findTreeNodeById(currentTree, selectedNode)?.data ?? undefined;
 
+    const closePopUpMenu = () => dispatch(setSelectedNode(null));
+
+    const flingGesture = Gesture.Fling()
+        .direction(Directions.DOWN)
+        .onStart((e) => {
+            runOnJS(closePopUpMenu)();
+        });
+
     return (
-        <Animated.View
-            style={[
-                animatedMenuStyles,
-                {
-                    position: "absolute",
-                    height: MENU_HEIGHT,
-                    width: MENU_WIDTH,
-                    backgroundColor: colors.darkGray,
-                    borderRadius: 20,
-                    padding: 20,
-                },
-            ]}>
-            <AppTextInput
-                onBlur={updateNodeName}
-                placeholder="Skill Name"
-                textState={[text, onChangeText]}
-                onlyContainsLettersAndNumbers
-                containerStyles={{ marginBottom: 20 }}
-            />
+        <GestureDetector gesture={flingGesture}>
+            <Animated.View
+                style={[
+                    animatedMenuStyles,
+                    {
+                        position: "absolute",
+                        height: MENU_HEIGHT,
+                        width: MENU_WIDTH,
+                        backgroundColor: colors.darkGray,
+                        borderRadius: 20,
+                        padding: 20,
+                        paddingTop: 40,
+                    },
+                ]}>
+                <View
+                    style={{
+                        backgroundColor: `${colors.line}`,
+                        width: 150,
+                        height: 6,
+                        top: 15,
+                        left: (MENU_WIDTH - 150) / 2,
+                        borderRadius: 10,
+                        position: "absolute",
+                    }}
+                />
 
-            <RadioInput text="Mastered" state={[mastered, setMastered]} onPress={toggleCompletionInNode(mastered)} style={{ marginBottom: 20 }} />
+                <AppTextInput
+                    onBlur={updateNodeName}
+                    placeholder="Skill Name"
+                    textState={[text, onChangeText]}
+                    onlyContainsLettersAndNumbers
+                    containerStyles={{ marginBottom: 20 }}
+                />
 
-            <TouchableOpacity
-                style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
-                onPress={() => navigation.navigate("SkillPage", currentSkill)}>
-                <AppText style={{ color: colors.accent }} fontSize={18}>
-                    Open
-                </AppText>
-            </TouchableOpacity>
+                <RadioInput text="Mastered" state={[mastered, setMastered]} onPress={toggleCompletionInNode(mastered)} style={{ marginBottom: 20 }} />
 
-            <View style={[centerFlex, { justifyContent: "flex-end", flex: 1 }]}>
-                {!currentNode.children && (
-                    <TouchableOpacity
-                        style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
-                        onPress={deleteNode}>
-                        <AppText style={{ color: colors.accent }} fontSize={18}>
-                            Delete Node
-                        </AppText>
-                    </TouchableOpacity>
-                )}
+                <TouchableOpacity
+                    style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
+                    onPress={() => navigation.navigate("SkillPage", currentSkill)}>
+                    <AppText style={{ color: colors.accent }} fontSize={18}>
+                        Go To Skill Page
+                    </AppText>
+                </TouchableOpacity>
 
-                {currentNode.children && (
-                    <TouchableOpacity
-                        style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
-                        onPress={() => dispatch(openChildrenHoistSelector(currentNode.children!))}>
-                        <AppText style={{ color: colors.accent }} fontSize={18}>
-                            Delete Node
-                        </AppText>
-                    </TouchableOpacity>
-                )}
-            </View>
-        </Animated.View>
+                <View style={[centerFlex, { justifyContent: "flex-end", flex: 1 }]}>
+                    {!currentNode.children && (
+                        <TouchableOpacity
+                            style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
+                            onPress={deleteNode}>
+                            <AppText style={{ color: colors.red }} fontSize={18}>
+                                Delete Node
+                            </AppText>
+                        </TouchableOpacity>
+                    )}
+
+                    {currentNode.children && (
+                        <TouchableOpacity
+                            style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
+                            onPress={() => dispatch(openChildrenHoistSelector(currentNode.children!))}>
+                            <AppText style={{ color: colors.red }} fontSize={18}>
+                                Delete Node
+                            </AppText>
+                        </TouchableOpacity>
+                    )}
+                </View>
+            </Animated.View>
+        </GestureDetector>
     );
 }
 
@@ -163,7 +187,7 @@ function useHandlePopMenuAnimations(foundNodeCoordinates: CirclePositionInCanvas
 
     const { height, width } = useAppSelector(selectScreenDimentions);
 
-    const MENU_HEIGHT = height / 2;
+    const MENU_HEIGHT = height / 1.5;
     const MENU_WIDTH = width - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL - CIRCLE_SIZE_SELECTED - 30;
 
     //This handles the menu animations 👇
@@ -173,7 +197,7 @@ function useHandlePopMenuAnimations(foundNodeCoordinates: CirclePositionInCanvas
 
         const left = menuPosition === "LEFT_SIDE_OF_SCREEN" ? 0 : width - MENU_WIDTH;
 
-        const top = MENU_HEIGHT / 2;
+        const top = MENU_HEIGHT / 4.5;
 
         let standardMenuStyles = { opacity: withTiming(isOpen.value ? 1 : 0), transform: [{ scale: withSpring(isOpen.value ? 1 : 0.9) }] };
 

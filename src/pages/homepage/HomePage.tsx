@@ -86,7 +86,7 @@ function HomePage() {
             const data = `data:image/png;base64,${tentativeBestEncodedImage}`;
             const base64Code = data.split("data:image/png;base64,")[1];
 
-            const filename = FileSystem.documentDirectory + "some_unique_file_name.png";
+            const filename = FileSystem.documentDirectory + `${currentTree.treeName ?? "yourTree"}` + ".png";
 
             await FileSystem.writeAsStringAsync(filename, base64Code, {
                 encoding: FileSystem.EncodingType.Base64,

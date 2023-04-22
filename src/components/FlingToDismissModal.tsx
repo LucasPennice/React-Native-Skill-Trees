@@ -42,7 +42,7 @@ const ModalWithGesturesEnabled = gestureHandlerRootHOC(() => {
                                 </AppText>
                             </Pressable>
                         )}
-                        <View style={{ backgroundColor: `${colors.line}5D`, width: 150, height: 8, borderRadius: 10, position: "absolute" }} />
+                        <View style={{ backgroundColor: `${colors.line}`, width: 150, height: 6, borderRadius: 10, position: "absolute" }} />
                         {leftHeaderButton && (
                             <Pressable onPress={leftHeaderButton.onPress} style={{ alignSelf: "flex-end", position: "absolute" }}>
                                 <AppText style={{ color: colors.accent, padding: 10 }} fontSize={16}>

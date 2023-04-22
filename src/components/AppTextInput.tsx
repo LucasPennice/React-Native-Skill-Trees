@@ -1,4 +1,4 @@
-import { Platform, Pressable, TextInput, View, ViewProps } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, TextInput, View, ViewProps } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { centerFlex } from "../types";
 import AppText from "./AppText";
@@ -67,46 +67,41 @@ function AppTextInput({
     };
 
     return (
-        <View style={[centerFlex, { flexDirection: "row", position: "relative" }, containerStyles]}>
-            <Animated.View
-                style={[
-                    inputStyles,
-                    {
-                        flex: 1,
-                        height: 60,
-                    },
-                ]}>
-                <TextInput
-                    blurOnSubmit
-                    //@ts-ignore
-                    enterKeyHint="done"
-                    multiline
-                    onChangeText={updateText}
-                    placeholder={placeholder}
-                    onBlur={onBlur}
-                    value={text}
-                    style={{
-                        backgroundColor: `${colors.line}4D`,
-                        borderRadius: 15,
-                        fontSize: 20,
-                        paddingLeft: 20,
-                        paddingTop: Platform.OS === "ios" ? 18 : 13,
-                        fontFamily: "helvetica",
-                        textAlign: "left",
-                        textAlignVertical: "top",
-                        color: "white",
-                        flex: 1,
-                    }}
-                />
-            </Animated.View>
-            <Animated.View style={[centerFlex, clearButtonStyles, { position: "absolute", height: 60 }]}>
-                <Pressable style={[centerFlex, { flex: 1, paddingHorizontal: 10 }]} onPress={() => setText("")}>
-                    <AppText style={{ color: "white" }} fontSize={16}>
-                        Clear
-                    </AppText>
-                </Pressable>
-            </Animated.View>
-        </View>
+        <KeyboardAvoidingView behavior={"height"}>
+            <View style={[centerFlex, { flexDirection: "row", position: "relative" }, containerStyles]}>
+                <Animated.View style={[inputStyles, { flex: 1, height: 60 }]}>
+                    <TextInput
+                        blurOnSubmit
+                        //@ts-ignore
+                        enterKeyHint="done"
+                        multiline
+                        onChangeText={updateText}
+                        placeholder={placeholder}
+                        onBlur={onBlur}
+                        value={text}
+                        style={{
+                            backgroundColor: `${colors.line}4D`,
+                            borderRadius: 15,
+                            fontSize: 20,
+                            paddingLeft: 20,
+                            paddingTop: Platform.OS === "ios" ? 18 : 13,
+                            fontFamily: "helvetica",
+                            textAlign: "left",
+                            textAlignVertical: "top",
+                            color: "white",
+                            flex: 1,
+                        }}
+                    />
+                </Animated.View>
+                <Animated.View style={[centerFlex, clearButtonStyles, { position: "absolute", height: 60 }]}>
+                    <Pressable style={[centerFlex, { flex: 1, paddingHorizontal: 10 }]} onPress={() => setText("")}>
+                        <AppText style={{ color: "white" }} fontSize={16}>
+                            Clear
+                        </AppText>
+                    </Pressable>
+                </Animated.View>
+            </View>
+        </KeyboardAvoidingView>
     );
 }
 export default AppTextInput;
