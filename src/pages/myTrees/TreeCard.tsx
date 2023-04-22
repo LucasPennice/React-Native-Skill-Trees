@@ -41,10 +41,12 @@ function TreeCard({ element, changeTreeAndNavigateHome }: { element: Tree<Skill>
     const longPressGesture = Gesture.LongPress()
         .minDuration(500)
         .onBegin(() => {
-            scale.value = withTiming(1.05, { duration: 500, easing: Easing.bezier(0.33, 1, 0.68, 1) });
+            scale.value = withTiming(1.05, { duration: 1000, easing: Easing.bezier(0.83, 0, 0.17, 1) });
         })
         .onStart(() => {
             runOnJS(dispatchSetTree)();
+        })
+        .onFinalize(() => {
             scale.value = withSpring(1);
         });
 

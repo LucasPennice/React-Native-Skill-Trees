@@ -1,4 +1,4 @@
-import { Pressable, View } from "react-native";
+import { Alert, Pressable, View } from "react-native";
 import TreeView from "./canvas/TreeView";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
@@ -52,52 +52,60 @@ function HomePage() {
     };
 
     const shareCanvasScreenShot = async () => {
-        if (!canvasRef.current || !currentTree) return;
+        try {
+            if (!canvasRef.current || !currentTree) return;
 
-        setIsTakingScreenshot(true);
+            setIsTakingScreenshot(true);
 
-        const boundsRect = createBoundsRect(currentTree);
+            const boundsRect = createBoundsRect(currentTree);
 
-        const image1 = canvasRef.current!.makeImageSnapshot(boundsRect);
-        const image2 = canvasRef.current!.makeImageSnapshot(boundsRect);
-        const image3 = canvasRef.current!.makeImageSnapshot(boundsRect);
-        const image4 = canvasRef.current!.makeImageSnapshot(boundsRect);
-        const image5 = canvasRef.current!.makeImageSnapshot(boundsRect);
+            const image1 = canvasRef.current!.makeImageSnapshot(boundsRect);
+            const image2 = canvasRef.current!.makeImageSnapshot(boundsRect);
+            const image3 = canvasRef.current!.makeImageSnapshot(boundsRect);
+            const image4 = canvasRef.current!.makeImageSnapshot(boundsRect);
+            const image5 = canvasRef.current!.makeImageSnapshot(boundsRect);
 
-        const encodedImage1 = image1.encodeToBase64(ImageFormat.PNG, 99);
-        const encodedImage2 = image2.encodeToBase64(ImageFormat.PNG, 99);
-        const encodedImage3 = image3.encodeToBase64(ImageFormat.PNG, 99);
-        const encodedImage4 = image4.encodeToBase64(ImageFormat.PNG, 99);
-        const encodedImage5 = image5.encodeToBase64(ImageFormat.PNG, 99);
+            const encodedImage1 = image1.encodeToBase64(ImageFormat.PNG, 99);
+            const encodedImage2 = image2.encodeToBase64(ImageFormat.PNG, 99);
+            const encodedImage3 = image3.encodeToBase64(ImageFormat.PNG, 99);
+            const encodedImage4 = image4.encodeToBase64(ImageFormat.PNG, 99);
+            const encodedImage5 = image5.encodeToBase64(ImageFormat.PNG, 99);
 
-        const encodedImages = [encodedImage1, encodedImage2, encodedImage3, encodedImage4, encodedImage5];
+            const encodedImages = [encodedImage1, encodedImage2, encodedImage3, encodedImage4, encodedImage5];
 
-        let tentativeBestEncodedImage: string | null = null;
+            let tentativeBestEncodedImage: string | null = null;
 
-        for (let index = 0; index < encodedImages.length; index++) {
-            const encodedImage = encodedImages[index];
+            for (let index = 0; index < encodedImages.length; index++) {
+                const encodedImage = encodedImages[index];
 
-            if (tentativeBestEncodedImage === null || encodedImage.length > tentativeBestEncodedImage.length) {
-                tentativeBestEncodedImage = encodedImage;
+                if (tentativeBestEncodedImage === null || encodedImage.length > tentativeBestEncodedImage.length) {
+                    tentativeBestEncodedImage = encodedImage;
+                }
             }
-        }
 
-        setTimeout(async () => {
-            const data = `data:image/png;base64,${tentativeBestEncodedImage}`;
-            const base64Code = data.split("data:image/png;base64,")[1];
+            await new Promise((resolve) =>
+                setTimeout(async () => {
+                    const data = `data:image/png;base64,${tentativeBestEncodedImage}`;
+                    const base64Code = data.split("data:image/png;base64,")[1];
 
-            const filename = FileSystem.documentDirectory + `${currentTree.treeName ?? "yourTree"}` + ".png";
+                    const filename = FileSystem.documentDirectory + `${currentTree.treeName ?? "yourTree"}` + ".png";
 
-            await FileSystem.writeAsStringAsync(filename, base64Code, {
-                encoding: FileSystem.EncodingType.Base64,
-            });
+                    await FileSystem.writeAsStringAsync(filename, base64Code, {
+                        encoding: FileSystem.EncodingType.Base64,
+                    });
 
-            await MediaLibrary.saveToLibraryAsync(filename);
+                    await MediaLibrary.saveToLibraryAsync(filename);
 
-            await Sharing.shareAsync(filename);
+                    await Sharing.shareAsync(filename);
 
+                    resolve("");
+                }, 1000)
+            );
+        } catch (error) {
+            Alert.alert("Could not generate image, please try again");
+        } finally {
             setIsTakingScreenshot(false);
-        }, 1000);
+        }
 
         function createBoundsRect(tree: Tree<Skill>) {
             const nodeCoordinates = getCirclePositions(tree);
