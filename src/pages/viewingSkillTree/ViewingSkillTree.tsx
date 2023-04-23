@@ -5,12 +5,11 @@ import { IsSharingAvailableContext } from "../../../App";
 import AppText from "../../components/AppText";
 import { centerFlex, colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { selectCurrentTree, selectTentativeTree, selectTreeSlice, setSelectedDndZone, setSelectedNode } from "../../redux/userTreesSlice";
 import { DnDZone } from "../../types";
 import { shareCanvasScreenshot } from "../../useIsSharingAvailable";
 import AddNode from "./AddNode";
-import TreeView from "./canvas/TreeView";
+import InteractiveTree from "./canvas/InteractiveTree";
 import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
 import SettingsMenu from "./components/SettingsMenu";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
@@ -24,7 +23,6 @@ function ViewingSkillTree() {
     //Redux State
     const currentTree = useAppSelector(selectCurrentTree);
     const { selectedDndZone, newNode, selectedNode } = useAppSelector(selectTreeSlice);
-    const screenDimentions = useAppSelector(selectScreenDimentions);
     const tentativeNewTree = useAppSelector(selectTentativeTree);
     const dispatch = useAppDispatch();
     //Hooks
@@ -50,7 +48,7 @@ function ViewingSkillTree() {
     return (
         <View style={{ position: "relative", backgroundColor: colors.background, overflow: "hidden" }}>
             {currentTree && (
-                <TreeView
+                <InteractiveTree
                     tree={tentativeNewTree ?? currentTree}
                     canvasRef={canvasRef}
                     onNodeClick={onNodeClick}

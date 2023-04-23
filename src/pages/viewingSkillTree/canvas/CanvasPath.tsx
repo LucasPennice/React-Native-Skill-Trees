@@ -32,9 +32,6 @@ function CanvasPath({
 
         p.moveTo(p1x.current, p1y.current - CIRCLE_SIZE);
 
-        // mid-point of line:
-        var mp1x = (p2x.current + p1x.current) * 0.5;
-
         p.cubicTo(
             p1x.current,
             p1y.current - 0.87 * (p1y.current - p2y.current),
@@ -43,10 +40,6 @@ function CanvasPath({
             p2x.current,
             p2y.current + CIRCLE_SIZE
         );
-
-        const pathString = p.toSVGString();
-        const properties = new svgPathProperties(pathString);
-        const pathLength = properties.getTotalLength();
 
         return p;
     }, [p1x, p1y, p2x, p2y]);

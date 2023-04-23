@@ -58,27 +58,6 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         return result;
     }
 
-    function treeToCoordArray(tree: Tree<Skill>, result: Coordinates[]) {
-        // Recursive Case 👇
-        if (tree.children) {
-            for (let i = 0; i < tree.children.length; i++) {
-                const element = tree.children[i];
-                treeToCoordArray(element, result);
-            }
-        }
-
-        // Non Recursive Case 👇
-
-        result.push({
-            id: tree.data.id,
-            name: tree.data.name,
-            x: tree.x,
-            y: tree.y,
-            level: tree.level,
-            parentId: tree.parentId ?? null,
-        });
-    }
-
     function handleOverlap(tree: Tree<Skill>) {
         let overlapInTree = true;
         let loopAvoider = -1;
@@ -303,3 +282,24 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         }
     }
 };
+
+export function treeToCoordArray(tree: Tree<Skill>, result: Coordinates[]) {
+    // Recursive Case 👇
+    if (tree.children) {
+        for (let i = 0; i < tree.children.length; i++) {
+            const element = tree.children[i];
+            treeToCoordArray(element, result);
+        }
+    }
+
+    // Non Recursive Case 👇
+
+    result.push({
+        id: tree.data.id,
+        name: tree.data.name,
+        x: tree.x,
+        y: tree.y,
+        level: tree.level,
+        parentId: tree.parentId ?? null,
+    });
+}

@@ -1,22 +1,22 @@
-import { Blur, Canvas, DiffRect, Group, Rect, SkiaDomView, rect, runSpring, runTiming, useComputedValue, useValue } from "@shopify/react-native-skia";
-import { MutableRefObject, useEffect, useRef, useState } from "react";
-import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
-import { selectCurrentTree, selectTreeSlice } from "../../../redux/userTreesSlice";
-import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import CanvasTree from "./CanvasTree";
-import { useAppSelector } from "../../../redux/reduxHooks";
-import { centerFlex, colors, NAV_HEGIHT } from "../../../parameters";
-import { CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree } from "../../../types";
-import DragAndDropZones from "./DragAndDropZones";
-import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
-import { getCanvasDimensions, calculateDragAndDropZones, centerNodesInCanvas, getNodesCoordinates } from "./coordinateFunctions";
+import { Blur, Canvas, SkiaDomView, runTiming, useValue } from "@shopify/react-native-skia";
+import { MutableRefObject, useEffect } from "react";
+import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
-import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
-import { View } from "react-native";
+import { NAV_HEGIHT, centerFlex, colors } from "../../../parameters";
+import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
+import { useAppSelector } from "../../../redux/reduxHooks";
+import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { selectTreeSlice } from "../../../redux/userTreesSlice";
+import { DnDZone, Skill, Tree } from "../../../types";
 import PopUpMenu from "../components/PopUpMenu";
+import CanvasTree from "./CanvasTree";
+import DragAndDropZones from "./DragAndDropZones";
+import { calculateDragAndDropZones, centerNodesInCanvas, getCanvasDimensions, getNodesCoordinates } from "./coordinateFunctions";
+import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
+import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
 
-type TreeViewProps = {
+type InteractiveTreeProps = {
     tree: Tree<Skill>;
     onNodeClick?: (nodeId: string) => void;
     showDndZones?: boolean;
@@ -25,13 +25,13 @@ type TreeViewProps = {
     canvasRef: MutableRefObject<SkiaDomView | null>;
 };
 
-function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef, isTakingScreenshot }: TreeViewProps) {
+function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef, isTakingScreenshot }: InteractiveTreeProps) {
     //Redux State
     const screenDimentions = useAppSelector(selectScreenDimentions);
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
     //Derived State
-    const nodeCoordinates = getNodesCoordinates(tree);
+    const nodeCoordinates = getNodesCoordinates(tree, "hierarchy");
     const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
     const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
     const dragAndDropZones = calculateDragAndDropZones(nodeCoordinatesCentered);
@@ -86,6 +86,6 @@ function TreeView({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef, 
     );
 }
 
-TreeView.whyDidYouRender = true;
+InteractiveTree.whyDidYouRender = true;
 
-export default TreeView;
+export default InteractiveTree;

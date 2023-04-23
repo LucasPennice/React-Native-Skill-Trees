@@ -1,6 +1,5 @@
-import { current } from "@reduxjs/toolkit";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { CanvasDimensions, CirclePositionInCanvasWithLevel, DnDZone, ModifiableProperties, Skill, Tree } from "../../../types";
+import { CanvasDimensions, CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree } from "../../../types";
 import { Coordinates, PlotTreeReingoldTiltfordAlgorithm } from "../../../functions/treeToHierarchicalCoordinates";
 import {
     BROTHER_DND_ZONE_HEIGHT,
@@ -13,13 +12,18 @@ import {
     ONLY_CHILDREN_DND_ZONE_DIMENTIONS,
     PARENT_DND_ZONE_DIMENTIONS,
 } from "../../../parameters";
-import { findNodeById, findParentOfNode } from "../../../functions/extractInformationFromTree";
-import { editTreeProperties } from "../../../functions/mutateTree";
+import { PlotCircularTree } from "../../../functions/treeToRadialCoordinates";
 
-export function getNodesCoordinates(currentTree?: Tree<Skill>): CirclePositionInCanvasWithLevel[] {
+export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): CirclePositionInCanvasWithLevel[] {
     if (!currentTree) return [];
 
-    const unscaledCoordinates = PlotTreeReingoldTiltfordAlgorithm(currentTree);
+    let unscaledCoordinates: Coordinates[] | undefined = undefined;
+
+    if (mode === "hierarchy") {
+        unscaledCoordinates = PlotTreeReingoldTiltfordAlgorithm(currentTree);
+    } else {
+        unscaledCoordinates = PlotCircularTree(currentTree);
+    }
 
     const scaledCoordinates = scaleCoordinatesAfterReingoldTiltford(unscaledCoordinates);
 
