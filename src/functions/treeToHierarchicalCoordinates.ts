@@ -69,11 +69,16 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         const treeDepths = coordArray.map((t) => t.level);
         const treeDepth = Math.max(...treeDepths);
 
-        while (overlapInTree && loopAvoider <= treeDepth) {
+        while (overlapInTree) {
             const overlap = checkForOverlap(result);
+
+            console.log("overlap", overlap);
 
             if (overlap !== undefined) {
                 const treesToShift = getTreesToShift(result, overlap.nodesInConflict);
+
+                console.log("treesToShift", treesToShift);
+
                 result = shiftNodes(result, treesToShift, overlap.biggestOverlap);
             } else {
                 overlapInTree = false;
@@ -211,6 +216,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
                 if (i === nodeInPathIndexForChildren) {
                     if (currentLevel >= lcaLevel) {
                         treesToShift.byBiggestOverlap.push(child.data.id);
+                        addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
                     } else {
                         treesToShift.byHalfOfBiggestOverlap.push(child.data.id);
                     }

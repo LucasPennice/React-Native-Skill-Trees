@@ -33,6 +33,8 @@ function RadialCanvasPath({
     if (!rootNodeCoordinates) return <></>;
     if (isRoot) return <></>;
 
+    const parentToRootAngle = getParentNodeToRootAngle();
+
     const p = Skia.Path.Make();
 
     const p1 = getP1();
@@ -41,9 +43,28 @@ function RadialCanvasPath({
     p.moveTo(p1.x, p1.y);
 
     //Me parece que me tengo que armar una funcion que haga que las constantes estas dependan de la rotacion
-    p.cubicTo(p1.x, p1.y - 0.87 * (p1.y - p2.y), p2.x, p2.y - 0.43 * (p2.y - p1.y), p2.x, p2.y);
 
-    return <Path path={p} color={pathColor} style="stroke" strokeWidth={1} opacity={pathBlurOnInactive ?? 1} />;
+    const cpx1 = p1.x - Math.cos(parentToRootAngle) * 0.87 * (p1.x - p2.x);
+    const cpy1 = p1.y - Math.sin(parentToRootAngle) * 0.87 * (p1.y - p2.y);
+    const cpx2 = p2.x - Math.cos(parentToRootAngle) * 0.43 * (p2.x - p1.x);
+    const cpy2 = p2.y - Math.sin(parentToRootAngle) * 0.43 * (p2.y - p1.y);
+    p.cubicTo(cpx1, cpy1, cpx2, cpy2, p2.x, p2.y);
+
+    const cp1 = Skia.Path.Make();
+    cp1.moveTo(cpx1, cpy1);
+    cp1.addCircle(cpx1, cpy1, 2);
+
+    const cp2 = Skia.Path.Make();
+    cp2.moveTo(cpx2, cpy2);
+    cp2.addCircle(cpx2, cpy2, 2);
+
+    return (
+        <>
+            {/* <Path path={cp2} color="yellow" /> */}
+            {/* <Path path={cp1} color="white" /> */}
+            <Path path={p} color={pathColor} style="stroke" strokeWidth={1} opacity={pathBlurOnInactive ?? 1} />
+        </>
+    );
 
     function getP1() {
         const p0 = rootNodeCoordinates!;
@@ -96,6 +117,18 @@ function RadialCanvasPath({
         }
 
         return { x: p0.x + foo * directionVector.x, y: p0.y + foo * directionVector.y };
+    }
+
+    function getParentNodeToRootAngle() {
+        const deltaX = rootNodeCoordinates!.x - parentOfNodeCoord.x;
+        const deltaY = rootNodeCoordinates!.y - parentOfNodeCoord.y;
+
+        if (deltaX === 0) return Math.PI / 2;
+        if (deltaX === 0) return 0;
+
+        const angle = Math.atan(deltaY / deltaX);
+
+        return angle;
     }
 }
 
