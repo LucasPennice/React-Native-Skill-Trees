@@ -72,12 +72,8 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         while (overlapInTree) {
             const overlap = checkForOverlap(result);
 
-            console.log("overlap", overlap);
-
             if (overlap !== undefined) {
                 const treesToShift = getTreesToShift(result, overlap.nodesInConflict);
-
-                console.log("treesToShift", treesToShift);
 
                 result = shiftNodes(result, treesToShift, overlap.biggestOverlap);
             } else {

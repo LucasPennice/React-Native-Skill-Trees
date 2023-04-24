@@ -59,7 +59,7 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
             const isFirstNode = childrenIdx === 0;
             const childrenDistanceToCenter = currentMod.distanceToCenter + 1;
 
-            const angleBetweenChildrenInRadians = arcToAngleRadians(1, childrenDistanceToCenter);
+            const angleBetweenChildrenInRadians = arcToAngleRadians(0.5, childrenDistanceToCenter);
             const childrenAngleSpan = (tree.children.length - 1) * angleBetweenChildrenInRadians;
 
             let desiredAngleToCenterChildren = childrenAngleSpan / 2;
@@ -68,7 +68,6 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
 
             for (let idx = 0; idx < tree.children.length; idx++) {
                 const childrenMod = {
-                    // angleInRadians: currentMod.angleInRadians,
                     angleInRadians: currentMod.angleInRadians + idx * angleBetweenChildrenInRadians - desiredAngleToCenterChildren,
                     distanceToCenter: childrenDistanceToCenter,
                 };

@@ -195,3 +195,30 @@ export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: 
 
     return editTreeProperties(currentTree, parentOfTargetNode, newProperties);
 }
+
+export function mutateEveryTreeNode(rootNode: Tree<Skill> | undefined, mutation: (v: Tree<Skill>) => Tree<Skill>) {
+    if (!rootNode) return undefined;
+
+    let result: Tree<Skill> = { ...mutation(rootNode) };
+
+    //Base Case 👇
+    if (!rootNode.children || !result.children) return result;
+
+    // //Recursive Case 👇
+
+    const updatedChildren: Tree<Skill>[] = [];
+
+    for (let idx = 0; idx < rootNode.children.length; idx++) {
+        const element = rootNode.children[idx];
+
+        const d = mutateEveryTreeNode(element, mutation);
+
+        if (d) updatedChildren.push(d);
+    }
+
+    result.children = updatedChildren;
+
+    if (result.children!.length === 0) delete result["children"];
+
+    return result;
+}

@@ -1,6 +1,6 @@
 import { Path, Skia, SkiaMutableValue } from "@shopify/react-native-skia";
-import { NodeCoordinate } from "../../../types";
 import { CIRCLE_SIZE } from "../../../parameters";
+import { NodeCoordinate } from "../../../types";
 
 type pathCoordinates = {
     cx: number;
@@ -33,42 +33,61 @@ function RadialCanvasPath({
     if (!rootNodeCoordinates) return <></>;
     if (isRoot) return <></>;
 
-    const parentToRootAngle = getParentNodeToRootAngle();
-
-    const p = Skia.Path.Make();
-
-    const p1 = getP1();
-    const p2 = getP2();
-
-    p.moveTo(p1.x, p1.y);
-
-    //Me parece que me tengo que armar una funcion que haga que las constantes estas dependan de la rotacion
-
-    const cpx1 = p1.x - Math.cos(parentToRootAngle) * 0.87 * (p1.x - p2.x);
-    const cpy1 = p1.y - Math.sin(parentToRootAngle) * 0.87 * (p1.y - p2.y);
-    const cpx2 = p2.x - Math.cos(parentToRootAngle) * 0.43 * (p2.x - p1.x);
-    const cpy2 = p2.y - Math.sin(parentToRootAngle) * 0.43 * (p2.y - p1.y);
-    p.cubicTo(cpx1, cpy1, cpx2, cpy2, p2.x, p2.y);
+    const { c1, c2, p: res } = getCurvedPath(rootNodeCoordinates, parentOfNodeCoord, centerOfNode);
+    if (res.toSVGString().includes("nan")) {
+    }
 
     const cp1 = Skia.Path.Make();
-    cp1.moveTo(cpx1, cpy1);
-    cp1.addCircle(cpx1, cpy1, 2);
+    cp1.moveTo(c1.x, c1.y);
+    cp1.addCircle(c1.x, c1.y, 2);
 
     const cp2 = Skia.Path.Make();
-    cp2.moveTo(cpx2, cpy2);
-    cp2.addCircle(cpx2, cpy2, 2);
+    cp2.moveTo(c2.x, c2.y);
+    cp2.addCircle(c2.x, c2.y, 2);
 
-    return (
-        <>
-            {/* <Path path={cp2} color="yellow" /> */}
-            {/* <Path path={cp1} color="white" /> */}
-            <Path path={p} color={pathColor} style="stroke" strokeWidth={1} opacity={pathBlurOnInactive ?? 1} />
-        </>
-    );
+    return <Path path={res} color={pathColor} style="stroke" strokeWidth={2} opacity={pathBlurOnInactive ?? 1} />;
+}
 
-    function getP1() {
-        const p0 = rootNodeCoordinates!;
-        const p1 = centerOfNode;
+function getCurvedPath(rootCoordinates: NodeCoordinate, parentOfNodeCoord: { x: number; y: number }, centerOfNode: { x: number; y: number }) {
+    const finalPoint = getFinalPoint(rootCoordinates, centerOfNode);
+    const startingPoint = getStartingPoint(rootCoordinates, parentOfNodeCoord);
+
+    const translatedFinalPoint = { x: finalPoint.x - rootCoordinates.x, y: finalPoint.y - rootCoordinates.y };
+    const translatedStartingPoint = { x: startingPoint.x - rootCoordinates.x, y: startingPoint.y - rootCoordinates.y };
+
+    const tentativeVectorAngle = Math.atan2(translatedFinalPoint.y, translatedFinalPoint.x);
+    const vectorAngle = tentativeVectorAngle < 0 ? tentativeVectorAngle + 2 * Math.PI : tentativeVectorAngle;
+    const rotationAngle = (3 * Math.PI) / 2 - vectorAngle;
+
+    const [rotatedAndTranslatedStartingPointX, rotatedAndTranslatedStartingPointY] = getConstantsRotated(rotationAngle, [
+        translatedStartingPoint.x,
+        translatedStartingPoint.y,
+    ]);
+    const [rotatedAndTranslatedFinalPointX, rotatedAndTranslatedFinalPointY] = getConstantsRotated(rotationAngle, [
+        translatedFinalPoint.x,
+        translatedFinalPoint.y,
+    ]);
+
+    const cpx1 = rotatedAndTranslatedFinalPointX - 0.83 * (rotatedAndTranslatedFinalPointX - rotatedAndTranslatedStartingPointX);
+    const cpy1 = rotatedAndTranslatedFinalPointY - 0.23 * (rotatedAndTranslatedFinalPointY - rotatedAndTranslatedStartingPointY);
+    const cpx2 = rotatedAndTranslatedStartingPointX - 1 * (rotatedAndTranslatedStartingPointX - rotatedAndTranslatedFinalPointX);
+    const cpy2 = rotatedAndTranslatedStartingPointY + 0.4 * (rotatedAndTranslatedFinalPointY - rotatedAndTranslatedStartingPointY);
+
+    const [rotatedCP1X, rotatedCP1Y] = getConstantsRotated(-rotationAngle, [cpx1, cpy1]);
+    const [rotatedCP2X, rotatedCP2Y] = getConstantsRotated(-rotationAngle, [cpx2, cpy2]);
+
+    const translatedAndRotatedCP1 = { x: rotatedCP1X + rootCoordinates.x, y: rotatedCP1Y + rootCoordinates.y };
+    const translatedAndRotatedCP2 = { x: rotatedCP2X + rootCoordinates.x, y: rotatedCP2Y + rootCoordinates.y };
+
+    const p = Skia.Path.Make();
+    p.moveTo(startingPoint.x, startingPoint.y);
+    p.cubicTo(translatedAndRotatedCP1.x, translatedAndRotatedCP1.y, translatedAndRotatedCP2.x, translatedAndRotatedCP2.y, finalPoint.x, finalPoint.y);
+
+    return { p, c1: { ...translatedAndRotatedCP1 }, c2: { ...translatedAndRotatedCP2 } };
+
+    function getFinalPoint(rootCoordinates: NodeCoordinate, centerOfNode: { x: number; y: number }) {
+        const p0 = { ...rootCoordinates };
+        const p1 = { ...centerOfNode };
 
         const deltaX = 0 - p0.x;
         const deltaY = 0 - p0.y;
@@ -85,9 +104,13 @@ function RadialCanvasPath({
         return { x: p0.x + foo * directionVector.x, y: p0.y + foo * directionVector.y };
     }
 
-    function getP2() {
-        const p0 = rootNodeCoordinates!;
-        const p1 = parentOfNodeCoord;
+    function getStartingPoint(rootCoordinates: NodeCoordinate, parentOfNodeCoord: { x: number; y: number }) {
+        const p0 = { ...rootCoordinates };
+        const p1 = { ...parentOfNodeCoord };
+
+        const rootNodeEqualsParentOfNode = p0.x === p1.x && p0.y === p1.y;
+
+        if (rootNodeEqualsParentOfNode) return startingPointWhenRootNodeEqualsParent();
 
         const deltaX = 0 - p0.x;
         const deltaY = 0 - p0.y;
@@ -101,35 +124,44 @@ function RadialCanvasPath({
 
         const foo = (lineLongitude + CIRCLE_SIZE) / lineLongitude;
 
-        const rootNodeEqualsParentOfNode = p0.x === p1.x && p0.y === p1.y;
-
-        if (rootNodeEqualsParentOfNode && centerOfNode.x === p0.x && centerOfNode.y > p0.y) {
-            return { x: p0.x, y: p0.y + CIRCLE_SIZE };
-        }
-        if (rootNodeEqualsParentOfNode && centerOfNode.x === p0.x && centerOfNode.y < p0.y) {
-            return { x: p0.x, y: p0.y - CIRCLE_SIZE };
-        }
-        if (rootNodeEqualsParentOfNode && centerOfNode.y === p0.y && centerOfNode.x > p0.x) {
-            return { x: p0.x + CIRCLE_SIZE, y: p0.y };
-        }
-        if (rootNodeEqualsParentOfNode && centerOfNode.y === p0.y && centerOfNode.x < p0.x) {
-            return { x: p0.x - CIRCLE_SIZE, y: p0.y };
-        }
-
         return { x: p0.x + foo * directionVector.x, y: p0.y + foo * directionVector.y };
+
+        function startingPointWhenRootNodeEqualsParent() {
+            if (centerOfNode.x === p0.x && centerOfNode.y > p0.y) {
+                return { x: p0.x, y: p0.y + CIRCLE_SIZE };
+            }
+            if (centerOfNode.x === p0.x && centerOfNode.y < p0.y) {
+                return { x: p0.x, y: p0.y - CIRCLE_SIZE };
+            }
+            if (centerOfNode.y === p0.y && centerOfNode.x > p0.x) {
+                return { x: p0.x + CIRCLE_SIZE, y: p0.y };
+            }
+            if (centerOfNode.y === p0.y && centerOfNode.x < p0.x) {
+                return { x: p0.x - CIRCLE_SIZE, y: p0.y };
+            }
+
+            const deltaX = 0 - centerOfNode.x;
+            const deltaY = 0 - centerOfNode.y;
+
+            const directionVector = { x: p1.x + deltaX, y: p1.y + deltaY };
+
+            const cateto1 = Math.pow(p1.x - centerOfNode.x, 2);
+            const cateto2 = Math.pow(p1.y - centerOfNode.y, 2);
+
+            const lineLongitude = Math.sqrt(cateto1 + cateto2);
+
+            const foo = (lineLongitude - CIRCLE_SIZE) / lineLongitude;
+
+            return { x: centerOfNode.x + foo * directionVector.x, y: centerOfNode.y + foo * directionVector.y };
+        }
     }
+}
 
-    function getParentNodeToRootAngle() {
-        const deltaX = rootNodeCoordinates!.x - parentOfNodeCoord.x;
-        const deltaY = rootNodeCoordinates!.y - parentOfNodeCoord.y;
+function getConstantsRotated(angleRadians: number, constantsVector: number[]) {
+    const r1 = Math.cos(angleRadians) * constantsVector[0] - Math.sin(angleRadians) * constantsVector[1];
+    const r2 = Math.sin(angleRadians) * constantsVector[0] + Math.cos(angleRadians) * constantsVector[1];
 
-        if (deltaX === 0) return Math.PI / 2;
-        if (deltaX === 0) return 0;
-
-        const angle = Math.atan(deltaY / deltaX);
-
-        return angle;
-    }
+    return [r1, r2];
 }
 
 export default RadialCanvasPath;
