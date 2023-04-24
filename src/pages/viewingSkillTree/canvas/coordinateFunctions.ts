@@ -1,5 +1,5 @@
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { CanvasDimensions, CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree } from "../../../types";
+import { CanvasDimensions, NodeCoordinate, DnDZone, Skill, Tree } from "../../../types";
 import { Coordinates, PlotTreeReingoldTiltfordAlgorithm } from "../../../functions/treeToHierarchicalCoordinates";
 import {
     BROTHER_DND_ZONE_HEIGHT,
@@ -14,18 +14,19 @@ import {
 } from "../../../parameters";
 import { PlotCircularTree } from "../../../functions/treeToRadialCoordinates";
 
-export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): CirclePositionInCanvasWithLevel[] {
+export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): NodeCoordinate[] {
     if (!currentTree) return [];
 
     let unscaledCoordinates: Coordinates[] | undefined = undefined;
+    let scaledCoordinates: Coordinates[] | undefined = undefined;
 
     if (mode === "hierarchy") {
         unscaledCoordinates = PlotTreeReingoldTiltfordAlgorithm(currentTree);
+        scaledCoordinates = scaleCoordinatesAfterReingoldTiltford(unscaledCoordinates);
     } else {
         unscaledCoordinates = PlotCircularTree(currentTree);
+        scaledCoordinates = scaleCoordinatesAfterRadialReingoldTiltford(unscaledCoordinates);
     }
-
-    const scaledCoordinates = scaleCoordinatesAfterReingoldTiltford(unscaledCoordinates);
 
     return scaledCoordinates;
 
@@ -34,9 +35,18 @@ export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: 
             return { ...f, x: f.x * DISTANCE_BETWEEN_CHILDREN + 2 * CIRCLE_SIZE, y: f.y * DISTANCE_BETWEEN_GENERATIONS + CIRCLE_SIZE };
         });
     }
+
+    function scaleCoordinatesAfterRadialReingoldTiltford(coordToScale: Coordinates[]) {
+        //We cannot scale by different constants the nodes will not be rendered along the circumferences
+
+        const SCALE = DISTANCE_BETWEEN_GENERATIONS;
+        return coordToScale.map((f) => {
+            return { ...f, x: f.x * SCALE, y: f.y * SCALE };
+        });
+    }
 }
 
-export function treeWidthFromCoordinates(coordinates: CirclePositionInCanvasWithLevel[]) {
+export function treeWidthFromCoordinates(coordinates: NodeCoordinate[]) {
     let minCoordinate: number | undefined = undefined,
         maxCoordinate: number | undefined = undefined;
 
@@ -52,7 +62,7 @@ export function treeWidthFromCoordinates(coordinates: CirclePositionInCanvasWith
     return Math.abs(maxCoordinate! - minCoordinate!) + 2 * CIRCLE_SIZE;
 }
 
-export function treeHeightFromCoordinates(coordinates: CirclePositionInCanvasWithLevel[]) {
+export function treeHeightFromCoordinates(coordinates: NodeCoordinate[]) {
     let minCoordinate: number | undefined = undefined,
         maxCoordinate: number | undefined = undefined;
 
@@ -68,7 +78,7 @@ export function treeHeightFromCoordinates(coordinates: CirclePositionInCanvasWit
     return Math.abs(maxCoordinate! - minCoordinate!) + 4 * CIRCLE_SIZE;
 }
 
-function dndZonesFromNodeCoord(nodeCoord: CirclePositionInCanvasWithLevel, dndType: DnDZone["type"]): DnDZone {
+function dndZonesFromNodeCoord(nodeCoord: NodeCoordinate, dndType: DnDZone["type"]): DnDZone {
     if (dndType === "PARENT")
         return {
             x: nodeCoord.x - PARENT_DND_ZONE_DIMENTIONS.width / 2,
@@ -115,11 +125,11 @@ function dndZonesFromNodeCoord(nodeCoord: CirclePositionInCanvasWithLevel, dndTy
     throw "dndType not supported in coordOfDnDZoneBasedOnNodeCoord";
 }
 
-export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositionInCanvasWithLevel[]) {
+export function calculateDragAndDropZones(nodeCoordinatesCentered: NodeCoordinate[]) {
     const result: DnDZone[] = [];
 
-    for (let idx = 0; idx < circlePositionsInCanvas.length; idx++) {
-        const pos = circlePositionsInCanvas[idx];
+    for (let idx = 0; idx < nodeCoordinatesCentered.length; idx++) {
+        const pos = nodeCoordinatesCentered[idx];
 
         const isRoot = pos.level === 0;
 
@@ -134,7 +144,7 @@ export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositio
             result.push(rightBrotherDndZone);
         }
 
-        if (nodeDoesntHaveChildren(circlePositionsInCanvas, pos)) {
+        if (nodeDoesntHaveChildren(nodeCoordinatesCentered, pos)) {
             const onlyChildrenDndZone = dndZonesFromNodeCoord(pos, "ONLY_CHILDREN");
             result.push(onlyChildrenDndZone);
         }
@@ -143,13 +153,13 @@ export function calculateDragAndDropZones(circlePositionsInCanvas: CirclePositio
     return result;
 }
 
-function nodeDoesntHaveChildren(circlePositionsInCanvas: CirclePositionInCanvasWithLevel[], pos: CirclePositionInCanvasWithLevel) {
-    const foo = circlePositionsInCanvas.find((x) => x.parentId === pos.id);
+function nodeDoesntHaveChildren(nodeCoordinatesCentered: NodeCoordinate[], pos: NodeCoordinate) {
+    const foo = nodeCoordinatesCentered.find((x) => x.parentId === pos.id);
 
     return foo === undefined;
 }
 
-export function getCanvasDimensions(coordinates: CirclePositionInCanvasWithLevel[], screenDimentions: ScreenDimentions): CanvasDimensions {
+export function getCanvasDimensions(coordinates: NodeCoordinate[], screenDimentions: ScreenDimentions): CanvasDimensions {
     const { height, width } = screenDimentions;
 
     const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;
@@ -185,7 +195,7 @@ function getCanvasHeight(treeHeight: number, screenHeight: number) {
     return treeHeight + CANVAS_VERTICAL_PADDING;
 }
 
-export function centerNodesInCanvas(nodeCoordinates: CirclePositionInCanvasWithLevel[], canvasDimentions: CanvasDimensions) {
+export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDimentions: CanvasDimensions) {
     const minXCoord = Math.min(...nodeCoordinates.map((x) => x.x));
 
     const treeWidth = treeWidthFromCoordinates(nodeCoordinates);

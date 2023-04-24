@@ -10,8 +10,6 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
     let treeCoordinates: Coordinates[] = [];
     treeToCoordArray(result, treeCoordinates);
 
-    console.log(treeCoordinates);
-
     const smallestXCoordinate = Math.min(...treeCoordinates.map((c) => c.x));
     const smallestYCoordinate = Math.min(...treeCoordinates.map((c) => c.y));
 
@@ -70,6 +68,7 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
 
             for (let idx = 0; idx < tree.children.length; idx++) {
                 const childrenMod = {
+                    // angleInRadians: currentMod.angleInRadians,
                     angleInRadians: currentMod.angleInRadians + idx * angleBetweenChildrenInRadians - desiredAngleToCenterChildren,
                     distanceToCenter: childrenDistanceToCenter,
                 };

@@ -1,10 +1,11 @@
-import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../../../types";
+import { findParentOfNode } from "../../../functions/extractInformationFromTree";
 import { colors } from "../../../parameters";
-import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
+import { NodeCoordinate, Skill, Tree } from "../../../types";
+import HierarchicalCanvasPath from "./HierarchicalCanvasPath";
 import Label from "./Label";
 import Node from "./Node";
-import CanvasPath from "./CanvasPath";
-import { findParentOfNode } from "../../../functions/extractInformationFromTree";
+import RadialCanvasPath from "./RadialCanvasPath";
+import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 
 type TreeProps = {
     tree: Tree<Skill>;
@@ -13,19 +14,20 @@ type TreeProps = {
     stateProps: {
         selectedNode: string | null;
         showLabel: boolean;
-        circlePositionsInCanvas: CirclePositionInCanvasWithLevel[];
+        nodeCoordinatesCentered: NodeCoordinate[];
     };
     rootCoordinates?: { width: number; height: number };
     treeAccentColor: string;
+    isRadial?: boolean;
 };
 
-function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, wholeTree, treeAccentColor }: TreeProps) {
+function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, wholeTree, treeAccentColor, isRadial }: TreeProps) {
     //Props
-    const { selectedNode, showLabel, circlePositionsInCanvas } = stateProps;
+    const { selectedNode, showLabel, nodeCoordinatesCentered } = stateProps;
 
     const defaultParentInfo = parentNodeInfo ?? { coordinates: { x: rC!.width, y: rC!.height }, numberOfChildren: 1, currentChildIndex: 0 };
 
-    const currentNodeCoordintes = circlePositionsInCanvas.find((c) => c.id === tree.data.id)!;
+    const currentNodeCoordintes = nodeCoordinatesCentered.find((c) => c.id === tree.data.id)!;
 
     const pathInitialPoint = defaultParentInfo.coordinates;
 
@@ -55,12 +57,22 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
 
     return (
         <>
-            <CanvasPath
-                coordinates={{ cx, cy, pathInitialPoint }}
-                isRoot={Boolean(tree.isRoot)}
-                pathBlurOnInactive={pathBlurOnInactive}
-                pathColor={pathColor}
-            />
+            {isRadial ? (
+                <RadialCanvasPath
+                    coordinates={{ cx, cy, pathInitialPoint }}
+                    isRoot={Boolean(tree.isRoot)}
+                    pathBlurOnInactive={pathBlurOnInactive}
+                    pathColor={pathColor}
+                    nodeCoordinatesCentered={nodeCoordinatesCentered}
+                />
+            ) : (
+                <HierarchicalCanvasPath
+                    coordinates={{ cx, cy, pathInitialPoint }}
+                    isRoot={Boolean(tree.isRoot)}
+                    pathBlurOnInactive={pathBlurOnInactive}
+                    pathColor={pathColor}
+                />
+            )}
             {/* Recursive fucntion that renders the rest of the tree */}
             {tree.children &&
                 tree.children.map((element, idx) => {
@@ -71,7 +83,8 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
                             wholeTree={wholeTree}
                             treeAccentColor={treeAccentColor}
                             parentNodeInfo={{ ...newParentNodeInfo, currentChildIndex: idx }}
-                            stateProps={{ selectedNode, showLabel, circlePositionsInCanvas }}
+                            stateProps={{ selectedNode, showLabel, nodeCoordinatesCentered }}
+                            isRadial={isRadial}
                         />
                     );
                 })}

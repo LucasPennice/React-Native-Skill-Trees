@@ -35,7 +35,7 @@ export type DnDZone = {
 };
 
 export type CirclePositionInCanvas = { x: number; y: number; id: string };
-export type CirclePositionInCanvasWithLevel = { x: number; y: number; id: string; level: number; parentId: string | null };
+export type NodeCoordinate = { x: number; y: number; id: string; level: number; parentId: string | null };
 
 export type CanvasDimensions = {
     canvasWidth: number;

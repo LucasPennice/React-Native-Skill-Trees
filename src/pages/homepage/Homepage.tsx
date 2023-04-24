@@ -1,8 +1,8 @@
-import { Canvas } from "@shopify/react-native-skia";
+import { Canvas, Circle, DashPathEffect } from "@shopify/react-native-skia";
 import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
-import { NAV_HEGIHT, centerFlex, colors } from "../../parameters";
+import { CIRCLE_SIZE, DISTANCE_BETWEEN_GENERATIONS, NAV_HEGIHT, centerFlex, colors } from "../../parameters";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 import CanvasTree from "../viewingSkillTree/canvas/CanvasTree";
@@ -88,18 +88,46 @@ function Homepage() {
                     <Animated.View style={[transform]}>
                         <Canvas style={{ width: canvasWidth, height: canvasHeight }} mode="continuous">
                             <CanvasTree
-                                stateProps={{ selectedNode: null, showLabel: false, circlePositionsInCanvas: nodeCoordinatesCentered }}
+                                stateProps={{ selectedNode: null, showLabel: false, nodeCoordinatesCentered: nodeCoordinatesCentered }}
                                 tree={inputTree}
                                 wholeTree={inputTree}
                                 treeAccentColor={inputTree.accentColor!}
                                 rootCoordinates={{ width: 0, height: 0 }}
+                                isRadial
                             />
+                            {Circles()}
                         </Canvas>
                     </Animated.View>
                 </View>
             </GestureDetector>
         </View>
     );
+    function Circles() {
+        const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
+
+        if (!rootNode) return <></>;
+
+        const rootNodeCoord = { x: rootNode.x, y: rootNode.y };
+
+        const levels = Math.max(...nodeCoordinatesCentered.map((c) => c.level));
+
+        const levelsArray = [...Array(levels + 1).keys()];
+
+        return levelsArray.map((level, idx) => {
+            return (
+                <Circle
+                    key={idx}
+                    cx={rootNodeCoord.x}
+                    cy={rootNodeCoord.y}
+                    r={level * DISTANCE_BETWEEN_GENERATIONS}
+                    color="lightblue"
+                    style={"stroke"}
+                    opacity={0.5}>
+                    <DashPathEffect intervals={[20, 20]} />
+                </Circle>
+            );
+        });
+    }
 }
 
 export default Homepage;

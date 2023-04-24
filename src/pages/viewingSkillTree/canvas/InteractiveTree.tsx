@@ -69,7 +69,7 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
                             mode="continuous"
                             ref={canvasRef}>
                             <CanvasTree
-                                stateProps={{ selectedNode, showLabel, circlePositionsInCanvas: nodeCoordinatesCentered }}
+                                stateProps={{ selectedNode, showLabel, nodeCoordinatesCentered: nodeCoordinatesCentered }}
                                 tree={tree}
                                 wholeTree={tree}
                                 treeAccentColor={treeAccentColor}

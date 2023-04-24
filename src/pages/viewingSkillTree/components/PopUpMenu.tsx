@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert, Button, Dimensions, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
-import { CirclePositionInCanvas, CirclePositionInCanvasWithLevel } from "../../../types";
+import { CirclePositionInCanvas, NodeCoordinate } from "../../../types";
 import { mutateUserTree, removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../../redux/userTreesSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
@@ -19,7 +19,7 @@ import { findNodeById, countNodesInTree } from "../../../functions/extractInform
 import { deleteNodeWithNoChildren, editTreeProperties } from "../../../functions/mutateTree";
 
 type Props = {
-    foundNodeCoordinates: CirclePositionInCanvasWithLevel;
+    foundNodeCoordinates: NodeCoordinate;
     canvasWidth: number;
 };
 
@@ -178,7 +178,7 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
 
 export default PopUpMenu;
 
-function useHandlePopMenuAnimations(foundNodeCoordinates: CirclePositionInCanvasWithLevel, selectedNode: string | null, canvasWidth: number) {
+function useHandlePopMenuAnimations(foundNodeCoordinates: NodeCoordinate, selectedNode: string | null, canvasWidth: number) {
     const isOpen = useSharedValue(false);
 
     useEffect(() => {
@@ -212,7 +212,7 @@ function useHandlePopMenuAnimations(foundNodeCoordinates: CirclePositionInCanvas
             foundNodeCoordinates,
             screenWidth,
         }: {
-            foundNodeCoordinates: CirclePositionInCanvasWithLevel;
+            foundNodeCoordinates: NodeCoordinate;
             canvasWidth: number;
             screenWidth: number;
         }) {

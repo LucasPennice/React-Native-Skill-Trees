@@ -1,4 +1,4 @@
-import { CirclePositionInCanvasWithLevel, Skill, Tree } from "../types";
+import { NodeCoordinate, Skill, Tree } from "../types";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
     if (!rootNode) return 0;

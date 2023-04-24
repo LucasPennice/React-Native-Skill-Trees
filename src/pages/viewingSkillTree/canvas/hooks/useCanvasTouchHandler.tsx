@@ -1,11 +1,11 @@
 import { TouchHandler, TouchInfo, useTouchHandler, useValue } from "@shopify/react-native-skia";
-import { CirclePositionInCanvasWithLevel, DnDZone, Skill, Tree } from "../../../../types";
+import { NodeCoordinate, DnDZone, Skill, Tree } from "../../../../types";
 import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, TOUCH_BUFFER } from "../../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../../redux/reduxHooks";
 import { selectTreeSlice, setSelectedNode } from "../../../../redux/userTreesSlice";
 
 type Props = {
-    nodeCoordinatesCentered: CirclePositionInCanvasWithLevel[];
+    nodeCoordinatesCentered: NodeCoordinate[];
     tree: Tree<Skill>;
     onNodeClick?: (nodeId: string) => void;
     onDndZoneClick?: (clickedZone?: DnDZone) => void;

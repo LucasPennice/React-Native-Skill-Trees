@@ -1,7 +1,6 @@
-import { Blur, OpacityMatrix, Path, Skia, SkiaMutableValue, useComputedValue } from "@shopify/react-native-skia";
-import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
-import { svgPathProperties } from "svg-path-properties";
+import { Path, Skia, SkiaMutableValue, useComputedValue } from "@shopify/react-native-skia";
 import { CIRCLE_SIZE } from "../../../parameters";
+import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 
 type pathCoordinates = {
     cx: number;
@@ -9,7 +8,7 @@ type pathCoordinates = {
     pathInitialPoint: { x: number; y: number };
 };
 
-function CanvasPath({
+function HierarchicalCanvasPath({
     coordinates,
     pathColor,
     isRoot,
@@ -49,4 +48,4 @@ function CanvasPath({
     return <Path path={path} color={pathColor} style="stroke" strokeWidth={3} opacity={pathBlurOnInactive ?? 1} />;
 }
 
-export default CanvasPath;
+export default HierarchicalCanvasPath;
