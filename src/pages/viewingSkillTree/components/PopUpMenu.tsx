@@ -17,6 +17,7 @@ import { StackNavigatorParams } from "../../../../App";
 import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
 import { findNodeById, countNodesInTree } from "../../../functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, editTreeProperties } from "../../../functions/mutateTree";
+import usePlayCompletionSound from "../../../usePlayCompletionSound";
 
 type Props = {
     foundNodeCoordinates: NodeCoordinate;
@@ -48,6 +49,8 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
         onChangeText(currentNode ? currentNode.data.name : "Name");
         setMastered(currentNode && currentNode.data.isCompleted ? currentNode.data.isCompleted : false);
     }, [selectedNode]);
+
+    const playSound = usePlayCompletionSound();
 
     if (!currentNode) return <></>;
 
@@ -81,6 +84,8 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
         const newProperties = { ...currentNode, data: { ...currentNode.data, isCompleted: !completionState } };
 
         const result = editTreeProperties(currentTree, currentNode, newProperties);
+
+        if (!completionState) playSound();
 
         dispatch(mutateUserTree(result));
     };
