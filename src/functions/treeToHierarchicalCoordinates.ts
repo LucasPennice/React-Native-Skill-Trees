@@ -2,7 +2,7 @@ import { findDistanceBetweenNodesById, findLowestCommonAncestorIdOfNodes, return
 import { Skill, Tree } from "../types";
 
 export type Coordinates = { x: number; y: number; id: string; level: number; parentId: string | null; name: string };
-type Contour = { leftNode: { coord: number; id: string }; rightNode: { coord: number; id: string } };
+type HierarchicalContour = { leftNode: { coord: number; id: string }; rightNode: { coord: number; id: string } };
 
 export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => {
     let result: Tree<Skill>;
@@ -60,14 +60,8 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
     function handleOverlap(tree: Tree<Skill>) {
         let overlapInTree = true;
-        let loopAvoider = -1;
 
         let result: Tree<Skill> = { ...tree };
-
-        const coordArray: Coordinates[] = [];
-        treeToCoordArray(result, coordArray);
-        const treeDepths = coordArray.map((t) => t.level);
-        const treeDepth = Math.max(...treeDepths);
 
         while (overlapInTree) {
             const overlap = checkForOverlap(result);
@@ -79,7 +73,6 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
             } else {
                 overlapInTree = false;
             }
-            loopAvoider++;
         }
 
         result = centerRoot(result);
@@ -99,7 +92,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
     type OverlapCheck = undefined | { biggestOverlap: number; nodesInConflict: [string, string] };
 
     function checkForOverlap(tree: Tree<Skill>): OverlapCheck {
-        const contourByLevel: { [key: string]: Contour[] } = {};
+        const contourByLevel: { [key: string]: HierarchicalContour[] } = {};
         getTreeContourByLevel(tree, contourByLevel);
 
         let result: OverlapCheck = undefined;
@@ -120,7 +113,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         return result as OverlapCheck;
     }
 
-    function getLevelBiggestOverlap(levelContour: Contour[]) {
+    function getLevelBiggestOverlap(levelContour: HierarchicalContour[]) {
         let result: OverlapCheck;
 
         for (let idx = 0; idx < levelContour.length; idx++) {
@@ -150,7 +143,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         return result;
     }
 
-    function getTreeContourByLevel(tree: Tree<Skill>, result: { [key: string]: Contour[] }) {
+    function getTreeContourByLevel(tree: Tree<Skill>, result: { [key: string]: HierarchicalContour[] }) {
         //Base Case 👇
 
         if (!tree.children) return;
@@ -162,7 +155,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
         const key = `${tree.level}`;
 
-        const contourToAppend: Contour = {
+        const contourToAppend: HierarchicalContour = {
             leftNode: { coord: leftmostNode.x, id: leftmostNode.data.id },
             rightNode: { coord: rightmostNode.x, id: rightmostNode.data.id },
         };
@@ -174,75 +167,6 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
             const element = tree.children[i];
 
             getTreeContourByLevel(element, result);
-        }
-    }
-
-    function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, string]) {
-        const treesToShift: { byBiggestOverlap: string[]; byHalfOfBiggestOverlap: string[] } = { byBiggestOverlap: [], byHalfOfBiggestOverlap: [] };
-
-        const pathToRightNode = returnPathFromRootToNode(result, nodesInConflict[1]);
-        const nodesInConflictLCA = findLowestCommonAncestorIdOfNodes(result, ...nodesInConflict);
-
-        if (!nodesInConflictLCA) throw "getTreesToShift nodesInConflictLCA";
-
-        const lcaIndex = pathToRightNode.findIndex((id) => id === nodesInConflictLCA);
-
-        if (lcaIndex === -1) throw "getTreesToShift lcaIndex error";
-
-        getTreesToShiftFromNodePathInConflict(result);
-
-        return treesToShift;
-
-        function getTreesToShiftFromNodePathInConflict(tree: Tree<Skill>) {
-            //Base Case 👇
-            if (!tree.children) return undefined;
-            if (tree.isRoot) treesToShift.byHalfOfBiggestOverlap.push(tree.data.id);
-
-            //Recursive Case 👇
-            const currentLevel = tree.level;
-            const lcaLevel = lcaIndex;
-            const nodeInPathIndexForChildren = tree.children.findIndex((t) => t.data.id === pathToRightNode[currentLevel + 1]);
-            const areAnyOfChildrenInPath = nodeInPathIndexForChildren === -1 ? false : true;
-
-            if (!areAnyOfChildrenInPath) return undefined;
-
-            for (let i = 0; i < tree.children.length; i++) {
-                const child = tree.children[i];
-
-                if (i === nodeInPathIndexForChildren) {
-                    if (currentLevel >= lcaLevel) {
-                        treesToShift.byBiggestOverlap.push(child.data.id);
-                        addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
-                    } else {
-                        treesToShift.byHalfOfBiggestOverlap.push(child.data.id);
-                    }
-                    if (child.data.id === pathToRightNode[pathToRightNode.length - 1])
-                        addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
-                    getTreesToShiftFromNodePathInConflict(child);
-                }
-
-                if (i > nodeInPathIndexForChildren) {
-                    if (currentLevel >= lcaLevel) {
-                        treesToShift.byBiggestOverlap.push(child.data.id);
-                        addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
-                    } else {
-                        treesToShift.byHalfOfBiggestOverlap.push(child.data.id);
-                        addEveryChildFromTreeToArray(child, treesToShift.byHalfOfBiggestOverlap);
-                    }
-                }
-            }
-        }
-
-        function addEveryChildFromTreeToArray(tree: Tree<Skill>, arrToAdd: string[]) {
-            if (!tree.children) return;
-
-            for (let i = 0; i < tree.children.length; i++) {
-                const element = tree.children[i];
-
-                arrToAdd.push(element.data.id);
-
-                addEveryChildFromTreeToArray(element, arrToAdd);
-            }
         }
     }
 
@@ -284,6 +208,74 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         }
     }
 };
+
+export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, string]) {
+    const treesToShift: { byBiggestOverlap: string[]; byHalfOfBiggestOverlap: string[] } = { byBiggestOverlap: [], byHalfOfBiggestOverlap: [] };
+
+    const pathToRightNode = returnPathFromRootToNode(result, nodesInConflict[1]);
+    const nodesInConflictLCA = findLowestCommonAncestorIdOfNodes(result, ...nodesInConflict);
+
+    if (!nodesInConflictLCA) throw "getTreesToShift nodesInConflictLCA";
+
+    const lcaIndex = pathToRightNode.findIndex((id) => id === nodesInConflictLCA);
+
+    if (lcaIndex === -1) throw "getTreesToShift lcaIndex error";
+
+    getTreesToShiftFromNodePathInConflict(result);
+
+    return treesToShift;
+
+    function getTreesToShiftFromNodePathInConflict(tree: Tree<Skill>) {
+        //Base Case 👇
+        if (!tree.children) return undefined;
+        if (tree.isRoot) treesToShift.byHalfOfBiggestOverlap.push(tree.data.id);
+
+        //Recursive Case 👇
+        const currentLevel = tree.level;
+        const lcaLevel = lcaIndex;
+        const nodeInPathIndexForChildren = tree.children.findIndex((t) => t.data.id === pathToRightNode[currentLevel + 1]);
+        const areAnyOfChildrenInPath = nodeInPathIndexForChildren === -1 ? false : true;
+
+        if (!areAnyOfChildrenInPath) return undefined;
+
+        for (let i = 0; i < tree.children.length; i++) {
+            const child = tree.children[i];
+
+            if (i === nodeInPathIndexForChildren) {
+                if (currentLevel >= lcaLevel) {
+                    treesToShift.byBiggestOverlap.push(child.data.id);
+                    addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
+                } else {
+                    treesToShift.byHalfOfBiggestOverlap.push(child.data.id);
+                }
+                if (child.data.id === pathToRightNode[pathToRightNode.length - 1]) addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
+                getTreesToShiftFromNodePathInConflict(child);
+            }
+
+            if (i > nodeInPathIndexForChildren) {
+                if (currentLevel >= lcaLevel) {
+                    treesToShift.byBiggestOverlap.push(child.data.id);
+                    addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
+                } else {
+                    treesToShift.byHalfOfBiggestOverlap.push(child.data.id);
+                    addEveryChildFromTreeToArray(child, treesToShift.byHalfOfBiggestOverlap);
+                }
+            }
+        }
+    }
+
+    function addEveryChildFromTreeToArray(tree: Tree<Skill>, arrToAdd: string[]) {
+        if (!tree.children) return;
+
+        for (let i = 0; i < tree.children.length; i++) {
+            const element = tree.children[i];
+
+            arrToAdd.push(element.data.id);
+
+            addEveryChildFromTreeToArray(element, arrToAdd);
+        }
+    }
+}
 
 export function treeToCoordArray(tree: Tree<Skill>, result: Coordinates[]) {
     // Recursive Case 👇
