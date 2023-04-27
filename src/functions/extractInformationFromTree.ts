@@ -172,3 +172,18 @@ export function countNodesInTree(rootNode: Tree<Skill> | undefined) {
 
     return result;
 }
+
+//extraer todos los node id de un arbol -> pasarle los subarboles, rotar los subarboles
+
+export function extractTreeIds(rootNode: Tree<Skill>, idArr: string[]) {
+    //Base case 👇
+
+    if (!rootNode.children) return idArr.push(rootNode.data.id);
+
+    //Recursive case 👇
+
+    for (let i = 0; i < rootNode.children.length; i++) {
+        extractTreeIds(rootNode.children[i], idArr);
+    }
+    return idArr.push(rootNode.data.id);
+}
