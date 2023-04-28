@@ -37,7 +37,7 @@ export function roundPolarCoordinates(pc: PolarCoordinate): PolarCoordinate {
     return { angleInRadians: roundedAngle, distanceToCenter: roundedDistance };
 }
 
-function returnSmallestBetweenAngleAndComplement(angle: number) {
+export function returnSmallestBetweenAngleAndComplement(angle: number) {
     const complement = angle - 2 * Math.PI;
 
     if (Math.abs(angle) < Math.abs(complement)) return angle;

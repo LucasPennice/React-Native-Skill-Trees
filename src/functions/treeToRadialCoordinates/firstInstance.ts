@@ -1,6 +1,5 @@
 import { Skill, Tree } from "../../types";
 import { arcToAngleRadians, polarToCartesianCoordinates } from "../coordinateSystem";
-import { findDistanceBetweenNodesById } from "../extractInformationFromTree";
 import { ALLOWED_NODE_SPACING, PolarCoordinate } from "./general";
 
 export function firstIteration(tree: Tree<Skill>, completeTree: Tree<Skill>, currentTreeMod?: PolarCoordinate, childrenIdx?: number) {
@@ -10,12 +9,9 @@ export function firstIteration(tree: Tree<Skill>, completeTree: Tree<Skill>, cur
     };
 
     //Base Case 👇
-    const coord = polarToCartesianCoordinates(currentMod);
+    const treeCoord = polarToCartesianCoordinates(currentMod);
 
-    const distance = findDistanceBetweenNodesById(completeTree, tree.data.id);
-    const level = distance ? distance - 1 : 0;
-
-    let result: Tree<Skill> = { ...tree, x: coord.x, y: coord.y, level, children: undefined };
+    let result: Tree<Skill> = { ...tree, x: treeCoord.x, y: treeCoord.y, level: currentMod.distanceToCenter, children: undefined };
 
     if (!tree.children) return result;
 
@@ -23,23 +19,14 @@ export function firstIteration(tree: Tree<Skill>, completeTree: Tree<Skill>, cur
 
     //Recursive Case 👇
 
-    if (tree.isRoot) {
-        const anglePerChildren = (2 * Math.PI) / tree.children.length;
+    if (tree.isRoot) pushLevel1SubTrees();
 
-        for (let idx = 0; idx < tree.children.length; idx++) {
-            const firstLevelChildrenMod = { angleInRadians: 0, distanceToCenter: 1 };
-            const element = tree.children[idx];
-
-            const d = firstIteration(element, completeTree, firstLevelChildrenMod, idx);
-
-            if (d) result.children.push(d);
-        }
-    } else {
+    if (!tree.isRoot) {
         const isFirstNode = childrenIdx === 0;
         const childrenDistanceToCenter = currentMod.distanceToCenter + 1;
 
-        const angleBetweenChildrenInRadians = arcToAngleRadians(ALLOWED_NODE_SPACING, childrenDistanceToCenter);
-        const childrenAngleSpan = (tree.children.length - 1) * angleBetweenChildrenInRadians;
+        const angleBetweenChildren = arcToAngleRadians(ALLOWED_NODE_SPACING, childrenDistanceToCenter);
+        const childrenAngleSpan = (tree.children.length - 1) * angleBetweenChildren;
 
         let desiredAngleToCenterChildren = childrenAngleSpan / 2;
 
@@ -47,7 +34,7 @@ export function firstIteration(tree: Tree<Skill>, completeTree: Tree<Skill>, cur
 
         for (let idx = 0; idx < tree.children.length; idx++) {
             const childrenMod = {
-                angleInRadians: currentMod.angleInRadians + idx * angleBetweenChildrenInRadians - desiredAngleToCenterChildren,
+                angleInRadians: currentMod.angleInRadians + idx * angleBetweenChildren - desiredAngleToCenterChildren,
                 distanceToCenter: childrenDistanceToCenter,
             };
 
@@ -62,4 +49,17 @@ export function firstIteration(tree: Tree<Skill>, completeTree: Tree<Skill>, cur
     if (result.children.length === 0) delete result["children"];
 
     return result;
+
+    function pushLevel1SubTrees() {
+        if (!tree.children) throw "pushLevel1SubTrees";
+
+        for (let idx = 0; idx < tree.children.length; idx++) {
+            const firstLevelChildrenMod = { angleInRadians: 0, distanceToCenter: 1 };
+            const element = tree.children[idx];
+
+            const d = firstIteration(element, completeTree, firstLevelChildrenMod, idx);
+
+            if (d) result.children!.push(d);
+        }
+    }
 }

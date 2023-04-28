@@ -1,5 +1,11 @@
+import { CIRCLE_SIZE, DISTANCE_BETWEEN_GENERATIONS } from "../../parameters";
 import { Skill, Tree } from "../../types";
-import { angleBetweenPolarCoordinates, arcToAngleRadians, cartesianToPositivePolarCoordinates } from "../coordinateSystem";
+import {
+    angleBetweenPolarCoordinates,
+    arcToAngleRadians,
+    cartesianToPositivePolarCoordinates,
+    returnSmallestBetweenAngleAndComplement,
+} from "../coordinateSystem";
 import { extractTreeIds, findTreeHeight } from "../extractInformationFromTree";
 import {
     ALLOWED_NODE_SPACING,
@@ -70,7 +76,6 @@ function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill> {
 
     subTrees.forEach((subTree, idx) => {
         const subTreeWithoutOverlap = fixOverlapWithinTree(subTree, idx);
-
         subTreesWithoutOverlap.push(subTreeWithoutOverlap);
     });
 
@@ -80,7 +85,6 @@ function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill> {
         let result: Tree<Skill> = { ...subTree };
 
         let overlapWithinTree = true;
-        //🚨 deberia ser la depth del arbol, idealmente no deberia haber
         let loopAvoider = 0;
 
         while (overlapWithinTree && loopAvoider < 10) {
@@ -94,6 +98,7 @@ function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill> {
 
                 result = shiftNodesClockWise(result, treesToShift, polarOverlap.biggestOverlapAngle);
             }
+
             loopAvoider++;
         }
 
@@ -222,33 +227,133 @@ function getLevelBiggestOverlap(levelContour: PolarContour[]) {
 }
 
 function fixLevelOverflow(tree: Tree<Skill>) {
-    const treeHeight = findTreeHeight(tree);
+    const subTrees = tree.children;
 
-    //treeDepth = tree deepest level
-    const treeDepth = treeHeight - 1;
+    if (!subTrees) return tree;
 
-    let levelAngleSpan: number[] = [];
+    let treeAngleSpanPerLevel: number[] = [];
 
-    getLevelAngleSpanOfTree(tree, levelAngleSpan);
+    subTrees.forEach((subTree) => {
+        const subTreeContour: PolarContour[] = [];
+
+        getSubTreeContour(subTree, subTreeContour);
+
+        updateLevelAngleSpan(subTreeContour, treeAngleSpanPerLevel);
+    });
+
+    console.log(treeAngleSpanPerLevel);
+
     //En cada uno de los subtrees, busco el contorno de TODO EL SUBARBOL, calculo el angulo entre los extremos del contorno, sumo ese angulo a
     // UN objeto que tiene un contador por nivel
     //si alguno de los contadores supera 2pi ese nivel esta overlflwo
 
     return tree;
 
-    function getLevelAngleSpanOfTree(tree: Tree<Skill>, levelAngleSpan: number[]) {
+    function getLevelAngleSpan(tree: Tree<Skill>, angleSpanPerLevel: number[]) {
+        //Recorro un subarbol
+        //para cada nivel me guardo el nodo mas a la izquierda y mas a la derecha
+        //Despues de hacer eso calculo los spans de ese subarbol
+        //Recien ahi paso a otro subarbol
         //Base case 👇
+        // if (!tree.children) {
+        //     const polarTreeCoord = cartesianToPositivePolarCoordinates({ x: tree.x, y: tree.y }, UNCENTERED_ROOT_COORDINATES);
+        //     const singleNodeAngleSpan = angleSpanOfSingleNode(polarTreeCoord.distanceToCenter);
+        //     angleSpanPerLevel[tree.level] = angleSpanPerLevel[tree.level] + singleNodeAngleSpan;
+        //     return;
+        // }
+        // //Recursive case 👇
+        // for (let i = 0; i < tree.children.length; i++) getLevelAngleSpan(tree.children[i], angleSpanPerLevel);
+        // const levelAngleSpan = angleSpanOfLevel(tree.children);
+        // angleSpanPerLevel[tree.level] = angleSpanPerLevel[tree.level] + levelAngleSpan;
+        // return;
+    }
+}
 
-        if (!tree.children) return (levelAngleSpan[tree.level] = levelAngleSpan[tree.level] + 123);
+function angleSpanOfLevel(leftmostNode: PolarContour["leftNode"], rightmostNode: PolarContour["rightNode"]) {
+    const leftPolarCoordinates: PolarCoordinate = { angleInRadians: leftmostNode.angleInRadians, distanceToCenter: leftmostNode.distanceToCenter };
+    const rightPolarCoordinates: PolarCoordinate = { angleInRadians: rightmostNode.angleInRadians, distanceToCenter: rightmostNode.distanceToCenter };
 
-        //Recursive case 👇
+    const angleBetweenNodes = angleBetweenPolarCoordinates(rightPolarCoordinates, leftPolarCoordinates);
 
-        for (let i = 0; i < tree.children.length; i++) getLevelAngleSpanOfTree(tree.children[i], levelAngleSpan);
+    const scaledDownCircleSize = (2 * CIRCLE_SIZE) / DISTANCE_BETWEEN_GENERATIONS;
 
-        return (levelAngleSpan[tree.level] = levelAngleSpan[tree.level] + 123);
+    const angleSpanPadding = arcToAngleRadians(ALLOWED_NODE_SPACING + scaledDownCircleSize, leftPolarCoordinates.distanceToCenter);
+
+    const result = angleBetweenNodes + angleSpanPadding;
+
+    return result;
+}
+
+function updateLevelAngleSpan(subTreeContour: PolarContour[], treeAngleSpanPerLevel: number[]) {
+    //Because the root node of the subtrees is at level one, and we use the level as the index for subTreeContour,
+    //The first position of the contour contains undefined, so we ignore the first position
+
+    const contourQty = subTreeContour.length - 1;
+
+    for (let level = 1; level <= contourQty; level++) {
+        const levelContour = subTreeContour[level];
+
+        const levelAngleSpan = angleSpanOfLevel(levelContour.leftNode, levelContour.rightNode);
+        console.log(levelAngleSpan);
+
+        if (treeAngleSpanPerLevel[level] === undefined) treeAngleSpanPerLevel[level] = levelAngleSpan;
+        if (treeAngleSpanPerLevel[level] !== undefined) treeAngleSpanPerLevel[level] = treeAngleSpanPerLevel[level] + levelAngleSpan;
+    }
+}
+
+function getSubTreeContour(tree: Tree<Skill>, treeContour: PolarContour[]) {
+    // Base case 👇
+
+    //By design the root of my subtree is at level 1
+    const subTreeRoot = tree.level === 1;
+
+    if (!tree.children || subTreeRoot) {
+        const leftmostNode = tree;
+        const rightmostNode = tree;
+        updateTreeContour(leftmostNode, rightmostNode, treeContour);
+
+        if (!tree.children) return;
     }
 
-    function angleSpanOfSingleNode() {}
+    //Recursive case 👇
+    const rightmostNode = tree.children[0];
+    const leftmostNode = tree.children[tree.children.length - 1];
 
-    function angleSpanOfLevel() {}
+    updateTreeContour(leftmostNode, rightmostNode, treeContour);
+
+    for (let i = 0; i < tree.children.length; i++) getSubTreeContour(tree.children[i], treeContour);
+
+    return;
+
+    function updateTreeContour(leftMostTree: Tree<Skill>, rightMostTree: Tree<Skill>, treeContour: PolarContour[]) {
+        const level = leftMostTree.level;
+
+        const leftMostPolarCoord = cartesianToPositivePolarCoordinates({ x: leftMostTree.x, y: leftMostTree.y }, UNCENTERED_ROOT_COORDINATES);
+        const rightMostPolarCoord = cartesianToPositivePolarCoordinates({ x: rightMostTree.x, y: rightMostTree.y }, UNCENTERED_ROOT_COORDINATES);
+
+        if (treeContour[level] === undefined) {
+            treeContour[level] = {
+                leftNode: { ...leftMostPolarCoord, id: leftMostTree.data.id },
+                rightNode: { ...rightMostPolarCoord, id: rightMostTree.data.id },
+            };
+            return;
+        }
+
+        const contourLeftAngleNormalized = returnSmallestBetweenAngleAndComplement(treeContour[level].leftNode.angleInRadians);
+        const tentativeLeftContourNormalized = returnSmallestBetweenAngleAndComplement(leftMostPolarCoord.angleInRadians);
+
+        const updateLeftNode = contourLeftAngleNormalized < tentativeLeftContourNormalized;
+
+        if (updateLeftNode) treeContour[level].leftNode = { ...leftMostPolarCoord, id: leftMostTree.data.id };
+
+        const contourRightAngleNormalized = returnSmallestBetweenAngleAndComplement(treeContour[level].rightNode.angleInRadians);
+        const tentativeRightContourNormalized = returnSmallestBetweenAngleAndComplement(rightMostPolarCoord.angleInRadians);
+
+        //Remember that the Y axis of the canvas points "down"
+        const updateRightNode = contourRightAngleNormalized > tentativeRightContourNormalized;
+
+        if (updateRightNode) treeContour[level].rightNode = { ...rightMostPolarCoord, id: rightMostTree.data.id };
+
+        return;
+    }
 }
