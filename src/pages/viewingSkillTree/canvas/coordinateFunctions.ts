@@ -12,7 +12,7 @@ import {
     ONLY_CHILDREN_DND_ZONE_DIMENTIONS,
     PARENT_DND_ZONE_DIMENTIONS,
 } from "../../../parameters";
-import { PlotCircularTree } from "../../../functions/treeToRadialCoordinates";
+import { PlotCircularTree } from "../../../functions/treeToRadialCoordinates/general";
 
 export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): NodeCoordinate[] {
     if (!currentTree) return [];
