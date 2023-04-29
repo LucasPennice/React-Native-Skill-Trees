@@ -1,9 +1,9 @@
 import { Skill, Tree } from "../../types";
-import { cartesianToPositivePolarCoordinates, polarToCartesianCoordinates } from "../coordinateSystem";
+import { cartesianToPositivePolarCoordinates, polarToCartesianCoordinates, returnSmallestBetweenAngleAndComplement } from "../coordinateSystem";
 import { findLowestCommonAncestorIdOfNodes, returnPathFromRootToNode } from "../extractInformationFromTree";
 import { Coordinates, treeToCoordArray } from "../treeToHierarchicalCoordinates";
 import { firstIteration } from "./firstInstance";
-import { handleOverlap } from "./overflow";
+import { handleOverlap } from "./overlap";
 
 //☢️ The canvas has the positive y axis pointing downwards, this changes how calculations are to be made ☢️
 
@@ -154,5 +154,62 @@ export function shiftNodesClockWise(
         if (shiftByHalfOfBiggestOverlap) return overlapAngle / 2;
 
         return 0;
+    }
+}
+
+export function getSubTreeContour(tree: Tree<Skill>, treeContour: PolarContour[]) {
+    // Base case 👇
+
+    //By design the root of my subtree is at level 1
+    const subTreeRoot = tree.level === 1;
+
+    if (!tree.children || subTreeRoot) {
+        const leftmostNode = tree;
+        const rightmostNode = tree;
+        updateTreeContour(leftmostNode, rightmostNode, treeContour);
+
+        if (!tree.children) return;
+    }
+
+    //Recursive case 👇
+    const rightmostNode = tree.children[0];
+    const leftmostNode = tree.children[tree.children.length - 1];
+
+    updateTreeContour(leftmostNode, rightmostNode, treeContour);
+
+    for (let i = 0; i < tree.children.length; i++) getSubTreeContour(tree.children[i], treeContour);
+
+    return;
+
+    function updateTreeContour(leftMostTree: Tree<Skill>, rightMostTree: Tree<Skill>, treeContour: PolarContour[]) {
+        const level = leftMostTree.level;
+
+        const leftMostPolarCoord = cartesianToPositivePolarCoordinates({ x: leftMostTree.x, y: leftMostTree.y }, UNCENTERED_ROOT_COORDINATES);
+        const rightMostPolarCoord = cartesianToPositivePolarCoordinates({ x: rightMostTree.x, y: rightMostTree.y }, UNCENTERED_ROOT_COORDINATES);
+
+        if (treeContour[level] === undefined) {
+            treeContour[level] = {
+                leftNode: { ...leftMostPolarCoord, id: leftMostTree.data.id },
+                rightNode: { ...rightMostPolarCoord, id: rightMostTree.data.id },
+            };
+            return;
+        }
+
+        const contourLeftAngleNormalized = returnSmallestBetweenAngleAndComplement(treeContour[level].leftNode.angleInRadians);
+        const tentativeLeftContourNormalized = returnSmallestBetweenAngleAndComplement(leftMostPolarCoord.angleInRadians);
+
+        const updateLeftNode = contourLeftAngleNormalized < tentativeLeftContourNormalized;
+
+        if (updateLeftNode) treeContour[level].leftNode = { ...leftMostPolarCoord, id: leftMostTree.data.id };
+
+        const contourRightAngleNormalized = returnSmallestBetweenAngleAndComplement(treeContour[level].rightNode.angleInRadians);
+        const tentativeRightContourNormalized = returnSmallestBetweenAngleAndComplement(rightMostPolarCoord.angleInRadians);
+
+        //Remember that the Y axis of the canvas points "down"
+        const updateRightNode = contourRightAngleNormalized > tentativeRightContourNormalized;
+
+        if (updateRightNode) treeContour[level].rightNode = { ...rightMostPolarCoord, id: rightMostTree.data.id };
+
+        return;
     }
 }
