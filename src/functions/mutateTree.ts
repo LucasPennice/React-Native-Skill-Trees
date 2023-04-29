@@ -125,6 +125,32 @@ export function editTreeProperties(rootNode: Tree<Skill> | undefined, targetNode
     return result;
 }
 
+export function mutateEveryTree(rootNode: Tree<Skill> | undefined, mutation: (v: Tree<Skill>) => Tree<Skill>) {
+    if (!rootNode) return undefined;
+
+    //Base Case 👇
+
+    const mutatedTree = mutation(rootNode);
+
+    let result: Tree<Skill> = { ...rootNode, ...mutatedTree, children: [] };
+
+    if (!rootNode.children) return result;
+
+    //Recursive Case 👇
+
+    for (let idx = 0; idx < rootNode.children.length; idx++) {
+        const element = rootNode.children[idx];
+
+        const d = mutateEveryTree(element, mutation);
+
+        if (d) result.children!.push(d);
+    }
+
+    if (result.children!.length === 0) delete result["children"];
+
+    return result;
+}
+
 export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: Tree<Skill>, newNode: Skill) {
     //Tengo 3 casos
 

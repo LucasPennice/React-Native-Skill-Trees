@@ -30,9 +30,9 @@ export function cartesianToPositivePolarCoordinates(point: { x: number; y: numbe
 }
 
 export function roundPolarCoordinates(pc: PolarCoordinate): PolarCoordinate {
-    const roundedDistance = Math.round(pc.distanceToCenter);
+    const roundedDistance = parseFloat(pc.distanceToCenter.toFixed(3));
 
-    const roundedAngle = parseFloat(pc.angleInRadians.toFixed(5));
+    const roundedAngle = parseFloat(pc.angleInRadians.toFixed(3));
 
     return { angleInRadians: roundedAngle, distanceToCenter: roundedDistance };
 }
