@@ -60,7 +60,7 @@ export function getTreesToShiftForCircularTree(result: Tree<Skill>, nodesInConfl
 
     function getTreesToShiftFromNodePathInConflict(tree: Tree<Skill>) {
         //Base Case 👇
-        if (!tree.children) return undefined;
+        if (!tree.children || !tree.children.length) return undefined;
         if (tree.isRoot) treesToShift.byHalfOfBiggestOverlap.push(tree.data.id);
 
         //Recursive Case 👇
@@ -98,7 +98,7 @@ export function getTreesToShiftForCircularTree(result: Tree<Skill>, nodesInConfl
     }
 
     function addEveryChildFromTreeToArray(tree: Tree<Skill>, arrToAdd: string[]) {
-        if (!tree.children) return;
+        if (!tree.children || !tree.children.length) return;
 
         for (let i = 0; i < tree.children.length; i++) {
             const element = tree.children[i];
@@ -163,12 +163,12 @@ export function getSubTreeContour(tree: Tree<Skill>, treeContour: PolarContour[]
     //By design the root of my subtree is at level 1
     const subTreeRoot = tree.level === 1;
 
-    if (!tree.children || subTreeRoot) {
+    if (!tree.children || !tree.children.length || subTreeRoot) {
         const leftmostNode = tree;
         const rightmostNode = tree;
         updateTreeContour(leftmostNode, rightmostNode, treeContour);
 
-        if (!tree.children) return;
+        if (!tree.children || !tree.children.length) return;
     }
 
     //Recursive case 👇

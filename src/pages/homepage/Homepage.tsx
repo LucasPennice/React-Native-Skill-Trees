@@ -11,6 +11,7 @@ import { Skill, Tree } from "../../types";
 import CanvasTree from "../viewingSkillTree/canvas/CanvasTree";
 import { centerNodesInCanvas, getCanvasDimensions, getNodesCoordinates } from "../viewingSkillTree/canvas/coordinateFunctions";
 import useHandleCanvasScroll from "../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
+import { cartesianToPositivePolarCoordinates } from "../../functions/coordinateSystem";
 
 //@ts-ignore
 const mockInputTree: any = {
@@ -407,7 +408,7 @@ function Homepage() {
                                 rootCoordinates={{ width: 0, height: 0 }}
                                 isRadial
                             />
-                            {Circles()}
+                            <Circles />
                         </Canvas>
                     </Animated.View>
                 </View>
@@ -419,26 +420,37 @@ function Homepage() {
 
         if (!rootNode) return <></>;
 
+        const levelDistances = getLevelDistances();
+
         const rootNodeCoord = { x: rootNode.x, y: rootNode.y };
 
-        const levels = Math.max(...nodeCoordinatesCentered.map((c) => c.level));
+        return (
+            <>
+                {levelDistances.map((r, idx) => {
+                    return (
+                        <Circle key={idx} cx={rootNodeCoord.x} cy={rootNodeCoord.y} r={r} color="gray" style={"stroke"} opacity={0.7}>
+                            <DashPathEffect intervals={[10, 10]} />
+                        </Circle>
+                    );
+                })}
+            </>
+        );
 
-        const levelsArray = [...Array(levels + 1).keys()];
+        function getLevelDistances() {
+            const result: number[] = [];
 
-        return levelsArray.map((level, idx) => {
-            return (
-                <Circle
-                    key={idx}
-                    cx={rootNodeCoord.x}
-                    cy={rootNodeCoord.y}
-                    r={level * DISTANCE_BETWEEN_GENERATIONS}
-                    color="lightblue"
-                    style={"stroke"}
-                    opacity={0.5}>
-                    <DashPathEffect intervals={[20, 20]} />
-                </Circle>
-            );
-        });
+            for (let i = 0; i < nodeCoordinatesCentered.length; i++) {
+                const element = nodeCoordinatesCentered[i];
+
+                if (result[element.level] === undefined) {
+                    const polarCoord = cartesianToPositivePolarCoordinates({ x: element.x, y: element.y }, { x: rootNode!.x, y: rootNode!.y });
+
+                    result[element.level] = polarCoord.distanceToCenter;
+                }
+            }
+
+            return result;
+        }
     }
 }
 

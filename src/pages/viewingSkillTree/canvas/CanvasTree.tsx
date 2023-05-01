@@ -5,6 +5,7 @@ import HierarchicalCanvasPath from "./HierarchicalCanvasPath";
 import Label from "./Label";
 import Node from "./Node";
 import RadialCanvasPath from "./RadialCanvasPath";
+import RadialLabel from "./RadialLabel";
 import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 
 type TreeProps = {
@@ -93,7 +94,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
                 <Label treeAccentColor={treeAccentColor} tree={tree} coord={{ cx, cy }} pathBlurOnInactive={pathBlurOnInactive} />
             )}
             {showLabel && isRadial && (
-                <Label treeAccentColor={treeAccentColor} tree={tree} coord={{ cx, cy }} pathBlurOnInactive={pathBlurOnInactive} />
+                <RadialLabel treeAccentColor={treeAccentColor} tree={tree} coord={{ cx, cy }} pathBlurOnInactive={pathBlurOnInactive} />
             )}
 
             <Node

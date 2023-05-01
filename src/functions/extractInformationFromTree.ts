@@ -114,7 +114,7 @@ export function returnPathFromRootToNode(tree: Tree<Skill>, nodeId: string) {
         //Base Case 👇
         if (tree.data.id === nodeId) return true;
 
-        if (!tree.children) {
+        if (!tree.children || !tree.children.length) {
             arr.pop();
             return false;
         }

@@ -44,11 +44,25 @@ export function handleOverlap(tree: Tree<Skill>) {
     return result;
 
     function mockShiftSubTreesToMinimizeSpace(tree: Tree<Skill>) {
+        //Recorro todos los subtrees
+        //Comparo el contorno de derecha del subarbol actual con el contorno a izquierda del arbol siguiente
+        //Encuentro el overlap, muevo todos los subarboles siguientes ese overlap a la derecha, sigo
+
         const subTrees = tree.children;
 
         if (!subTrees) return tree;
 
         const rotatedSubtrees: Tree<Skill>[] = [];
+
+        const subTreesContour = [];
+
+        subTrees.forEach((subTree) => {
+            const subTreeContour: { [key: string]: PolarContour[] } = {};
+
+            getTreeContourByLevel(subTree, subTreeContour);
+
+            subTreesContour.push(subTreeContour);
+        });
 
         subTrees.forEach((subTree, idx) => {
             const subTreeIds: string[] = [];
@@ -128,41 +142,43 @@ function checkForOverlap(tree: Tree<Skill>): PolarOverlapCheck {
     });
 
     return result as PolarOverlapCheck;
+}
 
-    function getTreeContourByLevel(tree: Tree<Skill>, result: { [key: string]: PolarContour[] }) {
-        //Base Case 👇
+function getTreeContourByLevel(tree: Tree<Skill>, result: { [key: string]: PolarContour[] }) {
+    //Base Case 👇
 
-        if (!tree.children) return;
+    if (!tree.children || !tree.children.length) return;
 
-        //Recursive Case 👇
+    //Recursive Case 👇
 
-        const leftmostNode = tree.children[tree.children.length - 1];
-        const rightmostNode = tree.children[0];
+    const leftmostNode = tree.children[tree.children.length - 1];
+    const rightmostNode = tree.children[0];
 
-        const key = `${tree.level + 1}`;
+    console.log(tree.children);
 
-        const leftmostNodePolarCoordinates = {
-            ...cartesianToPositivePolarCoordinates({ x: leftmostNode.x, y: leftmostNode.y }, UNCENTERED_ROOT_COORDINATES),
-            id: leftmostNode.data.id,
-        };
-        const rightmostNodetNodePolarCoordinates = {
-            ...cartesianToPositivePolarCoordinates({ x: rightmostNode.x, y: rightmostNode.y }, UNCENTERED_ROOT_COORDINATES),
-            id: rightmostNode.data.id,
-        };
+    const key = `${tree.level + 1}`;
 
-        const contourToAppend: PolarContour = {
-            leftNode: leftmostNodePolarCoordinates,
-            rightNode: rightmostNodetNodePolarCoordinates,
-        };
+    const leftmostNodePolarCoordinates = {
+        ...cartesianToPositivePolarCoordinates({ x: leftmostNode.x, y: leftmostNode.y }, UNCENTERED_ROOT_COORDINATES),
+        id: leftmostNode.data.id,
+    };
+    const rightmostNodetNodePolarCoordinates = {
+        ...cartesianToPositivePolarCoordinates({ x: rightmostNode.x, y: rightmostNode.y }, UNCENTERED_ROOT_COORDINATES),
+        id: rightmostNode.data.id,
+    };
 
-        if (result[key]) result[key] = [...result[key], contourToAppend];
-        if (!result[key]) result[key] = [contourToAppend];
+    const contourToAppend: PolarContour = {
+        leftNode: leftmostNodePolarCoordinates,
+        rightNode: rightmostNodetNodePolarCoordinates,
+    };
 
-        for (let i = 0; i < tree.children.length; i++) {
-            const element = tree.children[i];
+    if (result[key]) result[key] = [...result[key], contourToAppend];
+    if (!result[key]) result[key] = [contourToAppend];
 
-            getTreeContourByLevel(element, result);
-        }
+    for (let i = 0; i < tree.children.length; i++) {
+        const element = tree.children[i];
+
+        getTreeContourByLevel(element, result);
     }
 }
 

@@ -35,7 +35,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
         const result: Tree<Skill> = { ...tree, x, y: level, level, children: undefined };
 
-        if (!tree.children) return result;
+        if (!tree.children || !tree.children.length) return result;
 
         result.children = [];
 
@@ -80,7 +80,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         return result;
 
         function centerRoot(tree: Tree<Skill>) {
-            if (!tree.children) return tree;
+            if (!tree.children || !tree.children.length) return tree;
 
             const leftChildrenCoord = tree.children[0].x;
             const rightChildrenCoord = tree.children[tree.children.length - 1].x;
@@ -146,7 +146,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
     function getTreeContourByLevel(tree: Tree<Skill>, result: { [key: string]: HierarchicalContour[] }) {
         //Base Case 👇
 
-        if (!tree.children) return;
+        if (!tree.children || !tree.children.length) return;
 
         //Recursive Case 👇
 
@@ -227,7 +227,7 @@ export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, s
 
     function getTreesToShiftFromNodePathInConflict(tree: Tree<Skill>) {
         //Base Case 👇
-        if (!tree.children) return undefined;
+        if (!tree.children || !tree.children.length) return undefined;
         if (tree.isRoot) treesToShift.byHalfOfBiggestOverlap.push(tree.data.id);
 
         //Recursive Case 👇
@@ -265,7 +265,7 @@ export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, s
     }
 
     function addEveryChildFromTreeToArray(tree: Tree<Skill>, arrToAdd: string[]) {
-        if (!tree.children) return;
+        if (!tree.children || !tree.children.length) return;
 
         for (let i = 0; i < tree.children.length; i++) {
             const element = tree.children[i];
