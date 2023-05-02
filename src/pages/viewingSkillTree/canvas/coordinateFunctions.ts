@@ -212,3 +212,16 @@ export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDim
         return { ...c, x: c.x + paddingFromLeftBorder, y: c.y + paddingFromTopBorder };
     });
 }
+
+export function movePointParallelToVector(directionVector: { x: number; y: number }, distanceToMove: number, pointToMove: { x: number; y: number }) {
+    const directionVectorModule = Math.sqrt(Math.pow(directionVector.x, 2) + Math.pow(directionVector.y, 2));
+
+    const directionVersor = { x: directionVector.x / directionVectorModule, y: directionVector.y / directionVectorModule };
+
+    const vectorScale = distanceToMove / directionVectorModule;
+
+    const deltaX = directionVersor.x * vectorScale;
+    const deltaY = directionVersor.y * vectorScale;
+
+    return { x: pointToMove.x + deltaX, y: pointToMove.y + deltaY };
+}

@@ -13,7 +13,7 @@ export function firstIteration(tree: Tree<Skill>, completeTree: Tree<Skill>, cur
 
     let result: Tree<Skill> = { ...tree, x: treeCoord.x, y: treeCoord.y, level: currentMod.distanceToCenter, children: undefined };
 
-    if (!tree.children || !tree.children.length) return result;
+    if (!tree.children) return result;
 
     result.children = [];
 
@@ -51,7 +51,7 @@ export function firstIteration(tree: Tree<Skill>, completeTree: Tree<Skill>, cur
     return result;
 
     function pushLevel1SubTrees() {
-        if (!tree.children || !tree.children.length) throw "pushLevel1SubTrees";
+        if (!tree.children) throw "pushLevel1SubTrees";
 
         for (let idx = 0; idx < tree.children.length; idx++) {
             const firstLevelChildrenMod = { angleInRadians: 0, distanceToCenter: 1 };

@@ -1,6 +1,6 @@
 import { Skill, Tree } from "../../types";
 import { cartesianToPositivePolarCoordinates, polarToCartesianCoordinates, returnSmallestBetweenAngleAndComplement } from "../coordinateSystem";
-import { findLowestCommonAncestorIdOfNodes, returnPathFromRootToNode } from "../extractInformationFromTree";
+import { findLowestCommonAncestorIdOfNodes, findTreeHeight, returnPathFromRootToNode } from "../extractInformationFromTree";
 import { Coordinates, treeToCoordArray } from "../treeToHierarchicalCoordinates";
 import { firstIteration } from "./firstInstance";
 import { handleOverlap } from "./overlap";
@@ -13,11 +13,15 @@ export type PolarContour = { leftNode: PolarCoordinate & { id: string }; rightNo
 
 export type PolarOverlapCheck = undefined | { biggestOverlapAngle: number; nodesInConflict: [string, string] };
 
+export type RadialDistanceTable = { [key: string]: { current: number; original: number } };
+
 export const ALLOWED_NODE_SPACING = 0.5;
 
 export const UNCENTERED_ROOT_COORDINATES = { x: 0, y: 0 };
 
 export function PlotCircularTree(completeTree: Tree<Skill>) {
+    let levelDistanceTable = getInitialLevelDistanceTable(completeTree);
+
     let result: Tree<Skill> = { ...completeTree };
 
     result = firstIteration(completeTree, completeTree);
@@ -40,6 +44,20 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
         });
 
     return treeCoordinates;
+}
+
+function getInitialLevelDistanceTable(tree: Tree<Skill>): RadialDistanceTable {
+    const treeDepth = findTreeHeight(tree);
+
+    const levelsArray = [...Array(treeDepth).keys()];
+
+    let result: RadialDistanceTable = {};
+
+    levelsArray.forEach((level) => {
+        result[level] = { current: level, original: level };
+    });
+
+    return result;
 }
 
 export function getTreesToShiftForCircularTree(result: Tree<Skill>, nodesInConflict: [string, string]) {
@@ -110,7 +128,7 @@ export function getTreesToShiftForCircularTree(result: Tree<Skill>, nodesInConfl
     }
 }
 
-export function shiftNodesClockWise(
+export function shiftNodesCounterClockWise(
     result: Tree<Skill>,
     treesToShift: { byBiggestOverlap: string[]; byHalfOfBiggestOverlap: string[] },
     overlapAngle: number
@@ -130,7 +148,7 @@ export function shiftNodesClockWise(
 
     //Base Case 👇
 
-    if (!result.children) return updatedTree;
+    if (!result.children || !result.children.length) return updatedTree;
 
     updatedTree.children = [];
 
@@ -139,7 +157,7 @@ export function shiftNodesClockWise(
     for (let i = 0; i < result.children.length; i++) {
         const element = result.children[i];
 
-        updatedTree.children.push(shiftNodesClockWise(element, treesToShift, overlapAngle));
+        updatedTree.children.push(shiftNodesCounterClockWise(element, treesToShift, overlapAngle));
     }
 
     return updatedTree;
