@@ -2,16 +2,15 @@ import { Canvas, Circle, DashPathEffect } from "@shopify/react-native-skia";
 import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
+import { cartesianToPositivePolarCoordinates } from "../../functions/coordinateSystem";
 import { mutateEveryTreeNode } from "../../functions/mutateTree";
-import { DISTANCE_BETWEEN_GENERATIONS, NAV_HEGIHT, bigasstree, centerFlex, colors } from "../../parameters";
+import { NAV_HEGIHT, centerFlex, colors } from "../../parameters";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { selectTreeSlice } from "../../redux/userTreesSlice";
 import { Skill, Tree } from "../../types";
 import CanvasTree from "../viewingSkillTree/canvas/CanvasTree";
 import { centerNodesInCanvas, getCanvasDimensions, getNodesCoordinates } from "../viewingSkillTree/canvas/coordinateFunctions";
 import useHandleCanvasScroll from "../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
-import { cartesianToPositivePolarCoordinates } from "../../functions/coordinateSystem";
 
 //@ts-ignore
 const mockInputTree: any = {

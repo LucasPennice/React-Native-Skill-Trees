@@ -1,10 +1,9 @@
 import { movePointParallelToVector } from "../../pages/viewingSkillTree/canvas/coordinateFunctions";
-import { CIRCLE_SIZE, DISTANCE_BETWEEN_GENERATIONS } from "../../parameters";
 import { Skill, Tree } from "../../types";
 import { angleBetweenPolarCoordinates, arcToAngleRadians, cartesianToPositivePolarCoordinates } from "../coordinateSystem";
 import { findParentOfNode } from "../extractInformationFromTree";
 import { mutateEveryTree } from "../mutateTree";
-import { ALLOWED_NODE_SPACING, PolarContour, PolarCoordinate, UNCENTERED_ROOT_COORDINATES, getSubTreeContour } from "./general";
+import { ALLOWED_NODE_SPACING, PolarContour, PolarCoordinate, UNCENTERED_ROOT_COORDINATES } from "./general";
 import { getRadialTreeContourByLevel } from "./overlap";
 
 export function fixLevelOverflow(tree: Tree<Skill>) {
