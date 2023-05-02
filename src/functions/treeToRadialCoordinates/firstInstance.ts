@@ -11,9 +11,9 @@ export function firstIteration(tree: Tree<Skill>, completeTree: Tree<Skill>, cur
     //Base Case 👇
     const treeCoord = polarToCartesianCoordinates(currentMod);
 
-    let result: Tree<Skill> = { ...tree, x: treeCoord.x, y: treeCoord.y, level: currentMod.distanceToCenter, children: undefined };
+    let result: Tree<Skill> = { ...tree, x: treeCoord.x, y: treeCoord.y, level: currentMod.distanceToCenter, children: [] };
 
-    if (!tree.children) return result;
+    if (!tree.children.length) return result;
 
     result.children = [];
 
@@ -46,12 +46,10 @@ export function firstIteration(tree: Tree<Skill>, completeTree: Tree<Skill>, cur
         }
     }
 
-    if (result.children.length === 0) delete result["children"];
-
     return result;
 
     function pushLevel1SubTrees() {
-        if (!tree.children) throw "pushLevel1SubTrees";
+        if (!tree.children.length) throw "pushLevel1SubTrees";
 
         for (let idx = 0; idx < tree.children.length; idx++) {
             const firstLevelChildrenMod = { angleInRadians: 0, distanceToCenter: 1 };

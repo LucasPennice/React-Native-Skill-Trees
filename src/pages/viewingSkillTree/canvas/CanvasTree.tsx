@@ -28,21 +28,21 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
 
     const defaultParentInfo = parentNodeInfo ?? { coordinates: { x: rC!.width, y: rC!.height }, numberOfChildren: 1, currentChildIndex: 0 };
 
-    const currentNodeCoordintes = nodeCoordinatesCentered.find((c) => c.id === tree.data.id)!;
+    const currentNodeCoordintes = nodeCoordinatesCentered.find((c) => c.id === tree.nodeId)!;
 
     const pathInitialPoint = defaultParentInfo.coordinates;
 
     const cx = currentNodeCoordintes.x;
     const cy = currentNodeCoordintes.y;
 
-    let newParentNodeInfo = { coordinates: { ...currentNodeCoordintes, x: cx, y: cy }, numberOfChildren: tree.children ? tree.children.length : 0 };
+    let newParentNodeInfo = { coordinates: { ...currentNodeCoordintes, x: cx, y: cy }, numberOfChildren: tree.children.length };
 
     const { circleBlurOnInactive, groupTransform, pathBlurOnInactive } = useHandleTreeAnimations(selectedNode, showLabel, tree);
 
     const nodeAndParentCompleted = (() => {
         if (tree.data.isCompleted !== true) return false;
 
-        const parentNode = findParentOfNode(wholeTree, tree.data.id);
+        const parentNode = findParentOfNode(wholeTree, tree.nodeId);
 
         if (!parentNode) return false;
 
@@ -53,7 +53,8 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
 
     const pathColor = nodeAndParentCompleted ? `${treeAccentColor}` : colors.line;
 
-    const textColor = tree.data.isCompleted ? treeAccentColor : tree.data.id === selectedNode ? "white" : colors.unmarkedText;
+    const textColor = tree.data.isCompleted ? treeAccentColor : tree.nodeId === selectedNode ? "white" : colors.unmarkedText;
+
     const letterToRender = tree.data.name ? tree.data.name[0] : "-";
 
     return (
@@ -75,20 +76,19 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
                 />
             )}
             {/* Recursive fucntion that renders the rest of the tree */}
-            {tree.children &&
-                tree.children.map((element, idx) => {
-                    return (
-                        <CanvasTree
-                            key={element.data.id}
-                            tree={element}
-                            wholeTree={wholeTree}
-                            treeAccentColor={treeAccentColor}
-                            parentNodeInfo={{ ...newParentNodeInfo, currentChildIndex: idx }}
-                            stateProps={{ selectedNode, showLabel, nodeCoordinatesCentered }}
-                            isRadial={isRadial}
-                        />
-                    );
-                })}
+            {tree.children.map((element, idx) => {
+                return (
+                    <CanvasTree
+                        key={element.nodeId}
+                        tree={element}
+                        wholeTree={wholeTree}
+                        treeAccentColor={treeAccentColor}
+                        parentNodeInfo={{ ...newParentNodeInfo, currentChildIndex: idx }}
+                        stateProps={{ selectedNode, showLabel, nodeCoordinatesCentered }}
+                        isRadial={isRadial}
+                    />
+                );
+            })}
 
             {showLabel && !isRadial && (
                 <Label treeAccentColor={treeAccentColor} tree={tree} coord={{ cx, cy }} pathBlurOnInactive={pathBlurOnInactive} />
@@ -98,7 +98,7 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
             )}
 
             <Node
-                key={`${tree.data.id}node`}
+                key={`${tree.nodeId}node`}
                 circleBlurOnInactive={circleBlurOnInactive}
                 isComplete={tree.data.isCompleted}
                 treeAccentColor={treeAccentColor}

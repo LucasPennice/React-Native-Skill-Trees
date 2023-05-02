@@ -45,6 +45,8 @@ function ViewingSkillTree() {
         dispatch(setSelectedDndZone(clickedZone));
     };
 
+    console.log(JSON.stringify(tentativeNewTree ?? currentTree));
+
     return (
         <View style={{ position: "relative", backgroundColor: colors.background, overflow: "hidden" }}>
             {currentTree && (

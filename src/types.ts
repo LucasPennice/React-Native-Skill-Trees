@@ -2,23 +2,23 @@ import { StyleProp, ViewStyle } from "react-native/types";
 
 export type Skill = {
     name: string;
-    id: string;
     isCompleted?: boolean;
 };
 
 export type SelectedNode = string | null;
 
 export interface Tree<T> {
-    isRoot?: boolean;
+    isRoot: boolean;
     parentId: string | undefined;
-    treeId?: string;
-    treeName?: string;
-    accentColor?: string;
+    treeId: string;
+    nodeId: string;
+    treeName: string;
+    accentColor: string;
     x: number;
     y: number;
     level: number;
     data: T;
-    children?: Tree<T>[];
+    children: Tree<T>[];
 }
 
 export type ModifiableProperties<T> = {

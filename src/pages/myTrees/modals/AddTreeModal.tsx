@@ -9,7 +9,7 @@ import ColorSelector from "../../../components/ColorsSelector";
 import RadioInput from "../../../components/RadioInput";
 import { Skill, Tree } from "../../../types";
 import { appendToUserTree } from "../../../redux/userTreesSlice";
-import { makeid } from "../../../functions/misc";
+import { createTree, makeid } from "../../../functions/misc";
 import { colors, possibleTreeColors } from "../../../parameters";
 
 function AddTreeModal() {
@@ -35,17 +35,7 @@ function AddTreeModal() {
     const createNewTree = () => {
         if (treeName === "" || selectedColor === "" || firstSkillName === "") return Alert.alert("Please fill all of the fields");
 
-        const newTree: Tree<Skill> = {
-            treeName: treeName.trim(),
-            accentColor: selectedColor,
-            isRoot: true,
-            parentId: undefined,
-            treeId: makeid(24),
-            level: 0,
-            x: 0,
-            y: 0,
-            data: { id: makeid(24), name: firstSkillName.trim(), isCompleted: firstSkillComplete },
-        };
+        const newTree = createTree(treeName, selectedColor, true, { name: firstSkillName, isCompleted: firstSkillComplete });
 
         dispatch(appendToUserTree(newTree));
         closeModal();

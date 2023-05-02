@@ -38,7 +38,7 @@ function ProgressIndicatorAndName() {
     const currentTree = useAppSelector(selectCurrentTree);
     const { width } = useAppSelector(selectScreenDimentions);
 
-    const treeAccentColor = currentTree && currentTree.accentColor ? currentTree.accentColor : colors.accent;
+    const treeAccentColor = currentTree ? currentTree.accentColor : colors.accent;
 
     const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}3D`, 30, 6);
 
@@ -107,7 +107,7 @@ function ProgressIndicatorAndName() {
                 textProps={{ ellipsizeMode: "tail", numberOfLines: 1 }}
                 style={{ color: colors.unmarkedText, maxWidth: width - 190 }}
                 fontSize={20}>
-                {currentTree.treeName ?? "Tree Name"}
+                {currentTree.treeName}
             </AppText>
         </View>
     );

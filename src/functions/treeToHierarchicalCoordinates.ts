@@ -30,12 +30,12 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         let desiredXValueToCenterChildren = 0;
         const isFirstNode = childrenIdx === 0;
 
-        const distance = findDistanceBetweenNodesById(completeTree, tree.data.id);
+        const distance = findDistanceBetweenNodesById(completeTree, tree.nodeId);
         const level = distance ? distance - 1 : 0;
 
-        const result: Tree<Skill> = { ...tree, x, y: level, level, children: undefined };
+        const result: Tree<Skill> = { ...tree, x, y: level, level, children: [] };
 
-        if (!tree.children || !tree.children.length) return result;
+        if (!tree.children.length) return result;
 
         result.children = [];
 
@@ -52,8 +52,6 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
             if (d) result.children.push(d);
         }
-
-        if (result.children.length === 0) delete result["children"];
 
         return result;
     }
@@ -146,7 +144,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
     function getTreeContourByLevel(tree: Tree<Skill>, result: { [key: string]: HierarchicalContour[] }) {
         //Base Case 👇
 
-        if (!tree.children || !tree.children.length) return;
+        if (!tree.children.length) return;
 
         //Recursive Case 👇
 
@@ -156,8 +154,8 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         const key = `${tree.level}`;
 
         const contourToAppend: HierarchicalContour = {
-            leftNode: { coord: leftmostNode.x, id: leftmostNode.data.id },
-            rightNode: { coord: rightmostNode.x, id: rightmostNode.data.id },
+            leftNode: { coord: leftmostNode.x, id: leftmostNode.nodeId },
+            rightNode: { coord: rightmostNode.x, id: rightmostNode.nodeId },
         };
 
         if (result[key]) result[key] = [...result[key], contourToAppend];
@@ -175,13 +173,13 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
         treesToShift: { byBiggestOverlap: string[]; byHalfOfBiggestOverlap: string[] },
         overlapDistance: number
     ) {
-        const currentTreeShiftDistance = getCurrentTreeShiftDistance(result.data.id);
+        const currentTreeShiftDistance = getCurrentTreeShiftDistance(result.nodeId);
 
         const updatedTree: Tree<Skill> = { ...result, x: result.x + currentTreeShiftDistance };
 
         //Base Case 👇
 
-        if (!result.children) return updatedTree;
+        if (!result.children.length) return updatedTree;
 
         updatedTree.children = [];
 
@@ -227,13 +225,13 @@ export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, s
 
     function getTreesToShiftFromNodePathInConflict(tree: Tree<Skill>) {
         //Base Case 👇
-        if (!tree.children || !tree.children.length) return undefined;
-        if (tree.isRoot) treesToShift.byHalfOfBiggestOverlap.push(tree.data.id);
+        if (!tree.children.length) return undefined;
+        if (tree.isRoot) treesToShift.byHalfOfBiggestOverlap.push(tree.nodeId);
 
         //Recursive Case 👇
         const currentLevel = tree.level;
         const lcaLevel = lcaIndex;
-        const nodeInPathIndexForChildren = tree.children.findIndex((t) => t.data.id === pathToRightNode[currentLevel + 1]);
+        const nodeInPathIndexForChildren = tree.children.findIndex((t) => t.nodeId === pathToRightNode[currentLevel + 1]);
         const areAnyOfChildrenInPath = nodeInPathIndexForChildren === -1 ? false : true;
 
         if (!areAnyOfChildrenInPath) return undefined;
@@ -243,21 +241,21 @@ export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, s
 
             if (i === nodeInPathIndexForChildren) {
                 if (currentLevel >= lcaLevel) {
-                    treesToShift.byBiggestOverlap.push(child.data.id);
+                    treesToShift.byBiggestOverlap.push(child.nodeId);
                     addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
                 } else {
-                    treesToShift.byHalfOfBiggestOverlap.push(child.data.id);
+                    treesToShift.byHalfOfBiggestOverlap.push(child.nodeId);
                 }
-                if (child.data.id === pathToRightNode[pathToRightNode.length - 1]) addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
+                if (child.nodeId === pathToRightNode[pathToRightNode.length - 1]) addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
                 getTreesToShiftFromNodePathInConflict(child);
             }
 
             if (i > nodeInPathIndexForChildren) {
                 if (currentLevel >= lcaLevel) {
-                    treesToShift.byBiggestOverlap.push(child.data.id);
+                    treesToShift.byBiggestOverlap.push(child.nodeId);
                     addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
                 } else {
-                    treesToShift.byHalfOfBiggestOverlap.push(child.data.id);
+                    treesToShift.byHalfOfBiggestOverlap.push(child.nodeId);
                     addEveryChildFromTreeToArray(child, treesToShift.byHalfOfBiggestOverlap);
                 }
             }
@@ -265,12 +263,12 @@ export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, s
     }
 
     function addEveryChildFromTreeToArray(tree: Tree<Skill>, arrToAdd: string[]) {
-        if (!tree.children || !tree.children.length) return;
+        if (!tree.children.length) return;
 
         for (let i = 0; i < tree.children.length; i++) {
             const element = tree.children[i];
 
-            arrToAdd.push(element.data.id);
+            arrToAdd.push(element.nodeId);
 
             addEveryChildFromTreeToArray(element, arrToAdd);
         }
@@ -279,7 +277,7 @@ export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, s
 
 export function treeToCoordArray(tree: Tree<Skill>, result: Coordinates[]) {
     // Recursive Case 👇
-    if (tree.children) {
+    if (tree.children.length) {
         for (let i = 0; i < tree.children.length; i++) {
             const element = tree.children[i];
             treeToCoordArray(element, result);
@@ -289,7 +287,7 @@ export function treeToCoordArray(tree: Tree<Skill>, result: Coordinates[]) {
     // Non Recursive Case 👇
 
     result.push({
-        id: tree.data.id,
+        id: tree.nodeId,
         name: tree.data.name,
         x: tree.x,
         y: tree.y,

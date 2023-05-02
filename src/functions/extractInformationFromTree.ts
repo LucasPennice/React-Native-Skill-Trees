@@ -3,11 +3,9 @@ import { NodeCoordinate, Skill, Tree } from "../types";
 export function findTreeHeight(rootNode?: Tree<Skill>) {
     if (!rootNode) return 0;
 
-    if (!rootNode.data) return 0;
-
     let maxHeight = 0;
 
-    if (!rootNode.children) return maxHeight + 1;
+    if (!rootNode.children.length) return maxHeight + 1;
 
     for (let child of rootNode.children) {
         let childHeight = findTreeHeight(child);
@@ -22,9 +20,9 @@ export function findNodeById(rootNode: Tree<Skill> | undefined, id: string | nul
     if (!rootNode) return undefined;
     if (!id) return undefined;
 
-    if (rootNode.data.id === id) return rootNode;
+    if (rootNode.nodeId === id) return rootNode;
 
-    if (!rootNode.children) return undefined;
+    if (!rootNode.children.length) return undefined;
 
     let result = undefined;
 
@@ -44,8 +42,8 @@ export function findDistanceBetweenNodesById(rootNode: Tree<Skill> | undefined, 
 
     //Base case 👇
 
-    if (rootNode.data.id === id) return 1;
-    if (!rootNode.children) return 0;
+    if (rootNode.nodeId === id) return 1;
+    if (!rootNode.children.length) return 0;
 
     //Recursive case 👇
 
@@ -109,12 +107,12 @@ export function returnPathFromRootToNode(tree: Tree<Skill>, nodeId: string) {
     return result;
 
     function getPathFromRootToNode(tree: Tree<Skill>, nodeId: string, arr: string[]) {
-        arr.push(tree.data.id);
+        arr.push(tree.nodeId);
 
         //Base Case 👇
-        if (tree.data.id === nodeId) return true;
+        if (tree.nodeId === nodeId) return true;
 
-        if (!tree.children || !tree.children.length) {
+        if (!tree.children.length) {
             arr.pop();
             return false;
         }
@@ -140,9 +138,9 @@ export function countCompletedNodesInTree(rootNode: Tree<Skill> | undefined) {
 
     //Base case 👇
 
-    if (!rootNode.children && rootNode.data.isCompleted) return 1;
-    if (!rootNode.children && !rootNode.data.isCompleted) return 0;
-    if (!rootNode.children) return 0;
+    if (!rootNode.children.length && rootNode.data.isCompleted) return 1;
+    if (!rootNode.children.length && !rootNode.data.isCompleted) return 0;
+    if (!rootNode.children.length) return 0;
 
     //Recursive case 👇
 
@@ -160,7 +158,7 @@ export function countNodesInTree(rootNode: Tree<Skill> | undefined) {
 
     //Base case 👇
 
-    if (!rootNode.children) return 1;
+    if (!rootNode.children.length) return 1;
 
     //Recursive case 👇
 
@@ -178,12 +176,12 @@ export function countNodesInTree(rootNode: Tree<Skill> | undefined) {
 export function extractTreeIds(rootNode: Tree<Skill>, idArr: string[]) {
     //Base case 👇
 
-    if (!rootNode.children) return idArr.push(rootNode.data.id);
+    if (!rootNode.children.length) return idArr.push(rootNode.nodeId);
 
     //Recursive case 👇
 
     for (let i = 0; i < rootNode.children.length; i++) {
         extractTreeIds(rootNode.children[i], idArr);
     }
-    return idArr.push(rootNode.data.id);
+    return idArr.push(rootNode.nodeId);
 }

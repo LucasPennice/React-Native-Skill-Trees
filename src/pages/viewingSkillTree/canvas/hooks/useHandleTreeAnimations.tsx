@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Skill, Tree } from "../../../../types";
 
 const useHandleTreeAnimations = (selectedNode: string | null, showLabel: boolean, tree: Tree<Skill>) => {
-    const { circleBlurOnInactive, pathBlurOnInactive } = useAnimationsForUnselected(selectedNode, tree.data.id);
+    const { circleBlurOnInactive, pathBlurOnInactive } = useAnimationsForUnselected(selectedNode, tree.nodeId);
 
     const { groupTransform } = useAnimationsOnSelect(selectedNode, tree);
 
@@ -14,7 +14,7 @@ const useHandleTreeAnimations = (selectedNode: string | null, showLabel: boolean
 export default useHandleTreeAnimations;
 
 function useAnimationsOnSelect(selectedNode: string | null, tree: Tree<Skill>) {
-    const treeId = tree.data.id;
+    const treeId = tree.nodeId;
 
     const shouldTransform = useValue(0);
 

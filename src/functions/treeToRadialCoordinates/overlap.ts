@@ -26,7 +26,7 @@ export function handleOverlap(tree: Tree<Skill>) {
     function mockShiftSubTreesToMinimizeSpace(tree: Tree<Skill>) {
         const subTrees = tree.children;
 
-        if (!subTrees) return tree;
+        if (!subTrees.length) return tree;
 
         let result = { ...tree };
 
@@ -138,7 +138,7 @@ export function handleOverlap(tree: Tree<Skill>) {
 function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill> {
     const subTrees = tree.children;
 
-    if (!subTrees) return tree;
+    if (!subTrees.length) return tree;
 
     const subTreesWithoutOverlap: Tree<Skill>[] = [];
 
@@ -212,7 +212,7 @@ export function getRadialTreeContourByLevel(tree: Tree<Skill>) {
     function getUnorderedTreeContourByLevel(tree: Tree<Skill>, result: { [key: string]: PolarContour[] }) {
         //Base Case 👇
 
-        if (!tree.children || !tree.children.length) return;
+        if (!tree.children.length) return;
 
         //Recursive Case 👇
 
@@ -223,11 +223,11 @@ export function getRadialTreeContourByLevel(tree: Tree<Skill>) {
 
         const leftmostNodePolarCoordinates = {
             ...cartesianToPositivePolarCoordinates({ x: leftmostNode.x, y: leftmostNode.y }, UNCENTERED_ROOT_COORDINATES),
-            id: leftmostNode.data.id,
+            id: leftmostNode.nodeId,
         };
         const rightmostNodetNodePolarCoordinates = {
             ...cartesianToPositivePolarCoordinates({ x: rightmostNode.x, y: rightmostNode.y }, UNCENTERED_ROOT_COORDINATES),
-            id: rightmostNode.data.id,
+            id: rightmostNode.nodeId,
         };
 
         const contourToAppend: PolarContour = {

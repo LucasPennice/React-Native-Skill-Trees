@@ -7,26 +7,24 @@ export function deleteNodeWithNoChildren(rootNode: Tree<Skill> | undefined, node
 
     //Base case 👇
 
-    if (rootNode.data.id === nodeToDelete.data.id) return undefined;
-    if (!rootNode.children) return rootNode;
+    if (rootNode.nodeId === nodeToDelete.nodeId) return undefined;
+    if (!rootNode.children.length) return rootNode;
 
     //Recursive case 👇
 
     let result: Tree<Skill> = { ...rootNode, children: [] };
 
-    if (rootNode.treeId) result.treeId = rootNode.treeId;
-    if (rootNode.treeName) result.treeName = rootNode.treeName;
+    result.treeId = rootNode.treeId;
+    result.treeName = rootNode.treeName;
 
     for (let i = 0; i < rootNode.children.length; i++) {
         const currentChildren = rootNode.children[i];
 
-        if (currentChildren.data.id !== nodeToDelete.data.id) {
+        if (currentChildren.nodeId !== nodeToDelete.nodeId) {
             const d = deleteNodeWithNoChildren(currentChildren, nodeToDelete);
             if (d) result.children!.push(d);
         }
     }
-
-    if (result.children!.length === 0) delete result["children"];
 
     return result;
 }
@@ -36,21 +34,21 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
 
     // //Base case 👇
 
-    if (!rootNode.children) return rootNode;
+    if (!rootNode.children.length) return rootNode;
 
-    if (rootNode.data.id === nodeToDelete.data.id) return returnHoistedNode(rootNode, childrenToHoist);
+    if (rootNode.nodeId === nodeToDelete.nodeId) return returnHoistedNode(rootNode, childrenToHoist);
 
     //Recursive case 👇
 
     let result: Tree<Skill> = { ...rootNode, children: [] };
 
-    if (rootNode.treeId) result.treeId = rootNode.treeId;
-    if (rootNode.treeName) result.treeName = rootNode.treeName;
+    result.treeId = rootNode.treeId;
+    result.treeName = rootNode.treeName;
 
     for (let i = 0; i < rootNode.children.length; i++) {
         const currentChildren = rootNode.children[i];
 
-        if (currentChildren.data.id !== nodeToDelete.data.id) {
+        if (currentChildren.nodeId !== nodeToDelete.nodeId) {
             const d = deleteNodeWithChildren(currentChildren, nodeToDelete, childrenToHoist);
             if (d) result.children!.push(d);
         } else {
@@ -59,8 +57,6 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
             result.children!.push(newNode);
         }
     }
-
-    if (result.children!.length === 0) delete result["children"];
 
     return result;
 
@@ -73,18 +69,16 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
 
         result.isRoot = parentNode.isRoot;
 
-        if (childrenToHoist.children && result.children) {
+        if (childrenToHoist.children.length && result.children.length) {
             result = { ...result, children: [...result.children, ...childrenToHoist.children] };
         }
 
         //Update the parentId of the hoisted nodes' children
-        if (result.children) {
-            result.children.forEach((e) => (e.parentId = result.data.id));
+        if (result.children.length) {
+            result.children.forEach((e) => (e.parentId = result.nodeId));
         }
 
-        result.children = result.children!.filter((c) => c.data.id !== childrenToHoist.data.id);
-
-        if (result.children.length === 0) delete result["children"];
+        result.children = result.children!.filter((c) => c.nodeId !== childrenToHoist.nodeId);
 
         return result;
     }
@@ -95,7 +89,7 @@ export function editTreeProperties(rootNode: Tree<Skill> | undefined, targetNode
 
     //Base Case 👇
 
-    if (rootNode.data.id === targetNode.data.id) {
+    if (rootNode.nodeId === targetNode.nodeId) {
         const result = { ...rootNode };
 
         const keysToEdit = Object.keys(newProperties);
@@ -106,7 +100,7 @@ export function editTreeProperties(rootNode: Tree<Skill> | undefined, targetNode
         return result;
     }
 
-    if (!rootNode.children) return rootNode;
+    if (!rootNode.children.length) return rootNode;
 
     //Recursive Case 👇
 
@@ -117,10 +111,8 @@ export function editTreeProperties(rootNode: Tree<Skill> | undefined, targetNode
 
         const d = editTreeProperties(element, targetNode, newProperties);
 
-        if (d) result.children!.push(d);
+        if (d) result.children.push(d);
     }
-
-    if (result.children!.length === 0) delete result["children"];
 
     return result;
 }
@@ -134,7 +126,7 @@ export function mutateEveryTree(rootNode: Tree<Skill> | undefined, mutation: (v:
 
     let result: Tree<Skill> = { ...rootNode, ...mutatedTree, children: [] };
 
-    if (!rootNode.children) return result;
+    if (!rootNode.children.length) return result;
 
     //Recursive Case 👇
 
@@ -143,39 +135,36 @@ export function mutateEveryTree(rootNode: Tree<Skill> | undefined, mutation: (v:
 
         const d = mutateEveryTree(element, mutation);
 
-        if (d) result.children!.push(d);
+        if (d) result.children.push(d);
     }
-
-    if (result.children!.length === 0) delete result["children"];
 
     return result;
 }
 
-export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: Tree<Skill>, newNode: Skill) {
-    //Tengo 3 casos
-
+export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: Tree<Skill>, newNode: Tree<Skill>) {
     const targetNode = findNodeById(currentTree, selectedDndZone.ofNode);
-
     if (!targetNode) throw "couldnt find targetNode on getTentativeModifiedTree";
 
+    const treePropertiesToInherit = { accentColor: targetNode.accentColor, treeId: targetNode.treeId, treeName: targetNode.treeName };
+
     if (selectedDndZone.type === "PARENT") {
-        const oldParent: Tree<Skill> = { ...targetNode, isRoot: false, parentId: newNode.id };
+        //The old parent now becomes the child of the new node
+        const oldParent: Tree<Skill> = { ...targetNode, isRoot: false, parentId: newNode.nodeId };
 
-        delete oldParent["treeId"];
-        delete oldParent["treeName"];
-        delete oldParent["accentColor"];
-
-        const newProperties: ModifiableProperties<Tree<Skill>> = { ...targetNode, data: newNode, children: [oldParent] };
+        const newProperties: ModifiableProperties<Tree<Skill>> = { ...targetNode, ...newNode, ...treePropertiesToInherit, children: [oldParent] };
 
         return editTreeProperties(currentTree, targetNode, newProperties);
     }
 
     const newChild: Tree<Skill> = {
-        data: newNode,
-        parentId: targetNode.data.id,
+        ...newNode,
+        parentId: targetNode.nodeId,
         level: targetNode.level + 1,
         x: targetNode.x,
         y: targetNode.y + DISTANCE_BETWEEN_GENERATIONS,
+        children: [],
+        isRoot: false,
+        ...treePropertiesToInherit,
     };
 
     if (selectedDndZone.type === "ONLY_CHILDREN") {
@@ -186,7 +175,7 @@ export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: 
 
     //From now on we are in the "BROTHERS" cases
 
-    const parentOfTargetNode = findParentOfNode(currentTree, targetNode.data.id);
+    const parentOfTargetNode = findParentOfNode(currentTree, targetNode.nodeId);
 
     if (!parentOfTargetNode) throw "couldnt find parentOfTargetNode on getTentativeModifiedTree";
     if (!parentOfTargetNode.children) throw "parentOfTargetNode.children is undefined on getTentativeModifiedTree";
@@ -196,24 +185,30 @@ export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: 
     for (let i = 0; i < parentOfTargetNode.children.length; i++) {
         const element = parentOfTargetNode.children[i];
 
-        if (selectedDndZone.type === "LEFT_BROTHER" && element.data.id === targetNode.data.id)
+        if (selectedDndZone.type === "LEFT_BROTHER" && element.nodeId === targetNode.nodeId)
             newChildren.push({
-                data: newNode,
+                ...targetNode,
+                ...newNode,
                 parentId: targetNode.parentId,
                 level: targetNode.level,
                 x: targetNode.x - DISTANCE_BETWEEN_CHILDREN,
                 y: targetNode.y,
+                children: [],
+                ...treePropertiesToInherit,
             });
 
         newChildren.push(element);
 
-        if (selectedDndZone.type === "RIGHT_BROTHER" && element.data.id === targetNode.data.id)
+        if (selectedDndZone.type === "RIGHT_BROTHER" && element.nodeId === targetNode.nodeId)
             newChildren.push({
-                data: newNode,
+                ...targetNode,
+                ...newNode,
                 parentId: targetNode.parentId,
                 level: targetNode.level,
                 x: targetNode.x + DISTANCE_BETWEEN_CHILDREN,
                 y: targetNode.y,
+                children: [],
+                ...treePropertiesToInherit,
             });
     }
 
@@ -228,7 +223,7 @@ export function mutateEveryTreeNode(rootNode: Tree<Skill> | undefined, mutation:
     let result: Tree<Skill> = { ...mutation(rootNode) };
 
     //Base Case 👇
-    if (!rootNode.children || !result.children) return result;
+    if (!rootNode.children.length) return result;
 
     // //Recursive Case 👇
 
@@ -243,8 +238,6 @@ export function mutateEveryTreeNode(rootNode: Tree<Skill> | undefined, mutation:
     }
 
     result.children = updatedChildren;
-
-    if (result.children!.length === 0) delete result["children"];
 
     return result;
 }

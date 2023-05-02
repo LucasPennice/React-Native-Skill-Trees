@@ -11,7 +11,7 @@ export function fixLevelOverflow(tree: Tree<Skill>) {
     let loopAvoider = 0;
     let levelOverflow: LevelOverflow | true = true;
 
-    if (!updatedTree.children || !updatedTree.children.length) return tree;
+    if (!updatedTree.children.length) return tree;
 
     while (levelOverflow !== undefined && loopAvoider < 20) {
         let treeAngleSpanPerLevel: number[] = [];
@@ -54,7 +54,7 @@ function factoryUpdateRadiusOfTree(levelOverflow: LevelOverflow, wholeTree: Tree
 
         const radiusIncreaseIndex = levelOverflow!.overflow / (2 * Math.PI);
 
-        const parentNode = findParentOfNode(wholeTree, tree.data.id);
+        const parentNode = findParentOfNode(wholeTree, tree.nodeId);
 
         if (!parentNode) throw "!parentNode at factoryUpdateRadiusOfTree";
 

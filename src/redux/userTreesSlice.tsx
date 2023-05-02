@@ -9,7 +9,7 @@ type UserTreesSlice = {
     currentTreeId: string | undefined;
     selectedNode: string | null;
     selectedDndZone: DnDZone | undefined;
-    newNode: Skill | undefined;
+    newNode: Tree<Skill> | undefined;
 };
 
 // Define the initial state using that type
@@ -67,7 +67,7 @@ export const userTreesSlice = createSlice({
         clearNewNodeState: (state) => {
             state.newNode = undefined;
         },
-        setNewNode: (state, action: PayloadAction<Skill>) => {
+        setNewNode: (state, action: PayloadAction<Tree<Skill>>) => {
             state.newNode = { ...action.payload };
         },
     },

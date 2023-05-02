@@ -62,13 +62,13 @@ export function getTreesToShiftForCircularTree(result: Tree<Skill>, nodesInConfl
 
     function getTreesToShiftFromNodePathInConflict(tree: Tree<Skill>) {
         //Base Case 👇
-        if (!tree.children || !tree.children.length) return undefined;
-        if (tree.isRoot) treesToShift.byHalfOfBiggestOverlap.push(tree.data.id);
+        if (!tree.children.length) return undefined;
+        if (tree.isRoot) treesToShift.byHalfOfBiggestOverlap.push(tree.nodeId);
 
         //Recursive Case 👇
         const currentLevel = tree.level;
         const lcaLevel = lcaIndex;
-        const nodeInPathIndexForChildren = tree.children.findIndex((t) => t.data.id === pathToRightNode[currentLevel + 1]);
+        const nodeInPathIndexForChildren = tree.children.findIndex((t) => t.nodeId === pathToRightNode[currentLevel + 1]);
         const areAnyOfChildrenInPath = nodeInPathIndexForChildren === -1 ? false : true;
 
         if (!areAnyOfChildrenInPath) return undefined;
@@ -78,21 +78,21 @@ export function getTreesToShiftForCircularTree(result: Tree<Skill>, nodesInConfl
 
             if (i === nodeInPathIndexForChildren) {
                 if (currentLevel >= lcaLevel) {
-                    treesToShift.byBiggestOverlap.push(child.data.id);
+                    treesToShift.byBiggestOverlap.push(child.nodeId);
                     addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
                 } else {
-                    treesToShift.byHalfOfBiggestOverlap.push(child.data.id);
+                    treesToShift.byHalfOfBiggestOverlap.push(child.nodeId);
                 }
-                if (child.data.id === pathToRightNode[pathToRightNode.length - 1]) addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
+                if (child.nodeId === pathToRightNode[pathToRightNode.length - 1]) addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
                 getTreesToShiftFromNodePathInConflict(child);
             }
 
             if (i < nodeInPathIndexForChildren) {
                 if (currentLevel >= lcaLevel) {
-                    treesToShift.byBiggestOverlap.push(child.data.id);
+                    treesToShift.byBiggestOverlap.push(child.nodeId);
                     addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
                 } else {
-                    treesToShift.byHalfOfBiggestOverlap.push(child.data.id);
+                    treesToShift.byHalfOfBiggestOverlap.push(child.nodeId);
                     addEveryChildFromTreeToArray(child, treesToShift.byHalfOfBiggestOverlap);
                 }
             }
@@ -100,12 +100,12 @@ export function getTreesToShiftForCircularTree(result: Tree<Skill>, nodesInConfl
     }
 
     function addEveryChildFromTreeToArray(tree: Tree<Skill>, arrToAdd: string[]) {
-        if (!tree.children || !tree.children.length) return;
+        if (!tree.children.length) return;
 
         for (let i = 0; i < tree.children.length; i++) {
             const element = tree.children[i];
 
-            arrToAdd.push(element.data.id);
+            arrToAdd.push(element.nodeId);
 
             addEveryChildFromTreeToArray(element, arrToAdd);
         }
@@ -117,7 +117,7 @@ export function shiftNodesCounterClockWise(
     treesToShift: { byBiggestOverlap: string[]; byHalfOfBiggestOverlap: string[] },
     overlapAngle: number
 ) {
-    const shiftAngleForTree = getShiftAngleForTree(result.data.id);
+    const shiftAngleForTree = getShiftAngleForTree(result.nodeId);
 
     const treeCoordBeforeShift = cartesianToPositivePolarCoordinates({ x: result.x, y: result.y }, UNCENTERED_ROOT_COORDINATES);
 
@@ -132,7 +132,7 @@ export function shiftNodesCounterClockWise(
 
     //Base Case 👇
 
-    if (!result.children || !result.children.length) return updatedTree;
+    if (!result.children.length) return updatedTree;
 
     updatedTree.children = [];
 

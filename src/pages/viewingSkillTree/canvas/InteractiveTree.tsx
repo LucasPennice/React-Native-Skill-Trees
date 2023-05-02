@@ -43,8 +43,6 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
     const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, foundNodeCoordinates, isTakingScreenshot);
     //
 
-    const treeAccentColor = tree.accentColor ? tree.accentColor : colors.accent;
-
     //Handles the blur animation on tree change
     useEffect(() => {
         runBlurAnimation();
@@ -72,7 +70,7 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
                                 stateProps={{ selectedNode, showLabel, nodeCoordinatesCentered: nodeCoordinatesCentered }}
                                 tree={tree}
                                 wholeTree={tree}
-                                treeAccentColor={treeAccentColor}
+                                treeAccentColor={tree.accentColor}
                                 rootCoordinates={{ width: 0, height: 0 }}
                             />
                             {showDndZones && <DragAndDropZones data={dragAndDropZones} selectedDndZone={selectedDndZone} />}

@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
-import { View, Alert } from "react-native";
+import { Alert, View } from "react-native";
 import AppText from "../../../components/AppText";
+import AppTextInput from "../../../components/AppTextInput";
+import FlingToDismissModal from "../../../components/FlingToDismissModal";
+import RadioInput from "../../../components/RadioInput";
+import { createTree } from "../../../functions/misc";
+import { colors } from "../../../parameters";
 import { selectCanvasDisplaySettings, toggleNewNode } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { colors } from "../../../parameters";
-import FlingToDismissModal from "../../../components/FlingToDismissModal";
-import AppTextInput from "../../../components/AppTextInput";
-import RadioInput from "../../../components/RadioInput";
-import { setNewNode, setSelectedNode } from "../../../redux/userTreesSlice";
-import { makeid } from "../../../functions/misc";
+import { selectCurrentTree, setNewNode, setSelectedNode } from "../../../redux/userTreesSlice";
 
 function NewNodeModal() {
     const { openMenu } = useAppSelector(selectCanvasDisplaySettings);
+    const currentTree = useAppSelector(selectCurrentTree);
     const dispatch = useAppDispatch();
 
     const [text, onChangeText] = useState("");
@@ -25,8 +26,13 @@ function NewNodeModal() {
     const closeModal = () => dispatch(toggleNewNode());
 
     const addNewNode = () => {
+        if (!currentTree) return;
+
         if (text === "") return Alert.alert("Please enter a name for the new skill");
-        dispatch(setNewNode({ name: text.trim(), isCompleted, id: makeid(24) }));
+
+        const newNode = createTree(currentTree.treeName, currentTree.accentColor, false, { name: text.trim(), isCompleted });
+
+        dispatch(setNewNode(newNode));
         dispatch(toggleNewNode());
         dispatch(setSelectedNode(null));
     };

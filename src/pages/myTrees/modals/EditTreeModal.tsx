@@ -9,6 +9,7 @@ import { selectTreeOptions, setTree } from "../../../redux/editTreeSlice";
 import { mutateUserTree, removeUserTree } from "../../../redux/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 import { colors, possibleTreeColors } from "../../../parameters";
+import { mutateEveryTree } from "../../../functions/mutateTree";
 
 function EditTreeModal() {
     //Redux State
@@ -19,9 +20,9 @@ function EditTreeModal() {
     const [selectedColor, setSelectedColor] = useState<string>("");
 
     useEffect(() => {
-        const defaultTreeName = tree && tree.treeName ? tree.treeName : "";
+        const defaultTreeName = tree ? tree.treeName : "";
         setTreeName(defaultTreeName);
-        const defaultAccentColor = tree && tree.accentColor ? tree.accentColor : "";
+        const defaultAccentColor = tree ? tree.accentColor : "";
         setSelectedColor(defaultAccentColor);
     }, [open]);
 
@@ -30,7 +31,7 @@ function EditTreeModal() {
     const closeModal = () => dispatch(setTree(undefined));
 
     const deleteTree = () => {
-        if (!tree || !tree.treeId) return;
+        if (!tree) return;
 
         dispatch(removeUserTree(tree.treeId));
         closeModal();
@@ -47,17 +48,27 @@ function EditTreeModal() {
             { cancelable: true }
         );
 
-    const newTreeValue: Tree<Skill> | undefined = tree === undefined ? undefined : { ...tree, accentColor: selectedColor, treeName: treeName };
+    const updateTreeNameAndColor = (selectedColor: string, treeName: string) => () => {
+        if (selectedColor === "") return Alert.alert("Please select a color");
+        if (treeName === "") return Alert.alert("Please give the tree a name");
 
-    const updateTreeNameAndColor = (newTreeValue: Tree<Skill> | undefined) => () => {
-        if (newTreeValue === undefined) return;
+        const updatedTree = mutateEveryTree(tree, updateTreeNameAndColor);
 
-        dispatch(mutateUserTree(newTreeValue));
+        if (updatedTree === undefined) return;
+
+        dispatch(mutateUserTree(updatedTree));
         closeModal();
+
+        function updateTreeNameAndColor(tree: Tree<Skill>): Tree<Skill> {
+            return { ...tree, accentColor: selectedColor, treeName };
+        }
     };
 
     return (
-        <FlingToDismissModal closeModal={closeModal} open={open} leftHeaderButton={{ onPress: updateTreeNameAndColor(newTreeValue), title: "Save" }}>
+        <FlingToDismissModal
+            closeModal={closeModal}
+            open={open}
+            leftHeaderButton={{ onPress: updateTreeNameAndColor(selectedColor, treeName), title: "Save" }}>
             <View style={{ flex: 1 }}>
                 <AppTextInput placeholder={"Tree Name"} textState={[treeName, setTreeName]} containerStyles={{ marginVertical: 20 }} />
                 <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
