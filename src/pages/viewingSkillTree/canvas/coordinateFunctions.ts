@@ -1,6 +1,6 @@
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { CanvasDimensions, NodeCoordinate, DnDZone, Skill, Tree } from "../../../types";
-import { Coordinates, PlotTreeReingoldTiltfordAlgorithm } from "../../../functions/treeToHierarchicalCoordinates";
+import { CanvasDimensions, NodeCoordinate, DnDZone, Skill, Tree, Coordinates } from "../../../types";
+import { PlotTreeReingoldTiltfordAlgorithm } from "../../../functions/treeToHierarchicalCoordinates";
 import {
     BROTHER_DND_ZONE_HEIGHT,
     CANVAS_HORIZONTAL_PADDING,

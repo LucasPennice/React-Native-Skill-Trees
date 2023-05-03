@@ -21,6 +21,11 @@ export interface Tree<T> {
     children: Tree<T>[];
 }
 
+export type CirclePositionInCanvas = { x: number; y: number; id: string };
+export type Coordinates = { x: number; y: number; id: string; level: number; parentId: string | null; name: string };
+
+export type NodeCoordinate = { x: number; y: number; id: string; level: number; parentId: string | null };
+
 export type ModifiableProperties<T> = {
     [Property in keyof T]: T[Property];
 };
@@ -33,9 +38,6 @@ export type DnDZone = {
     width: number;
     height: number;
 };
-
-export type CirclePositionInCanvas = { x: number; y: number; id: string };
-export type NodeCoordinate = { x: number; y: number; id: string; level: number; parentId: string | null };
 
 export type CanvasDimensions = {
     canvasWidth: number;

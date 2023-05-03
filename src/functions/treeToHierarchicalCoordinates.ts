@@ -1,7 +1,6 @@
 import { findDistanceBetweenNodesById, findLowestCommonAncestorIdOfNodes, returnPathFromRootToNode } from "./extractInformationFromTree";
-import { Skill, Tree } from "../types";
+import { Coordinates, Skill, Tree } from "../types";
 
-export type Coordinates = { x: number; y: number; id: string; level: number; parentId: string | null; name: string };
 type HierarchicalContour = { leftNode: { coord: number; id: string }; rightNode: { coord: number; id: string } };
 
 export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => {

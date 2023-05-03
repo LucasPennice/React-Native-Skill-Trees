@@ -1,7 +1,7 @@
-import { Skill, Tree } from "../../types";
+import { Coordinates, Skill, Tree } from "../../types";
 import { cartesianToPositivePolarCoordinates, polarToCartesianCoordinates } from "../coordinateSystem";
 import { findLowestCommonAncestorIdOfNodes, returnPathFromRootToNode } from "../extractInformationFromTree";
-import { Coordinates, treeToCoordArray } from "../treeToHierarchicalCoordinates";
+import { treeToCoordArray } from "../treeToHierarchicalCoordinates";
 import { firstIteration } from "./firstInstance";
 import { handleOverlap } from "./overlap";
 
