@@ -185,3 +185,15 @@ export function extractTreeIds(rootNode: Tree<Skill>, idArr: string[]) {
     }
     return idArr.push(rootNode.nodeId);
 }
+
+export function addEveryChildFromTreeToArray(tree: Tree<Skill>, arrToAdd: string[]) {
+    if (!tree.children.length) return;
+
+    for (let i = 0; i < tree.children.length; i++) {
+        const element = tree.children[i];
+
+        arrToAdd.push(element.nodeId);
+
+        addEveryChildFromTreeToArray(element, arrToAdd);
+    }
+}

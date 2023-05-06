@@ -25,8 +25,6 @@ export function fixLevelOverflow(tree: Tree<Skill>) {
 
         levelOverflow = checkForLevelOverlow(treeAngleSpanPerLevel);
 
-        console.log(levelOverflow);
-
         if (levelOverflow) updatedTree = increaseRadiusOfLevelAndBelow(updatedTree, levelOverflow!);
         loopAvoider++;
     }

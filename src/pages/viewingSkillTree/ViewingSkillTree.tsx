@@ -1,4 +1,4 @@
-import { SkiaDomView } from "@shopify/react-native-skia";
+import { SkiaDomView, useCanvasRef } from "@shopify/react-native-skia";
 import { useContext, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 import { IsSharingAvailableContext } from "../../../App";
@@ -27,7 +27,7 @@ function ViewingSkillTree() {
     const dispatch = useAppDispatch();
     //Hooks
     const isSharingAvailable = useContext(IsSharingAvailableContext);
-    const canvasRef = useRef<SkiaDomView | null>(null);
+    const canvasRef = useCanvasRef();
     const [isTakingScreenshot, setIsTakingScreenshot] = useState(false);
     useRunHomepageCleanup();
     //Derived State
@@ -44,8 +44,6 @@ function ViewingSkillTree() {
         if (mode !== "AddingNode") return;
         dispatch(setSelectedDndZone(clickedZone));
     };
-
-    console.log(JSON.stringify(tentativeNewTree ?? currentTree));
 
     return (
         <View style={{ position: "relative", backgroundColor: colors.background, overflow: "hidden" }}>
