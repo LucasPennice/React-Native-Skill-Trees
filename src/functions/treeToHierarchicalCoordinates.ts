@@ -78,18 +78,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
             }
         }
 
-        // result = centerRoot(result);
-
         return result;
-
-        function centerRoot(tree: Tree<Skill>) {
-            if (!tree.children || !tree.children.length) return tree;
-
-            const leftChildrenCoord = tree.children[0].x;
-            const rightChildrenCoord = tree.children[tree.children.length - 1].x;
-
-            return { ...tree, x: leftChildrenCoord + (rightChildrenCoord - leftChildrenCoord) / 2 } as Tree<Skill>;
-        }
     }
 
     type OverlapCheck = undefined | { biggestOverlap: number; nodesInConflict: [string, string] };
