@@ -3,18 +3,17 @@ import { MutableRefObject, useEffect } from "react";
 import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
-import { NAV_HEGIHT, centerFlex, colors } from "../../../parameters";
-import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
+import { NAV_HEGIHT, centerFlex } from "../../../parameters";
 import { useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { selectTreeSlice } from "../../../redux/userTreesSlice";
-import { DnDZone, Skill, Tree } from "../../../types";
+import { CoordinatesWithTreeData, DnDZone, ParentId, Skill, Tree } from "../../../types";
 import PopUpMenu from "../components/PopUpMenu";
-import CanvasTree from "./CanvasTree";
 import DragAndDropZones from "./DragAndDropZones";
-import { calculateDragAndDropZones, centerNodesInCanvas, getCanvasDimensions, getNodesCoordinates } from "./coordinateFunctions";
+import { BombasticToNormal, calculateDragAndDropZones, centerNodesInCanvas, getCanvasDimensions, getNodesCoordinates } from "./coordinateFunctions";
 import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
 import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
+import HierarchicalSkillTree from "./HierarchicalSkillTree";
 
 type InteractiveTreeProps = {
     tree: Tree<Skill>;
@@ -29,12 +28,13 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
     //Redux State
     const screenDimentions = useAppSelector(selectScreenDimentions);
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
-    const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
     //Derived State
-    const nodeCoordinates = getNodesCoordinates(tree, "hierarchy");
+    const coordinatesWithTreeData = getNodesCoordinates(tree, "hierarchy");
+    const nodeCoordinates = BombasticToNormal(coordinatesWithTreeData);
     const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
     const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
     const dragAndDropZones = calculateDragAndDropZones(nodeCoordinatesCentered);
+    const centeredCoordinatedWithTreeData = getCoordinatedWithoutTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
     const foundNodeCoordinates = nodeCoordinates.find((c) => c.id === selectedNode);
 
     //Hooks
@@ -66,13 +66,8 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
                             }}
                             mode="continuous"
                             ref={canvasRef}>
-                            <CanvasTree
-                                stateProps={{ selectedNode, showLabel, nodeCoordinatesCentered: nodeCoordinatesCentered }}
-                                tree={tree}
-                                wholeTree={tree}
-                                treeAccentColor={tree.accentColor}
-                                rootCoordinates={{ width: 0, height: 0 }}
-                            />
+                            <HierarchicalSkillTree nodeCoordinatesCentered={centeredCoordinatedWithTreeData} selectedNode={selectedNode} />
+
                             {showDndZones && <DragAndDropZones data={dragAndDropZones} selectedDndZone={selectedDndZone} />}
                             <Blur blur={blur} />
                         </Canvas>
@@ -85,5 +80,35 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
 }
 
 InteractiveTree.whyDidYouRender = true;
+
+//The animations break for some reason when using CoordinatesWithTreeData
+//It seems to be a bug of reanimated 2
+function getCoordinatedWithoutTreeData(
+    coordinatesWithTreeData: CoordinatesWithTreeData[],
+    nodeCoordinatesCentered: {
+        x: number;
+        y: number;
+        id: string;
+        level: number;
+        parentId: ParentId;
+    }[]
+): CoordinatesWithTreeData[] {
+    return nodeCoordinatesCentered.map((centeredCoord, i) => {
+        const currentBombastic = coordinatesWithTreeData[i];
+
+        return {
+            accentColor: currentBombastic.accentColor,
+            data: currentBombastic.data,
+            isRoot: currentBombastic.isRoot,
+            level: currentBombastic.level,
+            nodeId: currentBombastic.nodeId,
+            parentId: currentBombastic.parentId,
+            treeId: currentBombastic.treeId,
+            treeName: currentBombastic.treeName,
+            x: centeredCoord.x,
+            y: centeredCoord.y,
+        };
+    });
+}
 
 export default InteractiveTree;

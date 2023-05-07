@@ -4,7 +4,7 @@ import {
     findLowestCommonAncestorIdOfNodes,
     returnPathFromRootToNode,
 } from "./extractInformationFromTree";
-import { Coordinates, HierarchicalContour, Skill, Tree } from "../types";
+import { CoordinatesWithTreeData, Coordinates, HierarchicalContour, Skill, Tree } from "../types";
 import { findNodeById } from "./extractInformationFromTree";
 
 export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => {
@@ -14,7 +14,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
     result = handleOverlap(result);
 
-    let treeCoordinates: Coordinates[] = [];
+    let treeCoordinates: CoordinatesWithTreeData[] = [];
     treeToCoordArray(result, treeCoordinates);
 
     const smallestXCoordinate = Math.min(...treeCoordinates.map((c) => c.x));
@@ -313,7 +313,7 @@ export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, s
     }
 }
 
-export function treeToCoordArray(tree: Tree<Skill>, result: Coordinates[]) {
+export function treeToCoordArray(tree: Tree<Skill>, result: CoordinatesWithTreeData[]) {
     // Recursive Case 👇
     if (tree.children.length) {
         for (let i = 0; i < tree.children.length; i++) {
@@ -325,11 +325,15 @@ export function treeToCoordArray(tree: Tree<Skill>, result: Coordinates[]) {
     // Non Recursive Case 👇
 
     result.push({
-        id: tree.nodeId,
-        name: tree.data.name,
+        accentColor: tree.accentColor,
+        data: tree.data,
+        isRoot: tree.isRoot,
+        nodeId: tree.nodeId,
+        treeId: tree.treeId,
+        treeName: tree.treeName,
         x: tree.x,
         y: tree.y,
         level: tree.level,
-        parentId: tree.parentId ?? null,
+        parentId: tree.parentId,
     });
 }

@@ -1,4 +1,4 @@
-import { Coordinates, Skill, Tree } from "../../types";
+import { CoordinatesWithTreeData, Coordinates, Skill, Tree } from "../../types";
 import { treeToCoordArray } from "../treeToHierarchicalCoordinates";
 import { firstIteration } from "./firstInstance";
 import { handleOverlap } from "./overlap";
@@ -12,7 +12,7 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
 
     result = handleOverlap(result);
 
-    let treeCoordinates: Coordinates[] = [];
+    let treeCoordinates: CoordinatesWithTreeData[] = [];
     treeToCoordArray(result, treeCoordinates);
 
     const smallestXCoordinate = Math.min(...treeCoordinates.map((c) => c.x));

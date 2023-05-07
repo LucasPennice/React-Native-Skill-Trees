@@ -38,6 +38,8 @@ const useCanvasTouchHandler = ({ nodeCoordinatesCentered, onNodeClick, tree, dra
 
                 const clickedNode = nodeCoordinatesCentered.find(didTapCircle(touchInfo));
 
+                console.log(clickedNode);
+
                 if (clickedNode === undefined) return dispatch(setSelectedNode(null));
 
                 if (selectedNode != clickedNode.id && onNodeClick) return onNodeClick(clickedNode.id);

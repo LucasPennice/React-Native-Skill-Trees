@@ -91,7 +91,13 @@ function CanvasTree({ tree, parentNodeInfo, stateProps, rootCoordinates: rC, who
             })}
 
             {showLabel && !isRadial && (
-                <Label treeAccentColor={treeAccentColor} tree={tree} coord={{ cx, cy }} pathBlurOnInactive={pathBlurOnInactive} />
+                <Label
+                    treeAccentColor={treeAccentColor}
+                    color={"red"}
+                    text={tree.data.name}
+                    coord={{ cx, cy }}
+                    pathBlurOnInactive={pathBlurOnInactive}
+                />
             )}
             {showLabel && isRadial && (
                 <RadialLabel treeAccentColor={treeAccentColor} tree={tree} coord={{ cx, cy }} pathBlurOnInactive={pathBlurOnInactive} />

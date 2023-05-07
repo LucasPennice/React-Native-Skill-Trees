@@ -1,5 +1,5 @@
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { CanvasDimensions, NodeCoordinate, DnDZone, Skill, Tree, Coordinates } from "../../../types";
+import { CanvasDimensions, NodeCoordinate, DnDZone, Skill, Tree, Coordinates, CoordinatesWithTreeData } from "../../../types";
 import { PlotTreeReingoldTiltfordAlgorithm } from "../../../functions/treeToHierarchicalCoordinates";
 import {
     BROTHER_DND_ZONE_HEIGHT,
@@ -14,11 +14,11 @@ import {
 } from "../../../parameters";
 import { PlotCircularTree } from "../../../functions/treeToRadialCoordinates/general";
 
-export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): NodeCoordinate[] {
+export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): CoordinatesWithTreeData[] {
     if (!currentTree) return [];
 
-    let unscaledCoordinates: Coordinates[] | undefined = undefined;
-    let scaledCoordinates: Coordinates[] | undefined = undefined;
+    let unscaledCoordinates: CoordinatesWithTreeData[] = [];
+    let scaledCoordinates: CoordinatesWithTreeData[] = [];
 
     if (mode === "hierarchy") {
         unscaledCoordinates = PlotTreeReingoldTiltfordAlgorithm(currentTree);
@@ -30,13 +30,13 @@ export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: 
 
     return scaledCoordinates;
 
-    function scaleCoordinatesAfterReingoldTiltford(coordToScale: Coordinates[]) {
+    function scaleCoordinatesAfterReingoldTiltford(coordToScale: CoordinatesWithTreeData[]) {
         return coordToScale.map((f) => {
             return { ...f, x: f.x * DISTANCE_BETWEEN_CHILDREN + 2 * CIRCLE_SIZE, y: f.y * DISTANCE_BETWEEN_GENERATIONS + CIRCLE_SIZE };
         });
     }
 
-    function scaleCoordinatesAfterRadialReingoldTiltford(coordToScale: Coordinates[]) {
+    function scaleCoordinatesAfterRadialReingoldTiltford(coordToScale: CoordinatesWithTreeData[]) {
         //We cannot scale by different constants the nodes will not be rendered along the circumferences
 
         const SCALE = DISTANCE_BETWEEN_GENERATIONS;
@@ -210,5 +210,17 @@ export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDim
 
     return normalizedCoordinates.map((c) => {
         return { ...c, x: c.x + paddingFromLeftBorder, y: c.y + paddingFromTopBorder };
+    });
+}
+
+export function BombasticToNormal(foo: CoordinatesWithTreeData[]): NodeCoordinate[] {
+    return foo.map((bb) => {
+        return {
+            id: bb.nodeId,
+            level: bb.level,
+            parentId: bb.parentId,
+            x: bb.x,
+            y: bb.y,
+        };
     });
 }

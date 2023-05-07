@@ -8,7 +8,7 @@ import { useAppSelector } from "../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { Skill, Tree } from "../../types";
 import CanvasTree from "../viewingSkillTree/canvas/CanvasTree";
-import { centerNodesInCanvas, getCanvasDimensions, getNodesCoordinates } from "../viewingSkillTree/canvas/coordinateFunctions";
+import { BombasticToNormal, centerNodesInCanvas, getCanvasDimensions, getNodesCoordinates } from "../viewingSkillTree/canvas/coordinateFunctions";
 import useHandleCanvasScroll from "../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
 
 const mockInputTree: Tree<Skill> = {
@@ -430,7 +430,8 @@ function Homepage() {
     const screenDimentions = useAppSelector(selectScreenDimentions);
     //Derived State
     // const inputTree = getInputTree(userTrees);
-    const nodeCoordinates = getNodesCoordinates(mockInputTree, "radial");
+    const BBnodeCoordinates = getNodesCoordinates(mockInputTree, "radial");
+    const nodeCoordinates = BombasticToNormal(BBnodeCoordinates);
     const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
     const { canvasHeight, canvasWidth } = canvasDimentions;
     const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);

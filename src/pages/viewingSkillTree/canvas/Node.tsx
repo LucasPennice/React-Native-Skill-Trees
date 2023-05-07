@@ -1,23 +1,24 @@
 import {
+    Circle,
+    DiffRect,
     Group,
     Path,
-    useFont,
-    Text,
+    Skia,
     SkiaMutableValue,
     SkiaValue,
-    useComputedValue,
-    Skia,
-    DiffRect,
-    rrect,
+    Text,
     rect,
-    useValue,
+    rrect,
+    useComputedValue,
+    useFont,
     useSharedValueEffect,
+    useValue,
 } from "@shopify/react-native-skia";
-import { CIRCLE_SIZE, colors } from "../../../parameters";
-import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
+import { useEffect } from "react";
 import { useSharedValue, withDelay, withTiming } from "react-native-reanimated";
-import { useEffect, useState } from "react";
+import { CIRCLE_SIZE, colors } from "../../../parameters";
 import useIsFirstRender from "../../../useIsFirstRender";
+import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 
 function Node({
     coord,
@@ -192,6 +193,7 @@ function Node({
 
     return (
         <Group origin={{ x: cx, y: cy }} transform={groupTransform} opacity={circleBlurOnInactive ?? 1}>
+            <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
             <DiffRect inner={animatedinnerRect} outer={animatedOuterRect} color={`${treeAccentColor}7D`} />
             {!isComplete && <Path path={path} style="stroke" strokeWidth={2} color={colors.line} />}
             <Path path={path} style="stroke" start={start} strokeCap={"round"} strokeWidth={2} color={treeAccentColor} />

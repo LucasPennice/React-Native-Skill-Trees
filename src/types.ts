@@ -7,22 +7,31 @@ export type CartesianCoordinate = { x: number; y: number };
 
 export type ParentId = string | null;
 
-export interface Tree<T> {
+export type Tree<T> = CartesianCoordinate & {
     isRoot: boolean;
     parentId: ParentId;
     treeId: string;
     nodeId: string;
     treeName: string;
     accentColor: string;
-    x: number;
-    y: number;
     level: number;
     data: T;
     children: Tree<T>[];
-}
+};
 
 export type CirclePositionInCanvas = CartesianCoordinate & { id: string };
 export type Coordinates = CartesianCoordinate & { id: string; level: number; parentId: ParentId; name: string };
+
+export type CoordinatesWithTreeData = CartesianCoordinate & {
+    isRoot: boolean;
+    parentId: ParentId;
+    treeId: string;
+    nodeId: string;
+    treeName: string;
+    accentColor: string;
+    level: number;
+    data: Skill;
+};
 
 export type NodeCoordinate = CartesianCoordinate & { id: string; level: number; parentId: ParentId };
 

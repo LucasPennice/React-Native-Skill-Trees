@@ -6,14 +6,16 @@ const labelMarginTop = 40;
 
 function Label({
     coord,
-    tree,
+    color,
+    text,
     pathBlurOnInactive,
     treeAccentColor,
 }: {
-    tree: Tree<Skill>;
+    text: string;
+    color: string;
     treeAccentColor: string;
     coord: { cx: number; cy: number };
-    pathBlurOnInactive: SkiaMutableValue<number>;
+    pathBlurOnInactive?: SkiaMutableValue<number>;
 }) {
     const labelFont = useFont(require("../../../../assets/Helvetica.ttf"), 12);
 
@@ -21,7 +23,6 @@ function Label({
 
     const { cx, cy } = coord;
 
-    const text = tree.data.name;
     const wordArr = text.split(" ");
 
     const distanceBetweenWords = 14;
@@ -38,22 +39,15 @@ function Label({
 
     return (
         <Group opacity={pathBlurOnInactive}>
-            <RoundedRect
-                r={5}
-                height={rectangleDimentions.height}
-                width={rectangleDimentions.width}
-                x={rectX}
-                y={rectY}
-                color={tree.data.isCompleted ? treeAccentColor : colors.line}
-            />
+            <RoundedRect r={5} height={rectangleDimentions.height} width={rectangleDimentions.width} x={rectX} y={rectY} color={color} />
             {wordArr.map((word, idx) => {
                 const wordWidth = labelFont.getTextWidth(word);
 
                 const textX = cx - wordWidth / 2;
                 const textY = cy + fontSize / 2 + idx * distanceBetweenWords + labelMarginTop;
 
-                return <Text key={idx} x={textX} y={textY} text={tree.nodeId.slice(0, 6)} color="white" font={labelFont} />;
-                // return <Text key={idx} x={textX} y={textY} text={word} color="white" font={labelFont} />;
+                // return <Text key={idx} x={textX} y={textY} text={text.nodeId.slice(0, 6)} color="white" font={labelFont} />;
+                return <Text key={idx} x={textX} y={textY} text={word} color="white" font={labelFont} />;
             })}
         </Group>
     );
