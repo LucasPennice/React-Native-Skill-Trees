@@ -3,6 +3,8 @@ import {
     DiffRect,
     Group,
     Path,
+    Rect,
+    RoundedRect,
     Skia,
     SkiaMutableValue,
     SkiaValue,
@@ -19,6 +21,7 @@ import { useSharedValue, withDelay, withTiming } from "react-native-reanimated";
 import { CIRCLE_SIZE, colors } from "../../../parameters";
 import useIsFirstRender from "../../../useIsFirstRender";
 import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
+import { interpolateColors } from "../../../functions/misc";
 
 function Node({
     coord,
@@ -194,8 +197,8 @@ function Node({
     return (
         <Group origin={{ x: cx, y: cy }} transform={groupTransform} opacity={circleBlurOnInactive ?? 1}>
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
-            <DiffRect inner={animatedinnerRect} outer={animatedOuterRect} color={`${treeAccentColor}7D`} />
-            {!isComplete && <Path path={path} style="stroke" strokeWidth={2} color={colors.line} />}
+            <Path path={path} style="stroke" strokeWidth={2} color={colors.line} />
+            <DiffRect inner={animatedinnerRect} outer={animatedOuterRect} color={`${interpolateColors(treeAccentColor, colors.background, 0.49)}`} />
             <Path path={path} style="stroke" start={start} strokeCap={"round"} strokeWidth={2} color={treeAccentColor} />
             <Text x={textX} y={textY} text={letter} font={nodeLetterFont} color={color} />
         </Group>

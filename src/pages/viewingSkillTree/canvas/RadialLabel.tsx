@@ -4,24 +4,13 @@ import { colors } from "../../../parameters";
 
 const labelMarginTop = 40;
 
-function RadialLabel({
-    coord,
-    tree,
-    pathBlurOnInactive,
-    treeAccentColor,
-}: {
-    tree: Tree<Skill>;
-    treeAccentColor: string;
-    coord: { cx: number; cy: number };
-    pathBlurOnInactive: SkiaMutableValue<number>;
-}) {
+function RadialLabel({ coord, color, text }: { color: string; text: string; coord: { cx: number; cy: number } }) {
     const labelFont = useFont(require("../../../../assets/Helvetica.ttf"), 12);
 
     if (!labelFont) return <></>;
 
     const { cx, cy } = coord;
 
-    const text = tree.data.name;
     const wordArr = text.split(" ");
 
     const distanceBetweenWords = 14;
@@ -37,23 +26,15 @@ function RadialLabel({
     const rectY = cy + labelMarginTop - fontSize / 4 - verticalPadding;
 
     return (
-        <Group opacity={pathBlurOnInactive}>
-            <RoundedRect
-                r={5}
-                height={rectangleDimentions.height}
-                width={rectangleDimentions.width}
-                x={rectX}
-                y={rectY}
-                color={tree.data.isCompleted ? treeAccentColor : colors.line}
-            />
+        <Group>
+            <RoundedRect r={5} height={rectangleDimentions.height} width={rectangleDimentions.width} x={rectX} y={rectY} color={color} />
             {wordArr.map((word, idx) => {
                 const wordWidth = labelFont.getTextWidth(word);
 
                 const textX = cx - wordWidth / 2;
                 const textY = cy + fontSize / 2 + idx * distanceBetweenWords + labelMarginTop;
 
-                return <Text key={idx} x={textX} y={textY} text={tree.nodeId.slice(0, 6)} color="white" font={labelFont} />;
-                // return <Text key={idx} x={textX} y={textY} text={word} color="white" font={labelFont} />;
+                return <Text key={idx} x={textX} y={textY} text={word} color="white" font={labelFont} />;
             })}
         </Group>
     );

@@ -1,5 +1,5 @@
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { CanvasDimensions, NodeCoordinate, DnDZone, Skill, Tree, Coordinates, CoordinatesWithTreeData } from "../../../types";
+import { CanvasDimensions, NodeCoordinate, DnDZone, Skill, Tree, Coordinates, CoordinatesWithTreeData, ParentId } from "../../../types";
 import { PlotTreeReingoldTiltfordAlgorithm } from "../../../functions/treeToHierarchicalCoordinates";
 import {
     BROTHER_DND_ZONE_HEIGHT,
@@ -213,7 +213,7 @@ export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDim
     });
 }
 
-export function BombasticToNormal(foo: CoordinatesWithTreeData[]): NodeCoordinate[] {
+export function removeTreeDataFromCoordinate(foo: CoordinatesWithTreeData[]): NodeCoordinate[] {
     return foo.map((bb) => {
         return {
             id: bb.nodeId,
@@ -221,6 +221,36 @@ export function BombasticToNormal(foo: CoordinatesWithTreeData[]): NodeCoordinat
             parentId: bb.parentId,
             x: bb.x,
             y: bb.y,
+        };
+    });
+}
+
+//The animations break for some reason when using CoordinatesWithTreeData
+//It seems to be a bug of reanimated 2
+export function getCoordinatedWithTreeData(
+    coordinatesWithTreeData: CoordinatesWithTreeData[],
+    nodeCoordinatesCentered: {
+        x: number;
+        y: number;
+        id: string;
+        level: number;
+        parentId: ParentId;
+    }[]
+): CoordinatesWithTreeData[] {
+    return nodeCoordinatesCentered.map((centeredCoord, i) => {
+        const currentBombastic = coordinatesWithTreeData[i];
+
+        return {
+            accentColor: currentBombastic.accentColor,
+            data: currentBombastic.data,
+            isRoot: currentBombastic.isRoot,
+            level: currentBombastic.level,
+            nodeId: currentBombastic.nodeId,
+            parentId: currentBombastic.parentId,
+            treeId: currentBombastic.treeId,
+            treeName: currentBombastic.treeName,
+            x: centeredCoord.x,
+            y: centeredCoord.y,
         };
     });
 }
