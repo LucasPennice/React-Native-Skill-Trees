@@ -1,13 +1,13 @@
 import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { selectCanvasDisplaySettings, closeChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
-import { mutateUserTree, selectCurrentTree, setSelectedNode } from "../../../redux/userTreesSlice";
-import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { Skill, Tree } from "../../../types";
-import { centerFlex, colors } from "../../../parameters";
 import AppText from "../../../components/AppText";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import { findNodeById, findParentOfNode } from "../../../functions/extractInformationFromTree";
 import { deleteNodeWithChildren } from "../../../functions/mutateTree";
+import { centerFlex, colors } from "../../../parameters";
+import { closeChildrenHoistSelector, selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
+import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
+import { mutateUserTree, selectCurrentTree, setSelectedNode } from "../../../redux/userTreesSlice";
+import { Skill, Tree } from "../../../types";
 
 function ChildrenHoistSelectorModal() {
     const { openMenu, candidatesToHoist } = useAppSelector(selectCanvasDisplaySettings);
@@ -33,7 +33,7 @@ function ChildrenHoistSelectorModal() {
     const open = openMenu == "childrenHoistSelector";
 
     const confirmDeleteNode = (children: Tree<Skill>) => () => {
-        const parent = findParentOfNode(currentTree, children.data.id);
+        const parent = findParentOfNode(currentTree, children.nodeId);
 
         const parentName = parent ? parent.data.name : "";
 

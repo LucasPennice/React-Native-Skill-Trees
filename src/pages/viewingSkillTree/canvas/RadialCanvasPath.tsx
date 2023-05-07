@@ -1,11 +1,11 @@
 import { Path, Skia, SkiaMutableValue } from "@shopify/react-native-skia";
 import { CIRCLE_SIZE } from "../../../parameters";
-import { NodeCoordinate } from "../../../types";
+import { CartesianCoordinate, NodeCoordinate } from "../../../types";
 
 type pathCoordinates = {
     cx: number;
     cy: number;
-    pathInitialPoint: { x: number; y: number };
+    pathInitialPoint: CartesianCoordinate;
 };
 
 function RadialCanvasPath({
@@ -48,7 +48,7 @@ function RadialCanvasPath({
     return <Path path={res} color={pathColor} style="stroke" strokeWidth={2} opacity={pathBlurOnInactive ?? 1} />;
 }
 
-function getCurvedPath(rootCoordinates: NodeCoordinate, parentOfNodeCoord: { x: number; y: number }, centerOfNode: { x: number; y: number }) {
+function getCurvedPath(rootCoordinates: NodeCoordinate, parentOfNodeCoord: CartesianCoordinate, centerOfNode: CartesianCoordinate) {
     const finalPoint = getFinalPoint(rootCoordinates, centerOfNode);
     const startingPoint = getStartingPoint(rootCoordinates, parentOfNodeCoord);
 
@@ -85,7 +85,7 @@ function getCurvedPath(rootCoordinates: NodeCoordinate, parentOfNodeCoord: { x: 
 
     return { p, c1: { ...translatedAndRotatedCP1 }, c2: { ...translatedAndRotatedCP2 } };
 
-    function getFinalPoint(rootCoordinates: NodeCoordinate, centerOfNode: { x: number; y: number }) {
+    function getFinalPoint(rootCoordinates: NodeCoordinate, centerOfNode: CartesianCoordinate) {
         const p0 = { ...rootCoordinates };
         const p1 = { ...centerOfNode };
 
@@ -104,7 +104,7 @@ function getCurvedPath(rootCoordinates: NodeCoordinate, parentOfNodeCoord: { x: 
         return { x: p0.x + foo * directionVector.x, y: p0.y + foo * directionVector.y };
     }
 
-    function getStartingPoint(rootCoordinates: NodeCoordinate, parentOfNodeCoord: { x: number; y: number }) {
+    function getStartingPoint(rootCoordinates: NodeCoordinate, parentOfNodeCoord: CartesianCoordinate) {
         const p0 = { ...rootCoordinates };
         const p1 = { ...parentOfNodeCoord };
 

@@ -6,16 +6,16 @@ import { cartesianToPositivePolarCoordinates } from "../../functions/coordinateS
 import { NAV_HEGIHT, centerFlex, colors } from "../../parameters";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { Skill, Tree } from "../../types";
 import CanvasTree from "../viewingSkillTree/canvas/CanvasTree";
 import { centerNodesInCanvas, getCanvasDimensions, getNodesCoordinates } from "../viewingSkillTree/canvas/coordinateFunctions";
 import useHandleCanvasScroll from "../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
-import { Skill, Tree } from "../../types";
 
 const mockInputTree: Tree<Skill> = {
     treeName: "Teat",
     accentColor: "#FED739",
     isRoot: true,
-    parentId: undefined,
+    parentId: null,
     treeId: "5TFyIFSOPdyWM4BTORuqmyjB",
     level: 0,
     nodeId: "OEYV9lGXxT9osAsdR0gbg0qx",

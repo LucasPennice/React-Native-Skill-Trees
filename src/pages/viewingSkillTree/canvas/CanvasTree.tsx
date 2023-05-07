@@ -1,6 +1,6 @@
 import { findParentOfNode } from "../../../functions/extractInformationFromTree";
 import { colors } from "../../../parameters";
-import { NodeCoordinate, Skill, Tree } from "../../../types";
+import { CartesianCoordinate, NodeCoordinate, Skill, Tree } from "../../../types";
 import HierarchicalCanvasPath from "./HierarchicalCanvasPath";
 import Label from "./Label";
 import Node from "./Node";
@@ -11,7 +11,7 @@ import useHandleTreeAnimations from "./hooks/useHandleTreeAnimations";
 type TreeProps = {
     tree: Tree<Skill>;
     wholeTree: Tree<Skill>;
-    parentNodeInfo?: { coordinates: { x: number; y: number }; numberOfChildren: number; currentChildIndex: number };
+    parentNodeInfo?: { coordinates: CartesianCoordinate; numberOfChildren: number; currentChildIndex: number };
     stateProps: {
         selectedNode: string | null;
         showLabel: boolean;

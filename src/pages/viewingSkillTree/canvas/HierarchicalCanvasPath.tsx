@@ -1,11 +1,12 @@
 import { Path, Skia, SkiaMutableValue, useComputedValue } from "@shopify/react-native-skia";
 import { CIRCLE_SIZE } from "../../../parameters";
 import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
+import { CartesianCoordinate } from "../../../types";
 
 type pathCoordinates = {
     cx: number;
     cy: number;
-    pathInitialPoint: { x: number; y: number };
+    pathInitialPoint: CartesianCoordinate;
 };
 
 function HierarchicalCanvasPath({

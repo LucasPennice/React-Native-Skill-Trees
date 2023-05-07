@@ -17,7 +17,7 @@ export function createTree(treeName: string, color: string, isRoot: boolean, dat
         treeName: treeName.trim(),
         accentColor: color,
         isRoot,
-        parentId: undefined,
+        parentId: null,
         treeId: makeid(24),
         level: 0,
         nodeId: makeid(24),

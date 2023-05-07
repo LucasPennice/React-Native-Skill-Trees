@@ -1,4 +1,4 @@
-import { PolarCoordinate } from "../types";
+import { CartesianCoordinate, PolarCoordinate } from "../types";
 
 export function arcToAngleRadians(arcLength: number, circleRadius: number) {
     if (circleRadius === 0) return 0;
@@ -12,7 +12,7 @@ export function polarToCartesianCoordinates(coord: PolarCoordinate) {
     return { x, y };
 }
 
-export function cartesianToPositivePolarCoordinates(point: { x: number; y: number }, center: { x: number; y: number }): PolarCoordinate {
+export function cartesianToPositivePolarCoordinates(point: CartesianCoordinate, center: CartesianCoordinate): PolarCoordinate {
     const translatedX = point.x - center.x;
     const translatedY = point.y - center.y;
 
@@ -53,7 +53,7 @@ export function angleBetweenPolarCoordinates(startingCoord: PolarCoordinate, fin
 
     return result;
 }
-export function movePointParallelToVector(directionVector: { x: number; y: number }, distanceToMove: number, pointToMove: { x: number; y: number }) {
+export function movePointParallelToVector(directionVector: CartesianCoordinate, distanceToMove: number, pointToMove: CartesianCoordinate) {
     const directionVectorModule = Math.sqrt(Math.pow(directionVector.x, 2) + Math.pow(directionVector.y, 2));
 
     const directionVersor = { x: directionVector.x / directionVectorModule, y: directionVector.y / directionVectorModule };

@@ -1,15 +1,15 @@
-import { StyleProp, ViewStyle } from "react-native/types";
-
 export type Skill = {
     name: string;
     isCompleted?: boolean;
 };
 
-export type SelectedNode = string | null;
+export type CartesianCoordinate = { x: number; y: number };
+
+export type ParentId = string | null;
 
 export interface Tree<T> {
     isRoot: boolean;
-    parentId: string | undefined;
+    parentId: ParentId;
     treeId: string;
     nodeId: string;
     treeName: string;
@@ -21,14 +21,16 @@ export interface Tree<T> {
     children: Tree<T>[];
 }
 
-export type CirclePositionInCanvas = { x: number; y: number; id: string };
-export type Coordinates = { x: number; y: number; id: string; level: number; parentId: string | null; name: string };
+export type CirclePositionInCanvas = CartesianCoordinate & { id: string };
+export type Coordinates = CartesianCoordinate & { id: string; level: number; parentId: ParentId; name: string };
 
-export type NodeCoordinate = { x: number; y: number; id: string; level: number; parentId: string | null };
+export type NodeCoordinate = CartesianCoordinate & { id: string; level: number; parentId: ParentId };
 
 export type ModifiableProperties<T> = {
     [Property in keyof T]: T[Property];
 };
+
+export type HierarchicalContour = { leftNode: { coord: number; id: string }; rightNode: { coord: number; id: string } };
 
 export type DnDZone = {
     type: "PARENT" | "ONLY_CHILDREN" | "LEFT_BROTHER" | "RIGHT_BROTHER";
