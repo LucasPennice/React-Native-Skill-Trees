@@ -405,3 +405,7 @@ export const bigasstree: any = {
         },
     ],
 };
+
+export const ALLOWED_NODE_SPACING = 0.5;
+
+export const UNCENTERED_ROOT_COORDINATES = { x: 0, y: 0 };

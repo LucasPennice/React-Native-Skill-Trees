@@ -1,4 +1,6 @@
-import { NodeCoordinate, Skill, Tree } from "../types";
+import { UNCENTERED_ROOT_COORDINATES } from "../parameters";
+import { NodeCoordinate, PolarContour, Skill, Tree } from "../types";
+import { cartesianToPositivePolarCoordinates } from "./coordinateSystem";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
     if (!rootNode) return 0;
@@ -195,5 +197,57 @@ export function addEveryChildFromTreeToArray(tree: Tree<Skill>, arrToAdd: string
         arrToAdd.push(element.nodeId);
 
         addEveryChildFromTreeToArray(element, arrToAdd);
+    }
+}
+
+export function getRadialTreeContourByLevel(tree: Tree<Skill>) {
+    const contourByLevelWithUnorderedContours: { [key: string]: PolarContour[] } = {};
+
+    getUnorderedTreeContourByLevel(tree, contourByLevelWithUnorderedContours);
+
+    const treeLevels = Object.keys(contourByLevelWithUnorderedContours);
+
+    const contourByLevel = { ...contourByLevelWithUnorderedContours };
+
+    treeLevels.forEach((level) => {
+        contourByLevel[level] = contourByLevel[level].reverse();
+    });
+
+    return { contourByLevel, treeLevels };
+
+    function getUnorderedTreeContourByLevel(tree: Tree<Skill>, result: { [key: string]: PolarContour[] }) {
+        //Base Case 👇
+
+        if (!tree.children.length) return;
+
+        //Recursive Case 👇
+
+        const leftmostNode = tree.children[tree.children.length - 1];
+        const rightmostNode = tree.children[0];
+
+        const key = `${tree.level + 1}`;
+
+        const leftmostNodePolarCoordinates = {
+            ...cartesianToPositivePolarCoordinates({ x: leftmostNode.x, y: leftmostNode.y }, UNCENTERED_ROOT_COORDINATES),
+            id: leftmostNode.nodeId,
+        };
+        const rightmostNodetNodePolarCoordinates = {
+            ...cartesianToPositivePolarCoordinates({ x: rightmostNode.x, y: rightmostNode.y }, UNCENTERED_ROOT_COORDINATES),
+            id: rightmostNode.nodeId,
+        };
+
+        const contourToAppend: PolarContour = {
+            leftNode: leftmostNodePolarCoordinates,
+            rightNode: rightmostNodetNodePolarCoordinates,
+        };
+
+        if (result[key]) result[key] = [...result[key], contourToAppend];
+        if (!result[key]) result[key] = [contourToAppend];
+
+        for (let i = 0; i < tree.children.length; i++) {
+            const element = tree.children[i];
+
+            getUnorderedTreeContourByLevel(element, result);
+        }
     }
 }

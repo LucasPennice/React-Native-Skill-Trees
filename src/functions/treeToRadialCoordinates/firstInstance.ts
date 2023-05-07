@@ -1,6 +1,6 @@
-import { Skill, Tree } from "../../types";
+import { ALLOWED_NODE_SPACING } from "../../parameters";
+import { PolarCoordinate, Skill, Tree } from "../../types";
 import { arcToAngleRadians, polarToCartesianCoordinates } from "../coordinateSystem";
-import { ALLOWED_NODE_SPACING, PolarCoordinate } from "./general";
 
 export function firstIteration(tree: Tree<Skill>, completeTree: Tree<Skill>, currentTreeMod?: PolarCoordinate, childrenIdx?: number) {
     const currentMod: PolarCoordinate = {

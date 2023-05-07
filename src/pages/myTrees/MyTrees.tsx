@@ -34,10 +34,11 @@ function MyTrees({ navigation }: Props) {
                     Long press to access it's options menu
                 </AppText>
 
-                {userTrees.map((element, idx) => {
-                    const changeTreeAndNavigateToViewingTree = factoryChangeTreeAndNavigateToViewingTree(element.treeId ?? "");
-                    return <TreeCard element={element} changeTreeAndNavigateToViewingTree={changeTreeAndNavigateToViewingTree} key={idx} />;
-                })}
+                {userTrees.length > 0 &&
+                    userTrees.map((element, idx) => {
+                        const changeTreeAndNavigateToViewingTree = factoryChangeTreeAndNavigateToViewingTree(element.treeId ?? "");
+                        return <TreeCard element={element} changeTreeAndNavigateToViewingTree={changeTreeAndNavigateToViewingTree} key={idx} />;
+                    })}
             </ScrollView>
 
             <EditTreeModal />

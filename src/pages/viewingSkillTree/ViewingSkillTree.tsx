@@ -1,7 +1,6 @@
 import { SkiaDomView, useCanvasRef } from "@shopify/react-native-skia";
 import { useContext, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
-import { IsSharingAvailableContext } from "../../../App";
 import AppText from "../../components/AppText";
 import { centerFlex, colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
@@ -16,6 +15,7 @@ import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import NewNodeModal from "./modals/NewNodeModal";
 import TakingScreenshotLoadingScreenModal from "./modals/TakingScreenshotLoadingScreenModal";
 import useRunHomepageCleanup from "./useRunHomepageCleanup";
+import { IsSharingAvailableContext } from "../../context";
 
 type Mode = "SelectedNode" | "AddingNode" | "TakingScreenshot" | "Idle";
 

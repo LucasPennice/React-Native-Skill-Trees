@@ -1,11 +1,10 @@
 {
   "name": "book-path",
   "version": "1.0.0",
-  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "start": "expo start --dev-client",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
@@ -20,15 +19,15 @@
     "@welldone-software/why-did-you-render": "^7.0.1",
     "d3": "^7.8.4",
     "d3-hierarchy": "^3.1.2",
-    "expo": "^48.0.9",
+    "expo": "~48.0.15",
     "expo-blur": "~12.2.2",
     "expo-file-system": "~15.2.2",
     "expo-media-library": "^15.2.3",
     "expo-sharing": "~11.2.2",
-    "expo-splash-screen": "~0.18.1",
+    "expo-splash-screen": "~0.18.2",
     "expo-status-bar": "~1.4.4",
     "react": "18.2.0",
-    "react-native": "0.71.6",
+    "react-native": "0.71.7",
     "react-native-gesture-handler": "~2.9.0",
     "react-native-reanimated": "~2.14.4",
     "react-native-svg": "13.4.0",

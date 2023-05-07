@@ -28,6 +28,7 @@ import { Skill } from "./src/types";
 import useIsSharingAvailable from "./src/useIsSharingAvailable";
 import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
 import "./wdyr";
+import { IsSharingAvailableContext } from "./src/context";
 enableScreens();
 export type StackNavigatorParams = {
     Home: undefined;
@@ -47,8 +48,6 @@ export type Routes = {
     hideFromNavBar?: boolean;
     title: string;
 }[];
-
-export const IsSharingAvailableContext = createContext(false);
 
 export default function App() {
     const isSharingAvailable = useIsSharingAvailable();
