@@ -30,12 +30,14 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
     //Derived State
     const coordinatesWithTreeData = getNodesCoordinates(tree, "hierarchy");
+    //
     const nodeCoordinates = BombasticToNormal(coordinatesWithTreeData);
     const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
     const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
     const dragAndDropZones = calculateDragAndDropZones(nodeCoordinatesCentered);
-    const centeredCoordinatedWithTreeData = getCoordinatedWithoutTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
     const foundNodeCoordinates = nodeCoordinates.find((c) => c.id === selectedNode);
+    //
+    const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
     //Hooks
     const { touchHandler } = useCanvasTouchHandler({ tree, nodeCoordinatesCentered, onNodeClick, onDndZoneClick, showDndZones, dragAndDropZones });
@@ -67,7 +69,6 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
                             mode="continuous"
                             ref={canvasRef}>
                             <HierarchicalSkillTree nodeCoordinatesCentered={centeredCoordinatedWithTreeData} selectedNode={selectedNode} />
-
                             {showDndZones && <DragAndDropZones data={dragAndDropZones} selectedDndZone={selectedDndZone} />}
                             <Blur blur={blur} />
                         </Canvas>
@@ -83,7 +84,7 @@ InteractiveTree.whyDidYouRender = true;
 
 //The animations break for some reason when using CoordinatesWithTreeData
 //It seems to be a bug of reanimated 2
-function getCoordinatedWithoutTreeData(
+function getCoordinatedWithTreeData(
     coordinatesWithTreeData: CoordinatesWithTreeData[],
     nodeCoordinatesCentered: {
         x: number;

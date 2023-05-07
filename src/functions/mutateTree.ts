@@ -151,7 +151,13 @@ export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: 
         //The old parent now becomes the child of the new node
         const oldParent: Tree<Skill> = { ...targetNode, isRoot: false, parentId: newNode.nodeId };
 
-        const newProperties: ModifiableProperties<Tree<Skill>> = { ...targetNode, ...newNode, ...treePropertiesToInherit, children: [oldParent] };
+        const newProperties: ModifiableProperties<Tree<Skill>> = {
+            ...targetNode,
+            ...newNode,
+            parentId: targetNode.parentId,
+            ...treePropertiesToInherit,
+            children: [oldParent],
+        };
 
         return editTreeProperties(currentTree, targetNode, newProperties);
     }

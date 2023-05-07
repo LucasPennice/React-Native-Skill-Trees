@@ -45,22 +45,9 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode }: TreePr
                     />
                 );
             })}
-            {nodeCoordinatesCentered.map((node) => {
-                const { groupTransform } = useAnimationsOnSelect(selectedNode, node.nodeId);
-
-                const textColor = node.data.isCompleted ? node.accentColor : colors.unmarkedText;
-
-                return (
-                    <Node
-                        groupTransform={groupTransform}
-                        key={`${node.nodeId}_node`}
-                        isComplete={node.data.isCompleted}
-                        treeAccentColor={node.accentColor}
-                        coord={{ cx: node.x, cy: node.y }}
-                        text={{ color: textColor, letter: node.data.name[0] }}
-                    />
-                );
-            })}
+            {nodeCoordinatesCentered.map((node) => (
+                <RenderNode key={`${node.nodeId}_node`} node={node} selectedNode={selectedNode} />
+            ))}
         </>
     );
 }
@@ -86,3 +73,20 @@ function useAnimationsOnSelect(selectedNode: string | null, nodeId: string) {
 }
 
 export default HierarchicalSkillTree;
+
+//Necessary to avoid hooks bug
+function RenderNode({ node, selectedNode }: { selectedNode: string | null; node: CoordinatesWithTreeData }) {
+    const { groupTransform } = useAnimationsOnSelect(selectedNode, node.nodeId);
+
+    const textColor = node.data.isCompleted ? node.accentColor : colors.unmarkedText;
+
+    return (
+        <Node
+            groupTransform={groupTransform}
+            isComplete={node.data.isCompleted}
+            treeAccentColor={node.accentColor}
+            coord={{ cx: node.x, cy: node.y }}
+            text={{ color: textColor, letter: node.data.name[0] }}
+        />
+    );
+}
