@@ -221,15 +221,11 @@ export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, s
     return treesToShift;
 
     function treesToCenterAfterShift(tree: Tree<Skill>) {
-        //Quiero todos los nodos desde el nivel del LCA (incluido) hacia arriba
-
         const result1 = getAllNodesFromLevel0ToLCALevel();
 
         const result2 = getAllNodesInBetweenConflictingTrees();
 
         return [...result1, ...result2];
-
-        //quiero todos los nodos por debajo del lca y que esten entre medio de los dos caminos de los paths
 
         function getAllNodesInBetweenConflictingTrees() {
             const result: string[] = [];

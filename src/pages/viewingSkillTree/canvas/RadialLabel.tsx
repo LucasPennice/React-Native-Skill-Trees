@@ -31,7 +31,7 @@ function RadialLabel({
     const rectangleDimentions = calculateRectangleDimentions(wordArr);
 
     const rectX = x + CIRCLE_SIZE + horizontalPadding;
-    const rectY = y - fontSize / 4 - verticalPadding - 3;
+    const rectY = y - fontSize / 4 - verticalPadding - 4 * wordArr.length;
 
     const directionVector = { x: coord.x - rootCoord.x, y: coord.y - rootCoord.y };
     const angleInRadians = Math.atan2(directionVector.y, directionVector.x);

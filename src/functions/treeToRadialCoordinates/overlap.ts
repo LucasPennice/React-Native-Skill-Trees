@@ -9,6 +9,7 @@ import {
 import {
     extractTreeIds,
     findLowestCommonAncestorIdOfNodes,
+    findNodeById,
     getRadialTreeContourByLevel,
     returnPathFromRootToNode,
 } from "../extractInformationFromTree";
@@ -21,11 +22,11 @@ export function handleOverlap(tree: Tree<Skill>) {
 
     result = fixOverlapWithinSubTreesOfLevel1(result);
 
-    result = mockShiftSubTreesToMinimizeSpace(result);
+    result = shiftSubTreesToMinimizeSpace(result);
 
     return result;
 
-    function mockShiftSubTreesToMinimizeSpace(tree: Tree<Skill>) {
+    function shiftSubTreesToMinimizeSpace(tree: Tree<Skill>) {
         const subTrees = tree.children;
 
         if (!subTrees.length) return tree;
@@ -51,17 +52,8 @@ export function handleOverlap(tree: Tree<Skill>) {
                         { byBiggestOverlap: treesToShift, byHalfOfBiggestOverlap: [] },
                         overlap.biggestOverlapAngle
                     );
-                    //agarro todas las ids del subtree en el que estoy ahora
-                    //Y todas las ids de todos los subtrees a la derecha de este
-                    //Muevo todos esos subtrees overlap amount
                 }
             }
-
-            // const subTreeIds: string[] = [];
-
-            // extractTreeIds(subTree, subTreeIds);
-
-            // rotatedSubtrees.push(shiftNodesCounterClockWise(subTree, { byBiggestOverlap: subTreeIds, byHalfOfBiggestOverlap: [] }, 1.2 * idx));
         });
 
         return result;
@@ -155,21 +147,26 @@ function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill> {
         let result: Tree<Skill> = { ...subTree };
 
         let overlapWithinTree = true;
-        let loopAvoider = 0;
 
-        while (overlapWithinTree && loopAvoider < 10) {
-            const polarOverlap = checkForOverlap(result);
+        while (overlapWithinTree) {
+            let polarOverlap = checkForOverlap(result);
+
+            //Tolerance to avoid loops
+            if (polarOverlap && polarOverlap.biggestOverlapAngle < 0.00001) polarOverlap = undefined;
 
             if (polarOverlap === undefined) overlapWithinTree = false;
             if (polarOverlap !== undefined) {
                 //We append the rootNode to the subTree so that the path finding functions can work correctly
+                console.log("🌴");
+                console.log(polarOverlap);
+
                 const subTreeWithRootNode = { ...tree, children: [subTree] };
                 const treesToShift = getTreesToShiftForCircularTree(subTreeWithRootNode, polarOverlap.nodesInConflict);
+                console.log(treesToShift);
+                console.log("🌴");
 
                 result = shiftNodesCounterClockWise(result, treesToShift, polarOverlap.biggestOverlapAngle);
             }
-
-            loopAvoider++;
         }
 
         return result;
@@ -254,53 +251,107 @@ function getLevelBiggestOverlap(levelContour: PolarContour[]) {
 export function getTreesToShiftForCircularTree(result: Tree<Skill>, nodesInConflict: [string, string]) {
     const treesToShift: { byBiggestOverlap: string[]; byHalfOfBiggestOverlap: string[] } = { byBiggestOverlap: [], byHalfOfBiggestOverlap: [] };
 
-    const pathToRightNode = returnPathFromRootToNode(result, nodesInConflict[1]);
     const nodesInConflictLCA = findLowestCommonAncestorIdOfNodes(result, ...nodesInConflict);
+    const LCANode = findNodeById(result, nodesInConflictLCA);
 
-    if (!nodesInConflictLCA) throw "getTreesToShift nodesInConflictLCA";
+    if (!nodesInConflictLCA) throw "getTreesToShiftForCircularTree nodesInConflictLCA";
+    if (!LCANode) throw "getTreesToShiftForCircularTree LCANode";
 
+    const pathToRightNode = returnPathFromRootToNode(result, nodesInConflict[1]);
+    const pathToLeftNode = returnPathFromRootToNode(result, nodesInConflict[0]);
     const lcaIndex = pathToRightNode.findIndex((id) => id === nodesInConflictLCA);
 
-    if (lcaIndex === -1) throw "getTreesToShift lcaIndex error";
+    if (lcaIndex === -1) throw "getTreesToShiftForCircularTree lcaIndex error";
 
-    getTreesToShiftFromNodePathInConflict(result);
+    treesToShift.byBiggestOverlap = treesToShiftByBiggestOverlap(result);
+
+    treesToShift.byHalfOfBiggestOverlap = treesToCenterAfterShift(result);
 
     return treesToShift;
 
-    function getTreesToShiftFromNodePathInConflict(tree: Tree<Skill>) {
-        //Base Case 👇
-        if (!tree.children.length) return undefined;
-        if (tree.isRoot) treesToShift.byHalfOfBiggestOverlap.push(tree.nodeId);
+    function treesToCenterAfterShift(tree: Tree<Skill>) {
+        const result1 = getAllNodesFromLevel0ToLCALevel();
 
-        //Recursive Case 👇
-        const currentLevel = tree.level;
-        const lcaLevel = lcaIndex;
-        const nodeInPathIndexForChildren = tree.children.findIndex((t) => t.nodeId === pathToRightNode[currentLevel + 1]);
-        const areAnyOfChildrenInPath = nodeInPathIndexForChildren === -1 ? false : true;
+        const result2 = getAllNodesInBetweenConflictingTrees();
 
-        if (!areAnyOfChildrenInPath) return undefined;
+        return [...result1, ...result2];
 
-        for (let i = 0; i < tree.children.length; i++) {
-            const child = tree.children[i];
+        function getAllNodesInBetweenConflictingTrees() {
+            const result: string[] = [];
 
-            if (i === nodeInPathIndexForChildren) {
-                if (currentLevel >= lcaLevel) {
-                    treesToShift.byBiggestOverlap.push(child.nodeId);
-                    addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
-                } else {
-                    treesToShift.byHalfOfBiggestOverlap.push(child.nodeId);
-                }
-                if (child.nodeId === pathToRightNode[pathToRightNode.length - 1]) addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
-                getTreesToShiftFromNodePathInConflict(child);
+            const leftConflictingChildId = pathToLeftNode[lcaIndex + 1];
+            const rightConflictingChildId = pathToRightNode[lcaIndex + 1];
+
+            const leftConflictingChildIdx = LCANode!.children.findIndex((t) => t.nodeId === leftConflictingChildId);
+            const rightConflictingChildIdx = LCANode!.children.findIndex((t) => t.nodeId === rightConflictingChildId);
+
+            if (leftConflictingChildIdx === -1 || rightConflictingChildIdx === -1)
+                throw "LCANode children not found at fn getAllNodesInBetweenConflictingTrees";
+
+            for (let i = rightConflictingChildIdx + 1; i < leftConflictingChildIdx; i++) {
+                const treeToShift = LCANode!.children[i];
+
+                result.push(treeToShift.nodeId);
+                addEveryChildFromTreeToArray(treeToShift, result);
             }
 
-            if (i < nodeInPathIndexForChildren) {
-                if (currentLevel >= lcaLevel) {
-                    treesToShift.byBiggestOverlap.push(child.nodeId);
-                    addEveryChildFromTreeToArray(child, treesToShift.byBiggestOverlap);
-                } else {
-                    treesToShift.byHalfOfBiggestOverlap.push(child.nodeId);
-                    addEveryChildFromTreeToArray(child, treesToShift.byHalfOfBiggestOverlap);
+            return result;
+        }
+
+        function getAllNodesFromLevel0ToLCALevel() {
+            const result: string[] = [];
+
+            ifNodeLevelLowerOrEqualThanLCALevelAppendIt(tree, result);
+
+            return result;
+
+            function ifNodeLevelLowerOrEqualThanLCALevelAppendIt(tree: Tree<Skill>, arr: string[]) {
+                //Base Case 👇
+                if (tree.level > LCANode!.level) return undefined;
+
+                arr.push(tree.nodeId);
+
+                if (!tree.children.length) return undefined;
+
+                //Recursive Case 👇
+                for (let i = 0; i < tree.children.length; i++) {
+                    const child = tree.children[i];
+                    ifNodeLevelLowerOrEqualThanLCALevelAppendIt(child, arr);
+                }
+            }
+        }
+    }
+
+    function treesToShiftByBiggestOverlap(tree: Tree<Skill>) {
+        const result: string[] = [];
+
+        appendTreeInConflictAndRightSiblings(tree);
+
+        return result;
+
+        function appendTreeInConflictAndRightSiblings(tree: Tree<Skill>) {
+            //Base Case 👇
+            if (!tree.children.length) return undefined;
+
+            //Recursive Case 👇
+            const currentLevel = tree.level;
+            const lcaLevel = lcaIndex;
+            const nodeInPathIndexForChildren = tree.children.findIndex((t) => t.nodeId === pathToRightNode[currentLevel + 1]);
+            const areAnyOfChildrenInPath = nodeInPathIndexForChildren === -1 ? false : true;
+
+            if (!areAnyOfChildrenInPath) return undefined;
+
+            for (let i = 0; i < tree.children.length; i++) {
+                const childInPath = i <= nodeInPathIndexForChildren;
+
+                const child = tree.children[i];
+
+                if (childInPath) {
+                    if (currentLevel >= lcaLevel) result.push(child.nodeId);
+
+                    if (child.nodeId === pathToRightNode[pathToRightNode.length - 1]) addEveryChildFromTreeToArray(child, result);
+
+                    appendTreeInConflictAndRightSiblings(child);
                 }
             }
         }
