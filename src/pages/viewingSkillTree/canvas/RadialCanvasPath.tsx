@@ -1,6 +1,7 @@
 import { Path, Skia, SkiaMutableValue } from "@shopify/react-native-skia";
 import { CIRCLE_SIZE } from "../../../parameters";
 import { CartesianCoordinate, NodeCoordinate } from "../../../types";
+import { getConstantsRotated } from "../../../functions/coordinateSystem";
 
 type pathCoordinates = {
     cx: number;
@@ -155,13 +156,6 @@ function getCurvedPath(rootCoordinates: NodeCoordinate, parentOfNodeCoord: Carte
             return { x: centerOfNode.x + foo * directionVector.x, y: centerOfNode.y + foo * directionVector.y };
         }
     }
-}
-
-function getConstantsRotated(angleRadians: number, constantsVector: number[]) {
-    const r1 = Math.cos(angleRadians) * constantsVector[0] - Math.sin(angleRadians) * constantsVector[1];
-    const r2 = Math.sin(angleRadians) * constantsVector[0] + Math.cos(angleRadians) * constantsVector[1];
-
-    return [r1, r2];
 }
 
 export default RadialCanvasPath;

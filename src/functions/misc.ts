@@ -1,3 +1,4 @@
+import { colors } from "../parameters";
 import { Skill, Tree } from "../types";
 
 export function makeid(length: number) {
@@ -47,4 +48,48 @@ export function interpolateColors(color1: string, color2: string, percent: numbe
 
     // Convert the interpolated RGB values back to a hex color
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+export function checkContrastHex(color1: string, color2: string) {
+    let [luminance1, luminance2] = [color1, color2].map((color) => {
+        color = color.startsWith("#") ? color.slice(1) : color;
+
+        let r = parseInt(color.slice(0, 2), 16);
+        let g = parseInt(color.slice(2, 4), 16);
+        let b = parseInt(color.slice(4, 6), 16);
+
+        return luminance(r, g, b);
+    });
+
+    return contrastRatio(luminance1, luminance2);
+
+    function contrastRatio(luminance1: number, luminance2: number) {
+        let lighterLum = Math.max(luminance1, luminance2);
+        let darkerLum = Math.min(luminance1, luminance2);
+
+        return (lighterLum + 0.05) / (darkerLum + 0.05);
+    }
+
+    function luminance(r: number, g: number, b: number) {
+        let [lumR, lumG, lumB] = [r, g, b].map((component) => {
+            let proportion = component / 255;
+
+            return proportion <= 0.03928 ? proportion / 12.92 : Math.pow((proportion + 0.055) / 1.055, 2.4);
+        });
+
+        return 0.2126 * lumR + 0.7152 * lumG + 0.0722 * lumB;
+    }
+}
+
+export function getLabelTextColor(treeAccentColor: string) {
+    const whiteContrast = checkContrastHex(treeAccentColor, "#FFFFFF");
+    const backgroundContrast = checkContrastHex(treeAccentColor, colors.background);
+    console.log("----");
+    console.log(whiteContrast);
+    console.log(backgroundContrast);
+    console.log("----");
+
+    if (whiteContrast > backgroundContrast) return "#FFFFFF";
+
+    return colors.background;
 }

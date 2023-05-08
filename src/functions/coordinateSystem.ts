@@ -65,3 +65,10 @@ export function movePointParallelToVector(directionVector: CartesianCoordinate, 
 
     return { x: pointToMove.x + deltaX, y: pointToMove.y + deltaY };
 }
+
+export function getConstantsRotated(angleRadians: number, constantsVector: number[]) {
+    const r1 = Math.cos(angleRadians) * constantsVector[0] - Math.sin(angleRadians) * constantsVector[1];
+    const r2 = Math.sin(angleRadians) * constantsVector[0] + Math.cos(angleRadians) * constantsVector[1];
+
+    return [r1, r2];
+}

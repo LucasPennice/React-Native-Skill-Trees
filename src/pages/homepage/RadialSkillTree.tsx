@@ -1,13 +1,12 @@
-import { Fragment, useEffect } from "react";
-import { colors } from "../../parameters";
-import { CoordinatesWithTreeData, CartesianCoordinate, ParentId } from "../../types";
-import HierarchicalCanvasPath from "../viewingSkillTree/canvas/HierarchicalCanvasPath";
-import Label from "../viewingSkillTree/canvas/Label";
-import Node from "../viewingSkillTree/canvas/Node";
-import { useSharedValue, withSpring } from "react-native-reanimated";
 import { mix, useComputedValue, useSharedValueEffect, useValue } from "@shopify/react-native-skia";
-import RadialLabel from "../viewingSkillTree/canvas/RadialLabel";
+import { Fragment, useEffect } from "react";
+import { useSharedValue, withSpring } from "react-native-reanimated";
+import { getLabelTextColor } from "../../functions/misc";
+import { colors } from "../../parameters";
+import { CartesianCoordinate, CoordinatesWithTreeData } from "../../types";
+import Node from "../viewingSkillTree/canvas/Node";
 import RadialCanvasPath from "../viewingSkillTree/canvas/RadialCanvasPath";
+import RadialLabel from "../viewingSkillTree/canvas/RadialLabel";
 import { removeTreeDataFromCoordinate } from "../viewingSkillTree/canvas/coordinateFunctions";
 
 type TreeProps = {
@@ -18,12 +17,13 @@ type TreeProps = {
 function RadialSkillTree({ nodeCoordinatesCentered, selectedNode }: TreeProps) {
     const nodeCoordinates = removeTreeDataFromCoordinate(nodeCoordinatesCentered);
 
+    const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
+    const rootCoordinates = { x: rootNode!.x, y: rootNode!.y };
+
+    const labelTextColor = getLabelTextColor(rootNode!.accentColor);
+
     return (
         <>
-            {nodeCoordinatesCentered.map((node, idx) => {
-                return <RadialLabel key={idx} text={node.data.name} color={node.accentColor} coord={{ cx: node.x, cy: node.y }} />;
-            })}
-
             {nodeCoordinatesCentered.map((node, idx) => {
                 const parentNode = nodeCoordinatesCentered.find((n) => n.nodeId === node.parentId);
 
@@ -46,6 +46,19 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode }: TreeProps) {
             {nodeCoordinatesCentered.map((node) => (
                 <RenderNode key={`${node.nodeId}_node`} node={node} selectedNode={selectedNode} />
             ))}
+            {nodeCoordinatesCentered.map((node, idx) => {
+                if (node.isRoot) return <Fragment key={idx}></Fragment>;
+
+                return (
+                    <RadialLabel
+                        key={idx}
+                        text={node.data.name}
+                        color={{ rect: node.accentColor, text: labelTextColor }}
+                        coord={{ x: node.x, y: node.y }}
+                        rootCoord={rootCoordinates}
+                    />
+                );
+            })}
         </>
     );
 }

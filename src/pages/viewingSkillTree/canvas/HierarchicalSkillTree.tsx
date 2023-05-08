@@ -6,6 +6,7 @@ import Label from "./Label";
 import Node from "./Node";
 import { useSharedValue, withSpring } from "react-native-reanimated";
 import { mix, useComputedValue, useSharedValueEffect, useValue } from "@shopify/react-native-skia";
+import { getLabelTextColor } from "../../../functions/misc";
 
 type TreeProps = {
     nodeCoordinatesCentered: CoordinatesWithTreeData[];
@@ -13,6 +14,9 @@ type TreeProps = {
 };
 
 function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode }: TreeProps) {
+    const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
+    const labelTextColor = getLabelTextColor(rootNode!.accentColor);
+
     return (
         <>
             {nodeCoordinatesCentered.map((node, idx) => {
@@ -38,9 +42,8 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode }: TreePr
                 return (
                     <Label
                         key={idx}
-                        treeAccentColor={node.accentColor}
                         text={node.data.name}
-                        color={node.accentColor}
+                        color={{ rect: node.accentColor, text: labelTextColor }}
                         coord={{ cx: node.x, cy: node.y }}
                     />
                 );
