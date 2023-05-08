@@ -9,7 +9,7 @@ import { setTree } from "../../redux/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { Skill, Tree } from "../../types";
-import { ProgressWheelParams } from "../viewingSkillTree/components/ProgressIndicatorAndName";
+import { ProgressWheelParams } from "../../components/ProgressIndicatorAndName";
 
 function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tree<Skill>; changeTreeAndNavigateToViewingTree: () => void }) {
     //Redux Related

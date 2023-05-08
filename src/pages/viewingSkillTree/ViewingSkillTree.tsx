@@ -9,13 +9,14 @@ import { DnDZone } from "../../types";
 import { shareCanvasScreenshot } from "../../useIsSharingAvailable";
 import AddNode from "./AddNode";
 import InteractiveTree from "./canvas/InteractiveTree";
-import ProgressIndicatorAndName from "./components/ProgressIndicatorAndName";
+import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import SettingsMenu from "./components/SettingsMenu";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import NewNodeModal from "./modals/NewNodeModal";
 import TakingScreenshotLoadingScreenModal from "./modals/TakingScreenshotLoadingScreenModal";
 import useRunHomepageCleanup from "./useRunHomepageCleanup";
 import { IsSharingAvailableContext } from "../../context";
+import ShareTreeButton from "../../components/ShareTreeButton";
 
 type Mode = "SelectedNode" | "AddingNode" | "TakingScreenshot" | "Idle";
 
@@ -57,34 +58,21 @@ function ViewingSkillTree() {
                     isTakingScreenshot={isTakingScreenshot}
                 />
             )}
-            <ProgressIndicatorAndName />
+            {currentTree && <ProgressIndicatorAndName tree={currentTree} />}
             {(mode === "Idle" || mode === "AddingNode") && <AddNode />}
             {currentTree !== undefined && <SettingsMenu />}
 
-            {shouldRenderShareButton && (
-                <Pressable
-                    onPress={() => shareCanvasScreenshot(canvasRef.current, setIsTakingScreenshot, currentTree.treeName ?? "tree")}
-                    style={[
-                        centerFlex,
-                        {
-                            position: "absolute",
-                            width: 50,
-                            height: 50,
-                            top: 70,
-                            left: 10,
-                            backgroundColor: colors.darkGray,
-                            borderRadius: 10,
-                        },
-                    ]}>
-                    <AppText fontSize={24} style={{ lineHeight: 33 }}>
-                        🌎
-                    </AppText>
-                </Pressable>
+            {currentTree && (
+                <ShareTreeButton
+                    canvasRef={canvasRef}
+                    shouldShare={Boolean(shouldRenderShareButton)}
+                    takingScreenShotState={[isTakingScreenshot, setIsTakingScreenshot]}
+                    treeName={currentTree.treeName}
+                />
             )}
 
             <ChildrenHoistSelectorModal />
             <NewNodeModal />
-            <TakingScreenshotLoadingScreenModal open={isTakingScreenshot} />
         </View>
     );
 

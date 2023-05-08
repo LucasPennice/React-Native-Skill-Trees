@@ -1,13 +1,14 @@
 import { Circle, Circle as SvgCircle, Svg } from "react-native-svg";
 import Animated, { useAnimatedProps, useSharedValue, withSpring } from "react-native-reanimated";
-import { selectCurrentTree } from "../../../redux/userTreesSlice";
-import { useAppSelector } from "../../../redux/reduxHooks";
+import { selectCurrentTree } from "../redux/userTreesSlice";
+import { useAppSelector } from "../redux/reduxHooks";
 import { useEffect } from "react";
 import { Text, View } from "react-native";
-import { centerFlex, colors } from "../../../parameters";
-import AppText from "../../../components/AppText";
-import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { countCompletedNodesInTree, countNodesInTree } from "../../../functions/extractInformationFromTree";
+import { centerFlex, colors } from "../parameters";
+import AppText from "./AppText";
+import { selectScreenDimentions } from "../redux/screenDimentionsSlice";
+import { countCompletedNodesInTree, countNodesInTree } from "../functions/extractInformationFromTree";
+import { Skill, Tree } from "../types";
 
 export class ProgressWheelParams {
     size = 65;
@@ -34,19 +35,18 @@ export class ProgressWheelParams {
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
 
-function ProgressIndicatorAndName() {
-    const currentTree = useAppSelector(selectCurrentTree);
+function ProgressIndicatorAndName({ tree }: { tree: Tree<Skill> }) {
     const { width } = useAppSelector(selectScreenDimentions);
 
-    const treeAccentColor = currentTree ? currentTree.accentColor : colors.accent;
+    const treeAccentColor = tree.accentColor;
 
     const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}3D`, 30, 6);
 
     const completedPercentage = useSharedValue(0);
 
     useEffect(() => {
-        const completedNodesQty = countCompletedNodesInTree(currentTree);
-        const nodesQty = countNodesInTree(currentTree);
+        const completedNodesQty = countCompletedNodesInTree(tree);
+        const nodesQty = countNodesInTree(tree);
 
         if (!completedNodesQty || !nodesQty) {
             completedPercentage.value = 0;
@@ -54,7 +54,7 @@ function ProgressIndicatorAndName() {
         }
 
         completedPercentage.value = (completedNodesQty / nodesQty) * 100;
-    }, [currentTree]);
+    }, [tree]);
 
     const animatedProps = useAnimatedProps(() => {
         const result = progressWheelProps.circumference - (progressWheelProps.circumference * completedPercentage.value) / 100;
@@ -62,7 +62,7 @@ function ProgressIndicatorAndName() {
         return { strokeDashoffset: withSpring(result, { overshootClamping: true, damping: 65 }) };
     }, [completedPercentage.value]);
 
-    if (!currentTree) return <></>;
+    if (!tree) return <></>;
 
     return (
         <View
@@ -107,7 +107,7 @@ function ProgressIndicatorAndName() {
                 textProps={{ ellipsizeMode: "tail", numberOfLines: 1 }}
                 style={{ color: colors.unmarkedText, maxWidth: width - 190 }}
                 fontSize={20}>
-                {currentTree.treeName}
+                {tree.treeName}
             </AppText>
         </View>
     );

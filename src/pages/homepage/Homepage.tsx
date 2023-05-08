@@ -18,6 +18,7 @@ import {
 } from "../viewingSkillTree/canvas/coordinateFunctions";
 import useHandleCanvasScroll from "../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
 import RadialSkillTree from "./RadialSkillTree";
+import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 
 function Homepage() {
     //Redux State
@@ -39,16 +40,19 @@ function Homepage() {
     return (
         <View style={{ position: "relative", backgroundColor: colors.background, overflow: "hidden" }}>
             {homepageTree.children.length != 0 && (
-                <GestureDetector gesture={canvasGestures}>
-                    <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
-                        <Animated.View style={[transform]}>
-                            <Canvas style={{ width: canvasWidth, height: canvasHeight }} mode="continuous">
-                                <Circles />
-                                <RadialSkillTree nodeCoordinatesCentered={centeredCoordinatedWithTreeData} selectedNode={null} />
-                            </Canvas>
-                        </Animated.View>
-                    </View>
-                </GestureDetector>
+                <>
+                    <GestureDetector gesture={canvasGestures}>
+                        <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
+                            <Animated.View style={[transform]}>
+                                <Canvas style={{ width: canvasWidth, height: canvasHeight }} mode="continuous">
+                                    <Circles />
+                                    <RadialSkillTree nodeCoordinatesCentered={centeredCoordinatedWithTreeData} selectedNode={null} />
+                                </Canvas>
+                            </Animated.View>
+                        </View>
+                    </GestureDetector>
+                    <ProgressIndicatorAndName tree={homepageTree} />
+                </>
             )}
         </View>
     );
@@ -105,7 +109,7 @@ function buildHomepageTree(userTrees: Tree<Skill>[]) {
     });
 
     const result: Tree<Skill> = {
-        accentColor: "white",
+        accentColor: "#FFFFFF",
         nodeId: ROOT_ID,
         isRoot: true,
         children: modifiedUserTrees,
