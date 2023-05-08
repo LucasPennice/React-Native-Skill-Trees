@@ -3,9 +3,11 @@ import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import { cartesianToPositivePolarCoordinates } from "../../functions/coordinateSystem";
+import { mutateEveryTreeNode } from "../../functions/mutateTree";
 import { NAV_HEGIHT, centerFlex, colors } from "../../parameters";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { selectTreeSlice } from "../../redux/userTreesSlice";
 import { Skill, Tree } from "../../types";
 import {
     centerNodesInCanvas,
@@ -17,159 +19,13 @@ import {
 import useHandleCanvasScroll from "../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
 import RadialSkillTree from "./RadialSkillTree";
 
-const mockInputTree: Tree<Skill> = {
-    treeName: "Teat",
-    accentColor: "#FED739",
-    isRoot: true,
-    parentId: null,
-    treeId: "5TFyIFSOPdyWM4BTORuqmyjB",
-    level: 0,
-    nodeId: "OEYV9lGXxT9osAsdR0gbg0qx",
-    children: [
-        {
-            treeName: "Teat",
-            accentColor: "#FED739",
-            isRoot: false,
-            parentId: "OEYV9lGXxT9osAsdR0gbg0qx",
-            treeId: "5TFyIFSOPdyWM4BTORuqmyjB",
-            level: 1,
-            nodeId: "S6OQ0keJsWq6ehPavkyuhYQc",
-            children: [
-                {
-                    treeName: "Teat",
-                    accentColor: "#FED739",
-                    isRoot: false,
-                    parentId: "S6OQ0keJsWq6ehPavkyuhYQc",
-                    treeId: "5TFyIFSOPdyWM4BTORuqmyjB",
-                    level: 2,
-                    nodeId: "1",
-                    children: [
-                        {
-                            treeName: "Teat",
-                            accentColor: "#FED739",
-                            isRoot: false,
-                            parentId: "1",
-                            treeId: "5TFyIFSOPdyWM4BTORuqmyjB",
-                            level: 2,
-                            nodeId: "1-1",
-                            children: [],
-                            x: 0,
-                            y: 240,
-                            data: { name: "3", isCompleted: false },
-                        },
-                        {
-                            treeName: "Teat",
-                            accentColor: "#FED739",
-                            isRoot: false,
-                            parentId: "1",
-                            treeId: "5TFyIFSOPdyWM4BTORuqmyjB",
-                            level: 2,
-                            nodeId: "1-2",
-                            children: [],
-                            x: 0,
-                            y: 240,
-                            data: { name: "3", isCompleted: false },
-                        },
-                        {
-                            treeName: "Teat",
-                            accentColor: "#FED739",
-                            isRoot: false,
-                            parentId: "1",
-                            treeId: "5TFyIFSOPdyWM4BTORuqmyjB",
-                            level: 2,
-                            nodeId: "1-3",
-                            children: [],
-                            x: 0,
-                            y: 240,
-                            data: { name: "3", isCompleted: false },
-                        },
-                    ],
-                    x: 0,
-                    y: 240,
-                    data: { name: "3", isCompleted: false },
-                },
-                {
-                    treeName: "Teat",
-                    accentColor: "#FED739",
-                    isRoot: false,
-                    parentId: "S6OQ0keJsWq6ehPavkyuhYQc",
-                    treeId: "5TFyIFSOPdyWM4BTORuqmyjB",
-                    level: 2,
-                    nodeId: "2",
-                    children: [
-                        {
-                            treeName: "Teat",
-                            accentColor: "#FED739",
-                            isRoot: false,
-                            parentId: "2",
-                            treeId: "5TFyIFSOPdyWM4BTORuqmyjB",
-                            level: 2,
-                            nodeId: "2-1",
-                            children: [],
-                            x: 0,
-                            y: 240,
-                            data: { name: "3", isCompleted: false },
-                        },
-                        {
-                            treeName: "Teat",
-                            accentColor: "#FED739",
-                            isRoot: false,
-                            parentId: "2",
-                            treeId: "5TFyIFSOPdyWM4BTORuqmyjB",
-                            level: 2,
-                            nodeId: "2-2",
-                            children: [],
-                            x: 0,
-                            y: 240,
-                            data: { name: "3", isCompleted: false },
-                        },
-                        {
-                            treeName: "Teat",
-                            accentColor: "#FED739",
-                            isRoot: false,
-                            parentId: "2",
-                            treeId: "5TFyIFSOPdyWM4BTORuqmyjB",
-                            level: 2,
-                            nodeId: "2-3",
-                            children: [],
-                            x: 0,
-                            y: 240,
-                            data: { name: "3", isCompleted: false },
-                        },
-                        {
-                            treeName: "Teat",
-                            accentColor: "#FED739",
-                            isRoot: false,
-                            parentId: "2",
-                            treeId: "5TFyIFSOPdyWM4BTORuqmyjB",
-                            level: 2,
-                            nodeId: "2-4",
-                            children: [],
-                            x: 0,
-                            y: 240,
-                            data: { name: "3", isCompleted: false },
-                        },
-                    ],
-                    x: 0,
-                    y: 240,
-                    data: { name: "3", isCompleted: false },
-                },
-            ],
-            x: 0,
-            y: 120,
-            data: { name: "Teat", isCompleted: false },
-        },
-    ],
-    x: 0,
-    y: 0,
-    data: { name: "Root", isCompleted: true },
-};
-
 function Homepage() {
     //Redux State
     const screenDimentions = useAppSelector(selectScreenDimentions);
+    const { userTrees } = useAppSelector(selectTreeSlice);
     //Derived State
-    const coordinatesWithTreeData = getNodesCoordinates(mockInputTree, "radial");
+    const homepageTree = buildHomepageTree(userTrees);
+    const coordinatesWithTreeData = getNodesCoordinates(homepageTree, "radial");
     //
     const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
     const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
@@ -182,16 +38,18 @@ function Homepage() {
 
     return (
         <View style={{ position: "relative", backgroundColor: colors.background, overflow: "hidden" }}>
-            <GestureDetector gesture={canvasGestures}>
-                <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
-                    <Animated.View style={[transform]}>
-                        <Canvas style={{ width: canvasWidth, height: canvasHeight }} mode="continuous">
-                            <Circles />
-                            <RadialSkillTree nodeCoordinatesCentered={centeredCoordinatedWithTreeData} selectedNode={null} />
-                        </Canvas>
-                    </Animated.View>
-                </View>
-            </GestureDetector>
+            {homepageTree.children.length != 0 && (
+                <GestureDetector gesture={canvasGestures}>
+                    <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
+                        <Animated.View style={[transform]}>
+                            <Canvas style={{ width: canvasWidth, height: canvasHeight }} mode="continuous">
+                                <Circles />
+                                <RadialSkillTree nodeCoordinatesCentered={centeredCoordinatedWithTreeData} selectedNode={null} />
+                            </Canvas>
+                        </Animated.View>
+                    </View>
+                </GestureDetector>
+            )}
         </View>
     );
     function Circles() {
@@ -234,3 +92,35 @@ function Homepage() {
 }
 
 export default Homepage;
+
+function buildHomepageTree(userTrees: Tree<Skill>[]) {
+    const ROOT_ID = "homepageRoot";
+
+    const modifiedUserTrees = userTrees.map((uT) => {
+        const treeWithUpdatedLevel = mutateEveryTreeNode(uT, increaseLevelByOne);
+
+        if (!treeWithUpdatedLevel) throw "buildHomepageTree not treeWithUpdatedLevel";
+
+        return { ...treeWithUpdatedLevel, isRoot: false, parentId: ROOT_ID };
+    });
+
+    const result: Tree<Skill> = {
+        accentColor: "white",
+        nodeId: ROOT_ID,
+        isRoot: true,
+        children: modifiedUserTrees,
+        data: { name: "Root", isCompleted: false },
+        level: 0,
+        parentId: null,
+        treeId: "HomepageTree",
+        treeName: "Your Skill Tree",
+        x: 0,
+        y: 0,
+    };
+
+    return result;
+
+    function increaseLevelByOne(tree: Tree<Skill>): Tree<Skill> {
+        return { ...tree, level: tree.level + 1 };
+    }
+}

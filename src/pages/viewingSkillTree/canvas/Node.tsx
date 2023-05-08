@@ -44,7 +44,7 @@ function Node({
 
     const { cx, cy } = coord;
 
-    const textWidth = nodeLetterFont ? nodeLetterFont.getTextWidth(letter) : 0;
+    const textWidth = nodeLetterFont ? nodeLetterFont.getTextWidth(letter.toUpperCase()) : 0;
 
     const x = useAnimateSkiaValue({ initialValue: cx, stateToAnimate: cx });
     const y = useAnimateSkiaValue({ initialValue: cy, stateToAnimate: cy });
@@ -200,7 +200,7 @@ function Node({
             <Path path={path} style="stroke" strokeWidth={2} color={colors.line} />
             <DiffRect inner={animatedinnerRect} outer={animatedOuterRect} color={`${interpolateColors(treeAccentColor, colors.background, 0.49)}`} />
             <Path path={path} style="stroke" start={start} strokeCap={"round"} strokeWidth={2} color={treeAccentColor} />
-            <Text x={textX} y={textY} text={letter} font={nodeLetterFont} color={color} />
+            <Text x={textX} y={textY} text={letter.toUpperCase()} font={nodeLetterFont} color={color} />
         </Group>
     );
 

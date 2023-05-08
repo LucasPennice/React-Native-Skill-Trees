@@ -84,10 +84,6 @@ export function checkContrastHex(color1: string, color2: string) {
 export function getLabelTextColor(treeAccentColor: string) {
     const whiteContrast = checkContrastHex(treeAccentColor, "#FFFFFF");
     const backgroundContrast = checkContrastHex(treeAccentColor, colors.background);
-    console.log("----");
-    console.log(whiteContrast);
-    console.log(backgroundContrast);
-    console.log("----");
 
     if (whiteContrast > backgroundContrast) return "#FFFFFF";
 

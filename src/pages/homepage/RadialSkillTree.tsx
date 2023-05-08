@@ -20,8 +20,6 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode }: TreeProps) {
     const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
     const rootCoordinates = { x: rootNode!.x, y: rootNode!.y };
 
-    const labelTextColor = getLabelTextColor(rootNode!.accentColor);
-
     return (
         <>
             {nodeCoordinatesCentered.map((node, idx) => {
@@ -48,6 +46,8 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode }: TreeProps) {
             ))}
             {nodeCoordinatesCentered.map((node, idx) => {
                 if (node.isRoot) return <Fragment key={idx}></Fragment>;
+
+                const labelTextColor = getLabelTextColor(node.accentColor);
 
                 return (
                     <RadialLabel
