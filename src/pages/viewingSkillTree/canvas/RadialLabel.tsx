@@ -34,7 +34,8 @@ function RadialLabel({
     const rectY = y - fontSize / 4 - verticalPadding - 4 * wordArr.length;
 
     const directionVector = { x: coord.x - rootCoord.x, y: coord.y - rootCoord.y };
-    const angleInRadians = Math.atan2(directionVector.y, directionVector.x);
+    const possiblyNegativeAngleInRadians = Math.atan2(directionVector.y, directionVector.x);
+    const angleInRadians = possiblyNegativeAngleInRadians < 0 ? possiblyNegativeAngleInRadians + 2 * Math.PI : possiblyNegativeAngleInRadians;
 
     return (
         <Group origin={{ x: x, y: y }} transform={[{ rotate: angleInRadians }]}>
@@ -43,7 +44,26 @@ function RadialLabel({
                 const textX = rectX + horizontalPadding - 1;
                 const textY = rectY + 3 * verticalPadding + idx * distanceBetweenWords;
 
-                return <Text key={idx} x={textX} y={textY} text={word} color={color.text} font={labelFont} />;
+                const rotatedTextX = textX - rectangleDimentions.width + 2 * horizontalPadding - 2;
+                const rotatedTextY = textY + verticalPadding + 3;
+
+                const shouldRotate = angleInRadians > Math.PI / 2 && angleInRadians < 3 * (Math.PI / 2);
+
+                return (
+                    <Text
+                        origin={{
+                            x: textX,
+                            y: textY,
+                        }}
+                        transform={[{ rotate: shouldRotate ? Math.PI : 0 }]}
+                        key={idx}
+                        x={shouldRotate ? rotatedTextX : textX}
+                        y={shouldRotate ? rotatedTextY : textY}
+                        text={word}
+                        color={color.text}
+                        font={labelFont}
+                    />
+                );
             })}
         </Group>
     );

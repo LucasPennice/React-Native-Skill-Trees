@@ -1,4 +1,4 @@
-import { mix, useComputedValue, useSharedValueEffect, useValue } from "@shopify/react-native-skia";
+import { Text, mix, useComputedValue, useFont, useSharedValueEffect, useValue } from "@shopify/react-native-skia";
 import { Fragment, useEffect } from "react";
 import { useSharedValue, withSpring } from "react-native-reanimated";
 import { getLabelTextColor } from "../../functions/misc";
@@ -19,6 +19,12 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode }: TreeProps) {
 
     const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
     const rootCoordinates = { x: rootNode!.x, y: rootNode!.y };
+
+    const labelFont = useFont(require("../../../assets/Helvetica.ttf"), 12);
+    const rootNodeCoordinates = nodeCoordinatesCentered.find((c) => c.level === 0);
+
+    if (!rootNodeCoordinates) return <></>;
+    if (!labelFont) return <></>;
 
     return (
         <>
