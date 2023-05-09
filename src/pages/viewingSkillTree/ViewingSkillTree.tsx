@@ -1,22 +1,19 @@
-import { SkiaDomView, useCanvasRef } from "@shopify/react-native-skia";
-import { useContext, useRef, useState } from "react";
-import { Pressable, View } from "react-native";
-import AppText from "../../components/AppText";
-import { centerFlex, colors } from "../../parameters";
+import { useCanvasRef } from "@shopify/react-native-skia";
+import { useContext, useState } from "react";
+import { View } from "react-native";
+import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
+import ShareTreeButton from "../../components/takingScreenshot/ShareTreeButton";
+import { IsSharingAvailableContext } from "../../context";
+import { colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCurrentTree, selectTentativeTree, selectTreeSlice, setSelectedDndZone, setSelectedNode } from "../../redux/userTreesSlice";
 import { DnDZone } from "../../types";
-import { shareCanvasScreenshot } from "../../useIsSharingAvailable";
 import AddNode from "./AddNode";
 import InteractiveTree from "./canvas/InteractiveTree";
-import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import SettingsMenu from "./components/SettingsMenu";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import NewNodeModal from "./modals/NewNodeModal";
-import TakingScreenshotLoadingScreenModal from "./modals/TakingScreenshotLoadingScreenModal";
 import useRunHomepageCleanup from "./useRunHomepageCleanup";
-import { IsSharingAvailableContext } from "../../context";
-import ShareTreeButton from "../../components/ShareTreeButton";
 
 type Mode = "SelectedNode" | "AddingNode" | "TakingScreenshot" | "Idle";
 
@@ -67,7 +64,7 @@ function ViewingSkillTree() {
                     canvasRef={canvasRef}
                     shouldShare={Boolean(shouldRenderShareButton)}
                     takingScreenShotState={[isTakingScreenshot, setIsTakingScreenshot]}
-                    treeName={currentTree.treeName}
+                    tree={currentTree}
                 />
             )}
 

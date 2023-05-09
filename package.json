@@ -20,9 +20,11 @@
     "d3": "^7.8.4",
     "d3-hierarchy": "^3.1.2",
     "expo": "~48.0.15",
+    "expo-av": "~13.2.1",
     "expo-blur": "~12.2.2",
     "expo-file-system": "~15.2.2",
     "expo-media-library": "^15.2.3",
+    "expo-print": "^12.2.1",
     "expo-sharing": "~11.2.2",
     "expo-splash-screen": "~0.18.2",
     "expo-status-bar": "~1.4.4",
@@ -33,8 +35,7 @@
     "react-native-svg": "13.4.0",
     "react-redux": "^8.0.5",
     "svg-path-properties": "^1.1.0",
-    "typescript": "^4.9.4",
-    "expo-av": "~13.2.1"
+    "typescript": "^4.9.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

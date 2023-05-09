@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { ImageFormat, SkiaDomView } from "@shopify/react-native-skia";
-import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
+import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 
 function useIsSharingAvailable() {
@@ -19,53 +19,35 @@ function useIsSharingAvailable() {
 
 export default useIsSharingAvailable;
 
-export async function shareCanvasScreenshot(canvasRef: SkiaDomView | null, setIsTakingScreenshot: (v: boolean) => void, fileName: string) {
-    if (!canvasRef) return Alert.alert("Please try again");
-
+//Base64Code does includes "data:image/png;base64,"
+export async function sharePNG(fileName: string, data: string) {
     try {
-        setIsTakingScreenshot(true);
+        const parsedFileName = fileName.replace(/\s/g, "");
 
-        const imagesArray = [
-            canvasRef.makeImageSnapshot(),
-            canvasRef.makeImageSnapshot(),
-            canvasRef.makeImageSnapshot(),
-            canvasRef.makeImageSnapshot(),
-            canvasRef.makeImageSnapshot(),
-        ];
+        const base64Code = data.split("data:image/png;base64,")[1];
 
-        const encodedImages = imagesArray.map((image) => image.encodeToBase64(ImageFormat.PNG, 99));
+        const imageURI = FileSystem.documentDirectory + `${parsedFileName}` + ".png";
 
-        let tentativeBestEncodedImage: string | null = null;
+        await FileSystem.writeAsStringAsync(imageURI, base64Code, { encoding: FileSystem.EncodingType.Base64 });
 
-        for (let index = 0; index < encodedImages.length; index++) {
-            const encodedImage = encodedImages[index];
+        await MediaLibrary.saveToLibraryAsync(imageURI);
 
-            if (tentativeBestEncodedImage === null || encodedImage.length > tentativeBestEncodedImage.length) {
-                tentativeBestEncodedImage = encodedImage;
-            }
-        }
-
-        await new Promise((resolve) =>
-            setTimeout(async () => {
-                const data = `data:image/png;base64,${tentativeBestEncodedImage}`;
-                const base64Code = data.split("data:image/png;base64,")[1];
-
-                const directoryURI = FileSystem.documentDirectory + `${fileName}` + ".png";
-
-                await FileSystem.writeAsStringAsync(directoryURI, base64Code, {
-                    encoding: FileSystem.EncodingType.Base64,
-                });
-
-                await MediaLibrary.saveToLibraryAsync(directoryURI);
-
-                await Sharing.shareAsync(directoryURI);
-
-                resolve("");
-            }, 1000)
-        );
+        await Sharing.shareAsync(imageURI);
     } catch (error) {
-        Alert.alert("Could not generate image, please try again");
-    } finally {
-        setIsTakingScreenshot(false);
+        Alert.alert("Could not share png");
+    }
+}
+
+export async function sharePDF(html: string) {
+    try {
+        const { uri } = await Print.printToFileAsync({
+            html,
+            base64: true,
+            margins: { bottom: 0, left: 0, right: 0, top: 0 },
+        });
+
+        await Sharing.shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
+    } catch (error) {
+        Alert.alert("Could not share pdf");
     }
 }

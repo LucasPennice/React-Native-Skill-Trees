@@ -157,13 +157,8 @@ function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill> {
             if (polarOverlap === undefined) overlapWithinTree = false;
             if (polarOverlap !== undefined) {
                 //We append the rootNode to the subTree so that the path finding functions can work correctly
-                console.log("🌴");
-                console.log(polarOverlap);
-
                 const subTreeWithRootNode = { ...tree, children: [subTree] };
                 const treesToShift = getTreesToShiftForCircularTree(subTreeWithRootNode, polarOverlap.nodesInConflict);
-                console.log(treesToShift);
-                console.log("🌴");
 
                 result = shiftNodesCounterClockWise(result, treesToShift, polarOverlap.biggestOverlapAngle);
             }

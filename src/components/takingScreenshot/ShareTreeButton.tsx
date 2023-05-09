@@ -1,23 +1,20 @@
-import { Alert, Pressable } from "react-native";
-import { shareCanvasScreenshot } from "../useIsSharingAvailable";
-import { centerFlex, colors } from "../parameters";
-import AppText from "./AppText";
-import { Skill, Tree } from "../types";
 import { SkiaDomView } from "@shopify/react-native-skia";
-import TakingScreenshotLoadingScreenModal from "../pages/viewingSkillTree/modals/TakingScreenshotLoadingScreenModal";
 import { RefObject } from "react";
+import { Alert, Pressable } from "react-native";
+import { centerFlex, colors } from "../../parameters";
+import { Skill, Tree } from "../../types";
+import AppText from "../AppText";
+import TakingScreenshotLoadingScreenModal from "./TakingScreenshotLoadingScreenModal";
 
 type Props = {
     shouldShare: boolean;
     takingScreenShotState: [boolean, (v: boolean) => void];
-    treeName: string;
+    tree: Tree<Skill>;
     canvasRef: RefObject<SkiaDomView>;
 };
 
-function ShareTreeButton({ shouldShare, takingScreenShotState, treeName, canvasRef }: Props) {
+function ShareTreeButton({ shouldShare, takingScreenShotState, tree, canvasRef }: Props) {
     const [isTakingScreenshot, setIsTakingScreenshot] = takingScreenShotState;
-
-    const fileName = treeName.replace(/\s/g, "");
 
     return (
         <>
@@ -25,7 +22,7 @@ function ShareTreeButton({ shouldShare, takingScreenShotState, treeName, canvasR
                 <Pressable
                     onPress={() => {
                         if (!canvasRef.current) return Alert.alert("Please try again");
-                        shareCanvasScreenshot(canvasRef.current, setIsTakingScreenshot, fileName);
+                        setIsTakingScreenshot(true);
                     }}
                     style={[
                         centerFlex,
@@ -44,7 +41,7 @@ function ShareTreeButton({ shouldShare, takingScreenShotState, treeName, canvasR
                     </AppText>
                 </Pressable>
             )}
-            <TakingScreenshotLoadingScreenModal open={isTakingScreenshot} />
+            <TakingScreenshotLoadingScreenModal canvasRef={canvasRef.current!} takingScreenShotState={takingScreenShotState} tree={tree} />
         </>
     );
 }
