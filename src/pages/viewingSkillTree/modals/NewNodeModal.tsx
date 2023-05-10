@@ -22,8 +22,10 @@ function NewNodeModal({ closeModal, open }: Props) {
     const [isCompleted, setIsCompleted] = useState(false);
 
     useEffect(() => {
-        onChangeText("");
-        setIsCompleted(false);
+        if (open === false) {
+            onChangeText("");
+            setIsCompleted(false);
+        }
     }, [open]);
 
     const addNewNode = () => {

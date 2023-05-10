@@ -31,7 +31,7 @@ function AddNode({ openNewNodeModal }: Props) {
     const [mode, setMode] = useState<MODES>("IDLE");
 
     useEffect(() => {
-        if (selectedDndZone) return setMode("CONFIRM_POSITION");
+        if (selectedDndZone !== undefined) return setMode("CONFIRM_POSITION");
         if (newNode) return setMode("SELECT_POSITION");
 
         return setMode("IDLE");

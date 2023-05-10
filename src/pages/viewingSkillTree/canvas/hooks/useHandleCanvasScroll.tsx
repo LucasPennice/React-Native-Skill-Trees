@@ -3,8 +3,9 @@ import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reani
 import { useAppSelector } from "../../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../../redux/screenDimentionsSlice";
 import { CanvasDimensions, NodeCoordinate } from "../../../../types";
-import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE } from "../../../../parameters";
+import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE, CIRCLE_SIZE_SELECTED } from "../../../../parameters";
 import { useEffect } from "react";
+import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "./useCanvasTouchHandler";
 
 const DEFAULT_SCALE = 1;
 
@@ -101,11 +102,17 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
         if (foundNodeCoordinates) {
             const position = whereShouldNodeBe({ foundNodeCoordinates, canvasWidth, screenWidth: screenDimentions.width });
 
-            const leftBound = (canvasWidth - screenDimentions.width) / 2;
+            const leftBound =
+                canvasWidth === screenDimentions.width
+                    ? -screenDimentions.width / 4 + CIRCLE_SIZE_SELECTED / 2 - 5
+                    : (canvasWidth - screenDimentions.width) / 2;
+
+            const POP_MENU_WIDTH = screenDimentions.width - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL - CIRCLE_SIZE_SELECTED - 30;
+            const MENU_HEIGHT = screenDimentions.height / 1.5;
 
             const foundNodeTranslatedX = leftBound - foundNodeCoordinates.x;
-            const positionAdjustmentsForX = position === "LEFT_SIDE_OF_SCREEN" ? screenDimentions.width - 9.5 * CIRCLE_SIZE : 0;
-            const foundNodeTranslatedY = canvasHeight / 2 - foundNodeCoordinates.y - 8 * CIRCLE_SIZE;
+            const positionAdjustmentsForX = position === "LEFT_SIDE_OF_SCREEN" ? POP_MENU_WIDTH : 0;
+            const foundNodeTranslatedY = -foundNodeCoordinates.y + MENU_HEIGHT / 2 - 2 * CIRCLE_SIZE_SELECTED;
 
             return {
                 transform: [
