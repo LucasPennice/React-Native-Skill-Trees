@@ -3,7 +3,7 @@ import { useContext, useState } from "react";
 import { View } from "react-native";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
-import CanvasSettingsModal from "../../components/SettingsModal";
+import CanvasSettingsModal from "../../components/CanvasSettingsModal";
 import ShareTreeButton from "../../components/takingScreenshot/ShareTreeButton";
 import { IsSharingAvailableContext } from "../../context";
 import { colors } from "../../parameters";

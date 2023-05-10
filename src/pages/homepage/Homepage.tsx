@@ -22,19 +22,19 @@ import {
 import useHandleCanvasScroll from "../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
 import RadialSkillTree from "./RadialSkillTree";
 import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
-import CanvasSettingsModal from "../../components/SettingsModal";
+import CanvasSettingsModal from "../../components/CanvasSettingsModal";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 
 function Homepage() {
     //Redux State
     const screenDimentions = useAppSelector(selectScreenDimentions);
-    const { showLabel, oneColorPerTree, showCircleGuide } = useAppSelector(selectCanvasDisplaySettings);
+    const { showLabel, oneColorPerTree, showCircleGuide, homepageTreeColor } = useAppSelector(selectCanvasDisplaySettings);
     const { userTrees } = useAppSelector(selectTreeSlice);
     //State
     const [isTakingScreenshot, setIsTakingScreenshot] = useState(false);
     const [canvasSettings, setCanvasSettings] = useState(false);
     //Derived State
-    const homepageTree = buildHomepageTree(userTrees);
+    const homepageTree = buildHomepageTree(userTrees, homepageTreeColor);
     const coordinatesWithTreeData = getNodesCoordinates(homepageTree, "radial");
     //
     const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
@@ -126,7 +126,7 @@ function Homepage() {
 
 export default Homepage;
 
-function buildHomepageTree(userTrees: Tree<Skill>[]) {
+function buildHomepageTree(userTrees: Tree<Skill>[], homepageTreeColor: string) {
     const ROOT_ID = "homepageRoot";
 
     const modifiedUserTrees = userTrees.map((uT) => {
@@ -138,7 +138,7 @@ function buildHomepageTree(userTrees: Tree<Skill>[]) {
     });
 
     const result: Tree<Skill> = {
-        accentColor: "#FFFFFF",
+        accentColor: homepageTreeColor,
         nodeId: ROOT_ID,
         isRoot: true,
         children: modifiedUserTrees,

@@ -1,10 +1,17 @@
 import { ScrollView, View } from "react-native";
-import { colors } from "../parameters";
-import { selectCanvasDisplaySettings, setOneColorPerTree, setShowCircleGuide, setShowLabel } from "../redux/canvasDisplaySettingsSlice";
+import { colors, possibleTreeColors } from "../parameters";
+import {
+    selectCanvasDisplaySettings,
+    setHomepageTreeColor,
+    setOneColorPerTree,
+    setShowCircleGuide,
+    setShowLabel,
+} from "../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../redux/reduxHooks";
 import AppText from "./AppText";
 import FlingToDismissModal from "./FlingToDismissModal";
 import RadioInput from "./RadioInput";
+import ColorSelector from "./ColorsSelector";
 
 type Props = {
     closeModal: () => void;
@@ -12,7 +19,7 @@ type Props = {
 };
 
 function CanvasSettingsModal({ closeModal, open }: Props) {
-    const { oneColorPerTree, showCircleGuide, showLabel } = useAppSelector(selectCanvasDisplaySettings);
+    const { oneColorPerTree, showCircleGuide, showLabel, homepageTreeColor } = useAppSelector(selectCanvasDisplaySettings);
     const dispatch = useAppDispatch();
 
     const updateOneColorPerTree = (v: boolean) => {
@@ -23,6 +30,9 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
     };
     const updateShowLabel = (v: boolean) => {
         dispatch(setShowLabel(v));
+    };
+    const updateHomepageTreeColor = (v: string) => {
+        dispatch(setHomepageTreeColor(v));
     };
 
     return (
@@ -39,6 +49,16 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
                     <RadioInput state={[showLabel, updateShowLabel]} text={"Show labels"} style={{ marginBottom: 15 }} />
                     <RadioInput state={[oneColorPerTree, updateOneColorPerTree]} text={"One color per tree"} style={{ marginBottom: 15 }} />
                     <RadioInput state={[showCircleGuide, updateShowCircleGuide]} text={"Show circle guide"} />
+                    <AppText fontSize={18} style={{ color: "#FFFFFF", marginBottom: 10 }}>
+                        Homepage Tree Color
+                    </AppText>
+                    <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 5, opacity: 0.8 }}>
+                        Completed skills and progress bars will show with this color
+                    </AppText>
+                    <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 10, opacity: 0.7 }}>
+                        Scroll to see more colors
+                    </AppText>
+                    <ColorSelector colorsArray={possibleTreeColors} state={[homepageTreeColor, updateHomepageTreeColor]} />
                 </ScrollView>
             </View>
         </FlingToDismissModal>

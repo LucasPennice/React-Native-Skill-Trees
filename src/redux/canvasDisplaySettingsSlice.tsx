@@ -10,6 +10,7 @@ type CanvasDisplaySettings = {
     showDragAndDropGuides: boolean;
     oneColorPerTree: boolean;
     showCircleGuide: boolean;
+    homepageTreeColor: string;
 };
 
 // Define the initial state using that type
@@ -20,6 +21,7 @@ const initialState: CanvasDisplaySettings = {
     showDragAndDropGuides: false,
     openMenu: null,
     candidatesToHoist: null,
+    homepageTreeColor: "#FFFFFF",
 };
 
 export const canvasDisplaySettingsSlice = createSlice({
@@ -34,6 +36,9 @@ export const canvasDisplaySettingsSlice = createSlice({
         },
         setShowCircleGuide: (state, action: PayloadAction<boolean>) => {
             state.showCircleGuide = action.payload;
+        },
+        setHomepageTreeColor: (state, action: PayloadAction<string>) => {
+            state.homepageTreeColor = action.payload;
         },
         setOneColorPerTree: (state, action: PayloadAction<boolean>) => {
             state.oneColorPerTree = action.payload;
@@ -89,6 +94,7 @@ export const {
     openChildrenHoistSelector,
     toggleNewNode,
     toggleShowDnDGuides,
+    setHomepageTreeColor,
     setOneColorPerTree,
     setShowCircleGuide,
     setShowLabel,
