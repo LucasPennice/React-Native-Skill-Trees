@@ -1,23 +1,33 @@
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
-import { Alert, Button, Dimensions, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
-import { CirclePositionInCanvas, NodeCoordinate } from "../../../types";
-import { mutateUserTree, removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../../redux/userTreesSlice";
-import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { openChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
-import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE_SELECTED, MENU_DAMPENING, centerFlex, colors } from "../../../parameters";
+import { Alert, TouchableOpacity, View } from "react-native";
+import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+    Easing,
+    FadeInDown,
+    FadeOutDown,
+    runOnJS,
+    spring,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+    withTiming,
+} from "react-native-reanimated";
+import { StackNavigatorParams } from "../../../../App";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StackNavigatorParams } from "../../../../App";
-import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
-import { findNodeById, countNodesInTree } from "../../../functions/extractInformationFromTree";
+import { countNodesInTree, findNodeById } from "../../../functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, editTreeProperties } from "../../../functions/mutateTree";
+import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE_SELECTED, MENU_DAMPENING, centerFlex, colors } from "../../../parameters";
+import { openChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
+import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
+import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { mutateUserTree, removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../../redux/userTreesSlice";
+import { NodeCoordinate } from "../../../types";
 import usePlayCompletionSound from "../../../usePlayCompletionSound";
+import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
 
 type Props = {
     foundNodeCoordinates: NodeCoordinate;
@@ -38,8 +48,6 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
 
     const MENU_HEIGHT = height / 1.5;
     const MENU_WIDTH = width - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL - CIRCLE_SIZE_SELECTED - 30;
-
-    const { animatedMenuStyles } = useHandlePopMenuAnimations(foundNodeCoordinates, selectedNode, canvasWidth);
 
     const navigation = useNavigation<NativeStackScreenProps<StackNavigatorParams>["navigation"]>();
 
@@ -110,19 +118,27 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
             runOnJS(closePopUpMenu)();
         });
 
+    const menuPosition = whereIsSelectedNode({ canvasWidth, foundNodeCoordinates, screenWidth: width });
+    const left = menuPosition === "LEFT_SIDE_OF_SCREEN" ? 0 : width - MENU_WIDTH;
+    const top = MENU_HEIGHT / 4.5;
+
     return (
         <GestureDetector gesture={flingGesture}>
             <Animated.View
+                entering={FadeInDown.easing(Easing.elastic()).duration(300)}
+                exiting={FadeOutDown.easing(Easing.elastic()).duration(300)}
                 style={[
-                    animatedMenuStyles,
                     {
+                        left,
+                        top,
                         position: "absolute",
                         height: MENU_HEIGHT,
                         width: MENU_WIDTH,
                         backgroundColor: colors.darkGray,
                         borderRadius: 20,
-                        padding: 20,
-                        paddingTop: 40,
+                        paddingHorizontal: 10,
+                        paddingTop: 30,
+                        paddingBottom: 10,
                     },
                 ]}>
                 <View
@@ -136,6 +152,9 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
                         position: "absolute",
                     }}
                 />
+                <AppText style={{ color: colors.line, marginBottom: 10 }} fontSize={12}>
+                    Drag me down or click the cirlcle to close
+                </AppText>
 
                 <AppTextInput
                     onBlur={updateNodeName}
@@ -179,55 +198,22 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
             </Animated.View>
         </GestureDetector>
     );
+
+    function whereIsSelectedNode({
+        canvasWidth,
+        foundNodeCoordinates,
+        screenWidth,
+    }: {
+        foundNodeCoordinates: NodeCoordinate;
+        canvasWidth: number;
+        screenWidth: number;
+    }) {
+        const distanceFromRightMargin = canvasWidth - foundNodeCoordinates.x;
+
+        if (distanceFromRightMargin <= screenWidth + CANVAS_HORIZONTAL_PADDING / 2) return "LEFT_SIDE_OF_SCREEN";
+
+        return "RIGHT_SIDE_OF_SCREEN";
+    }
 }
 
 export default PopUpMenu;
-
-function useHandlePopMenuAnimations(foundNodeCoordinates: NodeCoordinate, selectedNode: string | null, canvasWidth: number) {
-    const isOpen = useSharedValue(false);
-
-    useEffect(() => {
-        isOpen.value = selectedNode != null;
-    }, [selectedNode]);
-
-    const { height, width } = useAppSelector(selectScreenDimentions);
-
-    const MENU_HEIGHT = height / 1.5;
-    const MENU_WIDTH = width - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL - CIRCLE_SIZE_SELECTED - 30;
-
-    //This handles the menu animations 👇
-
-    const animatedMenuStyles = useAnimatedStyle(() => {
-        const menuPosition = whereIsSelectedNode({ canvasWidth, foundNodeCoordinates, screenWidth: width });
-
-        const left = menuPosition === "LEFT_SIDE_OF_SCREEN" ? 0 : width - MENU_WIDTH;
-
-        const top = MENU_HEIGHT / 4.5;
-
-        let standardMenuStyles = { opacity: withTiming(isOpen.value ? 1 : 0), transform: [{ scale: withSpring(isOpen.value ? 1 : 0.9) }] };
-
-        return {
-            left: withSpring(left, MENU_DAMPENING),
-            top: withSpring(top, MENU_DAMPENING),
-            ...standardMenuStyles,
-        };
-
-        function whereIsSelectedNode({
-            canvasWidth,
-            foundNodeCoordinates,
-            screenWidth,
-        }: {
-            foundNodeCoordinates: NodeCoordinate;
-            canvasWidth: number;
-            screenWidth: number;
-        }) {
-            const distanceFromRightMargin = canvasWidth - foundNodeCoordinates.x;
-
-            if (distanceFromRightMargin <= screenWidth + CANVAS_HORIZONTAL_PADDING / 2) return "LEFT_SIDE_OF_SCREEN";
-
-            return "RIGHT_SIDE_OF_SCREEN";
-        }
-    }, [foundNodeCoordinates, selectedNode]);
-
-    return { animatedMenuStyles };
-}

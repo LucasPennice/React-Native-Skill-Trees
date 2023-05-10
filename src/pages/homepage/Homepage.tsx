@@ -21,13 +21,18 @@ import {
 } from "../viewingSkillTree/canvas/coordinateFunctions";
 import useHandleCanvasScroll from "../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
 import RadialSkillTree from "./RadialSkillTree";
+import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
+import CanvasSettingsModal from "../../components/SettingsModal";
+import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 
 function Homepage() {
     //Redux State
     const screenDimentions = useAppSelector(selectScreenDimentions);
+    const { showLabel, oneColorPerTree, showCircleGuide } = useAppSelector(selectCanvasDisplaySettings);
     const { userTrees } = useAppSelector(selectTreeSlice);
     //State
     const [isTakingScreenshot, setIsTakingScreenshot] = useState(false);
+    const [canvasSettings, setCanvasSettings] = useState(false);
     //Derived State
     const homepageTree = buildHomepageTree(userTrees);
     const coordinatesWithTreeData = getNodesCoordinates(homepageTree, "radial");
@@ -56,21 +61,26 @@ function Homepage() {
                                         height: canvasHeight,
                                         transform: [{ scale: isTakingScreenshot ? screenDimentions.width / canvasWidth : 1 }],
                                     }}
-                                    mode="continuous"
                                     ref={canvasRef}>
-                                    <Circles />
-                                    <RadialSkillTree nodeCoordinatesCentered={centeredCoordinatedWithTreeData} selectedNode={null} />
+                                    {showCircleGuide && <Circles />}
+                                    <RadialSkillTree
+                                        nodeCoordinatesCentered={centeredCoordinatedWithTreeData}
+                                        selectedNode={null}
+                                        settings={{ showLabel, oneColorPerTree }}
+                                    />
                                 </Canvas>
                             </Animated.View>
                         </View>
                     </GestureDetector>
                     <ProgressIndicatorAndName tree={homepageTree} />
+                    <OpenSettingsMenu openModal={() => setCanvasSettings(true)} />
                     <ShareTreeButton
                         canvasRef={canvasRef}
                         shouldShare
                         takingScreenShotState={[isTakingScreenshot, setIsTakingScreenshot]}
                         tree={homepageTree}
                     />
+                    <CanvasSettingsModal open={canvasSettings} closeModal={() => setCanvasSettings(false)} />
                 </>
             )}
         </View>

@@ -12,9 +12,13 @@ import { removeTreeDataFromCoordinate } from "../viewingSkillTree/canvas/coordin
 type TreeProps = {
     nodeCoordinatesCentered: CoordinatesWithTreeData[];
     selectedNode: string | null;
+    settings: {
+        showLabel: boolean;
+        oneColorPerTree: boolean;
+    };
 };
 
-function RadialSkillTree({ nodeCoordinatesCentered, selectedNode }: TreeProps) {
+function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings }: TreeProps) {
     const nodeCoordinates = removeTreeDataFromCoordinate(nodeCoordinatesCentered);
 
     const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
@@ -35,7 +39,8 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode }: TreeProps) {
 
                 let parentCoord: CartesianCoordinate = { x: parentNode.x, y: parentNode.y };
 
-                const pathColor = parentNode.data.isCompleted ? node.accentColor : colors.line;
+                const nodeColor = settings.oneColorPerTree ? rootNode!.accentColor : node.accentColor;
+                const pathColor = parentNode.data.isCompleted ? nodeColor : colors.line;
                 return (
                     <RadialCanvasPath
                         key={`${node.nodeId}_path`}
@@ -47,24 +52,27 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode }: TreeProps) {
                 );
             })}
 
-            {nodeCoordinatesCentered.map((node) => (
-                <RenderNode key={`${node.nodeId}_node`} node={node} selectedNode={selectedNode} />
-            ))}
-            {nodeCoordinatesCentered.map((node, idx) => {
-                if (node.isRoot) return <Fragment key={idx}></Fragment>;
-
-                const labelTextColor = getLabelTextColor(node.accentColor);
-
-                return (
-                    <RadialLabel
-                        key={idx}
-                        text={node.data.name}
-                        color={{ rect: node.accentColor, text: labelTextColor }}
-                        coord={{ x: node.x, y: node.y }}
-                        rootCoord={rootCoordinates}
-                    />
-                );
+            {nodeCoordinatesCentered.map((node) => {
+                const accentColor = settings.oneColorPerTree ? rootNode!.accentColor : node.accentColor;
+                return <RenderNode key={`${node.nodeId}_node`} node={{ ...node, accentColor }} selectedNode={selectedNode} />;
             })}
+            {settings.showLabel &&
+                nodeCoordinatesCentered.map((node, idx) => {
+                    if (node.isRoot) return <Fragment key={idx}></Fragment>;
+
+                    const rectColor = settings.oneColorPerTree ? rootNode!.accentColor : node.accentColor;
+                    const labelTextColor = getLabelTextColor(rectColor);
+
+                    return (
+                        <RadialLabel
+                            key={idx}
+                            text={node.data.name}
+                            color={{ rect: rectColor, text: labelTextColor }}
+                            coord={{ x: node.x, y: node.y }}
+                            rootCoord={rootCoordinates}
+                        />
+                    );
+                })}
         </>
     );
 }

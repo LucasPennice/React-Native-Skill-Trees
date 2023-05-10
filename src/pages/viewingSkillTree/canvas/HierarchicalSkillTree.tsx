@@ -11,9 +11,10 @@ import { getLabelTextColor } from "../../../functions/misc";
 type TreeProps = {
     nodeCoordinatesCentered: CoordinatesWithTreeData[];
     selectedNode: string | null;
+    showLabel: boolean;
 };
 
-function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode }: TreeProps) {
+function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, showLabel }: TreeProps) {
     const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
     const labelTextColor = getLabelTextColor(rootNode!.accentColor);
 
@@ -38,16 +39,17 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode }: TreePr
                 );
             })}
 
-            {nodeCoordinatesCentered.map((node, idx) => {
-                return (
-                    <Label
-                        key={idx}
-                        text={node.data.name}
-                        color={{ rect: node.accentColor, text: labelTextColor }}
-                        coord={{ cx: node.x, cy: node.y }}
-                    />
-                );
-            })}
+            {showLabel &&
+                nodeCoordinatesCentered.map((node, idx) => {
+                    return (
+                        <Label
+                            key={idx}
+                            text={node.data.name}
+                            color={{ rect: node.accentColor, text: labelTextColor }}
+                            coord={{ cx: node.x, cy: node.y }}
+                        />
+                    );
+                })}
             {nodeCoordinatesCentered.map((node) => (
                 <RenderNode key={`${node.nodeId}_node`} node={node} selectedNode={selectedNode} />
             ))}

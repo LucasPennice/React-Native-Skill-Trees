@@ -7,20 +7,21 @@ import { NAV_HEGIHT, centerFlex } from "../../../parameters";
 import { useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { selectTreeSlice } from "../../../redux/userTreesSlice";
-import { CoordinatesWithTreeData, DnDZone, ParentId, Skill, Tree } from "../../../types";
+import { DnDZone, Skill, Tree } from "../../../types";
 import PopUpMenu from "../components/PopUpMenu";
 import DragAndDropZones from "./DragAndDropZones";
+import HierarchicalSkillTree from "./HierarchicalSkillTree";
 import {
-    removeTreeDataFromCoordinate,
     calculateDragAndDropZones,
     centerNodesInCanvas,
     getCanvasDimensions,
-    getNodesCoordinates,
     getCoordinatedWithTreeData,
+    getNodesCoordinates,
+    removeTreeDataFromCoordinate,
 } from "./coordinateFunctions";
 import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
 import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
-import HierarchicalSkillTree from "./HierarchicalSkillTree";
+import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
 
 type InteractiveTreeProps = {
     tree: Tree<Skill>;
@@ -35,6 +36,7 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
     //Redux State
     const screenDimentions = useAppSelector(selectScreenDimentions);
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
+    const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
     //Derived State
     const coordinatesWithTreeData = getNodesCoordinates(tree, "hierarchy");
     //
@@ -73,9 +75,12 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
                                 height: canvasHeight,
                                 transform: [{ scale: isTakingScreenshot ? screenDimentions.width / canvasWidth : 1 }],
                             }}
-                            mode="continuous"
                             ref={canvasRef}>
-                            <HierarchicalSkillTree nodeCoordinatesCentered={centeredCoordinatedWithTreeData} selectedNode={selectedNode} />
+                            <HierarchicalSkillTree
+                                nodeCoordinatesCentered={centeredCoordinatedWithTreeData}
+                                selectedNode={selectedNode}
+                                showLabel={showLabel}
+                            />
                             {showDndZones && <DragAndDropZones data={dragAndDropZones} selectedDndZone={selectedDndZone} />}
                             <Blur blur={blur} />
                         </Canvas>

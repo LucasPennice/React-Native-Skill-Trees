@@ -81,9 +81,7 @@ function EditTreeModal() {
                     Scroll to see more colors
                 </AppText>
                 <ColorSelector colorsArray={possibleTreeColors} state={[selectedColor, setSelectedColor]} />
-                <TouchableOpacity
-                    style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, marginBottom: 30 }}
-                    onPress={confirmDeleteTree}>
+                <TouchableOpacity style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15 }} onPress={confirmDeleteTree}>
                     <AppText fontSize={16} style={{ color: colors.accent }}>
                         Delete this tree
                     </AppText>

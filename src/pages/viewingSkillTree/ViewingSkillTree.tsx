@@ -1,7 +1,9 @@
 import { useCanvasRef } from "@shopify/react-native-skia";
 import { useContext, useState } from "react";
 import { View } from "react-native";
+import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
+import CanvasSettingsModal from "../../components/SettingsModal";
 import ShareTreeButton from "../../components/takingScreenshot/ShareTreeButton";
 import { IsSharingAvailableContext } from "../../context";
 import { colors } from "../../parameters";
@@ -10,7 +12,6 @@ import { selectCurrentTree, selectTentativeTree, selectTreeSlice, setSelectedDnd
 import { DnDZone } from "../../types";
 import AddNode from "./AddNode";
 import InteractiveTree from "./canvas/InteractiveTree";
-import SettingsMenu from "./components/SettingsMenu";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import NewNodeModal from "./modals/NewNodeModal";
 import useRunHomepageCleanup from "./useRunHomepageCleanup";
@@ -26,7 +27,9 @@ function ViewingSkillTree() {
     //Hooks
     const isSharingAvailable = useContext(IsSharingAvailableContext);
     const canvasRef = useCanvasRef();
+    //Local State
     const [isTakingScreenshot, setIsTakingScreenshot] = useState(false);
+    const [canvasSettings, setCanvasSettings] = useState(false);
     useRunHomepageCleanup();
     //Derived State
     const shouldRenderDndZones = newNode && !selectedDndZone;
@@ -57,7 +60,7 @@ function ViewingSkillTree() {
             )}
             {currentTree && <ProgressIndicatorAndName tree={currentTree} />}
             {(mode === "Idle" || mode === "AddingNode") && <AddNode />}
-            {currentTree !== undefined && <SettingsMenu />}
+            <OpenSettingsMenu openModal={() => setCanvasSettings(true)} />
 
             {currentTree && (
                 <ShareTreeButton
@@ -70,6 +73,7 @@ function ViewingSkillTree() {
 
             <ChildrenHoistSelectorModal />
             <NewNodeModal />
+            <CanvasSettingsModal open={canvasSettings} closeModal={() => setCanvasSettings(false)} />
         </View>
     );
 

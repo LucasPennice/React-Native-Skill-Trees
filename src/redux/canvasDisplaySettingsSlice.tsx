@@ -8,11 +8,15 @@ type CanvasDisplaySettings = {
     openMenu: "treeSelector" | "treeSettings" | "childrenHoistSelector" | "newNode" | null;
     candidatesToHoist: Tree<Skill>[] | null;
     showDragAndDropGuides: boolean;
+    oneColorPerTree: boolean;
+    showCircleGuide: boolean;
 };
 
 // Define the initial state using that type
 const initialState: CanvasDisplaySettings = {
     showLabel: false,
+    oneColorPerTree: false,
+    showCircleGuide: false,
     showDragAndDropGuides: false,
     openMenu: null,
     candidatesToHoist: null,
@@ -24,6 +28,15 @@ export const canvasDisplaySettingsSlice = createSlice({
     reducers: {
         toggleShowLabel: (state) => {
             state.showLabel = !state.showLabel;
+        },
+        setShowLabel: (state, action: PayloadAction<boolean>) => {
+            state.showLabel = action.payload;
+        },
+        setShowCircleGuide: (state, action: PayloadAction<boolean>) => {
+            state.showCircleGuide = action.payload;
+        },
+        setOneColorPerTree: (state, action: PayloadAction<boolean>) => {
+            state.oneColorPerTree = action.payload;
         },
         toggleShowDnDGuides: (state) => {
             state.showDragAndDropGuides = !state.showDragAndDropGuides;
@@ -76,6 +89,9 @@ export const {
     openChildrenHoistSelector,
     toggleNewNode,
     toggleShowDnDGuides,
+    setOneColorPerTree,
+    setShowCircleGuide,
+    setShowLabel,
 } = canvasDisplaySettingsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type

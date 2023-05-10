@@ -46,10 +46,9 @@ function RadioInput({
                 },
                 style,
             ]}
-            //@ts-ignore
             onPress={() => {
-                //@ts-ignore
-                setMastered((p) => !p);
+                const newValue = !mastered;
+                setMastered(newValue);
                 if (onPress) onPress();
             }}>
             <AppText style={{ color: "white" }} fontSize={18}>

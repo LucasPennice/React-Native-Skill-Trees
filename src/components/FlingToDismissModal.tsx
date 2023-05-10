@@ -23,14 +23,12 @@ const ModalWithGesturesEnabled = gestureHandlerRootHOC(() => {
         });
     return (
         <GestureDetector gesture={flingGesture}>
-            <SafeAreaView style={[centerFlex, { flex: 1, justifyContent: "flex-end", backgroundColor: "#0000009D" }]}>
+            <SafeAreaView style={[{ flex: 1, justifyContent: "flex-end", backgroundColor: colors.darkGray }]}>
                 <View
                     style={{
-                        backgroundColor: colors.darkGray,
                         borderRadius: 10,
                         flex: 1,
                         width: "100%",
-                        transform: [{ translateY: 30 }],
                         padding: 10,
                     }}>
                     <View style={[centerFlex, { position: "relative" }]}>
@@ -76,7 +74,7 @@ function FlingToDismissModal({
     leftHeaderButton?: { onPress: () => void; title: string };
 }) {
     return (
-        <Modal animationType="slide" transparent={true} visible={open} onRequestClose={closeModal}>
+        <Modal animationType="slide" visible={open} onRequestClose={closeModal} presentationStyle={"formSheet"}>
             <PropsContext.Provider value={{ closeModal, children, leftHeaderButton }}>
                 <ModalWithGesturesEnabled />
             </PropsContext.Provider>
