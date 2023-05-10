@@ -10,7 +10,7 @@ type CanvasDisplaySettings = {
 };
 
 // Define the initial state using that type
-const initialState: CanvasDisplaySettings = {
+export const defaultCanvasDisplaySettings: CanvasDisplaySettings = {
     showLabel: false,
     oneColorPerTree: false,
     showCircleGuide: false,
@@ -19,7 +19,7 @@ const initialState: CanvasDisplaySettings = {
 
 export const canvasDisplaySettingsSlice = createSlice({
     name: "canvasDisplaySettings",
-    initialState,
+    initialState: defaultCanvasDisplaySettings,
     reducers: {
         setShowLabel: (state, action: PayloadAction<boolean>) => {
             state.showLabel = action.payload;
@@ -33,13 +33,16 @@ export const canvasDisplaySettingsSlice = createSlice({
         setOneColorPerTree: (state, action: PayloadAction<boolean>) => {
             state.oneColorPerTree = action.payload;
         },
-        populateCanvasSettings: (state, action: PayloadAction<CanvasDisplaySettings>) => {
-            state = action.payload;
+        populateCanvasDisplaySettings: (state, action: PayloadAction<CanvasDisplaySettings>) => {
+            state.homepageTreeColor = action.payload.homepageTreeColor;
+            state.oneColorPerTree = action.payload.oneColorPerTree;
+            state.showCircleGuide = action.payload.showCircleGuide;
+            state.showLabel = action.payload.showLabel;
         },
     },
 });
 
-export const { setHomepageTreeColor, setOneColorPerTree, setShowCircleGuide, setShowLabel, populateCanvasSettings } =
+export const { setHomepageTreeColor, setOneColorPerTree, setShowCircleGuide, setShowLabel, populateCanvasDisplaySettings } =
     canvasDisplaySettingsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
