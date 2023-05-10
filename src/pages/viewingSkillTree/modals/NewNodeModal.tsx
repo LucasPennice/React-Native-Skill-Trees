@@ -6,12 +6,15 @@ import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import RadioInput from "../../../components/RadioInput";
 import { createTree } from "../../../functions/misc";
 import { colors } from "../../../parameters";
-import { selectCanvasDisplaySettings, toggleNewNode } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectCurrentTree, setNewNode, setSelectedNode } from "../../../redux/userTreesSlice";
 
-function NewNodeModal() {
-    const { openMenu } = useAppSelector(selectCanvasDisplaySettings);
+type Props = {
+    closeModal: () => void;
+    open: boolean;
+};
+
+function NewNodeModal({ closeModal, open }: Props) {
     const currentTree = useAppSelector(selectCurrentTree);
     const dispatch = useAppDispatch();
 
@@ -21,9 +24,7 @@ function NewNodeModal() {
     useEffect(() => {
         onChangeText("");
         setIsCompleted(false);
-    }, [openMenu]);
-
-    const closeModal = () => dispatch(toggleNewNode());
+    }, [open]);
 
     const addNewNode = () => {
         if (!currentTree) return;
@@ -33,12 +34,12 @@ function NewNodeModal() {
         const newNode = createTree(currentTree.treeName, currentTree.accentColor, false, { name: text.trim(), isCompleted });
 
         dispatch(setNewNode(newNode));
-        dispatch(toggleNewNode());
+        closeModal();
         dispatch(setSelectedNode(null));
     };
 
     return (
-        <FlingToDismissModal closeModal={closeModal} open={openMenu == "newNode"} leftHeaderButton={{ onPress: addNewNode, title: "Confirm" }}>
+        <FlingToDismissModal closeModal={closeModal} open={open} leftHeaderButton={{ onPress: addNewNode, title: "Confirm" }}>
             <View style={{ flex: 1, marginTop: 20 }}>
                 <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }} fontSize={16}>
                     Enter the name of the new skill you'll add to the roadmap

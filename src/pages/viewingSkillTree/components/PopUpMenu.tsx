@@ -3,38 +3,28 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import { Alert, TouchableOpacity, View } from "react-native";
 import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, {
-    Easing,
-    FadeInDown,
-    FadeOutDown,
-    runOnJS,
-    spring,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
-    withTiming,
-} from "react-native-reanimated";
+import Animated, { Easing, FadeInDown, FadeOutDown, runOnJS } from "react-native-reanimated";
 import { StackNavigatorParams } from "../../../../App";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
 import { countNodesInTree, findNodeById } from "../../../functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, editTreeProperties } from "../../../functions/mutateTree";
-import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE_SELECTED, MENU_DAMPENING, centerFlex, colors } from "../../../parameters";
-import { openChildrenHoistSelector } from "../../../redux/canvasDisplaySettingsSlice";
+import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE_SELECTED, centerFlex, colors } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { mutateUserTree, removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../../redux/userTreesSlice";
-import { NodeCoordinate } from "../../../types";
+import { NodeCoordinate, Skill, Tree } from "../../../types";
 import usePlayCompletionSound from "../../../usePlayCompletionSound";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
 
 type Props = {
     foundNodeCoordinates: NodeCoordinate;
     canvasWidth: number;
+    openChildrenHoistSelector: (candidatesToHoist: Tree<Skill>[]) => void;
 };
 
-function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
+function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelector }: Props) {
     //Redux store state
     const currentTree = useAppSelector(selectCurrentTree);
     const { selectedNode } = useAppSelector(selectTreeSlice);
@@ -188,7 +178,7 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth }: Props) {
                     {currentNode.children.length != 0 && (
                         <TouchableOpacity
                             style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
-                            onPress={() => dispatch(openChildrenHoistSelector(currentNode.children))}>
+                            onPress={() => openChildrenHoistSelector(currentNode.children)}>
                             <AppText style={{ color: colors.red }} fontSize={18}>
                                 Delete Node
                             </AppText>

@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
+import Animated, { useAnimatedStyle, withSequence, withSpring, withTiming } from "react-native-reanimated";
 import AppText from "../../components/AppText";
-import { toggleNewNode } from "../../redux/canvasDisplaySettingsSlice";
+import { MENU_HIGH_DAMPENING, centerFlex, colors } from "../../parameters";
+import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
+import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 import {
     clearNewNodeState,
     mutateUserTree,
@@ -10,14 +13,14 @@ import {
     selectTreeSlice,
     setSelectedDndZone,
 } from "../../redux/userTreesSlice";
-import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { MENU_HIGH_DAMPENING, centerFlex, colors } from "../../parameters";
-import Animated, { useAnimatedStyle, withSequence, withSpring, withTiming } from "react-native-reanimated";
-import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 
 type MODES = "IDLE" | "SELECT_POSITION" | "CONFIRM_POSITION";
 
-function AddNode() {
+type Props = {
+    openNewNodeModal: () => void;
+};
+
+function AddNode({ openNewNodeModal }: Props) {
     //Redux Store
     const currentTree = useAppSelector(selectCurrentTree);
     const { selectedDndZone, newNode } = useAppSelector(selectTreeSlice);
@@ -59,7 +62,7 @@ function AddNode() {
         <Animated.View style={[styles, centerFlex, s.container]}>
             {mode === "IDLE" && (
                 <Animated.View style={[centerFlex, { flexDirection: "row", gap: 20 }, opacity]}>
-                    <Pressable onPress={() => dispatch(toggleNewNode())} style={s.button}>
+                    <Pressable onPress={openNewNodeModal} style={s.button}>
                         <AppText style={{ color: colors.accent }} fontSize={15}>
                             Add Node
                         </AppText>

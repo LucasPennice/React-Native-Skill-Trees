@@ -29,6 +29,7 @@ import useIsSharingAvailable from "./src/useIsSharingAvailable";
 import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
 import "./wdyr";
 import { IsSharingAvailableContext } from "./src/context";
+import { populateCanvasSettings } from "./src/redux/canvasDisplaySettingsSlice";
 enableScreens();
 export type StackNavigatorParams = {
     Home: undefined;
@@ -106,9 +107,17 @@ function AppWithReduxContext() {
 
     const populateReduxStore = async () => {
         try {
-            const userTrees = await AsyncStorage.getItem("@roadmaps");
+            const [userTreesKeyValue, canvasSettingsKeyValue] = await AsyncStorage.multiGet(["@roadmaps", "@canvasSettings"]);
+
+            const userTrees = userTreesKeyValue[1];
+            const canvasSettings = canvasSettingsKeyValue[1];
+
             if (userTrees !== null && userTrees !== "") {
                 dispatch(populateUserTrees(JSON.parse(userTrees)));
+            }
+
+            if (canvasSettings !== null && canvasSettings !== "") {
+                dispatch(populateCanvasSettings(JSON.parse(canvasSettings)));
             }
         } catch (e) {
             console.log("There has been an error getting the user's roadmaps");

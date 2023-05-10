@@ -9,7 +9,7 @@ import { IsSharingAvailableContext } from "../../context";
 import { colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCurrentTree, selectTentativeTree, selectTreeSlice, setSelectedDndZone, setSelectedNode } from "../../redux/userTreesSlice";
-import { DnDZone } from "../../types";
+import { DnDZone, Skill, Tree } from "../../types";
 import AddNode from "./AddNode";
 import InteractiveTree from "./canvas/InteractiveTree";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
@@ -30,6 +30,9 @@ function ViewingSkillTree() {
     //Local State
     const [isTakingScreenshot, setIsTakingScreenshot] = useState(false);
     const [canvasSettings, setCanvasSettings] = useState(false);
+    const [newNodeModal, setNewNodeModal] = useState(false);
+    const [candidatesToHoistModal, setCandidatesToHoistModal] = useState(false);
+    const [candidatesToHoist, setCandidatesToHoist] = useState<Tree<Skill>[] | null>(null);
     useRunHomepageCleanup();
     //Derived State
     const shouldRenderDndZones = newNode && !selectedDndZone;
@@ -46,10 +49,16 @@ function ViewingSkillTree() {
         dispatch(setSelectedDndZone(clickedZone));
     };
 
+    const openChildrenHoistSelector = (childrenToHoist: Tree<Skill>[]) => {
+        setCandidatesToHoist(childrenToHoist);
+        setCandidatesToHoistModal(true);
+    };
+
     return (
         <View style={{ position: "relative", backgroundColor: colors.background, overflow: "hidden" }}>
             {currentTree && (
                 <InteractiveTree
+                    openChildrenHoistSelector={openChildrenHoistSelector}
                     tree={tentativeNewTree ?? currentTree}
                     canvasRef={canvasRef}
                     onNodeClick={onNodeClick}
@@ -59,8 +68,8 @@ function ViewingSkillTree() {
                 />
             )}
             {currentTree && <ProgressIndicatorAndName tree={currentTree} />}
-            {(mode === "Idle" || mode === "AddingNode") && <AddNode />}
-            <OpenSettingsMenu openModal={() => setCanvasSettings(true)} />
+            {(mode === "Idle" || mode === "AddingNode") && <AddNode openNewNodeModal={() => setNewNodeModal(true)} />}
+            {mode === "Idle" && <OpenSettingsMenu openModal={() => setCanvasSettings(true)} />}
 
             {currentTree && (
                 <ShareTreeButton
@@ -71,8 +80,15 @@ function ViewingSkillTree() {
                 />
             )}
 
-            <ChildrenHoistSelectorModal />
-            <NewNodeModal />
+            <ChildrenHoistSelectorModal
+                open={candidatesToHoistModal}
+                candidatesToHoist={candidatesToHoist}
+                closeModalAndClearCandidates={() => {
+                    setCandidatesToHoist(null);
+                    setCandidatesToHoistModal(false);
+                }}
+            />
+            <NewNodeModal open={newNodeModal} closeModal={() => setNewNodeModal(false)} />
             <CanvasSettingsModal open={canvasSettings} closeModal={() => setCanvasSettings(false)} />
         </View>
     );

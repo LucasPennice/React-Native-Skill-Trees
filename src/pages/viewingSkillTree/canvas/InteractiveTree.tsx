@@ -30,9 +30,18 @@ type InteractiveTreeProps = {
     isTakingScreenshot?: boolean;
     onDndZoneClick?: (clickedZone?: DnDZone) => void;
     canvasRef: MutableRefObject<SkiaDomView | null>;
+    openChildrenHoistSelector: (candidatesToHoist: Tree<Skill>[]) => void;
 };
 
-function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef, isTakingScreenshot }: InteractiveTreeProps) {
+function InteractiveTree({
+    tree,
+    onNodeClick,
+    showDndZones,
+    onDndZoneClick,
+    canvasRef,
+    isTakingScreenshot,
+    openChildrenHoistSelector,
+}: InteractiveTreeProps) {
     //Redux State
     const screenDimentions = useAppSelector(selectScreenDimentions);
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
@@ -87,7 +96,13 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
                     </Animated.View>
                 </View>
             </GestureDetector>
-            {foundNodeCoordinates && <PopUpMenu foundNodeCoordinates={foundNodeCoordinates} canvasWidth={canvasWidth} />}
+            {foundNodeCoordinates && (
+                <PopUpMenu
+                    foundNodeCoordinates={foundNodeCoordinates}
+                    canvasWidth={canvasWidth}
+                    openChildrenHoistSelector={openChildrenHoistSelector}
+                />
+            )}
         </>
     );
 }

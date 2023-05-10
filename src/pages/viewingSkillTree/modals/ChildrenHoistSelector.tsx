@@ -4,13 +4,17 @@ import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import { findNodeById, findParentOfNode } from "../../../functions/extractInformationFromTree";
 import { deleteNodeWithChildren } from "../../../functions/mutateTree";
 import { centerFlex, colors } from "../../../parameters";
-import { closeChildrenHoistSelector, selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { mutateUserTree, selectCurrentTree, setSelectedNode } from "../../../redux/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 
-function ChildrenHoistSelectorModal() {
-    const { openMenu, candidatesToHoist } = useAppSelector(selectCanvasDisplaySettings);
+type Props = {
+    candidatesToHoist: Tree<Skill>[] | null;
+    closeModalAndClearCandidates: () => void;
+    open: boolean;
+};
+
+function ChildrenHoistSelectorModal({ candidatesToHoist, closeModalAndClearCandidates, open }: Props) {
     const currentTree = useAppSelector(selectCurrentTree);
 
     const dispatch = useAppDispatch();
@@ -18,19 +22,16 @@ function ChildrenHoistSelectorModal() {
     const deleteParentAndHoistChildren = (children: Tree<Skill>) => () => {
         const nodeToDelete = findNodeById(currentTree, children.parentId ?? null);
 
-        if (!nodeToDelete) return dispatch(closeChildrenHoistSelector());
+        if (!nodeToDelete) return closeModalAndClearCandidates();
 
         const newTree = deleteNodeWithChildren(currentTree, nodeToDelete, children);
 
         dispatch(mutateUserTree(newTree));
 
-        dispatch(closeChildrenHoistSelector());
+        closeModalAndClearCandidates();
 
         dispatch(setSelectedNode(null));
     };
-
-    const closeModal = () => dispatch(closeChildrenHoistSelector());
-    const open = openMenu == "childrenHoistSelector";
 
     const confirmDeleteNode = (children: Tree<Skill>) => () => {
         const parent = findParentOfNode(currentTree, children.nodeId);
@@ -49,7 +50,7 @@ function ChildrenHoistSelectorModal() {
     };
 
     return (
-        <FlingToDismissModal closeModal={closeModal} open={open}>
+        <FlingToDismissModal closeModal={closeModalAndClearCandidates} open={open}>
             <View style={[centerFlex, { flex: 1 }]}>
                 <ScrollView style={[{ flex: 1, width: "100%", marginTop: 20 }]}>
                     {candidatesToHoist !== null &&
