@@ -15,6 +15,13 @@ import {
 } from "../extractInformationFromTree";
 import { fixLevelOverflow } from "./levelOverflow";
 
+type PolarContourByLevel = {
+    contourByLevel: {
+        [level: string]: PolarContour[];
+    };
+    treeLevels: string[];
+};
+
 export function handleOverlap(tree: Tree<Skill>) {
     let result: Tree<Skill> = { ...tree };
 
@@ -35,17 +42,22 @@ export function handleOverlap(tree: Tree<Skill>) {
 
         const subTreesContour = getSubTreesContour(subTrees);
 
+        //This contour contains the last node positioned at that level for every level drawn
+        //so most likely it holds nodes from several trees at the same time
+        //it also holds the left nodes but I dont intend on using them
+        let rightContourOfTreeGraph: PolarContourByLevel = updateRightContourOfTreeGraph(undefined, subTreesContour[0]);
+
         subTrees.forEach((_, idx) => {
             const isLastSubTree = idx === subTrees.length - 1;
 
             if (!isLastSubTree) {
-                const currentSubTreeContour = subTreesContour[idx];
-                const nextSubTreeContour = subTreesContour[idx + 1];
+                const updatesSubTrees = getSubTreesContour(result.children);
+                rightContourOfTreeGraph = updateRightContourOfTreeGraph(rightContourOfTreeGraph, updatesSubTrees[idx]);
+                const nextSubTreeContour = updatesSubTrees[idx + 1];
 
-                const overlap = checkForOverlapBetweenContours(currentSubTreeContour, nextSubTreeContour);
-
+                const overlap = checkForOverlapBetweenContours(rightContourOfTreeGraph, nextSubTreeContour);
                 if (overlap) {
-                    const treesToShift = getIdsFromCurrentToLastSubTrees(subTrees, idx);
+                    const treesToShift = getIdsFromNextToLastSubTrees(subTrees, idx + 1);
 
                     result = shiftNodesCounterClockWise(
                         result,
@@ -58,10 +70,22 @@ export function handleOverlap(tree: Tree<Skill>) {
 
         return result;
 
-        function getIdsFromCurrentToLastSubTrees(subTrees: Tree<Skill>[], currentSubTreeIdx: number) {
+        function updateRightContourOfTreeGraph(rightContourOfTreeGraph: PolarContourByLevel | undefined, shiftedSubTreeContour: PolarContourByLevel) {
+            if (rightContourOfTreeGraph === undefined) return shiftedSubTreeContour;
+
+            const result = { ...rightContourOfTreeGraph };
+
+            shiftedSubTreeContour.treeLevels.forEach((level) => {
+                result.contourByLevel[level] = shiftedSubTreeContour.contourByLevel[level];
+            });
+
+            return result;
+        }
+
+        function getIdsFromNextToLastSubTrees(subTrees: Tree<Skill>[], nextSubTreeIdx: number) {
             const result: string[] = [];
 
-            const subTreesToExtactIds = subTrees.slice(currentSubTreeIdx + 1);
+            const subTreesToExtactIds = subTrees.slice(nextSubTreeIdx);
 
             subTreesToExtactIds.forEach((subTree) => {
                 extractTreeIds(subTree, result);
@@ -115,7 +139,7 @@ export function handleOverlap(tree: Tree<Skill>) {
     }
 
     function getSubTreesContour(subTrees: Tree<Skill>[]) {
-        const result: { contourByLevel: { [x: string]: PolarContour[] }; treeLevels: string[] }[] = [];
+        const result: PolarContourByLevel[] = [];
 
         subTrees.forEach((subTree) => {
             const subTreeWithRootNode = { ...tree, children: [subTree] };
@@ -204,11 +228,12 @@ function getLevelBiggestOverlap(levelContour: PolarContour[]) {
         const overlapBetweenThisAndNextContour = checkForOverlapBetweenNodes(nextContour.leftNode, currentContour.rightNode);
         const poorSpacing = checkForPoorSpacing(nextContour.leftNode, currentContour.rightNode);
 
-        if (overlapBetweenThisAndNextContour)
+        if (overlapBetweenThisAndNextContour) {
             result = {
                 biggestOverlapAngle: overlapBetweenThisAndNextContour,
                 nodesInConflict: [currentContour.rightNode.id, nextContour.leftNode.id],
             };
+        }
 
         if (overlapBetweenThisAndNextContour === undefined && poorSpacing !== undefined) {
             result = {
@@ -233,7 +258,7 @@ function getLevelBiggestOverlap(levelContour: PolarContour[]) {
     }
 
     function checkForPoorSpacing(nextContourLeftNode: PolarCoordinate, currentContourRightNode: PolarCoordinate): undefined | number {
-        const deltaAngle = Math.abs(Math.abs(nextContourLeftNode.angleInRadians) - Math.abs(currentContourRightNode.angleInRadians));
+        const deltaAngle = angleBetweenPolarCoordinates(currentContourRightNode, nextContourLeftNode);
 
         const roundedDelta = parseFloat(deltaAngle.toFixed(5));
 
