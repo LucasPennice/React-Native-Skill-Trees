@@ -1,5 +1,5 @@
 import { UNCENTERED_ROOT_COORDINATES } from "../parameters";
-import { NodeCoordinate, PolarContour, Skill, Tree } from "../types";
+import { NodeCoordinate, PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
 import { cartesianToPositivePolarCoordinates } from "./coordinateSystem";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
@@ -250,4 +250,19 @@ export function getRadialTreeContourByLevel(tree: Tree<Skill>) {
             getUnorderedTreeContourByLevel(element, result);
         }
     }
+}
+
+export function getSubTreesContour(tree: Tree<Skill>) {
+    const subTrees = tree.children;
+    const result: PolarContourByLevel[] = [];
+
+    subTrees.forEach((subTree) => {
+        const subTreeWithRootNode = { ...tree, children: [subTree] };
+
+        const contourByLevel = getRadialTreeContourByLevel(subTreeWithRootNode);
+
+        result.push(contourByLevel);
+    });
+
+    return result;
 }

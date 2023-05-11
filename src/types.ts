@@ -62,3 +62,10 @@ export type PolarContour = { leftNode: PolarCoordinate & { id: string }; rightNo
 export type PolarOverlapCheck = undefined | { biggestOverlapAngle: number; nodesInConflict: [string, string] };
 
 export type RadialDistanceTable = { [key: string]: { current: number; original: number } };
+
+export type PolarContourByLevel = {
+    contourByLevel: {
+        [level: string]: PolarContour[];
+    };
+    treeLevels: string[];
+};

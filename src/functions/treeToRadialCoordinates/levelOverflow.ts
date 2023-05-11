@@ -1,10 +1,25 @@
 import { ALLOWED_NODE_SPACING, UNCENTERED_ROOT_COORDINATES } from "../../parameters";
 import { PolarContour, PolarCoordinate, Skill, Tree } from "../../types";
 import { angleBetweenPolarCoordinates, arcToAngleRadians, cartesianToPositivePolarCoordinates, movePointParallelToVector } from "../coordinateSystem";
-import { findParentOfNode, getRadialTreeContourByLevel } from "../extractInformationFromTree";
+import { findParentOfNode, getRadialTreeContourByLevel, getSubTreesContour } from "../extractInformationFromTree";
 import { mutateEveryTree } from "../mutateTree";
+import { DistanceToCenterPerLevel } from "./overlap";
 
-export function fixLevelOverflow(tree: Tree<Skill>) {
+//👇 THIS FUNCTION SHOULD ONLY CHECK IF THEER IS LEVEL OVERFLOW
+export function checkForLevelOverflow(treeInFinalPosition: Tree<Skill>, distanceToCenterPerLevel: DistanceToCenterPerLevel) {
+    const subTrees = treeInFinalPosition.children;
+
+    let result = { updatedLevelOverflow: false, updatedDistancePerLevel: distanceToCenterPerLevel };
+
+    if (!subTrees.length) return result;
+
+    const subTreesContour = getSubTreesContour(treeInFinalPosition);
+
+    return result;
+}
+
+//👇 AND THIS FUNCTION SHOULD FIX THAT
+export function fixLevelOverflow(tree: Tree<Skill>, distanceToCenterPerLevel: DistanceToCenterPerLevel) {
     let updatedTree = { ...tree };
     let loopAvoider = 0;
     let levelOverflow: LevelOverflow | true = true;
