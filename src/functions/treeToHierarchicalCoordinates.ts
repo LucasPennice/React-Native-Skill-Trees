@@ -1,11 +1,11 @@
+import { CoordinatesWithTreeData, HierarchicalContour, Skill, Tree } from "../types";
 import {
     addEveryChildFromTreeToArray,
     findDistanceBetweenNodesById,
     findLowestCommonAncestorIdOfNodes,
+    findNodeById,
     returnPathFromRootToNode,
 } from "./extractInformationFromTree";
-import { CoordinatesWithTreeData, Coordinates, HierarchicalContour, Skill, Tree } from "../types";
-import { findNodeById } from "./extractInformationFromTree";
 
 export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => {
     let result: Tree<Skill>;

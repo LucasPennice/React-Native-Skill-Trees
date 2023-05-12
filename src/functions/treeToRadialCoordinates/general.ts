@@ -1,16 +1,34 @@
-import { CoordinatesWithTreeData, Coordinates, Skill, Tree } from "../../types";
+import { CoordinatesWithTreeData, LevelOverflow, Skill, Tree } from "../../types";
 import { treeToCoordArray } from "../treeToHierarchicalCoordinates";
 import { firstIteration } from "./firstInstance";
-import { handleOverlap } from "./overlap";
+import { checkForLevelOverflow } from "./levelOverflow";
+import {
+    DistanceToCenterPerLevel,
+    fixOverlapWithinSubTreesOfLevel1,
+    getDistanceToCenterPerLevel,
+    shiftSubTreeToFinalAngle,
+    updateDistanceToCenterPerLevel,
+} from "./overlap";
 
 //☢️ The canvas has the positive y axis pointing downwards, this changes how calculations are to be made ☢️
 
 export function PlotCircularTree(completeTree: Tree<Skill>) {
     let result: Tree<Skill> = { ...completeTree };
 
-    result = firstIteration(completeTree, completeTree);
+    let levelOverflow: LevelOverflow = undefined;
 
-    result = handleOverlap(result);
+    let distanceToCenterPerLevel: DistanceToCenterPerLevel = getDistanceToCenterPerLevel(completeTree);
+    do {
+        result = firstIteration(completeTree, completeTree, distanceToCenterPerLevel);
+
+        result = fixOverlapWithinSubTreesOfLevel1(result);
+
+        result = shiftSubTreeToFinalAngle(result);
+
+        levelOverflow = checkForLevelOverflow(result);
+
+        if (levelOverflow !== undefined) distanceToCenterPerLevel = updateDistanceToCenterPerLevel(distanceToCenterPerLevel, levelOverflow);
+    } while (levelOverflow);
 
     let treeCoordinates: CoordinatesWithTreeData[] = [];
     treeToCoordArray(result, treeCoordinates);

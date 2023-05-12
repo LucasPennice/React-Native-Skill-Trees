@@ -46,10 +46,24 @@ export function returnSmallestBetweenAngleAndComplement(angle: number) {
 }
 
 export function angleBetweenPolarCoordinates(startingCoord: PolarCoordinate, finalCoord: PolarCoordinate) {
-    const startingAngleInQ3 = startingCoord.angleInRadians > Math.PI && startingCoord.angleInRadians < (3 / 2) * Math.PI;
-    const finalAngleInQ2 = finalCoord.angleInRadians > Math.PI * 0.5 && finalCoord.angleInRadians < Math.PI;
+    if (isBorderCase()) return handleBorderCase();
+    // if (startingAngleInQ3 && finalAngleInQ2) return handleBorderCase();
 
-    if (startingAngleInQ3 && finalAngleInQ2) {
+    const startingAngleNormalized = returnSmallestBetweenAngleAndComplement(startingCoord.angleInRadians);
+    const finalAngleNormalized = returnSmallestBetweenAngleAndComplement(finalCoord.angleInRadians);
+
+    const result = finalAngleNormalized - startingAngleNormalized;
+
+    return result;
+
+    function isBorderCase() {
+        const startingAngleInQ2orQ3 = startingCoord.angleInRadians > Math.PI * 0.5 && startingCoord.angleInRadians < (3 / 2) * Math.PI;
+        const finalAngleInQ2orQ3 = finalCoord.angleInRadians > Math.PI * 0.5 && finalCoord.angleInRadians < (3 / 2) * Math.PI;
+
+        return startingAngleInQ2orQ3 && finalAngleInQ2orQ3;
+    }
+
+    function handleBorderCase() {
         const translatedStartingAngle = 0;
         const translatedFinalAngle = finalCoord.angleInRadians - startingCoord.angleInRadians;
 
@@ -57,12 +71,6 @@ export function angleBetweenPolarCoordinates(startingCoord: PolarCoordinate, fin
 
         return finalAngleNormalized - translatedStartingAngle;
     }
-    const startingAngleNormalized = returnSmallestBetweenAngleAndComplement(startingCoord.angleInRadians);
-    const finalAngleNormalized = returnSmallestBetweenAngleAndComplement(finalCoord.angleInRadians);
-
-    const result = finalAngleNormalized - startingAngleNormalized;
-
-    return result;
 }
 export function movePointParallelToVector(directionVector: CartesianCoordinate, distanceToMove: number, pointToMove: CartesianCoordinate) {
     const directionVectorModule = Math.sqrt(Math.pow(directionVector.x, 2) + Math.pow(directionVector.y, 2));
