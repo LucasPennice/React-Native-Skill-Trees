@@ -46,6 +46,17 @@ export function returnSmallestBetweenAngleAndComplement(angle: number) {
 }
 
 export function angleBetweenPolarCoordinates(startingCoord: PolarCoordinate, finalCoord: PolarCoordinate) {
+    const startingAngleInQ3 = startingCoord.angleInRadians > Math.PI && startingCoord.angleInRadians < (3 / 2) * Math.PI;
+    const finalAngleInQ2 = finalCoord.angleInRadians > Math.PI * 0.5 && finalCoord.angleInRadians < Math.PI;
+
+    if (startingAngleInQ3 && finalAngleInQ2) {
+        const translatedStartingAngle = 0;
+        const translatedFinalAngle = finalCoord.angleInRadians - startingCoord.angleInRadians;
+
+        const finalAngleNormalized = returnSmallestBetweenAngleAndComplement(translatedFinalAngle);
+
+        return finalAngleNormalized - translatedStartingAngle;
+    }
     const startingAngleNormalized = returnSmallestBetweenAngleAndComplement(startingCoord.angleInRadians);
     const finalAngleNormalized = returnSmallestBetweenAngleAndComplement(finalCoord.angleInRadians);
 
@@ -55,6 +66,8 @@ export function angleBetweenPolarCoordinates(startingCoord: PolarCoordinate, fin
 }
 export function movePointParallelToVector(directionVector: CartesianCoordinate, distanceToMove: number, pointToMove: CartesianCoordinate) {
     const directionVectorModule = Math.sqrt(Math.pow(directionVector.x, 2) + Math.pow(directionVector.y, 2));
+
+    if (directionVectorModule === 0) throw "cannot divide by 0 at movePointParallelToVector";
 
     const directionVersor = { x: directionVector.x / directionVectorModule, y: directionVector.y / directionVectorModule };
 

@@ -1,73 +1,130 @@
 import { ALLOWED_NODE_SPACING, UNCENTERED_ROOT_COORDINATES } from "../../parameters";
-import { PolarContour, PolarCoordinate, Skill, Tree } from "../../types";
+import { LevelOverflow, PolarContour, PolarContourByLevel, Skill, Tree } from "../../types";
 import { angleBetweenPolarCoordinates, arcToAngleRadians, cartesianToPositivePolarCoordinates, movePointParallelToVector } from "../coordinateSystem";
-import { findParentOfNode, getRadialTreeContourByLevel, getSubTreesContour } from "../extractInformationFromTree";
+import { findParentOfNode, getSubTreesContour } from "../extractInformationFromTree";
 import { mutateEveryTree } from "../mutateTree";
 import { DistanceToCenterPerLevel } from "./overlap";
 
-//👇 THIS FUNCTION SHOULD ONLY CHECK IF THEER IS LEVEL OVERFLOW
-export function checkForLevelOverflow(treeInFinalPosition: Tree<Skill>, distanceToCenterPerLevel: DistanceToCenterPerLevel) {
+//THIS VALUE OF PI SHOULD BE USE TO CHECK FOR OVERFLOW
+export const ROUNDED_2PI = 6.289;
+
+export function checkForLevelOverflow(treeInFinalPosition: Tree<Skill>): LevelOverflow {
     const subTrees = treeInFinalPosition.children;
 
-    let result = { updatedLevelOverflow: false, updatedDistancePerLevel: distanceToCenterPerLevel };
+    let result: LevelOverflow = undefined;
 
     if (!subTrees.length) return result;
 
     const subTreesContour = getSubTreesContour(treeInFinalPosition);
 
-    return result;
-}
+    const subTreesOuterContours = formatSubTreesContour(subTreesContour);
 
-//👇 AND THIS FUNCTION SHOULD FIX THAT
-export function fixLevelOverflow(tree: Tree<Skill>, distanceToCenterPerLevel: DistanceToCenterPerLevel) {
-    let updatedTree = { ...tree };
-    let loopAvoider = 0;
-    let levelOverflow: LevelOverflow | true = true;
+    const angleSpanPerLevel = getAngleSpanPerLevel(subTreesOuterContours);
 
-    if (!updatedTree.children.length) return tree;
+    const angleSpans = Object.values(angleSpanPerLevel);
 
-    while (levelOverflow !== undefined && loopAvoider < 20) {
-        let treeAngleSpanPerLevel: number[] = [];
+    const overflowAmount = angleSpans.find((span) => span > ROUNDED_2PI);
+    const overflowLevel = angleSpans.findIndex((span) => span > ROUNDED_2PI) + 1;
 
-        updatedTree.children!.forEach((subTree) => {
-            const subTreeWithRootNode = { ...updatedTree, children: [subTree] };
-            const radialTreeContour = getRadialTreeContourByLevel(subTreeWithRootNode);
+    if (overflowAmount === undefined) return undefined;
 
-            updateLevelAngleSpan(radialTreeContour, treeAngleSpanPerLevel);
+    return { overflow: overflowAmount, level: overflowLevel };
+
+    function formatSubTreesContour(subTreesContour: PolarContourByLevel[]) {
+        const result: PolarContourByLevel = { contourByLevel: {}, treeLevels: [] };
+
+        subTreesContour.forEach((treeContour) => {
+            treeContour.treeLevels.forEach((level) => {
+                const levelContour = treeContour.contourByLevel[level];
+
+                const leftmostNode = levelContour[0].leftNode;
+                const rightmostNode = levelContour[levelContour.length - 1].rightNode;
+
+                const outerContourOfLevel: PolarContour = { leftNode: leftmostNode, rightNode: rightmostNode };
+
+                if (!result.contourByLevel[level]) {
+                    result.contourByLevel[level] = [outerContourOfLevel];
+                } else {
+                    result.contourByLevel[level].push(outerContourOfLevel);
+                }
+
+                if (!result.treeLevels.length || result.treeLevels.length < parseInt(level)) {
+                    const foo = Array.from(Array(parseInt(level) + 1).keys()).map((l) => `${l}`);
+                    const newTreeLevels = foo.slice(1, foo.length);
+                    result.treeLevels = newTreeLevels;
+                }
+            });
         });
-
-        levelOverflow = checkForLevelOverlow(treeAngleSpanPerLevel);
-
-        if (levelOverflow) updatedTree = increaseRadiusOfLevelAndBelow(updatedTree, levelOverflow!);
-        loopAvoider++;
-    }
-
-    return updatedTree;
-
-    function increaseRadiusOfLevelAndBelow(tree: Tree<Skill>, levelOverflow: LevelOverflow) {
-        if (!levelOverflow) throw "levelOverflow undefined at increaseRadiusOfLevelAndBelow";
-
-        const result = mutateEveryTree(tree, factoryUpdateRadiusOfTree(levelOverflow, tree));
-
-        if (!result) throw "result undefined at increaseRadiusOfLevelAndBelow";
-
         return result;
     }
 }
 
-function factoryUpdateRadiusOfTree(levelOverflow: LevelOverflow, wholeTree: Tree<Skill>) {
+function getAngleSpanPerLevel(subTreesOuterContours: PolarContourByLevel) {
+    const result: { [key: string]: number } = {};
+    const levels = subTreesOuterContours.treeLevels.map((l) => parseInt(l));
+
+    levels.forEach((level) => {
+        const currentLevelContours = subTreesOuterContours.contourByLevel[level];
+
+        currentLevelContours.forEach((contour, idx) => {
+            //If there is only one node in the entire tree in that level
+            if (currentLevelContours.length === 1) result[level] = 0;
+            const isLastContour = idx === currentLevelContours.length - 1;
+
+            let totalAngle = 0;
+
+            let treeAngle = Math.abs(angleBetweenPolarCoordinates(contour.leftNode, contour.rightNode));
+
+            totalAngle += treeAngle;
+
+            if (!isLastContour) {
+                const nextContour = currentLevelContours[idx + 1];
+
+                let angleBetweenTrees = angleBetweenPolarCoordinates(contour.rightNode, nextContour.leftNode);
+
+                totalAngle += Math.abs(angleBetweenTrees);
+            }
+
+            if (result[level] === undefined) {
+                result[level] = totalAngle;
+            } else {
+                result[level] += totalAngle;
+            }
+        });
+    });
+
+    //Here we add the padding that trees have between them one time
+    levels.forEach((level) => {
+        const originalDistanceToCenter = level;
+        result[level] += arcToAngleRadians(ALLOWED_NODE_SPACING, originalDistanceToCenter);
+    });
+
+    return result;
+}
+
+export function fixLevelOverflow(tree: Tree<Skill>, distanceToCenterPerLevel: DistanceToCenterPerLevel) {
+    const result = mutateEveryTree(tree, factoryUpdateRadiusOfTree(distanceToCenterPerLevel, tree));
+
+    if (!result) throw "result undefined at increaseRadiusOfLevelAndBelow";
+
+    return result;
+}
+
+function factoryUpdateRadiusOfTree(distanceToCenterPerLevel: DistanceToCenterPerLevel, wholeTree: Tree<Skill>) {
     return function updateRadiusOfTree(tree: Tree<Skill>): Tree<Skill> {
         const result = { ...tree };
 
-        if (tree.level < levelOverflow!.level) return result;
+        if (result.level === 0) return result;
 
         const oldPolarCoord = cartesianToPositivePolarCoordinates({ x: result.x, y: result.y }, UNCENTERED_ROOT_COORDINATES);
 
-        const radiusIncreaseIndex = levelOverflow!.overflow / (2 * Math.PI);
+        const newRadius = distanceToCenterPerLevel[tree.level];
 
         const parentNode = findParentOfNode(wholeTree, tree.nodeId);
 
         if (!parentNode) throw "!parentNode at factoryUpdateRadiusOfTree";
+
+        if (newRadius === oldPolarCoord.distanceToCenter) return result;
 
         const translatedCoord = translateNodeToNewDistanceFromCenter();
 
@@ -76,54 +133,9 @@ function factoryUpdateRadiusOfTree(levelOverflow: LevelOverflow, wholeTree: Tree
         function translateNodeToNewDistanceFromCenter() {
             const directionVector = { x: parentNode!.x, y: parentNode!.y };
 
-            const deltaRadius = oldPolarCoord.distanceToCenter * (radiusIncreaseIndex - 1);
+            const deltaRadius = newRadius - oldPolarCoord.distanceToCenter;
 
             return movePointParallelToVector(directionVector, deltaRadius, { x: result.x, y: result.y });
         }
     };
-}
-
-type LevelOverflow = undefined | { overflow: number; level: number };
-
-function checkForLevelOverlow(treeAngleSpanPerLevel: number[]): LevelOverflow {
-    const ROUNDED_2PI = 6.289;
-    const overflowAngle = treeAngleSpanPerLevel.find((span) => span > ROUNDED_2PI);
-    const overflowLevel = treeAngleSpanPerLevel.findIndex((span) => span > ROUNDED_2PI);
-
-    if (overflowAngle === undefined) return undefined;
-
-    return { level: overflowLevel, overflow: overflowAngle };
-}
-
-function angleSpanOfLevel(leftmostNode: PolarContour["leftNode"], rightmostNode: PolarContour["rightNode"], level: number) {
-    const leftPolarCoordinates: PolarCoordinate = { angleInRadians: leftmostNode.angleInRadians, distanceToCenter: leftmostNode.distanceToCenter };
-    const rightPolarCoordinates: PolarCoordinate = { angleInRadians: rightmostNode.angleInRadians, distanceToCenter: rightmostNode.distanceToCenter };
-
-    const angleBetweenNodes = angleBetweenPolarCoordinates(rightPolarCoordinates, leftPolarCoordinates);
-
-    const angleSpanPadding = arcToAngleRadians(ALLOWED_NODE_SPACING, level);
-
-    const result = angleBetweenNodes + angleSpanPadding;
-
-    return result;
-}
-
-function updateLevelAngleSpan(
-    subTreeContour: { contourByLevel: { [x: string]: PolarContour[] }; treeLevels: string[] },
-    treeAngleSpanPerLevel: number[]
-) {
-    //Because the root node of the subtrees is at level one, and we use the level as the index for subTreeContour,
-    //The first position of the contour contains undefined, so we ignore the first position
-
-    subTreeContour.treeLevels.forEach((l) => {
-        const level = parseInt(l);
-        const levelContours = subTreeContour.contourByLevel[level];
-
-        levelContours.forEach((contour) => {
-            const levelAngleSpan = parseFloat(angleSpanOfLevel(contour.leftNode, contour.rightNode, level).toFixed(3));
-
-            if (treeAngleSpanPerLevel[level] !== undefined) treeAngleSpanPerLevel[level] = treeAngleSpanPerLevel[level] + levelAngleSpan;
-            if (treeAngleSpanPerLevel[level] === undefined) treeAngleSpanPerLevel[level] = levelAngleSpan;
-        });
-    });
 }

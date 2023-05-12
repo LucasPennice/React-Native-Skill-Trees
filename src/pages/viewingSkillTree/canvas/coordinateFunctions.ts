@@ -1,6 +1,5 @@
-import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { CanvasDimensions, NodeCoordinate, DnDZone, Skill, Tree, Coordinates, CoordinatesWithTreeData, ParentId } from "../../../types";
 import { PlotTreeReingoldTiltfordAlgorithm } from "../../../functions/treeToHierarchicalCoordinates";
+import { PlotCircularTree } from "../../../functions/treeToRadialCoordinates/general";
 import {
     BROTHER_DND_ZONE_HEIGHT,
     CANVAS_HORIZONTAL_PADDING,
@@ -12,7 +11,8 @@ import {
     ONLY_CHILDREN_DND_ZONE_DIMENTIONS,
     PARENT_DND_ZONE_DIMENTIONS,
 } from "../../../parameters";
-import { PlotCircularTree } from "../../../functions/treeToRadialCoordinates/general";
+import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { CanvasDimensions, CoordinatesWithTreeData, DnDZone, NodeCoordinate, ParentId, Skill, Tree } from "../../../types";
 
 export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): CoordinatesWithTreeData[] {
     if (!currentTree) return [];

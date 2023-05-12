@@ -69,3 +69,4 @@ export type PolarContourByLevel = {
     };
     treeLevels: string[];
 };
+export type LevelOverflow = undefined | { overflow: number; level: number };

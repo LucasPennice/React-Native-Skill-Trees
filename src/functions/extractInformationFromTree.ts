@@ -1,5 +1,5 @@
 import { UNCENTERED_ROOT_COORDINATES } from "../parameters";
-import { NodeCoordinate, PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
+import { PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
 import { cartesianToPositivePolarCoordinates } from "./coordinateSystem";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
