@@ -5,7 +5,7 @@ import { findNodeById, findParentOfNode } from "../../../functions/extractInform
 import { deleteNodeWithChildren } from "../../../functions/mutateTree";
 import { centerFlex, colors } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { mutateUserTree, selectCurrentTree, setSelectedNode } from "../../../redux/userTreesSlice";
+import { updateUserTrees, selectCurrentTree, setSelectedNode } from "../../../redux/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 
 type Props = {
@@ -26,7 +26,7 @@ function ChildrenHoistSelectorModal({ candidatesToHoist, closeModalAndClearCandi
 
         const newTree = deleteNodeWithChildren(currentTree, nodeToDelete, children);
 
-        dispatch(mutateUserTree(newTree));
+        dispatch(updateUserTrees(newTree));
 
         closeModalAndClearCandidates();
 

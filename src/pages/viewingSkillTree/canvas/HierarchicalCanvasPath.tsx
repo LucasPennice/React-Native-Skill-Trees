@@ -1,7 +1,7 @@
-import { Path, Skia, SkiaMutableValue, useComputedValue } from "@shopify/react-native-skia";
+import { Path, Skia, useComputedValue } from "@shopify/react-native-skia";
 import { CIRCLE_SIZE } from "../../../parameters";
-import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 import { CartesianCoordinate } from "../../../types";
+import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
 
 type pathCoordinates = {
     cx: number;
@@ -9,17 +9,7 @@ type pathCoordinates = {
     pathInitialPoint: CartesianCoordinate;
 };
 
-function HierarchicalCanvasPath({
-    coordinates,
-    pathColor,
-    isRoot,
-    pathBlurOnInactive,
-}: {
-    coordinates: pathCoordinates;
-    pathColor: string;
-    isRoot?: boolean;
-    pathBlurOnInactive?: SkiaMutableValue<number>;
-}) {
+function HierarchicalCanvasPath({ coordinates, pathColor, isRoot }: { coordinates: pathCoordinates; pathColor: string; isRoot?: boolean }) {
     const { cx, cy, pathInitialPoint } = coordinates;
 
     const p1x = useAnimateSkiaValue({ initialValue: cx, stateToAnimate: cx });
@@ -46,7 +36,7 @@ function HierarchicalCanvasPath({
 
     if (isRoot) return <></>;
 
-    return <Path path={path} color={pathColor} style="stroke" strokeWidth={3} opacity={pathBlurOnInactive ?? 1} />;
+    return <Path path={path} color={pathColor} style="stroke" strokeWidth={3} />;
 }
 
 export default HierarchicalCanvasPath;

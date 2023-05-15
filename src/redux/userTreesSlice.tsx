@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { insertNodeBasedOnDnDZone } from "../functions/mutateTree";
 import { DnDZone, Skill, Tree } from "../types";
 import type { RootState } from "./reduxStore";
+import { treeCompletedSkillPercentage } from "../functions/extractInformationFromTree";
 
 // Define a type for the slice state
 type UserTreesSlice = {
@@ -37,7 +38,7 @@ export const userTreesSlice = createSlice({
         populateUserTrees: (state, action: PayloadAction<Tree<Skill>[]>) => {
             state.userTrees = action.payload;
         },
-        mutateUserTree: (state, action: PayloadAction<Tree<Skill> | undefined>) => {
+        updateUserTrees: (state, action: PayloadAction<Tree<Skill> | undefined>) => {
             //We pass the new value of the mutated tree
             //And then update the value of userTrees with the new state
             const valueToMutate = action.payload;
@@ -76,7 +77,7 @@ export const userTreesSlice = createSlice({
 export const {
     changeTree,
     unselectTree,
-    mutateUserTree,
+    updateUserTrees,
     populateUserTrees,
     appendToUserTree,
     removeUserTree,
@@ -103,9 +104,16 @@ export const selectTentativeTree = (state: RootState) => {
     const { selectedDndZone, newNode } = state.currentTree;
     const currentTree = selectCurrentTree(state);
 
-    const tentativeNewTree = selectedDndZone && currentTree && newNode ? insertNodeBasedOnDnDZone(selectedDndZone, currentTree, newNode) : undefined;
+    let result = selectedDndZone && currentTree && newNode ? insertNodeBasedOnDnDZone(selectedDndZone, currentTree, newNode) : undefined;
 
-    return tentativeNewTree;
+    if (result === undefined) return result;
+
+    const treeSkillCompletion = treeCompletedSkillPercentage(result);
+
+    if (treeSkillCompletion === 100) result = { ...result, data: { ...result.data, isCompleted: true } };
+    if (treeSkillCompletion !== 100) result = { ...result, data: { ...result.data, isCompleted: false } };
+
+    return result;
 };
 
 export const selectTreeSlice = (state: RootState) => state.currentTree;

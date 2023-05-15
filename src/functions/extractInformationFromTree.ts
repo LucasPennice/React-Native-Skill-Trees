@@ -266,3 +266,51 @@ export function getSubTreesContour(tree: Tree<Skill>) {
 
     return result;
 }
+
+export function countCompletedSkillNodes(rootNode: Tree<Skill>) {
+    const shouldCountNode = rootNode.data.isCompleted && rootNode.category === "SKILL";
+
+    //Base case 👇
+    if (!rootNode.children.length && shouldCountNode) return 1;
+    if (!rootNode.children.length && !rootNode.data.isCompleted) return 0;
+    if (!rootNode.children.length) return 0;
+
+    //Recursive case 👇
+
+    let result = shouldCountNode ? 1 : 0;
+
+    for (let i = 0; i < rootNode.children.length; i++) {
+        result = result + countCompletedSkillNodes(rootNode.children[i]);
+    }
+
+    return result;
+}
+export function countSkillNodes(rootNode: Tree<Skill>) {
+    const shouldCountNode = rootNode.category === "SKILL";
+    //Base case 👇
+
+    if (!rootNode.children.length && shouldCountNode) return 1;
+
+    //Recursive case 👇
+
+    let result = shouldCountNode ? 1 : 0;
+
+    for (let i = 0; i < rootNode.children.length; i++) {
+        result = result + countSkillNodes(rootNode.children[i]);
+    }
+
+    return result;
+}
+
+//This function ignores USER and SKILL_TREE nodes when calculating the percentage
+export function treeCompletedSkillPercentage(rootNode: Tree<Skill>) {
+    const skillNodeQty = countSkillNodes(rootNode);
+
+    if (skillNodeQty === 0) return 100;
+
+    const completedSkillNodeQty = countCompletedSkillNodes(rootNode);
+
+    const result = (completedSkillNodeQty / skillNodeQty) * 100;
+
+    return result;
+}

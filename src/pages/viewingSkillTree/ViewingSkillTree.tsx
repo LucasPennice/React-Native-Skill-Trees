@@ -41,6 +41,7 @@ function ViewingSkillTree() {
 
     const onNodeClick = (id: string) => {
         if (mode !== "Idle") return;
+
         dispatch(setSelectedNode(id));
     };
 

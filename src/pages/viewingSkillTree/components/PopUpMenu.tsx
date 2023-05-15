@@ -8,14 +8,13 @@ import { StackNavigatorParams } from "../../../../App";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
-import { countNodesInTree, findNodeById } from "../../../functions/extractInformationFromTree";
+import { countNodesInTree, countSkillNodes, findNodeById, treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, editTreeProperties } from "../../../functions/mutateTree";
 import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE_SELECTED, centerFlex, colors } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { mutateUserTree, removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../../redux/userTreesSlice";
+import { updateUserTrees, removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../../redux/userTreesSlice";
 import { NodeCoordinate, Skill, Tree } from "../../../types";
-import usePlayCompletionSound from "../../../usePlayCompletionSound";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
 
 type Props = {
@@ -23,6 +22,11 @@ type Props = {
     canvasWidth: number;
     openChildrenHoistSelector: (candidatesToHoist: Tree<Skill>[]) => void;
 };
+
+//☢️ POP MENU SHOULD ONLY BE ABLE TO OPEN SKILL TYPE NODES
+//THIS IS BECAUSE IN POPUPMENU WE CAN TOGGLE THE COMPLETION STATE OF NODES, AND THE ONLY COMPLETION STATE THAT THE USER CAN TOGGLE
+//IS THE SKILL NODES
+//THE OTHER NODE TYPES' COMPLETION STATE IS CALCULATED ☢️
 
 function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelector }: Props) {
     //Redux store state
@@ -48,8 +52,6 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
         setMastered(currentNode && currentNode.data.isCompleted ? currentNode.data.isCompleted : false);
     }, [selectedNode]);
 
-    const playSound = usePlayCompletionSound();
-
     if (!currentNode) return <></>;
 
     const deleteTree = () => {
@@ -71,21 +73,30 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
         );
 
     const deleteNode = () => {
-        if (countNodesInTree(currentTree) === 1) return confirmDeleteTree();
+        if (!currentTree) return undefined;
+
+        const isLastChildrenRemaining = countSkillNodes(currentTree) === 1;
+
+        if (isLastChildrenRemaining) return confirmDeleteTree();
 
         const result = deleteNodeWithNoChildren(currentTree, currentNode);
-        dispatch(mutateUserTree(result));
+        dispatch(updateUserTrees(result));
         dispatch(setSelectedNode(null));
     };
 
     const toggleCompletionInNode = (completionState: boolean) => () => {
         const newProperties = { ...currentNode, data: { ...currentNode.data, isCompleted: !completionState } };
 
-        const result = editTreeProperties(currentTree, currentNode, newProperties);
+        let result = editTreeProperties(currentTree, currentNode, newProperties);
 
-        if (!completionState) playSound();
+        if (!result) return undefined;
 
-        dispatch(mutateUserTree(result));
+        const treeSkillCompletion = treeCompletedSkillPercentage(result);
+
+        if (treeSkillCompletion === 100) result = { ...result, data: { ...result.data, isCompleted: true } };
+        if (treeSkillCompletion !== 100) result = { ...result, data: { ...result.data, isCompleted: false } };
+
+        dispatch(updateUserTrees(result));
     };
 
     const updateNodeName = () => {
@@ -95,7 +106,7 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
 
         const result = editTreeProperties(currentTree, currentNode, newProperties);
 
-        dispatch(mutateUserTree(result));
+        dispatch(updateUserTrees(result));
     };
 
     const currentSkill = findNodeById(currentTree, selectedNode)?.data ?? undefined;

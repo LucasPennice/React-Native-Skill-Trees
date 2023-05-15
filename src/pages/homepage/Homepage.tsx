@@ -149,6 +149,7 @@ function buildHomepageTree(userTrees: Tree<Skill>[], homepageTreeColor: string) 
         treeName: "Your Skill Tree",
         x: 0,
         y: 0,
+        category: "USER",
     };
 
     return result;

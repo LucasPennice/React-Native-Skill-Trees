@@ -6,7 +6,7 @@ import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import AppText from "../../../components/AppText";
 import ColorSelector from "../../../components/ColorsSelector";
 import { selectTreeOptions, setTree } from "../../../redux/editTreeSlice";
-import { mutateUserTree, removeUserTree } from "../../../redux/userTreesSlice";
+import { updateUserTrees, removeUserTree } from "../../../redux/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 import { colors, possibleTreeColors } from "../../../parameters";
 import { mutateEveryTree } from "../../../functions/mutateTree";
@@ -56,10 +56,12 @@ function EditTreeModal() {
 
         if (updatedTree === undefined) return;
 
-        dispatch(mutateUserTree(updatedTree));
+        dispatch(updateUserTrees(updatedTree));
         closeModal();
 
         function updateTreeNameAndColor(tree: Tree<Skill>): Tree<Skill> {
+            if (tree.isRoot) return { ...tree, data: { ...tree.data, name: treeName }, accentColor: selectedColor, treeName };
+
             return { ...tree, accentColor: selectedColor, treeName };
         }
     };

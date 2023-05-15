@@ -3,13 +3,13 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { Circle, Svg } from "react-native-svg";
 import AppText from "../../components/AppText";
-import { countCompletedNodesInTree, countNodesInTree } from "../../functions/extractInformationFromTree";
+import { ProgressWheelParams } from "../../components/ProgressIndicatorAndName";
+import { countCompletedSkillNodes, countSkillNodes, treeCompletedSkillPercentage } from "../../functions/extractInformationFromTree";
 import { centerFlex, colors } from "../../parameters";
 import { setTree } from "../../redux/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { Skill, Tree } from "../../types";
-import { ProgressWheelParams } from "../../components/ProgressIndicatorAndName";
 
 function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tree<Skill>; changeTreeAndNavigateToViewingTree: () => void }) {
     //Redux Related
@@ -21,14 +21,9 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
 
     const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}3D`, 50, 8);
 
-    const completedNodesQty = countCompletedNodesInTree(element);
-    const nodesQty = countNodesInTree(element);
-
-    let completedPercentage = 0;
-
-    if (!completedNodesQty || !nodesQty) completedPercentage = 0;
-
-    completedPercentage = ((completedNodesQty ?? 0) / (nodesQty ?? 1)) * 100;
+    const completedSkillsQty = countCompletedSkillNodes(element);
+    const skillsQty = countSkillNodes(element);
+    const completedPercentage = treeCompletedSkillPercentage(element);
 
     const result = progressWheelProps.circumference - (progressWheelProps.circumference * completedPercentage) / 100;
 
@@ -85,7 +80,7 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
                         {completedPercentage.toFixed(0)}% Complete
                     </AppText>
                     <AppText fontSize={20} style={{ color: "#FFFFFF5D" }}>
-                        {completedNodesQty} skills of {nodesQty}
+                        {completedSkillsQty} skills of {skillsQty}
                     </AppText>
                 </View>
                 <Svg width={progressWheelProps.size} height={progressWheelProps.size}>

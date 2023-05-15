@@ -1,5 +1,5 @@
 import { colors } from "../parameters";
-import { Skill, Tree } from "../types";
+import { NodeCategory, Skill, Tree } from "../types";
 
 export function makeid(length: number) {
     let result = "";
@@ -13,7 +13,7 @@ export function makeid(length: number) {
     return result;
 }
 
-export function createTree(treeName: string, color: string, isRoot: boolean, data: Skill) {
+export function createTree(treeName: string, color: string, isRoot: boolean, category: NodeCategory, data: Skill) {
     const result: Tree<Skill> = {
         treeName: treeName.trim(),
         accentColor: color,
@@ -22,6 +22,7 @@ export function createTree(treeName: string, color: string, isRoot: boolean, dat
         treeId: makeid(24),
         level: 0,
         nodeId: makeid(24),
+        category,
         children: [],
         x: 0,
         y: 0,

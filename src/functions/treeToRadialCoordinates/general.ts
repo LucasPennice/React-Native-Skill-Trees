@@ -1,5 +1,5 @@
-import { CoordinatesWithTreeData, LevelOverflow, Skill, Tree } from "../../types";
-import { treeToCoordArray } from "../treeToHierarchicalCoordinates";
+import { CoordinatesWithTreeData, LevelOverflow, NodeCategory, Skill, Tree } from "../../types";
+
 import { firstIteration } from "./firstInstance";
 import { checkForLevelOverflow } from "./levelOverflow";
 import {
@@ -31,7 +31,7 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
     } while (levelOverflow);
 
     let treeCoordinates: CoordinatesWithTreeData[] = [];
-    treeToCoordArray(result, treeCoordinates);
+    radialTreeToCoordArray(result, treeCoordinates);
 
     const smallestXCoordinate = Math.min(...treeCoordinates.map((c) => c.x));
     const smallestYCoordinate = Math.min(...treeCoordinates.map((c) => c.y));
@@ -46,4 +46,38 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
         });
 
     return treeCoordinates;
+}
+
+function radialTreeToCoordArray(tree: Tree<Skill>, result: CoordinatesWithTreeData[]) {
+    // Recursive Case 👇
+    if (tree.children.length) {
+        for (let i = 0; i < tree.children.length; i++) {
+            const element = tree.children[i];
+            radialTreeToCoordArray(element, result);
+        }
+    }
+
+    // Non Recursive Case 👇
+
+    result.push({
+        accentColor: tree.accentColor,
+        data: tree.data,
+        isRoot: tree.isRoot,
+        category: getCategory(),
+        nodeId: tree.nodeId,
+        treeId: tree.treeId,
+        treeName: tree.treeName,
+        x: tree.x,
+        y: tree.y,
+        level: tree.level,
+        parentId: tree.parentId,
+    });
+
+    function getCategory(): NodeCategory {
+        if (tree.isRoot) return "USER";
+
+        if (tree.level === 1) return "SKILL_TREE";
+
+        return "SKILL";
+    }
 }

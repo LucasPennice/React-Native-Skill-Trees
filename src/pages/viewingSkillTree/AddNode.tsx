@@ -7,12 +7,13 @@ import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 import {
     clearNewNodeState,
-    mutateUserTree,
+    updateUserTrees,
     selectCurrentTree,
     selectTentativeTree,
     selectTreeSlice,
     setSelectedDndZone,
 } from "../../redux/userTreesSlice";
+import { treeCompletedSkillPercentage } from "../../functions/extractInformationFromTree";
 
 type MODES = "IDLE" | "SELECT_POSITION" | "CONFIRM_POSITION";
 
@@ -91,7 +92,7 @@ function AddNode({ openNewNodeModal }: Props) {
                     </Pressable>
                     <Pressable
                         onPress={() => {
-                            dispatch(mutateUserTree(tentativeNewTree));
+                            dispatch(updateUserTrees(tentativeNewTree));
                             dispatch(setSelectedDndZone(undefined));
                             dispatch(clearNewNodeState());
                         }}

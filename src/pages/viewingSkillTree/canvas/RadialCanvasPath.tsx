@@ -1,7 +1,7 @@
-import { Path, Skia, SkiaMutableValue } from "@shopify/react-native-skia";
+import { Path, Skia } from "@shopify/react-native-skia";
+import { getConstantsRotated } from "../../../functions/coordinateSystem";
 import { CIRCLE_SIZE } from "../../../parameters";
 import { CartesianCoordinate, NodeCoordinate } from "../../../types";
-import { getConstantsRotated } from "../../../functions/coordinateSystem";
 
 type pathCoordinates = {
     cx: number;
@@ -13,13 +13,11 @@ function RadialCanvasPath({
     coordinates,
     pathColor,
     isRoot,
-    pathBlurOnInactive,
     nodeCoordinatesCentered,
 }: {
     coordinates: pathCoordinates;
     pathColor: string;
     isRoot?: boolean;
-    pathBlurOnInactive?: SkiaMutableValue<number>;
     nodeCoordinatesCentered: NodeCoordinate[];
 }) {
     const { cx, cy, pathInitialPoint } = coordinates;
@@ -46,7 +44,7 @@ function RadialCanvasPath({
     cp2.moveTo(c2.x, c2.y);
     cp2.addCircle(c2.x, c2.y, 2);
 
-    return <Path path={res} color={pathColor} style="stroke" strokeWidth={2} opacity={pathBlurOnInactive ?? 1} />;
+    return <Path path={res} color={pathColor} style="stroke" strokeWidth={2} />;
 }
 
 function getCurvedPath(rootCoordinates: NodeCoordinate, parentOfNodeCoord: CartesianCoordinate, centerOfNode: CartesianCoordinate) {

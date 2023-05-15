@@ -1,11 +1,37 @@
+export type Milestone = {
+    complete: boolean;
+    title: string;
+    description: string;
+    completedOn: Date | undefined;
+};
+
+export type ExternalResource = {
+    title: string;
+    url?: string;
+    description: string;
+};
+
+export type SkillLogs = {
+    date: Date;
+    text: string;
+};
+
 export type Skill = {
     name: string;
     isCompleted?: boolean;
+    // milestones: Milestone[];
+    // startingSkillLevel?: string;
+    // idealSkillLevel?: string;
+    // motivesToLearn: string[];
+    // usefulResources: ExternalResource[];
+    // logs: string[];
 };
 
 export type CartesianCoordinate = { x: number; y: number };
 
 export type ParentId = string | null;
+
+export type NodeCategory = "SKILL" | "SKILL_TREE" | "USER";
 
 export type Tree<T> = CartesianCoordinate & {
     isRoot: boolean;
@@ -17,6 +43,7 @@ export type Tree<T> = CartesianCoordinate & {
     level: number;
     data: T;
     children: Tree<T>[];
+    category: NodeCategory;
 };
 
 export type CirclePositionInCanvas = CartesianCoordinate & { id: string };
@@ -31,6 +58,7 @@ export type CoordinatesWithTreeData = CartesianCoordinate & {
     accentColor: string;
     level: number;
     data: Skill;
+    category: NodeCategory;
 };
 
 export type NodeCoordinate = CartesianCoordinate & { id: string; level: number; parentId: ParentId };

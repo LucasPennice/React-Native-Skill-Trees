@@ -33,7 +33,7 @@ function NewNodeModal({ closeModal, open }: Props) {
 
         if (text === "") return Alert.alert("Please enter a name for the new skill");
 
-        const newNode = createTree(currentTree.treeName, currentTree.accentColor, false, { name: text.trim(), isCompleted });
+        const newNode = createTree(currentTree.treeName, currentTree.accentColor, false, "SKILL", { name: text.trim(), isCompleted });
 
         dispatch(setNewNode(newNode));
         closeModal();

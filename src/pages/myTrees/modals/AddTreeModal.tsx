@@ -1,23 +1,19 @@
-import { Alert, ScrollView, View } from "react-native";
-import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
 import { useEffect, useState } from "react";
-import AppTextInput from "../../../components/AppTextInput";
-import FlingToDismissModal from "../../../components/FlingToDismissModal";
+import { Alert, View } from "react-native";
 import AppText from "../../../components/AppText";
+import AppTextInput from "../../../components/AppTextInput";
 import ColorSelector from "../../../components/ColorsSelector";
-import RadioInput from "../../../components/RadioInput";
-import { Skill, Tree } from "../../../types";
-import { appendToUserTree } from "../../../redux/userTreesSlice";
-import { createTree, makeid } from "../../../functions/misc";
+import FlingToDismissModal from "../../../components/FlingToDismissModal";
+import { createTree } from "../../../functions/misc";
 import { colors, possibleTreeColors } from "../../../parameters";
+import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
+import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
+import { appendToUserTree } from "../../../redux/userTreesSlice";
 
 function AddTreeModal() {
     //Local State
     const [treeName, setTreeName] = useState("");
     const [selectedColor, setSelectedColor] = useState("");
-    const [firstSkillName, setFirstSkillName] = useState("");
-    const [firstSkillComplete, setFirstSkillComplete] = useState(false);
     //Redux State
     const { open } = useAppSelector(selectAddTree);
 
@@ -26,16 +22,14 @@ function AddTreeModal() {
     useEffect(() => {
         setTreeName("");
         setSelectedColor("");
-        setFirstSkillName("");
-        setFirstSkillComplete(false);
     }, [open]);
 
     const closeModal = () => dispatch(close());
 
     const createNewTree = () => {
-        if (treeName === "" || selectedColor === "" || firstSkillName === "") return Alert.alert("Please fill all of the fields");
+        if (treeName === "" || selectedColor === "") return Alert.alert("Please fill all of the fields");
 
-        const newTree = createTree(treeName, selectedColor, true, { name: firstSkillName, isCompleted: firstSkillComplete });
+        const newTree = createTree(treeName, selectedColor, true, "SKILL_TREE", { name: treeName, isCompleted: true });
 
         dispatch(appendToUserTree(newTree));
         closeModal();
@@ -60,19 +54,6 @@ function AddTreeModal() {
                     Scroll to see more colors
                 </AppText>
                 <ColorSelector colorsArray={possibleTreeColors} state={[selectedColor, setSelectedColor]} />
-                <AppText fontSize={16} style={{ color: colors.unmarkedText, marginTop: 10 }}>
-                    Enter the name of the first skill your tree will have
-                </AppText>
-                <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
-                    Every other skill will stem from it
-                </AppText>
-                <AppTextInput
-                    placeholder={"First Skill Name"}
-                    onlyContainsLettersAndNumbers
-                    textState={[firstSkillName, setFirstSkillName]}
-                    containerStyles={{ marginTop: 10, marginBottom: 20 }}
-                />
-                <RadioInput state={[firstSkillComplete, setFirstSkillComplete]} text={"I Mastered This Skill"} />
             </View>
         </FlingToDismissModal>
     );

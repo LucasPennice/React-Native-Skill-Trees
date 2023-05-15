@@ -238,17 +238,18 @@ export function getCoordinatedWithTreeData(
     }[]
 ): CoordinatesWithTreeData[] {
     return nodeCoordinatesCentered.map((centeredCoord, i) => {
-        const currentBombastic = coordinatesWithTreeData[i];
+        const coordWithTreeData = coordinatesWithTreeData[i];
 
         return {
-            accentColor: currentBombastic.accentColor,
-            data: currentBombastic.data,
-            isRoot: currentBombastic.isRoot,
-            level: currentBombastic.level,
-            nodeId: currentBombastic.nodeId,
-            parentId: currentBombastic.parentId,
-            treeId: currentBombastic.treeId,
-            treeName: currentBombastic.treeName,
+            accentColor: coordWithTreeData.accentColor,
+            data: coordWithTreeData.data,
+            isRoot: coordWithTreeData.isRoot,
+            level: coordWithTreeData.level,
+            nodeId: coordWithTreeData.nodeId,
+            parentId: coordWithTreeData.parentId,
+            treeId: coordWithTreeData.treeId,
+            category: coordWithTreeData.category,
+            treeName: coordWithTreeData.treeName,
             x: centeredCoord.x,
             y: centeredCoord.y,
         };

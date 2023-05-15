@@ -15,7 +15,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
     result = handleOverlap(result);
 
     let treeCoordinates: CoordinatesWithTreeData[] = [];
-    treeToCoordArray(result, treeCoordinates);
+    hierarchicalTreeToCoordArray(result, treeCoordinates);
 
     const smallestXCoordinate = Math.min(...treeCoordinates.map((c) => c.x));
 
@@ -309,12 +309,12 @@ export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, s
     }
 }
 
-export function treeToCoordArray(tree: Tree<Skill>, result: CoordinatesWithTreeData[]) {
+export function hierarchicalTreeToCoordArray(tree: Tree<Skill>, result: CoordinatesWithTreeData[]) {
     // Recursive Case 👇
     if (tree.children.length) {
         for (let i = 0; i < tree.children.length; i++) {
             const element = tree.children[i];
-            treeToCoordArray(element, result);
+            hierarchicalTreeToCoordArray(element, result);
         }
     }
 
@@ -324,6 +324,7 @@ export function treeToCoordArray(tree: Tree<Skill>, result: CoordinatesWithTreeD
         accentColor: tree.accentColor,
         data: tree.data,
         isRoot: tree.isRoot,
+        category: tree.isRoot ? "SKILL_TREE" : "SKILL",
         nodeId: tree.nodeId,
         treeId: tree.treeId,
         treeName: tree.treeName,

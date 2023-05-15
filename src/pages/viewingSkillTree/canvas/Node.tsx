@@ -3,7 +3,6 @@ import {
     DiffRect,
     Group,
     Path,
-    Rect,
     RoundedRect,
     Skia,
     SkiaMutableValue,
@@ -18,10 +17,11 @@ import {
 } from "@shopify/react-native-skia";
 import { useEffect } from "react";
 import { useSharedValue, withDelay, withTiming } from "react-native-reanimated";
+import { interpolateColors } from "../../../functions/misc";
 import { CIRCLE_SIZE, colors } from "../../../parameters";
+import { NodeCategory } from "../../../types";
 import useIsFirstRender from "../../../useIsFirstRender";
 import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
-import { interpolateColors } from "../../../functions/misc";
 
 function Node({
     coord,
@@ -30,6 +30,7 @@ function Node({
     groupTransform,
     treeAccentColor,
     text,
+    category,
 }: {
     isComplete?: boolean;
     coord: { cx: number; cy: number };
@@ -37,6 +38,7 @@ function Node({
     circleBlurOnInactive?: SkiaMutableValue<number>;
     treeAccentColor: string;
     text: { color: string; letter: string };
+    category: NodeCategory;
 }) {
     const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 20);
 
@@ -190,17 +192,64 @@ function Node({
         duration: REMAINING_ANIMATION_DURATION,
     });
 
-    //
-
+    const skillTreeX = useComputedValue(() => {
+        return x.current - CIRCLE_SIZE;
+    }, [x]);
+    const skillTreeY = useComputedValue(() => {
+        return y.current - CIRCLE_SIZE;
+    }, [y]);
     if (!nodeLetterFont) return <></>;
 
     return (
         <Group origin={{ x: cx, y: cy }} transform={groupTransform} opacity={circleBlurOnInactive ?? 1}>
-            <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
-            <Path path={path} style="stroke" strokeWidth={2} color={colors.line} />
-            <DiffRect inner={animatedinnerRect} outer={animatedOuterRect} color={`${interpolateColors(treeAccentColor, colors.background, 0.49)}`} />
-            <Path path={path} style="stroke" start={start} strokeCap={"round"} strokeWidth={2} color={treeAccentColor} />
-            <Text x={textX} y={textY} text={letter.toUpperCase()} font={nodeLetterFont} color={color} />
+            {category === "SKILL" && (
+                <>
+                    <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
+                    <Path path={path} style="stroke" strokeWidth={2} color={colors.line} />
+                    <DiffRect
+                        inner={animatedinnerRect}
+                        outer={animatedOuterRect}
+                        color={`${interpolateColors(treeAccentColor, colors.background, 0.49)}`}
+                    />
+                    <Path path={path} style="stroke" start={start} strokeCap={"round"} strokeWidth={2} color={treeAccentColor} />
+                    <Text x={textX} y={textY} text={letter.toUpperCase()} font={nodeLetterFont} color={color} />
+                </>
+            )}
+            {category === "SKILL_TREE" && (
+                <>
+                    {!isComplete && (
+                        <RoundedRect
+                            height={2 * CIRCLE_SIZE}
+                            width={2 * CIRCLE_SIZE}
+                            x={skillTreeX}
+                            y={skillTreeY}
+                            r={5}
+                            style={"fill"}
+                            strokeWidth={2}
+                            color={colors.background}
+                        />
+                    )}
+
+                    <RoundedRect
+                        height={2 * CIRCLE_SIZE}
+                        width={2 * CIRCLE_SIZE}
+                        x={skillTreeX}
+                        y={skillTreeY}
+                        r={5}
+                        style={isComplete ? "fill" : "stroke"}
+                        strokeWidth={2}
+                        color={treeAccentColor}
+                    />
+                    <Text x={textX} y={textY} text={letter.toUpperCase()} font={nodeLetterFont} color={isComplete ? colors.background : color} />
+                </>
+            )}
+            {category === "USER" && (
+                <>
+                    <Circle cx={x} cy={y} r={2 * CIRCLE_SIZE} color={colors.background} />
+                    <Circle cx={x} cy={y} r={2 * CIRCLE_SIZE} color={treeAccentColor} style={"stroke"} strokeWidth={2} />
+                    <Text x={textX} y={textY} text={letter.toUpperCase()} font={nodeLetterFont} color={isComplete ? color : treeAccentColor} />
+                </>
+            )}
         </Group>
     );
 

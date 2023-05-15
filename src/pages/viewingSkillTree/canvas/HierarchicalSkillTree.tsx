@@ -92,6 +92,7 @@ function RenderNode({ node, selectedNode }: { selectedNode: string | null; node:
             treeAccentColor={node.accentColor}
             coord={{ cx: node.x, cy: node.y }}
             text={{ color: textColor, letter: node.data.name[0] }}
+            category={node.category}
         />
     );
 }

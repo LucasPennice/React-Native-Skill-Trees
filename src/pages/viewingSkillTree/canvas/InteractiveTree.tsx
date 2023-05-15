@@ -57,8 +57,25 @@ function InteractiveTree({
     //
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
+    const foo = (nodeId: string) => {
+        const node = coordinatesWithTreeData.find((c) => c.nodeId === nodeId && c.category === "SKILL");
+
+        const isSkillNode = node !== undefined;
+
+        if (isSkillNode && onNodeClick) return onNodeClick(nodeId);
+
+        return;
+    };
+
     //Hooks
-    const { touchHandler } = useCanvasTouchHandler({ tree, nodeCoordinatesCentered, onNodeClick, onDndZoneClick, showDndZones, dragAndDropZones });
+    const { touchHandler } = useCanvasTouchHandler({
+        tree,
+        nodeCoordinatesCentered,
+        onNodeClick: foo,
+        onDndZoneClick,
+        showDndZones,
+        dragAndDropZones,
+    });
     const { canvasHeight, canvasWidth } = canvasDimentions;
     const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, foundNodeCoordinates, isTakingScreenshot);
     //

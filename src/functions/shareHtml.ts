@@ -1,12 +1,11 @@
 import { Skill, Tree } from "../types";
-import { countCompletedNodesInTree } from "./extractInformationFromTree";
-import { countNodesInTree } from "./extractInformationFromTree";
+import { countCompletedSkillNodes, countSkillNodes } from "./extractInformationFromTree";
 
 export function testTemplateHTML(tree: Tree<Skill>, imageData: string) {
     const accentColor = tree.accentColor;
 
-    const nodeQty = countNodesInTree(tree)!;
-    const completedNodes = countCompletedNodesInTree(tree)!;
+    const nodeQty = countSkillNodes(tree)!;
+    const completedNodes = countCompletedSkillNodes(tree)!;
     const percentage = (completedNodes / nodeQty) * 100;
     const dashoffset = 100 - percentage;
     const treeName = tree.treeName;
