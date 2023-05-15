@@ -19,12 +19,16 @@ export type SkillLogs = {
 export type Skill = {
     name: string;
     isCompleted?: boolean;
-    // milestones: Milestone[];
-    // startingSkillLevel?: string;
-    // idealSkillLevel?: string;
-    // motivesToLearn: string[];
-    // usefulResources: ExternalResource[];
-    // logs: string[];
+    milestones: Milestone[];
+    startingSkillLevel?: string;
+    idealSkillLevel?: string;
+    motivesToLearn: string[];
+    usefulResources: ExternalResource[];
+    logs: string[];
+};
+
+export const getDefaultSkillValue = (name: string, isCompleted: boolean): Skill => {
+    return { name, isCompleted, logs: [], milestones: [], motivesToLearn: [], usefulResources: [] };
 };
 
 export type CartesianCoordinate = { x: number; y: number };

@@ -12,7 +12,7 @@ function useKeepAsyncStorageUpdated() {
     const isFirstRender = useIsFirstRender();
 
     useEffect(() => {
-        if (userTrees.length === 0) return;
+        if (isFirstRender) return;
 
         (async () => {
             const userTreesInMemory = await AsyncStorage.getItem("@roadmaps");

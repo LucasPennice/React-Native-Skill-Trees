@@ -8,6 +8,7 @@ import { createTree } from "../../../functions/misc";
 import { colors } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectCurrentTree, setNewNode, setSelectedNode } from "../../../redux/userTreesSlice";
+import { getDefaultSkillValue } from "../../../types";
 
 type Props = {
     closeModal: () => void;
@@ -33,7 +34,7 @@ function NewNodeModal({ closeModal, open }: Props) {
 
         if (text === "") return Alert.alert("Please enter a name for the new skill");
 
-        const newNode = createTree(currentTree.treeName, currentTree.accentColor, false, "SKILL", { name: text.trim(), isCompleted });
+        const newNode = createTree(currentTree.treeName, currentTree.accentColor, false, "SKILL", getDefaultSkillValue(text.trim(), isCompleted));
 
         dispatch(setNewNode(newNode));
         closeModal();

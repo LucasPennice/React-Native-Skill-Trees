@@ -9,6 +9,7 @@ import { colors, possibleTreeColors } from "../../../parameters";
 import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { appendToUserTree } from "../../../redux/userTreesSlice";
+import { getDefaultSkillValue } from "../../../types";
 
 function AddTreeModal() {
     //Local State
@@ -29,7 +30,7 @@ function AddTreeModal() {
     const createNewTree = () => {
         if (treeName === "" || selectedColor === "") return Alert.alert("Please fill all of the fields");
 
-        const newTree = createTree(treeName, selectedColor, true, "SKILL_TREE", { name: treeName, isCompleted: true });
+        const newTree = createTree(treeName, selectedColor, true, "SKILL_TREE", getDefaultSkillValue(treeName, true));
 
         dispatch(appendToUserTree(newTree));
         closeModal();

@@ -10,7 +10,7 @@ import { colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCurrentTree, selectTentativeTree, selectTreeSlice, setSelectedDndZone, setSelectedNode } from "../../redux/userTreesSlice";
 import { DnDZone, Skill, Tree } from "../../types";
-import AddNode from "./AddNode";
+import AddNodeStateIndicator from "./AddNodeStateIndicator";
 import InteractiveTree from "./canvas/InteractiveTree";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import NewNodeModal from "./modals/NewNodeModal";
@@ -69,7 +69,7 @@ function ViewingSkillTree() {
                 />
             )}
             {currentTree && <ProgressIndicatorAndName tree={currentTree} />}
-            {(mode === "Idle" || mode === "AddingNode") && <AddNode openNewNodeModal={() => setNewNodeModal(true)} />}
+            {(mode === "Idle" || mode === "AddingNode") && <AddNodeStateIndicator openNewNodeModal={() => setNewNodeModal(true)} />}
             {mode === "Idle" && <OpenSettingsMenu openModal={() => setCanvasSettings(true)} />}
 
             {currentTree && (

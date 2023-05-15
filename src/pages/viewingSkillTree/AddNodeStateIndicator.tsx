@@ -7,13 +7,12 @@ import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 import {
     clearNewNodeState,
-    updateUserTrees,
     selectCurrentTree,
     selectTentativeTree,
     selectTreeSlice,
     setSelectedDndZone,
+    updateUserTrees,
 } from "../../redux/userTreesSlice";
-import { treeCompletedSkillPercentage } from "../../functions/extractInformationFromTree";
 
 type MODES = "IDLE" | "SELECT_POSITION" | "CONFIRM_POSITION";
 

@@ -11,7 +11,7 @@ import { NAV_HEGIHT, centerFlex, colors } from "../../parameters";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { selectTreeSlice } from "../../redux/userTreesSlice";
-import { Skill, Tree } from "../../types";
+import { Skill, Tree, getDefaultSkillValue } from "../../types";
 import {
     centerNodesInCanvas,
     getCanvasDimensions,
@@ -50,39 +50,37 @@ function Homepage() {
 
     return (
         <View style={{ position: "relative", backgroundColor: colors.background, overflow: "hidden" }}>
-            {homepageTree.children.length != 0 && (
-                <>
-                    <GestureDetector gesture={canvasGestures}>
-                        <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
-                            <Animated.View style={[transform]}>
-                                <Canvas
-                                    style={{
-                                        width: canvasWidth,
-                                        height: canvasHeight,
-                                        transform: [{ scale: isTakingScreenshot ? screenDimentions.width / canvasWidth : 1 }],
-                                    }}
-                                    ref={canvasRef}>
-                                    {showCircleGuide && <Circles />}
-                                    <RadialSkillTree
-                                        nodeCoordinatesCentered={centeredCoordinatedWithTreeData}
-                                        selectedNode={null}
-                                        settings={{ showLabel, oneColorPerTree }}
-                                    />
-                                </Canvas>
-                            </Animated.View>
-                        </View>
-                    </GestureDetector>
-                    <ProgressIndicatorAndName tree={homepageTree} />
-                    <OpenSettingsMenu openModal={() => setCanvasSettings(true)} />
-                    <ShareTreeButton
-                        canvasRef={canvasRef}
-                        shouldShare
-                        takingScreenShotState={[isTakingScreenshot, setIsTakingScreenshot]}
-                        tree={homepageTree}
-                    />
-                    <CanvasSettingsModal open={canvasSettings} closeModal={() => setCanvasSettings(false)} />
-                </>
-            )}
+            <>
+                <GestureDetector gesture={canvasGestures}>
+                    <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
+                        <Animated.View style={[transform]}>
+                            <Canvas
+                                style={{
+                                    width: canvasWidth,
+                                    height: canvasHeight,
+                                    transform: [{ scale: isTakingScreenshot ? screenDimentions.width / canvasWidth : 1 }],
+                                }}
+                                ref={canvasRef}>
+                                {showCircleGuide && <Circles />}
+                                <RadialSkillTree
+                                    nodeCoordinatesCentered={centeredCoordinatedWithTreeData}
+                                    selectedNode={null}
+                                    settings={{ showLabel, oneColorPerTree }}
+                                />
+                            </Canvas>
+                        </Animated.View>
+                    </View>
+                </GestureDetector>
+                <ProgressIndicatorAndName tree={homepageTree} />
+                <OpenSettingsMenu openModal={() => setCanvasSettings(true)} />
+                <ShareTreeButton
+                    canvasRef={canvasRef}
+                    shouldShare
+                    takingScreenShotState={[isTakingScreenshot, setIsTakingScreenshot]}
+                    tree={homepageTree}
+                />
+                <CanvasSettingsModal open={canvasSettings} closeModal={() => setCanvasSettings(false)} />
+            </>
         </View>
     );
     function Circles() {
@@ -142,7 +140,7 @@ function buildHomepageTree(userTrees: Tree<Skill>[], homepageTreeColor: string) 
         nodeId: ROOT_ID,
         isRoot: true,
         children: modifiedUserTrees,
-        data: { name: "Root", isCompleted: false },
+        data: getDefaultSkillValue("Root", false),
         level: 0,
         parentId: null,
         treeId: "HomepageTree",

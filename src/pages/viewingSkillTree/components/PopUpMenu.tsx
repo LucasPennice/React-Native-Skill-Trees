@@ -8,12 +8,12 @@ import { StackNavigatorParams } from "../../../../App";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
-import { countNodesInTree, countSkillNodes, findNodeById, treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
+import { countSkillNodes, findNodeById, treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, editTreeProperties } from "../../../functions/mutateTree";
 import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE_SELECTED, centerFlex, colors } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { updateUserTrees, removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode } from "../../../redux/userTreesSlice";
+import { removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode, updateUserTrees } from "../../../redux/userTreesSlice";
 import { NodeCoordinate, Skill, Tree } from "../../../types";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
 
