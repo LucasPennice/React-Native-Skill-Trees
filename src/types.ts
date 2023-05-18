@@ -15,6 +15,7 @@ export type SkillResource = {
 export type SkillLogs = {
     date: Date;
     text: string;
+    id: string;
 };
 
 export type SkillLevel = {

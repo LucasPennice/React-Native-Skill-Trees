@@ -7,7 +7,7 @@ import { TransitionSpec } from "@react-navigation/stack/lib/typescript/src/types
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { createContext, useCallback } from "react";
-import { Platform, SafeAreaView, StatusBar, TouchableOpacity, View } from "react-native";
+import { Platform, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { enableScreens } from "react-native-screens";
 import { Provider } from "react-redux";
@@ -202,3 +202,13 @@ function AppWithReduxContext() {
         </View>
     );
 }
+
+export const generalStyles = StyleSheet.create({
+    btn: {
+        alignSelf: "flex-start",
+        backgroundColor: colors.darkGray,
+        paddingHorizontal: 30,
+        paddingVertical: 15,
+        borderRadius: 10,
+    },
+});

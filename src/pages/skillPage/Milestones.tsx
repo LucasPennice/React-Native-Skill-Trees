@@ -6,6 +6,7 @@ import AppText from "../../components/AppText";
 import { centerFlex, colors } from "../../parameters";
 import { Milestone } from "../../types";
 import { LeftAction, RightAction } from "./Modals/ActionButtons";
+import { generalStyles } from "../../../App";
 
 function Milestones({
     milestones,
@@ -31,7 +32,7 @@ function Milestones({
             ))}
 
             <Animated.View layout={Layout.duration(200)}>
-                <Pressable onPress={openModal(null, undefined)} style={styles.btn}>
+                <Pressable onPress={openModal(null, undefined)} style={generalStyles.btn}>
                     <AppText style={{ color: colors.accent }} fontSize={16}>
                         Add Milestone
                     </AppText>
@@ -40,16 +41,6 @@ function Milestones({
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    btn: {
-        alignSelf: "flex-start",
-        backgroundColor: colors.darkGray,
-        paddingHorizontal: 30,
-        paddingVertical: 15,
-        borderRadius: 10,
-    },
-});
 
 export default Milestones;
 
