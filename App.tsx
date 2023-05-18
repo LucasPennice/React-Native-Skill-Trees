@@ -36,7 +36,7 @@ export type StackNavigatorParams = {
     ViewingSkillTree: undefined;
     MyTrees: undefined;
     Settings: undefined;
-    SkillPage: Skill | undefined;
+    SkillPage: { skill: Skill | undefined; color: string | undefined };
 };
 
 export type RouteName = keyof StackNavigatorParams;
@@ -185,7 +185,7 @@ function AppWithReduxContext() {
             )}
             {Platform.OS !== "android" && (
                 <Stack.Navigator
-                    initialRouteName={"Home"}
+                    initialRouteName={"SkillPage"}
                     screenOptions={{
                         headerStyle: { backgroundColor: colors.background },
                         headerTintColor: colors.accent,

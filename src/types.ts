@@ -3,9 +3,10 @@ export type Milestone = {
     title: string;
     description: string;
     completedOn: Date | undefined;
+    id: string;
 };
 
-export type ExternalResource = {
+export type SkillResource = {
     title: string;
     url?: string;
     description: string;
@@ -16,19 +17,25 @@ export type SkillLogs = {
     text: string;
 };
 
+export type SkillLevel = {
+    ideal: string;
+    starting: string;
+};
+
 export type Skill = {
     name: string;
     isCompleted?: boolean;
-    milestones: Milestone[];
-    startingSkillLevel?: string;
-    idealSkillLevel?: string;
-    motivesToLearn: string[];
-    usefulResources: ExternalResource[];
-    logs: string[];
+    milestones?: Milestone[];
+    skillLevel?: SkillLevel;
+    motivesToLearn?: string[];
+    usefulResources?: SkillResource[];
+    logs?: SkillLogs[];
 };
 
+export const skillStringDetailsKeys: (keyof Skill)[] = ["logs", "motivesToLearn"];
+
 export const getDefaultSkillValue = (name: string, isCompleted: boolean): Skill => {
-    return { name, isCompleted, logs: [], milestones: [], motivesToLearn: [], usefulResources: [] };
+    return { name, isCompleted };
 };
 
 export type CartesianCoordinate = { x: number; y: number };

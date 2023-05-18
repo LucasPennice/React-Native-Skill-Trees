@@ -110,6 +110,7 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
     };
 
     const currentSkill = findNodeById(currentTree, selectedNode)?.data ?? undefined;
+    const currentSkillAccentColor = currentTree ? currentTree.accentColor : "white";
 
     const closePopUpMenu = () => dispatch(setSelectedNode(null));
 
@@ -122,6 +123,8 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
     const menuPosition = whereIsSelectedNode({ canvasWidth, foundNodeCoordinates, screenWidth: width });
     const left = menuPosition === "LEFT_SIDE_OF_SCREEN" ? 0 : width - MENU_WIDTH;
     const top = MENU_HEIGHT / 4.5;
+
+    const currentSkillParams: { skill: Skill | undefined; color: string | undefined } = { skill: currentSkill, color: currentSkillAccentColor };
 
     return (
         <GestureDetector gesture={flingGesture}>
@@ -169,7 +172,7 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
 
                 <TouchableOpacity
                     style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
-                    onPress={() => navigation.navigate("SkillPage", currentSkill)}>
+                    onPress={() => navigation.navigate("SkillPage", currentSkillParams)}>
                     <AppText style={{ color: colors.accent }} fontSize={18}>
                         Go To Skill Page
                     </AppText>

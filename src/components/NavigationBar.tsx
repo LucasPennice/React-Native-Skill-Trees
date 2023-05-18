@@ -70,6 +70,7 @@ function NavigationBar({ data: APP_ROUTES }: { data: Routes }) {
                 return (
                     <Pressable
                         key={idx}
+                        //@ts-ignore
                         onPress={() => nav.navigate(appRoute.route)}
                         style={[centerFlex, { padding: 20 }]}
                         onLayout={(e) => {
