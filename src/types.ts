@@ -2,7 +2,7 @@ export type Milestone = {
     complete: boolean;
     title: string;
     description: string;
-    completedOn: Date | undefined;
+    completedOn: string | undefined;
     id: string;
 };
 
@@ -14,7 +14,7 @@ export type SkillResource = {
 };
 
 export type SkillLogs = {
-    date: Date;
+    date: string;
     text: string;
     id: string;
 };

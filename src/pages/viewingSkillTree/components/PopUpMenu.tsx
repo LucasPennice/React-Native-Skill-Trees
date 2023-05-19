@@ -109,9 +109,6 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
         dispatch(updateUserTrees(result));
     };
 
-    const currentSkill = findNodeById(currentTree, selectedNode)?.data ?? undefined;
-    const currentSkillAccentColor = currentTree ? currentTree.accentColor : "white";
-
     const closePopUpMenu = () => dispatch(setSelectedNode(null));
 
     const flingGesture = Gesture.Fling()
@@ -125,10 +122,7 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
     const top = MENU_HEIGHT / 4.5;
 
     const goToSkillPage = () => {
-        if (currentTree === undefined) return undefined;
-        if (currentSkill === undefined) return undefined;
-
-        navigation.navigate("SkillPage", { color: currentTree.accentColor, skill: currentSkill, treeId: currentTree.treeId });
+        navigation.navigate("SkillPage", currentNode);
     };
 
     return (

@@ -85,7 +85,7 @@ function MilestoneCard({
                             </AppText>
                             {data.completedOn !== undefined && (
                                 <AppText fontSize={18} style={{ color: "white" }}>
-                                    - {data.completedOn.toLocaleDateString()}
+                                    - {data.completedOn}
                                 </AppText>
                             )}
                         </View>

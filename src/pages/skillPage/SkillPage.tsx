@@ -19,6 +19,7 @@ import SkillLevels from "./DisplayDetails/SkillLevels";
 import SkillResources from "./DisplayDetails/SkillResources";
 import useConfirmLeaveScreenWithoutSaving from "./useConfirmLeaveScreenWithoutSaving";
 import useSaveUpdatedSkillToAsyncStorage from "./useUpdateTreeWithNewSkillDetails";
+import useCheckForUnsavedChanges from "./useCheckForUnsavedChanges";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "SkillPage">;
 const SKILL_DETAILS_KEYS: (keyof Skill)[] = ["logs", "motivesToLearn", "isCompleted", "milestones", "skillLevel", "usefulResources"];
@@ -28,7 +29,7 @@ export const getDefaultFns = {
         return { complete: false, completedOn: undefined, description: "", title: "", id: makeid(24) };
     },
     logs: (): SkillLogs => {
-        return { date: new Date(), text: "", id: makeid(24) };
+        return { date: new Date().toLocaleDateString(), text: "", id: makeid(24) };
     },
     motivesToLearn: (): MotiveToLearn => {
         return { text: "", id: makeid(24) };
@@ -44,8 +45,8 @@ export const getDefaultFns = {
 export type SkillModal<T> = { open: boolean; data: T; ref: Swipeable | null };
 
 function SkillPage({ route, navigation }: Props) {
-    const currentSkill = route.params;
-    const { skill, color } = currentSkill;
+    const treeNode = route.params;
+    const { data: skill, accentColor: color } = treeNode;
     //Local State
     const [skillState, setSkillState] = useState<Skill>(skill);
     //Local State - Modal
@@ -58,11 +59,10 @@ function SkillPage({ route, navigation }: Props) {
     });
     const [editSkillLevelModal, setEditSkillLevelModal] = useState<SkillModal<SkillLevel | undefined>>({ open: false, data: undefined, ref: null });
     const [editResourcesModal, setEditResourcesModal] = useState<SkillModal<SkillResource | undefined>>({ open: false, data: undefined, ref: null });
-    //Derived State
-    const unsavedChanges = JSON.stringify(currentSkill.skill) !== JSON.stringify(skillState);
     //Hooks
+    const unsavedChanges = useCheckForUnsavedChanges(skillState, treeNode);
     useConfirmLeaveScreenWithoutSaving(navigation, unsavedChanges);
-    const updateSkillDetails = useSaveUpdatedSkillToAsyncStorage(skillState);
+    const updateSkillDetails = useSaveUpdatedSkillToAsyncStorage(skillState, treeNode);
 
     //THIS 👇 object must have a function per key in SKILL_DETAILS_KEYS
     const openModalFns: { [key: string]: any } = {

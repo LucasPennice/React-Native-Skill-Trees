@@ -24,7 +24,7 @@ import { useAppDispatch } from "./src/redux/reduxHooks";
 import { store } from "./src/redux/reduxStore";
 import { updateDimentions } from "./src/redux/screenDimentionsSlice";
 import { populateUserTrees } from "./src/redux/userTreesSlice";
-import { Skill } from "./src/types";
+import { Skill, Tree } from "./src/types";
 import useIsSharingAvailable from "./src/useIsSharingAvailable";
 import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
 import "./wdyr";
@@ -37,7 +37,7 @@ export type StackNavigatorParams = {
     ViewingSkillTree: undefined;
     MyTrees: undefined;
     Settings: undefined;
-    SkillPage: { skill: Skill; color: string; treeId: string };
+    SkillPage: Tree<Skill>;
 };
 
 export type RouteName = keyof StackNavigatorParams;

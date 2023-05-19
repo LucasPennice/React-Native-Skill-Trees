@@ -23,7 +23,7 @@ function UpdateMilestoneModal({ closeModal, updateMilestonesArray, milestones, s
     const [description, setDescription] = useState<Milestone["description"]>(data.description);
     const [title, setTitle] = useState<Milestone["title"]>(data.title);
 
-    const newMilestone: Milestone = { complete, completedOn: new Date(), description, title, id: state.data.id };
+    const newMilestone: Milestone = { complete, completedOn: new Date().toLocaleDateString(), description, title, id: state.data.id };
 
     const isEditing = checkIfEditing();
 

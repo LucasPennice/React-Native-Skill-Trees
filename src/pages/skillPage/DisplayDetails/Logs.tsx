@@ -75,7 +75,7 @@ function LogCard({
                         {data.text}
                     </AppText>
                     <AppText fontSize={20} style={{ color: "white", maxWidth: width - 170 }} textProps={{ ellipsizeMode: "tail", numberOfLines: 1 }}>
-                        {data.date.toLocaleDateString()}
+                        {data.date}
                     </AppText>
                 </View>
             </Swipeable>
