@@ -185,7 +185,7 @@ function AppWithReduxContext() {
             )}
             {Platform.OS !== "android" && (
                 <Stack.Navigator
-                    initialRouteName={"SkillPage"}
+                    initialRouteName={"Home"}
                     screenOptions={{
                         headerStyle: { backgroundColor: colors.background },
                         headerTintColor: colors.accent,

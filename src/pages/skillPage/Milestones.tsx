@@ -5,21 +5,21 @@ import Animated, { Layout } from "react-native-reanimated";
 import AppText from "../../components/AppText";
 import { centerFlex, colors } from "../../parameters";
 import { Milestone } from "../../types";
-import { LeftAction, RightAction } from "./Modals/ActionButtons";
+import { LeftAction, RightAction } from "./DisplayDetails/ActionButtons";
 import { generalStyles } from "../../../App";
 
 function Milestones({
     milestones,
     openModal,
-    updateMilestonesArray,
+    mutateMilestones,
 }: {
     milestones: Milestone[];
     openModal: (ref: Swipeable | null, data?: Milestone) => () => void;
-    updateMilestonesArray: (newMilestones: Milestone[] | undefined) => void;
+    mutateMilestones: (newMilestones: Milestone[] | undefined) => void;
 }) {
     const deleteMilestone = (idToDelete: string) => () => {
         const result = milestones.filter((milestone) => milestone.id !== idToDelete);
-        updateMilestonesArray(result);
+        mutateMilestones(result);
     };
 
     return (

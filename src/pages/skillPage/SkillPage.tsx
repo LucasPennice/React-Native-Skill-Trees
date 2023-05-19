@@ -3,39 +3,67 @@ import { Fragment, useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { StackNavigatorParams } from "../../../App";
 import AppText from "../../components/AppText";
-import { colors } from "../../parameters";
-import { Milestone, Skill, SkillLevel, SkillLogs, SkillResource, getDefaultSkillValue } from "../../types";
+import { centerFlex, colors } from "../../parameters";
+import { Milestone, MotiveToLearn, Skill, SkillLevel, SkillLogs, SkillResource, getDefaultSkillValue } from "../../types";
 import Milestones from "./Milestones";
 import UpdateMilestoneModal from "./Modals/UpdateMilestoneModal";
 import { makeid } from "../../functions/misc";
 import { Swipeable } from "react-native-gesture-handler";
-import Logs from "./Modals/Logs";
+import Logs from "./DisplayDetails/Logs";
 import UpdateLogsModal from "./Modals/UpdateLogsModal";
+import UpdateMotivesToLearnModal from "./Modals/UpdateMotivesToLearnModal";
+import UpdateResourcesModal from "./Modals/UpdateResourcesModal";
+import UpdateSkillLevelModal from "./Modals/UpdateSkillLevelModal";
+import MotivesToLearn from "./DisplayDetails/MotivesToLearn";
+import SkillLevels from "./DisplayDetails/SkillLevels";
+import SkillResources from "./DisplayDetails/SkillResources";
+import useConfirmLeaveScreenWithoutSaving from "./useConfirmLeaveScreenWithoutSaving";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "SkillPage">;
 const SKILL_DETAILS_KEYS: (keyof Skill)[] = ["logs", "motivesToLearn", "isCompleted", "milestones", "skillLevel", "usefulResources"];
 
-export const getDefaultMilestone = () => {
-    return { complete: false, completedOn: undefined, description: "", title: "", id: makeid(24) };
-};
-export const getDefaultLog = (): SkillLogs => {
-    return { date: new Date(), text: "", id: makeid(24) };
+export const getDefaultFns = {
+    milestone: (): Milestone => {
+        return { complete: false, completedOn: undefined, description: "", title: "", id: makeid(24) };
+    },
+    logs: (): SkillLogs => {
+        return { date: new Date(), text: "", id: makeid(24) };
+    },
+    motivesToLearn: (): MotiveToLearn => {
+        return { text: "", id: makeid(24) };
+    },
+    skillLevel: (): SkillLevel => {
+        return { ideal: "", starting: "" };
+    },
+    usefulResources: (): SkillResource => {
+        return { description: "", title: "", url: undefined, id: makeid(24) };
+    },
 };
 
 export type SkillModal<T> = { open: boolean; data: T; ref: Swipeable | null };
 
-function SkillPage({ route }: Props) {
+function SkillPage({ route, navigation }: Props) {
     const currentSkill = route.params ?? undefined;
 
-    // if (!currentSkill||!currentSkill.skill || !currentSkill.color) return <></>;
+    if (!currentSkill || !currentSkill.skill || !currentSkill.color) return <></>;
 
-    // const { skill, color } = currentSkill;
-    const color = colors.accent;
+    const { skill, color } = currentSkill;
     //Local State
-    const [skillState, setSkillState] = useState<Skill>(getDefaultSkillValue("puitios", false));
+    const [skillState, setSkillState] = useState<Skill>(skill);
     //Local State - Modal
     const [editMilestoneModal, setEditMilestoneModal] = useState<SkillModal<Milestone | undefined>>({ open: false, data: undefined, ref: null });
     const [editLogsModal, setEditLogsModal] = useState<SkillModal<SkillLogs | undefined>>({ open: false, data: undefined, ref: null });
+    const [editMotivesToLearnModal, setEditMotivesToLearnModal] = useState<SkillModal<MotiveToLearn | undefined>>({
+        open: false,
+        data: undefined,
+        ref: null,
+    });
+    const [editSkillLevelModal, setEditSkillLevelModal] = useState<SkillModal<SkillLevel | undefined>>({ open: false, data: undefined, ref: null });
+    const [editResourcesModal, setEditResourcesModal] = useState<SkillModal<SkillResource | undefined>>({ open: false, data: undefined, ref: null });
+    //Derived State
+    const unsavedChanges = JSON.stringify(currentSkill.skill) !== JSON.stringify(skillState);
+    //Hooks
+    useConfirmLeaveScreenWithoutSaving(navigation, unsavedChanges);
 
     //THIS 👇 object must have a function per key in SKILL_DETAILS_KEYS
     const openModalFns: { [key: string]: any } = {
@@ -45,17 +73,43 @@ function SkillPage({ route }: Props) {
 
                 if (dataToEdit !== undefined) return { data: dataToEdit, open: true, ref: refToSwippeable };
 
-                return { data: getDefaultMilestone(), open: true, ref: null };
+                return { data: getDefaultFns.milestone(), open: true, ref: null };
             });
         },
         logs: (refToSwippeable: Swipeable | null, data?: SkillLogs) => () => {
-            console.log("duduuude");
             setEditLogsModal((p) => {
                 const dataToEdit = data as SkillLogs | undefined;
 
                 if (dataToEdit !== undefined) return { data: dataToEdit, open: true, ref: refToSwippeable };
 
-                return { data: getDefaultLog(), open: true, ref: null };
+                return { data: getDefaultFns.logs(), open: true, ref: null };
+            });
+        },
+        motivesToLearn: (refToSwippeable: Swipeable | null, data?: MotiveToLearn) => () => {
+            setEditMotivesToLearnModal((p) => {
+                const dataToEdit = data as MotiveToLearn | undefined;
+
+                if (dataToEdit !== undefined) return { data: dataToEdit, open: true, ref: refToSwippeable };
+
+                return { data: getDefaultFns.motivesToLearn(), open: true, ref: null };
+            });
+        },
+        skillLevel: (refToSwippeable: Swipeable | null, data?: SkillLevel) => () => {
+            setEditSkillLevelModal((p) => {
+                const dataToEdit = data as SkillLevel | undefined;
+
+                if (dataToEdit !== undefined) return { data: dataToEdit, open: true, ref: refToSwippeable };
+
+                return { data: getDefaultFns.skillLevel(), open: true, ref: null };
+            });
+        },
+        usefulResources: (refToSwippeable: Swipeable | null, data?: SkillResource) => () => {
+            setEditResourcesModal((p) => {
+                const dataToEdit = data as SkillResource | undefined;
+
+                if (dataToEdit !== undefined) return { data: dataToEdit, open: true, ref: refToSwippeable };
+
+                return { data: getDefaultFns.usefulResources(), open: true, ref: null };
             });
         },
     };
@@ -68,6 +122,18 @@ function SkillPage({ route }: Props) {
         logs: (newSkillLogs: SkillLogs[] | undefined) =>
             setSkillState((p) => {
                 return { ...p, logs: newSkillLogs };
+            }),
+        motivesToLearn: (newMotivesToLearn: MotiveToLearn[] | undefined) =>
+            setSkillState((p) => {
+                return { ...p, motivesToLearn: newMotivesToLearn };
+            }),
+        skillLevel: (newSkillLevel: SkillLevel | undefined) =>
+            setSkillState((p) => {
+                return { ...p, skillLevel: newSkillLevel };
+            }),
+        usefulResources: (newSkillResources: SkillResource[] | undefined) =>
+            setSkillState((p) => {
+                return { ...p, usefulResources: newSkillResources };
             }),
     };
 
@@ -84,13 +150,44 @@ function SkillPage({ route }: Props) {
                 return { ...p, open: false, ref: null };
             });
         },
+        motivesToLearn: () => {
+            if (editMotivesToLearnModal.ref !== null) editMotivesToLearnModal.ref.close();
+            setEditMotivesToLearnModal((p) => {
+                return { ...p, open: false, ref: null };
+            });
+        },
+        skillLevel: () => {
+            if (editSkillLevelModal.ref !== null) editSkillLevelModal.ref.close();
+            setEditSkillLevelModal((p) => {
+                return { ...p, open: false, ref: null };
+            });
+        },
+        usefulResources: () => {
+            if (editResourcesModal.ref !== null) editResourcesModal.ref.close();
+            setEditResourcesModal((p) => {
+                return { ...p, open: false, ref: null };
+            });
+        },
+    };
+
+    const updateSkillDetails = () => {
+        console.log("save changes to storage");
     };
 
     return (
         <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 10 }}>
-            <AppText fontSize={32} style={{ color: "white", fontFamily: "helveticaBold", marginBottom: 5 }}>
-                {skillState.name}
-            </AppText>
+            <View style={[centerFlex, { flexDirection: "row", justifyContent: "space-between" }]}>
+                <AppText fontSize={32} style={{ color: "white", fontFamily: "helveticaBold", marginBottom: 5 }}>
+                    {skillState.name}
+                </AppText>
+                {unsavedChanges && (
+                    <Pressable onPress={updateSkillDetails} style={styles.btn}>
+                        <AppText style={{ color: color }} fontSize={16}>
+                            Save
+                        </AppText>
+                    </Pressable>
+                )}
+            </View>
             <Pressable onPress={() => setSkillState(getDefaultSkillValue("puitios", false))} style={styles.btn}>
                 <AppText style={{ color: color }} fontSize={16}>
                     RESET
@@ -103,9 +200,25 @@ function SkillPage({ route }: Props) {
             {/* Display And Add Details */}
 
             {skillState.milestones !== undefined && (
-                <Milestones milestones={skillState.milestones} openModal={openModalFns.milestones} updateMilestonesArray={updateFns.milestones} />
+                <Milestones milestones={skillState.milestones} openModal={openModalFns.milestones} mutateMilestones={updateFns.milestones} />
             )}
             {skillState.logs !== undefined && <Logs logs={skillState.logs} mutateLogs={updateFns.logs} openModal={openModalFns.logs} />}
+            {skillState.motivesToLearn !== undefined && (
+                <MotivesToLearn
+                    motivesToLearn={skillState.motivesToLearn}
+                    mutateMotivesToLearn={updateFns.motivesToLearn}
+                    openModal={openModalFns.motivesToLearn}
+                />
+            )}
+            {skillState.skillLevel !== undefined && <SkillLevels skillLevels={skillState.skillLevel} openModal={openModalFns.skillLevel} />}
+
+            {skillState.usefulResources !== undefined && (
+                <SkillResources
+                    mutateResources={updateFns.usefulResources}
+                    skillResources={skillState.usefulResources}
+                    openModal={openModalFns.usefulResources}
+                />
+            )}
 
             {/* Add Detail Section  */}
             <AppText fontSize={16} style={{ color: "white", fontFamily: "helvetica", marginVertical: 10 }}>
@@ -149,6 +262,31 @@ function SkillPage({ route }: Props) {
                     logs={skillState.logs}
                     mutateLogs={updateFns.logs}
                     state={editLogsModal as SkillModal<SkillLogs>}
+                />
+            )}
+
+            {skillState.motivesToLearn !== undefined && editMotivesToLearnModal.data !== undefined && (
+                <UpdateMotivesToLearnModal
+                    motivesToLearn={skillState.motivesToLearn}
+                    mutateMotivesToLearn={updateFns.motivesToLearn}
+                    state={editMotivesToLearnModal as SkillModal<MotiveToLearn>}
+                    closeModal={closeModalFns.motivesToLearn}
+                />
+            )}
+
+            {skillState.skillLevel !== undefined && editSkillLevelModal.data !== undefined && (
+                <UpdateSkillLevelModal
+                    closeModal={closeModalFns.skillLevel}
+                    mutateSkillLevel={updateFns.skillLevel}
+                    state={editSkillLevelModal as SkillModal<SkillLevel>}
+                />
+            )}
+            {skillState.usefulResources !== undefined && editResourcesModal.data !== undefined && (
+                <UpdateResourcesModal
+                    closeModal={closeModalFns.usefulResources}
+                    mutateSkillResources={updateFns.usefulResources}
+                    resources={skillState.usefulResources}
+                    state={editResourcesModal as SkillModal<SkillResource>}
                 />
             )}
         </ScrollView>

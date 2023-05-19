@@ -10,10 +10,16 @@ export type SkillResource = {
     title: string;
     url?: string;
     description: string;
+    id: string;
 };
 
 export type SkillLogs = {
     date: Date;
+    text: string;
+    id: string;
+};
+
+export type MotiveToLearn = {
     text: string;
     id: string;
 };
@@ -28,7 +34,7 @@ export type Skill = {
     isCompleted?: boolean;
     milestones?: Milestone[];
     skillLevel?: SkillLevel;
-    motivesToLearn?: string[];
+    motivesToLearn?: MotiveToLearn[];
     usefulResources?: SkillResource[];
     logs?: SkillLogs[];
 };

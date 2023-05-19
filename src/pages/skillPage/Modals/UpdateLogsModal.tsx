@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { SkillLogs } from "../../../types";
-import { SkillModal, getDefaultLog } from "../SkillPage";
 import { Alert } from "react-native";
-import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
+import FlingToDismissModal from "../../../components/FlingToDismissModal";
+import { SkillLogs } from "../../../types";
+import { SkillModal, getDefaultFns } from "../SkillPage";
 
 type ModalProps = {
     state: SkillModal<SkillLogs>;
@@ -56,8 +56,9 @@ function UpdateLogsModal({ closeModal, logs, mutateLogs, state }: ModalProps) {
             return;
         }
 
-        setText("");
-        setDate(new Date());
+        let defaultLog = getDefaultFns.logs();
+        setText(defaultLog.text);
+        setDate(defaultLog.date);
     }, [state]);
 
     return (
@@ -75,7 +76,7 @@ function UpdateLogsModal({ closeModal, logs, mutateLogs, state }: ModalProps) {
     );
 
     function checkIfEditing() {
-        let defaultLog = getDefaultLog();
+        let defaultLog = getDefaultFns.logs();
         let defaultLogWithNoId = {
             text: defaultLog.text,
             date: defaultLog.date,

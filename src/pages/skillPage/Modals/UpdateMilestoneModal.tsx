@@ -5,7 +5,7 @@ import RadioInput from "../../../components/RadioInput";
 import { Milestone } from "../../../types";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import { Alert } from "react-native";
-import { SkillModal, getDefaultMilestone } from "../SkillPage";
+import { SkillModal, getDefaultFns } from "../SkillPage";
 
 type ModalProps = {
     state: SkillModal<Milestone>;
@@ -60,9 +60,11 @@ function UpdateMilestoneModal({ closeModal, updateMilestonesArray, milestones, s
             return;
         }
 
-        setTitle("");
-        setComplete(false);
-        setDescription("");
+        let defaultMilestone = getDefaultFns.milestone();
+
+        setTitle(defaultMilestone.title);
+        setComplete(defaultMilestone.complete);
+        setDescription(defaultMilestone.description);
     }, [state]);
 
     return (
@@ -85,7 +87,7 @@ function UpdateMilestoneModal({ closeModal, updateMilestonesArray, milestones, s
     );
 
     function checkIfEditing() {
-        let defaultMilestone = getDefaultMilestone();
+        let defaultMilestone = getDefaultFns.milestone();
         let defaultMilestoneWithNoId = {
             complete: defaultMilestone.complete,
             completedOn: defaultMilestone.completedOn,
