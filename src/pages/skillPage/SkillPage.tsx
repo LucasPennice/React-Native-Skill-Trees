@@ -4,9 +4,9 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { StackNavigatorParams } from "../../../App";
 import AppText from "../../components/AppText";
-import { makeid } from "../../functions/misc";
 import { centerFlex, colors } from "../../parameters";
-import { Milestone, MotiveToLearn, Skill, SkillLevel, SkillLogs, SkillResource } from "../../types";
+import { SkillColorContext } from "../../context";
+import { Milestone, MotiveToLearn, Skill, SkillLevel, SkillLogs, SkillModal, SkillResource } from "../../types";
 import Logs from "./DisplayDetails/Logs";
 import MotivesToLearn from "./DisplayDetails/MotivesToLearn";
 import SkillLevels from "./DisplayDetails/SkillLevels";
@@ -17,34 +17,13 @@ import UpdateMilestoneModal from "./Modals/UpdateMilestoneModal";
 import UpdateMotivesToLearnModal from "./Modals/UpdateMotivesToLearnModal";
 import UpdateResourcesModal from "./Modals/UpdateResourcesModal";
 import UpdateSkillLevelModal from "./Modals/UpdateSkillLevelModal";
+import { getDefaultFns } from "./functions";
 import useCheckForUnsavedChanges from "./useCheckForUnsavedChanges";
 import useConfirmLeaveScreenWithoutSaving from "./useConfirmLeaveScreenWithoutSaving";
 import useSaveUpdatedSkillToAsyncStorage from "./useUpdateTreeWithNewSkillDetails";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "SkillPage">;
 const SKILL_DETAILS_KEYS: (keyof Skill)[] = ["logs", "motivesToLearn", "isCompleted", "milestones", "skillLevel", "usefulResources"];
-
-export const getDefaultFns = {
-    milestone: (): Milestone => {
-        return { complete: false, completedOn: undefined, description: "", title: "", id: makeid(24) };
-    },
-    logs: (): SkillLogs => {
-        return { date: new Date().toLocaleDateString(), text: "", id: makeid(24) };
-    },
-    motivesToLearn: (): MotiveToLearn => {
-        return { text: "", id: makeid(24) };
-    },
-    skillLevel: (): SkillLevel => {
-        return { ideal: "", starting: "" };
-    },
-    usefulResources: (): SkillResource => {
-        return { description: "", title: "", url: undefined, id: makeid(24) };
-    },
-};
-
-export const SkillColorContext = createContext("#FFFFFF");
-
-export type SkillModal<T> = { open: boolean; data: T; ref: Swipeable | null };
 
 function SkillPage({ route, navigation }: Props) {
     const treeNode = route.params;
@@ -203,7 +182,6 @@ function SkillPage({ route, navigation }: Props) {
                         openModal={openModalFns.motivesToLearn}
                     />
                 )}
-                {skillState.skillLevel !== undefined && <SkillLevels skillLevels={skillState.skillLevel} openModal={openModalFns.skillLevel} />}
 
                 {skillState.usefulResources !== undefined && (
                     <SkillResources
@@ -212,12 +190,16 @@ function SkillPage({ route, navigation }: Props) {
                         openModal={openModalFns.usefulResources}
                     />
                 )}
+
+                {skillState.skillLevel !== undefined && <SkillLevels skillLevels={skillState.skillLevel} openModal={openModalFns.skillLevel} />}
             </SkillColorContext.Provider>
 
             {/* Add Detail Section  */}
-            <AppText fontSize={16} style={{ color: "white", fontFamily: "helvetica", marginVertical: 10 }}>
-                Add these Sections To Your Skill Page
-            </AppText>
+            {SKILL_DETAILS_KEYS.find((detail) => skillState[detail] === undefined) && (
+                <AppText fontSize={16} style={{ color: "white", fontFamily: "helvetica", marginVertical: 10 }}>
+                    Add these Sections To Your Skill Page
+                </AppText>
+            )}
 
             <View style={{ display: "flex", justifyContent: "flex-start", flexWrap: "wrap", flexDirection: "row", gap: 10 }}>
                 {SKILL_DETAILS_KEYS.map((detail, idx) => {

@@ -2,12 +2,12 @@ import { useContext, useRef } from "react";
 import { Dimensions, Pressable, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import Animated, { Layout } from "react-native-reanimated";
-import { generalStyles } from "../../../../App";
 import AppText from "../../../components/AppText";
 import { centerFlex, colors } from "../../../parameters";
 import { MotiveToLearn } from "../../../types";
 import { LeftAction, RightAction } from "./ActionButtons";
-import { SkillColorContext } from "../SkillPage";
+import { SkillColorContext } from "../../../context";
+import { generalStyles } from "../../../styles";
 type Props = {
     motivesToLearn: MotiveToLearn[];
     mutateMotivesToLearn: (newMotivesToLearn: MotiveToLearn[] | undefined) => void;
@@ -23,7 +23,7 @@ function MotivesToLearn({ motivesToLearn, mutateMotivesToLearn, openModal }: Pro
     };
 
     return (
-        <View style={[centerFlex, { alignItems: "flex-start", gap: 15, marginBottom: 10 }]}>
+        <Animated.View layout={Layout.duration(200)} style={[centerFlex, { alignItems: "flex-start", gap: 15, marginBottom: 10 }]}>
             <AppText fontSize={24} style={{ color: "white", fontFamily: "helveticaBold" }}>
                 Motives To Learn
             </AppText>
@@ -38,7 +38,7 @@ function MotivesToLearn({ motivesToLearn, mutateMotivesToLearn, openModal }: Pro
                     </AppText>
                 </Pressable>
             </Animated.View>
-        </View>
+        </Animated.View>
     );
 }
 

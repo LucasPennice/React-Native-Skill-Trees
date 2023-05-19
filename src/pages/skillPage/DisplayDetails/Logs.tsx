@@ -4,10 +4,10 @@ import { Dimensions, Pressable, View } from "react-native";
 import { centerFlex, colors } from "../../../parameters";
 import AppText from "../../../components/AppText";
 import Animated, { Layout } from "react-native-reanimated";
-import { generalStyles } from "../../../../App";
 import { useContext, useRef } from "react";
 import { LeftAction, RightAction } from "./ActionButtons";
-import { SkillColorContext } from "../SkillPage";
+import { SkillColorContext } from "../../../context";
+import { generalStyles } from "../../../styles";
 
 function Logs({
     logs,
@@ -26,7 +26,7 @@ function Logs({
     };
 
     return (
-        <View style={[centerFlex, { alignItems: "flex-start", gap: 15, marginBottom: 10 }]}>
+        <Animated.View layout={Layout.duration(200)} style={[centerFlex, { alignItems: "flex-start", gap: 15, marginBottom: 10 }]}>
             <AppText fontSize={24} style={{ color: "white", fontFamily: "helveticaBold" }}>
                 Logs
             </AppText>
@@ -41,7 +41,7 @@ function Logs({
                     </AppText>
                 </Pressable>
             </Animated.View>
-        </View>
+        </Animated.View>
     );
 }
 

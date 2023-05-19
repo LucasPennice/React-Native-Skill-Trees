@@ -1,3 +1,5 @@
+import { Swipeable } from "react-native-gesture-handler";
+
 export type Milestone = {
     complete: boolean;
     title: string;
@@ -116,3 +118,5 @@ export type PolarContourByLevel = {
     treeLevels: string[];
 };
 export type LevelOverflow = undefined | { overflow: number; level: number };
+
+export type SkillModal<T> = { open: boolean; data: T; ref: Swipeable | null };

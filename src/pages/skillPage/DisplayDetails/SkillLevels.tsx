@@ -14,12 +14,12 @@ type Props = {
 
 function SkillLevels({ openModal, skillLevels }: Props) {
     return (
-        <View style={[centerFlex, { alignItems: "flex-start", gap: 15, marginBottom: 10 }]}>
+        <Animated.View layout={Layout.duration(200)} style={[centerFlex, { alignItems: "flex-start", gap: 15, marginBottom: 10 }]}>
             <AppText fontSize={24} style={{ color: "white", fontFamily: "helveticaBold" }}>
                 Skill Level
             </AppText>
             <SkillLevelCard openModal={openModal} data={skillLevels} />
-        </View>
+        </Animated.View>
     );
 }
 

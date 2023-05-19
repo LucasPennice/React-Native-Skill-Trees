@@ -6,8 +6,8 @@ import AppText from "../../components/AppText";
 import { centerFlex, colors } from "../../parameters";
 import { Milestone } from "../../types";
 import { LeftAction, RightAction } from "./DisplayDetails/ActionButtons";
-import { generalStyles } from "../../../App";
-import { SkillColorContext } from "./SkillPage";
+import { SkillColorContext } from "../../context";
+import { generalStyles } from "../../styles";
 
 function Milestones({
     milestones,
@@ -26,7 +26,7 @@ function Milestones({
     };
 
     return (
-        <View style={[centerFlex, { alignItems: "flex-start", gap: 15, marginBottom: 10 }]}>
+        <Animated.View layout={Layout.duration(200)} style={[centerFlex, { alignItems: "flex-start", gap: 15, marginBottom: 10 }]}>
             <AppText fontSize={24} style={{ color: "white", fontFamily: "helveticaBold" }}>
                 Milestones
             </AppText>
@@ -41,7 +41,7 @@ function Milestones({
                     </AppText>
                 </Pressable>
             </Animated.View>
-        </View>
+        </Animated.View>
     );
 }
 

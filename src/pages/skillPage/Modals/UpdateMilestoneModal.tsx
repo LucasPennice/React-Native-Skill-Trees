@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
-import { Milestone } from "../../../types";
+import { Milestone, SkillModal } from "../../../types";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import { Alert } from "react-native";
-import { SkillModal, getDefaultFns } from "../SkillPage";
+import { getDefaultFns } from "../functions";
 
 type ModalProps = {
     state: SkillModal<Milestone>;

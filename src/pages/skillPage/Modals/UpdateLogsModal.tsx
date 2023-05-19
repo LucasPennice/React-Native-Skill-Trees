@@ -3,8 +3,8 @@ import { Alert } from "react-native";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
-import { SkillLogs } from "../../../types";
-import { SkillModal, getDefaultFns } from "../SkillPage";
+import { SkillLogs, SkillModal } from "../../../types";
+import { getDefaultFns } from "../functions";
 
 type ModalProps = {
     state: SkillModal<SkillLogs>;
