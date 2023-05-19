@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useContext, useRef } from "react";
 import { Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import Animated, { Layout } from "react-native-reanimated";
@@ -7,6 +7,7 @@ import { centerFlex, colors } from "../../parameters";
 import { Milestone } from "../../types";
 import { LeftAction, RightAction } from "./DisplayDetails/ActionButtons";
 import { generalStyles } from "../../../App";
+import { SkillColorContext } from "./SkillPage";
 
 function Milestones({
     milestones,
@@ -17,6 +18,8 @@ function Milestones({
     openModal: (ref: Swipeable | null, data?: Milestone) => () => void;
     mutateMilestones: (newMilestones: Milestone[] | undefined) => void;
 }) {
+    const color = useContext(SkillColorContext);
+
     const deleteMilestone = (idToDelete: string) => () => {
         const result = milestones.filter((milestone) => milestone.id !== idToDelete);
         mutateMilestones(result);
@@ -33,7 +36,7 @@ function Milestones({
 
             <Animated.View layout={Layout.duration(200)}>
                 <Pressable onPress={openModal(null, undefined)} style={generalStyles.btn}>
-                    <AppText style={{ color: colors.accent }} fontSize={16}>
+                    <AppText style={{ color }} fontSize={16}>
                         Add Milestone
                     </AppText>
                 </Pressable>
@@ -54,6 +57,7 @@ function MilestoneCard({
     deleteMilestone: () => void;
 }) {
     const { width } = Dimensions.get("window");
+    const color = useContext(SkillColorContext);
 
     const ref = useRef<Swipeable | null>(null);
     return (
@@ -72,7 +76,7 @@ function MilestoneCard({
                             paddingVertical: 15,
                             borderRadius: 10,
                             borderWidth: 1,
-                            borderColor: data.complete ? colors.accent : colors.darkGray,
+                            borderColor: data.complete ? color : colors.darkGray,
                         },
                     ]}>
                     <View style={[centerFlex, { gap: 5, alignItems: "flex-start" }]}>

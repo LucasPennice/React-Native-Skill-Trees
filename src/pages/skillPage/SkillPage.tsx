@@ -1,25 +1,25 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, createContext, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
 import { StackNavigatorParams } from "../../../App";
 import AppText from "../../components/AppText";
-import { centerFlex, colors } from "../../parameters";
-import { Milestone, MotiveToLearn, Skill, SkillLevel, SkillLogs, SkillResource, getDefaultSkillValue } from "../../types";
-import Milestones from "./Milestones";
-import UpdateMilestoneModal from "./Modals/UpdateMilestoneModal";
 import { makeid } from "../../functions/misc";
-import { Swipeable } from "react-native-gesture-handler";
+import { centerFlex, colors } from "../../parameters";
+import { Milestone, MotiveToLearn, Skill, SkillLevel, SkillLogs, SkillResource } from "../../types";
 import Logs from "./DisplayDetails/Logs";
-import UpdateLogsModal from "./Modals/UpdateLogsModal";
-import UpdateMotivesToLearnModal from "./Modals/UpdateMotivesToLearnModal";
-import UpdateResourcesModal from "./Modals/UpdateResourcesModal";
-import UpdateSkillLevelModal from "./Modals/UpdateSkillLevelModal";
 import MotivesToLearn from "./DisplayDetails/MotivesToLearn";
 import SkillLevels from "./DisplayDetails/SkillLevels";
 import SkillResources from "./DisplayDetails/SkillResources";
+import Milestones from "./Milestones";
+import UpdateLogsModal from "./Modals/UpdateLogsModal";
+import UpdateMilestoneModal from "./Modals/UpdateMilestoneModal";
+import UpdateMotivesToLearnModal from "./Modals/UpdateMotivesToLearnModal";
+import UpdateResourcesModal from "./Modals/UpdateResourcesModal";
+import UpdateSkillLevelModal from "./Modals/UpdateSkillLevelModal";
+import useCheckForUnsavedChanges from "./useCheckForUnsavedChanges";
 import useConfirmLeaveScreenWithoutSaving from "./useConfirmLeaveScreenWithoutSaving";
 import useSaveUpdatedSkillToAsyncStorage from "./useUpdateTreeWithNewSkillDetails";
-import useCheckForUnsavedChanges from "./useCheckForUnsavedChanges";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "SkillPage">;
 const SKILL_DETAILS_KEYS: (keyof Skill)[] = ["logs", "motivesToLearn", "isCompleted", "milestones", "skillLevel", "usefulResources"];
@@ -41,6 +41,8 @@ export const getDefaultFns = {
         return { description: "", title: "", url: undefined, id: makeid(24) };
     },
 };
+
+export const SkillColorContext = createContext("#FFFFFF");
 
 export type SkillModal<T> = { open: boolean; data: T; ref: Swipeable | null };
 
@@ -189,26 +191,28 @@ function SkillPage({ route, navigation }: Props) {
 
             {/* Display And Add Details */}
 
-            {skillState.milestones !== undefined && (
-                <Milestones milestones={skillState.milestones} openModal={openModalFns.milestones} mutateMilestones={updateFns.milestones} />
-            )}
-            {skillState.logs !== undefined && <Logs logs={skillState.logs} mutateLogs={updateFns.logs} openModal={openModalFns.logs} />}
-            {skillState.motivesToLearn !== undefined && (
-                <MotivesToLearn
-                    motivesToLearn={skillState.motivesToLearn}
-                    mutateMotivesToLearn={updateFns.motivesToLearn}
-                    openModal={openModalFns.motivesToLearn}
-                />
-            )}
-            {skillState.skillLevel !== undefined && <SkillLevels skillLevels={skillState.skillLevel} openModal={openModalFns.skillLevel} />}
+            <SkillColorContext.Provider value={color}>
+                {skillState.milestones !== undefined && (
+                    <Milestones milestones={skillState.milestones} openModal={openModalFns.milestones} mutateMilestones={updateFns.milestones} />
+                )}
+                {skillState.logs !== undefined && <Logs logs={skillState.logs} mutateLogs={updateFns.logs} openModal={openModalFns.logs} />}
+                {skillState.motivesToLearn !== undefined && (
+                    <MotivesToLearn
+                        motivesToLearn={skillState.motivesToLearn}
+                        mutateMotivesToLearn={updateFns.motivesToLearn}
+                        openModal={openModalFns.motivesToLearn}
+                    />
+                )}
+                {skillState.skillLevel !== undefined && <SkillLevels skillLevels={skillState.skillLevel} openModal={openModalFns.skillLevel} />}
 
-            {skillState.usefulResources !== undefined && (
-                <SkillResources
-                    mutateResources={updateFns.usefulResources}
-                    skillResources={skillState.usefulResources}
-                    openModal={openModalFns.usefulResources}
-                />
-            )}
+                {skillState.usefulResources !== undefined && (
+                    <SkillResources
+                        mutateResources={updateFns.usefulResources}
+                        skillResources={skillState.usefulResources}
+                        openModal={openModalFns.usefulResources}
+                    />
+                )}
+            </SkillColorContext.Provider>
 
             {/* Add Detail Section  */}
             <AppText fontSize={16} style={{ color: "white", fontFamily: "helvetica", marginVertical: 10 }}>

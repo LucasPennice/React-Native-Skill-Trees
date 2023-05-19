@@ -19,8 +19,6 @@ function useUpdateTreeWithNewSkillDetails(updatedSkill: Skill, nodeToUpdate: Tre
         if (updatedTree === undefined) throw "couldn't update tree useUpdateTreeWithNewSkillDetails";
 
         dispatch(updateUserTrees(updatedTree));
-
-        console.log("parece andar");
     };
 
     return updateSkillDetails;

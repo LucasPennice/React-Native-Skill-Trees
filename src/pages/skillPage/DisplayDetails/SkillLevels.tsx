@@ -1,12 +1,11 @@
 import { useRef } from "react";
-import { Dimensions, Pressable, View } from "react-native";
+import { Dimensions, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import Animated, { Layout } from "react-native-reanimated";
-import { generalStyles } from "../../../../App";
 import AppText from "../../../components/AppText";
 import { centerFlex, colors } from "../../../parameters";
-import { MotiveToLearn, SkillLevel } from "../../../types";
-import { LeftAction, RightAction } from "./ActionButtons";
+import { SkillLevel } from "../../../types";
+import { LeftAction } from "./ActionButtons";
 
 type Props = {
     skillLevels: SkillLevel;

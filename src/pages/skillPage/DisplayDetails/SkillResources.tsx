@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useContext, useRef } from "react";
 import { Dimensions, Pressable, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import Animated, { Layout } from "react-native-reanimated";
@@ -7,6 +7,7 @@ import AppText from "../../../components/AppText";
 import { centerFlex, colors } from "../../../parameters";
 import { SkillResource } from "../../../types";
 import { LeftAction, RightAction } from "./ActionButtons";
+import { SkillColorContext } from "../SkillPage";
 type Props = {
     skillResources: SkillResource[];
     mutateResources: (newMotivesToLearn: SkillResource[] | undefined) => void;
@@ -14,6 +15,8 @@ type Props = {
 };
 
 function SkillResources({ mutateResources, openModal, skillResources }: Props) {
+    const color = useContext(SkillColorContext);
+
     const deleteResource = (idToDelete: string) => () => {
         const result = skillResources.filter((motive) => motive.id !== idToDelete);
         mutateResources(result);
@@ -30,7 +33,7 @@ function SkillResources({ mutateResources, openModal, skillResources }: Props) {
 
             <Animated.View layout={Layout.duration(200)}>
                 <Pressable onPress={openModal(null, undefined)} style={generalStyles.btn}>
-                    <AppText style={{ color: colors.accent }} fontSize={16}>
+                    <AppText style={{ color }} fontSize={16}>
                         Add Resource
                     </AppText>
                 </Pressable>

@@ -5,8 +5,9 @@ import { centerFlex, colors } from "../../../parameters";
 import AppText from "../../../components/AppText";
 import Animated, { Layout } from "react-native-reanimated";
 import { generalStyles } from "../../../../App";
-import { useRef } from "react";
+import { useContext, useRef } from "react";
 import { LeftAction, RightAction } from "./ActionButtons";
+import { SkillColorContext } from "../SkillPage";
 
 function Logs({
     logs,
@@ -17,6 +18,8 @@ function Logs({
     openModal: (ref: Swipeable | null, data?: SkillLogs) => () => void;
     mutateLogs: (newLogs: SkillLogs[] | undefined) => void;
 }) {
+    const color = useContext(SkillColorContext);
+
     const deleteLog = (idToDelete: string) => () => {
         const result = logs.filter((log) => log.id !== idToDelete);
         mutateLogs(result);
@@ -33,7 +36,7 @@ function Logs({
 
             <Animated.View layout={Layout.duration(200)}>
                 <Pressable onPress={openModal(null, undefined)} style={generalStyles.btn}>
-                    <AppText style={{ color: colors.accent }} fontSize={16}>
+                    <AppText style={{ color }} fontSize={16}>
                         Add Log
                     </AppText>
                 </Pressable>
