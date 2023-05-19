@@ -124,7 +124,12 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
     const left = menuPosition === "LEFT_SIDE_OF_SCREEN" ? 0 : width - MENU_WIDTH;
     const top = MENU_HEIGHT / 4.5;
 
-    const currentSkillParams: { skill: Skill | undefined; color: string | undefined } = { skill: currentSkill, color: currentSkillAccentColor };
+    const goToSkillPage = () => {
+        if (currentTree === undefined) return undefined;
+        if (currentSkill === undefined) return undefined;
+
+        navigation.navigate("SkillPage", { color: currentTree.accentColor, skill: currentSkill, treeId: currentTree.treeId });
+    };
 
     return (
         <GestureDetector gesture={flingGesture}>
@@ -172,7 +177,7 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
 
                 <TouchableOpacity
                     style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
-                    onPress={() => navigation.navigate("SkillPage", currentSkillParams)}>
+                    onPress={goToSkillPage}>
                     <AppText style={{ color: colors.accent }} fontSize={18}>
                         Go To Skill Page
                     </AppText>

@@ -31,12 +31,13 @@ import "./wdyr";
 import { IsSharingAvailableContext } from "./src/context";
 import { populateCanvasDisplaySettings } from "./src/redux/canvasDisplaySettingsSlice";
 enableScreens();
+
 export type StackNavigatorParams = {
     Home: undefined;
     ViewingSkillTree: undefined;
     MyTrees: undefined;
     Settings: undefined;
-    SkillPage: { skill: Skill | undefined; color: string | undefined };
+    SkillPage: { skill: Skill; color: string; treeId: string };
 };
 
 export type RouteName = keyof StackNavigatorParams;

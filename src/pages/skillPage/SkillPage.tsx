@@ -18,6 +18,7 @@ import MotivesToLearn from "./DisplayDetails/MotivesToLearn";
 import SkillLevels from "./DisplayDetails/SkillLevels";
 import SkillResources from "./DisplayDetails/SkillResources";
 import useConfirmLeaveScreenWithoutSaving from "./useConfirmLeaveScreenWithoutSaving";
+import useSaveUpdatedSkillToAsyncStorage from "./useUpdateTreeWithNewSkillDetails";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "SkillPage">;
 const SKILL_DETAILS_KEYS: (keyof Skill)[] = ["logs", "motivesToLearn", "isCompleted", "milestones", "skillLevel", "usefulResources"];
@@ -43,10 +44,7 @@ export const getDefaultFns = {
 export type SkillModal<T> = { open: boolean; data: T; ref: Swipeable | null };
 
 function SkillPage({ route, navigation }: Props) {
-    const currentSkill = route.params ?? undefined;
-
-    if (!currentSkill || !currentSkill.skill || !currentSkill.color) return <></>;
-
+    const currentSkill = route.params;
     const { skill, color } = currentSkill;
     //Local State
     const [skillState, setSkillState] = useState<Skill>(skill);
@@ -64,6 +62,7 @@ function SkillPage({ route, navigation }: Props) {
     const unsavedChanges = JSON.stringify(currentSkill.skill) !== JSON.stringify(skillState);
     //Hooks
     useConfirmLeaveScreenWithoutSaving(navigation, unsavedChanges);
+    const updateSkillDetails = useSaveUpdatedSkillToAsyncStorage(skillState);
 
     //THIS 👇 object must have a function per key in SKILL_DETAILS_KEYS
     const openModalFns: { [key: string]: any } = {
@@ -170,10 +169,6 @@ function SkillPage({ route, navigation }: Props) {
         },
     };
 
-    const updateSkillDetails = () => {
-        console.log("save changes to storage");
-    };
-
     return (
         <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 10 }}>
             <View style={[centerFlex, { flexDirection: "row", justifyContent: "space-between" }]}>
@@ -188,11 +183,6 @@ function SkillPage({ route, navigation }: Props) {
                     </Pressable>
                 )}
             </View>
-            <Pressable onPress={() => setSkillState(getDefaultSkillValue("puitios", false))} style={styles.btn}>
-                <AppText style={{ color: color }} fontSize={16}>
-                    RESET
-                </AppText>
-            </Pressable>
             <AppText fontSize={16} style={{ color: colors.unmarkedText, fontFamily: "helvetica", marginBottom: 5 }}>
                 {skillState.isCompleted ? "Mastered" : "Not Mastered"}
             </AppText>
