@@ -94,14 +94,7 @@ function InteractiveTree({
             <GestureDetector gesture={canvasGestures}>
                 <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
                     <Animated.View style={[transform]}>
-                        <Canvas
-                            onTouch={touchHandler}
-                            style={{
-                                width: canvasWidth,
-                                height: canvasHeight,
-                                transform: [{ scale: isTakingScreenshot ? screenDimentions.width / canvasWidth : 1 }],
-                            }}
-                            ref={canvasRef}>
+                        <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight }} ref={canvasRef}>
                             <HierarchicalSkillTree
                                 nodeCoordinatesCentered={centeredCoordinatedWithTreeData}
                                 selectedNode={selectedNode}

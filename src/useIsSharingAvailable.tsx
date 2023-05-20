@@ -1,6 +1,5 @@
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
-import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
@@ -34,20 +33,7 @@ export async function sharePNG(fileName: string, data: string) {
 
         await Sharing.shareAsync(imageURI);
     } catch (error) {
-        Alert.alert("Could not share png");
-    }
-}
-
-export async function sharePDF(html: string) {
-    try {
-        const { uri } = await Print.printToFileAsync({
-            html,
-            base64: true,
-            margins: { bottom: 0, left: 0, right: 0, top: 0 },
-        });
-
-        await Sharing.shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
-    } catch (error) {
-        Alert.alert("Could not share pdf");
+        console.error(error);
+        Alert.alert("There was an error sharing your skill tree");
     }
 }

@@ -1,10 +1,11 @@
 import { SkiaDomView } from "@shopify/react-native-skia";
-import { RefObject } from "react";
+import { RefObject, useEffect } from "react";
 import { Alert, Pressable } from "react-native";
 import { centerFlex, colors } from "../../parameters";
 import { Skill, Tree } from "../../types";
 import AppText from "../AppText";
 import TakingScreenshotLoadingScreenModal from "./TakingScreenshotLoadingScreenModal";
+import { usePermissions } from "expo-media-library";
 
 type Props = {
     shouldShare: boolean;
@@ -13,8 +14,22 @@ type Props = {
     canvasRef: RefObject<SkiaDomView>;
 };
 
-function ShareTreeButton({ shouldShare, takingScreenShotState, tree, canvasRef }: Props) {
+function ShareTree({ shouldShare, takingScreenShotState, tree, canvasRef }: Props) {
     const [isTakingScreenshot, setIsTakingScreenshot] = takingScreenShotState;
+    const [permissionResponse, requestPermission] = usePermissions();
+
+    useEffect(() => {
+        if (!isTakingScreenshot) return;
+
+        if (!permissionResponse) {
+            requestPermission();
+            return;
+        }
+        if (!permissionResponse.granted) {
+            requestPermission();
+            return;
+        }
+    }, [isTakingScreenshot]);
 
     return (
         <>
@@ -46,4 +61,4 @@ function ShareTreeButton({ shouldShare, takingScreenShotState, tree, canvasRef }
     );
 }
 
-export default ShareTreeButton;
+export default ShareTree;

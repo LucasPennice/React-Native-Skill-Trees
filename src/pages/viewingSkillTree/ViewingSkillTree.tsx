@@ -4,7 +4,7 @@ import { View } from "react-native";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import CanvasSettingsModal from "../../components/CanvasSettingsModal";
-import ShareTreeButton from "../../components/takingScreenshot/ShareTreeButton";
+import ShareTreeButton from "../../components/takingScreenshot/ShareTree";
 import { IsSharingAvailableContext } from "../../context";
 import { colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
