@@ -2,6 +2,7 @@
   "expo": {
     "name": "book-path",
     "slug": "book-path",
+    "scheme": "skillTree",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -31,7 +32,8 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.ACCESS_MEDIA_LOCATION"
-      ]
+      ],
+      "package": "com.lucaspennice.roadmaps"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -45,6 +47,11 @@
           "isAccessMediaLocationEnabled": true
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "8981af4a-4906-4aac-b1a6-fc350c76048e"
+      }
+    }
   }
 }

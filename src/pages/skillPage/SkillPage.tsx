@@ -21,6 +21,7 @@ import { getDefaultFns } from "./functions";
 import useCheckForUnsavedChanges from "./useCheckForUnsavedChanges";
 import useConfirmLeaveScreenWithoutSaving from "./useConfirmLeaveScreenWithoutSaving";
 import useSaveUpdatedSkillToAsyncStorage from "./useUpdateTreeWithNewSkillDetails";
+import Animated, { FadeOutUp, Layout } from "react-native-reanimated";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "SkillPage">;
 const SKILL_DETAILS_KEYS: (keyof Skill)[] = ["logs", "motivesToLearn", "isCompleted", "milestones", "skillLevel", "usefulResources"];
@@ -152,20 +153,25 @@ function SkillPage({ route, navigation }: Props) {
 
     return (
         <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 10 }}>
-            <View style={[centerFlex, { flexDirection: "row", justifyContent: "space-between" }]}>
+            <View style={[centerFlex, { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", height: 50 }]}>
                 <AppText fontSize={32} style={{ color: "white", fontFamily: "helveticaBold", marginBottom: 5 }}>
                     {skillState.name}
                 </AppText>
                 {unsavedChanges && (
-                    <Pressable onPress={updateSkillDetails} style={styles.btn}>
-                        <AppText style={{ color: color }} fontSize={16}>
-                            Save
-                        </AppText>
-                    </Pressable>
+                    <Animated.View exiting={FadeOutUp}>
+                        <Pressable onPress={updateSkillDetails} style={[styles.btn]}>
+                            <AppText style={{ color: color }} fontSize={16}>
+                                Save
+                            </AppText>
+                        </Pressable>
+                    </Animated.View>
                 )}
             </View>
-            <AppText fontSize={16} style={{ color: colors.unmarkedText, fontFamily: "helvetica", marginBottom: 5 }}>
+            <AppText fontSize={18} style={{ color: colors.unmarkedText, fontFamily: "helvetica", marginBottom: 5 }}>
                 {skillState.isCompleted ? "Mastered" : "Not Mastered"}
+            </AppText>
+            <AppText style={{ color: `${colors.unmarkedText}8D`, marginBottom: 15 }} fontSize={16}>
+                Swipe on an entry to edit or delete
             </AppText>
 
             {/* Display And Add Details */}
@@ -195,32 +201,37 @@ function SkillPage({ route, navigation }: Props) {
             </SkillColorContext.Provider>
 
             {/* Add Detail Section  */}
-            {SKILL_DETAILS_KEYS.find((detail) => skillState[detail] === undefined) && (
-                <AppText fontSize={16} style={{ color: "white", fontFamily: "helvetica", marginVertical: 10 }}>
-                    Add these Sections To Your Skill Page
-                </AppText>
-            )}
 
-            <View style={{ display: "flex", justifyContent: "flex-start", flexWrap: "wrap", flexDirection: "row", gap: 10 }}>
-                {SKILL_DETAILS_KEYS.map((detail, idx) => {
-                    const skillDetail = skillState[detail];
+            <Animated.View layout={Layout.duration(200)}>
+                {SKILL_DETAILS_KEYS.find((detail) => skillState[detail] === undefined) && (
+                    <AppText fontSize={16} style={{ color: "white", fontFamily: "helvetica", marginVertical: 10 }}>
+                        Add these Sections To Your Skill Page
+                    </AppText>
+                )}
+                <View style={{ display: "flex", justifyContent: "flex-start", flexWrap: "wrap", flexDirection: "row", gap: 10 }}>
+                    {SKILL_DETAILS_KEYS.map((detail, idx) => {
+                        const skillDetail = skillState[detail];
 
-                    if (skillDetail !== undefined) return <Fragment key={idx}></Fragment>;
+                        if (skillDetail !== undefined) return <Fragment key={idx}></Fragment>;
 
-                    const initiateSkillAndOpenItsModal = () => {
-                        initiateSkillState(detail)();
-                        openModalFns[detail]()();
-                    };
+                        const initiateSkillAndOpenItsModal = () => {
+                            initiateSkillState(detail)();
+                            openModalFns[detail]()();
+                        };
 
-                    return (
-                        <Pressable onPress={initiateSkillAndOpenItsModal} style={styles.btn} key={idx}>
-                            <AppText style={{ color: color }} fontSize={16}>
-                                {detail}
-                            </AppText>
-                        </Pressable>
-                    );
-                })}
-            </View>
+                        const uncapitalizedText = detail.split(/(?=[A-Z])/).join(" ");
+                        const text = `${uncapitalizedText[0].toUpperCase()}${uncapitalizedText.slice(1)}`;
+
+                        return (
+                            <Pressable onPress={initiateSkillAndOpenItsModal} style={styles.btn} key={text}>
+                                <AppText style={{ color: color }} fontSize={16}>
+                                    {text}
+                                </AppText>
+                            </Pressable>
+                        );
+                    })}
+                </View>
+            </Animated.View>
 
             {/* Detail Modal to Edit or Add New Entry */}
 
