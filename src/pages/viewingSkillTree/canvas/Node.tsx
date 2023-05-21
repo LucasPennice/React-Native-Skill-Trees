@@ -238,7 +238,7 @@ function Node({
                         r={5}
                         style={isComplete ? "fill" : "stroke"}
                         strokeWidth={2}
-                        color={treeAccentColor}
+                        color={isComplete ? treeAccentColor : colors.line}
                     />
                     <Text x={textX} y={textY} text={letter.toUpperCase()} font={nodeLetterFont} color={isComplete ? colors.background : color} />
                 </>

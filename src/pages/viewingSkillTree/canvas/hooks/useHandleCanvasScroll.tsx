@@ -3,7 +3,7 @@ import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reani
 import { useAppSelector } from "../../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../../redux/screenDimentionsSlice";
 import { CanvasDimensions, NodeCoordinate } from "../../../../types";
-import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE, CIRCLE_SIZE_SELECTED } from "../../../../parameters";
+import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, NAV_HEGIHT } from "../../../../parameters";
 import { useEffect, useState } from "react";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "./useCanvasTouchHandler";
 
@@ -67,7 +67,7 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
 
             offset.value = {
                 x: clamp(-widthBounds, widthBounds, newXValue),
-                y: clamp(-screenDimentions.height / 2, screenDimentions.height / 2, newYValue),
+                y: clamp(-screenDimentions.height / 2 + NAV_HEGIHT, screenDimentions.height / 2, newYValue),
             };
 
             function getWidthBounds(canvasW: number, scale: number, screenW: number) {
@@ -93,24 +93,15 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
 
     const transform = useAnimatedStyle(() => {
         if (foundNodeCoordinates) {
-            const position = whereShouldNodeBe({ foundNodeCoordinates, canvasWidth, screenWidth: screenDimentions.width });
+            const foundNodeTranslatedX = -foundNodeCoordinates.x + screenDimentions.width - 1.5 * CIRCLE_SIZE_SELECTED;
 
-            const leftBound =
-                canvasWidth === screenDimentions.width
-                    ? -screenDimentions.width / 4 + CIRCLE_SIZE_SELECTED / 2 - 5
-                    : (canvasWidth - screenDimentions.width) / 2;
-
-            const POP_MENU_WIDTH = screenDimentions.width - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL - CIRCLE_SIZE_SELECTED - 30;
-            const MENU_HEIGHT = screenDimentions.height / 1.5;
-
-            const foundNodeTranslatedX = leftBound - foundNodeCoordinates.x;
-            const positionAdjustmentsForX = position === "LEFT_SIDE_OF_SCREEN" ? POP_MENU_WIDTH : 0;
-            const foundNodeTranslatedY = -foundNodeCoordinates.y + MENU_HEIGHT / 2 - 2 * CIRCLE_SIZE_SELECTED;
+            const deltaY = canvasHeight / 2 - foundNodeCoordinates.y;
+            const foundNodeTranslatedY = canvasHeight / 2 + deltaY - screenDimentions.height / 2 + CIRCLE_SIZE_SELECTED;
 
             return {
                 transform: [
                     {
-                        translateX: withSpring(foundNodeTranslatedX + positionAdjustmentsForX, { damping: 32, stiffness: 350 }),
+                        translateX: withSpring(foundNodeTranslatedX, { damping: 32, stiffness: 350 }),
                     },
                     {
                         translateY: withSpring(foundNodeTranslatedY, { damping: 32, stiffness: 350 }),
@@ -130,22 +121,6 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
         return {
             transform: [{ translateX: offset.value.x }, { translateY: offset.value.y }, { scale: scale.value }],
         };
-
-        function whereShouldNodeBe({
-            canvasWidth,
-            foundNodeCoordinates,
-            screenWidth,
-        }: {
-            foundNodeCoordinates: NodeCoordinate;
-            canvasWidth: number;
-            screenWidth: number;
-        }) {
-            const distanceFromRightMargin = canvasWidth - foundNodeCoordinates.x;
-
-            if (distanceFromRightMargin <= screenWidth + CANVAS_HORIZONTAL_PADDING / 2) return "LEFT_SIDE_OF_SCREEN";
-
-            return "RIGHT_SIDE_OF_SCREEN";
-        }
     }, [offset, scale, foundNodeCoordinates, shouldAnimateTransformation]);
 
     return { transform, canvasGestures };

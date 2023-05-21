@@ -53,7 +53,7 @@ function InteractiveTree({
     const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
     const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
     const dragAndDropZones = calculateDragAndDropZones(nodeCoordinatesCentered);
-    const foundNodeCoordinates = nodeCoordinates.find((c) => c.id === selectedNode);
+    const foundNodeCoordinates = nodeCoordinatesCentered.find((c) => c.id === selectedNode);
     //
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
@@ -106,13 +106,7 @@ function InteractiveTree({
                     </Animated.View>
                 </View>
             </GestureDetector>
-            {foundNodeCoordinates && (
-                <PopUpMenu
-                    foundNodeCoordinates={foundNodeCoordinates}
-                    canvasWidth={canvasWidth}
-                    openChildrenHoistSelector={openChildrenHoistSelector}
-                />
-            )}
+            {foundNodeCoordinates && <PopUpMenu openChildrenHoistSelector={openChildrenHoistSelector} />}
         </>
     );
 }

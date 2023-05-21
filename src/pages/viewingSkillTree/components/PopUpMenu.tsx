@@ -10,16 +10,13 @@ import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
 import { countSkillNodes, findNodeById, treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, editTreeProperties } from "../../../functions/mutateTree";
-import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE_SELECTED, centerFlex, colors } from "../../../parameters";
+import { CIRCLE_SIZE_SELECTED, centerFlex, colors } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode, updateUserTrees } from "../../../redux/userTreesSlice";
-import { NodeCoordinate, Skill, Tree } from "../../../types";
-import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "../canvas/hooks/useCanvasTouchHandler";
+import { Skill, Tree } from "../../../types";
 
 type Props = {
-    foundNodeCoordinates: NodeCoordinate;
-    canvasWidth: number;
     openChildrenHoistSelector: (candidatesToHoist: Tree<Skill>[]) => void;
 };
 
@@ -28,7 +25,7 @@ type Props = {
 //IS THE SKILL NODES
 //THE OTHER NODE TYPES' COMPLETION STATE IS CALCULATED ☢️
 
-function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelector }: Props) {
+function PopUpMenu({ openChildrenHoistSelector }: Props) {
     //Redux store state
     const currentTree = useAppSelector(selectCurrentTree);
     const { selectedNode } = useAppSelector(selectTreeSlice);
@@ -40,8 +37,8 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
     const [text, onChangeText] = useState(currentNode ? currentNode.data.name : "Name");
     const [mastered, setMastered] = useState(currentNode && currentNode.data.isCompleted ? currentNode.data.isCompleted : false);
 
-    const MENU_HEIGHT = height / 1.5;
-    const MENU_WIDTH = width - DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL - CIRCLE_SIZE_SELECTED - 30;
+    const MENU_HEIGHT = 340;
+    const MENU_WIDTH = width - 3 * CIRCLE_SIZE_SELECTED;
 
     const navigation = useNavigation<NativeStackScreenProps<StackNavigatorParams>["navigation"]>();
 
@@ -117,9 +114,7 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
             runOnJS(closePopUpMenu)();
         });
 
-    const menuPosition = whereIsSelectedNode({ canvasWidth, foundNodeCoordinates, screenWidth: width });
-    const left = menuPosition === "LEFT_SIDE_OF_SCREEN" ? 0 : width - MENU_WIDTH;
-    const top = MENU_HEIGHT / 4.5;
+    const top = height / 2 - MENU_HEIGHT / 2;
 
     const goToSkillPage = () => {
         navigation.navigate("SkillPage", currentNode);
@@ -132,7 +127,7 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
                 exiting={FadeOutDown.easing(Easing.elastic()).duration(300)}
                 style={[
                     {
-                        left,
+                        left: 0,
                         top,
                         position: "absolute",
                         height: MENU_HEIGHT,
@@ -201,22 +196,6 @@ function PopUpMenu({ foundNodeCoordinates, canvasWidth, openChildrenHoistSelecto
             </Animated.View>
         </GestureDetector>
     );
-
-    function whereIsSelectedNode({
-        canvasWidth,
-        foundNodeCoordinates,
-        screenWidth,
-    }: {
-        foundNodeCoordinates: NodeCoordinate;
-        canvasWidth: number;
-        screenWidth: number;
-    }) {
-        const distanceFromRightMargin = canvasWidth - foundNodeCoordinates.x;
-
-        if (distanceFromRightMargin <= screenWidth + CANVAS_HORIZONTAL_PADDING / 2) return "LEFT_SIDE_OF_SCREEN";
-
-        return "RIGHT_SIDE_OF_SCREEN";
-    }
 }
 
 export default PopUpMenu;

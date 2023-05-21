@@ -17,6 +17,10 @@ function NavigationBar({ data: APP_ROUTES }: { data: Routes }) {
         setRouteName(currentRoute);
     });
 
+    const foo = appRoutesForNavBar.find((route) => route.route === routeName);
+
+    const res = foo === undefined ? "MyTrees" : foo.route;
+
     return (
         <View
             style={[
@@ -39,7 +43,7 @@ function NavigationBar({ data: APP_ROUTES }: { data: Routes }) {
                         onPress={() => nav.navigate(appRoute.route)}
                         style={[centerFlex, { height: NAV_HEGIHT, width: 100 }]}>
                         <View style={centerFlex}>
-                            <AppText style={{ color: appRoute.route === routeName ? colors.accent : colors.unmarkedText }} fontSize={16}>
+                            <AppText style={{ color: appRoute.route === res ? colors.accent : colors.unmarkedText }} fontSize={16}>
                                 {appRoute.title}
                             </AppText>
                         </View>

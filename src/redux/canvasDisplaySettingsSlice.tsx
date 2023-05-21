@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "./reduxStore";
+import { colors } from "../parameters";
 
 // Define a type for the slice state
 type CanvasDisplaySettings = {
@@ -14,7 +15,7 @@ export const defaultCanvasDisplaySettings: CanvasDisplaySettings = {
     showLabel: false,
     oneColorPerTree: false,
     showCircleGuide: false,
-    homepageTreeColor: "#FFFFFF",
+    homepageTreeColor: colors.accent,
 };
 
 export const canvasDisplaySettingsSlice = createSlice({

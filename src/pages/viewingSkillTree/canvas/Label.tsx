@@ -19,7 +19,14 @@ function Label({
 
     const { cx, cy } = coord;
 
-    const wordArr = text.split(" ");
+    const WORD_LENGTH_LIMIT = 11;
+    const WORD_QTY_LIMIT = 3;
+    let wordArr = text.split(" ").map((word) => {
+        if (word.length > WORD_LENGTH_LIMIT) return `${word.slice(0, WORD_LENGTH_LIMIT)}...`;
+        return word;
+    });
+
+    wordArr = wordArr.length > WORD_QTY_LIMIT ? [...wordArr.slice(0, WORD_QTY_LIMIT), "..."] : wordArr;
 
     const distanceBetweenWords = 14;
     const fontSize = 12;
@@ -30,7 +37,7 @@ function Label({
 
     const rectangleDimentions = calculateRectangleDimentions(wordArr);
 
-    const rectX = cx - rectangleDimentions.width / 2 + 2;
+    const rectX = cx - rectangleDimentions.width / 2;
     const rectY = cy + labelMarginTop - fontSize / 4 - verticalPadding;
 
     return (
@@ -39,7 +46,7 @@ function Label({
             {wordArr.map((word, idx) => {
                 const wordWidth = labelFont.getTextWidth(word);
 
-                const textX = cx - wordWidth / 2 + 2;
+                const textX = cx - wordWidth / 2;
                 const textY = cy + fontSize / 2 + idx * distanceBetweenWords + labelMarginTop;
 
                 return <Text key={idx} x={textX} y={textY} text={word} color={color.text} font={labelFont} />;

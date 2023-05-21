@@ -19,7 +19,15 @@ function RadialLabel({
 
     const { x, y } = coord;
 
-    const wordArr = text.split(" ");
+    const WORD_LENGTH_LIMIT = 7;
+    const WORD_QTY_LIMIT = 3;
+
+    let wordArr = text.split(" ").map((word) => {
+        if (word.length > WORD_LENGTH_LIMIT) return `${word.slice(0, WORD_LENGTH_LIMIT)}...`;
+        return word;
+    });
+
+    wordArr = wordArr.length > WORD_QTY_LIMIT ? [...wordArr.slice(0, WORD_QTY_LIMIT), "..."] : wordArr;
 
     const distanceBetweenWords = 14;
     const fontSize = 12;
