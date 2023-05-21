@@ -4,12 +4,12 @@ import { useAppSelector } from "../../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../../redux/screenDimentionsSlice";
 import { CanvasDimensions, NodeCoordinate } from "../../../../types";
 import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE, CIRCLE_SIZE_SELECTED } from "../../../../parameters";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "./useCanvasTouchHandler";
 
 const DEFAULT_SCALE = 1;
 
-function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoordinates?: NodeCoordinate, isTakingScreenshot?: boolean) {
+function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoordinates?: NodeCoordinate) {
     const { canvasHeight, canvasWidth } = canvasDimentions;
     const screenDimentions = useAppSelector(selectScreenDimentions);
 
@@ -21,6 +21,8 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
 
     const scale = useSharedValue(DEFAULT_SCALE);
     const savedScale = useSharedValue(DEFAULT_SCALE);
+
+    const shouldAnimateTransformation = useShouldAnimateTransformation(foundNodeCoordinates !== undefined);
 
     useEffect(() => {
         const currentCanvasMinScale = screenDimentions.width / canvasWidth;
@@ -90,15 +92,6 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
     const canvasGestures = Gesture.Simultaneous(canvasPan, canvasZoom);
 
     const transform = useAnimatedStyle(() => {
-        if (isTakingScreenshot) {
-            return {
-                transform: [
-                    { translateX: withSpring(0, { damping: 32, stiffness: 350 }) },
-                    { translateY: withSpring(0, { damping: 32, stiffness: 350 }) },
-                    { scale: withSpring(DEFAULT_SCALE, { damping: 32, stiffness: 350 }) },
-                ],
-            };
-        }
         if (foundNodeCoordinates) {
             const position = whereShouldNodeBe({ foundNodeCoordinates, canvasWidth, screenWidth: screenDimentions.width });
 
@@ -126,12 +119,16 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
                 ],
             };
         }
+        if (shouldAnimateTransformation)
+            return {
+                transform: [
+                    { translateX: withSpring(offset.value.x, { damping: 32, stiffness: 350 }) },
+                    { translateY: withSpring(offset.value.y, { damping: 32, stiffness: 350 }) },
+                    { scale: withSpring(scale.value, { damping: 32, stiffness: 350 }) },
+                ],
+            };
         return {
-            transform: [
-                { translateX: withSpring(offset.value.x, { damping: 32, stiffness: 500 }) },
-                { translateY: withSpring(offset.value.y, { damping: 32, stiffness: 500 }) },
-                { scale: withSpring(scale.value, { damping: 32, stiffness: 500 }) },
-            ],
+            transform: [{ translateX: offset.value.x }, { translateY: offset.value.y }, { scale: scale.value }],
         };
 
         function whereShouldNodeBe({
@@ -149,9 +146,25 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
 
             return "RIGHT_SIDE_OF_SCREEN";
         }
-    }, [offset, scale, foundNodeCoordinates, isTakingScreenshot]);
+    }, [offset, scale, foundNodeCoordinates, shouldAnimateTransformation]);
 
     return { transform, canvasGestures };
 }
 
 export default useHandleCanvasScroll;
+
+function useShouldAnimateTransformation(popUpMenuOpen: boolean) {
+    const [result, setResult] = useState(true);
+
+    useEffect(() => {
+        if (popUpMenuOpen) setResult(true);
+
+        if (!popUpMenuOpen) {
+            setTimeout(() => {
+                setResult(false);
+            }, 200);
+        }
+    }, [popUpMenuOpen]);
+
+    return result;
+}

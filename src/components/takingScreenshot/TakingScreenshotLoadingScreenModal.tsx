@@ -1,25 +1,16 @@
-import { ImageFormat, SkiaDomView } from "@shopify/react-native-skia";
+import { ImageFormat, SkiaDomView, rect } from "@shopify/react-native-skia";
 import { shareAsync } from "expo-sharing";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, Dimensions, Modal, Pressable, SafeAreaView, View } from "react-native";
+import { Alert, Dimensions, Pressable, View } from "react-native";
 import { Gesture, GestureDetector, gestureHandlerRootHOC } from "react-native-gesture-handler";
-import Animated, {
-    Easing,
-    FadeInDown,
-    FadeOutUp,
-    SlideInDown,
-    SlideOutDown,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
-} from "react-native-reanimated";
+import Animated, { Easing, FadeInDown, FadeOutUp, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import ViewShot from "react-native-view-shot";
 import { centerFlex, colors } from "../../parameters";
 import { generalStyles } from "../../styles";
 import { Skill, Tree } from "../../types";
 import AppText from "../AppText";
-import ProgressIndicatorAndName from "../ProgressIndicatorAndName";
 import FlingToDismissModal from "../FlingToDismissModal";
+import ProgressIndicatorAndName from "../ProgressIndicatorAndName";
 
 type Stage = "TAKING_SCREENSHOT" | "EDITING_LAYOUT";
 
@@ -81,12 +72,13 @@ function TakingScreenshotLoadingScreenModal({
 
     async function getScreenShots() {
         setStage("TAKING_SCREENSHOT");
+
         try {
             await new Promise((resolve) =>
                 setTimeout(async () => {
                     const image = canvasRef.makeImageSnapshot();
 
-                    const encodedImage = image.encodeToBase64(ImageFormat.PNG, 99);
+                    const encodedImage = image.encodeToBase64(ImageFormat.PNG, 100);
 
                     const formattedImage = `data:image/png;base64,${encodedImage}`;
 

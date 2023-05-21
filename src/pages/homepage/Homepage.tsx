@@ -44,7 +44,7 @@ function Homepage() {
     //
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
-    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, undefined, isTakingScreenshot);
+    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, undefined);
 
     const canvasRef = useCanvasRef();
 

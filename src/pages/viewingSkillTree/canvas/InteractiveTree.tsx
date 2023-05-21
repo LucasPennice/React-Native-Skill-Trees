@@ -77,7 +77,7 @@ function InteractiveTree({
         dragAndDropZones,
     });
     const { canvasHeight, canvasWidth } = canvasDimentions;
-    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, foundNodeCoordinates, isTakingScreenshot);
+    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, foundNodeCoordinates);
     //
 
     //Handles the blur animation on tree change
