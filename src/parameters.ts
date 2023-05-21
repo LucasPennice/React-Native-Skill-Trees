@@ -9,7 +9,7 @@ export const TOUCH_BUFFER = 15;
 export const DISTANCE_BETWEEN_CHILDREN = 100;
 export const DISTANCE_BETWEEN_GENERATIONS = 25 + 50 + 3 * CIRCLE_SIZE;
 
-export const NAV_HEGIHT = 65;
+export const NAV_HEGIHT = 60;
 
 export const CANVAS_SPRING = { damping: 29 };
 export const MENU_DAMPENING = { damping: 20, stiffness: 300 };

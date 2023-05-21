@@ -13,7 +13,6 @@ import NavigationBar from "./src/components/NavigationBar";
 import { IsSharingAvailableContext } from "./src/context";
 import Homepage from "./src/pages/homepage/Homepage";
 import MyTrees from "./src/pages/myTrees/MyTrees";
-import Settings from "./src/pages/settings/Settings";
 import SkillPage from "./src/pages/skillPage/SkillPage";
 import ViewingSkillTree from "./src/pages/viewingSkillTree/ViewingSkillTree";
 import { colors } from "./src/parameters";
@@ -61,7 +60,7 @@ export default function App() {
                     <NavigationContainer>
                         {/* <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}> */}
                         <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-                            {Platform.OS === "android" && <StatusBar backgroundColor={colors.background} />}
+                            {Platform.OS === "android" && <StatusBar />}
                             <AppWithReduxContext />
                         </SafeAreaView>
                     </NavigationContainer>
@@ -96,7 +95,7 @@ function AppWithReduxContext() {
                     </TouchableOpacity>
                 ),
             },
-            title: "My Skill Trees",
+            title: "Skill Trees",
         },
         // { component: Settings, route: "Settings", title: "Settings" },
         {

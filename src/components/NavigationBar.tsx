@@ -1,42 +1,21 @@
 import { useNavigation } from "@react-navigation/native";
-import { Fragment, useState } from "react";
-import { Dimensions, Pressable, View } from "react-native";
-import Animated, { useAnimatedStyle, withSpring } from "react-native-reanimated";
-import AppText from "./AppText";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Pressable, View } from "react-native";
 import { Routes, StackNavigatorParams } from "../../App";
 import { NAV_HEGIHT, centerFlex, colors } from "../parameters";
+import AppText from "./AppText";
+import { useState } from "react";
 
 function NavigationBar({ data: APP_ROUTES }: { data: Routes }) {
     const nav = useNavigation<NativeStackScreenProps<StackNavigatorParams>["navigation"]>();
+    const appRoutesForNavBar = APP_ROUTES.filter((route) => route.hideFromNavBar !== true);
 
-    const { width } = Dimensions.get("screen");
-
-    const [navData, setNavData] = useState<null | { routeIdx: number; routeNames: string[] }>(null);
-    const [routeNameLength, setRouteNameLength] = useState<number[]>([]);
+    const [routeName, setRouteName] = useState("Home");
 
     nav.addListener("state", (e) => {
         const currentRoute = e.data.state.routes[e.data.state.routes.length - 1].name;
-
-        const currentRouteIdx = e.data.state.routeNames.findIndex((r) => r === currentRoute);
-
-        setNavData({ routeIdx: currentRouteIdx, routeNames: e.data.state.routeNames });
+        setRouteName(currentRoute);
     });
-
-    const animatedStyles = useAnimatedStyle(() => {
-        if (!navData) return { left: 0, opacity: 0 };
-
-        const wordLeftShift = routeNameLength.reduce((a, b, idx) => (idx < navData.routeIdx ? a + b : a), 0);
-        const leftMargin = (width - routeNameLength.reduce((a, b) => a + b, 0)) / 2;
-
-        return {
-            left: withSpring(leftMargin + wordLeftShift, { damping: 28, stiffness: 300 }),
-            opacity: 1,
-            width: routeNameLength[navData.routeIdx] ?? 50,
-        };
-    }, [navData, routeNameLength]);
-
-    if (!navData || !nav) return <></>;
 
     return (
         <View
@@ -44,43 +23,26 @@ function NavigationBar({ data: APP_ROUTES }: { data: Routes }) {
                 centerFlex,
                 {
                     height: NAV_HEGIHT,
-                    backgroundColor: colors.background,
+                    backgroundColor: colors.darkGray,
                     borderTopLeftRadius: 10,
                     borderTopEndRadius: 10,
                     flexDirection: "row",
                     position: "relative",
+                    gap: 30,
                 },
             ]}>
-            <Animated.View
-                style={[
-                    animatedStyles,
-                    {
-                        width: width / navData.routeNames.length,
-                        position: "absolute",
-                        backgroundColor: colors.darkGray,
-                        height: 40,
-                        top: 13,
-                        borderRadius: 10,
-                    },
-                ]}
-            />
-            {APP_ROUTES.map((appRoute, idx) => {
-                if (appRoute.hideFromNavBar) return <Fragment key={idx}></Fragment>;
-
+            {appRoutesForNavBar.map((appRoute, idx) => {
                 return (
                     <Pressable
                         key={idx}
                         //@ts-ignore
                         onPress={() => nav.navigate(appRoute.route)}
-                        style={[centerFlex, { padding: 20 }]}
-                        onLayout={(e) => {
-                            const result = [...routeNameLength];
-                            result[idx] = e.nativeEvent.layout.width;
-                            setRouteNameLength(result);
-                        }}>
-                        <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
-                            {appRoute.title}
-                        </AppText>
+                        style={[centerFlex, { height: NAV_HEGIHT, width: 100 }]}>
+                        <View style={centerFlex}>
+                            <AppText style={{ color: appRoute.route === routeName ? colors.accent : colors.unmarkedText }} fontSize={16}>
+                                {appRoute.title}
+                            </AppText>
+                        </View>
                     </Pressable>
                 );
             })}
