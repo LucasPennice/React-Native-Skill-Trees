@@ -1,24 +1,33 @@
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCanvasRef } from "@shopify/react-native-skia";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { View } from "react-native";
+import { StackNavigatorParams } from "../../../App";
+import CanvasSettingsModal from "../../components/CanvasSettingsModal";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
-import CanvasSettingsModal from "../../components/CanvasSettingsModal";
 import ShareTreeButton from "../../components/takingScreenshot/ShareTree";
 import { IsSharingAvailableContext } from "../../context";
 import { colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { selectCurrentTree, selectTentativeTree, selectTreeSlice, setSelectedDndZone, setSelectedNode } from "../../redux/userTreesSlice";
+import {
+    clearNewNodeState,
+    selectCurrentTree,
+    selectTentativeTree,
+    selectTreeSlice,
+    setSelectedDndZone,
+    setSelectedNode,
+} from "../../redux/userTreesSlice";
 import { DnDZone, Skill, Tree } from "../../types";
 import AddNodeStateIndicator from "./AddNodeStateIndicator";
 import InteractiveTree from "./canvas/InteractiveTree";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import NewNodeModal from "./modals/NewNodeModal";
-import useRunHomepageCleanup from "./useRunHomepageCleanup";
 
 type Mode = "SelectedNode" | "AddingNode" | "TakingScreenshot" | "Idle";
+type Props = NativeStackScreenProps<StackNavigatorParams, "ViewingSkillTree">;
 
-function ViewingSkillTree() {
+function ViewingSkillTree({ navigation }: Props) {
     //Redux State
     const currentTree = useAppSelector(selectCurrentTree);
     const { selectedDndZone, newNode, selectedNode } = useAppSelector(selectTreeSlice);
@@ -27,13 +36,13 @@ function ViewingSkillTree() {
     //Hooks
     const isSharingAvailable = useContext(IsSharingAvailableContext);
     const canvasRef = useCanvasRef();
+    useRunCleanupOnNavigation();
     //Local State
     const [isTakingScreenshot, setIsTakingScreenshot] = useState(false);
     const [canvasSettings, setCanvasSettings] = useState(false);
     const [newNodeModal, setNewNodeModal] = useState(false);
     const [candidatesToHoistModal, setCandidatesToHoistModal] = useState(false);
     const [candidatesToHoist, setCandidatesToHoist] = useState<Tree<Skill>[] | null>(null);
-    useRunHomepageCleanup();
     //Derived State
     const shouldRenderDndZones = newNode && !selectedDndZone;
     const mode = getMode();
@@ -96,16 +105,23 @@ function ViewingSkillTree() {
 
     function getMode(): Mode {
         if (selectedNode !== null) return "SelectedNode";
-        if (newNode !== undefined) return "AddingNode";
+        if (newNode !== undefined || newNodeModal !== false) return "AddingNode";
         if (isTakingScreenshot) return "TakingScreenshot";
         return "Idle";
     }
-}
 
-ViewingSkillTree.whyDidYouRender = false;
-// HomePage.whyDidYouRender = {
-//     logOnDifferentValues: true,
-//     customName: "Homeapge",
-// };
+    function useRunCleanupOnNavigation() {
+        useEffect(() => {
+            setIsTakingScreenshot(false);
+            setCanvasSettings(false);
+            setNewNodeModal(false);
+            setCandidatesToHoistModal(false);
+            setCandidatesToHoist(null);
+            dispatch(setSelectedNode(null));
+            dispatch(setSelectedDndZone(undefined));
+            dispatch(clearNewNodeState());
+        }, [navigation]);
+    }
+}
 
 export default ViewingSkillTree;

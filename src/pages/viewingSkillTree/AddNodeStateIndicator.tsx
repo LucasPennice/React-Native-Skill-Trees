@@ -20,7 +20,7 @@ type Props = {
     openNewNodeModal: () => void;
 };
 
-function AddNode({ openNewNodeModal }: Props) {
+function AddNodeStateIndicator({ openNewNodeModal }: Props) {
     //Redux Store
     const currentTree = useAppSelector(selectCurrentTree);
     const { selectedDndZone, newNode } = useAppSelector(selectTreeSlice);
@@ -126,4 +126,4 @@ const s = StyleSheet.create({
     },
 });
 
-export default AddNode;
+export default AddNodeStateIndicator;

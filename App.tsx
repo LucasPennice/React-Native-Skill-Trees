@@ -1,4 +1,3 @@
-/// <reference types="@welldone-software/why-did-you-render" />
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { NativeStackNavigationOptions, createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -27,7 +26,6 @@ import { populateUserTrees } from "./src/redux/userTreesSlice";
 import { Skill, Tree } from "./src/types";
 import useIsSharingAvailable from "./src/useIsSharingAvailable";
 import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
-import "./wdyr";
 
 const prefix = Linking.createURL("/");
 
@@ -98,9 +96,9 @@ function AppWithReduxContext() {
                     </TouchableOpacity>
                 ),
             },
-            title: "My Trees",
+            title: "My Skill Trees",
         },
-        { component: Settings, route: "Settings", title: "Settings" },
+        // { component: Settings, route: "Settings", title: "Settings" },
         {
             component: SkillPage,
             route: "SkillPage",
