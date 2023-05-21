@@ -1,5 +1,5 @@
 import { Blur, Canvas, SkiaDomView, runTiming, useValue } from "@shopify/react-native-skia";
-import { MutableRefObject, useEffect } from "react";
+import { MutableRefObject, useEffect, useRef } from "react";
 import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
@@ -7,7 +7,7 @@ import { NAV_HEGIHT, centerFlex } from "../../../parameters";
 import { useAppSelector } from "../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { selectTreeSlice } from "../../../redux/userTreesSlice";
-import { DnDZone, Skill, Tree } from "../../../types";
+import { CanvasDimensions, DnDZone, Skill, Tree } from "../../../types";
 import PopUpMenu from "../components/PopUpMenu";
 import DragAndDropZones from "./DragAndDropZones";
 import HierarchicalSkillTree from "./HierarchicalSkillTree";
@@ -27,27 +27,20 @@ type InteractiveTreeProps = {
     tree: Tree<Skill>;
     onNodeClick?: (nodeId: string) => void;
     showDndZones?: boolean;
-    isTakingScreenshot?: boolean;
     onDndZoneClick?: (clickedZone?: DnDZone) => void;
     canvasRef: MutableRefObject<SkiaDomView | null>;
     openChildrenHoistSelector: (candidatesToHoist: Tree<Skill>[]) => void;
 };
 
-function InteractiveTree({
-    tree,
-    onNodeClick,
-    showDndZones,
-    onDndZoneClick,
-    canvasRef,
-    isTakingScreenshot,
-    openChildrenHoistSelector,
-}: InteractiveTreeProps) {
+function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef, openChildrenHoistSelector }: InteractiveTreeProps) {
     //Redux State
     const screenDimentions = useAppSelector(selectScreenDimentions);
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
     //Derived State
     const coordinatesWithTreeData = getNodesCoordinates(tree, "hierarchy");
+    //
+    const prevCanvasDimentions = useRef<null | CanvasDimensions>(null);
     //
     const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
     const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
@@ -57,7 +50,11 @@ function InteractiveTree({
     //
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
-    const foo = (nodeId: string) => {
+    useEffect(() => {
+        prevCanvasDimentions.current = canvasDimentions;
+    }, [canvasDimentions]);
+
+    const ifSkillNodeRunNodeClick = (nodeId: string) => {
         const node = coordinatesWithTreeData.find((c) => c.nodeId === nodeId && c.category === "SKILL");
 
         const isSkillNode = node !== undefined;
@@ -71,13 +68,13 @@ function InteractiveTree({
     const { touchHandler } = useCanvasTouchHandler({
         tree,
         nodeCoordinatesCentered,
-        onNodeClick: foo,
+        onNodeClick: ifSkillNodeRunNodeClick,
         onDndZoneClick,
         showDndZones,
         dragAndDropZones,
     });
     const { canvasHeight, canvasWidth } = canvasDimentions;
-    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, foundNodeCoordinates);
+    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, prevCanvasDimentions.current, foundNodeCoordinates);
     //
 
     //Handles the blur animation on tree change

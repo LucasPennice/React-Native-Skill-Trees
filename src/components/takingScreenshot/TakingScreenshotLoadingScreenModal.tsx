@@ -123,8 +123,8 @@ function LayoutSelector({ selectedImage, tree, cancelSharing }: { selectedImage:
     const MovableCanvasImage = gestureHandlerRootHOC(() => {
         const { height, width } = Dimensions.get("window");
 
-        const start = useSharedValue({ x: 0, y: 0 });
-        const offset = useSharedValue({ x: 0, y: 0 });
+        const start = useSharedValue({ x: 0, y: -height / 4 });
+        const offset = useSharedValue({ x: 0, y: -height / 4 });
 
         const scale = useSharedValue(1);
         const savedScale = useSharedValue(1);
@@ -135,8 +135,8 @@ function LayoutSelector({ selectedImage, tree, cancelSharing }: { selectedImage:
         const showBorder = useSharedValue(false);
 
         useEffect(() => {
-            start.value = { x: 0, y: 0 };
-            offset.value = { x: 0, y: 0 };
+            start.value = { x: 0, y: -height / 4 };
+            offset.value = { x: 0, y: -height / 4 };
             scale.value = 1;
             savedScale.value = 1;
             rotation.value = 0;

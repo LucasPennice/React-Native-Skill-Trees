@@ -1,15 +1,18 @@
+import { useEffect, useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
 import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { CIRCLE_SIZE_SELECTED, NAV_HEGIHT } from "../../../../parameters";
 import { useAppSelector } from "../../../../redux/reduxHooks";
 import { selectScreenDimentions } from "../../../../redux/screenDimentionsSlice";
 import { CanvasDimensions, NodeCoordinate } from "../../../../types";
-import { CANVAS_HORIZONTAL_PADDING, CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, NAV_HEGIHT } from "../../../../parameters";
-import { useEffect, useState } from "react";
-import { DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL } from "./useCanvasTouchHandler";
 
 const DEFAULT_SCALE = 1;
 
-function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoordinates?: NodeCoordinate) {
+function useHandleCanvasScroll(
+    canvasDimentions: CanvasDimensions,
+    prevCanvasDimensions: CanvasDimensions | null,
+    foundNodeCoordinates?: NodeCoordinate
+) {
     const { canvasHeight, canvasWidth } = canvasDimentions;
     const screenDimentions = useAppSelector(selectScreenDimentions);
 
@@ -22,7 +25,12 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
     const scale = useSharedValue(DEFAULT_SCALE);
     const savedScale = useSharedValue(DEFAULT_SCALE);
 
-    const shouldAnimateTransformation = useShouldAnimateTransformation(foundNodeCoordinates !== undefined);
+    const deltaX = prevCanvasDimensions !== null ? canvasDimentions.canvasWidth - prevCanvasDimensions.canvasWidth : 0;
+    const deltaY = prevCanvasDimensions !== null ? canvasDimentions.canvasHeight - prevCanvasDimensions.canvasHeight : 0;
+
+    const canvasDimensionChange = deltaX !== 0 || deltaY !== 0;
+
+    const shouldAnimateTransformation = useShouldAnimateTransformation(foundNodeCoordinates !== undefined || canvasDimensionChange);
 
     useEffect(() => {
         const currentCanvasMinScale = screenDimentions.width / canvasWidth;

@@ -25,6 +25,7 @@ import { populateUserTrees } from "./src/redux/userTreesSlice";
 import { Skill, Tree } from "./src/types";
 import useIsSharingAvailable from "./src/useIsSharingAvailable";
 import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const prefix = Linking.createURL("/");
 
@@ -47,6 +48,8 @@ export type Routes = {
     title: string;
 }[];
 
+const queryClient = new QueryClient();
+
 export default function App() {
     const isSharingAvailable = useIsSharingAvailable();
 
@@ -55,17 +58,19 @@ export default function App() {
     };
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <Provider store={store}>
-                <IsSharingAvailableContext.Provider value={isSharingAvailable}>
-                    <NavigationContainer>
-                        {/* <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}> */}
-                        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-                            {Platform.OS === "android" && <StatusBar />}
-                            <AppWithReduxContext />
-                        </SafeAreaView>
-                    </NavigationContainer>
-                </IsSharingAvailableContext.Provider>
-            </Provider>
+            <QueryClientProvider client={queryClient}>
+                <Provider store={store}>
+                    <IsSharingAvailableContext.Provider value={isSharingAvailable}>
+                        <NavigationContainer>
+                            {/* <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}> */}
+                            <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+                                {Platform.OS === "android" && <StatusBar />}
+                                <AppWithReduxContext />
+                            </SafeAreaView>
+                        </NavigationContainer>
+                    </IsSharingAvailableContext.Provider>
+                </Provider>
+            </QueryClientProvider>
         </GestureHandlerRootView>
     );
 }

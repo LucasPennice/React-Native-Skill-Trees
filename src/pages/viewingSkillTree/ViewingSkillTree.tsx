@@ -74,7 +74,6 @@ function ViewingSkillTree({ navigation }: Props) {
                     onNodeClick={onNodeClick}
                     showDndZones={shouldRenderDndZones}
                     onDndZoneClick={onDndZoneClick}
-                    isTakingScreenshot={isTakingScreenshot}
                 />
             )}
             {currentTree && <ProgressIndicatorAndName tree={currentTree} />}
