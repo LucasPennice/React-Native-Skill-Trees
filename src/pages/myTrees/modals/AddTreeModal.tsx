@@ -1,5 +1,8 @@
+import { Canvas } from "@shopify/react-native-skia";
+import { UseQueryResult } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Alert, Dimensions, Pressable, View } from "react-native";
+import { GestureDetector } from "react-native-gesture-handler";
 import Animated, { FadeInDown, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import axiosClient from "../../../../axiosClient";
 import { useRequestProcessor } from "../../../../requestProcessor";
@@ -7,15 +10,16 @@ import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import ColorSelector from "../../../components/ColorsSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
+import LoadingIcon from "../../../components/LoadingIcon";
 import { createTree } from "../../../functions/misc";
 import { MENU_HIGH_DAMPENING, centerFlex, colors, possibleTreeColors } from "../../../parameters";
 import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
+import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
+import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { appendToUserTree } from "../../../redux/userTreesSlice";
 import { generalStyles } from "../../../styles";
 import { Skill, Tree, getDefaultSkillValue } from "../../../types";
-import { UseQueryResult } from "@tanstack/react-query";
-import { Canvas } from "@shopify/react-native-skia";
 import HierarchicalSkillTree from "../../viewingSkillTree/canvas/HierarchicalSkillTree";
 import {
     centerNodesInCanvas,
@@ -24,26 +28,23 @@ import {
     getNodesCoordinates,
     removeTreeDataFromCoordinate,
 } from "../../viewingSkillTree/canvas/coordinateFunctions";
-import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
-import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import useHandleImportTree from "./useHandleImportTree";
 import useHandleCanvasScroll from "../../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
-import { GestureDetector } from "react-native-gesture-handler";
-import LoadingIcon from "../../../components/LoadingIcon";
+import useHandleImportTree from "./useHandleImportTree";
 
 function AddTreeModal() {
-    const { query, resetQuery } = useRequestProcessor();
+    const { query } = useRequestProcessor();
     const { width } = Dimensions.get("screen");
     //Local State
     const [treeName, setTreeName] = useState("");
-    const [treeImportLink, setTreeImportLink] = useState("");
+    const [treeImportKey, setTreeImportKey] = useState("");
     const [selectedColor, setSelectedColor] = useState("");
     const [mode, setMode] = useState<"CREATE_TREE" | "IMPORT_TREE">("CREATE_TREE");
     //Redux State
     const { open } = useAppSelector(selectAddTree);
     const dispatch = useAppDispatch();
     //
-    const importTreeQuery = query(["getTreeById", treeImportLink], () => axiosClient.get(`getTreeById/${treeImportLink}`).then((res) => res.data), {
+    const importTreeQuery = query(["getTreeById", treeImportKey], () => axiosClient.get(`getTreeByKey/${treeImportKey}`).then((res) => res.data), {
+        cacheTime: 0,
         enabled: false,
     });
 
@@ -51,13 +52,13 @@ function AddTreeModal() {
         setTreeName("");
         setSelectedColor("");
         setMode("CREATE_TREE");
-        setTreeImportLink("");
-        resetQuery(["getTreeById"]);
+        setTreeImportKey("");
+        importTreeQuery.remove();
     }, [open]);
 
     useEffect(() => {
-        setTreeImportLink("");
-        resetQuery(["getTreeById"]);
+        setTreeImportKey("");
+        importTreeQuery.remove();
     }, [mode]);
 
     const closeModal = () => dispatch(close());
@@ -122,7 +123,7 @@ function AddTreeModal() {
                 )}
                 {mode === "IMPORT_TREE" && (
                     <Animated.View entering={FadeInDown}>
-                        <ImportTree importTreeQuery={importTreeQuery} linkState={[treeImportLink, setTreeImportLink]} closeModal={closeModal} />
+                        <ImportTree importTreeQuery={importTreeQuery} linkState={[treeImportKey, setTreeImportKey]} closeModal={closeModal} />
                     </Animated.View>
                 )}
             </>
@@ -140,7 +141,7 @@ function ImportTree({
     closeModal: () => void;
 }) {
     const { data, isError, isFetching, refetch: fetchTreeFromImportLink } = importTreeQuery;
-    const [treeImportLink, setTreeImportLink] = linkState;
+    const [treeImportKey, setTreeImportKey] = linkState;
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
     const { height, width } = useAppSelector(selectScreenDimentions);
 
@@ -167,16 +168,11 @@ function ImportTree({
                         There was an error fetching your tree. Please check if the id is correct and try again
                     </AppText>
                 )}
-                <AppTextInput
-                    placeholder={"Import Link"}
-                    textState={[treeImportLink, setTreeImportLink]}
-                    onlyContainsLettersAndNumbers
-                    containerStyles={{ marginVertical: 20 }}
-                />
+                <AppTextInput placeholder={"Import Link"} textState={[treeImportKey, setTreeImportKey]} containerStyles={{ marginVertical: 20 }} />
                 <Pressable
-                    disabled={treeImportLink.length === 0}
+                    disabled={treeImportKey.length === 0}
                     onPress={() => fetchTreeFromImportLink()}
-                    style={[generalStyles.btn, { backgroundColor: `${colors.line}4D`, opacity: treeImportLink.length === 0 ? 0.5 : 1 }]}>
+                    style={[generalStyles.btn, { backgroundColor: `${colors.line}4D`, opacity: treeImportKey.length === 0 ? 0.5 : 1 }]}>
                     <AppText fontSize={16} style={{ color: colors.accent }}>
                         Search
                     </AppText>

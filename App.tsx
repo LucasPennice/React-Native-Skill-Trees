@@ -26,6 +26,8 @@ import { Skill, Tree } from "./src/types";
 import useIsSharingAvailable from "./src/useIsSharingAvailable";
 import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { populateUserId } from "./src/redux/userSlice";
+import { makeid } from "./src/functions/misc";
 
 const prefix = Linking.createURL("/");
 
@@ -119,10 +121,15 @@ function AppWithReduxContext() {
 
     const populateReduxStore = async () => {
         try {
-            const [userTreesKeyValue, canvasDisplaySettingsKeyValue] = await AsyncStorage.multiGet(["@roadmaps", "@canvasDisplaySettings"]);
+            const [userTreesKeyValue, canvasDisplaySettingsKeyValue, userInfoKeyValue] = await AsyncStorage.multiGet([
+                "@roadmaps",
+                "@canvasDisplaySettings",
+                "@userId",
+            ]);
 
             const userTrees = userTreesKeyValue[1];
             const canvasDisplaySettings = canvasDisplaySettingsKeyValue[1];
+            const userId = userInfoKeyValue[1];
 
             if (userTrees !== null && userTrees !== "") {
                 dispatch(populateUserTrees(JSON.parse(userTrees)));
@@ -130,6 +137,12 @@ function AppWithReduxContext() {
 
             if (canvasDisplaySettings !== null && canvasDisplaySettings !== "") {
                 dispatch(populateCanvasDisplaySettings(JSON.parse(canvasDisplaySettings)));
+            }
+
+            if (userId !== null && userId !== "") {
+                dispatch(populateUserId(userId));
+            } else {
+                dispatch(populateUserId(makeid(24)));
             }
         } catch (e) {
             console.log("There has been an error getting the user's roadmaps");

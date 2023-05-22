@@ -25,5 +25,5 @@ export function useRequestProcessor() {
         return queryClient.resetQueries({ queryKey: keys, exact: true });
     }
 
-    return { query, mutate, resetQuery };
+    return { query, mutate, resetQuery, invalidateQueries: queryClient.invalidateQueries };
 }

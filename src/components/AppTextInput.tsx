@@ -10,12 +10,14 @@ function AppTextInput({
     containerStyles,
     onlyContainsLettersAndNumbers,
     onBlur,
+    disable,
 }: {
     textState: [string, (v: string) => void];
     placeholder: string;
     containerStyles?: ViewProps["style"];
     onlyContainsLettersAndNumbers?: boolean;
     onBlur?: () => void;
+    disable?: boolean;
 }) {
     const [text, setText] = textState;
 
@@ -33,10 +35,11 @@ function AppTextInput({
     }, [textInputEmpty]);
 
     const inputStyles = useAnimatedStyle(() => {
+        if (disable) return { marginRight: 0 };
         return {
             marginRight: withSpring(textInputEmpty.value ? 60 : 0, { damping: 25, stiffness: 300 }),
         };
-    }, [textInputEmpty]);
+    }, [textInputEmpty, disable]);
 
     const allowOnlyLettersInInput = (setter: (v: string) => void) => (tentativeInput: string) => {
         //@ts-ignore
@@ -92,13 +95,15 @@ function AppTextInput({
                         }}
                     />
                 </Animated.View>
-                <Animated.View style={[centerFlex, clearButtonStyles, { position: "absolute", height: 60 }]}>
-                    <Pressable style={[centerFlex, { flex: 1, paddingHorizontal: 10 }]} onPress={() => setText("")}>
-                        <AppText style={{ color: "white" }} fontSize={16}>
-                            Clear
-                        </AppText>
-                    </Pressable>
-                </Animated.View>
+                {disable !== true && (
+                    <Animated.View style={[centerFlex, clearButtonStyles, { position: "absolute", height: 60 }]}>
+                        <Pressable style={[centerFlex, { flex: 1, paddingHorizontal: 10 }]} onPress={() => setText("")}>
+                            <AppText style={{ color: "white" }} fontSize={16}>
+                                Clear
+                            </AppText>
+                        </Pressable>
+                    </Animated.View>
+                )}
             </View>
         </KeyboardAvoidingView>
     );

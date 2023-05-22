@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect } from "react";
+import { selectCanvasDisplaySettings } from "./redux/canvasDisplaySettingsSlice";
 import { useAppSelector } from "./redux/reduxHooks";
 import { selectTreeSlice } from "./redux/userTreesSlice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { selectCanvasDisplaySettings } from "./redux/canvasDisplaySettingsSlice";
 import useIsFirstRender from "./useIsFirstRender";
+import { selectUserSlice } from "./redux/userSlice";
 
 function useKeepAsyncStorageUpdated() {
     const { userTrees } = useAppSelector(selectTreeSlice);
+    const { userId } = useAppSelector(selectUserSlice);
     const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
 
     const isFirstRender = useIsFirstRender();
@@ -38,6 +40,12 @@ function useKeepAsyncStorageUpdated() {
             }
         })();
     }, [canvasDisplaySettings]);
+
+    useEffect(() => {
+        if (userId === "") return;
+
+        AsyncStorage.setItem("@userId", userId);
+    }, [userId]);
 }
 
 export default useKeepAsyncStorageUpdated;
