@@ -6,7 +6,7 @@ import { StackNavigatorParams } from "../../../App";
 import CanvasSettingsModal from "../../components/CanvasSettingsModal";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
-import ShareTreeButton from "../../components/takingScreenshot/ShareTree";
+import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeLayout";
 import { IsSharingAvailableContext } from "../../context";
 import { colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
@@ -23,6 +23,7 @@ import AddNodeStateIndicator from "./AddNodeStateIndicator";
 import InteractiveTree from "./canvas/InteractiveTree";
 import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import NewNodeModal from "./modals/NewNodeModal";
+import ShareTreeUrl from "../../components/ShareTreeUrl";
 
 type Mode = "SelectedNode" | "AddingNode" | "TakingScreenshot" | "Idle";
 type Props = NativeStackScreenProps<StackNavigatorParams, "ViewingSkillTree">;
@@ -79,9 +80,10 @@ function ViewingSkillTree({ navigation }: Props) {
             {currentTree && <ProgressIndicatorAndName tree={currentTree} />}
             {(mode === "Idle" || mode === "AddingNode") && <AddNodeStateIndicator openNewNodeModal={() => setNewNodeModal(true)} />}
             {mode === "Idle" && <OpenSettingsMenu openModal={() => setCanvasSettings(true)} />}
+            {currentTree && mode === "Idle" && <ShareTreeUrl tree={currentTree} />}
 
             {currentTree && (
-                <ShareTreeButton
+                <ShareTreeLayout
                     canvasRef={canvasRef}
                     shouldShare={Boolean(shouldRenderShareButton)}
                     takingScreenShotState={[isTakingScreenshot, setIsTakingScreenshot]}

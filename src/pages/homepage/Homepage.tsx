@@ -4,7 +4,7 @@ import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
-import ShareTreeButton from "../../components/takingScreenshot/ShareTree";
+import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeLayout";
 import { cartesianToPositivePolarCoordinates } from "../../functions/coordinateSystem";
 import { mutateEveryTreeNode } from "../../functions/mutateTree";
 import { NAV_HEGIHT, centerFlex, colors } from "../../parameters";
@@ -67,7 +67,7 @@ function Homepage() {
                 </GestureDetector>
                 <ProgressIndicatorAndName tree={homepageTree} />
                 <OpenSettingsMenu openModal={() => setCanvasSettings(true)} />
-                <ShareTreeButton
+                <ShareTreeLayout
                     canvasRef={canvasRef}
                     shouldShare
                     takingScreenShotState={[isTakingScreenshot, setIsTakingScreenshot]}

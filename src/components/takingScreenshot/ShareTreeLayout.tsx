@@ -14,7 +14,7 @@ type Props = {
     canvasRef: RefObject<SkiaDomView>;
 };
 
-function ShareTree({ shouldShare, takingScreenShotState, tree, canvasRef }: Props) {
+function ShareTreeLayout({ shouldShare, takingScreenShotState, tree, canvasRef }: Props) {
     const [isTakingScreenshot, setIsTakingScreenshot] = takingScreenShotState;
     const [permissionResponse, requestPermission] = usePermissions();
 
@@ -61,4 +61,4 @@ function ShareTree({ shouldShare, takingScreenShotState, tree, canvasRef }: Prop
     );
 }
 
-export default ShareTree;
+export default ShareTreeLayout;
