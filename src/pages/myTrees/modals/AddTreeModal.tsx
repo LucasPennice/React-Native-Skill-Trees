@@ -15,6 +15,21 @@ import { appendToUserTree } from "../../../redux/userTreesSlice";
 import { generalStyles } from "../../../styles";
 import { Skill, Tree, getDefaultSkillValue } from "../../../types";
 import { UseQueryResult } from "@tanstack/react-query";
+import { Canvas } from "@shopify/react-native-skia";
+import HierarchicalSkillTree from "../../viewingSkillTree/canvas/HierarchicalSkillTree";
+import {
+    centerNodesInCanvas,
+    getCanvasDimensions,
+    getCoordinatedWithTreeData,
+    getNodesCoordinates,
+    removeTreeDataFromCoordinate,
+} from "../../viewingSkillTree/canvas/coordinateFunctions";
+import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
+import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import useHandleImportTree from "./useHandleImportTree";
+import useHandleCanvasScroll from "../../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
+import { GestureDetector } from "react-native-gesture-handler";
+import LoadingIcon from "../../../components/LoadingIcon";
 
 function AddTreeModal() {
     const { query, resetQuery } = useRequestProcessor();
@@ -28,15 +43,22 @@ function AddTreeModal() {
     const { open } = useAppSelector(selectAddTree);
     const dispatch = useAppDispatch();
     //
-    const q = query(["users", treeImportLink], () => axiosClient.get(`getTreeById/${treeImportLink}`).then((res) => res.data), { enabled: false });
+    const importTreeQuery = query(["getTreeById", treeImportLink], () => axiosClient.get(`getTreeById/${treeImportLink}`).then((res) => res.data), {
+        enabled: false,
+    });
 
     useEffect(() => {
         setTreeName("");
         setSelectedColor("");
         setMode("CREATE_TREE");
         setTreeImportLink("");
-        resetQuery(["users"]);
+        resetQuery(["getTreeById"]);
     }, [open]);
+
+    useEffect(() => {
+        setTreeImportLink("");
+        resetQuery(["getTreeById"]);
+    }, [mode]);
 
     const closeModal = () => dispatch(close());
 
@@ -100,7 +122,7 @@ function AddTreeModal() {
                 )}
                 {mode === "IMPORT_TREE" && (
                     <Animated.View entering={FadeInDown}>
-                        <ImportTree q={q} linkState={[treeImportLink, setTreeImportLink]} />
+                        <ImportTree importTreeQuery={importTreeQuery} linkState={[treeImportLink, setTreeImportLink]} closeModal={closeModal} />
                     </Animated.View>
                 )}
             </>
@@ -108,11 +130,34 @@ function AddTreeModal() {
     );
 }
 
-function ImportTree({ q, linkState }: { q: UseQueryResult<any, unknown>; linkState: [string, (v: string) => void] }) {
-    const { data, isError, isFetching, refetch: fetchTreeFromImportLink } = q;
+function ImportTree({
+    importTreeQuery,
+    linkState,
+    closeModal,
+}: {
+    importTreeQuery: UseQueryResult<any, unknown>;
+    linkState: [string, (v: string) => void];
+    closeModal: () => void;
+}) {
+    const { data, isError, isFetching, refetch: fetchTreeFromImportLink } = importTreeQuery;
     const [treeImportLink, setTreeImportLink] = linkState;
+    const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
+    const { height, width } = useAppSelector(selectScreenDimentions);
 
     const initialState = !isFetching && data === undefined;
+
+    const handleImportTree = useHandleImportTree(data as Tree<Skill> | undefined, closeModal);
+
+    const WIDTH = width - 20;
+    const HEIGHT = height - 200;
+
+    const coordinatesWithTreeData = getNodesCoordinates(data as Tree<Skill>, "hierarchy");
+    const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
+    const canvasDimentions = getCanvasDimensions(nodeCoordinates, { width: WIDTH, height: HEIGHT });
+    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
+    const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
+
+    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, null, undefined);
 
     if (initialState)
         return (
@@ -133,7 +178,7 @@ function ImportTree({ q, linkState }: { q: UseQueryResult<any, unknown>; linkSta
                     onPress={() => fetchTreeFromImportLink()}
                     style={[generalStyles.btn, { backgroundColor: `${colors.line}4D`, opacity: treeImportLink.length === 0 ? 0.5 : 1 }]}>
                     <AppText fontSize={16} style={{ color: colors.accent }}>
-                        Import
+                        Search
                     </AppText>
                 </Pressable>
             </>
@@ -141,17 +186,38 @@ function ImportTree({ q, linkState }: { q: UseQueryResult<any, unknown>; linkSta
 
     if (isFetching)
         return (
-            <AppText fontSize={16} style={{ color: colors.accent }}>
-                Loading...
-            </AppText>
+            <Animated.View entering={FadeInDown} style={[centerFlex, { width: WIDTH, height: HEIGHT }]}>
+                <LoadingIcon />
+            </Animated.View>
         );
 
     return (
-        <>
-            <AppText fontSize={16} style={{ color: colors.accent }}>
-                {JSON.stringify(data)}
-            </AppText>
-        </>
+        <Animated.View entering={FadeInDown} style={[centerFlex, { marginTop: 15, justifyContent: "space-between" }]}>
+            <GestureDetector gesture={canvasGestures}>
+                <View style={[{ width: WIDTH, height: HEIGHT, overflow: "hidden", borderRadius: 10, backgroundColor: colors.background }]}>
+                    <Animated.View style={[transform]}>
+                        <Canvas
+                            style={{
+                                width: canvasDimentions.canvasWidth,
+                                height: canvasDimentions.canvasHeight,
+                            }}>
+                            <HierarchicalSkillTree
+                                nodeCoordinatesCentered={centeredCoordinatedWithTreeData}
+                                selectedNode={null}
+                                showLabel={showLabel}
+                            />
+                        </Canvas>
+                    </Animated.View>
+                </View>
+            </GestureDetector>
+            <View>
+                <Pressable onPress={handleImportTree} style={[generalStyles.btn, { backgroundColor: `${colors.line}4D`, marginTop: 15 }]}>
+                    <AppText fontSize={16} style={{ color: colors.accent }}>
+                        Import
+                    </AppText>
+                </Pressable>
+            </View>
+        </Animated.View>
     );
 }
 
