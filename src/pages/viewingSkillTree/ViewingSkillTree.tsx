@@ -79,8 +79,6 @@ function ViewingSkillTree({ navigation }: Props) {
             )}
             {currentTree && <ProgressIndicatorAndName tree={currentTree} />}
             {(mode === "Idle" || mode === "AddingNode") && <AddNodeStateIndicator openNewNodeModal={() => setNewNodeModal(true)} />}
-            {mode === "Idle" && <OpenSettingsMenu openModal={() => setCanvasSettings(true)} />}
-            {currentTree && mode === "Idle" && <ShareTreeUrl tree={currentTree} />}
 
             {currentTree && (
                 <ShareTreeLayout
@@ -90,6 +88,9 @@ function ViewingSkillTree({ navigation }: Props) {
                     tree={currentTree}
                 />
             )}
+            {currentTree && mode === "Idle" && <ShareTreeUrl tree={currentTree} />}
+
+            {mode === "Idle" && <OpenSettingsMenu openModal={() => setCanvasSettings(true)} />}
 
             <ChildrenHoistSelectorModal
                 open={candidatesToHoistModal}

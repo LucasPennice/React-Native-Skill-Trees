@@ -6,6 +6,9 @@ import { Skill, Tree } from "../../types";
 import AppText from "../AppText";
 import TakingScreenshotLoadingScreenModal from "./TakingScreenshotLoadingScreenModal";
 import { usePermissions } from "expo-media-library";
+import Icon from "react-native-vector-icons";
+import ShareTreeIcon from "../Icons/ShareTreeIcon";
+import ShareScreenshotIcon from "../Icons/ShareScreenshotIcon";
 
 type Props = {
     shouldShare: boolean;
@@ -51,9 +54,7 @@ function ShareTreeLayout({ shouldShare, takingScreenShotState, tree, canvasRef }
                             borderRadius: 10,
                         },
                     ]}>
-                    <AppText fontSize={24} style={{ lineHeight: 33 }}>
-                        🌎
-                    </AppText>
+                    <ShareScreenshotIcon />
                 </Pressable>
             )}
             <TakingScreenshotLoadingScreenModal canvasRef={canvasRef.current!} takingScreenShotState={takingScreenShotState} tree={tree} />

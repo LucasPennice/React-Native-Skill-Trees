@@ -13,6 +13,7 @@ function AppText({
 }) {
     return (
         <Text
+            allowFontScaling={false}
             {...textProps}
             style={[
                 {

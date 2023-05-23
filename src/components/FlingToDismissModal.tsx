@@ -1,9 +1,10 @@
-import { Modal, Pressable, SafeAreaView, View } from "react-native";
+import * as ExpoNavigationBar from "expo-navigation-bar";
+import { createContext, useContext } from "react";
+import { Modal, Platform, Pressable, SafeAreaView, StatusBar, View } from "react-native";
 import { Directions, Gesture, GestureDetector, gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
-import AppText from "./AppText";
-import { createContext, useContext } from "react";
 import { centerFlex, colors } from "../parameters";
+import AppText from "./AppText";
 
 type PropsContext = { closeModal: () => void; children: JSX.Element; leftHeaderButton: { onPress: () => void; title: string } | undefined } | null;
 
@@ -21,6 +22,7 @@ const ModalWithGesturesEnabled = gestureHandlerRootHOC(() => {
         .onStart((e) => {
             runOnJS(closeModal)();
         });
+
     return (
         <GestureDetector gesture={flingGesture}>
             <SafeAreaView style={[{ flex: 1, justifyContent: "flex-end", backgroundColor: colors.darkGray }]}>
@@ -73,8 +75,11 @@ function FlingToDismissModal({
     children: JSX.Element;
     leftHeaderButton?: { onPress: () => void; title: string };
 }) {
+    if (Platform.OS === "android") ExpoNavigationBar.setBackgroundColorAsync(colors.darkGray);
+
     return (
         <Modal animationType="slide" visible={open} onRequestClose={closeModal} presentationStyle={"formSheet"}>
+            <StatusBar backgroundColor={colors.background} barStyle="light-content" />
             <PropsContext.Provider value={{ closeModal, children, leftHeaderButton }}>
                 <ModalWithGesturesEnabled />
             </PropsContext.Provider>

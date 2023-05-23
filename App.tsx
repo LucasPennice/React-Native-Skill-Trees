@@ -28,6 +28,7 @@ import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { populateUserId } from "./src/redux/userSlice";
 import { makeid } from "./src/functions/misc";
+import * as ExpoNavigationBar from "expo-navigation-bar";
 
 const prefix = Linking.createURL("/");
 
@@ -58,6 +59,9 @@ export default function App() {
     const linking = {
         prefixes: [prefix],
     };
+
+    if (Platform.OS === "android") ExpoNavigationBar.setBackgroundColorAsync(colors.darkGray);
+
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <QueryClientProvider client={queryClient}>

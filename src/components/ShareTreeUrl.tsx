@@ -9,6 +9,7 @@ import { Skill, Tree } from "../types";
 import AppText from "./AppText";
 import AppTextInput from "./AppTextInput";
 import FlingToDismissModal from "./FlingToDismissModal";
+import ShareTreeIcon from "./Icons/ShareTreeIcon";
 import LoadingIcon from "./LoadingIcon";
 
 function ShareTreeUrl({ tree }: { tree: Tree<Skill> }) {
@@ -24,7 +25,7 @@ function ShareTreeUrl({ tree }: { tree: Tree<Skill> }) {
     } = mutate(["storeTree", tree, userId], () => axiosClient.post(`shareTree/${userId}`, tree).then((res) => res.data), {});
 
     return (
-        <View style={{ position: "absolute", top: 70, left: 130 }}>
+        <View style={{ position: "absolute", top: 70, left: 70 }}>
             <Pressable
                 disabled={status === "loading"}
                 style={[
@@ -32,9 +33,7 @@ function ShareTreeUrl({ tree }: { tree: Tree<Skill> }) {
                     { width: 50, height: 50, borderRadius: 10, backgroundColor: colors.darkGray, opacity: status === "loading" ? 0.5 : 1 },
                 ]}
                 onPress={() => runMutation()}>
-                <AppText style={{ color: colors.background, fontFamily: "helveticaBold" }} fontSize={16}>
-                    ✈️
-                </AppText>
+                <ShareTreeIcon />
             </Pressable>
 
             <FlingToDismissModal closeModal={() => reset()} open={status !== "idle"}>
