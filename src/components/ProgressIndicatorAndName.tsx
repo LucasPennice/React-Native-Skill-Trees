@@ -5,7 +5,7 @@ import { Circle, Svg, Circle as SvgCircle } from "react-native-svg";
 import { treeCompletedSkillPercentage } from "../functions/extractInformationFromTree";
 import { centerFlex, colors } from "../parameters";
 import { useAppSelector } from "../redux/reduxHooks";
-import { selectScreenDimentions } from "../redux/screenDimentionsSlice";
+import { selectSafeScreenDimentions } from "../redux/screenDimentionsSlice";
 import { Skill, Tree } from "../types";
 import AppText from "./AppText";
 
@@ -35,7 +35,7 @@ export class ProgressWheelParams {
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
 
 function ProgressIndicatorAndName({ tree }: { tree: Tree<Skill> }) {
-    const { width } = useAppSelector(selectScreenDimentions);
+    const { width } = useAppSelector(selectSafeScreenDimentions);
 
     const treeAccentColor = tree.accentColor;
 

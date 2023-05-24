@@ -3,14 +3,14 @@ import { Gesture } from "react-native-gesture-handler";
 import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED, NAV_HEGIHT } from "../../../../parameters";
 import { useAppSelector } from "../../../../redux/reduxHooks";
-import { selectScreenDimentions } from "../../../../redux/screenDimentionsSlice";
+import { selectSafeScreenDimentions } from "../../../../redux/screenDimentionsSlice";
 import { CanvasDimensions, NodeCoordinate } from "../../../../types";
 
 const DEFAULT_SCALE = 1;
 
 function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoordinates?: NodeCoordinate) {
     const { canvasHeight, canvasWidth } = canvasDimentions;
-    const screenDimentions = useAppSelector(selectScreenDimentions);
+    const screenDimentions = useAppSelector(selectSafeScreenDimentions);
 
     const minScale = screenDimentions.width / canvasWidth;
     const MAX_SCALE = 1.4;
@@ -34,7 +34,7 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
 
         offset.value = { x: 0, y: 0 };
         start.value = { x: 0, y: 0 };
-    }, [canvasDimentions]);
+    }, [canvasDimentions.canvasHeight, canvasDimentions.canvasWidth]);
 
     const canvasZoom = Gesture.Pinch()
         .onUpdate((e) => {

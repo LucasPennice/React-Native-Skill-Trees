@@ -4,7 +4,7 @@ import Animated, { useAnimatedStyle, withSequence, withSpring, withTiming } from
 import AppText from "../../components/AppText";
 import { MENU_HIGH_DAMPENING, centerFlex, colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
 import {
     clearNewNodeState,
     selectCurrentTree,
@@ -25,7 +25,7 @@ function AddNodeStateIndicator({ openNewNodeModal }: Props) {
     const currentTree = useAppSelector(selectCurrentTree);
     const { selectedDndZone, newNode } = useAppSelector(selectTreeSlice);
     const tentativeNewTree = useAppSelector(selectTentativeTree);
-    const { width } = useAppSelector(selectScreenDimentions);
+    const { width } = useAppSelector(selectSafeScreenDimentions);
     const dispatch = useAppDispatch();
     //Local State
     const [mode, setMode] = useState<MODES>("IDLE");

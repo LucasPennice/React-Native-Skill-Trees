@@ -12,7 +12,7 @@ import { countSkillNodes, findNodeById, treeCompletedSkillPercentage } from "../
 import { deleteNodeWithNoChildren, editTreeProperties } from "../../../functions/mutateTree";
 import { CIRCLE_SIZE_SELECTED, centerFlex, colors } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode, updateUserTrees } from "../../../redux/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 
@@ -29,7 +29,7 @@ function PopUpMenu({ openChildrenHoistSelector }: Props) {
     //Redux store state
     const currentTree = useAppSelector(selectCurrentTree);
     const { selectedNode } = useAppSelector(selectTreeSlice);
-    const { height, width } = useAppSelector(selectScreenDimentions);
+    const { height, width } = useAppSelector(selectSafeScreenDimentions);
     const dispatch = useAppDispatch();
     //
     const currentNode = findNodeById(currentTree, selectedNode);

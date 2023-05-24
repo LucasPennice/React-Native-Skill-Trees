@@ -8,13 +8,13 @@ import { countCompletedSkillNodes, countSkillNodes, treeCompletedSkillPercentage
 import { centerFlex, colors } from "../../parameters";
 import { setTree } from "../../redux/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { Skill, Tree } from "../../types";
 
 function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tree<Skill>; changeTreeAndNavigateToViewingTree: () => void }) {
     //Redux Related
     const dispatch = useAppDispatch();
-    const { width } = useAppSelector(selectScreenDimentions);
+    const { width } = useAppSelector(selectSafeScreenDimentions);
     const dispatchSetTree = () => dispatch(setTree(element));
     //
     const treeAccentColor = element && element.accentColor ? element.accentColor : colors.accent;

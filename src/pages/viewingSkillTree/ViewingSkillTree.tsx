@@ -66,7 +66,7 @@ function ViewingSkillTree({ navigation }: Props) {
     };
 
     return (
-        <View style={{ position: "relative", backgroundColor: colors.background, overflow: "hidden" }}>
+        <View style={{ position: "relative", backgroundColor: colors.background, flex: 1, overflow: "hidden" }}>
             {currentTree && (
                 <InteractiveTree
                     openChildrenHoistSelector={openChildrenHoistSelector}

@@ -20,7 +20,7 @@ import { open } from "./src/redux/addTreeModalSlice";
 import { populateCanvasDisplaySettings } from "./src/redux/canvasDisplaySettingsSlice";
 import { useAppDispatch } from "./src/redux/reduxHooks";
 import { store } from "./src/redux/reduxStore";
-import { updateDimentions } from "./src/redux/screenDimentionsSlice";
+import { updateSafeScreenDimentions } from "./src/redux/screenDimentionsSlice";
 import { populateUserTrees } from "./src/redux/userTreesSlice";
 import { Skill, Tree } from "./src/types";
 import useIsSharingAvailable from "./src/useIsSharingAvailable";
@@ -176,7 +176,7 @@ function AppWithReduxContext() {
             onLayout={(event) => {
                 onLayoutRootView();
                 var { x, y, width, height } = event.nativeEvent.layout;
-                dispatch(updateDimentions({ width, height }));
+                dispatch(updateSafeScreenDimentions({ width, height }));
             }}>
             <Stack.Navigator
                 initialRouteName={"Home"}

@@ -1,13 +1,14 @@
 import { Blur, Canvas, SkiaDomView, runTiming, useValue } from "@shopify/react-native-skia";
-import { MutableRefObject, useEffect, useRef } from "react";
+import { MutableRefObject, useEffect } from "react";
 import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
-import { NAV_HEGIHT, centerFlex } from "../../../parameters";
+import { centerFlex } from "../../../parameters";
+import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppSelector } from "../../../redux/reduxHooks";
-import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { selectTreeSlice } from "../../../redux/userTreesSlice";
-import { CanvasDimensions, DnDZone, Skill, Tree } from "../../../types";
+import { DnDZone, Skill, Tree } from "../../../types";
 import PopUpMenu from "../components/PopUpMenu";
 import DragAndDropZones from "./DragAndDropZones";
 import HierarchicalSkillTree from "./HierarchicalSkillTree";
@@ -21,7 +22,6 @@ import {
 } from "./coordinateFunctions";
 import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
 import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
-import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
 
 type InteractiveTreeProps = {
     tree: Tree<Skill>;
@@ -34,7 +34,7 @@ type InteractiveTreeProps = {
 
 function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef, openChildrenHoistSelector }: InteractiveTreeProps) {
     //Redux State
-    const screenDimentions = useAppSelector(selectScreenDimentions);
+    const screenDimentions = useAppSelector(selectSafeScreenDimentions);
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
     //Derived State
@@ -83,8 +83,8 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
     return (
         <>
             <GestureDetector gesture={canvasGestures}>
-                <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
-                    <Animated.View style={[transform]}>
+                <View style={[centerFlex, { width: screenDimentions.width, flex: 1 }]}>
+                    <Animated.View style={[transform, { flex: 1 }]}>
                         <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight }} ref={canvasRef}>
                             <HierarchicalSkillTree
                                 nodeCoordinatesCentered={centeredCoordinatedWithTreeData}

@@ -17,16 +17,17 @@ export const screenDimentionsSlice = createSlice({
     name: "screenDimentions",
     initialState,
     reducers: {
-        updateDimentions: (state, action: PayloadAction<ScreenDimentions>) => {
+        updateSafeScreenDimentions: (state, action: PayloadAction<ScreenDimentions>) => {
+            if (state.height !== initialState.height && state.width !== initialState.width) return;
             state.height = action.payload.height;
             state.width = action.payload.width;
         },
     },
 });
 
-export const { updateDimentions } = screenDimentionsSlice.actions;
+export const { updateSafeScreenDimentions } = screenDimentionsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
-export const selectScreenDimentions = (state: RootState) => state.screenDimentions;
+export const selectSafeScreenDimentions = (state: RootState) => state.screenDimentions;
 
 export default screenDimentionsSlice.reducer;

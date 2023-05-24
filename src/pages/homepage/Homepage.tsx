@@ -9,7 +9,7 @@ import { cartesianToPositivePolarCoordinates } from "../../functions/coordinateS
 import { mutateEveryTreeNode } from "../../functions/mutateTree";
 import { NAV_HEGIHT, centerFlex, colors } from "../../parameters";
 import { useAppSelector } from "../../redux/reduxHooks";
-import { selectScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { selectTreeSlice } from "../../redux/userTreesSlice";
 import { Skill, Tree, getDefaultSkillValue } from "../../types";
 import {
@@ -27,7 +27,7 @@ import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 
 function Homepage() {
     //Redux State
-    const screenDimentions = useAppSelector(selectScreenDimentions);
+    const screenDimentions = useAppSelector(selectSafeScreenDimentions);
     const { showLabel, oneColorPerTree, showCircleGuide, homepageTreeColor } = useAppSelector(selectCanvasDisplaySettings);
     const { userTrees } = useAppSelector(selectTreeSlice);
     //State

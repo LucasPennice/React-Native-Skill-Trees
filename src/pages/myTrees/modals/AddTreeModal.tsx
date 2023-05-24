@@ -16,7 +16,7 @@ import { MENU_HIGH_DAMPENING, centerFlex, colors, possibleTreeColors } from "../
 import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
 import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { selectScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { appendToUserTree } from "../../../redux/userTreesSlice";
 import { generalStyles } from "../../../styles";
 import { Skill, Tree, getDefaultSkillValue } from "../../../types";
@@ -143,7 +143,7 @@ function ImportTree({
     const { data, isError, isFetching, refetch: fetchTreeFromImportLink } = importTreeQuery;
     const [treeImportKey, setTreeImportKey] = linkState;
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
-    const { height, width } = useAppSelector(selectScreenDimentions);
+    const { height, width } = useAppSelector(selectSafeScreenDimentions);
 
     const initialState = !isFetching && data === undefined;
 
