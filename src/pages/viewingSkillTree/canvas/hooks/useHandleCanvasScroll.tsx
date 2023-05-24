@@ -8,11 +8,7 @@ import { CanvasDimensions, NodeCoordinate } from "../../../../types";
 
 const DEFAULT_SCALE = 1;
 
-function useHandleCanvasScroll(
-    canvasDimentions: CanvasDimensions,
-    prevCanvasDimensions: CanvasDimensions | null,
-    foundNodeCoordinates?: NodeCoordinate
-) {
+function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoordinates?: NodeCoordinate) {
     const { canvasHeight, canvasWidth } = canvasDimentions;
     const screenDimentions = useAppSelector(selectScreenDimentions);
 
@@ -25,12 +21,7 @@ function useHandleCanvasScroll(
     const scale = useSharedValue(DEFAULT_SCALE);
     const savedScale = useSharedValue(DEFAULT_SCALE);
 
-    const deltaX = prevCanvasDimensions !== null ? canvasDimentions.canvasWidth - prevCanvasDimensions.canvasWidth : 0;
-    const deltaY = prevCanvasDimensions !== null ? canvasDimentions.canvasHeight - prevCanvasDimensions.canvasHeight : 0;
-
-    const canvasDimensionChange = deltaX !== 0 || deltaY !== 0;
-
-    const shouldAnimateTransformation = useShouldAnimateTransformation(foundNodeCoordinates !== undefined || canvasDimensionChange);
+    const shouldAnimateTransformation = useShouldAnimateTransformation(foundNodeCoordinates !== undefined);
 
     useEffect(() => {
         const currentCanvasMinScale = screenDimentions.width / canvasWidth;

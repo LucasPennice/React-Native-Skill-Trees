@@ -40,8 +40,6 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
     //Derived State
     const coordinatesWithTreeData = getNodesCoordinates(tree, "hierarchy");
     //
-    const prevCanvasDimentions = useRef<null | CanvasDimensions>(null);
-    //
     const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
     const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
     const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
@@ -49,10 +47,6 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
     const foundNodeCoordinates = nodeCoordinatesCentered.find((c) => c.id === selectedNode);
     //
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
-
-    useEffect(() => {
-        prevCanvasDimentions.current = canvasDimentions;
-    }, [canvasDimentions]);
 
     const ifSkillNodeRunNodeClick = (nodeId: string) => {
         const node = coordinatesWithTreeData.find((c) => c.nodeId === nodeId && c.category === "SKILL");
@@ -74,7 +68,7 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
         dragAndDropZones,
     });
     const { canvasHeight, canvasWidth } = canvasDimentions;
-    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, prevCanvasDimentions.current, foundNodeCoordinates);
+    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, foundNodeCoordinates);
     //
 
     //Handles the blur animation on tree change
