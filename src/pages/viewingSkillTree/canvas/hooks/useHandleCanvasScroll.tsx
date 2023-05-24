@@ -92,7 +92,10 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
 
     const transform = useAnimatedStyle(() => {
         if (foundNodeCoordinates) {
-            const foundNodeTranslatedX = -foundNodeCoordinates.x + screenDimentions.width - 1.5 * CIRCLE_SIZE_SELECTED;
+            console.log(foundNodeCoordinates.x);
+            const alignCanvasLeftSideWithScreenLeftSide = (canvasWidth - screenDimentions.width) / 2;
+            const foundNodeTranslatedX =
+                alignCanvasLeftSideWithScreenLeftSide - foundNodeCoordinates.x + screenDimentions.width - 1.5 * CIRCLE_SIZE_SELECTED;
 
             const deltaY = canvasHeight / 2 - foundNodeCoordinates.y;
             const foundNodeTranslatedY = canvasHeight / 2 + deltaY - screenDimentions.height / 2 + CIRCLE_SIZE_SELECTED;
