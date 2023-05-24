@@ -78,7 +78,12 @@ function FlingToDismissModal({
     if (Platform.OS === "android") ExpoNavigationBar.setBackgroundColorAsync(colors.darkGray);
 
     return (
-        <Modal animationType="slide" visible={open} onRequestClose={closeModal} presentationStyle={"formSheet"}>
+        <Modal
+            animationType="slide"
+            transparent={Platform.OS === "android" ? true : false}
+            visible={open}
+            onRequestClose={closeModal}
+            presentationStyle={Platform.OS === "android" ? "overFullScreen" : "formSheet"}>
             <StatusBar backgroundColor={colors.background} barStyle="light-content" />
             <PropsContext.Provider value={{ closeModal, children, leftHeaderButton }}>
                 <ModalWithGesturesEnabled />

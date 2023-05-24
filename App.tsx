@@ -1,8 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { NavigationContainer } from "@react-navigation/native";
-import { NativeStackNavigationOptions, createNativeStackNavigator } from "@react-navigation/native-stack";
+import { DarkTheme, NavigationContainer } from "@react-navigation/native";
+import { CardStyleInterpolators, StackNavigationOptions, createStackNavigator } from "@react-navigation/stack";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
+import * as ExpoNavigationBar from "expo-navigation-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useCallback } from "react";
 import { Platform, SafeAreaView, StatusBar, TouchableOpacity, View } from "react-native";
@@ -11,6 +13,7 @@ import { Provider } from "react-redux";
 import AppText from "./src/components/AppText";
 import NavigationBar from "./src/components/NavigationBar";
 import { IsSharingAvailableContext } from "./src/context";
+import { makeid } from "./src/functions/misc";
 import Homepage from "./src/pages/homepage/Homepage";
 import MyTrees from "./src/pages/myTrees/MyTrees";
 import SkillPage from "./src/pages/skillPage/SkillPage";
@@ -21,14 +24,11 @@ import { populateCanvasDisplaySettings } from "./src/redux/canvasDisplaySettings
 import { useAppDispatch } from "./src/redux/reduxHooks";
 import { store } from "./src/redux/reduxStore";
 import { updateSafeScreenDimentions } from "./src/redux/screenDimentionsSlice";
+import { populateUserId } from "./src/redux/userSlice";
 import { populateUserTrees } from "./src/redux/userTreesSlice";
 import { Skill, Tree } from "./src/types";
 import useIsSharingAvailable from "./src/useIsSharingAvailable";
 import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { populateUserId } from "./src/redux/userSlice";
-import { makeid } from "./src/functions/misc";
-import * as ExpoNavigationBar from "expo-navigation-bar";
 
 const prefix = Linking.createURL("/");
 
@@ -46,7 +46,7 @@ export type Routes = {
     props?: StackNavigatorParams[RouteName];
     component: (props: any) => JSX.Element;
     route: RouteName;
-    options?: NativeStackNavigationOptions;
+    options?: StackNavigationOptions;
     hideFromNavBar?: boolean;
     title: string;
 }[];
@@ -56,10 +56,6 @@ const queryClient = new QueryClient();
 export default function App() {
     const isSharingAvailable = useIsSharingAvailable();
 
-    const linking = {
-        prefixes: [prefix],
-    };
-
     if (Platform.OS === "android") ExpoNavigationBar.setBackgroundColorAsync(colors.darkGray);
 
     return (
@@ -67,8 +63,7 @@ export default function App() {
             <QueryClientProvider client={queryClient}>
                 <Provider store={store}>
                     <IsSharingAvailableContext.Provider value={isSharingAvailable}>
-                        <NavigationContainer>
-                            {/* <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}> */}
+                        <NavigationContainer theme={DarkTheme}>
                             <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
                                 {Platform.OS === "android" && <StatusBar />}
                                 <AppWithReduxContext />
@@ -167,8 +162,7 @@ function AppWithReduxContext() {
         return null;
     }
 
-    // const AndroidStack = createStackNavigator<StackNavigatorParams>();
-    const Stack = createNativeStackNavigator<StackNavigatorParams>();
+    const Stack = createStackNavigator<StackNavigatorParams>();
 
     return (
         <View
@@ -181,10 +175,13 @@ function AppWithReduxContext() {
             <Stack.Navigator
                 initialRouteName={"Home"}
                 screenOptions={{
-                    headerStyle: { backgroundColor: colors.background },
+                    headerStyle: { backgroundColor: colors.background, shadowColor: "#00000000" },
                     headerTintColor: colors.accent,
+
                     headerTitleStyle: { fontWeight: "bold" },
                     title: "",
+                    cardStyleInterpolator: Platform.OS == "android" ? CardStyleInterpolators.forFadeFromBottomAndroid : undefined,
+                    presentation: Platform.OS == "android" ? "transparentModal" : undefined,
                 }}>
                 {APP_ROUTES.map((screen) => (
                     <Stack.Screen key={screen.route} name={screen.route} component={screen.component} options={screen.options} />
