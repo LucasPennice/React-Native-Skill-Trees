@@ -1,5 +1,5 @@
 import { Canvas, Circle, DashPathEffect, useCanvasRef } from "@shopify/react-native-skia";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
@@ -9,7 +9,7 @@ import { cartesianToPositivePolarCoordinates } from "../../functions/coordinateS
 import { mutateEveryTreeNode } from "../../functions/mutateTree";
 import { NAV_HEGIHT, centerFlex, colors } from "../../parameters";
 import { useAppSelector } from "../../redux/reduxHooks";
-import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { ScreenDimentions, selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { selectTreeSlice } from "../../redux/userTreesSlice";
 import { Skill, Tree, getDefaultSkillValue } from "../../types";
 import {
@@ -35,14 +35,9 @@ function Homepage() {
     const [canvasSettings, setCanvasSettings] = useState(false);
     //Derived State
     const homepageTree = buildHomepageTree(userTrees, homepageTreeColor);
-    const coordinatesWithTreeData = getNodesCoordinates(homepageTree, "radial");
-    //
-    const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
-    const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
+    const cachedTreeBuild = useMemo(() => handleTreeBuild(homepageTree, screenDimentions), [homepageTree, screenDimentions]);
+    const { canvasDimentions, centeredCoordinatedWithTreeData, nodeCoordinatesCentered } = cachedTreeBuild;
     const { canvasHeight, canvasWidth } = canvasDimentions;
-    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
-    //
-    const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
     const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, undefined);
 
@@ -149,4 +144,16 @@ function buildHomepageTree(userTrees: Tree<Skill>[], homepageTreeColor: string) 
     function increaseLevelByOne(tree: Tree<Skill>): Tree<Skill> {
         return { ...tree, level: tree.level + 1 };
     }
+}
+
+function handleTreeBuild(homepageTree: Tree<Skill>, screenDimentions: { width: number; height: number }) {
+    const coordinatesWithTreeData = getNodesCoordinates(homepageTree, "radial");
+    //
+    const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
+    const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
+    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
+    //
+    const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
+
+    return { canvasDimentions, centeredCoordinatedWithTreeData, nodeCoordinatesCentered };
 }

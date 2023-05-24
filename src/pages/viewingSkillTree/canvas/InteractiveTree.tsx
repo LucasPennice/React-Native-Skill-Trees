@@ -1,12 +1,12 @@
 import { Blur, Canvas, SkiaDomView, runTiming, useValue } from "@shopify/react-native-skia";
-import { MutableRefObject, useEffect } from "react";
+import { MutableRefObject, useCallback, useEffect, useMemo } from "react";
 import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import { centerFlex } from "../../../parameters";
 import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppSelector } from "../../../redux/reduxHooks";
-import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { ScreenDimentions, selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { selectTreeSlice } from "../../../redux/userTreesSlice";
 import { DnDZone, Skill, Tree } from "../../../types";
 import PopUpMenu from "../components/PopUpMenu";
@@ -38,15 +38,10 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
     //Derived State
-    const coordinatesWithTreeData = getNodesCoordinates(tree, "hierarchy");
-    //
-    const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
-    const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
-    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
-    const dragAndDropZones = calculateDragAndDropZones(nodeCoordinatesCentered);
+    const cachedTreeBuild = useMemo(() => handleTreeBuild(tree, screenDimentions), [tree, screenDimentions]);
+    const { centeredCoordinatedWithTreeData, dragAndDropZones, nodeCoordinatesCentered, coordinatesWithTreeData, canvasDimentions } = cachedTreeBuild;
+
     const foundNodeCoordinates = nodeCoordinatesCentered.find((c) => c.id === selectedNode);
-    //
-    const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
     const ifSkillNodeRunNodeClick = (nodeId: string) => {
         const node = coordinatesWithTreeData.find((c) => c.nodeId === nodeId && c.category === "SKILL");
@@ -105,3 +100,16 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
 InteractiveTree.whyDidYouRender = true;
 
 export default InteractiveTree;
+
+function handleTreeBuild(tree: Tree<Skill>, screenDimentions: { width: number; height: number }) {
+    const coordinatesWithTreeData = getNodesCoordinates(tree, "hierarchy");
+    //
+    const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
+    const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
+    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
+    const dragAndDropZones = calculateDragAndDropZones(nodeCoordinatesCentered);
+    //
+    const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
+
+    return { nodeCoordinatesCentered, centeredCoordinatedWithTreeData, dragAndDropZones, coordinatesWithTreeData, canvasDimentions };
+}
