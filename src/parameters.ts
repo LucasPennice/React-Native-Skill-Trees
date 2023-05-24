@@ -41,7 +41,7 @@ export const colors = {
 export const centerFlex: StyleProp<ViewStyle> = { display: "flex", justifyContent: "center", alignItems: "center" };
 
 //☢️ These colors have to be in hex format
-export const possibleTreeColors = ["#FE453A", "#FED739", "#FF9F23", "#50D158", "#40C8E0", "#1982F9", "#BF5AF2", "#FC385F"];
+export const possibleTreeColors = ["#FE453A", "#FED739", "#FF9F23", "#50D158", "#40C8E0", "#1982F9", "#BF5AF2", "#FC385F", "#FFFFFF"];
 
 export const ALLOWED_NODE_SPACING = 0.5;
 

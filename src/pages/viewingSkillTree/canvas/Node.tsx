@@ -73,9 +73,9 @@ function Node({
         };
     };
 
-    const OVERSHOOT_DURATION = isComplete ? 300 : 0;
-    const DELAY_AFTER_OVERSHOOT = isComplete ? 400 : 0;
-    const REMAINING_ANIMATION_DURATION = isComplete ? 400 : 0;
+    const OVERSHOOT_DURATION = isComplete ? 200 : 0;
+    const DELAY_AFTER_OVERSHOOT = isComplete ? 300 : 0;
+    const REMAINING_ANIMATION_DURATION = isComplete ? 300 : 0;
 
     //OUTER RECTANGLE
     const outerRectSizeInitial = 0;

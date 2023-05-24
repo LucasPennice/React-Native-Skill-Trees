@@ -1,8 +1,7 @@
-import { KeyboardAvoidingView, Platform, Pressable, TextInput, View, ViewProps } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import AppText from "./AppText";
-import { useEffect } from "react";
-import { colors, centerFlex } from "../parameters";
+import { KeyboardAvoidingView, Pressable, TextInput, TextInputProps, View, ViewProps } from "react-native";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { centerFlex } from "../parameters";
+import CloseIcon from "./Icons/CloseIcon";
 
 function AppTextInput({
     textState,
@@ -10,6 +9,7 @@ function AppTextInput({
     containerStyles,
     onlyContainsLettersAndNumbers,
     onBlur,
+    inputProps,
     disable,
 }: {
     textState: [string, (v: string) => void];
@@ -18,28 +18,9 @@ function AppTextInput({
     onlyContainsLettersAndNumbers?: boolean;
     onBlur?: () => void;
     disable?: boolean;
+    inputProps: TextInputProps;
 }) {
     const [text, setText] = textState;
-
-    const textInputEmpty = useSharedValue(false);
-
-    useEffect(() => {
-        textInputEmpty.value = text.length !== 0;
-    }, [text]);
-
-    const clearButtonStyles = useAnimatedStyle(() => {
-        return {
-            right: withSpring(textInputEmpty.value ? 0 : -35, { damping: 25, stiffness: 300 }),
-            opacity: withSpring(textInputEmpty.value ? 1 : 0, { damping: 25, stiffness: 300 }),
-        };
-    }, [textInputEmpty]);
-
-    const inputStyles = useAnimatedStyle(() => {
-        if (disable) return { marginRight: 0 };
-        return {
-            marginRight: withSpring(textInputEmpty.value ? 60 : 0, { damping: 25, stiffness: 300 }),
-        };
-    }, [textInputEmpty, disable]);
 
     const allowOnlyLettersInInput = (setter: (v: string) => void) => (tentativeInput: string) => {
         //@ts-ignore
@@ -70,37 +51,49 @@ function AppTextInput({
 
     return (
         <KeyboardAvoidingView behavior={"height"}>
-            <View style={[centerFlex, { flexDirection: "row", position: "relative" }, containerStyles]}>
-                <Animated.View style={[inputStyles, { flex: 1, height: 60 }]}>
-                    <TextInput
-                        blurOnSubmit
-                        //@ts-ignore
-                        enterKeyHint="done"
-                        multiline
-                        onChangeText={updateText}
-                        placeholder={placeholder}
-                        onBlur={onBlur}
-                        value={text}
-                        style={{
-                            backgroundColor: `${colors.line}4D`,
-                            borderRadius: 15,
-                            fontSize: 20,
-                            paddingLeft: 20,
-                            paddingTop: Platform.OS === "ios" ? 18 : 13,
-                            fontFamily: "helvetica",
-                            textAlign: "left",
-                            textAlignVertical: "top",
-                            color: "white",
-                            flex: 1,
-                        }}
-                    />
-                </Animated.View>
+            <View
+                style={[
+                    centerFlex,
+                    { flexDirection: "row", position: "relative", backgroundColor: "#282A2C", borderRadius: 10, paddingVertical: 10 },
+                    containerStyles,
+                ]}>
+                <TextInput
+                    blurOnSubmit
+                    //@ts-ignore
+                    enterKeyHint="done"
+                    multiline
+                    onChangeText={updateText}
+                    placeholder={placeholder}
+                    onBlur={onBlur}
+                    value={text}
+                    allowFontScaling={false}
+                    style={{
+                        fontSize: 20,
+                        paddingLeft: 20,
+                        fontFamily: "helvetica",
+                        textAlign: "left",
+                        textAlignVertical: "center",
+                        color: "white",
+                        flex: 1,
+                        marginRight: disable ? 20 : 50,
+                    }}
+                    {...inputProps}
+                />
                 {disable !== true && (
-                    <Animated.View style={[centerFlex, clearButtonStyles, { position: "absolute", height: 60 }]}>
+                    <Animated.View
+                        style={[
+                            centerFlex,
+                            {
+                                position: "absolute",
+                                height: "100%",
+                                width: 50,
+                                right: 0,
+                            },
+                        ]}
+                        entering={FadeIn}
+                        exiting={FadeOut}>
                         <Pressable style={[centerFlex, { flex: 1, paddingHorizontal: 10 }]} onPress={() => setText("")}>
-                            <AppText style={{ color: "white" }} fontSize={16}>
-                                Clear
-                            </AppText>
+                            <CloseIcon />
                         </Pressable>
                     </Animated.View>
                 )}

@@ -57,8 +57,9 @@ function ShareTreeUrl({ tree }: { tree: Tree<Skill> }) {
                                 Copy this
                             </AppText>
                             <AppTextInput
+                                inputProps={{ selectTextOnFocus: true, multiline: true }}
                                 disable
-                                containerStyles={{ width: width - 20, marginVertical: 15 }}
+                                containerStyles={{ width: width - 20, marginVertical: 15, padding: 0 }}
                                 textState={[treeShareLink, () => {}]}
                                 placeholder={"link"}
                             />

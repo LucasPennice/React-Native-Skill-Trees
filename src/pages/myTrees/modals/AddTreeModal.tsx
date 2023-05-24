@@ -3,7 +3,7 @@ import { UseQueryResult } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Alert, Dimensions, Pressable, View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
-import Animated, { FadeInDown, useAnimatedStyle, withSpring } from "react-native-reanimated";
+import Animated, { FadeInDown, FadeOutUp, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import axiosClient from "../../../../axiosClient";
 import { useRequestProcessor } from "../../../../requestProcessor";
 import AppText from "../../../components/AppText";
@@ -79,11 +79,7 @@ function AddTreeModal() {
     return (
         <FlingToDismissModal closeModal={closeModal} open={open} leftHeaderButton={{ onPress: createNewTree, title: "Add Tree" }}>
             <>
-                <View
-                    style={[
-                        centerFlex,
-                        { flexDirection: "row", backgroundColor: `${colors.line}4D`, height: 50, borderRadius: 10, position: "relative" },
-                    ]}>
+                <View style={[centerFlex, { flexDirection: "row", backgroundColor: "#282A2C", height: 50, borderRadius: 10, position: "relative" }]}>
                     <Animated.View
                         style={[
                             { backgroundColor: `${colors.line}3D`, position: "absolute", height: 50, width: width / 2 - 10, borderRadius: 10 },
@@ -102,7 +98,7 @@ function AddTreeModal() {
                     </Pressable>
                 </View>
                 {mode === "CREATE_TREE" && (
-                    <Animated.View entering={FadeInDown}>
+                    <Animated.View entering={FadeInDown} exiting={FadeOutUp.duration(50)}>
                         <AppTextInput
                             placeholder={"Tree Name"}
                             textState={[treeName, setTreeName]}
@@ -122,7 +118,7 @@ function AddTreeModal() {
                     </Animated.View>
                 )}
                 {mode === "IMPORT_TREE" && (
-                    <Animated.View entering={FadeInDown}>
+                    <Animated.View entering={FadeInDown} exiting={FadeOutUp.duration(50)}>
                         <ImportTree importTreeQuery={importTreeQuery} linkState={[treeImportKey, setTreeImportKey]} closeModal={closeModal} />
                     </Animated.View>
                 )}
@@ -158,7 +154,7 @@ function ImportTree({
     const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
-    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, null, undefined);
+    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, undefined);
 
     if (initialState)
         return (
@@ -172,7 +168,7 @@ function ImportTree({
                 <Pressable
                     disabled={treeImportKey.length === 0}
                     onPress={() => fetchTreeFromImportLink()}
-                    style={[generalStyles.btn, { backgroundColor: `${colors.line}4D`, opacity: treeImportKey.length === 0 ? 0.5 : 1 }]}>
+                    style={[generalStyles.btn, { backgroundColor: "#282A2C", opacity: treeImportKey.length === 0 ? 0.5 : 1 }]}>
                     <AppText fontSize={16} style={{ color: colors.accent }}>
                         Search
                     </AppText>
@@ -207,7 +203,7 @@ function ImportTree({
                 </View>
             </GestureDetector>
             <View>
-                <Pressable onPress={handleImportTree} style={[generalStyles.btn, { backgroundColor: `${colors.line}4D`, marginTop: 15 }]}>
+                <Pressable onPress={handleImportTree} style={[generalStyles.btn, { backgroundColor: "#282A2C", marginTop: 15 }]}>
                     <AppText fontSize={16} style={{ color: colors.accent }}>
                         Import
                     </AppText>

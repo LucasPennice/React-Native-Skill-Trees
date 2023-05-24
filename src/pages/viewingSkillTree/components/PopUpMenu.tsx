@@ -164,9 +164,7 @@ function PopUpMenu({ openChildrenHoistSelector }: Props) {
 
                 <RadioInput text="Mastered" state={[mastered, setMastered]} onPress={toggleCompletionInNode(mastered)} style={{ marginBottom: 20 }} />
 
-                <TouchableOpacity
-                    style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
-                    onPress={goToSkillPage}>
+                <TouchableOpacity style={{ backgroundColor: "#282A2C", borderRadius: 15, padding: 15, width: "100%" }} onPress={goToSkillPage}>
                     <AppText style={{ color: colors.accent }} fontSize={18}>
                         Go To Skill Page
                     </AppText>
@@ -174,9 +172,7 @@ function PopUpMenu({ openChildrenHoistSelector }: Props) {
 
                 <View style={[centerFlex, { justifyContent: "flex-end", flex: 1 }]}>
                     {currentNode.children.length === 0 && (
-                        <TouchableOpacity
-                            style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
-                            onPress={deleteNode}>
+                        <TouchableOpacity style={{ backgroundColor: "#282A2C", borderRadius: 15, padding: 15, width: "100%" }} onPress={deleteNode}>
                             <AppText style={{ color: colors.red }} fontSize={18}>
                                 Delete Node
                             </AppText>
@@ -185,7 +181,7 @@ function PopUpMenu({ openChildrenHoistSelector }: Props) {
 
                     {currentNode.children.length != 0 && (
                         <TouchableOpacity
-                            style={{ backgroundColor: `${colors.line}4D`, borderRadius: 15, padding: 15, width: "100%" }}
+                            style={{ backgroundColor: "#282A2C", borderRadius: 15, padding: 15, width: "100%" }}
                             onPress={() => openChildrenHoistSelector(currentNode.children)}>
                             <AppText style={{ color: colors.red }} fontSize={18}>
                                 Delete Node

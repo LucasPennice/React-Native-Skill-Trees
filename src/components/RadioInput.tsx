@@ -38,7 +38,7 @@ function RadioInput({
                 {
                     flexDirection: "row",
                     justifyContent: "space-between",
-                    backgroundColor: `${colors.line}4D`,
+                    backgroundColor: "#282A2C",
                     borderRadius: 15,
                     paddingHorizontal: 15,
                     height: 60,
