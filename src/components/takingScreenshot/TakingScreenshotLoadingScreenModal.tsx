@@ -43,7 +43,7 @@ function TakingScreenshotLoadingScreenModal({
 
     const closeModal = () => setOpen(false);
 
-    const BAR_WIDHT = width - 50;
+    const BAR_WIDHT = width > 600 ? 550 : width - 50;
 
     const styles = useAnimatedStyle(() => {
         return { width: withTiming(open ? BAR_WIDHT : 0, { duration: 1000, easing: Easing.bezierFn(0.83, 0, 0.17, 1) }) };
@@ -78,7 +78,7 @@ function TakingScreenshotLoadingScreenModal({
                 setTimeout(async () => {
                     const image = canvasRef.makeImageSnapshot();
 
-                    const encodedImage = image.encodeToBase64(ImageFormat.PNG, 100);
+                    const encodedImage = image.encodeToBase64(ImageFormat.PNG, 99);
 
                     const formattedImage = `data:image/png;base64,${encodedImage}`;
 
@@ -94,7 +94,9 @@ function TakingScreenshotLoadingScreenModal({
 }
 
 function LayoutSelector({ selectedImage, tree, cancelSharing }: { selectedImage: string; tree: Tree<Skill>; cancelSharing: () => void }) {
-    const { height, width } = Dimensions.get("screen");
+    const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
+    const width = screenWidth > 600 ? 600 : screenWidth;
+    const height = screenHeight > 400 ? 400 : screenHeight;
 
     //The only purpouse of this piece of state is to trigger a reset function inside MovableCanvasImage with a useEffect
     const [foo, setFoo] = useState(false);
@@ -121,7 +123,10 @@ function LayoutSelector({ selectedImage, tree, cancelSharing }: { selectedImage:
     }, []);
 
     const MovableCanvasImage = gestureHandlerRootHOC(() => {
-        const { height, width } = Dimensions.get("window");
+        const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
+
+        const width = screenWidth > 600 ? 600 : screenWidth;
+        const height = screenHeight > 400 ? 400 : screenHeight;
 
         const start = useSharedValue({ x: 0, y: -height / 4 });
         const offset = useSharedValue({ x: 0, y: -height / 4 });
@@ -204,7 +209,7 @@ function LayoutSelector({ selectedImage, tree, cancelSharing }: { selectedImage:
 
     return (
         <Animated.View style={[centerFlex, { flex: 1, justifyContent: "space-between" }]} entering={FadeInDown}>
-            <View style={{ width, paddingHorizontal: 15, marginTop: 10 }}>
+            <View style={{ width: SCREENSHOT_WIDTH, paddingHorizontal: 15, marginTop: 10 }}>
                 <AppText fontSize={24} style={{ color: "white", fontFamily: "helveticaBold", marginBottom: 10 }}>
                     Edit the layout to your liking
                 </AppText>
@@ -220,6 +225,7 @@ function LayoutSelector({ selectedImage, tree, cancelSharing }: { selectedImage:
                     justifyContent: "center",
                     alignItems: "center",
                     width: SCREENSHOT_WIDTH,
+                    maxHeight: 460,
                     aspectRatio,
                     overflow: "hidden",
                     backgroundColor: colors.background,

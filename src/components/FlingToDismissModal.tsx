@@ -1,6 +1,6 @@
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import { createContext, useContext } from "react";
-import { Modal, Platform, Pressable, SafeAreaView, StatusBar, View } from "react-native";
+import { Dimensions, Modal, Platform, Pressable, SafeAreaView, StatusBar, View } from "react-native";
 import { Directions, Gesture, GestureDetector, gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { centerFlex, colors } from "../parameters";
@@ -12,6 +12,7 @@ const PropsContext = createContext<PropsContext>(null);
 
 const ModalWithGesturesEnabled = gestureHandlerRootHOC(() => {
     const props = useContext(PropsContext);
+    const { width } = Dimensions.get("screen");
 
     if (!props) return <></>;
 
@@ -25,14 +26,8 @@ const ModalWithGesturesEnabled = gestureHandlerRootHOC(() => {
 
     return (
         <GestureDetector gesture={flingGesture}>
-            <SafeAreaView style={[{ flex: 1, justifyContent: "flex-end", backgroundColor: colors.darkGray }]}>
-                <View
-                    style={{
-                        borderRadius: 10,
-                        flex: 1,
-                        width: "100%",
-                        padding: 10,
-                    }}>
+            <SafeAreaView style={[{ justifyContent: "flex-end", backgroundColor: colors.darkGray, flex: 1, maxWidth: 600 }]}>
+                <View style={{ borderRadius: 10, flex: 1, padding: 10 }}>
                     <View style={[centerFlex, { position: "relative" }]}>
                         {leftHeaderButton && (
                             <Pressable onPress={closeModal} style={{ alignSelf: "flex-start" }}>
