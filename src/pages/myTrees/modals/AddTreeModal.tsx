@@ -30,12 +30,14 @@ import {
 } from "../../viewingSkillTree/canvas/coordinateFunctions";
 import useHandleCanvasScroll from "../../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
 import useHandleImportTree from "./useHandleImportTree";
+import EmojiSelector from "../../../components/EmojiSelector";
 
 function AddTreeModal() {
     const { query } = useRequestProcessor();
     const { width } = Dimensions.get("screen");
     //Local State
     const [treeName, setTreeName] = useState("");
+    const [icon, setIcon] = useState<null | string>(null);
     const [treeImportKey, setTreeImportKey] = useState("");
     const [selectedColor, setSelectedColor] = useState("");
     const [mode, setMode] = useState<"CREATE_TREE" | "IMPORT_TREE">("CREATE_TREE");
@@ -66,7 +68,10 @@ function AddTreeModal() {
     const createNewTree = () => {
         if (treeName === "" || selectedColor === "") return Alert.alert("Please fill all of the fields");
 
-        const newTree = createTree(treeName, selectedColor, true, "SKILL_TREE", getDefaultSkillValue(treeName, true));
+        const iconText = icon ?? treeName;
+        const isEmoji = icon === null ? false : true;
+
+        const newTree = createTree(treeName, selectedColor, true, "SKILL_TREE", getDefaultSkillValue(treeName, true, { isEmoji, text: iconText }));
 
         dispatch(appendToUserTree(newTree));
         closeModal();
@@ -114,7 +119,16 @@ function AddTreeModal() {
                         <AppText fontSize={16} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
                             Scroll to see more colors
                         </AppText>
-                        <ColorSelector colorsArray={possibleTreeColors} state={[selectedColor, setSelectedColor]} />
+                        <ColorSelector colorsArray={possibleTreeColors} state={[selectedColor, setSelectedColor]} style={{ marginBottom: 10 }} />
+                        <EmojiSelector
+                            selectedEmoji={icon}
+                            onEmojiClick={(clickedIcon: string) =>
+                                setIcon((p) => {
+                                    if (p === clickedIcon && p !== null) return null;
+                                    return clickedIcon;
+                                })
+                            }
+                        />
                     </Animated.View>
                 )}
                 {mode === "IMPORT_TREE" && (

@@ -1,46 +1,31 @@
-import { useEffect, useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
 import Animated, { useAnimatedStyle, withSequence, withSpring, withTiming } from "react-native-reanimated";
 import AppText from "../../components/AppText";
 import { MENU_HIGH_DAMPENING, centerFlex, colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
-import {
-    clearNewNodeState,
-    selectCurrentTree,
-    selectTentativeTree,
-    selectTreeSlice,
-    setSelectedDndZone,
-    updateUserTrees,
-} from "../../redux/userTreesSlice";
-
-type MODES = "IDLE" | "SELECT_POSITION" | "CONFIRM_POSITION";
+import { clearNewNodeState, selectCurrentTree, selectTentativeTree, setSelectedDndZone, updateUserTrees } from "../../redux/userTreesSlice";
+import { ModalState } from "./ViewingSkillTree";
 
 type Props = {
     openNewNodeModal: () => void;
+    updateUserTree: () => void;
+    returnToIdleState: () => void;
+    resetNewNodePosition: () => void;
+    mode: ModalState;
 };
 
-function AddNodeStateIndicator({ openNewNodeModal }: Props) {
+function AddNodeStateIndicator({ openNewNodeModal, mode, returnToIdleState, updateUserTree, resetNewNodePosition }: Props) {
     //Redux Store
     const currentTree = useAppSelector(selectCurrentTree);
-    const { selectedDndZone, newNode } = useAppSelector(selectTreeSlice);
-    const tentativeNewTree = useAppSelector(selectTentativeTree);
     const { width } = useAppSelector(selectSafeScreenDimentions);
     const dispatch = useAppDispatch();
-    //Local State
-    const [mode, setMode] = useState<MODES>("IDLE");
-
-    useEffect(() => {
-        if (selectedDndZone !== undefined) return setMode("CONFIRM_POSITION");
-        if (newNode) return setMode("SELECT_POSITION");
-
-        return setMode("IDLE");
-    }, [selectedDndZone, newNode]);
 
     const styles = useAnimatedStyle(() => {
-        if (mode === "CONFIRM_POSITION") return { width: withSpring(width - 20, MENU_HIGH_DAMPENING), height: withSpring(50, MENU_HIGH_DAMPENING) };
+        if (mode === "CONFIRM_NEW_NODE_POSITION")
+            return { width: withSpring(width - 20, MENU_HIGH_DAMPENING), height: withSpring(50, MENU_HIGH_DAMPENING) };
 
-        if (mode === "SELECT_POSITION") return { width: withSpring(width - 20, MENU_HIGH_DAMPENING), height: withSpring(80, MENU_HIGH_DAMPENING) };
+        if (mode === "PLACING_NEW_NODE") return { width: withSpring(width - 20, MENU_HIGH_DAMPENING), height: withSpring(80, MENU_HIGH_DAMPENING) };
 
         return {
             width: withSpring(100, MENU_HIGH_DAMPENING),
@@ -49,14 +34,15 @@ function AddNodeStateIndicator({ openNewNodeModal }: Props) {
     }, [mode, currentTree]);
 
     const opacity = useAnimatedStyle(() => {
-        if (mode === "CONFIRM_POSITION") return { opacity: withSequence(withTiming(0, { duration: 0 }), withTiming(1)) };
+        if (mode === "CONFIRM_NEW_NODE_POSITION") return { opacity: withSequence(withTiming(0, { duration: 0 }), withTiming(1)) };
 
-        if (mode === "SELECT_POSITION") return { opacity: withSequence(withTiming(0, { duration: 0 }), withTiming(1)) };
+        if (mode === "PLACING_NEW_NODE") return { opacity: withSequence(withTiming(0, { duration: 0 }), withTiming(1)) };
 
         return { opacity: withSequence(withTiming(0, { duration: 0 }), withTiming(1)) };
     }, [mode, currentTree]);
 
     if (!currentTree) return <></>;
+    if (mode !== "IDLE" && mode !== "CONFIRM_NEW_NODE_POSITION" && mode !== "PLACING_NEW_NODE") return <></>;
 
     return (
         <Animated.View style={[styles, centerFlex, s.container]}>
@@ -69,33 +55,27 @@ function AddNodeStateIndicator({ openNewNodeModal }: Props) {
                     </Pressable>
                 </Animated.View>
             )}
-            {mode === "SELECT_POSITION" && (
+            {mode === "PLACING_NEW_NODE" && (
                 <Animated.View style={[centerFlex, { flexDirection: "row", gap: 20 }, opacity]}>
                     <AppText style={{ color: colors.unmarkedText, width: width - 130 }} fontSize={13}>
                         Click the square where you want to insert your new skill
                     </AppText>
-                    <Pressable onPress={() => dispatch(clearNewNodeState())} style={s.button}>
+                    <Pressable onPress={returnToIdleState} style={s.button}>
                         <AppText style={{ color: colors.red }} fontSize={15}>
                             Cancel
                         </AppText>
                     </Pressable>
                 </Animated.View>
             )}
-            {mode === "CONFIRM_POSITION" && (
+            {mode === "CONFIRM_NEW_NODE_POSITION" && (
                 <Animated.View
                     style={[centerFlex, { flexDirection: "row", justifyContent: "space-between", flex: 1, paddingHorizontal: 10 }, opacity]}>
-                    <Pressable onPress={() => dispatch(setSelectedDndZone(undefined))} style={s.button}>
+                    <Pressable onPress={resetNewNodePosition} style={s.button}>
                         <AppText style={{ color: colors.red }} fontSize={15}>
                             Change position
                         </AppText>
                     </Pressable>
-                    <Pressable
-                        onPress={() => {
-                            dispatch(updateUserTrees(tentativeNewTree));
-                            dispatch(setSelectedDndZone(undefined));
-                            dispatch(clearNewNodeState());
-                        }}
-                        style={s.button}>
+                    <Pressable onPress={updateUserTree} style={s.button}>
                         <AppText style={{ color: colors.accent }} fontSize={15}>
                             Confirm
                         </AppText>

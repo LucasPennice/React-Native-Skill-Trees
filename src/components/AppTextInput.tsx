@@ -18,7 +18,7 @@ function AppTextInput({
     onlyContainsLettersAndNumbers?: boolean;
     onBlur?: () => void;
     disable?: boolean;
-    inputProps: TextInputProps;
+    inputProps?: TextInputProps;
 }) {
     const [text, setText] = textState;
 

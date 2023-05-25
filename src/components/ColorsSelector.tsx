@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { Pressable, ScrollView } from "react-native";
+import { Pressable, ScrollView, StyleProp, ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { centerFlex } from "../parameters";
 
-function ColorSelector({ colorsArray, state }: { colorsArray: string[]; state: [string, (v: string) => void] }) {
+function ColorSelector({ colorsArray, state, style }: { colorsArray: string[]; state: [string, (v: string) => void]; style?: StyleProp<ViewStyle> }) {
     const [selectedColor, setSelectedColor] = state;
 
     const selectColor = (color: string) => () => setSelectedColor(color);
 
     return (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={style} horizontal showsHorizontalScrollIndicator={false}>
             {colorsArray.map((color, idx) => {
                 return <ColorOption key={idx} color={color} selectedColor={selectedColor} selectColor={selectColor(color)} />;
             })}

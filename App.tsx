@@ -116,6 +116,7 @@ function AppWithReduxContext() {
     const [fontsLoaded] = useFonts({
         helvetica: require("./assets/Helvetica.ttf"),
         helveticaBold: require("./assets/Helvetica-Bold.ttf"),
+        emojisMono: require("./assets/NotoEmoji-Regular.ttf"),
     });
 
     const populateReduxStore = async () => {

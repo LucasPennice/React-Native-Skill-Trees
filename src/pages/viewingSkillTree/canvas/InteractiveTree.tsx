@@ -1,12 +1,12 @@
 import { Blur, Canvas, SkiaDomView, runTiming, useValue } from "@shopify/react-native-skia";
-import { MutableRefObject, useCallback, useEffect, useMemo } from "react";
+import { MutableRefObject, useEffect } from "react";
 import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import { centerFlex } from "../../../parameters";
 import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppSelector } from "../../../redux/reduxHooks";
-import { ScreenDimentions, selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { selectTreeSlice } from "../../../redux/userTreesSlice";
 import { DnDZone, Skill, Tree } from "../../../types";
 import PopUpMenu from "../components/PopUpMenu";
@@ -38,8 +38,10 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
     //Derived State
-    const cachedTreeBuild = useMemo(() => handleTreeBuild(tree, screenDimentions), [tree, screenDimentions]);
-    const { centeredCoordinatedWithTreeData, dragAndDropZones, nodeCoordinatesCentered, coordinatesWithTreeData, canvasDimentions } = cachedTreeBuild;
+    const { centeredCoordinatedWithTreeData, dragAndDropZones, nodeCoordinatesCentered, coordinatesWithTreeData, canvasDimentions } = handleTreeBuild(
+        tree,
+        screenDimentions
+    );
 
     const foundNodeCoordinates = nodeCoordinatesCentered.find((c) => c.id === selectedNode);
 

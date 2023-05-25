@@ -31,11 +31,14 @@ export type SkillLevel = {
     starting: string;
 };
 
+export type SkillIcon = { text: string; isEmoji: boolean };
+
 export type Skill = {
     name: string;
     isCompleted?: boolean;
     milestones?: Milestone[];
     skillLevel?: SkillLevel;
+    icon: SkillIcon;
     motivesToLearn?: MotiveToLearn[];
     usefulResources?: SkillResource[];
     logs?: SkillLogs[];
@@ -43,8 +46,8 @@ export type Skill = {
 
 export const skillStringDetailsKeys: (keyof Skill)[] = ["logs", "motivesToLearn"];
 
-export const getDefaultSkillValue = (name: string, isCompleted: boolean): Skill => {
-    return { name, isCompleted };
+export const getDefaultSkillValue = (name: string, isCompleted: boolean, icon: SkillIcon): Skill => {
+    return { name, isCompleted, icon };
 };
 
 export type CartesianCoordinate = { x: number; y: number };

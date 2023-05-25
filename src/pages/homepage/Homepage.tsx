@@ -1,15 +1,18 @@
-import { Canvas, Circle, DashPathEffect, useCanvasRef } from "@shopify/react-native-skia";
-import { useCallback, useMemo, useState } from "react";
-import { View } from "react-native";
+import { Canvas, Circle, DashPathEffect, Path, useCanvasRef } from "@shopify/react-native-skia";
+import { useMemo, useState } from "react";
+import { Dimensions, FlatList, Pressable, SafeAreaView, ScrollView, View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
-import Animated from "react-native-reanimated";
+import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
+import CanvasSettingsModal from "../../components/CanvasSettingsModal";
+import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeLayout";
 import { cartesianToPositivePolarCoordinates } from "../../functions/coordinateSystem";
 import { mutateEveryTreeNode } from "../../functions/mutateTree";
 import { NAV_HEGIHT, centerFlex, colors } from "../../parameters";
+import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { useAppSelector } from "../../redux/reduxHooks";
-import { ScreenDimentions, selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { selectTreeSlice } from "../../redux/userTreesSlice";
 import { Skill, Tree, getDefaultSkillValue } from "../../types";
 import {
@@ -21,9 +24,8 @@ import {
 } from "../viewingSkillTree/canvas/coordinateFunctions";
 import useHandleCanvasScroll from "../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
 import RadialSkillTree from "./RadialSkillTree";
-import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
-import CanvasSettingsModal from "../../components/CanvasSettingsModal";
-import OpenSettingsMenu from "../../components/OpenSettingsMenu";
+import AppText from "../../components/AppText";
+import { generalStyles } from "../../styles";
 
 function Homepage() {
     //Redux State
@@ -129,7 +131,7 @@ function buildHomepageTree(userTrees: Tree<Skill>[], homepageTreeColor: string) 
         nodeId: ROOT_ID,
         isRoot: true,
         children: modifiedUserTrees,
-        data: getDefaultSkillValue("Skill", false),
+        data: getDefaultSkillValue("Skill", false, { isEmoji: false, text: "S" }),
         level: 0,
         parentId: null,
         treeId: "HomepageTree",

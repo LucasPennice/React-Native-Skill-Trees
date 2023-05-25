@@ -26,7 +26,7 @@ export function createTree(treeName: string, color: string, isRoot: boolean, cat
         children: [],
         x: 0,
         y: 0,
-        data: getDefaultSkillValue(data.name.trim(), data.isCompleted ?? false),
+        data: getDefaultSkillValue(data.name.trim(), data.isCompleted ?? false, data.icon),
     };
 
     return result;

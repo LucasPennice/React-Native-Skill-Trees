@@ -9,23 +9,27 @@ import { colors } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectCurrentTree, setNewNode, setSelectedNode } from "../../../redux/userTreesSlice";
 import { getDefaultSkillValue } from "../../../types";
+import EmojiSelector from "../../../components/EmojiSelector";
 
 type Props = {
     closeModal: () => void;
+    confirmAddNewNode: () => void;
     open: boolean;
 };
 
-function NewNodeModal({ closeModal, open }: Props) {
+function AddNodeModal({ closeModal, open, confirmAddNewNode }: Props) {
     const currentTree = useAppSelector(selectCurrentTree);
     const dispatch = useAppDispatch();
 
     const [text, onChangeText] = useState("");
+    const [icon, setIcon] = useState<null | string>(null);
     const [isCompleted, setIsCompleted] = useState(false);
 
     useEffect(() => {
         if (open === false) {
             onChangeText("");
             setIsCompleted(false);
+            setIcon(null);
         }
     }, [open]);
 
@@ -34,17 +38,26 @@ function NewNodeModal({ closeModal, open }: Props) {
 
         if (text === "") return Alert.alert("Please enter a name for the new skill");
 
-        const newNode = createTree(currentTree.treeName, currentTree.accentColor, false, "SKILL", getDefaultSkillValue(text.trim(), isCompleted));
+        const iconText = icon ?? text;
+        const isEmoji = icon === null ? false : true;
+
+        const newNode = createTree(
+            currentTree.treeName,
+            currentTree.accentColor,
+            false,
+            "SKILL",
+            getDefaultSkillValue(text.trim(), isCompleted, { isEmoji, text: iconText })
+        );
 
         dispatch(setNewNode(newNode));
-        closeModal();
+        confirmAddNewNode();
         dispatch(setSelectedNode(null));
     };
 
     return (
         <FlingToDismissModal closeModal={closeModal} open={open} leftHeaderButton={{ onPress: addNewNode, title: "Confirm" }}>
             <View style={{ flex: 1, marginTop: 20 }}>
-                <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }} fontSize={16}>
+                <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }} fontSize={18}>
                     Enter the name of the new skill you'll add to the roadmap
                 </AppText>
 
@@ -52,12 +65,25 @@ function NewNodeModal({ closeModal, open }: Props) {
                     placeholder={"Skill Name"}
                     textState={[text, onChangeText]}
                     onlyContainsLettersAndNumbers
-                    containerStyles={{ marginBottom: 15 }}
+                    containerStyles={{ marginBottom: 10 }}
                 />
-                <RadioInput state={[isCompleted, setIsCompleted]} text={"I Mastered This Skill"} />
+                <RadioInput state={[isCompleted, setIsCompleted]} text={"I Mastered This Skill"} style={{ marginBottom: 10 }} />
+
+                <AppText style={{ color: colors.unmarkedText, marginVertical: 10 }} fontSize={16}>
+                    If you don't select an icon the first letter of the skill name will be used
+                </AppText>
+                <EmojiSelector
+                    selectedEmoji={icon}
+                    onEmojiClick={(clickedIcon: string) =>
+                        setIcon((p) => {
+                            if (p === clickedIcon && p !== null) return null;
+                            return clickedIcon;
+                        })
+                    }
+                />
             </View>
         </FlingToDismissModal>
     );
 }
 
-export default NewNodeModal;
+export default AddNodeModal;

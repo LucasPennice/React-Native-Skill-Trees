@@ -1,14 +1,11 @@
 import { SkiaDomView } from "@shopify/react-native-skia";
+import { usePermissions } from "expo-media-library";
 import { RefObject, useEffect } from "react";
 import { Alert, Pressable } from "react-native";
 import { centerFlex, colors } from "../../parameters";
 import { Skill, Tree } from "../../types";
-import AppText from "../AppText";
-import TakingScreenshotLoadingScreenModal from "./TakingScreenshotLoadingScreenModal";
-import { usePermissions } from "expo-media-library";
-import Icon from "react-native-vector-icons";
-import ShareTreeIcon from "../Icons/ShareTreeIcon";
 import ShareScreenshotIcon from "../Icons/ShareScreenshotIcon";
+import TakingScreenshotLoadingScreenModal from "./TakingScreenshotLoadingScreenModal";
 
 type Props = {
     shouldShare: boolean;
