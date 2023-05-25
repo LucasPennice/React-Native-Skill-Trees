@@ -1,4 +1,4 @@
-import { Blur, Canvas, SkiaDomView, runTiming, useValue } from "@shopify/react-native-skia";
+import { Blur, Canvas, SkiaDomView, runTiming, useFont, useValue } from "@shopify/react-native-skia";
 import { MutableRefObject, useEffect } from "react";
 import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";

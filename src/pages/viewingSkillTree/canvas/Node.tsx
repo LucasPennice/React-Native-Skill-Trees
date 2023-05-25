@@ -37,22 +37,32 @@ function Node({
     groupTransform?: SkiaValue<{ scale: number }[]>;
     circleBlurOnInactive?: SkiaMutableValue<number>;
     treeAccentColor: string;
-    text: { color: string; letter: string };
+    text: { color: string; letter: string; isEmoji: boolean };
     category: NodeCategory;
 }) {
     const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 20);
+    const emojiFont = useFont(require("../../../../assets/NotoEmoji-Regular.ttf"), 17);
 
     const { color, letter } = text;
 
     const { cx, cy } = coord;
 
-    const textWidth = nodeLetterFont ? nodeLetterFont.getTextWidth(letter.toUpperCase()) : 0;
+    const textWidth = getTextWidth();
+
+    const nodeIcon = text.isEmoji ? text.letter : text.letter.toUpperCase();
+
+    function getTextWidth() {
+        if (text.isEmoji && emojiFont) return emojiFont.getTextWidth(letter);
+        if (!text.isEmoji && nodeLetterFont) return nodeLetterFont.getTextWidth(letter.toUpperCase());
+
+        return 0;
+    }
 
     const x = useAnimateSkiaValue({ initialValue: cx, stateToAnimate: cx });
     const y = useAnimateSkiaValue({ initialValue: cy, stateToAnimate: cy });
 
     const textX = useComputedValue(() => x.current - textWidth / 2, [x, textWidth]);
-    const textY = useComputedValue(() => y.current + getHeightForFont(20) / 4 + 1, [y]);
+    const textY = useComputedValue(() => y.current + getHeightForFont(text.isEmoji ? 17 : 20) / 4 + 1, [y]);
 
     const path = useComputedValue(() => {
         const strokeWidth = 2;
@@ -198,7 +208,9 @@ function Node({
     const skillTreeY = useComputedValue(() => {
         return y.current - CIRCLE_SIZE;
     }, [y]);
+
     if (!nodeLetterFont) return <></>;
+    if (!emojiFont) return <></>;
 
     return (
         <Group origin={{ x: cx, y: cy }} transform={groupTransform} opacity={circleBlurOnInactive ?? 1}>
@@ -212,7 +224,7 @@ function Node({
                         color={`${interpolateColors(treeAccentColor, colors.background, 0.49)}`}
                     />
                     <Path path={path} style="stroke" start={start} strokeCap={"round"} strokeWidth={2} color={treeAccentColor} />
-                    <Text x={textX} y={textY} text={letter.toUpperCase()} font={nodeLetterFont} color={color} />
+                    <Text x={textX} y={textY} text={nodeIcon} font={text.isEmoji ? emojiFont : nodeLetterFont} color={color} />
                 </>
             )}
             {category === "SKILL_TREE" && (
@@ -240,14 +252,26 @@ function Node({
                         strokeWidth={2}
                         color={isComplete ? treeAccentColor : colors.line}
                     />
-                    <Text x={textX} y={textY} text={letter.toUpperCase()} font={nodeLetterFont} color={isComplete ? colors.background : color} />
+                    <Text
+                        x={textX}
+                        y={textY}
+                        text={nodeIcon}
+                        font={text.isEmoji ? emojiFont : nodeLetterFont}
+                        color={isComplete ? colors.background : color}
+                    />
                 </>
             )}
             {category === "USER" && (
                 <>
                     <Circle cx={x} cy={y} r={2 * CIRCLE_SIZE} color={colors.background} />
                     <Circle cx={x} cy={y} r={2 * CIRCLE_SIZE} color={treeAccentColor} style={"stroke"} strokeWidth={2} />
-                    <Text x={textX} y={textY} text={letter.toUpperCase()} font={nodeLetterFont} color={isComplete ? color : treeAccentColor} />
+                    <Text
+                        x={textX}
+                        y={textY}
+                        text={nodeIcon}
+                        font={text.isEmoji ? emojiFont : nodeLetterFont}
+                        color={isComplete ? color : treeAccentColor}
+                    />
                 </>
             )}
         </Group>

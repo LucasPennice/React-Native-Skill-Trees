@@ -59,10 +59,6 @@ function ViewingSkillTree({ navigation }: Props) {
         if (selectedNode === null) setModalState("IDLE");
     }, [selectedNode]);
 
-    useEffect(() => {
-        console.log(modalState);
-    }, [modalState]);
-
     const onNodeClick = (id: string) => {
         if (modalState !== "IDLE") return;
         dispatch(setSelectedNode(id));

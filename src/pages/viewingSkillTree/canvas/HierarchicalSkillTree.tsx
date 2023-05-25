@@ -91,7 +91,7 @@ function RenderNode({ node, selectedNode }: { selectedNode: string | null; node:
             isComplete={node.data.isCompleted}
             treeAccentColor={node.accentColor}
             coord={{ cx: node.x, cy: node.y }}
-            text={{ color: textColor, letter: node.data.name[0] }}
+            text={{ color: textColor, isEmoji: node.data.icon.isEmoji, letter: node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0] }}
             category={node.category}
         />
     );

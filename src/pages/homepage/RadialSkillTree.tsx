@@ -112,7 +112,7 @@ function RenderNode({ node, selectedNode }: { selectedNode: string | null; node:
             treeAccentColor={node.accentColor}
             coord={{ cx: node.x, cy: node.y }}
             category={node.category}
-            text={{ color: textColor, letter: node.data.name[0] }}
+            text={{ color: textColor, isEmoji: node.data.icon.isEmoji, letter: node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0] }}
         />
     );
 }
