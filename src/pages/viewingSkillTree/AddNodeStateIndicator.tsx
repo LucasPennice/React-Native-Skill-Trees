@@ -49,7 +49,7 @@ function AddNodeStateIndicator({ openNewNodeModal, mode, returnToIdleState, upda
             {mode === "IDLE" && (
                 <Animated.View style={[centerFlex, { flexDirection: "row", gap: 20 }, opacity]}>
                     <Pressable onPress={openNewNodeModal} style={s.button}>
-                        <AppText style={{ color: colors.accent }} fontSize={15}>
+                        <AppText style={{ color: colors.accent }} textProps={{ ellipsizeMode: "clip", numberOfLines: 1 }} fontSize={15}>
                             Add Node
                         </AppText>
                     </Pressable>

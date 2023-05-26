@@ -6,6 +6,7 @@ import { StackNavigatorParams } from "../../../App";
 import CanvasSettingsModal from "../../components/CanvasSettingsModal";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
+import ShareTreeUrl from "../../components/ShareTreeUrl";
 import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeLayout";
 import { IsSharingAvailableContext } from "../../context";
 import { colors } from "../../parameters";
@@ -22,9 +23,8 @@ import {
 import { DnDZone, Skill, Tree } from "../../types";
 import AddNodeStateIndicator from "./AddNodeStateIndicator";
 import InteractiveTree from "./canvas/InteractiveTree";
-import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 import AddNodeModal from "./modals/AddNodeModal";
-import ShareTreeUrl from "../../components/ShareTreeUrl";
+import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
 
 export type ModalState =
     | "TAKING_SCREENSHOT"

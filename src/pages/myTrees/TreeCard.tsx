@@ -10,6 +10,7 @@ import { setTree } from "../../redux/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { Skill, Tree } from "../../types";
+import AppTextInput from "../../components/AppTextInput";
 
 function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tree<Skill>; changeTreeAndNavigateToViewingTree: () => void }) {
     //Redux Related
@@ -19,7 +20,7 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
     //
     const treeAccentColor = element && element.accentColor ? element.accentColor : colors.accent;
 
-    const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}3D`, 50, 8);
+    const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}3D`, 60, 5);
 
     const completedSkillsQty = countCompletedSkillNodes(element);
     const skillsQty = countSkillNodes(element);
@@ -52,6 +53,8 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
     });
 
     const gestures = Gesture.Exclusive(tapGesture, longPressGesture);
+
+    const isEmojiIcon = element.data.icon.isEmoji;
 
     return (
         <GestureDetector gesture={gestures}>
@@ -102,6 +105,17 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
                         strokeDashoffset={result}
                     />
                 </Svg>
+                <AppText
+                    fontSize={isEmojiIcon ? 25 : 30}
+                    style={{
+                        position: "absolute",
+                        right: isEmojiIcon ? 34 : 39,
+                        color: element.accentColor,
+                        lineHeight: isEmojiIcon ? 28 : undefined,
+                        fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
+                    }}>
+                    {isEmojiIcon ? element.data.icon.text : element.data.icon.text[0]}
+                </AppText>
             </Animated.View>
         </GestureDetector>
     );

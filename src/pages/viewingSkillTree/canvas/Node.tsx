@@ -229,18 +229,16 @@ function Node({
             )}
             {category === "SKILL_TREE" && (
                 <>
-                    {!isComplete && (
-                        <RoundedRect
-                            height={2 * CIRCLE_SIZE}
-                            width={2 * CIRCLE_SIZE}
-                            x={skillTreeX}
-                            y={skillTreeY}
-                            r={5}
-                            style={"fill"}
-                            strokeWidth={2}
-                            color={colors.background}
-                        />
-                    )}
+                    <RoundedRect
+                        height={2 * CIRCLE_SIZE}
+                        width={2 * CIRCLE_SIZE}
+                        x={skillTreeX}
+                        y={skillTreeY}
+                        r={5}
+                        style={"fill"}
+                        strokeWidth={2}
+                        color={colors.background}
+                    />
 
                     <RoundedRect
                         height={2 * CIRCLE_SIZE}
@@ -248,7 +246,7 @@ function Node({
                         x={skillTreeX}
                         y={skillTreeY}
                         r={5}
-                        style={isComplete ? "fill" : "stroke"}
+                        style={"stroke"}
                         strokeWidth={2}
                         color={isComplete ? treeAccentColor : colors.line}
                     />
@@ -257,7 +255,7 @@ function Node({
                         y={textY}
                         text={nodeIcon}
                         font={text.isEmoji ? emojiFont : nodeLetterFont}
-                        color={isComplete ? colors.background : color}
+                        color={isComplete ? color : colors.line}
                     />
                 </>
             )}

@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleProp, ViewStyle } from "react-native";
+import { Pressable, ScrollView, StyleProp, View, ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import { MENU_DAMPENING, centerFlex, colors } from "../parameters";
 import AppText from "./AppText";
@@ -20,11 +20,13 @@ function ColorSelector({
     const selectColor = (color: string) => () => setSelectedColor(color);
 
     return (
-        <ScrollView contentContainerStyle={style} horizontal showsHorizontalScrollIndicator={false}>
-            {colorsArray.map((data, idx) => {
-                return <ColorOption key={idx} data={data} selectedColor={selectedColor} selectColor={selectColor(data.color)} />;
-            })}
-        </ScrollView>
+        <View style={{ height: 70 }}>
+            <ScrollView contentContainerStyle={[style]} horizontal showsHorizontalScrollIndicator={false}>
+                {colorsArray.map((data, idx) => {
+                    return <ColorOption key={idx} data={data} selectedColor={selectedColor} selectColor={selectColor(data.color)} />;
+                })}
+            </ScrollView>
+        </View>
     );
 }
 
@@ -56,7 +58,7 @@ function ColorOption({
                 centerFlex,
                 {
                     width: 70,
-                    marginRight: 25,
+                    marginRight: 10,
                     height: 70,
                 },
             ]}>

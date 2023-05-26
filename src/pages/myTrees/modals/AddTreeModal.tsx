@@ -11,6 +11,7 @@ import AppTextInput from "../../../components/AppTextInput";
 import ColorSelector from "../../../components/ColorsSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import LoadingIcon from "../../../components/LoadingIcon";
+import ShowHideEmojiSelector from "../../../components/ShowHideEmojiSelector";
 import { createTree } from "../../../functions/misc";
 import { MENU_HIGH_DAMPENING, centerFlex, colors, possibleTreeColors } from "../../../parameters";
 import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
@@ -30,7 +31,6 @@ import {
 } from "../../viewingSkillTree/canvas/coordinateFunctions";
 import useHandleCanvasScroll from "../../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
 import useHandleImportTree from "./useHandleImportTree";
-import EmojiSelector from "../../../components/EmojiSelector";
 
 function AddTreeModal() {
     const { query } = useRequestProcessor();
@@ -120,15 +120,8 @@ function AddTreeModal() {
                             Scroll to see more colors
                         </AppText>
                         <ColorSelector colorsArray={possibleTreeColors} state={[selectedColor, setSelectedColor]} style={{ marginBottom: 10 }} />
-                        <EmojiSelector
-                            selectedEmoji={icon}
-                            onEmojiClick={(clickedIcon: string) =>
-                                setIcon((p) => {
-                                    if (p === clickedIcon && p !== null) return null;
-                                    return clickedIcon;
-                                })
-                            }
-                        />
+
+                        <ShowHideEmojiSelector emojiState={[icon, setIcon]} />
                     </Animated.View>
                 )}
                 {mode === "IMPORT_TREE" && (

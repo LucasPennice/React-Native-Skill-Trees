@@ -1,7 +1,10 @@
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Alert, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { Easing, FadeInDown, FadeOutDown, runOnJS, useAnimatedStyle, withSpring } from "react-native-reanimated";
+import Animated, { Easing, FadeInDown, FadeOutDown, FadeOutUp, runOnJS, useAnimatedStyle, withSpring } from "react-native-reanimated";
+import { StackNavigatorParams } from "../../../../App";
 import AppText from "../../../components/AppText";
 import { findNodeById, treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
 import { editTreeProperties } from "../../../functions/mutateTree";
@@ -49,17 +52,25 @@ function PopUpMenu({ openChildrenHoistSelector, selectedTree }: Props) {
     const MENU_WIDTH = width - 3 * CIRCLE_SIZE_SELECTED;
 
     const s = StyleSheet.create({
-        container: {
-            left: 0,
-            top: 10,
-            position: "absolute",
-            height: MENU_HEIGHT,
-            width: MENU_WIDTH,
+        interactiveContainer: {
             backgroundColor: colors.darkGray,
             borderRadius: 20,
             paddingHorizontal: 10,
             paddingTop: 30,
             paddingBottom: 10,
+            width: MENU_WIDTH,
+            overflow: "hidden",
+        },
+        container: {
+            left: 0,
+            top: 10,
+            zIndex: 2,
+            position: "absolute",
+            height: MENU_HEIGHT,
+            width,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
         },
         dragLine: {
             backgroundColor: `${colors.line}`,
@@ -120,74 +131,93 @@ function PopUpMenu({ openChildrenHoistSelector, selectedTree }: Props) {
         });
 
     return (
-        <GestureDetector gesture={flingGesture}>
-            <Animated.View
-                entering={FadeInDown.easing(Easing.elastic()).duration(300)}
-                exiting={FadeOutDown.easing(Easing.elastic()).duration(300)}
-                style={s.container}>
-                <View style={s.dragLine} />
-                <AppText style={{ color: colors.line, marginBottom: 10 }} fontSize={12}>
-                    Drag me down or click the cirlcle to close
-                </AppText>
+        <Animated.View
+            entering={FadeInDown.easing(Easing.elastic()).duration(300)}
+            exiting={FadeOutDown.easing(Easing.elastic()).duration(300)}
+            style={[s.container]}>
+            <GestureDetector gesture={flingGesture}>
+                <Animated.View style={s.interactiveContainer}>
+                    <View style={s.dragLine} />
+                    <AppText style={{ color: colors.line, marginBottom: 10 }} fontSize={12}>
+                        Drag me down or click the cirlcle to close
+                    </AppText>
 
-                <View
-                    style={[
-                        centerFlex,
-                        { flexDirection: "row", backgroundColor: "#282A2C", height: 50, borderRadius: 10, position: "relative", marginBottom: 10 },
-                    ]}>
-                    <Animated.View
+                    <View
                         style={[
+                            centerFlex,
                             {
-                                position: "absolute",
+                                flexDirection: "row",
+                                backgroundColor: "#282A2C",
                                 height: 50,
-                                width: MENU_WIDTH / 2 - 10,
                                 borderRadius: 10,
-                                borderWidth: 1,
-                                borderColor: colors.accent,
+                                position: "relative",
+                                marginBottom: 10,
                             },
-                            transform,
-                        ]}
-                    />
-                    <Pressable onPress={() => setMode("VIEWING")} style={[centerFlex, { flex: 1, height: 50 }]}>
-                        <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
-                            Details
-                        </AppText>
-                    </Pressable>
-                    <Pressable onPress={() => setMode("EDITING")} style={[centerFlex, { height: 50, flex: 1 }]}>
-                        <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
-                            Edit
-                        </AppText>
-                    </Pressable>
-                </View>
+                        ]}>
+                        <Animated.View
+                            style={[
+                                {
+                                    position: "absolute",
+                                    height: 50,
+                                    width: MENU_WIDTH / 2 - 10,
+                                    borderRadius: 10,
+                                    borderWidth: 1,
+                                    borderColor: colors.accent,
+                                },
+                                transform,
+                            ]}
+                        />
+                        <Pressable onPress={() => setMode("VIEWING")} style={[centerFlex, { flex: 1, height: 50 }]}>
+                            <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
+                                Details
+                            </AppText>
+                        </Pressable>
+                        <Pressable onPress={() => setMode("EDITING")} style={[centerFlex, { height: 50, flex: 1 }]}>
+                            <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
+                                Edit
+                            </AppText>
+                        </Pressable>
+                    </View>
 
-                {mode === "EDITING" && (
-                    <>
-                        {showSaveChangesBtn && (
-                            <Pressable onPress={saveChanges} style={[generalStyles.btn, { backgroundColor: "#282A2C", marginBottom: 10 }]}>
-                                <AppText fontSize={16} style={{ color: colors.accent }}>
-                                    Save
-                                </AppText>
-                            </Pressable>
-                        )}
+                    {mode === "EDITING" && (
                         <EditSkill
                             newSkillPropsState={[newSkillProps, setNewSkillProps]}
                             openChildrenHoistSelector={openChildrenHoistSelector}
                             selectedNode={selectedNode}
                             selectedTree={selectedTree}
                         />
-                    </>
+                    )}
+                    {mode === "VIEWING" && <ViewingView selectedNode={selectedNode} />}
+                </Animated.View>
+            </GestureDetector>
+            <Pressable onPress={closePopUpMenu} style={{ right: 0, width: 134, height, position: "absolute" }}>
+                {showSaveChangesBtn && (
+                    <Animated.View
+                        entering={FadeInDown}
+                        exiting={FadeOutUp}
+                        style={{ marginBottom: 10, position: "absolute", right: 20, top: height / 2 + 2 * CIRCLE_SIZE_SELECTED }}>
+                        <Pressable onPress={saveChanges} style={[generalStyles.btn, { backgroundColor: "#282A2C" }]}>
+                            <AppText fontSize={16} style={{ color: colors.accent }}>
+                                Save
+                            </AppText>
+                        </Pressable>
+                    </Animated.View>
                 )}
-
-                {mode === "VIEWING" && <ViewingView />}
-            </Animated.View>
-        </GestureDetector>
+            </Pressable>
+        </Animated.View>
     );
 
-    function ViewingView() {
+    function ViewingView({ selectedNode }: { selectedNode: Tree<Skill> }) {
+        const navigation = useNavigation<NativeStackScreenProps<StackNavigatorParams>["navigation"]>();
+        const goToSkillPage = () => {
+            navigation.navigate("SkillPage", selectedNode);
+        };
         return (
-            <AppText style={{ color: colors.line, marginBottom: 10 }} fontSize={12}>
-                LOL!
-            </AppText>
+            <TouchableOpacity style={[generalStyles.btn, { backgroundColor: "#282A2C", marginBottom: 10 }]} onPress={goToSkillPage}>
+                <AppText style={{ color: colors.accent }} fontSize={16}>
+                    Go To Skill Page
+                </AppText>
+            </TouchableOpacity>
         );
     }
 }
