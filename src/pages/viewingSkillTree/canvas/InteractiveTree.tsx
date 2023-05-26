@@ -7,7 +7,7 @@ import { centerFlex } from "../../../parameters";
 import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppSelector } from "../../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { selectTreeSlice } from "../../../redux/userTreesSlice";
+import { selectCurrentTree, selectTreeSlice } from "../../../redux/userTreesSlice";
 import { DnDZone, Skill, Tree } from "../../../types";
 import PopUpMenu from "../components/PopUpMenu";
 import DragAndDropZones from "./DragAndDropZones";
@@ -35,6 +35,7 @@ type InteractiveTreeProps = {
 function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef, openChildrenHoistSelector }: InteractiveTreeProps) {
     //Redux State
     const screenDimentions = useAppSelector(selectSafeScreenDimentions);
+    const currentTree = useAppSelector(selectCurrentTree);
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
     //Derived State
@@ -94,7 +95,7 @@ function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canv
                     </Animated.View>
                 </View>
             </GestureDetector>
-            {foundNodeCoordinates && <PopUpMenu openChildrenHoistSelector={openChildrenHoistSelector} />}
+            {foundNodeCoordinates && currentTree && <PopUpMenu selectedTree={currentTree} openChildrenHoistSelector={openChildrenHoistSelector} />}
         </>
     );
 }

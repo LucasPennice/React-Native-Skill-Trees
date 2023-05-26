@@ -35,7 +35,7 @@ export type SkillIcon = { text: string; isEmoji: boolean };
 
 export type Skill = {
     name: string;
-    isCompleted?: boolean;
+    isCompleted: boolean;
     milestones?: Milestone[];
     skillLevel?: SkillLevel;
     icon: SkillIcon;

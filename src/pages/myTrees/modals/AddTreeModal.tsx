@@ -87,17 +87,17 @@ function AddTreeModal() {
                 <View style={[centerFlex, { flexDirection: "row", backgroundColor: "#282A2C", height: 50, borderRadius: 10, position: "relative" }]}>
                     <Animated.View
                         style={[
-                            { backgroundColor: `${colors.line}3D`, position: "absolute", height: 50, width: width / 2 - 10, borderRadius: 10 },
+                            { position: "absolute", height: 50, width: width / 2 - 10, borderRadius: 10, borderWidth: 1, borderColor: colors.accent },
                             transform,
                         ]}
                     />
                     <Pressable onPress={() => setMode("CREATE_TREE")} style={[centerFlex, { flex: 1, height: 50 }]}>
-                        <AppText fontSize={16} style={{ color: mode === "CREATE_TREE" ? colors.accent : colors.unmarkedText }}>
+                        <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
                             Create Tree
                         </AppText>
                     </Pressable>
                     <Pressable onPress={() => setMode("IMPORT_TREE")} style={[centerFlex, { height: 50, flex: 1 }]}>
-                        <AppText fontSize={16} style={{ color: mode === "IMPORT_TREE" ? colors.accent : colors.unmarkedText }}>
+                        <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
                             Import Tree
                         </AppText>
                     </Pressable>

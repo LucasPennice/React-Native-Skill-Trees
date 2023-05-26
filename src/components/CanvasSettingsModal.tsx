@@ -41,7 +41,7 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
                 <AppText style={{ color: "white", marginBottom: 10 }} fontSize={24}>
                     Tree Display Menu
                 </AppText>
-                <AppText style={{ color: colors.line, marginBottom: 25 }} fontSize={14}>
+                <AppText style={{ color: colors.unmarkedText, marginBottom: 25 }} fontSize={14}>
                     These settings affect how your tree looks when sharing
                 </AppText>
 
@@ -52,10 +52,10 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
                     <AppText fontSize={18} style={{ color: "#FFFFFF", marginBottom: 10 }}>
                         Homepage Tree Color
                     </AppText>
-                    <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 5, opacity: 0.8 }}>
+                    <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 5 }}>
                         Completed skills and progress bars will show with this color
                     </AppText>
-                    <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 10, opacity: 0.7 }}>
+                    <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
                         Scroll to see more colors
                     </AppText>
                     <ColorSelector colorsArray={possibleTreeColors} state={[homepageTreeColor, updateHomepageTreeColor]} />

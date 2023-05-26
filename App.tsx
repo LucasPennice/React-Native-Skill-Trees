@@ -18,7 +18,7 @@ import Homepage from "./src/pages/homepage/Homepage";
 import MyTrees from "./src/pages/myTrees/MyTrees";
 import SkillPage from "./src/pages/skillPage/SkillPage";
 import ViewingSkillTree from "./src/pages/viewingSkillTree/ViewingSkillTree";
-import { colors } from "./src/parameters";
+import { centerFlex, colors } from "./src/parameters";
 import { open } from "./src/redux/addTreeModalSlice";
 import { populateCanvasDisplaySettings } from "./src/redux/canvasDisplaySettingsSlice";
 import { useAppDispatch } from "./src/redux/reduxHooks";
@@ -94,7 +94,7 @@ function AppWithReduxContext() {
             route: "MyTrees",
             options: {
                 headerRight: (props) => (
-                    <TouchableOpacity onPress={() => dispatch(open())} style={{ paddingVertical: 10, paddingHorizontal: 15 }}>
+                    <TouchableOpacity onPress={() => dispatch(open())} style={[centerFlex, { height: 48, paddingHorizontal: 15 }]}>
                         <AppText style={{ color: props.tintColor }} fontSize={16}>
                             + Add Tree
                         </AppText>

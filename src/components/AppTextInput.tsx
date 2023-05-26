@@ -1,6 +1,6 @@
 import { KeyboardAvoidingView, Pressable, TextInput, TextInputProps, View, ViewProps } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
-import { centerFlex } from "../parameters";
+import { centerFlex, colors } from "../parameters";
 import CloseIcon from "./Icons/CloseIcon";
 
 function AppTextInput({
@@ -67,6 +67,7 @@ function AppTextInput({
                     onBlur={onBlur}
                     value={text}
                     allowFontScaling={false}
+                    placeholderTextColor={colors.line}
                     style={{
                         fontSize: 20,
                         paddingLeft: 20,

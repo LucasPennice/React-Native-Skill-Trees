@@ -73,7 +73,7 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
                     <AppText
                         textProps={{ numberOfLines: 1, ellipsizeMode: "tail" }}
                         fontSize={20}
-                        style={{ color: "white", fontFamily: "helveticaBold", maxWidth: width - 150 }}>
+                        style={{ color: "#FFFFFF", fontFamily: "helveticaBold", maxWidth: width - 150 }}>
                         {element.treeName ?? "tree"}
                     </AppText>
                     <AppText fontSize={20} style={{ color: "#FFFFFF5D" }}>

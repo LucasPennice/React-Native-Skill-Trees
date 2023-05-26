@@ -1,23 +1,27 @@
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
-import { Alert, TouchableOpacity, View } from "react-native";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { Easing, FadeInDown, FadeOutDown, runOnJS } from "react-native-reanimated";
-import { StackNavigatorParams } from "../../../../App";
+import Animated, { Easing, FadeInDown, FadeOutDown, runOnJS, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import AppText from "../../../components/AppText";
-import AppTextInput from "../../../components/AppTextInput";
-import RadioInput from "../../../components/RadioInput";
-import { countSkillNodes, findNodeById, treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
-import { deleteNodeWithNoChildren, editTreeProperties } from "../../../functions/mutateTree";
-import { CIRCLE_SIZE_SELECTED, centerFlex, colors } from "../../../parameters";
+import { findNodeById, treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
+import { editTreeProperties } from "../../../functions/mutateTree";
+import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT, centerFlex, colors } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { removeUserTree, selectCurrentTree, selectTreeSlice, setSelectedNode, updateUserTrees } from "../../../redux/userTreesSlice";
+import { selectTreeSlice, setSelectedNode, updateUserTrees } from "../../../redux/userTreesSlice";
+import { generalStyles } from "../../../styles";
 import { Skill, Tree } from "../../../types";
+import EditSkill from "./EditSkill";
 
 type Props = {
     openChildrenHoistSelector: (candidatesToHoist: Tree<Skill>[]) => void;
+    selectedTree: Tree<Skill>;
+};
+
+export type SkillPropertiesEditableOnPopMenu = {
+    icon: Skill["icon"];
+    name: Skill["name"];
+    isCompleted: Skill["isCompleted"];
 };
 
 //☢️ POP MENU SHOULD ONLY BE ABLE TO OPEN SKILL TYPE NODES
@@ -25,85 +29,86 @@ type Props = {
 //IS THE SKILL NODES
 //THE OTHER NODE TYPES' COMPLETION STATE IS CALCULATED ☢️
 
-function PopUpMenu({ openChildrenHoistSelector }: Props) {
+function PopUpMenu({ openChildrenHoistSelector, selectedTree }: Props) {
     //Redux store state
-    const currentTree = useAppSelector(selectCurrentTree);
-    const { selectedNode } = useAppSelector(selectTreeSlice);
+    const { selectedNode: selectedNodeId } = useAppSelector(selectTreeSlice);
     const { height, width } = useAppSelector(selectSafeScreenDimentions);
     const dispatch = useAppDispatch();
     //
-    const currentNode = findNodeById(currentTree, selectedNode);
+    const selectedNode = findNodeById(selectedTree, selectedNodeId);
+    if (!selectedNode) throw "selectedNode not found at PopUpMenu";
     //Local State
-    const [text, onChangeText] = useState(currentNode ? currentNode.data.name : "Name");
-    const [mastered, setMastered] = useState(currentNode && currentNode.data.isCompleted ? currentNode.data.isCompleted : false);
+    const [newSkillProps, setNewSkillProps] = useState<SkillPropertiesEditableOnPopMenu>({
+        icon: selectedNode.data.icon,
+        isCompleted: selectedNode.data.isCompleted,
+        name: selectedNode.data.name,
+    });
+    const [mode, setMode] = useState<"EDITING" | "VIEWING">("VIEWING");
 
-    const MENU_HEIGHT = 340;
+    const MENU_HEIGHT = height - NAV_HEGIHT - 20;
     const MENU_WIDTH = width - 3 * CIRCLE_SIZE_SELECTED;
 
-    const navigation = useNavigation<NativeStackScreenProps<StackNavigatorParams>["navigation"]>();
+    const s = StyleSheet.create({
+        container: {
+            left: 0,
+            top: 10,
+            position: "absolute",
+            height: MENU_HEIGHT,
+            width: MENU_WIDTH,
+            backgroundColor: colors.darkGray,
+            borderRadius: 20,
+            paddingHorizontal: 10,
+            paddingTop: 30,
+            paddingBottom: 10,
+        },
+        dragLine: {
+            backgroundColor: `${colors.line}`,
+            width: 150,
+            height: 6,
+            top: 15,
+            left: (MENU_WIDTH - 150) / 2,
+            borderRadius: 10,
+            position: "absolute",
+        },
+    });
 
     useEffect(() => {
-        if (selectedNode === null) return;
+        setNewSkillProps({
+            icon: selectedNode.data.icon,
+            isCompleted: selectedNode.data.isCompleted,
+            name: selectedNode.data.name,
+        });
+        setMode("VIEWING");
+    }, [selectedNodeId]);
 
-        onChangeText(currentNode ? currentNode.data.name : "Name");
-        setMastered(currentNode && currentNode.data.isCompleted ? currentNode.data.isCompleted : false);
-    }, [selectedNode]);
+    const transform = useAnimatedStyle(() => {
+        return { left: withSpring(mode === "VIEWING" ? 0 : MENU_WIDTH / 2 - 10, MENU_HIGH_DAMPENING) };
+    }, [mode]);
 
-    if (!currentNode) return <></>;
+    if (!selectedNode) return <></>;
 
-    const deleteTree = () => {
-        if (!currentTree || !currentTree.treeId) return;
+    const showSaveChangesBtn =
+        JSON.stringify(newSkillProps) !==
+        JSON.stringify({ icon: selectedNode.data.icon, isCompleted: selectedNode.data.isCompleted, name: selectedNode.data.name });
 
-        dispatch(removeUserTree(currentTree.treeId));
-        navigation.navigate("MyTrees");
-    };
+    const saveChanges = () => {
+        if (newSkillProps.name === "") return Alert.alert("The skill name cannot be empty");
 
-    const confirmDeleteTree = () =>
-        Alert.alert(
-            `Deleting ${currentNode.data.name} will also delete ${currentTree!.treeName ?? ""}`,
-            "Are you sure you want to continue?",
-            [
-                { text: "No", style: "cancel" },
-                { text: "Yes", onPress: deleteTree, style: "destructive" },
-            ],
-            { cancelable: true }
-        );
+        const updatedTreeNode: Tree<Skill> = {
+            ...selectedNode,
+            data: { ...selectedNode.data, name: newSkillProps.name, isCompleted: newSkillProps.isCompleted, icon: newSkillProps.icon },
+        };
 
-    const deleteNode = () => {
-        if (!currentTree) return undefined;
+        let updatedRootNode = editTreeProperties(selectedTree, selectedNode, updatedTreeNode);
 
-        const isLastChildrenRemaining = countSkillNodes(currentTree) === 1;
+        if (!updatedRootNode) throw "Error saving tree in PopUpMenu";
 
-        if (isLastChildrenRemaining) return confirmDeleteTree();
+        const treeSkillCompletion = treeCompletedSkillPercentage(updatedRootNode);
 
-        const result = deleteNodeWithNoChildren(currentTree, currentNode);
-        dispatch(updateUserTrees(result));
-        dispatch(setSelectedNode(null));
-    };
+        if (treeSkillCompletion === 100) updatedRootNode = { ...updatedRootNode, data: { ...updatedRootNode.data, isCompleted: true } };
+        if (treeSkillCompletion !== 100) updatedRootNode = { ...updatedRootNode, data: { ...updatedRootNode.data, isCompleted: false } };
 
-    const toggleCompletionInNode = (completionState: boolean) => () => {
-        const newProperties = { ...currentNode, data: { ...currentNode.data, isCompleted: !completionState } };
-
-        let result = editTreeProperties(currentTree, currentNode, newProperties);
-
-        if (!result) return undefined;
-
-        const treeSkillCompletion = treeCompletedSkillPercentage(result);
-
-        if (treeSkillCompletion === 100) result = { ...result, data: { ...result.data, isCompleted: true } };
-        if (treeSkillCompletion !== 100) result = { ...result, data: { ...result.data, isCompleted: false } };
-
-        dispatch(updateUserTrees(result));
-    };
-
-    const updateNodeName = () => {
-        if (text === "") return;
-
-        const newProperties = { ...currentNode, data: { ...currentNode.data, name: text } };
-
-        const result = editTreeProperties(currentTree, currentNode, newProperties);
-
-        dispatch(updateUserTrees(result));
+        dispatch(updateUserTrees(updatedRootNode));
     };
 
     const closePopUpMenu = () => dispatch(setSelectedNode(null));
@@ -114,84 +119,77 @@ function PopUpMenu({ openChildrenHoistSelector }: Props) {
             runOnJS(closePopUpMenu)();
         });
 
-    const top = height / 2 - MENU_HEIGHT / 2;
-
-    const goToSkillPage = () => {
-        navigation.navigate("SkillPage", currentNode);
-    };
-
     return (
         <GestureDetector gesture={flingGesture}>
             <Animated.View
                 entering={FadeInDown.easing(Easing.elastic()).duration(300)}
                 exiting={FadeOutDown.easing(Easing.elastic()).duration(300)}
-                style={[
-                    {
-                        left: 0,
-                        top,
-                        position: "absolute",
-                        height: MENU_HEIGHT,
-                        width: MENU_WIDTH,
-                        backgroundColor: colors.darkGray,
-                        borderRadius: 20,
-                        paddingHorizontal: 10,
-                        paddingTop: 30,
-                        paddingBottom: 10,
-                    },
-                ]}>
-                <View
-                    style={{
-                        backgroundColor: `${colors.line}`,
-                        width: 150,
-                        height: 6,
-                        top: 15,
-                        left: (MENU_WIDTH - 150) / 2,
-                        borderRadius: 10,
-                        position: "absolute",
-                    }}
-                />
+                style={s.container}>
+                <View style={s.dragLine} />
                 <AppText style={{ color: colors.line, marginBottom: 10 }} fontSize={12}>
                     Drag me down or click the cirlcle to close
                 </AppText>
 
-                <AppTextInput
-                    onBlur={updateNodeName}
-                    placeholder="Skill Name"
-                    textState={[text, onChangeText]}
-                    onlyContainsLettersAndNumbers
-                    containerStyles={{ marginBottom: 20 }}
-                />
-
-                <RadioInput text="Mastered" state={[mastered, setMastered]} onPress={toggleCompletionInNode(mastered)} style={{ marginBottom: 20 }} />
-
-                <TouchableOpacity style={{ backgroundColor: "#282A2C", borderRadius: 15, padding: 15, width: "100%" }} onPress={goToSkillPage}>
-                    <AppText style={{ color: colors.accent }} fontSize={18}>
-                        Go To Skill Page
-                    </AppText>
-                </TouchableOpacity>
-
-                <View style={[centerFlex, { justifyContent: "flex-end", flex: 1 }]}>
-                    {currentNode.children.length === 0 && (
-                        <TouchableOpacity style={{ backgroundColor: "#282A2C", borderRadius: 15, padding: 15, width: "100%" }} onPress={deleteNode}>
-                            <AppText style={{ color: colors.red }} fontSize={18}>
-                                Delete Node
-                            </AppText>
-                        </TouchableOpacity>
-                    )}
-
-                    {currentNode.children.length != 0 && (
-                        <TouchableOpacity
-                            style={{ backgroundColor: "#282A2C", borderRadius: 15, padding: 15, width: "100%" }}
-                            onPress={() => openChildrenHoistSelector(currentNode.children)}>
-                            <AppText style={{ color: colors.red }} fontSize={18}>
-                                Delete Node
-                            </AppText>
-                        </TouchableOpacity>
-                    )}
+                <View
+                    style={[
+                        centerFlex,
+                        { flexDirection: "row", backgroundColor: "#282A2C", height: 50, borderRadius: 10, position: "relative", marginBottom: 10 },
+                    ]}>
+                    <Animated.View
+                        style={[
+                            {
+                                position: "absolute",
+                                height: 50,
+                                width: MENU_WIDTH / 2 - 10,
+                                borderRadius: 10,
+                                borderWidth: 1,
+                                borderColor: colors.accent,
+                            },
+                            transform,
+                        ]}
+                    />
+                    <Pressable onPress={() => setMode("VIEWING")} style={[centerFlex, { flex: 1, height: 50 }]}>
+                        <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
+                            Details
+                        </AppText>
+                    </Pressable>
+                    <Pressable onPress={() => setMode("EDITING")} style={[centerFlex, { height: 50, flex: 1 }]}>
+                        <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
+                            Edit
+                        </AppText>
+                    </Pressable>
                 </View>
+
+                {mode === "EDITING" && (
+                    <>
+                        {showSaveChangesBtn && (
+                            <Pressable onPress={saveChanges} style={[generalStyles.btn, { backgroundColor: "#282A2C", marginBottom: 10 }]}>
+                                <AppText fontSize={16} style={{ color: colors.accent }}>
+                                    Save
+                                </AppText>
+                            </Pressable>
+                        )}
+                        <EditSkill
+                            newSkillPropsState={[newSkillProps, setNewSkillProps]}
+                            openChildrenHoistSelector={openChildrenHoistSelector}
+                            selectedNode={selectedNode}
+                            selectedTree={selectedTree}
+                        />
+                    </>
+                )}
+
+                {mode === "VIEWING" && <ViewingView />}
             </Animated.View>
         </GestureDetector>
     );
+
+    function ViewingView() {
+        return (
+            <AppText style={{ color: colors.line, marginBottom: 10 }} fontSize={12}>
+                LOL!
+            </AppText>
+        );
+    }
 }
 
 export default PopUpMenu;

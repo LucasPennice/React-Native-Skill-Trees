@@ -1,29 +1,51 @@
-import { useState } from "react";
 import { Pressable, ScrollView, StyleProp, ViewStyle } from "react-native";
-import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
-import { centerFlex } from "../parameters";
+import Animated, { useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
+import { MENU_DAMPENING, centerFlex, colors } from "../parameters";
+import AppText from "./AppText";
 
-function ColorSelector({ colorsArray, state, style }: { colorsArray: string[]; state: [string, (v: string) => void]; style?: StyleProp<ViewStyle> }) {
+function ColorSelector({
+    colorsArray,
+    state,
+    style,
+}: {
+    colorsArray: {
+        label: string;
+        color: string;
+    }[];
+    state: [string, (v: string) => void];
+    style?: StyleProp<ViewStyle>;
+}) {
     const [selectedColor, setSelectedColor] = state;
 
     const selectColor = (color: string) => () => setSelectedColor(color);
 
     return (
         <ScrollView contentContainerStyle={style} horizontal showsHorizontalScrollIndicator={false}>
-            {colorsArray.map((color, idx) => {
-                return <ColorOption key={idx} color={color} selectedColor={selectedColor} selectColor={selectColor(color)} />;
+            {colorsArray.map((data, idx) => {
+                return <ColorOption key={idx} data={data} selectedColor={selectedColor} selectColor={selectColor(data.color)} />;
             })}
         </ScrollView>
     );
 }
 
-function ColorOption({ color, selectedColor, selectColor }: { color: string; selectedColor: string; selectColor: () => void }) {
-    const selected = selectedColor === color;
+function ColorOption({
+    data,
+    selectedColor,
+    selectColor,
+}: {
+    data: {
+        label: string;
+        color: string;
+    };
+    selectedColor: string;
+    selectColor: () => void;
+}) {
+    const selected = selectedColor === data.color;
 
     const styles = useAnimatedStyle(() => {
         return {
-            width: withTiming(selected ? 50 : 30, { duration: 200 }),
-            height: withTiming(selected ? 50 : 30, { duration: 200 }),
+            width: withSpring(selected ? 70 : 50, { ...MENU_DAMPENING }),
+            backgroundColor: withTiming(selected ? data.color : `${data.color}9D`, { duration: 200 }),
         };
     }, [selectedColor]);
 
@@ -33,20 +55,23 @@ function ColorOption({ color, selectedColor, selectColor }: { color: string; sel
             style={[
                 centerFlex,
                 {
-                    width: 50,
+                    width: 70,
                     marginRight: 25,
-                    height: 50,
+                    height: 70,
                 },
             ]}>
             <Animated.View
                 style={[
                     styles,
                     {
-                        borderRadius: 25,
-                        backgroundColor: color,
+                        height: 30,
+                        borderRadius: 10,
                     },
                 ]}
             />
+            <AppText fontSize={14} style={{ color: colors.unmarkedText, marginTop: 5 }}>
+                {data.label}
+            </AppText>
         </Pressable>
     );
 }

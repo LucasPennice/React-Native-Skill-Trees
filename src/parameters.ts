@@ -26,7 +26,7 @@ export const colors = {
     background: "#000000",
     darkGray: "#181A1C",
     line: "#515053",
-    unmarkedText: "#96959B",
+    unmarkedText: "#B1B2B2",
     red: "#FE453A",
     accent: "#1982F9",
     yellow: "#FED739",
@@ -41,7 +41,17 @@ export const colors = {
 export const centerFlex: StyleProp<ViewStyle> = { display: "flex", justifyContent: "center", alignItems: "center" };
 
 //☢️ These colors have to be in hex format
-export const possibleTreeColors = ["#FE453A", "#FED739", "#FF9F23", "#50D158", "#40C8E0", "#1982F9", "#BF5AF2", "#FC385F", "#FFFFFF"];
+export const possibleTreeColors = [
+    { label: "Red", color: "#FE453A" },
+    { label: "Yellow", color: "#FED739" },
+    { label: "Orange", color: "#FF9F23" },
+    { label: "Green", color: "#50D158" },
+    { label: "Sky Blue", color: "#40C8E0" },
+    { label: "Blue", color: "#1982F9" },
+    { label: "Purple", color: "#BF5AF2" },
+    { label: "Magenta", color: "#FC385F" },
+    { label: "White", color: "#FFFFFF" },
+];
 
 export const ALLOWED_NODE_SPACING = 0.5;
 
