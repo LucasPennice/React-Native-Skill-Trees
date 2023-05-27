@@ -131,7 +131,7 @@ function ViewingSkillTree({ navigation }: Props) {
                 candidatesToHoist={candidatesToHoist}
                 closeModalAndClearCandidates={() => {
                     setCandidatesToHoist(null);
-                    () => setModalState("IDLE");
+                    setModalState("IDLE");
                 }}
             />
             <AddNodeModal

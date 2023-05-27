@@ -9,5 +9,12 @@
             }
         },
         "production": {}
+    },
+    "submit": {
+        "production": {
+            "android": {
+                "serviceAccountKeyPath": "../pc-api-4841222116129285801-434-6e6fae20ab81.json"
+            }
+        }
     }
 }

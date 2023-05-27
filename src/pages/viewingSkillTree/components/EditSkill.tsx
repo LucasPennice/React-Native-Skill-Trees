@@ -30,7 +30,7 @@ function EditSkill({
     openChildrenHoistSelector: (candidatesToHoist: Tree<Skill>[]) => void;
 }) {
     const navigation = useNavigation<NativeStackScreenProps<StackNavigatorParams>["navigation"]>();
-    const { height, width } = useAppSelector(selectSafeScreenDimentions);
+    const { width } = useAppSelector(selectSafeScreenDimentions);
     const MENU_WIDTH = width - 3 * CIRCLE_SIZE_SELECTED;
 
     const [newSkillProps, setNewSkillProps] = newSkillPropsState;
@@ -118,7 +118,7 @@ function EditSkill({
                 </TouchableOpacity>
             )}
 
-            {selectedNode.children.length != 0 && (
+            {selectedNode.children.length !== 0 && (
                 <TouchableOpacity
                     style={[generalStyles.btn, { backgroundColor: "#282A2C" }]}
                     onPress={() => openChildrenHoistSelector(selectedNode.children)}>

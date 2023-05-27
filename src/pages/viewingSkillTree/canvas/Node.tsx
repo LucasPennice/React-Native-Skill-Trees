@@ -217,12 +217,14 @@ function Node({
             {category === "SKILL" && (
                 <>
                     <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
+                    {/* eslint-disable-next-line */}
                     <Path path={path} style="stroke" strokeWidth={2} color={colors.line} />
                     <DiffRect
                         inner={animatedinnerRect}
                         outer={animatedOuterRect}
                         color={`${interpolateColors(treeAccentColor, colors.background, 0.49)}`}
                     />
+                    {/* eslint-disable-next-line */}
                     <Path path={path} style="stroke" start={start} strokeCap={"round"} strokeWidth={2} color={treeAccentColor} />
                     <Text x={textX} y={textY} text={nodeIcon} font={text.isEmoji ? emojiFont : nodeLetterFont} color={color} />
                 </>
@@ -235,6 +237,7 @@ function Node({
                         x={skillTreeX}
                         y={skillTreeY}
                         r={5}
+                        // eslint-disable-next-line
                         style={"fill"}
                         strokeWidth={2}
                         color={colors.background}
@@ -246,6 +249,7 @@ function Node({
                         x={skillTreeX}
                         y={skillTreeY}
                         r={5}
+                        // eslint-disable-next-line
                         style={"stroke"}
                         strokeWidth={2}
                         color={isComplete ? treeAccentColor : colors.line}
@@ -262,6 +266,7 @@ function Node({
             {category === "USER" && (
                 <>
                     <Circle cx={x} cy={y} r={2 * CIRCLE_SIZE} color={colors.background} />
+                    {/* eslint-disable-next-line */}
                     <Circle cx={x} cy={y} r={2 * CIRCLE_SIZE} color={treeAccentColor} style={"stroke"} strokeWidth={2} />
                     <Text
                         x={textX}

@@ -10,13 +10,13 @@ function useUpdateTreeWithNewSkillDetails(updatedSkill: Skill, nodeToUpdate: Tre
     const updateSkillDetails = () => {
         const treeToEdit = userTrees.find((tree) => tree.treeId === nodeToUpdate.treeId);
 
-        if (treeToEdit === undefined) throw "useUpdateTreeWithNewSkillDetails tree to edit is undefined";
+        if (treeToEdit === undefined) throw new Error("useUpdateTreeWithNewSkillDetails tree to edit is undefined");
 
         const newProperties = { ...nodeToUpdate, data: { ...updatedSkill } };
 
         const updatedTree = editTreeProperties(treeToEdit, nodeToUpdate, newProperties);
 
-        if (updatedTree === undefined) throw "couldn't update tree useUpdateTreeWithNewSkillDetails";
+        if (updatedTree === undefined) throw new Error("couldn't update tree useUpdateTreeWithNewSkillDetails");
 
         dispatch(updateUserTrees(updatedTree));
     };

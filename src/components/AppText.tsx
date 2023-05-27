@@ -1,4 +1,4 @@
-import { Platform, Text, TextProps } from "react-native";
+import { Text, TextProps } from "react-native";
 
 function AppText({
     style,

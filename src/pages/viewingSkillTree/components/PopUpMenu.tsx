@@ -39,7 +39,7 @@ function PopUpMenu({ openChildrenHoistSelector, selectedTree }: Props) {
     const dispatch = useAppDispatch();
     //
     const selectedNode = findNodeById(selectedTree, selectedNodeId);
-    if (!selectedNode) throw "selectedNode not found at PopUpMenu";
+    if (!selectedNode) throw new Error("selectedNode not found at PopUpMenu");
     //Local State
     const [newSkillProps, setNewSkillProps] = useState<SkillPropertiesEditableOnPopMenu>({
         icon: selectedNode.data.icon,
@@ -112,7 +112,7 @@ function PopUpMenu({ openChildrenHoistSelector, selectedTree }: Props) {
 
         let updatedRootNode = editTreeProperties(selectedTree, selectedNode, updatedTreeNode);
 
-        if (!updatedRootNode) throw "Error saving tree in PopUpMenu";
+        if (!updatedRootNode) throw new Error("Error saving tree in PopUpMenu");
 
         const treeSkillCompletion = treeCompletedSkillPercentage(updatedRootNode);
 

@@ -58,7 +58,7 @@ export function firstIteration(
     return result;
 
     function pushLevel1SubTrees() {
-        if (!tree.children.length) throw "pushLevel1SubTrees";
+        if (!tree.children.length) throw new Error("pushLevel1SubTrees");
 
         for (let idx = 0; idx < tree.children.length; idx++) {
             const firstLevelChildrenMod: RadialTreeMod = { angleInRadians: 0, distanceToCenter: distanceToCenterPerLevel[1], level: 1 };

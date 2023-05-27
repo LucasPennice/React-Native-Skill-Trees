@@ -3,7 +3,6 @@ import { DarkTheme, NavigationContainer } from "@react-navigation/native";
 import { CardStyleInterpolators, StackNavigationOptions, createStackNavigator } from "@react-navigation/stack";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
-import * as Linking from "expo-linking";
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useCallback } from "react";
@@ -29,8 +28,6 @@ import { populateUserTrees } from "./src/redux/userTreesSlice";
 import { Skill, Tree } from "./src/types";
 import useIsSharingAvailable from "./src/useIsSharingAvailable";
 import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
-
-const prefix = Linking.createURL("/");
 
 export type StackNavigatorParams = {
     Home: undefined;
@@ -170,7 +167,7 @@ function AppWithReduxContext() {
             style={{ flex: 1 }}
             onLayout={(event) => {
                 onLayoutRootView();
-                var { x, y, width, height } = event.nativeEvent.layout;
+                var { width, height } = event.nativeEvent.layout;
                 dispatch(updateSafeScreenDimentions({ width, height }));
             }}>
             <Stack.Navigator
@@ -181,8 +178,8 @@ function AppWithReduxContext() {
 
                     headerTitleStyle: { fontWeight: "bold" },
                     title: "",
-                    cardStyleInterpolator: Platform.OS == "android" ? CardStyleInterpolators.forFadeFromBottomAndroid : undefined,
-                    presentation: Platform.OS == "android" ? "transparentModal" : undefined,
+                    cardStyleInterpolator: Platform.OS === "android" ? CardStyleInterpolators.forFadeFromBottomAndroid : undefined,
+                    presentation: Platform.OS === "android" ? "transparentModal" : undefined,
                 }}>
                 {APP_ROUTES.map((screen) => (
                     <Stack.Screen key={screen.route} name={screen.route} component={screen.component} options={screen.options} />

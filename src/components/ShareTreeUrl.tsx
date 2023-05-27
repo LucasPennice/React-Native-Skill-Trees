@@ -14,7 +14,7 @@ import LoadingIcon from "./LoadingIcon";
 
 function ShareTreeUrl({ tree }: { tree: Tree<Skill> }) {
     const { mutate } = useRequestProcessor();
-    const { width, height } = Dimensions.get("screen");
+    const { width } = Dimensions.get("screen");
     const { userId } = useAppSelector(selectUserSlice);
 
     const {

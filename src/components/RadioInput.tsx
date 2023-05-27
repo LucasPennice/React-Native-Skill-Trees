@@ -21,7 +21,7 @@ function RadioInput({
 
     useEffect(() => {
         isMastered.value = mastered;
-    }, [mastered]);
+    }, [mastered, isMastered]);
 
     const left = useAnimatedStyle(() => {
         return { left: withSpring(isMastered.value ? 35 : 5, { damping: 25, stiffness: 300 }) };

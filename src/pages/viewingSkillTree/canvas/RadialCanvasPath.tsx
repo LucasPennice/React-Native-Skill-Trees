@@ -44,6 +44,7 @@ function RadialCanvasPath({
     cp2.moveTo(c2.x, c2.y);
     cp2.addCircle(c2.x, c2.y, 2);
 
+    //eslint-disable-next-line
     return <Path path={res} color={pathColor} style="stroke" strokeWidth={2} />;
 }
 

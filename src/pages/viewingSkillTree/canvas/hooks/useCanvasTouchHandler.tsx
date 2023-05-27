@@ -1,8 +1,8 @@
-import { TouchHandler, TouchInfo, useTouchHandler, useValue } from "@shopify/react-native-skia";
-import { NodeCoordinate, DnDZone, Skill, Tree } from "../../../../types";
+import { TouchHandler, TouchInfo, useTouchHandler } from "@shopify/react-native-skia";
 import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, TOUCH_BUFFER } from "../../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../../redux/reduxHooks";
 import { selectTreeSlice, setSelectedNode } from "../../../../redux/userTreesSlice";
+import { DnDZone, NodeCoordinate, Skill, Tree } from "../../../../types";
 
 type Props = {
     nodeCoordinatesCentered: NodeCoordinate[];
@@ -40,7 +40,7 @@ const useCanvasTouchHandler = ({ nodeCoordinatesCentered, onNodeClick, tree, dra
 
                 if (clickedNode === undefined) return dispatch(setSelectedNode(null));
 
-                if (selectedNode != clickedNode.id && onNodeClick) return onNodeClick(clickedNode.id);
+                if (selectedNode !== clickedNode.id && onNodeClick) return onNodeClick(clickedNode.id);
 
                 return dispatch(setSelectedNode(null));
             },

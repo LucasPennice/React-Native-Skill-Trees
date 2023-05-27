@@ -43,7 +43,7 @@ export const userTreesSlice = createSlice({
             //And then update the value of userTrees with the new state
             const valueToMutate = action.payload;
 
-            if (valueToMutate === undefined) throw "deleteNodeWithNoChildrenFn error fn returned undefined";
+            if (valueToMutate === undefined) throw new Error("deleteNodeWithNoChildrenFn error fn returned undefined");
 
             state.userTrees = state.userTrees.map((tree) => {
                 if (tree.treeId === valueToMutate.treeId) return valueToMutate;

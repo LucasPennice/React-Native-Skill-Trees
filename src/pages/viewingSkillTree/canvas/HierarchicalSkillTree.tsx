@@ -1,12 +1,12 @@
+import { mix, useComputedValue, useSharedValueEffect, useValue } from "@shopify/react-native-skia";
 import { Fragment, useEffect } from "react";
+import { useSharedValue, withSpring } from "react-native-reanimated";
+import { getLabelTextColor } from "../../../functions/misc";
 import { colors } from "../../../parameters";
-import { CoordinatesWithTreeData, CartesianCoordinate, ParentId } from "../../../types";
+import { CartesianCoordinate, CoordinatesWithTreeData } from "../../../types";
 import HierarchicalCanvasPath from "./HierarchicalCanvasPath";
 import Label from "./Label";
 import Node from "./Node";
-import { useSharedValue, withSpring } from "react-native-reanimated";
-import { mix, useComputedValue, useSharedValueEffect, useValue } from "@shopify/react-native-skia";
-import { getLabelTextColor } from "../../../functions/misc";
 
 type TreeProps = {
     nodeCoordinatesCentered: CoordinatesWithTreeData[];

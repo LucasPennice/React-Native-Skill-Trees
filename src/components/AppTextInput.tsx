@@ -31,7 +31,7 @@ function AppTextInput({
 
             const containsSpecialCharacter = !/^[a-zA-Z0-9_ ]*$/.test(result);
 
-            const startWithWhitespace = !/^[^\ ]/.test(result);
+            const startWithWhitespace = !/^[^ ]/.test(result);
 
             if (startWithWhitespace && result !== "") result = result.trimStart();
 

@@ -143,7 +143,7 @@ export function mutateEveryTree(rootNode: Tree<Skill> | undefined, mutation: (v:
 
 export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: Tree<Skill>, newNode: Tree<Skill>) {
     const targetNode = findNodeById(currentTree, selectedDndZone.ofNode);
-    if (!targetNode) throw "couldnt find targetNode on getTentativeModifiedTree";
+    if (!targetNode) throw new Error("couldnt find targetNode on getTentativeModifiedTree");
 
     const treePropertiesToInherit = { accentColor: targetNode.accentColor, treeId: targetNode.treeId, treeName: targetNode.treeName };
 
@@ -183,8 +183,8 @@ export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: 
 
     const parentOfTargetNode = findParentOfNode(currentTree, targetNode.nodeId);
 
-    if (!parentOfTargetNode) throw "couldnt find parentOfTargetNode on getTentativeModifiedTree";
-    if (!parentOfTargetNode.children) throw "parentOfTargetNode.children is undefined on getTentativeModifiedTree";
+    if (!parentOfTargetNode) throw new Error("couldnt find parentOfTargetNode on getTentativeModifiedTree");
+    if (!parentOfTargetNode.children) throw new Error("parentOfTargetNode.children is undefined on getTentativeModifiedTree");
 
     const newChildren: Tree<Skill>[] = [];
 

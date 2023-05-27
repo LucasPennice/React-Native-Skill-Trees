@@ -1,4 +1,4 @@
-import { Text, mix, useComputedValue, useFont, useSharedValueEffect, useValue } from "@shopify/react-native-skia";
+import { mix, useComputedValue, useFont, useSharedValueEffect, useValue } from "@shopify/react-native-skia";
 import { Fragment, useEffect } from "react";
 import { useSharedValue, withSpring } from "react-native-reanimated";
 import { getLabelTextColor } from "../../functions/misc";

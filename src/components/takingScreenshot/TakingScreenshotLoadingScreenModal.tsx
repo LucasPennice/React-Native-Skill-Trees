@@ -1,4 +1,4 @@
-import { ImageFormat, SkiaDomView, rect } from "@shopify/react-native-skia";
+import { ImageFormat, SkiaDomView } from "@shopify/react-native-skia";
 import { shareAsync } from "expo-sharing";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, Dimensions, Pressable, View } from "react-native";
@@ -23,7 +23,7 @@ function TakingScreenshotLoadingScreenModal({
     takingScreenShotState: [boolean, (v: boolean) => void];
     tree: Tree<Skill>;
 }) {
-    const { height, width } = Dimensions.get("screen");
+    const { width } = Dimensions.get("screen");
 
     const [open, setOpen] = takingScreenShotState;
 
@@ -94,9 +94,8 @@ function TakingScreenshotLoadingScreenModal({
 }
 
 function LayoutSelector({ selectedImage, tree, cancelSharing }: { selectedImage: string; tree: Tree<Skill>; cancelSharing: () => void }) {
-    const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
+    const { width: screenWidth } = Dimensions.get("window");
     const width = screenWidth > 600 ? 600 : screenWidth;
-    const height = screenHeight > 400 ? 400 : screenHeight;
 
     //The only purpouse of this piece of state is to trigger a reset function inside MovableCanvasImage with a useEffect
     const [foo, setFoo] = useState(false);
@@ -124,10 +123,10 @@ function LayoutSelector({ selectedImage, tree, cancelSharing }: { selectedImage:
 
     const MovableCanvasImage = gestureHandlerRootHOC(() => {
         const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
-
         const width = screenWidth > 600 ? 600 : screenWidth;
         const height = screenHeight > 400 ? 400 : screenHeight;
 
+        /* eslint-disable react-hooks/rules-of-hooks */
         const start = useSharedValue({ x: 0, y: -height / 4 });
         const offset = useSharedValue({ x: 0, y: -height / 4 });
 
@@ -194,6 +193,8 @@ function LayoutSelector({ selectedImage, tree, cancelSharing }: { selectedImage:
                 borderColor: showBorder.value ? colors.accent : "#FFFFFF00",
             };
         });
+
+        /* eslint-enable react-hooks/rules-of-hooks */
 
         return (
             <GestureDetector gesture={canvasGestures}>

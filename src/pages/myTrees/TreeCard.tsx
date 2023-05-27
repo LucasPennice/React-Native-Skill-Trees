@@ -10,7 +10,6 @@ import { setTree } from "../../redux/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { Skill, Tree } from "../../types";
-import AppTextInput from "../../components/AppTextInput";
 
 function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tree<Skill>; changeTreeAndNavigateToViewingTree: () => void }) {
     //Redux Related

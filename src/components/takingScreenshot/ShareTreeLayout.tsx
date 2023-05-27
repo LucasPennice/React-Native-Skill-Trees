@@ -1,6 +1,6 @@
 import { SkiaDomView } from "@shopify/react-native-skia";
 import { usePermissions } from "expo-media-library";
-import { RefObject, useEffect } from "react";
+import { RefObject, useCallback, useEffect } from "react";
 import { Alert, Pressable } from "react-native";
 import { centerFlex, colors } from "../../parameters";
 import { Skill, Tree } from "../../types";
@@ -18,7 +18,7 @@ function ShareTreeLayout({ shouldShare, takingScreenShotState, tree, canvasRef }
     const [isTakingScreenshot, setIsTakingScreenshot] = takingScreenShotState;
     const [permissionResponse, requestPermission] = usePermissions();
 
-    useEffect(() => {
+    const handleScreenshotPermissions = useCallback(() => {
         if (!isTakingScreenshot) return;
 
         if (!permissionResponse) {
@@ -29,7 +29,11 @@ function ShareTreeLayout({ shouldShare, takingScreenShotState, tree, canvasRef }
             requestPermission();
             return;
         }
-    }, [isTakingScreenshot]);
+    }, []);
+
+    useEffect(() => {
+        handleScreenshotPermissions();
+    }, [handleScreenshotPermissions]);
 
     return (
         <>

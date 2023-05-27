@@ -75,7 +75,7 @@ export function angleBetweenPolarCoordinates(startingCoord: PolarCoordinate, fin
 export function movePointParallelToVector(directionVector: CartesianCoordinate, distanceToMove: number, pointToMove: CartesianCoordinate) {
     const directionVectorModule = Math.sqrt(Math.pow(directionVector.x, 2) + Math.pow(directionVector.y, 2));
 
-    if (directionVectorModule === 0) throw "cannot divide by 0 at movePointParallelToVector";
+    if (directionVectorModule === 0) throw new Error("cannot divide by 0 at movePointParallelToVector");
 
     const directionVersor = { x: directionVector.x / directionVectorModule, y: directionVector.y / directionVectorModule };
 

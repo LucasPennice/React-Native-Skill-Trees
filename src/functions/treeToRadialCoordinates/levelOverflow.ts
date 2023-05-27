@@ -105,7 +105,7 @@ function getAngleSpanPerLevel(subTreesOuterContours: PolarContourByLevel) {
 export function fixLevelOverflow(tree: Tree<Skill>, distanceToCenterPerLevel: DistanceToCenterPerLevel) {
     const result = mutateEveryTree(tree, factoryUpdateRadiusOfTree(distanceToCenterPerLevel, tree));
 
-    if (!result) throw "result undefined at increaseRadiusOfLevelAndBelow";
+    if (!result) throw new Error("result undefined at increaseRadiusOfLevelAndBelow");
 
     return result;
 }
@@ -122,7 +122,7 @@ function factoryUpdateRadiusOfTree(distanceToCenterPerLevel: DistanceToCenterPer
 
         const parentNode = findParentOfNode(wholeTree, tree.nodeId);
 
-        if (!parentNode) throw "!parentNode at factoryUpdateRadiusOfTree";
+        if (!parentNode) throw new Error("!parentNode at factoryUpdateRadiusOfTree");
 
         if (newRadius === oldPolarCoord.distanceToCenter) return result;
 

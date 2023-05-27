@@ -36,6 +36,7 @@ function HierarchicalCanvasPath({ coordinates, pathColor, isRoot }: { coordinate
 
     if (isRoot) return <></>;
 
+    //eslint-disable-next-line
     return <Path path={path} color={pathColor} style="stroke" strokeWidth={3} />;
 }
 

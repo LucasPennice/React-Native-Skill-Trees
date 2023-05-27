@@ -1,11 +1,12 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Fragment, createContext, useState } from "react";
+import { Fragment, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
+import Animated, { FadeOutUp, Layout } from "react-native-reanimated";
 import { StackNavigatorParams } from "../../../App";
 import AppText from "../../components/AppText";
-import { centerFlex, colors } from "../../parameters";
 import { SkillColorContext } from "../../context";
+import { centerFlex, colors } from "../../parameters";
 import { Milestone, MotiveToLearn, Skill, SkillLevel, SkillLogs, SkillModal, SkillResource } from "../../types";
 import Logs from "./DisplayDetails/Logs";
 import MotivesToLearn from "./DisplayDetails/MotivesToLearn";
@@ -21,7 +22,6 @@ import { getDefaultFns } from "./functions";
 import useCheckForUnsavedChanges from "./useCheckForUnsavedChanges";
 import useConfirmLeaveScreenWithoutSaving from "./useConfirmLeaveScreenWithoutSaving";
 import useSaveUpdatedSkillToAsyncStorage from "./useUpdateTreeWithNewSkillDetails";
-import Animated, { FadeOutUp, Layout } from "react-native-reanimated";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "SkillPage">;
 const SKILL_DETAILS_KEYS: (keyof Skill)[] = ["logs", "motivesToLearn", "isCompleted", "milestones", "skillLevel", "usefulResources"];

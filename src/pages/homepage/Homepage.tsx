@@ -1,8 +1,8 @@
-import { Canvas, Circle, DashPathEffect, Path, useCanvasRef } from "@shopify/react-native-skia";
+import { Canvas, Circle, DashPathEffect, useCanvasRef } from "@shopify/react-native-skia";
 import { useMemo, useState } from "react";
-import { Dimensions, FlatList, Pressable, SafeAreaView, ScrollView, View } from "react-native";
+import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
-import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import CanvasSettingsModal from "../../components/CanvasSettingsModal";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
@@ -24,8 +24,6 @@ import {
 } from "../viewingSkillTree/canvas/coordinateFunctions";
 import useHandleCanvasScroll from "../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
 import RadialSkillTree from "./RadialSkillTree";
-import AppText from "../../components/AppText";
-import { generalStyles } from "../../styles";
 
 function Homepage() {
     //Redux State
@@ -87,6 +85,7 @@ function Homepage() {
             <>
                 {levelDistances.map((r, idx) => {
                     return (
+                        // eslint-disable-next-line
                         <Circle key={idx} cx={rootNodeCoord.x} cy={rootNodeCoord.y} r={r} color="gray" style={"stroke"} opacity={0.7}>
                             <DashPathEffect intervals={[10, 10]} />
                         </Circle>
@@ -121,7 +120,7 @@ function buildHomepageTree(userTrees: Tree<Skill>[], homepageTreeColor: string) 
     const modifiedUserTrees = userTrees.map((uT) => {
         const treeWithUpdatedLevel = mutateEveryTreeNode(uT, increaseLevelByOne);
 
-        if (!treeWithUpdatedLevel) throw "buildHomepageTree not treeWithUpdatedLevel";
+        if (!treeWithUpdatedLevel) throw new Error("buildHomepageTree not treeWithUpdatedLevel");
 
         return { ...treeWithUpdatedLevel, isRoot: false, parentId: ROOT_ID };
     });

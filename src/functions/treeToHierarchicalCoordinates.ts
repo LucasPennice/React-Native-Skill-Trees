@@ -205,14 +205,14 @@ export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, s
     const nodesInConflictLCA = findLowestCommonAncestorIdOfNodes(result, ...nodesInConflict);
     const LCANode = findNodeById(result, nodesInConflictLCA);
 
-    if (!nodesInConflictLCA) throw "getTreesToShift nodesInConflictLCA";
-    if (!LCANode) throw "getTreesToShift LCANode";
+    if (!nodesInConflictLCA) throw new Error("getTreesToShift nodesInConflictLCA");
+    if (!LCANode) throw new Error("getTreesToShift LCANode");
 
     const pathToRightNode = returnPathFromRootToNode(result, nodesInConflict[1]);
     const pathToLeftNode = returnPathFromRootToNode(result, nodesInConflict[0]);
     const lcaIndex: number = pathToRightNode.findIndex((id) => id === nodesInConflictLCA);
 
-    if (lcaIndex === -1) throw "getTreesToShift lcaIndex error";
+    if (lcaIndex === -1) throw new Error("getTreesToShift lcaIndex error");
 
     treesToShift.byBiggestOverlap = treesToShiftByBiggestOverlap(result);
 
@@ -237,7 +237,7 @@ export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, s
             const rightConflictingChildIdx = LCANode!.children.findIndex((t) => t.nodeId === rightConflictingChildId);
 
             if (leftConflictingChildIdx === -1 || rightConflictingChildIdx === -1)
-                throw "LCANode children not found at fn getAllNodesInBetweenConflictingTrees";
+                throw new Error("LCANode children not found at fn getAllNodesInBetweenConflictingTrees");
 
             for (let i = leftConflictingChildIdx + 1; i < rightConflictingChildIdx; i++) {
                 const treeToShift = LCANode!.children[i];

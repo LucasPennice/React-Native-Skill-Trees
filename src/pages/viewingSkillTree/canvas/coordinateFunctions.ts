@@ -122,7 +122,7 @@ function dndZonesFromNodeCoord(nodeCoord: NodeCoordinate, dndType: DnDZone["type
             ofNode: nodeCoord.id,
         };
 
-    throw "dndType not supported in coordOfDnDZoneBasedOnNodeCoord";
+    throw new Error("dndType not supported in coordOfDnDZoneBasedOnNodeCoord");
 }
 
 export function calculateDragAndDropZones(nodeCoordinatesCentered: NodeCoordinate[]) {

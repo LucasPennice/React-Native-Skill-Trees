@@ -6,9 +6,13 @@ import { runOnJS } from "react-native-reanimated";
 import { centerFlex, colors } from "../parameters";
 import AppText from "./AppText";
 
-type PropsContext = { closeModal: () => void; children: JSX.Element; leftHeaderButton: { onPress: () => void; title: string } | undefined } | null;
+type PropsContextType = {
+    closeModal: () => void;
+    children: JSX.Element;
+    leftHeaderButton: { onPress: () => void; title: string } | undefined;
+} | null;
 
-const PropsContext = createContext<PropsContext>(null);
+const PropsContext = createContext<PropsContextType>(null);
 
 const ModalWithGesturesEnabled = gestureHandlerRootHOC(() => {
     const props = useContext(PropsContext);

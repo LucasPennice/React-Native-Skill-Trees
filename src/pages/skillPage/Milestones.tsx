@@ -1,13 +1,13 @@
 import { useContext, useRef } from "react";
-import { Dimensions, Pressable, StyleSheet, View } from "react-native";
+import { Dimensions, Pressable, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import Animated, { Layout } from "react-native-reanimated";
 import AppText from "../../components/AppText";
+import { SkillColorContext } from "../../context";
 import { centerFlex, colors } from "../../parameters";
+import { generalStyles } from "../../styles";
 import { Milestone } from "../../types";
 import { LeftAction, RightAction } from "./DisplayDetails/ActionButtons";
-import { SkillColorContext } from "../../context";
-import { generalStyles } from "../../styles";
 
 function Milestones({
     milestones,

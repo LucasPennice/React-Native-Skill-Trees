@@ -8,11 +8,11 @@ function useCheckForUnsavedChanges(updatedSkill: Skill, nodeToUpdate: Tree<Skill
 
     const treeToEdit = userTrees.find((tree) => tree.treeId === nodeToUpdate.treeId);
 
-    if (treeToEdit === undefined) throw "useCheckForUnsavedChanges tree to edit is undefined";
+    if (treeToEdit === undefined) throw new Error("useCheckForUnsavedChanges tree to edit is undefined");
 
     const node = findNodeById(treeToEdit, nodeToUpdate.nodeId);
 
-    if (node === undefined) throw "useCheckForUnsavedChanges node undefined";
+    if (node === undefined) throw new Error("useCheckForUnsavedChanges node undefined");
 
     return JSON.stringify(node.data) !== JSON.stringify(updatedSkill);
 }

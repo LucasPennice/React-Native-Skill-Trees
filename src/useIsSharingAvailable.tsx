@@ -25,7 +25,7 @@ export async function sharePNG(fileName: string, data: string) {
 
         const base64Code = data.split("data:image/png;base64,")[1];
 
-        const imageURI = FileSystem.documentDirectory + `${parsedFileName}` + ".png";
+        const imageURI = `${FileSystem.documentDirectory}${parsedFileName}.png`;
 
         await FileSystem.writeAsStringAsync(imageURI, base64Code, { encoding: FileSystem.EncodingType.Base64 });
 

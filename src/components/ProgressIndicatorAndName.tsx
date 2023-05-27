@@ -50,7 +50,7 @@ function ProgressIndicatorAndName({ tree }: { tree: Tree<Skill> }) {
         }
 
         completedPercentage.value = treeCompletedSkillPercentage(tree);
-    }, [tree]);
+    }, [tree, completedPercentage]);
 
     const animatedProps = useAnimatedProps(() => {
         const result = progressWheelProps.circumference - (progressWheelProps.circumference * completedPercentage.value) / 100;

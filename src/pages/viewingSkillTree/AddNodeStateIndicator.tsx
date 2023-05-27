@@ -2,9 +2,9 @@ import { Pressable, StyleSheet } from "react-native";
 import Animated, { useAnimatedStyle, withSequence, withSpring, withTiming } from "react-native-reanimated";
 import AppText from "../../components/AppText";
 import { MENU_HIGH_DAMPENING, centerFlex, colors } from "../../parameters";
-import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
+import { useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { clearNewNodeState, selectCurrentTree, selectTentativeTree, setSelectedDndZone, updateUserTrees } from "../../redux/userTreesSlice";
+import { selectCurrentTree } from "../../redux/userTreesSlice";
 import { ModalState } from "./ViewingSkillTree";
 
 type Props = {
@@ -19,7 +19,6 @@ function AddNodeStateIndicator({ openNewNodeModal, mode, returnToIdleState, upda
     //Redux Store
     const currentTree = useAppSelector(selectCurrentTree);
     const { width } = useAppSelector(selectSafeScreenDimentions);
-    const dispatch = useAppDispatch();
 
     const styles = useAnimatedStyle(() => {
         if (mode === "CONFIRM_NEW_NODE_POSITION")

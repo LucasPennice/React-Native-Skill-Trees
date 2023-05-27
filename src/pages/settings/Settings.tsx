@@ -1,4 +1,4 @@
-import { ScrollView, View } from "react-native";
+import { ScrollView } from "react-native";
 import AppText from "../../components/AppText";
 import { colors } from "../../parameters";
 
