@@ -43,7 +43,7 @@ export const userTreesSlice = createSlice({
             //And then update the value of userTrees with the new state
             const valueToMutate = action.payload;
 
-            if (valueToMutate === undefined) throw new Error("deleteNodeWithNoChildrenFn error fn returned undefined");
+            if (valueToMutate === undefined) throw new Error("updateUserTrees error tree is undefined");
 
             state.userTrees = state.userTrees.map((tree) => {
                 if (tree.treeId === valueToMutate.treeId) return valueToMutate;
@@ -71,6 +71,20 @@ export const userTreesSlice = createSlice({
         setNewNode: (state, action: PayloadAction<Tree<Skill>>) => {
             state.newNode = { ...action.payload };
         },
+        updateUserTreeWithAppendedNode: (state, action: PayloadAction<Tree<Skill> | undefined>) => {
+            state.selectedDndZone = undefined;
+            state.newNode = undefined;
+
+            const valueToMutate = action.payload;
+
+            if (valueToMutate === undefined) throw new Error("updateUserTreeWithAppendedNode error tree is undefined");
+
+            state.userTrees = state.userTrees.map((tree) => {
+                if (tree.treeId === valueToMutate.treeId) return valueToMutate;
+
+                return tree;
+            });
+        },
     },
 });
 
@@ -82,39 +96,11 @@ export const {
     appendToUserTree,
     removeUserTree,
     setSelectedNode,
+    updateUserTreeWithAppendedNode,
     setSelectedDndZone,
     clearNewNodeState,
     setNewNode,
 } = userTreesSlice.actions;
-
-// Other code such as selectors can use the imported `RootState` type
-export function selectCurrentTree(state: RootState) {
-    const { currentTreeId, userTrees } = state.currentTree;
-
-    if (currentTreeId === undefined) return undefined;
-
-    const tentativeCurrentTree = userTrees.find((t) => t.treeId === currentTreeId);
-
-    if (tentativeCurrentTree !== undefined) return tentativeCurrentTree;
-
-    return undefined;
-}
-
-export const selectTentativeTree = (state: RootState) => {
-    const { selectedDndZone, newNode } = state.currentTree;
-    const currentTree = selectCurrentTree(state);
-
-    let result = selectedDndZone && currentTree && newNode ? insertNodeBasedOnDnDZone(selectedDndZone, currentTree, newNode) : undefined;
-
-    if (result === undefined) return result;
-
-    const treeSkillCompletion = treeCompletedSkillPercentage(result);
-
-    if (treeSkillCompletion === 100) result = { ...result, data: { ...result.data, isCompleted: true } };
-    if (treeSkillCompletion !== 100) result = { ...result, data: { ...result.data, isCompleted: false } };
-
-    return result;
-};
 
 export const selectTreeSlice = (state: RootState) => state.currentTree;
 

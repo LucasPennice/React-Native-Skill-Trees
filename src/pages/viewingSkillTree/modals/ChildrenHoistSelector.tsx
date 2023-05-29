@@ -4,9 +4,10 @@ import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import { findNodeById, findParentOfNode } from "../../../functions/extractInformationFromTree";
 import { deleteNodeWithChildren } from "../../../functions/mutateTree";
 import { centerFlex, colors } from "../../../parameters";
-import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { updateUserTrees, selectCurrentTree, setSelectedNode } from "../../../redux/userTreesSlice";
+import { useAppDispatch } from "../../../redux/reduxHooks";
+import { setSelectedNode, updateUserTrees } from "../../../redux/userTreesSlice";
 import { Skill, Tree } from "../../../types";
+import useCurrentTree from "../../../useCurrentTree";
 
 type Props = {
     candidatesToHoist: Tree<Skill>[] | null;
@@ -15,7 +16,7 @@ type Props = {
 };
 
 function ChildrenHoistSelectorModal({ candidatesToHoist, closeModalAndClearCandidates, open }: Props) {
-    const currentTree = useAppSelector(selectCurrentTree);
+    const currentTree = useCurrentTree();
 
     const dispatch = useAppDispatch();
 

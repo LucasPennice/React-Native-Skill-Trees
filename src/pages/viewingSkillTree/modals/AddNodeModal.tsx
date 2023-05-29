@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import { Alert, View } from "react-native";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
+import EmojiSelector from "../../../components/EmojiSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import RadioInput from "../../../components/RadioInput";
 import { createTree } from "../../../functions/misc";
 import { colors } from "../../../parameters";
-import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { selectCurrentTree, setNewNode, setSelectedNode } from "../../../redux/userTreesSlice";
+import { useAppDispatch } from "../../../redux/reduxHooks";
+import { setNewNode, setSelectedNode } from "../../../redux/userTreesSlice";
 import { getDefaultSkillValue } from "../../../types";
-import EmojiSelector from "../../../components/EmojiSelector";
+import useCurrentTree from "../../../useCurrentTree";
 
 type Props = {
     closeModal: () => void;
@@ -18,7 +19,7 @@ type Props = {
 };
 
 function AddNodeModal({ closeModal, open, confirmAddNewNode }: Props) {
-    const currentTree = useAppSelector(selectCurrentTree);
+    const currentTree = useCurrentTree();
     const dispatch = useAppDispatch();
 
     const [text, onChangeText] = useState("");

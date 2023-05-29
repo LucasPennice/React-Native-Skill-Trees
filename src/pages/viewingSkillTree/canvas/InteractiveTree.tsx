@@ -7,8 +7,9 @@ import { centerFlex } from "../../../parameters";
 import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
 import { useAppSelector } from "../../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { selectCurrentTree, selectTreeSlice } from "../../../redux/userTreesSlice";
+import { selectTreeSlice } from "../../../redux/userTreesSlice";
 import { DnDZone, Skill, Tree } from "../../../types";
+import useCurrentTree from "../../../useCurrentTree";
 import PopUpMenu from "../components/PopUpMenu";
 import DragAndDropZones from "./DragAndDropZones";
 import HierarchicalSkillTree from "./HierarchicalSkillTree";
@@ -35,7 +36,7 @@ type InteractiveTreeProps = {
 function InteractiveTree({ tree, onNodeClick, showDndZones, onDndZoneClick, canvasRef, openChildrenHoistSelector }: InteractiveTreeProps) {
     //Redux State
     const screenDimentions = useAppSelector(selectSafeScreenDimentions);
-    const currentTree = useAppSelector(selectCurrentTree);
+    const currentTree = useCurrentTree();
     const { selectedNode, selectedDndZone, currentTreeId } = useAppSelector(selectTreeSlice);
     const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
     //Derived State

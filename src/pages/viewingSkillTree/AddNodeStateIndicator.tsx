@@ -4,8 +4,8 @@ import AppText from "../../components/AppText";
 import { MENU_HIGH_DAMPENING, centerFlex, colors } from "../../parameters";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { selectCurrentTree } from "../../redux/userTreesSlice";
 import { ModalState } from "./ViewingSkillTree";
+import useCurrentTree from "../../useCurrentTree";
 
 type Props = {
     openNewNodeModal: () => void;
@@ -17,7 +17,7 @@ type Props = {
 
 function AddNodeStateIndicator({ openNewNodeModal, mode, returnToIdleState, updateUserTree, resetNewNodePosition }: Props) {
     //Redux Store
-    const currentTree = useAppSelector(selectCurrentTree);
+    const currentTree = useCurrentTree();
     const { width } = useAppSelector(selectSafeScreenDimentions);
 
     const styles = useAnimatedStyle(() => {

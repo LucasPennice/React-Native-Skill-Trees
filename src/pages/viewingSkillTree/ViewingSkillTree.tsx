@@ -11,16 +11,10 @@ import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeLayout";
 import { IsSharingAvailableContext } from "../../context";
 import { colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import {
-    clearNewNodeState,
-    selectCurrentTree,
-    selectTentativeTree,
-    selectTreeSlice,
-    setSelectedDndZone,
-    setSelectedNode,
-    updateUserTrees,
-} from "../../redux/userTreesSlice";
+import { clearNewNodeState, selectTreeSlice, setSelectedDndZone, setSelectedNode, updateUserTreeWithAppendedNode } from "../../redux/userTreesSlice";
 import { DnDZone, Skill, Tree } from "../../types";
+import useCurrentTree from "../../useCurrentTree";
+import useTentativeNewTree from "../../useTentativeNewTree";
 import AddNodeStateIndicator from "./AddNodeStateIndicator";
 import InteractiveTree from "./canvas/InteractiveTree";
 import AddNodeModal from "./modals/AddNodeModal";
@@ -39,9 +33,9 @@ type Props = NativeStackScreenProps<StackNavigatorParams, "ViewingSkillTree">;
 
 function ViewingSkillTree({ navigation }: Props) {
     //Redux State
-    const currentTree = useAppSelector(selectCurrentTree);
+    const currentTree = useCurrentTree();
+    const tentativeNewTree = useTentativeNewTree();
     const { selectedDndZone, newNode, selectedNode } = useAppSelector(selectTreeSlice);
-    const tentativeNewTree = useAppSelector(selectTentativeTree);
     const dispatch = useAppDispatch();
     //Hooks
     const isSharingAvailable = useContext(IsSharingAvailableContext);
@@ -55,6 +49,13 @@ function ViewingSkillTree({ navigation }: Props) {
     const shouldRenderDndZones = newNode && !selectedDndZone;
     const shouldRenderShareButton = isSharingAvailable && currentTree && modalState === "IDLE";
 
+    // useEffect(() => {
+    //     console.log("current Tree", currentTree);
+    // }, [currentTree]);
+    // useEffect(() => {
+    //     console.log("tentative tree", tentativeNewTree);
+    // }, [tentativeNewTree]);
+
     useEffect(() => {
         if (selectedNode === null) setModalState("IDLE");
     }, [selectedNode]);
@@ -67,6 +68,7 @@ function ViewingSkillTree({ navigation }: Props) {
 
     const onDndZoneClick = (clickedZone: DnDZone | undefined) => {
         if (modalState !== "PLACING_NEW_NODE") return;
+        if (clickedZone === undefined) return;
         dispatch(setSelectedDndZone(clickedZone));
         setModalState("CONFIRM_NEW_NODE_POSITION");
     };
@@ -100,10 +102,8 @@ function ViewingSkillTree({ navigation }: Props) {
                     dispatch(setSelectedDndZone(undefined));
                 }}
                 updateUserTree={() => {
-                    dispatch(updateUserTrees(tentativeNewTree));
-                    dispatch(setSelectedDndZone(undefined));
-                    dispatch(clearNewNodeState());
                     setModalState("IDLE");
+                    dispatch(updateUserTreeWithAppendedNode(tentativeNewTree));
                 }}
                 openNewNodeModal={() => setModalState("INPUT_DATA_FOR_NEW_NODE")}
             />
@@ -145,12 +145,14 @@ function ViewingSkillTree({ navigation }: Props) {
 
     function useRunCleanupOnNavigation() {
         useEffect(() => {
-            setModalState("IDLE");
-            setCandidatesToHoist(null);
-            dispatch(setSelectedNode(null));
-            dispatch(setSelectedDndZone(undefined));
-            dispatch(clearNewNodeState());
-        }, [navigation]);
+            return () => {
+                setModalState("IDLE");
+                setCandidatesToHoist(null);
+                dispatch(setSelectedNode(null));
+                dispatch(setSelectedDndZone(undefined));
+                dispatch(clearNewNodeState());
+            };
+        }, []);
     }
 }
 
