@@ -71,16 +71,11 @@ export const userTreesSlice = createSlice({
         setNewNode: (state, action: PayloadAction<Tree<Skill>>) => {
             state.newNode = { ...action.payload };
         },
-        updateUserTreeWithAppendedNode: (state, action: PayloadAction<Tree<Skill> | undefined>) => {
+        updateUserTreeWithAppendedNode: (state, action: PayloadAction<Tree<Skill>>) => {
             state.selectedDndZone = undefined;
             state.newNode = undefined;
-
-            const valueToMutate = action.payload;
-
-            if (valueToMutate === undefined) throw new Error("updateUserTreeWithAppendedNode error tree is undefined");
-
             state.userTrees = state.userTrees.map((tree) => {
-                if (tree.treeId === valueToMutate.treeId) return valueToMutate;
+                if (tree.treeId === action.payload.treeId) return action.payload;
 
                 return tree;
             });

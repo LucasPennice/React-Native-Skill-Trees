@@ -46,15 +46,9 @@ function ViewingSkillTree({ navigation }: Props) {
     //Local State
     const [candidatesToHoist, setCandidatesToHoist] = useState<Tree<Skill>[] | null>(null);
     //Derived State
+
     const shouldRenderDndZones = newNode && !selectedDndZone;
     const shouldRenderShareButton = isSharingAvailable && currentTree && modalState === "IDLE";
-
-    // useEffect(() => {
-    //     console.log("current Tree", currentTree);
-    // }, [currentTree]);
-    // useEffect(() => {
-    //     console.log("tentative tree", tentativeNewTree);
-    // }, [tentativeNewTree]);
 
     useEffect(() => {
         if (selectedNode === null) setModalState("IDLE");
@@ -103,6 +97,7 @@ function ViewingSkillTree({ navigation }: Props) {
                 }}
                 updateUserTree={() => {
                     setModalState("IDLE");
+                    if (tentativeNewTree === undefined) return;
                     dispatch(updateUserTreeWithAppendedNode(tentativeNewTree));
                 }}
                 openNewNodeModal={() => setModalState("INPUT_DATA_FOR_NEW_NODE")}
