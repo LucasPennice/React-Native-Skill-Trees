@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
 import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { CIRCLE_SIZE_SELECTED, NAV_HEGIHT } from "../../../../parameters";
+import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
 import { useAppSelector } from "../../../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../../../redux/screenDimentionsSlice";
 import { CanvasDimensions, NodeCoordinate } from "../../../../types";
@@ -16,7 +16,8 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
     const MAX_SCALE = 1.4;
 
     const start = useSharedValue({ x: 0, y: 0 });
-    const offset = useSharedValue({ x: 0, y: 0 });
+    const offsetX = useSharedValue(0);
+    const offsetY = useSharedValue(0);
 
     const scale = useSharedValue(DEFAULT_SCALE);
     const savedScale = useSharedValue(DEFAULT_SCALE);
@@ -32,28 +33,42 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
             savedScale.value = currentCanvasMinScale;
         }
 
-        offset.value = { x: 0, y: 0 };
+        offsetX.value = 0;
+        offsetY.value = 0;
         start.value = { x: 0, y: 0 };
     }, [canvasDimentions.canvasHeight, canvasDimentions.canvasWidth]);
 
     const canvasZoom = Gesture.Pinch()
         .onUpdate((e) => {
             if (foundNodeCoordinates) return;
-
             const newScaleValue = savedScale.value * e.scale;
-            scale.value = clamp(minScale, MAX_SCALE, newScaleValue);
 
-            function clamp(min: number, max: number, value: number) {
-                if (value <= min) return min;
-
-                if (value >= max) return max;
-
-                return value;
-            }
+            scale.value = newScaleValue;
         })
         .onEnd(() => {
+            //We return scale to safe values here
+
+            if (scale.value < minScale) {
+                savedScale.value = minScale;
+                scale.value = withSpring(minScale, MENU_HIGH_DAMPENING);
+                return;
+            }
+
+            if (scale.value > MAX_SCALE) {
+                savedScale.value = MAX_SCALE;
+                scale.value = withSpring(MAX_SCALE, MENU_HIGH_DAMPENING);
+                return;
+            }
+
             savedScale.value = scale.value;
         });
+
+    const widthBounds = getWidthBounds(canvasWidth, scale.value, screenDimentions.width);
+    const minX = -widthBounds;
+    const maxX = widthBounds;
+
+    const minY = -screenDimentions.height / 2 + NAV_HEGIHT;
+    const maxY = screenDimentions.height / 2;
 
     const canvasPan = Gesture.Pan()
         .onUpdate((e) => {
@@ -62,33 +77,34 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
             const newXValue = e.translationX + start.value.x;
             const newYValue = e.translationY + start.value.y;
 
-            const widthBounds = getWidthBounds(canvasWidth, scale.value, screenDimentions.width);
-
-            offset.value = {
-                x: clamp(-widthBounds, widthBounds, newXValue),
-                y: clamp(-screenDimentions.height / 2 + NAV_HEGIHT, screenDimentions.height / 2, newYValue),
-            };
-
-            function getWidthBounds(canvasW: number, scale: number, screenW: number) {
-                return (canvasW * scale - screenW) / 2;
-            }
-
-            function clamp(min: number, max: number, value: number) {
-                if (value <= min) return min;
-
-                if (value >= max) return max;
-
-                return value;
-            }
+            offsetX.value = newXValue;
+            offsetY.value = newYValue;
         })
         .onEnd(() => {
-            start.value = {
-                x: offset.value.x,
-                y: offset.value.y,
-            };
+            const xOutOfBounds = !(minX <= offsetX.value && offsetX.value <= maxX);
+            const yOutOfBounds = !(minY <= offsetY.value && offsetY.value <= maxY);
+
+            if (!xOutOfBounds && !yOutOfBounds) return (start.value = { x: offsetX.value, y: offsetY.value });
+
+            let newX = offsetX.value;
+            let newY = offsetY.value;
+
+            if (xOutOfBounds) {
+                if (offsetX.value < minX) newX = minX;
+                if (offsetX.value > maxX) newX = maxX;
+            }
+
+            if (yOutOfBounds) {
+                if (offsetY.value < minY) newY = minY;
+                if (offsetY.value > maxY) newY = maxY;
+            }
+
+            offsetX.value = withSpring(newX, MENU_HIGH_DAMPENING);
+            offsetY.value = withSpring(newY, MENU_HIGH_DAMPENING);
+            start.value = { x: newX, y: newY };
         });
 
-    const canvasGestures = Gesture.Simultaneous(canvasPan, canvasZoom);
+    const canvasGestures = Gesture.Race(canvasPan, canvasZoom);
 
     const transform = useAnimatedStyle(() => {
         if (foundNodeCoordinates) {
@@ -114,15 +130,15 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
         if (shouldAnimateTransformation)
             return {
                 transform: [
-                    { translateX: withSpring(offset.value.x, { damping: 32, stiffness: 350 }) },
-                    { translateY: withSpring(offset.value.y, { damping: 32, stiffness: 350 }) },
+                    { translateX: withSpring(offsetX.value, { damping: 32, stiffness: 350 }) },
+                    { translateY: withSpring(offsetY.value, { damping: 32, stiffness: 350 }) },
                     { scale: withSpring(scale.value, { damping: 32, stiffness: 350 }) },
                 ],
             };
         return {
-            transform: [{ translateX: offset.value.x }, { translateY: offset.value.y }, { scale: scale.value }],
+            transform: [{ translateX: offsetX.value }, { translateY: offsetY.value }, { scale: scale.value }],
         };
-    }, [offset, scale, foundNodeCoordinates, shouldAnimateTransformation]);
+    }, [offsetX, offsetY, scale, foundNodeCoordinates, shouldAnimateTransformation]);
 
     return { transform, canvasGestures };
 }
@@ -143,4 +159,7 @@ function useShouldAnimateTransformation(popUpMenuOpen: boolean) {
     }, [popUpMenuOpen]);
 
     return result;
+}
+function getWidthBounds(canvasW: number, scale: number, screenW: number) {
+    return (canvasW * scale - screenW) / 2;
 }

@@ -156,9 +156,7 @@ function AppWithReduxContext() {
 
     useKeepAsyncStorageUpdated();
 
-    if (!fontsLoaded) {
-        return null;
-    }
+    if (!fontsLoaded) return null;
 
     const Stack = createStackNavigator<StackNavigatorParams>();
 

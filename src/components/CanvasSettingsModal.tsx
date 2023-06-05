@@ -12,6 +12,8 @@ import AppText from "./AppText";
 import FlingToDismissModal from "./FlingToDismissModal";
 import RadioInput from "./RadioInput";
 import ColorSelector from "./ColorsSelector";
+import AppTextInput from "./AppTextInput";
+import { useEffect, useState } from "react";
 
 type Props = {
     closeModal: () => void;
@@ -21,6 +23,10 @@ type Props = {
 function CanvasSettingsModal({ closeModal, open }: Props) {
     const { oneColorPerTree, showCircleGuide, showLabel, homepageTreeColor } = useAppSelector(selectCanvasDisplaySettings);
     const dispatch = useAppDispatch();
+
+    const [homeTreeName, setHomeTreeName] = useState("");
+
+    useEffect(() => {}, []);
 
     const updateOneColorPerTree = (v: boolean) => {
         dispatch(setOneColorPerTree(v));
@@ -37,20 +43,32 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
 
     return (
         <FlingToDismissModal closeModal={closeModal} open={open}>
-            <View style={{ flex: 1, marginTop: 20 }}>
-                <AppText style={{ color: "white", marginBottom: 10 }} fontSize={24}>
-                    Tree Display Menu
-                </AppText>
-                <AppText style={{ color: colors.unmarkedText, marginBottom: 25 }} fontSize={14}>
-                    These settings affect how your tree looks when sharing
-                </AppText>
-
+            <View style={{ flex: 1 }}>
                 <ScrollView>
+                    <AppText style={{ color: "white", marginBottom: 10, fontFamily: "helveticaBold" }} fontSize={24}>
+                        General Skill Tree Styles
+                    </AppText>
+                    <AppText style={{ color: colors.unmarkedText, marginBottom: 25 }} fontSize={16}>
+                        These settings affect how every skill tree looks
+                    </AppText>
                     <RadioInput state={[showLabel, updateShowLabel]} text={"Show labels"} style={{ marginBottom: 15 }} />
-                    <RadioInput state={[oneColorPerTree, updateOneColorPerTree]} text={"One color per tree"} style={{ marginBottom: 15 }} />
-                    <RadioInput state={[showCircleGuide, updateShowCircleGuide]} text={"Show circle guide"} />
+                    <AppText style={{ color: "white", marginBottom: 10, fontFamily: "helveticaBold" }} fontSize={24}>
+                        Home Skill Tree Styles
+                    </AppText>
+                    <AppText style={{ color: colors.unmarkedText, marginBottom: 15 }} fontSize={16}>
+                        These settings affect how the home skill tree looks
+                    </AppText>
+                    <AppTextInput
+                        placeholder="Home Tree Name"
+                        textState={[homeTreeName, setHomeTreeName]}
+                        onlyContainsLettersAndNumbers
+                        containerStyles={{ marginBottom: 15 }}
+                    />
+
+                    <RadioInput state={[oneColorPerTree, updateOneColorPerTree]} text={"Monochromatic"} style={{ marginBottom: 15 }} />
+                    <RadioInput state={[showCircleGuide, updateShowCircleGuide]} text={"Show depth guides"} />
                     <AppText fontSize={18} style={{ color: "#FFFFFF", marginBottom: 10 }}>
-                        Homepage Tree Color
+                        Tree Color
                     </AppText>
                     <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 5 }}>
                         Completed skills and progress bars will show with this color
