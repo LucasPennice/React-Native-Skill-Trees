@@ -32,7 +32,7 @@ import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
 export type StackNavigatorParams = {
     Home: undefined;
     ViewingSkillTree: undefined;
-    MyTrees: undefined;
+    MyTrees: { openNewTreeModal?: boolean };
     Settings: undefined;
     SkillPage: Tree<Skill>;
 };

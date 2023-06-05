@@ -9,7 +9,7 @@ import { Skill, Tree } from "../types";
 import AppText from "./AppText";
 import AppTextInput from "./AppTextInput";
 import FlingToDismissModal from "./FlingToDismissModal";
-import ShareTreeIcon from "./Icons/ShareTreeIcon";
+import ExportTreeIcon from "./Icons/ExportTreeIcon";
 import LoadingIcon from "./LoadingIcon";
 
 function ShareTreeUrl({ tree }: { tree: Tree<Skill> }) {
@@ -33,7 +33,7 @@ function ShareTreeUrl({ tree }: { tree: Tree<Skill> }) {
                     { width: 50, height: 50, borderRadius: 10, backgroundColor: colors.darkGray, opacity: status === "loading" ? 0.5 : 1 },
                 ]}
                 onPress={() => runMutation()}>
-                <ShareTreeIcon />
+                <ExportTreeIcon />
             </Pressable>
 
             <FlingToDismissModal closeModal={() => reset()} open={status !== "idle"}>

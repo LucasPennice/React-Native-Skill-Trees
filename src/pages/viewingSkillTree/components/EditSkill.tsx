@@ -68,7 +68,7 @@ function EditSkill({
 
     const deleteTree = () => {
         dispatch(removeUserTree(selectedTree.treeId));
-        navigation.navigate("MyTrees");
+        navigation.navigate("MyTrees", {});
     };
 
     const confirmDeleteTree = () =>

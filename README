@@ -1,0 +1,9 @@
+CREATE A NEW ANDROID BUILD
+
+eas build --platform android
+
+UPLOAD THE NEW UPDATE
+
+eas submit -p android --latest
+
+BE SURE TO INCREASE THE APP AND ANDROID RELEASE VERSION

@@ -1,10 +1,10 @@
 import * as React from "react";
-import { colors } from "../../parameters";
 import { Path, Svg } from "react-native-svg";
-const ShareTreeIcon = (props) => (
-    <Svg width={30} height={30} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" {...props}>
+import { colors } from "../../../parameters";
+const WSShareScreenshotIcon = (props) => (
+    <Svg width={45} height={45} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" {...props}>
         <Path
-            stroke={colors.unmarkedText}
+            stroke={colors.accent}
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={1.2}
@@ -12,4 +12,4 @@ const ShareTreeIcon = (props) => (
         />
     </Svg>
 );
-export default ShareTreeIcon;
+export default WSShareScreenshotIcon;

@@ -7,7 +7,7 @@ import CanvasSettingsModal from "../../components/CanvasSettingsModal";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import ShareTreeUrl from "../../components/ShareTreeUrl";
-import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeLayout";
+import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeScreenshot";
 import { IsSharingAvailableContext } from "../../context";
 import { colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";

@@ -4,8 +4,8 @@ import { RefObject, useCallback, useEffect } from "react";
 import { Alert, Pressable } from "react-native";
 import { centerFlex, colors } from "../../parameters";
 import { Skill, Tree } from "../../types";
-import ShareScreenshotIcon from "../Icons/ShareScreenshotIcon";
 import TakingScreenshotLoadingScreenModal from "./TakingScreenshotLoadingScreenModal";
+import ShareScreenshotIcon from "../Icons/ShareScreenshotIcon";
 
 type Props = {
     shouldShare: boolean;

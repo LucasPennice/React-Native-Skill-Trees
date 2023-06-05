@@ -141,8 +141,6 @@ export function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill>
 
         let overlapWithinTree = true;
 
-        console.log("🏠");
-
         while (overlapWithinTree) {
             let polarOverlap = checkForOverlap(result);
 
@@ -154,8 +152,6 @@ export function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill>
                 //We append the rootNode to the subTree so that the path finding functions can work correctly
                 const subTreeWithRootNode = { ...tree, children: [subTree] };
                 const treesToShift = getTreesToShiftForCircularTree(subTreeWithRootNode, polarOverlap.nodesInConflict);
-
-                console.log(polarOverlap, treesToShift);
 
                 result = shiftNodesCounterClockWise(result, treesToShift, polarOverlap.biggestOverlapAngle);
             }

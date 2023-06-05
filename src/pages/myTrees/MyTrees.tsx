@@ -8,13 +8,25 @@ import { changeTree, selectTreeSlice } from "../../redux/userTreesSlice";
 import TreeCard from "./TreeCard";
 import AddTreeModal from "./modals/AddTreeModal";
 import EditTreeModal from "./modals/EditTreeModal";
+import { open } from "../../redux/addTreeModalSlice";
+import { useCallback, useEffect } from "react";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "MyTrees">;
 
-function MyTrees({ navigation }: Props) {
+function MyTrees({ navigation, route }: Props) {
+    const { params } = route;
     //Redux Related
     const { userTrees } = useAppSelector(selectTreeSlice);
     const dispatch = useAppDispatch();
+
+    const openNewTreeModal = useCallback(() => {
+        if (params && params.openNewTreeModal) dispatch(open());
+        //eslint-disable-next-line
+    }, []);
+
+    useEffect(() => {
+        openNewTreeModal();
+    }, [openNewTreeModal]);
 
     const factoryChangeTreeAndNavigateToViewingTree = (treeId: string) => () => {
         dispatch(changeTree(treeId));
