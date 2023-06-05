@@ -12,7 +12,7 @@ type CanvasDisplaySettings = {
 
 // Define the initial state using that type
 export const defaultCanvasDisplaySettings: CanvasDisplaySettings = {
-    showLabel: false,
+    showLabel: true,
     oneColorPerTree: false,
     showCircleGuide: false,
     homepageTreeColor: colors.accent,

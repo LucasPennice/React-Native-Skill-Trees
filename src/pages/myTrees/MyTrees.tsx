@@ -37,13 +37,13 @@ function MyTrees({ navigation, route }: Props) {
         <>
             <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 10 }}>
                 <AppText style={{ color: "white", fontFamily: "helveticaBold", marginBottom: 5 }} fontSize={32}>
-                    My Trees
+                    My Skill Trees
                 </AppText>
-                <AppText style={{ color: `${colors.unmarkedText}8D`, marginBottom: 5 }} fontSize={16}>
-                    Tap a roadmap to access it
+                <AppText style={{ color: colors.unmarkedText, marginBottom: 5 }} fontSize={16}>
+                    Click a Skill Tree to access it
                 </AppText>
-                <AppText style={{ color: `${colors.unmarkedText}8D`, marginBottom: 20 }} fontSize={16}>
-                    Long press to access it's options menu
+                <AppText style={{ color: colors.unmarkedText, marginBottom: 20 }} fontSize={16}>
+                    Long Press to options menu
                 </AppText>
 
                 {userTrees.length > 0 &&

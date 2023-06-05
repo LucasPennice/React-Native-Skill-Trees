@@ -28,7 +28,7 @@ export const colors = {
     line: "#515053",
     unmarkedText: "#B1B2B2",
     red: "#FE453A",
-    accent: "#1982F9",
+    accent: "#BF5AF2",
     yellow: "#FED739",
     orange: "#FF9F23",
     green: "#50D158",
