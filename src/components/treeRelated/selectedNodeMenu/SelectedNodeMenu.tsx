@@ -23,6 +23,7 @@ export type SelectedNodeMenuFunctions = {
     };
     closeMenu: () => void;
     goToSkillPage: () => void;
+    goToTreePage: () => void;
 };
 
 type Props = {
@@ -31,7 +32,7 @@ type Props = {
     allowEdit?: boolean;
 };
 
-//☢️ POP MENU SHOULD ONLY BE ABLE TO OPEN SKILL TYPE NODES
+//☢️ POP MENU SHOULD ONLY BE ABLE TO EDIT SKILL TYPE NODES
 //THIS IS BECAUSE IN POPUPMENU WE CAN TOGGLE THE COMPLETION STATE OF NODES, AND THE ONLY COMPLETION STATE THAT THE USER CAN TOGGLE
 //IS THE SKILL NODES
 //THE OTHER NODE TYPES' COMPLETION STATE IS CALCULATED ☢️
@@ -39,7 +40,7 @@ type Props = {
 function SelectedNodeMenu({ functions, state, allowEdit }: Props) {
     const { screenDimensions, selectedNode } = state;
     const { height } = screenDimensions;
-    const { closeMenu, editing, goToSkillPage } = functions;
+    const { closeMenu, editing, goToSkillPage, goToTreePage } = functions;
     const { menuWidth, styles } = getNodeMenuStyles(screenDimensions);
 
     //Local State
@@ -50,7 +51,7 @@ function SelectedNodeMenu({ functions, state, allowEdit }: Props) {
     });
     const [mode, setMode] = useState<"EDITING" | "VIEWING">("VIEWING");
 
-    const editingEnabled = Boolean(editing !== undefined) && Boolean(allowEdit);
+    const editingEnabled = Boolean(editing !== undefined) && Boolean(allowEdit) && selectedNode.category === "SKILL";
 
     useEffect(() => {
         setNewSkillProps({
@@ -103,14 +104,17 @@ function SelectedNodeMenu({ functions, state, allowEdit }: Props) {
                         Drag me down or click the cirlcle to close
                     </AppText>
 
-                    {allowEdit && <SliderToggler containerWidth={menuWidth / 2 - 10} isLeftSelected={mode === "VIEWING"} toggleMode={toggleMode} />}
+                    {editingEnabled && (
+                        <SliderToggler containerWidth={menuWidth / 2 - 10} isLeftSelected={mode === "VIEWING"} toggleMode={toggleMode} />
+                    )}
+
                     {mode === "EDITING" && editingEnabled && (
                         <Editing
                             newSkillPropsState={[newSkillProps, setNewSkillProps]}
                             handleDeleteSelectedNode={editingFunctions!.handleDeleteSelectedNode}
                         />
                     )}
-                    {mode === "VIEWING" && <Viewing goToSkillPage={goToSkillPage} />}
+                    {mode === "VIEWING" && <Viewing selectedNode={selectedNode} functions={{ goToTreePage, goToSkillPage }} />}
                 </Animated.View>
             </GestureDetector>
             <Pressable onPress={closeMenu} style={{ right: 0, width: 134, height, position: "absolute" }}>

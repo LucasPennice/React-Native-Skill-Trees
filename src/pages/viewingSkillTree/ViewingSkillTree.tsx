@@ -17,7 +17,14 @@ import { colors } from "../../parameters";
 import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { clearNewNodeState, selectTreeSlice, setSelectedDndZone, setSelectedNode, updateUserTreeWithAppendedNode } from "../../redux/userTreesSlice";
+import {
+    changeTree,
+    clearNewNodeState,
+    selectTreeSlice,
+    setSelectedDndZone,
+    setSelectedNode,
+    updateUserTreeWithAppendedNode,
+} from "../../redux/userTreesSlice";
 import { DnDZone, Skill, Tree } from "../../types";
 import useCurrentTree from "../../useCurrentTree";
 import useTentativeNewTree from "../../useTentativeNewTree";
@@ -36,7 +43,7 @@ export type ModalState =
     | "NODE_SELECTED";
 type Props = NativeStackScreenProps<StackNavigatorParams, "ViewingSkillTree">;
 
-function ViewingSkillTree({ navigation }: Props) {
+function ViewingSkillTree({ navigation, route }: Props) {
     //Redux State
     const selectedTree = useCurrentTree();
     const tentativeNewTree = useTentativeNewTree();
@@ -48,6 +55,7 @@ function ViewingSkillTree({ navigation }: Props) {
     const isSharingAvailable = useContext(IsSharingAvailableContext);
     const canvasRef = useCanvasRef();
     useRunCleanupOnNavigation();
+    useHandleRouteParams(route.params);
     //Local State - MODALS
     const [modalState, setModalState] = useState<ModalState>("IDLE");
     //Local State
@@ -55,7 +63,6 @@ function ViewingSkillTree({ navigation }: Props) {
     //Derived State
 
     const showDndZones = newNode && !selectedDndZone;
-    // const shouldRenderDndZones = newNode && !selectedDndZone;
     const shouldRenderShareButton = isSharingAvailable && selectedTree && modalState === "IDLE";
 
     useEffect(() => {
@@ -172,6 +179,14 @@ function ViewingSkillTree({ navigation }: Props) {
                 dispatch(setSelectedDndZone(undefined));
                 dispatch(clearNewNodeState());
             };
+        }, []);
+    }
+
+    function useHandleRouteParams(params: Props["route"]["params"]) {
+        useEffect(() => {
+            if (!params) return;
+
+            dispatch(changeTree(params.treeId));
         }, []);
     }
 }

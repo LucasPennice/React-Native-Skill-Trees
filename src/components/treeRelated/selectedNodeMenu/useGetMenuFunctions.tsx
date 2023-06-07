@@ -24,6 +24,10 @@ function useGetMenuFunctions(params: {
             if (!selectedNode) throw new Error("No selected node at goToSkillPage");
             navigation.navigate("SkillPage", selectedNode);
         },
+        goToTreePage: () => {
+            if (!selectedNode) throw new Error("No selected node at goToTreePage");
+            navigation.navigate("ViewingSkillTree", { treeId: selectedNode.treeId });
+        },
     };
 
     if (!openChildrenHoistSelector || !selectedTree) return nonEditingFns;

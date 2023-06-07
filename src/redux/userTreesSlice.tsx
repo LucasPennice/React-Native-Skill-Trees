@@ -1,8 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { insertNodeBasedOnDnDZone } from "../functions/mutateTree";
 import { DnDZone, Skill, Tree } from "../types";
 import type { RootState } from "./reduxStore";
-import { treeCompletedSkillPercentage } from "../functions/extractInformationFromTree";
 
 // Define a type for the slice state
 type UserTreesSlice = {
