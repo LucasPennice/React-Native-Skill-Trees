@@ -111,7 +111,7 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
                     <Animated.View style={[transform, { flex: 1 }]}>
                         <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight }} ref={canvasRef}>
                             {renderStyle === "hierarchy" && <HierarchicalSkillTreeRender state={state} config={config} treeData={treeData} />}
-                            {renderStyle === "radial" && <RadialTreeRendererRender config={config} treeData={treeData} />}
+                            {renderStyle === "radial" && <RadialTreeRendererRender state={state} config={config} treeData={treeData} />}
                             <Blur blur={blur} />
                         </Canvas>
                     </Animated.View>
@@ -159,15 +159,28 @@ function HierarchicalSkillTreeRender({
     );
 }
 
-function RadialTreeRendererRender({ treeData, config }: { treeData: TreeCoordinates; config: InteractiveTreeConfig }) {
+function RadialTreeRendererRender({
+    treeData,
+    config,
+    state,
+}: {
+    treeData: TreeCoordinates;
+    config: InteractiveTreeConfig;
+    state: InteractiveNodeState;
+}) {
     const { nodeCoordinates } = treeData;
     const { canvasDisplaySettings } = config;
     const { showLabel, oneColorPerTree, showCircleGuide } = canvasDisplaySettings;
+    const { selectedNodeId } = state;
 
     return (
         <>
             {showCircleGuide && <RadialTreeLevelCircles nodeCoordinates={nodeCoordinates} />}
-            <RadialSkillTree nodeCoordinatesCentered={nodeCoordinates} selectedNode={null} settings={{ showLabel, oneColorPerTree }} />
+            <RadialSkillTree
+                nodeCoordinatesCentered={nodeCoordinates}
+                selectedNode={selectedNodeId ?? null}
+                settings={{ showLabel, oneColorPerTree }}
+            />
         </>
     );
 }

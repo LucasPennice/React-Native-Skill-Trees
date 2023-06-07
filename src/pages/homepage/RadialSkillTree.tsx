@@ -52,10 +52,6 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings }: Tr
                 );
             })}
 
-            {nodeCoordinatesCentered.map((node) => {
-                const accentColor = settings.oneColorPerTree ? rootNode!.accentColor : node.accentColor;
-                return <RenderNode key={`${node.nodeId}_node`} node={{ ...node, accentColor }} selectedNode={selectedNode} />;
-            })}
             {settings.showLabel &&
                 nodeCoordinatesCentered.map((node, idx) => {
                     if (node.isRoot) return <Fragment key={idx}></Fragment>;
@@ -73,6 +69,10 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings }: Tr
                         />
                     );
                 })}
+            {nodeCoordinatesCentered.map((node) => {
+                const accentColor = settings.oneColorPerTree ? rootNode!.accentColor : node.accentColor;
+                return <RenderNode key={`${node.nodeId}_node`} node={{ ...node, accentColor }} selectedNode={selectedNode} />;
+            })}
         </>
     );
 }
