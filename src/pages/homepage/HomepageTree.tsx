@@ -15,7 +15,7 @@ import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSl
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { selectTreeSlice } from "../../redux/userTreesSlice";
-import { Skill, Tree, getDefaultSkillValue } from "../../types";
+import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "../../types";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "Home">;
 
@@ -77,7 +77,7 @@ function HomepageTree({ navigation }: Props) {
 
 export default HomepageTree;
 
-function buildHomepageTree(userTrees: Tree<Skill>[], homepageTreeColor: string) {
+function buildHomepageTree(userTrees: Tree<Skill>[], homepageTreeColor: ColorGradient) {
     const ROOT_ID = "homepageRoot";
 
     const modifiedUserTrees = userTrees.map((uT) => {

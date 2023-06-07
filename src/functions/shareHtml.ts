@@ -29,7 +29,7 @@ export function testTemplateHTML(tree: Tree<Skill>, imageData: string) {
                 max-width: 1010px;
             ">
             <svg width="100" height="100" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="35" fill="none" stroke="${accentColor}3D" stroke-width="15" />
+                <circle cx="50" cy="50" r="35" fill="none" stroke="${accentColor.color1}3D" stroke-width="15" />
                 <circle
                     shape-rendering="geometricPrecision"
                     stroke-dasharray="100"

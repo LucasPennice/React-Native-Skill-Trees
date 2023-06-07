@@ -160,7 +160,7 @@ function SkillPage({ route, navigation }: Props) {
                 {unsavedChanges && (
                     <Animated.View exiting={FadeOutUp}>
                         <Pressable onPress={updateSkillDetails} style={[styles.btn]}>
-                            <AppText style={{ color: color }} fontSize={16}>
+                            <AppText style={{ color: color.color1 }} fontSize={16}>
                                 Save
                             </AppText>
                         </Pressable>
@@ -176,7 +176,7 @@ function SkillPage({ route, navigation }: Props) {
 
             {/* Display And Add Details */}
 
-            <SkillColorContext.Provider value={color}>
+            <SkillColorContext.Provider value={color.color1}>
                 {skillState.milestones !== undefined && (
                     <Milestones milestones={skillState.milestones} openModal={openModalFns.milestones} mutateMilestones={updateFns.milestones} />
                 )}
@@ -224,7 +224,7 @@ function SkillPage({ route, navigation }: Props) {
 
                         return (
                             <Pressable onPress={initiateSkillAndOpenItsModal} style={styles.btn} key={text}>
-                                <AppText style={{ color: color }} fontSize={16}>
+                                <AppText style={{ color: color.color1 }} fontSize={16}>
                                     {text}
                                 </AppText>
                             </Pressable>

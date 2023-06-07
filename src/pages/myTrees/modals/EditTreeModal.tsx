@@ -7,12 +7,13 @@ import ColorSelector from "../../../components/ColorsSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import ShowHideEmojiSelector from "../../../components/ShowHideEmojiSelector";
 import { mutateEveryTree } from "../../../functions/mutateTree";
-import { colors, possibleTreeColors } from "../../../parameters";
+import { WHITE_GRADIENT, colors, nodeGradients, possibleTreeColors } from "../../../parameters";
 import { selectTreeOptions, setTree } from "../../../redux/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { removeUserTree, updateUserTrees } from "../../../redux/userTreesSlice";
 import { generalStyles } from "../../../styles";
-import { Skill, Tree } from "../../../types";
+import { ColorGradient, Skill, Tree } from "../../../types";
+import ColorGradientSelector from "../../../components/ColorGradientSelector";
 
 function EditTreeModal() {
     //Redux State
@@ -20,13 +21,13 @@ function EditTreeModal() {
     const open = tree !== undefined;
     //Local State
     const [treeName, setTreeName] = useState<string>("");
-    const [selectedColor, setSelectedColor] = useState<string>("");
+    const [selectedColor, setSelectedColor] = useState<ColorGradient | undefined>(undefined);
     const [icon, setIcon] = useState<null | string>(null);
 
     useEffect(() => {
         const defaultTreeName = tree ? tree.treeName : "";
         setTreeName(defaultTreeName);
-        const defaultAccentColor = tree ? tree.accentColor : "";
+        const defaultAccentColor = tree ? tree.accentColor : WHITE_GRADIENT;
         setSelectedColor(defaultAccentColor);
         const defaultIcon = tree && tree.data.icon.isEmoji ? tree.data.icon.text : null;
         setIcon(defaultIcon);
@@ -54,8 +55,8 @@ function EditTreeModal() {
             { cancelable: true }
         );
 
-    const updateTree = (selectedColor: string, treeName: string) => () => {
-        if (selectedColor === "") return Alert.alert("Please select a color");
+    const updateTree = (selectedColor: ColorGradient | undefined, treeName: string) => () => {
+        if (selectedColor === undefined) return Alert.alert("Please select a color");
         if (treeName === "") return Alert.alert("Please give the tree a name");
 
         let updatedTree = mutateEveryTree(tree, updateTree);
@@ -71,9 +72,9 @@ function EditTreeModal() {
         closeModal();
 
         function updateTree(tree: Tree<Skill>): Tree<Skill> {
-            if (tree.isRoot) return { ...tree, data: { ...tree.data, name: treeName }, accentColor: selectedColor, treeName };
+            if (tree.isRoot) return { ...tree, data: { ...tree.data, name: treeName }, accentColor: selectedColor!, treeName };
 
-            return { ...tree, accentColor: selectedColor, treeName };
+            return { ...tree, accentColor: selectedColor!, treeName };
         }
     };
 
@@ -90,7 +91,7 @@ function EditTreeModal() {
                 <AppText fontSize={16} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
                     Scroll to see more colors
                 </AppText>
-                <ColorSelector colorsArray={possibleTreeColors} state={[selectedColor, setSelectedColor]} />
+                <ColorGradientSelector colorsArray={nodeGradients} state={[selectedColor, setSelectedColor]} />
 
                 <ShowHideEmojiSelector emojiState={[icon, setIcon]} />
 

@@ -1,5 +1,5 @@
 import { ScrollView, View } from "react-native";
-import { colors, possibleTreeColors } from "../parameters";
+import { colors, nodeGradients, possibleTreeColors } from "../parameters";
 import {
     selectCanvasDisplaySettings,
     setHomepageTreeColor,
@@ -14,6 +14,8 @@ import RadioInput from "./RadioInput";
 import ColorSelector from "./ColorsSelector";
 import AppTextInput from "./AppTextInput";
 import { useEffect, useState } from "react";
+import { ColorGradient } from "../types";
+import ColorGradientSelector from "./ColorGradientSelector";
 
 type Props = {
     closeModal: () => void;
@@ -37,7 +39,7 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
     const updateShowLabel = (v: boolean) => {
         dispatch(setShowLabel(v));
     };
-    const updateHomepageTreeColor = (v: string) => {
+    const updateHomepageTreeColor = (v: ColorGradient) => {
         dispatch(setHomepageTreeColor(v));
     };
 
@@ -76,7 +78,7 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
                     <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
                         Scroll to see more colors
                     </AppText>
-                    <ColorSelector colorsArray={possibleTreeColors} state={[homepageTreeColor, updateHomepageTreeColor]} />
+                    <ColorGradientSelector colorsArray={nodeGradients} state={[homepageTreeColor, updateHomepageTreeColor]} />
                 </ScrollView>
             </View>
         </FlingToDismissModal>

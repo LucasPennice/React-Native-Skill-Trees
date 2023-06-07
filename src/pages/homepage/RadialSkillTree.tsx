@@ -40,7 +40,7 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings }: Tr
                 let parentCoord: CartesianCoordinate = { x: parentNode.x, y: parentNode.y };
 
                 const nodeColor = settings.oneColorPerTree ? rootNode!.accentColor : node.accentColor;
-                const pathColor = parentNode.data.isCompleted ? nodeColor : colors.line;
+                const pathColor = parentNode.data.isCompleted ? nodeColor.color1 : colors.line;
                 return (
                     <RadialCanvasPath
                         key={`${node.nodeId}_path`}
@@ -57,13 +57,13 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings }: Tr
                     if (node.isRoot) return <Fragment key={idx}></Fragment>;
 
                     const rectColor = settings.oneColorPerTree ? rootNode!.accentColor : node.accentColor;
-                    const labelTextColor = getLabelTextColor(rectColor);
+                    const labelTextColor = getLabelTextColor(rectColor.color1);
 
                     return (
                         <RadialLabel
                             key={idx}
                             text={node.data.name}
-                            color={{ rect: rectColor, text: labelTextColor }}
+                            color={{ rect: rectColor.color1, text: labelTextColor }}
                             coord={{ x: node.x, y: node.y }}
                             rootCoord={rootCoordinates}
                         />
@@ -71,6 +71,7 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings }: Tr
                 })}
             {nodeCoordinatesCentered.map((node) => {
                 const accentColor = settings.oneColorPerTree ? rootNode!.accentColor : node.accentColor;
+
                 return <RenderNode key={`${node.nodeId}_node`} node={{ ...node, accentColor }} selectedNode={selectedNode} />;
             })}
         </>
@@ -103,7 +104,7 @@ export default RadialSkillTree;
 function RenderNode({ node, selectedNode }: { selectedNode: string | null; node: CoordinatesWithTreeData }) {
     const { groupTransform } = useAnimationsOnSelect(selectedNode, node.nodeId);
 
-    const textColor = node.data.isCompleted ? node.accentColor : colors.unmarkedText;
+    const textColor = getLabelTextColor(node.accentColor.color1);
 
     return (
         <Node

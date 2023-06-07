@@ -20,7 +20,7 @@ import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { appendToUserTree } from "../../../redux/userTreesSlice";
 import { generalStyles } from "../../../styles";
-import { Skill, Tree, getDefaultSkillValue } from "../../../types";
+import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "../../../types";
 import HierarchicalSkillTree from "../../../components/treeRelated/hierarchical/HierarchicalSkillTree";
 import {
     centerNodesInCanvas,
@@ -31,6 +31,8 @@ import {
 } from "../../../components/treeRelated/coordinateFunctions";
 import useHandleCanvasScroll from "../../../components/treeRelated/hooks/useHandleCanvasScroll";
 import useHandleImportTree from "./useHandleImportTree";
+import ColorGradientSelector from "../../../components/ColorGradientSelector";
+import { nodeGradients } from "../../../parameters";
 
 function AddTreeModal() {
     const { query } = useRequestProcessor();
@@ -39,7 +41,7 @@ function AddTreeModal() {
     const [treeName, setTreeName] = useState("");
     const [icon, setIcon] = useState<null | string>(null);
     const [treeImportKey, setTreeImportKey] = useState("");
-    const [selectedColor, setSelectedColor] = useState("");
+    const [selectedColorGradient, setSelectedColorGradient] = useState<ColorGradient | undefined>(undefined);
     const [mode, setMode] = useState<"CREATE_TREE" | "IMPORT_TREE">("CREATE_TREE");
     //Redux State
     const { open } = useAppSelector(selectAddTree);
@@ -52,7 +54,7 @@ function AddTreeModal() {
 
     useEffect(() => {
         setTreeName("");
-        setSelectedColor("");
+        setSelectedColorGradient(undefined);
         setMode("CREATE_TREE");
         setTreeImportKey("");
         importTreeQuery.remove();
@@ -66,12 +68,18 @@ function AddTreeModal() {
     const closeModal = () => dispatch(close());
 
     const createNewTree = () => {
-        if (treeName === "" || selectedColor === "") return Alert.alert("Please fill all of the fields");
+        if (treeName === "" || !selectedColorGradient) return Alert.alert("Please fill all of the fields");
 
         const iconText = icon ?? treeName;
         const isEmoji = icon === null ? false : true;
 
-        const newTree = createTree(treeName, selectedColor, true, "SKILL_TREE", getDefaultSkillValue(treeName, true, { isEmoji, text: iconText }));
+        const newTree = createTree(
+            treeName,
+            selectedColorGradient,
+            true,
+            "SKILL_TREE",
+            getDefaultSkillValue(treeName, true, { isEmoji, text: iconText })
+        );
 
         dispatch(appendToUserTree(newTree));
         closeModal();
@@ -119,7 +127,7 @@ function AddTreeModal() {
                         <AppText fontSize={16} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
                             Scroll to see more colors
                         </AppText>
-                        <ColorSelector colorsArray={possibleTreeColors} state={[selectedColor, setSelectedColor]} style={{ marginBottom: 10 }} />
+                        <ColorGradientSelector colorsArray={nodeGradients} state={[selectedColorGradient, setSelectedColorGradient]} />
 
                         <ShowHideEmojiSelector emojiState={[icon, setIcon]} />
                     </Animated.View>

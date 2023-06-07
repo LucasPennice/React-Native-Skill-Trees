@@ -72,14 +72,14 @@ function ChildrenHoistSelectorModal({ candidatesToHoist, closeModalAndClearCandi
                                         style={[
                                             centerFlex,
                                             {
-                                                borderColor: isComplete ? currentTree.accentColor : colors.line,
+                                                borderColor: isComplete ? currentTree.accentColor.color1 : colors.line,
                                                 borderWidth: 3,
                                                 width: 40,
                                                 aspectRatio: 1,
                                                 borderRadius: 60,
                                             },
                                         ]}>
-                                        <AppText style={{ color: isComplete ? currentTree.accentColor : "white" }} fontSize={20}>
+                                        <AppText style={{ color: isComplete ? currentTree.accentColor.color1 : "white" }} fontSize={20}>
                                             {children.data.name[0]}
                                         </AppText>
                                     </View>

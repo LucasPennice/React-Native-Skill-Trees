@@ -16,7 +16,7 @@ type TreeProps = {
 
 function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, showLabel }: TreeProps) {
     const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
-    const labelTextColor = getLabelTextColor(rootNode!.accentColor);
+    const labelTextColor = getLabelTextColor(rootNode!.accentColor.color1);
 
     return (
         <>
@@ -27,7 +27,7 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, showLabe
 
                 let parentCoord: CartesianCoordinate = { x: parentNode.x, y: parentNode.y };
 
-                const pathColor = parentNode.data.isCompleted ? node.accentColor : colors.line;
+                const pathColor = parentNode.data.isCompleted ? node.accentColor.color1 : colors.line;
 
                 return (
                     <HierarchicalCanvasPath
@@ -45,7 +45,7 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, showLabe
                         <Label
                             key={idx}
                             text={node.data.name}
-                            color={{ rect: node.accentColor, text: labelTextColor }}
+                            color={{ rect: node.accentColor.color1, text: labelTextColor }}
                             coord={{ cx: node.x, cy: node.y }}
                         />
                     );
@@ -83,7 +83,7 @@ export default HierarchicalSkillTree;
 function RenderNode({ node, selectedNode }: { selectedNode: string | null; node: CoordinatesWithTreeData }) {
     const { groupTransform } = useAnimationsOnSelect(selectedNode, node.nodeId);
 
-    const textColor = node.data.isCompleted ? node.accentColor : colors.unmarkedText;
+    const textColor = node.data.isCompleted ? node.accentColor.color1 : colors.unmarkedText;
 
     return (
         <Node

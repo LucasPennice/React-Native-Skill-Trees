@@ -1,5 +1,5 @@
 import { Path, Skia, useComputedValue } from "@shopify/react-native-skia";
-import { CIRCLE_SIZE } from "../../../parameters";
+import { CIRCLE_SIZE, colors } from "../../../parameters";
 import { CartesianCoordinate } from "../../../types";
 import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
 
@@ -37,7 +37,7 @@ function HierarchicalCanvasPath({ coordinates, pathColor, isRoot }: { coordinate
     if (isRoot) return <></>;
 
     //eslint-disable-next-line
-    return <Path path={path} color={pathColor} style="stroke" strokeWidth={3} />;
+    return <Path path={path} color={colors.line} style="stroke" strokeWidth={2} />;
 }
 
 export default HierarchicalCanvasPath;

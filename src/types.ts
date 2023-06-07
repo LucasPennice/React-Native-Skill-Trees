@@ -62,7 +62,7 @@ export type Tree<T> = CartesianCoordinate & {
     treeId: string;
     nodeId: string;
     treeName: string;
-    accentColor: string;
+    accentColor: ColorGradient;
     level: number;
     data: T;
     children: Tree<T>[];
@@ -78,7 +78,7 @@ export type CoordinatesWithTreeData = CartesianCoordinate & {
     treeId: string;
     nodeId: string;
     treeName: string;
-    accentColor: string;
+    accentColor: ColorGradient;
     level: number;
     data: Skill;
     category: NodeCategory;
@@ -131,4 +131,10 @@ export type SkillPropertiesEditableOnPopMenu = {
     icon: Skill["icon"];
     name: Skill["name"];
     isCompleted: Skill["isCompleted"];
+};
+
+export type ColorGradient = {
+    label: string;
+    color1: string;
+    color2: string;
 };

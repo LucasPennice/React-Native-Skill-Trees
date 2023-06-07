@@ -1,4 +1,5 @@
 import { StyleProp, ViewStyle } from "react-native";
+import { ColorGradient } from "./types";
 
 export const CIRCLE_SIZE = 15;
 export const CIRCLE_SIZE_SELECTED = CIRCLE_SIZE * 3;
@@ -52,6 +53,19 @@ export const possibleTreeColors = [
     { label: "Magenta", color: "#FC385F" },
     { label: "White", color: "#FFFFFF" },
 ];
+
+export const nodeGradients: ColorGradient[] = [
+    { label: "Red", color1: "#FE453A", color2: "#FF9F23" },
+    { label: "Yellow", color1: "#FED739", color2: "#FF9F23" },
+    { label: "Orange", color1: "#FF9F23", color2: "#BF5AF2" },
+    { label: "Green", color1: "#50D158", color2: "#1982F9" },
+    { label: "Sky Blue", color1: "#40C8E0", color2: "#BF6AF2" },
+    { label: "Blue", color1: "#1982F9", color2: "#BF5AF2" },
+    { label: "Purple", color1: "#BF5AF2", color2: "#5A7BF2" },
+    { label: "Magenta", color1: "#FC385F", color2: "#BF5AF2" },
+    { label: "White", color1: "#FFFFFF", color2: "#CAEFD7" },
+];
+export const WHITE_GRADIENT = { label: "White", color1: "#FFFFFF", color2: "#CAEFD7" };
 
 export const ALLOWED_NODE_SPACING = 0.5;
 

@@ -2,8 +2,8 @@ import {
     Circle,
     DiffRect,
     Group,
+    LinearGradient,
     Path,
-    RoundedRect,
     Skia,
     SkiaMutableValue,
     SkiaValue,
@@ -14,12 +14,13 @@ import {
     useFont,
     useSharedValueEffect,
     useValue,
+    vec,
 } from "@shopify/react-native-skia";
 import { useEffect } from "react";
 import { useSharedValue, withDelay, withTiming } from "react-native-reanimated";
 import { interpolateColors } from "../../../functions/misc";
 import { CIRCLE_SIZE, colors } from "../../../parameters";
-import { NodeCategory } from "../../../types";
+import { ColorGradient, NodeCategory } from "../../../types";
 import useIsFirstRender from "../../../useIsFirstRender";
 import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
 
@@ -36,7 +37,7 @@ function Node({
     coord: { cx: number; cy: number };
     groupTransform?: SkiaValue<{ scale: number }[]>;
     circleBlurOnInactive?: SkiaMutableValue<number>;
-    treeAccentColor: string;
+    treeAccentColor: ColorGradient;
     text: { color: string; letter: string; isEmoji: boolean };
     category: NodeCategory;
 }) {
@@ -202,13 +203,6 @@ function Node({
         duration: REMAINING_ANIMATION_DURATION,
     });
 
-    const skillTreeX = useComputedValue(() => {
-        return x.current - CIRCLE_SIZE;
-    }, [x]);
-    const skillTreeY = useComputedValue(() => {
-        return y.current - CIRCLE_SIZE;
-    }, [y]);
-
     if (!nodeLetterFont) return <></>;
     if (!emojiFont) return <></>;
 
@@ -218,63 +212,77 @@ function Node({
                 <>
                     <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
                     {/* eslint-disable-next-line */}
-                    <Path path={path} style="stroke" strokeWidth={2} color={colors.line} />
+                    <Path path={path} style="stroke" strokeWidth={2}>
+                        <LinearGradient
+                            start={vec(x.current - CIRCLE_SIZE, y.current)}
+                            end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                            colors={["#515053", "#2C2C2D"]}
+                        />
+                    </Path>
                     <DiffRect
                         inner={animatedinnerRect}
                         outer={animatedOuterRect}
-                        color={`${interpolateColors(treeAccentColor, colors.background, 0.49)}`}
+                        color={`${interpolateColors(treeAccentColor.color1, colors.background, 0.49)}`}
                     />
                     {/* eslint-disable-next-line */}
-                    <Path path={path} style="stroke" start={start} strokeCap={"round"} strokeWidth={2} color={treeAccentColor} />
-                    <Text x={textX} y={textY} text={nodeIcon} font={text.isEmoji ? emojiFont : nodeLetterFont} color={color} />
+                    <Path path={path} style="stroke" start={start} strokeCap={"round"} strokeWidth={2}>
+                        <LinearGradient
+                            start={vec(x.current - CIRCLE_SIZE, y.current)}
+                            end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                            colors={[treeAccentColor.color1, treeAccentColor.color2]}
+                        />
+                    </Path>
+                    <Text x={textX} y={textY} text={nodeIcon} font={text.isEmoji ? emojiFont : nodeLetterFont} color={colors.unmarkedText}>
+                        {!isComplete && (
+                            <LinearGradient
+                                start={vec(x.current - CIRCLE_SIZE, y.current)}
+                                end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                                colors={["#515053", "#2C2C2D"]}
+                            />
+                        )}
+                    </Text>
                 </>
             )}
             {category === "SKILL_TREE" && (
                 <>
-                    <RoundedRect
-                        height={2 * CIRCLE_SIZE}
-                        width={2 * CIRCLE_SIZE}
-                        x={skillTreeX}
-                        y={skillTreeY}
-                        r={5}
-                        // eslint-disable-next-line
-                        style={"fill"}
-                        strokeWidth={2}
-                        color={colors.background}
-                    />
-
-                    <RoundedRect
-                        height={2 * CIRCLE_SIZE}
-                        width={2 * CIRCLE_SIZE}
-                        x={skillTreeX}
-                        y={skillTreeY}
-                        r={5}
-                        // eslint-disable-next-line
-                        style={"stroke"}
-                        strokeWidth={2}
-                        color={isComplete ? treeAccentColor : colors.line}
-                    />
-                    <Text
-                        x={textX}
-                        y={textY}
-                        text={nodeIcon}
-                        font={text.isEmoji ? emojiFont : nodeLetterFont}
-                        color={isComplete ? color : colors.line}
-                    />
+                    <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
+                    {/* eslint-disable-next-line */}
+                    <Path path={path} style="stroke" strokeWidth={2}>
+                        <LinearGradient
+                            start={vec(x.current - CIRCLE_SIZE, y.current)}
+                            end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                            colors={["#515053", "#2C2C2D"]}
+                        />
+                    </Path>
+                    {/* eslint-disable-next-line */}
+                    <Path path={path} start={start} style={"stroke"} strokeCap={"round"} strokeWidth={2} end={0.5}>
+                        <LinearGradient
+                            start={vec(x.current - CIRCLE_SIZE, y.current)}
+                            end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                            colors={[treeAccentColor.color1, treeAccentColor.color2]}
+                        />
+                    </Path>
+                    <Text x={textX} y={textY} text={nodeIcon} font={text.isEmoji ? emojiFont : nodeLetterFont}>
+                        <LinearGradient
+                            start={vec(x.current - CIRCLE_SIZE, y.current)}
+                            end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                            colors={[treeAccentColor.color1, treeAccentColor.color2]}
+                        />
+                    </Text>
                 </>
             )}
             {category === "USER" && (
                 <>
-                    <Circle cx={x} cy={y} r={2 * CIRCLE_SIZE} color={colors.background} />
+                    <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
                     {/* eslint-disable-next-line */}
-                    <Circle cx={x} cy={y} r={2 * CIRCLE_SIZE} color={treeAccentColor} style={"stroke"} strokeWidth={2} />
-                    <Text
-                        x={textX}
-                        y={textY}
-                        text={nodeIcon}
-                        font={text.isEmoji ? emojiFont : nodeLetterFont}
-                        color={isComplete ? color : treeAccentColor}
-                    />
+                    <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={treeAccentColor.color1} style={"fill"} strokeWidth={2}>
+                        <LinearGradient
+                            start={vec(x.current - CIRCLE_SIZE, y.current)}
+                            end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                            colors={[treeAccentColor.color1, treeAccentColor.color2]}
+                        />
+                    </Circle>
+                    <Text x={textX} y={textY} text={nodeIcon} font={text.isEmoji ? emojiFont : nodeLetterFont} color={text.color} />
                 </>
             )}
         </Group>

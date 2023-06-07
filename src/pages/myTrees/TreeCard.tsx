@@ -5,7 +5,7 @@ import { Circle, Svg } from "react-native-svg";
 import AppText from "../../components/AppText";
 import { ProgressWheelParams } from "../../components/ProgressIndicatorAndName";
 import { countCompletedSkillNodes, countSkillNodes, treeCompletedSkillPercentage } from "../../functions/extractInformationFromTree";
-import { centerFlex, colors } from "../../parameters";
+import { WHITE_GRADIENT, centerFlex, colors } from "../../parameters";
 import { setTree } from "../../redux/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
@@ -17,9 +17,9 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
     const { width } = useAppSelector(selectSafeScreenDimentions);
     const dispatchSetTree = () => dispatch(setTree(element));
     //
-    const treeAccentColor = element && element.accentColor ? element.accentColor : colors.accent;
+    const treeAccentColor = element ? element.accentColor : WHITE_GRADIENT;
 
-    const progressWheelProps = new ProgressWheelParams(treeAccentColor, `${treeAccentColor}3D`, 60, 5);
+    const progressWheelProps = new ProgressWheelParams(treeAccentColor.color1, `${treeAccentColor.color1}3D`, 60, 5);
 
     const completedSkillsQty = countCompletedSkillNodes(element);
     const skillsQty = countSkillNodes(element);
@@ -109,7 +109,7 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
                     style={{
                         position: "absolute",
                         right: isEmojiIcon ? 34 : 39,
-                        color: element.accentColor,
+                        color: element.accentColor.color1,
                         lineHeight: isEmojiIcon ? 28 : undefined,
                         fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
                     }}>

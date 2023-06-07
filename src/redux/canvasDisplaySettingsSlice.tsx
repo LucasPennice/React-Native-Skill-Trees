@@ -1,13 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "./reduxStore";
-import { colors } from "../parameters";
+import { colors, nodeGradients, WHITE_GRADIENT } from "../parameters";
+import { ColorGradient } from "../types";
 
 // Define a type for the slice state
 export type CanvasDisplaySettings = {
     showLabel: boolean;
     oneColorPerTree: boolean;
     showCircleGuide: boolean;
-    homepageTreeColor: string;
+    homepageTreeColor: ColorGradient;
 };
 
 // Define the initial state using that type
@@ -15,7 +16,7 @@ export const defaultCanvasDisplaySettings: CanvasDisplaySettings = {
     showLabel: true,
     oneColorPerTree: false,
     showCircleGuide: false,
-    homepageTreeColor: colors.accent,
+    homepageTreeColor: WHITE_GRADIENT,
 };
 
 export const canvasDisplaySettingsSlice = createSlice({
@@ -28,7 +29,7 @@ export const canvasDisplaySettingsSlice = createSlice({
         setShowCircleGuide: (state, action: PayloadAction<boolean>) => {
             state.showCircleGuide = action.payload;
         },
-        setHomepageTreeColor: (state, action: PayloadAction<string>) => {
+        setHomepageTreeColor: (state, action: PayloadAction<ColorGradient>) => {
             state.homepageTreeColor = action.payload;
         },
         setOneColorPerTree: (state, action: PayloadAction<boolean>) => {
