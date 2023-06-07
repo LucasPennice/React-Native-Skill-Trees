@@ -1,13 +1,13 @@
 import { mix, useComputedValue, useFont, useSharedValueEffect, useValue } from "@shopify/react-native-skia";
 import { Fragment, useEffect } from "react";
 import { useSharedValue, withSpring } from "react-native-reanimated";
+import { removeTreeDataFromCoordinate } from "../../components/treeRelated/coordinateFunctions";
+import Node from "../../components/treeRelated/general/Node";
+import RadialCanvasPath from "../../components/treeRelated/radial/RadialCanvasPath";
+import RadialLabel from "../../components/treeRelated/radial/RadialLabel";
 import { getLabelTextColor } from "../../functions/misc";
 import { colors } from "../../parameters";
 import { CartesianCoordinate, CoordinatesWithTreeData } from "../../types";
-import Node from "../viewingSkillTree/canvas/Node";
-import RadialCanvasPath from "../viewingSkillTree/canvas/RadialCanvasPath";
-import RadialLabel from "../viewingSkillTree/canvas/RadialLabel";
-import { removeTreeDataFromCoordinate } from "../viewingSkillTree/canvas/coordinateFunctions";
 
 type TreeProps = {
     nodeCoordinatesCentered: CoordinatesWithTreeData[];

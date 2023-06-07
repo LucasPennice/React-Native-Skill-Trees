@@ -21,15 +21,15 @@ import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice
 import { appendToUserTree } from "../../../redux/userTreesSlice";
 import { generalStyles } from "../../../styles";
 import { Skill, Tree, getDefaultSkillValue } from "../../../types";
-import HierarchicalSkillTree from "../../viewingSkillTree/canvas/HierarchicalSkillTree";
+import HierarchicalSkillTree from "../../../components/treeRelated/hierarchical/HierarchicalSkillTree";
 import {
     centerNodesInCanvas,
     getCanvasDimensions,
     getCoordinatedWithTreeData,
     getNodesCoordinates,
     removeTreeDataFromCoordinate,
-} from "../../viewingSkillTree/canvas/coordinateFunctions";
-import useHandleCanvasScroll from "../../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
+} from "../../../components/treeRelated/coordinateFunctions";
+import useHandleCanvasScroll from "../../../components/treeRelated/hooks/useHandleCanvasScroll";
 import useHandleImportTree from "./useHandleImportTree";
 
 function AddTreeModal() {

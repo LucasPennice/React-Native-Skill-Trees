@@ -1,64 +1,67 @@
-import { Canvas, Circle, DashPathEffect, useCanvasRef } from "@shopify/react-native-skia";
-import { useMemo, useState } from "react";
-import { View } from "react-native";
-import { GestureDetector } from "react-native-gesture-handler";
-import Animated from "react-native-reanimated";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useCanvasRef } from "@shopify/react-native-skia";
+import { useState } from "react";
+import { StackNavigatorParams } from "../../../App";
 import CanvasSettingsModal from "../../components/CanvasSettingsModal";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeScreenshot";
-import { cartesianToPositivePolarCoordinates } from "../../functions/coordinateSystem";
+import InteractiveTree, { InteractiveNodeState, InteractiveTreeConfig, InteractiveTreeFunctions } from "../../components/treeRelated/InteractiveTree";
+import SelectedNodeMenu from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
+import useGetMenuFunctions from "../../components/treeRelated/selectedNodeMenu/useGetMenuFunctions";
+import { findNodeById } from "../../functions/extractInformationFromTree";
 import { mutateEveryTreeNode } from "../../functions/mutateTree";
-import { NAV_HEGIHT, centerFlex } from "../../parameters";
 import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { selectTreeSlice } from "../../redux/userTreesSlice";
 import { Skill, Tree, getDefaultSkillValue } from "../../types";
-import {
-    centerNodesInCanvas,
-    getCanvasDimensions,
-    getCoordinatedWithTreeData,
-    getNodesCoordinates,
-    removeTreeDataFromCoordinate,
-} from "../viewingSkillTree/canvas/coordinateFunctions";
-import useHandleCanvasScroll from "../viewingSkillTree/canvas/hooks/useHandleCanvasScroll";
-import RadialSkillTree from "./RadialSkillTree";
 
-function HomepageTree() {
+type Props = NativeStackScreenProps<StackNavigatorParams, "Home">;
+
+function HomepageTree({ navigation }: Props) {
     //Redux State
-    const screenDimentions = useAppSelector(selectSafeScreenDimentions);
-    const { showLabel, oneColorPerTree, showCircleGuide, homepageTreeColor } = useAppSelector(selectCanvasDisplaySettings);
+    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
+    const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
+    const { homepageTreeColor } = canvasDisplaySettings;
     const { userTrees } = useAppSelector(selectTreeSlice);
     //State
     const [isTakingScreenshot, setIsTakingScreenshot] = useState(false);
     const [canvasSettings, setCanvasSettings] = useState(false);
+    const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
     //Derived State
     const homepageTree = buildHomepageTree(userTrees, homepageTreeColor);
-    const cachedTreeBuild = useMemo(() => handleTreeBuild(homepageTree, screenDimentions), [homepageTree, screenDimentions]);
-    const { canvasDimentions, centeredCoordinatedWithTreeData, nodeCoordinatesCentered } = cachedTreeBuild;
-    const { canvasHeight, canvasWidth } = canvasDimentions;
 
-    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, undefined);
+    const onNodeClick = (node: Tree<Skill>) => {
+        const nodeId = node.nodeId;
+
+        setSelectedNodeId(nodeId);
+
+        return;
+    };
 
     const canvasRef = useCanvasRef();
 
+    //CHANGE REDUX STATE TO HOLD NODE LATER 😝
+    const selectedNode = findNodeById(homepageTree, selectedNodeId);
+    const clearSelectedNode = () => setSelectedNodeId(null);
+
+    //Interactive Tree Props
+    const config: InteractiveTreeConfig = { canvasDisplaySettings, isInteractive: true, renderStyle: "radial" };
+    const state: InteractiveNodeState = { screenDimensions, canvasRef, selectedNodeId };
+    const functions: InteractiveTreeFunctions = { onNodeClick };
+    //Interactive Tree Props - SelectedNodeMenu
+    const menuFunctions = useGetMenuFunctions({ selectedNode, navigation, clearSelectedNode });
+
     return (
         <>
-            <GestureDetector gesture={canvasGestures}>
-                <View style={[centerFlex, { height: screenDimentions.height - NAV_HEGIHT, width: screenDimentions.width }]}>
-                    <Animated.View style={[transform]}>
-                        <Canvas style={{ width: canvasWidth, height: canvasHeight }} ref={canvasRef}>
-                            {showCircleGuide && <Circles />}
-                            <RadialSkillTree
-                                nodeCoordinatesCentered={centeredCoordinatedWithTreeData}
-                                selectedNode={null}
-                                settings={{ showLabel, oneColorPerTree }}
-                            />
-                        </Canvas>
-                    </Animated.View>
-                </View>
-            </GestureDetector>
+            <InteractiveTree
+                config={config}
+                state={state}
+                tree={homepageTree}
+                functions={functions}
+                renderOnSelectedNodeId={<SelectedNodeMenu functions={menuFunctions} state={{ screenDimensions, selectedNode: selectedNode! }} />}
+            />
             <ProgressIndicatorAndName tree={homepageTree} />
             <OpenSettingsMenu openModal={() => setCanvasSettings(true)} />
             <ShareTreeLayout
@@ -70,45 +73,6 @@ function HomepageTree() {
             <CanvasSettingsModal open={canvasSettings} closeModal={() => setCanvasSettings(false)} />
         </>
     );
-
-    function Circles() {
-        const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
-
-        if (!rootNode) return <></>;
-
-        const levelDistances = getLevelDistances();
-
-        const rootNodeCoord = { x: rootNode.x, y: rootNode.y };
-
-        return (
-            <>
-                {levelDistances.map((r, idx) => {
-                    return (
-                        // eslint-disable-next-line
-                        <Circle key={idx} cx={rootNodeCoord.x} cy={rootNodeCoord.y} r={r} color="gray" style={"stroke"} opacity={0.7}>
-                            <DashPathEffect intervals={[10, 10]} />
-                        </Circle>
-                    );
-                })}
-            </>
-        );
-
-        function getLevelDistances() {
-            const result: number[] = [];
-
-            for (let i = 0; i < nodeCoordinatesCentered.length; i++) {
-                const element = nodeCoordinatesCentered[i];
-
-                if (result[element.level] === undefined) {
-                    const polarCoord = cartesianToPositivePolarCoordinates({ x: element.x, y: element.y }, { x: rootNode!.x, y: rootNode!.y });
-
-                    result[element.level] = polarCoord.distanceToCenter;
-                }
-            }
-
-            return result;
-        }
-    }
 }
 
 export default HomepageTree;
@@ -144,16 +108,4 @@ function buildHomepageTree(userTrees: Tree<Skill>[], homepageTreeColor: string) 
     function increaseLevelByOne(tree: Tree<Skill>): Tree<Skill> {
         return { ...tree, level: tree.level + 1 };
     }
-}
-
-function handleTreeBuild(homepageTree: Tree<Skill>, screenDimentions: { width: number; height: number }) {
-    const coordinatesWithTreeData = getNodesCoordinates(homepageTree, "radial");
-    //
-    const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
-    const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
-    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
-    //
-    const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
-
-    return { canvasDimentions, centeredCoordinatedWithTreeData, nodeCoordinatesCentered };
 }

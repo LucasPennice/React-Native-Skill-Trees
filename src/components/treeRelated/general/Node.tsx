@@ -21,7 +21,7 @@ import { interpolateColors } from "../../../functions/misc";
 import { CIRCLE_SIZE, colors } from "../../../parameters";
 import { NodeCategory } from "../../../types";
 import useIsFirstRender from "../../../useIsFirstRender";
-import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
+import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
 
 function Node({
     coord,

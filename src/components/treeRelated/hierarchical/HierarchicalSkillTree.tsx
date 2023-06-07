@@ -4,9 +4,9 @@ import { useSharedValue, withSpring } from "react-native-reanimated";
 import { getLabelTextColor } from "../../../functions/misc";
 import { colors } from "../../../parameters";
 import { CartesianCoordinate, CoordinatesWithTreeData } from "../../../types";
+import Label from "../general/Label";
+import Node from "../general/Node";
 import HierarchicalCanvasPath from "./HierarchicalCanvasPath";
-import Label from "./Label";
-import Node from "./Node";
 
 type TreeProps = {
     nodeCoordinatesCentered: CoordinatesWithTreeData[];

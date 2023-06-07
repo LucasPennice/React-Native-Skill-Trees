@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
 import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
-import { useAppSelector } from "../../../../redux/reduxHooks";
-import { selectSafeScreenDimentions } from "../../../../redux/screenDimentionsSlice";
-import { CanvasDimensions, NodeCoordinate } from "../../../../types";
+import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../parameters";
+import { useAppSelector } from "../../../redux/reduxHooks";
+import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { CanvasDimensions, NodeCoordinate } from "../../../types";
 
 const DEFAULT_SCALE = 1;
 

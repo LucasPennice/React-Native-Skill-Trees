@@ -3,7 +3,7 @@ import type { RootState } from "./reduxStore";
 import { colors } from "../parameters";
 
 // Define a type for the slice state
-type CanvasDisplaySettings = {
+export type CanvasDisplaySettings = {
     showLabel: boolean;
     oneColorPerTree: boolean;
     showCircleGuide: boolean;

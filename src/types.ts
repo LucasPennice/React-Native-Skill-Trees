@@ -123,3 +123,12 @@ export type PolarContourByLevel = {
 export type LevelOverflow = undefined | { overflow: number; level: number };
 
 export type SkillModal<T> = { open: boolean; data: T; ref: Swipeable | null };
+
+export type SelectedNodeId = string | null;
+export type SelectedDnDZone = DnDZone | undefined;
+
+export type SkillPropertiesEditableOnPopMenu = {
+    icon: Skill["icon"];
+    name: Skill["name"];
+    isCompleted: Skill["isCompleted"];
+};

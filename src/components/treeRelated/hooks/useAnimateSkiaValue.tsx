@@ -1,7 +1,7 @@
 import { useSharedValueEffect, useValue } from "@shopify/react-native-skia";
 import { useEffect } from "react";
 import { useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
-import { CANVAS_SPRING } from "../../../../parameters";
+import { CANVAS_SPRING } from "../../../parameters";
 
 type Props<T> = {
     initialValue: T;

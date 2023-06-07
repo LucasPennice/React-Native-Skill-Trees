@@ -1,7 +1,7 @@
 import { Path, Skia, useComputedValue } from "@shopify/react-native-skia";
 import { CIRCLE_SIZE } from "../../../parameters";
 import { CartesianCoordinate } from "../../../types";
-import useAnimateSkiaValue from "./hooks/useAnimateSkiaValue";
+import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
 
 type pathCoordinates = {
     cx: number;
