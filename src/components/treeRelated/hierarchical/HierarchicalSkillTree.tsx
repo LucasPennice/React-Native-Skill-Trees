@@ -11,10 +11,13 @@ import HierarchicalCanvasPath from "./HierarchicalCanvasPath";
 type TreeProps = {
     nodeCoordinatesCentered: CoordinatesWithTreeData[];
     selectedNode: string | null;
-    showLabel: boolean;
+    settings: {
+        showLabel: boolean;
+        showIcons: boolean;
+    };
 };
 
-function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, showLabel }: TreeProps) {
+function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, settings }: TreeProps) {
     const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 17);
     const emojiFont = useFont(require("../../../../assets/NotoEmoji-Regular.ttf"), 17);
 
@@ -22,6 +25,7 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, showLabe
     if (!rootNode) return <></>;
     if (!nodeLetterFont || !emojiFont) return <></>;
 
+    const { showIcons, showLabel } = settings;
     const labelTextColor = getLabelTextColor(rootNode!.accentColor.color1);
     const treeCompletedPercentage = completedSkillPercentageFromCoords(nodeCoordinatesCentered, rootNode.treeId);
 
@@ -75,7 +79,7 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, showLabe
                     nodeId: node.nodeId,
                 };
 
-                const state = { font, treeCompletedPercentage, selectedNodeId: selectedNode };
+                const state = { font, treeCompletedPercentage, selectedNodeId: selectedNode, showIcons };
 
                 return <Node key={`${node.nodeId}_node`} state={state} nodeData={nodeData} />;
             })}

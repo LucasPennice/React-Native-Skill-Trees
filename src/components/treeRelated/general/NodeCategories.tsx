@@ -11,6 +11,7 @@ type NodeProps = {
     text: string;
     accentColor: ColorGradient;
     textCoordinates: { textX: SkiaValue<number>; textY: SkiaValue<number> };
+    showIcons: boolean;
 };
 
 type SkillNodeProps = {
@@ -20,7 +21,7 @@ type SkillNodeProps = {
 };
 
 function SkillNode({ path, isComplete, nodeState }: SkillNodeProps) {
-    const { accentColor, animatedCoordinates, font, text, textCoordinates } = nodeState;
+    const { accentColor, animatedCoordinates, font, text, textCoordinates, showIcons } = nodeState;
     const { x, y } = animatedCoordinates;
 
     const { textX, textY } = textCoordinates;
@@ -57,15 +58,17 @@ function SkillNode({ path, isComplete, nodeState }: SkillNodeProps) {
                     colors={[accentColor.color1, accentColor.color2]}
                 />
             </Path>
-            <Text x={textX} y={textY} text={text} font={font} color={colors.unmarkedText}>
-                {!isComplete && (
-                    <LinearGradient
-                        start={vec(x.current - CIRCLE_SIZE, y.current)}
-                        end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
-                        colors={["#515053", "#2C2C2D"]}
-                    />
-                )}
-            </Text>
+            {showIcons && (
+                <Text x={textX} y={textY} text={text} font={font} color={colors.unmarkedText}>
+                    {!isComplete && (
+                        <LinearGradient
+                            start={vec(x.current - CIRCLE_SIZE, y.current)}
+                            end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                            colors={["#515053", "#2C2C2D"]}
+                        />
+                    )}
+                </Text>
+            )}
         </>
     );
 }
@@ -78,7 +81,7 @@ type SkillTreeNodeProps = {
 };
 
 function SkillTreeNode({ isComplete, nodeState, path, treeCompletedPercentage }: SkillTreeNodeProps) {
-    const { accentColor, animatedCoordinates, font, text, textCoordinates } = nodeState;
+    const { accentColor, animatedCoordinates, font, text, textCoordinates, showIcons } = nodeState;
     const { x, y } = animatedCoordinates;
 
     const { textX, textY } = textCoordinates;
@@ -109,13 +112,15 @@ function SkillTreeNode({ isComplete, nodeState, path, treeCompletedPercentage }:
                     colors={[accentColor.color1, accentColor.color2]}
                 />
             </Path>
-            <Text x={textX} y={textY} text={text} font={font}>
-                <LinearGradient
-                    start={vec(x.current - CIRCLE_SIZE, y.current)}
-                    end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
-                    colors={[accentColor.color1, accentColor.color2]}
-                />
-            </Text>
+            {showIcons && (
+                <Text x={textX} y={textY} text={text} font={font}>
+                    <LinearGradient
+                        start={vec(x.current - CIRCLE_SIZE, y.current)}
+                        end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                        colors={[accentColor.color1, accentColor.color2]}
+                    />
+                </Text>
+            )}
         </>
     );
 }
@@ -127,7 +132,7 @@ type UserNodeProps = {
 };
 
 function UserNode({ nodeState, textColor }: UserNodeProps) {
-    const { accentColor, animatedCoordinates, font, text, textCoordinates } = nodeState;
+    const { accentColor, animatedCoordinates, font, text, textCoordinates, showIcons } = nodeState;
     const { x, y } = animatedCoordinates;
 
     const { textX, textY } = textCoordinates;
@@ -142,7 +147,7 @@ function UserNode({ nodeState, textColor }: UserNodeProps) {
                     colors={[accentColor.color1, accentColor.color2]}
                 />
             </Circle>
-            <Text x={textX} y={textY} text={text} font={font} color={textColor} />
+            {showIcons && <Text x={textX} y={textY} text={text} font={font} color={textColor} />}
         </>
     );
 }

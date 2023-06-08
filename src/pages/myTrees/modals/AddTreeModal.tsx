@@ -8,20 +8,10 @@ import axiosClient from "../../../../axiosClient";
 import { useRequestProcessor } from "../../../../requestProcessor";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
-import ColorSelector from "../../../components/ColorsSelector";
+import ColorGradientSelector from "../../../components/ColorGradientSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import LoadingIcon from "../../../components/LoadingIcon";
 import ShowHideEmojiSelector from "../../../components/ShowHideEmojiSelector";
-import { createTree } from "../../../functions/misc";
-import { MENU_HIGH_DAMPENING, centerFlex, colors, possibleTreeColors } from "../../../parameters";
-import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
-import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
-import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { appendToUserTree } from "../../../redux/userTreesSlice";
-import { generalStyles } from "../../../styles";
-import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "../../../types";
-import HierarchicalSkillTree from "../../../components/treeRelated/hierarchical/HierarchicalSkillTree";
 import {
     centerNodesInCanvas,
     getCanvasDimensions,
@@ -29,10 +19,18 @@ import {
     getNodesCoordinates,
     removeTreeDataFromCoordinate,
 } from "../../../components/treeRelated/coordinateFunctions";
+import HierarchicalSkillTree from "../../../components/treeRelated/hierarchical/HierarchicalSkillTree";
 import useHandleCanvasScroll from "../../../components/treeRelated/hooks/useHandleCanvasScroll";
+import { createTree } from "../../../functions/misc";
+import { MENU_HIGH_DAMPENING, centerFlex, colors, nodeGradients } from "../../../parameters";
+import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
+import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
+import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
+import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { appendToUserTree } from "../../../redux/userTreesSlice";
+import { generalStyles } from "../../../styles";
+import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "../../../types";
 import useHandleImportTree from "./useHandleImportTree";
-import ColorGradientSelector from "../../../components/ColorGradientSelector";
-import { nodeGradients } from "../../../parameters";
 
 function AddTreeModal() {
     const { query } = useRequestProcessor();
@@ -153,7 +151,7 @@ function ImportTree({
 }) {
     const { data, isError, isFetching, refetch: fetchTreeFromImportLink } = importTreeQuery;
     const [treeImportKey, setTreeImportKey] = linkState;
-    const { showLabel } = useAppSelector(selectCanvasDisplaySettings);
+    const { showLabel, showIcons } = useAppSelector(selectCanvasDisplaySettings);
     const { height, width } = useAppSelector(selectSafeScreenDimentions);
 
     const initialState = !isFetching && data === undefined;
@@ -211,7 +209,7 @@ function ImportTree({
                             <HierarchicalSkillTree
                                 nodeCoordinatesCentered={centeredCoordinatedWithTreeData}
                                 selectedNode={null}
-                                showLabel={showLabel}
+                                settings={{ showIcons, showLabel }}
                             />
                         </Canvas>
                     </Animated.View>

@@ -15,6 +15,7 @@ type TreeProps = {
     settings: {
         showLabel: boolean;
         oneColorPerTree: boolean;
+        showIcons: boolean;
     };
 };
 
@@ -98,7 +99,12 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings }: Tr
                         ? 0
                         : completedSkillPercentageFromCoords(nodeCoordinatesCentered, node.treeId);
 
-                const state = { font, treeCompletedPercentage: currentTreeCompletedPercentage, selectedNodeId: selectedNode };
+                const state = {
+                    font,
+                    treeCompletedPercentage: currentTreeCompletedPercentage,
+                    selectedNodeId: selectedNode,
+                    showIcons: settings.showIcons,
+                };
 
                 return <Node state={state} key={`${node.nodeId}_node`} nodeData={nodeData} />;
             })}

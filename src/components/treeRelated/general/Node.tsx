@@ -22,12 +22,13 @@ function Node({
         font: SkFont;
         treeCompletedPercentage: number;
         selectedNodeId: string | null;
+        showIcons: boolean;
     };
     circleBlurOnInactive?: SkiaMutableValue<number>;
     nodeData: CanvasNodeData;
 }) {
     const { category, coord, isComplete, text, treeAccentColor, nodeId } = nodeData;
-    const { font, treeCompletedPercentage, selectedNodeId } = state;
+    const { font, treeCompletedPercentage, selectedNodeId, showIcons } = state;
 
     const { cx, cy } = coord;
 
@@ -39,7 +40,7 @@ function Node({
     //Node Props
     const textCoordinates = { textX, textY };
     const animatedCoordinates = { x, y };
-    const nodeState: NodeProps = { accentColor: treeAccentColor, animatedCoordinates, font, text: nodeIcon, textCoordinates };
+    const nodeState: NodeProps = { accentColor: treeAccentColor, animatedCoordinates, font, text: nodeIcon, textCoordinates, showIcons };
 
     return (
         <Group origin={{ x: cx, y: cy }} transform={groupTransform} opacity={circleBlurOnInactive ?? 1}>

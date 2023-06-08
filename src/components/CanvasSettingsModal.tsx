@@ -1,21 +1,21 @@
+import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
-import { colors, nodeGradients, possibleTreeColors } from "../parameters";
+import { colors, nodeGradients } from "../parameters";
 import {
     selectCanvasDisplaySettings,
     setHomepageTreeColor,
     setOneColorPerTree,
     setShowCircleGuide,
+    setShowIcons,
     setShowLabel,
 } from "../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../redux/reduxHooks";
+import { ColorGradient } from "../types";
 import AppText from "./AppText";
+import AppTextInput from "./AppTextInput";
+import ColorGradientSelector from "./ColorGradientSelector";
 import FlingToDismissModal from "./FlingToDismissModal";
 import RadioInput from "./RadioInput";
-import ColorSelector from "./ColorsSelector";
-import AppTextInput from "./AppTextInput";
-import { useEffect, useState } from "react";
-import { ColorGradient } from "../types";
-import ColorGradientSelector from "./ColorGradientSelector";
 
 type Props = {
     closeModal: () => void;
@@ -23,7 +23,7 @@ type Props = {
 };
 
 function CanvasSettingsModal({ closeModal, open }: Props) {
-    const { oneColorPerTree, showCircleGuide, showLabel, homepageTreeColor } = useAppSelector(selectCanvasDisplaySettings);
+    const { oneColorPerTree, showCircleGuide, showLabel, homepageTreeColor, showIcons } = useAppSelector(selectCanvasDisplaySettings);
     const dispatch = useAppDispatch();
 
     const [homeTreeName, setHomeTreeName] = useState("");
@@ -42,6 +42,9 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
     const updateHomepageTreeColor = (v: ColorGradient) => {
         dispatch(setHomepageTreeColor(v));
     };
+    const updateShowIcons = (v: boolean) => {
+        dispatch(setShowIcons(v));
+    };
 
     return (
         <FlingToDismissModal closeModal={closeModal} open={open}>
@@ -54,6 +57,7 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
                         These settings affect how every skill tree looks
                     </AppText>
                     <RadioInput state={[showLabel, updateShowLabel]} text={"Show labels"} style={{ marginBottom: 15 }} />
+                    <RadioInput state={[showIcons, updateShowIcons]} text={"Show Icons"} style={{ marginBottom: 15 }} />
                     <AppText style={{ color: "white", marginBottom: 10, fontFamily: "helveticaBold" }} fontSize={24}>
                         Home Skill Tree Styles
                     </AppText>

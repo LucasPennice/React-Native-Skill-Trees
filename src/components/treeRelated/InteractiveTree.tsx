@@ -149,11 +149,15 @@ function HierarchicalSkillTreeRender({
     const { selectedDndZone, selectedNodeId } = state;
     const { dndZoneCoordinates, nodeCoordinates } = treeData;
     const { isInteractive, showDndZones, canvasDisplaySettings } = config;
-    const { showLabel } = canvasDisplaySettings;
+    const { showLabel, showIcons } = canvasDisplaySettings;
 
     return (
         <>
-            <HierarchicalSkillTree nodeCoordinatesCentered={nodeCoordinates} selectedNode={selectedNodeId ?? null} showLabel={showLabel} />
+            <HierarchicalSkillTree
+                nodeCoordinatesCentered={nodeCoordinates}
+                selectedNode={selectedNodeId ?? null}
+                settings={{ showIcons, showLabel }}
+            />
             {isInteractive && showDndZones && <DragAndDropZones data={dndZoneCoordinates} selectedDndZone={selectedDndZone} />}
         </>
     );
@@ -170,7 +174,7 @@ function RadialTreeRendererRender({
 }) {
     const { nodeCoordinates } = treeData;
     const { canvasDisplaySettings } = config;
-    const { showLabel, oneColorPerTree, showCircleGuide } = canvasDisplaySettings;
+    const { showLabel, oneColorPerTree, showCircleGuide, showIcons } = canvasDisplaySettings;
     const { selectedNodeId } = state;
 
     return (
@@ -179,7 +183,7 @@ function RadialTreeRendererRender({
             <RadialSkillTree
                 nodeCoordinatesCentered={nodeCoordinates}
                 selectedNode={selectedNodeId ?? null}
-                settings={{ showLabel, oneColorPerTree }}
+                settings={{ showLabel, oneColorPerTree, showIcons }}
             />
         </>
     );
