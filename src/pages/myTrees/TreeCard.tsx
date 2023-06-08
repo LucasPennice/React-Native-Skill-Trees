@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
-import { Circle, Svg } from "react-native-svg";
+import { Circle, Defs, LinearGradient, Stop, Svg } from "react-native-svg";
 import AppText from "../../components/AppText";
 import { ProgressWheelParams } from "../../components/ProgressIndicatorAndName";
 import { countCompletedSkillNodes, countSkillNodes, treeCompletedSkillPercentage } from "../../functions/extractInformationFromTree";
@@ -86,6 +86,12 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
                     </AppText>
                 </View>
                 <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
+                    <Defs>
+                        <LinearGradient id="progressColor" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <Stop offset="0%" stopColor={element.accentColor.color1} stopOpacity="1" />
+                            <Stop offset="100%" stopColor={element.accentColor.color2} stopOpacity="1" />
+                        </LinearGradient>
+                    </Defs>
                     <Circle
                         strokeWidth={progressWheelProps.strokeWidth}
                         cx={progressWheelProps.centerCoordinate}
@@ -98,17 +104,17 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
                         cx={progressWheelProps.centerCoordinate}
                         cy={progressWheelProps.centerCoordinate}
                         r={progressWheelProps.radius}
-                        stroke={progressWheelProps.progressStroke}
+                        stroke={"url(#progressColor)"}
                         strokeDasharray={progressWheelProps.circumference}
                         strokeLinecap="round"
                         strokeDashoffset={result}
                     />
                 </Svg>
                 <AppText
-                    fontSize={isEmojiIcon ? 25 : 30}
+                    fontSize={25}
                     style={{
                         position: "absolute",
-                        right: isEmojiIcon ? 34 : 39,
+                        right: isEmojiIcon ? 34 : 41,
                         color: element.accentColor.color1,
                         lineHeight: isEmojiIcon ? 28 : undefined,
                         fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",

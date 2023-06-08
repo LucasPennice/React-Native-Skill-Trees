@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { View } from "react-native";
 import Animated, { useAnimatedProps, useSharedValue, withSpring } from "react-native-reanimated";
-import { Circle, Svg, Circle as SvgCircle } from "react-native-svg";
+import { Circle, Defs, LinearGradient, Stop, Svg, Circle as SvgCircle } from "react-native-svg";
 import { treeCompletedSkillPercentage } from "../functions/extractInformationFromTree";
 import { centerFlex, colors } from "../parameters";
 import { useAppSelector } from "../redux/reduxHooks";
@@ -80,6 +80,13 @@ function ProgressIndicatorAndName({ tree }: { tree: Tree<Skill> }) {
                 },
             ]}>
             <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
+                <Defs>
+                    <LinearGradient id="progressColor" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <Stop offset="0%" stopColor={tree.accentColor.color1} stopOpacity="1" />
+                        <Stop offset="100%" stopColor={tree.accentColor.color2} stopOpacity="1" />
+                    </LinearGradient>
+                </Defs>
+
                 <Circle
                     strokeWidth={progressWheelProps.strokeWidth}
                     cx={progressWheelProps.centerCoordinate}
@@ -92,7 +99,7 @@ function ProgressIndicatorAndName({ tree }: { tree: Tree<Skill> }) {
                     cx={progressWheelProps.centerCoordinate}
                     cy={progressWheelProps.centerCoordinate}
                     r={progressWheelProps.radius}
-                    stroke={progressWheelProps.progressStroke}
+                    stroke={"url(#progressColor)"}
                     strokeDasharray={progressWheelProps.circumference}
                     strokeLinecap="round"
                     animatedProps={animatedProps}
