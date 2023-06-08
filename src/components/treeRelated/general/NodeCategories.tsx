@@ -74,19 +74,18 @@ type SkillTreeNodeProps = {
     nodeState: NodeProps;
     path: SkiaValue<SkPath>;
     isComplete: boolean;
+    treeCompletedPercentage: number;
 };
 
-function SkillTreeNode({ isComplete, nodeState, path }: SkillTreeNodeProps) {
+function SkillTreeNode({ isComplete, nodeState, path, treeCompletedPercentage }: SkillTreeNodeProps) {
     const { accentColor, animatedCoordinates, font, text, textCoordinates } = nodeState;
     const { x, y } = animatedCoordinates;
 
     const { textX, textY } = textCoordinates;
 
-    const startTrim = isComplete ? 0 : 1;
-
-    const start = useAnimateSkiaValue({
-        initialValue: startTrim,
-        stateToAnimate: startTrim,
+    const end = useAnimateSkiaValue({
+        initialValue: treeCompletedPercentage / 100,
+        stateToAnimate: treeCompletedPercentage / 100,
         delay: isComplete ? ANIMATION_CONSTANTS_ON_COMPLETE.delayAfterOvershoot : 0,
         duration: isComplete ? ANIMATION_CONSTANTS_ON_COMPLETE.remainingAnimationDuration : 0,
     });
@@ -103,7 +102,7 @@ function SkillTreeNode({ isComplete, nodeState, path }: SkillTreeNodeProps) {
                 />
             </Path>
             {/* eslint-disable-next-line */}
-            <Path path={path} start={start} style={"stroke"} strokeCap={"round"} strokeWidth={2} end={0.5}>
+            <Path path={path} end={end} style={"stroke"} strokeCap={"round"} strokeWidth={2}>
                 <LinearGradient
                     start={vec(x.current - CIRCLE_SIZE, y.current)}
                     end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
@@ -124,6 +123,7 @@ function SkillTreeNode({ isComplete, nodeState, path }: SkillTreeNodeProps) {
 type UserNodeProps = {
     nodeState: NodeProps;
     textColor: string;
+    treeCompletedPercentage: number;
 };
 
 function UserNode({ nodeState, textColor }: UserNodeProps) {

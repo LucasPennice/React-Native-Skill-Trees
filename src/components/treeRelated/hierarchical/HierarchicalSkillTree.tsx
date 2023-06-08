@@ -1,5 +1,6 @@
 import { useFont } from "@shopify/react-native-skia";
 import { Fragment } from "react";
+import { completedSkillPercentageFromCoords } from "../../../functions/extractInformationFromTree";
 import { getLabelTextColor } from "../../../functions/misc";
 import { colors } from "../../../parameters";
 import { CartesianCoordinate, CoordinatesWithTreeData } from "../../../types";
@@ -14,13 +15,15 @@ type TreeProps = {
 };
 
 function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, showLabel }: TreeProps) {
-    const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
-    const labelTextColor = getLabelTextColor(rootNode!.accentColor.color1);
-
     const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 17);
     const emojiFont = useFont(require("../../../../assets/NotoEmoji-Regular.ttf"), 17);
 
+    const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
+    if (!rootNode) return <></>;
     if (!nodeLetterFont || !emojiFont) return <></>;
+
+    const labelTextColor = getLabelTextColor(rootNode!.accentColor.color1);
+    const treeCompletedPercentage = completedSkillPercentageFromCoords(nodeCoordinatesCentered, rootNode.treeId);
 
     return (
         <>
@@ -72,7 +75,9 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, showLabe
                     nodeId: node.nodeId,
                 };
 
-                return <Node key={`${node.nodeId}_node`} font={font} selectedNodeId={selectedNode} nodeData={nodeData} />;
+                const state = { font, treeCompletedPercentage, selectedNodeId: selectedNode };
+
+                return <Node key={`${node.nodeId}_node`} state={state} nodeData={nodeData} />;
             })}
         </>
     );

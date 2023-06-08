@@ -16,15 +16,18 @@ export type CanvasNodeData = {
 function Node({
     nodeData,
     circleBlurOnInactive,
-    selectedNodeId,
-    font,
+    state,
 }: {
-    font: SkFont;
-    selectedNodeId: string | null;
+    state: {
+        font: SkFont;
+        treeCompletedPercentage: number;
+        selectedNodeId: string | null;
+    };
     circleBlurOnInactive?: SkiaMutableValue<number>;
     nodeData: CanvasNodeData;
 }) {
     const { category, coord, isComplete, text, treeAccentColor, nodeId } = nodeData;
+    const { font, treeCompletedPercentage, selectedNodeId } = state;
 
     const { cx, cy } = coord;
 
@@ -42,9 +45,11 @@ function Node({
         <Group origin={{ x: cx, y: cy }} transform={groupTransform} opacity={circleBlurOnInactive ?? 1}>
             {category === "SKILL" && <SkillNode nodeState={nodeState} isComplete={isComplete} path={path} />}
 
-            {category === "SKILL_TREE" && <SkillTreeNode nodeState={nodeState} isComplete={isComplete} path={path} />}
+            {category === "SKILL_TREE" && (
+                <SkillTreeNode nodeState={nodeState} isComplete={isComplete} path={path} treeCompletedPercentage={treeCompletedPercentage} />
+            )}
 
-            {category === "USER" && <UserNode nodeState={nodeState} textColor={text.color} />}
+            {category === "USER" && <UserNode nodeState={nodeState} textColor={text.color} treeCompletedPercentage={treeCompletedPercentage} />}
         </Group>
     );
 }

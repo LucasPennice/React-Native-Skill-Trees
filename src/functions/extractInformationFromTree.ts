@@ -1,5 +1,5 @@
 import { UNCENTERED_ROOT_COORDINATES } from "../parameters";
-import { PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
+import { CoordinatesWithTreeData, PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
 import { cartesianToPositivePolarCoordinates } from "./coordinateSystem";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
@@ -306,9 +306,33 @@ export function countSkillNodes(rootNode: Tree<Skill>) {
 export function treeCompletedSkillPercentage(rootNode: Tree<Skill>) {
     const skillNodeQty = countSkillNodes(rootNode);
 
-    if (skillNodeQty === 0) return 100;
+    if (skillNodeQty === 0) return 0;
 
     const completedSkillNodeQty = countCompletedSkillNodes(rootNode);
+
+    const result = (completedSkillNodeQty / skillNodeQty) * 100;
+
+    return result;
+}
+
+//This function ignores USER and SKILL_TREE nodes when calculating the percentage
+export function completedSkillPercentageFromCoords(coord: CoordinatesWithTreeData[], treeId: string) {
+    let skillNodeQty = coord.reduce((accumulator, currentValue) => {
+        if (currentValue.treeId !== treeId) return accumulator;
+        if (currentValue.category !== "SKILL") return accumulator;
+
+        return accumulator + 1;
+    }, 0);
+
+    if (skillNodeQty === 0) return 0;
+
+    const completedSkillNodeQty = coord.reduce((accumulator, currentValue) => {
+        if (currentValue.treeId !== treeId) return accumulator;
+        if (currentValue.category !== "SKILL") return accumulator;
+        if (!currentValue.data.isCompleted) return accumulator;
+
+        return accumulator + 1;
+    }, 0);
 
     const result = (completedSkillNodeQty / skillNodeQty) * 100;
 

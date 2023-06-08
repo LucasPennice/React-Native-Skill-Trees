@@ -4,6 +4,7 @@ import { removeTreeDataFromCoordinate } from "../../components/treeRelated/coord
 import Node, { CanvasNodeData } from "../../components/treeRelated/general/Node";
 import RadialCanvasPath from "../../components/treeRelated/radial/RadialCanvasPath";
 import RadialLabel from "../../components/treeRelated/radial/RadialLabel";
+import { completedSkillPercentageFromCoords } from "../../functions/extractInformationFromTree";
 import { getLabelTextColor } from "../../functions/misc";
 import { colors } from "../../parameters";
 import { CartesianCoordinate, CoordinatesWithTreeData } from "../../types";
@@ -18,19 +19,17 @@ type TreeProps = {
 };
 
 function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings }: TreeProps) {
-    const nodeCoordinates = removeTreeDataFromCoordinate(nodeCoordinatesCentered);
-
-    const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
-    const rootCoordinates = { x: rootNode!.x, y: rootNode!.y };
-
     const labelFont = useFont(require("../../../assets/Helvetica.ttf"), 12);
-    const nodeLetterFont = useFont(require("../../../assets/Helvetica.ttf"), 20);
+    const nodeLetterFont = useFont(require("../../../assets/Helvetica.ttf"), 17);
     const emojiFont = useFont(require("../../../assets/NotoEmoji-Regular.ttf"), 17);
 
-    const rootNodeCoordinates = nodeCoordinatesCentered.find((c) => c.level === 0);
-
-    if (!rootNodeCoordinates) return <></>;
+    const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
+    if (!rootNode) return <></>;
     if (!labelFont || !nodeLetterFont || !emojiFont) return <></>;
+
+    const nodeCoordinates = removeTreeDataFromCoordinate(nodeCoordinatesCentered);
+    const rootCoordinates = { x: rootNode!.x, y: rootNode!.y };
+    const treeCompletedPercentage = completedSkillPercentageFromCoords(nodeCoordinatesCentered, rootNode.treeId);
 
     return (
         <>
@@ -92,7 +91,16 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings }: Tr
                     nodeId: node.nodeId,
                 };
 
-                return <Node font={font} key={`${node.nodeId}_node`} selectedNodeId={selectedNode} nodeData={nodeData} />;
+                const currentTreeCompletedPercentage =
+                    node.category === "USER"
+                        ? treeCompletedPercentage
+                        : node.category === "SKILL"
+                        ? 0
+                        : completedSkillPercentageFromCoords(nodeCoordinatesCentered, node.treeId);
+
+                const state = { font, treeCompletedPercentage: currentTreeCompletedPercentage, selectedNodeId: selectedNode };
+
+                return <Node state={state} key={`${node.nodeId}_node`} nodeData={nodeData} />;
             })}
         </>
     );
