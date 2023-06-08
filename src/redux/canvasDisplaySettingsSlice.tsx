@@ -10,6 +10,7 @@ export type CanvasDisplaySettings = {
     showCircleGuide: boolean;
     showIcons: boolean;
     homepageTreeColor: ColorGradient;
+    homepageTreeName: string;
 };
 
 // Define the initial state using that type
@@ -19,6 +20,7 @@ export const defaultCanvasDisplaySettings: CanvasDisplaySettings = {
     showCircleGuide: false,
     showIcons: true,
     homepageTreeColor: WHITE_GRADIENT,
+    homepageTreeName: "Life Skills",
 };
 
 export const canvasDisplaySettingsSlice = createSlice({
@@ -27,6 +29,9 @@ export const canvasDisplaySettingsSlice = createSlice({
     reducers: {
         setShowLabel: (state, action: PayloadAction<boolean>) => {
             state.showLabel = action.payload;
+        },
+        setHomepageTreeName: (state, action: PayloadAction<string>) => {
+            state.homepageTreeName = action.payload;
         },
         setShowCircleGuide: (state, action: PayloadAction<boolean>) => {
             state.showCircleGuide = action.payload;
@@ -49,8 +54,15 @@ export const canvasDisplaySettingsSlice = createSlice({
     },
 });
 
-export const { setHomepageTreeColor, setOneColorPerTree, setShowCircleGuide, setShowLabel, populateCanvasDisplaySettings, setShowIcons } =
-    canvasDisplaySettingsSlice.actions;
+export const {
+    setHomepageTreeColor,
+    setOneColorPerTree,
+    setShowCircleGuide,
+    setShowLabel,
+    populateCanvasDisplaySettings,
+    setShowIcons,
+    setHomepageTreeName,
+} = canvasDisplaySettingsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectCanvasDisplaySettings = (state: RootState) => state.canvasDisplaySettings;

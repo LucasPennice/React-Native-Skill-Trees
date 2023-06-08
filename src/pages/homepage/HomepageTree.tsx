@@ -11,11 +11,11 @@ import SelectedNodeMenu from "../../components/treeRelated/selectedNodeMenu/Sele
 import useGetMenuFunctions from "../../components/treeRelated/selectedNodeMenu/useGetMenuFunctions";
 import { findNodeById } from "../../functions/extractInformationFromTree";
 import { mutateEveryTreeNode } from "../../functions/mutateTree";
-import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
+import { CanvasDisplaySettings, selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { selectTreeSlice } from "../../redux/userTreesSlice";
-import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "../../types";
+import { Skill, Tree, getDefaultSkillValue } from "../../types";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "Home">;
 
@@ -23,14 +23,13 @@ function HomepageTree({ navigation }: Props) {
     //Redux State
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
-    const { homepageTreeColor } = canvasDisplaySettings;
     const { userTrees } = useAppSelector(selectTreeSlice);
     //State
     const [isTakingScreenshot, setIsTakingScreenshot] = useState(false);
     const [canvasSettings, setCanvasSettings] = useState(false);
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
     //Derived State
-    const homepageTree = buildHomepageTree(userTrees, homepageTreeColor);
+    const homepageTree = buildHomepageTree(userTrees, canvasDisplaySettings);
 
     const onNodeClick = (node: Tree<Skill>) => {
         const nodeId = node.nodeId;
@@ -77,7 +76,8 @@ function HomepageTree({ navigation }: Props) {
 
 export default HomepageTree;
 
-function buildHomepageTree(userTrees: Tree<Skill>[], homepageTreeColor: ColorGradient) {
+function buildHomepageTree(userTrees: Tree<Skill>[], canvasDisplaySettings: CanvasDisplaySettings) {
+    const { homepageTreeColor, homepageTreeName } = canvasDisplaySettings;
     const ROOT_ID = "homepageRoot";
 
     const modifiedUserTrees = userTrees.map((uT) => {
@@ -93,11 +93,11 @@ function buildHomepageTree(userTrees: Tree<Skill>[], homepageTreeColor: ColorGra
         nodeId: ROOT_ID,
         isRoot: true,
         children: modifiedUserTrees,
-        data: getDefaultSkillValue("Skill", false, { isEmoji: false, text: "S" }),
+        data: getDefaultSkillValue(homepageTreeName, false, { isEmoji: false, text: "S" }),
         level: 0,
         parentId: null,
         treeId: "HomepageTree",
-        treeName: "Life Skills",
+        treeName: homepageTreeName,
         x: 0,
         y: 0,
         category: "USER",

@@ -8,6 +8,7 @@ import {
     setShowCircleGuide,
     setShowIcons,
     setShowLabel,
+    setHomepageTreeName,
 } from "../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../redux/reduxHooks";
 import { ColorGradient } from "../types";
@@ -23,12 +24,11 @@ type Props = {
 };
 
 function CanvasSettingsModal({ closeModal, open }: Props) {
-    const { oneColorPerTree, showCircleGuide, showLabel, homepageTreeColor, showIcons } = useAppSelector(selectCanvasDisplaySettings);
+    const { oneColorPerTree, showCircleGuide, showLabel, homepageTreeColor, showIcons, homepageTreeName } =
+        useAppSelector(selectCanvasDisplaySettings);
     const dispatch = useAppDispatch();
 
-    const [homeTreeName, setHomeTreeName] = useState("");
-
-    useEffect(() => {}, []);
+    const [homeTreeName, setHomeTreeName] = useState(homepageTreeName);
 
     const updateOneColorPerTree = (v: boolean) => {
         dispatch(setOneColorPerTree(v));
@@ -45,6 +45,11 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
     const updateShowIcons = (v: boolean) => {
         dispatch(setShowIcons(v));
     };
+
+    useEffect(() => {
+        if (homeTreeName === "") return;
+        dispatch(setHomepageTreeName(homeTreeName));
+    }, [homeTreeName]);
 
     return (
         <FlingToDismissModal closeModal={closeModal} open={open}>
