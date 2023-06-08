@@ -1,11 +1,10 @@
-import { mix, useComputedValue, useSharedValueEffect, useValue } from "@shopify/react-native-skia";
-import { Fragment, useEffect } from "react";
-import { useSharedValue, withSpring } from "react-native-reanimated";
+import { useFont } from "@shopify/react-native-skia";
+import { Fragment } from "react";
 import { getLabelTextColor } from "../../../functions/misc";
 import { colors } from "../../../parameters";
 import { CartesianCoordinate, CoordinatesWithTreeData } from "../../../types";
 import Label from "../general/Label";
-import Node from "../general/Node";
+import Node, { CanvasNodeData } from "../general/Node";
 import HierarchicalCanvasPath from "./HierarchicalCanvasPath";
 
 type TreeProps = {
@@ -17,6 +16,11 @@ type TreeProps = {
 function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, showLabel }: TreeProps) {
     const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
     const labelTextColor = getLabelTextColor(rootNode!.accentColor.color1);
+
+    const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 17);
+    const emojiFont = useFont(require("../../../../assets/NotoEmoji-Regular.ttf"), 17);
+
+    if (!nodeLetterFont || !emojiFont) return <></>;
 
     return (
         <>
@@ -50,49 +54,28 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, showLabe
                         />
                     );
                 })}
-            {nodeCoordinatesCentered.map((node) => (
-                <RenderNode key={`${node.nodeId}_node`} node={node} selectedNode={selectedNode} />
-            ))}
+            {nodeCoordinatesCentered.map((node) => {
+                const font = node.data.icon.isEmoji ? emojiFont : nodeLetterFont;
+                const textColor = node.data.isCompleted ? node.accentColor.color1 : colors.unmarkedText;
+                const text = {
+                    color: textColor,
+                    isEmoji: node.data.icon.isEmoji,
+                    letter: node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0],
+                };
+
+                const nodeData: CanvasNodeData = {
+                    isComplete: node.data.isCompleted,
+                    coord: { cx: node.x, cy: node.y },
+                    treeAccentColor: node.accentColor,
+                    text,
+                    category: node.category,
+                    nodeId: node.nodeId,
+                };
+
+                return <Node key={`${node.nodeId}_node`} font={font} selectedNodeId={selectedNode} nodeData={nodeData} />;
+            })}
         </>
     );
 }
 
-function useAnimationsOnSelect(selectedNode: string | null, nodeId: string) {
-    const shouldTransform = useValue(0);
-
-    const isActive = useSharedValue(0);
-
-    useEffect(() => {
-        const shouldActivate = selectedNode === nodeId;
-
-        isActive.value = withSpring(shouldActivate ? 1 : 0, { damping: 18, stiffness: 300 });
-    }, [selectedNode]);
-
-    useSharedValueEffect(() => {
-        shouldTransform.current = mix(isActive.value, 0, 1);
-    }, isActive);
-
-    const groupTransform = useComputedValue(() => [{ scale: mix(shouldTransform.current, 1, 3) }], [shouldTransform]);
-
-    return { groupTransform };
-}
-
 export default HierarchicalSkillTree;
-
-//Necessary to avoid hooks bug
-function RenderNode({ node, selectedNode }: { selectedNode: string | null; node: CoordinatesWithTreeData }) {
-    const { groupTransform } = useAnimationsOnSelect(selectedNode, node.nodeId);
-
-    const textColor = node.data.isCompleted ? node.accentColor.color1 : colors.unmarkedText;
-
-    return (
-        <Node
-            groupTransform={groupTransform}
-            isComplete={node.data.isCompleted}
-            treeAccentColor={node.accentColor}
-            coord={{ cx: node.x, cy: node.y }}
-            text={{ color: textColor, isEmoji: node.data.icon.isEmoji, letter: node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0] }}
-            category={node.category}
-        />
-    );
-}
