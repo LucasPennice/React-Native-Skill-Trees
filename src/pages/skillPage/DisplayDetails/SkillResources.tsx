@@ -25,18 +25,16 @@ function ResourceHeader({ openModal }: { openModal: () => void }) {
     );
 }
 
-function ResourceCard({ data, onPress }: { data: SkillResource; onPress?: (d: string) => void }) {
-    const { width } = Dimensions.get("window");
-
+function ResourceCard({ data, onPress, backgroundColor }: { data: SkillResource; onPress?: (d: string) => void; backgroundColor?: string }) {
     return (
-        <Pressable style={[{ width: width - 20 }]} onPress={onPress && data.url ? () => onPress(data.url!) : undefined}>
+        <Pressable style={[{ width: "100%" }]} onPress={onPress && data.url ? () => onPress(data.url!) : undefined}>
             <View
                 style={[
                     centerFlex,
                     {
                         flexDirection: "row",
                         gap: 15,
-                        backgroundColor: colors.darkGray,
+                        backgroundColor: backgroundColor ?? colors.darkGray,
                         paddingHorizontal: 15,
                         paddingVertical: 15,
                         justifyContent: "flex-start",

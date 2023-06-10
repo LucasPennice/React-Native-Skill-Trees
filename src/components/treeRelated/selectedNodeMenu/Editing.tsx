@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Alert, TouchableOpacity } from "react-native";
-import Animated, { FadeInDown, FadeOutUp, Layout } from "react-native-reanimated";
+import Animated, { FadeInDown, Layout } from "react-native-reanimated";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
@@ -60,7 +60,7 @@ function Editing({
     }, [icon]);
 
     return (
-        <Animated.View layout={Layout.stiffness(300).damping(26)} entering={FadeInDown} exiting={FadeOutUp}>
+        <Animated.View layout={Layout.stiffness(300).damping(26)} entering={FadeInDown}>
             <AppTextInput
                 placeholder="Skill Name"
                 textState={[newName, setNewName]}

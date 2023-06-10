@@ -26,9 +26,7 @@ function MilestoneHeader({ openModal }: { openModal: () => void }) {
     );
 }
 
-function MilestoneCard({ data, onPress }: { data: Milestone; onPress?: (d: string) => void }) {
-    const { width } = Dimensions.get("window");
-
+function MilestoneCard({ data, onPress, backgroundColor }: { data: Milestone; onPress?: (d: string) => void; backgroundColor?: string }) {
     return (
         <Pressable
             onPress={onPress ? () => onPress(data.id) : undefined}
@@ -37,8 +35,8 @@ function MilestoneCard({ data, onPress }: { data: Milestone; onPress?: (d: strin
                 {
                     flexDirection: "row",
                     gap: 15,
-                    backgroundColor: colors.darkGray,
-                    width: width - 20,
+                    backgroundColor: backgroundColor ?? colors.darkGray,
+                    width: "100%",
                     paddingHorizontal: 15,
                     justifyContent: "flex-start",
                     paddingVertical: 15,
@@ -49,10 +47,7 @@ function MilestoneCard({ data, onPress }: { data: Milestone; onPress?: (d: strin
             ]}>
             <View style={[centerFlex, { gap: 5, alignItems: "flex-start" }]}>
                 <View style={[centerFlex, { flexDirection: "row", gap: 5 }]}>
-                    <AppText
-                        fontSize={20}
-                        style={{ color: "#FFFFFF", maxWidth: width - 170 }}
-                        textProps={{ ellipsizeMode: "tail", numberOfLines: 1 }}>
+                    <AppText fontSize={20} style={{ color: "#FFFFFF" }}>
                         {data.title}
                     </AppText>
                 </View>

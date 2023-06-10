@@ -5,7 +5,12 @@ import { generalStyles } from "../../../styles";
 import { Skill, Tree } from "../../../types";
 import { useRoute } from "@react-navigation/native";
 import { RouteName } from "../../../../App";
-import { View } from "react-native";
+import { Linking, ScrollView, View } from "react-native";
+import { MilestoneCard } from "../../../pages/skillPage/Milestones";
+import { LogCard } from "../../../pages/skillPage/DisplayDetails/Logs";
+import { MotivesToLearnCard } from "../../../pages/skillPage/DisplayDetails/MotivesToLearn";
+import { ResourceCard } from "../../../pages/skillPage/DisplayDetails/SkillResources";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 function Viewing({ functions, selectedNode }: { functions: { goToSkillPage: () => void; goToTreePage: () => void }; selectedNode: Tree<Skill> }) {
     const route = useRoute();
@@ -19,20 +24,15 @@ function Viewing({ functions, selectedNode }: { functions: { goToSkillPage: () =
     const { category, treeName } = selectedNode;
 
     return (
-        <>
+        <Animated.View entering={FadeInDown}>
             {category !== "SKILL" && (
                 <AppText style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 10 }} fontSize={24}>
                     {treeName}
                 </AppText>
             )}
 
-            {category === "SKILL" && (
-                <TouchableOpacity style={[generalStyles.btn, { backgroundColor: "#282A2C", marginBottom: 10 }]} onPress={goToSkillPage}>
-                    <AppText style={{ color: colors.accent }} fontSize={16}>
-                        Go To Skill Page
-                    </AppText>
-                </TouchableOpacity>
-            )}
+            {category === "SKILL" && <SkillDetails data={selectedNode} goToSkillPage={goToSkillPage} />}
+
             {category !== "SKILL" && <TreeStats />}
 
             {category === "SKILL_TREE" && (
@@ -48,6 +48,52 @@ function Viewing({ functions, selectedNode }: { functions: { goToSkillPage: () =
                     </AppText>
                 </TouchableOpacity>
             )}
+        </Animated.View>
+    );
+}
+
+function SkillDetails({ goToSkillPage, data }: { goToSkillPage: () => void; data: Tree<Skill> }) {
+    const {
+        data: { milestones, logs, motivesToLearn, usefulResources },
+    } = data;
+    return (
+        <>
+            <View style={{ height: 300 }}>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    <TouchableOpacity
+                        style={[generalStyles.btn, { backgroundColor: "#282A2C", marginBottom: 10, width: "100%" }]}
+                        onPress={goToSkillPage}>
+                        <AppText style={{ color: colors.accent }} fontSize={16}>
+                            Go To Skill Page
+                        </AppText>
+                    </TouchableOpacity>
+                    <AppText fontSize={20} style={{ color: "#FFFFFF", marginVertical: 10 }}>
+                        Milestones
+                    </AppText>
+                    {milestones.map((milestone, key) => (
+                        <MilestoneCard data={milestone} key={key} backgroundColor="#282A2C" />
+                    ))}
+                    <AppText fontSize={20} style={{ color: "#FFFFFF", marginVertical: 10 }}>
+                        Motives To Learn
+                    </AppText>
+                    {motivesToLearn.map((motiveToLearn, key) => (
+                        <MotivesToLearnCard data={motiveToLearn} key={key} backgroundColor="#282A2C" />
+                    ))}
+
+                    <AppText fontSize={20} style={{ color: "#FFFFFF", marginVertical: 10 }}>
+                        Resources
+                    </AppText>
+                    {usefulResources.map((usefulResource, key) => (
+                        <ResourceCard onPress={(link: string) => Linking.openURL(link)} data={usefulResource} key={key} backgroundColor="#282A2C" />
+                    ))}
+                    <AppText fontSize={20} style={{ color: "#FFFFFF", marginVertical: 10 }}>
+                        Log Entries
+                    </AppText>
+                    {logs.map((log, key) => (
+                        <LogCard data={log} key={key} backgroundColor="#282A2C" />
+                    ))}
+                </ScrollView>
+            </View>
         </>
     );
 }

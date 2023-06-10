@@ -1,5 +1,5 @@
 import { KeyboardAvoidingView, Pressable, TextInput, TextInputProps, View, ViewProps } from "react-native";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { centerFlex, colors } from "../parameters";
 import CloseIcon from "./Icons/CloseIcon";
 
@@ -91,8 +91,7 @@ function AppTextInput({
                                 right: 0,
                             },
                         ]}
-                        entering={FadeIn}
-                        exiting={FadeOut}>
+                        entering={FadeIn}>
                         <Pressable style={[centerFlex, { flex: 1, paddingHorizontal: 10 }]} onPress={() => setText("")}>
                             <CloseIcon />
                         </Pressable>

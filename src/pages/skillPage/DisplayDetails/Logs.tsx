@@ -20,15 +20,13 @@ function LogHeader({ openModal }: { openModal: () => void }) {
     );
 }
 
-function LogCard({ data }: { data: SkillLogs }) {
-    const { width } = Dimensions.get("window");
-
+function LogCard({ data, backgroundColor }: { data: SkillLogs; backgroundColor?: string }) {
     return (
         <View
             style={[
                 {
-                    backgroundColor: colors.darkGray,
-                    width: width - 20,
+                    backgroundColor: backgroundColor ?? colors.darkGray,
+                    width: "100%",
                     paddingHorizontal: 15,
                     alignItems: "flex-start",
                     paddingVertical: 15,

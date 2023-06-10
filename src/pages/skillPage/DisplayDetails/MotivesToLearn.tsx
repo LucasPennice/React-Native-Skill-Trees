@@ -1,4 +1,4 @@
-import { Dimensions, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import AppText from "../../../components/AppText";
 import { centerFlex, colors } from "../../../parameters";
 import { generalStyles } from "../../../styles";
@@ -20,9 +20,7 @@ function MotivesToLearnHeader({ openModal }: { openModal: () => void }) {
     );
 }
 
-function MotivesToLearnCard({ data }: { data: MotiveToLearn }) {
-    const { width } = Dimensions.get("window");
-
+function MotivesToLearnCard({ data, backgroundColor }: { data: MotiveToLearn; backgroundColor?: string }) {
     return (
         <View
             style={[
@@ -30,8 +28,8 @@ function MotivesToLearnCard({ data }: { data: MotiveToLearn }) {
                 {
                     flexDirection: "row",
                     gap: 15,
-                    backgroundColor: colors.darkGray,
-                    width: width - 20,
+                    backgroundColor: backgroundColor ?? colors.darkGray,
+                    width: "100%",
                     paddingHorizontal: 15,
                     justifyContent: "flex-start",
                     paddingVertical: 15,
@@ -41,7 +39,7 @@ function MotivesToLearnCard({ data }: { data: MotiveToLearn }) {
                 },
             ]}>
             <View style={[centerFlex, { gap: 5, alignItems: "flex-start" }]}>
-                <AppText fontSize={20} style={{ color: "#FFFFFF", maxWidth: width - 170 }} textProps={{ ellipsizeMode: "tail", numberOfLines: 1 }}>
+                <AppText fontSize={20} style={{ color: "#FFFFFF" }}>
                     {data.text}
                 </AppText>
             </View>

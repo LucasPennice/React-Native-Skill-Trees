@@ -42,7 +42,7 @@ function ShowHideEmojiSelector({ emojiState, containerWidth }: { emojiState: [nu
                 </Animated.View>
             )}
             {!showEmojiSelector && (
-                <Animated.View entering={FadeInDown} exiting={FadeOutUp}>
+                <Animated.View>
                     <Pressable style={[generalStyles.btn, { backgroundColor: "#282A2C00" }]} onPress={() => setShowEmojiSelector(true)}>
                         <AppText style={{ color: colors.accent }} fontSize={16} textProps={{ ellipsizeMode: "clip", numberOfLines: 1 }}>
                             Edit Skill Icon

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { Easing, FadeInDown, FadeOutDown, FadeOutUp, runOnJS } from "react-native-reanimated";
+import Animated, { Easing, FadeInDown, FadeOutDown, FadeOutUp, Layout, runOnJS } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED, NAV_HEGIHT, colors } from "../../../parameters";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { generalStyles } from "../../../styles";
@@ -60,10 +60,13 @@ function SelectedNodeMenu({ functions, state, allowEdit }: Props) {
             isCompleted: selectedNode.data.isCompleted,
             name: selectedNode.data.name,
         });
+    }, [mode]);
+
+    useEffect(() => {
         setMode("VIEWING");
     }, []);
 
-    const showSaveChangesBtn = checkForSave(newSkillProps, selectedNode);
+    const showSaveChangesBtn = mode === "EDITING" && checkForSave(newSkillProps, selectedNode);
 
     const flingGesture = Gesture.Fling()
         .direction(Directions.DOWN)
@@ -116,7 +119,7 @@ function SelectedNodeMenu({ functions, state, allowEdit }: Props) {
             exiting={FadeOutDown.easing(Easing.elastic()).duration(300)}
             style={[styles.container]}>
             <GestureDetector gesture={flingGesture}>
-                <Animated.View style={styles.interactiveContainer}>
+                <Animated.View style={styles.interactiveContainer} layout={Layout.stiffness(200).damping(26)}>
                     <View style={styles.dragLine} />
                     <AppText style={{ color: colors.line, marginBottom: 10 }} fontSize={12}>
                         Drag me down or click the cirlcle to close
