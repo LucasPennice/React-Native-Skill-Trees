@@ -9,7 +9,7 @@ import { getDefaultFns } from "../functions";
 type ModalProps = {
     state: SkillModal<MotiveToLearn>;
     closeModal: () => void;
-    mutateMotivesToLearn: (newMotiveToLearns: MotiveToLearn[] | undefined) => void;
+    mutateMotivesToLearn: (newMotiveToLearns: MotiveToLearn[]) => void;
     motivesToLearn: MotiveToLearn[];
 };
 function UpdateMotivesToLearnModal({ closeModal, motivesToLearn, mutateMotivesToLearn, state }: ModalProps) {
@@ -64,10 +64,10 @@ function UpdateMotivesToLearnModal({ closeModal, motivesToLearn, mutateMotivesTo
             open={open}
             leftHeaderButton={{ onPress: updateSkillMotiveToLearnIfNewMotiveValid(newMotiveToLearn, isEditing), title: isEditing ? "Edit" : "Add" }}>
             <>
-                <AppText fontSize={20} style={{ color: "white", fontFamily: "helveticaBold" }}>
-                    Text
+                <AppText fontSize={24} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 5 }}>
+                    Motive To Learn
                 </AppText>
-                <AppTextInput placeholder={"Title"} textState={[text, setText]} onlyContainsLettersAndNumbers />
+                <AppTextInput placeholder={"Why is this worth doing?"} textState={[text, setText]} />
             </>
         </FlingToDismissModal>
     );

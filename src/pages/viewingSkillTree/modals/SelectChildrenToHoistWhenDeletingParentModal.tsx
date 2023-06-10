@@ -1,16 +1,14 @@
 import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { Circle, Defs, LinearGradient, Stop, Svg } from "react-native-svg";
 import AppText from "../../../components/AppText";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
-import { ProgressWheelParams } from "../../../components/ProgressIndicatorAndName";
-import { findParentOfNode } from "../../../functions/extractInformationFromTree";
+import NodeView from "../../../components/NodeView";
+import { checkIfTreeHasInvalidCompleteDependencies, findParentOfNode } from "../../../functions/extractInformationFromTree";
 import { deleteNodeWithChildren } from "../../../functions/mutateTree";
 import { centerFlex, colors } from "../../../parameters";
 import { useAppDispatch } from "../../../redux/reduxHooks";
 import { setSelectedNode, updateUserTrees } from "../../../redux/userTreesSlice";
-import { ColorGradient, Skill, Tree } from "../../../types";
+import { Skill, Tree } from "../../../types";
 import useCurrentTree from "../../../useCurrentTree";
-import NodeView from "../../../components/NodeView";
 
 type Props = {
     nodeToDelete: Tree<Skill> | null;
@@ -57,8 +55,6 @@ function SelectChildrenToHoistWhenDeletingParentModal({ nodeToDelete, closeModal
             <View style={[centerFlex, { flex: 1 }]}>
                 <ScrollView style={[{ flex: 1, width: "100%", marginTop: 20 }]}>
                     {candidatesToHoist.map((children, idx) => {
-                        const isComplete = children.data.isCompleted;
-
                         const blockDelete = checkIfShouldBlockDelete(nodeToDelete, children);
 
                         const notifyWhyDeleteBlocked = () =>
@@ -69,8 +65,7 @@ function SelectChildrenToHoistWhenDeletingParentModal({ nodeToDelete, closeModal
                         return (
                             <Pressable
                                 key={idx}
-                                style={[centerFlex, styles.pressable, { opacity: blockDelete ? 1 : 1 }]}
-                                // style={[centerFlex, styles.pressable, { opacity: blockDelete ? 0.2 : 1 }]}
+                                style={[centerFlex, styles.pressable, { opacity: blockDelete ? 0.3 : 1 }]}
                                 onPress={blockDelete ? notifyWhyDeleteBlocked : confirmDeleteNode(children)}>
                                 <View>
                                     <AppText style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 5 }} fontSize={20}>
@@ -128,22 +123,4 @@ function checkIfShouldBlockDelete(nodeToDelete: Tree<Skill>, candidate: Tree<Ski
     };
 
     return checkIfTreeHasInvalidCompleteDependencies(tentativeNewTree);
-}
-
-function checkIfTreeHasInvalidCompleteDependencies(tree: Tree<Skill>) {
-    //Base case 👇
-
-    if (!tree.children) return undefined;
-
-    //Recursive case 👇
-
-    let result = false;
-
-    for (let i = 0; i < tree.children.length; i++) {
-        const c = tree.children[i];
-        if (!tree.data.isCompleted && c.data.isCompleted) return (result = true);
-        checkIfTreeHasInvalidCompleteDependencies(c);
-    }
-
-    return result;
 }

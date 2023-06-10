@@ -74,7 +74,7 @@ function AppTextInput({
                         fontFamily: "helvetica",
                         textAlign: "left",
                         textAlignVertical: "center",
-                        color: "white",
+                        color: "#FFFFFF",
                         flex: 1,
                         marginRight: disable ? 20 : 50,
                     }}

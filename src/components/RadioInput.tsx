@@ -51,7 +51,7 @@ function RadioInput({
                 setMastered(newValue);
                 if (onPress) onPress();
             }}>
-            <AppText style={{ color: "white" }} fontSize={18}>
+            <AppText style={{ color: "#FFFFFF" }} fontSize={18}>
                 {text}
             </AppText>
             <Animated.View

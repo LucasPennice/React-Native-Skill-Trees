@@ -338,3 +338,21 @@ export function completedSkillPercentageFromCoords(coord: CoordinatesWithTreeDat
 
     return result;
 }
+
+export function checkIfTreeHasInvalidCompleteDependencies(tree: Tree<Skill>) {
+    //Base case 👇
+
+    if (!tree.children) return undefined;
+
+    //Recursive case 👇
+
+    let result = false;
+
+    for (let i = 0; i < tree.children.length; i++) {
+        const c = tree.children[i];
+        if (!tree.data.isCompleted && c.data.isCompleted) return (result = true);
+        checkIfTreeHasInvalidCompleteDependencies(c);
+    }
+
+    return result;
+}

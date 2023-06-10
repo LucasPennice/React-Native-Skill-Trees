@@ -36,7 +36,7 @@ function MyTrees({ navigation, route }: Props) {
     return (
         <>
             <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 10 }}>
-                <AppText style={{ color: "white", fontFamily: "helveticaBold", marginBottom: 5 }} fontSize={32}>
+                <AppText style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 5 }} fontSize={32}>
                     My Skill Trees
                 </AppText>
                 <AppText style={{ color: colors.unmarkedText, marginBottom: 5 }} fontSize={16}>

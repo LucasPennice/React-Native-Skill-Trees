@@ -6,11 +6,12 @@ import { Milestone, SkillModal } from "../../../types";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import { Alert } from "react-native";
 import { getDefaultFns } from "../functions";
+import { colors } from "../../../parameters";
 
 type ModalProps = {
     state: SkillModal<Milestone>;
     closeModal: () => void;
-    updateMilestonesArray: (newMilestones: Milestone[] | undefined) => void;
+    updateMilestonesArray: (newMilestones: Milestone[]) => void;
     milestones: Milestone[];
 };
 
@@ -30,14 +31,14 @@ function UpdateMilestoneModal({ closeModal, updateMilestonesArray, milestones, s
     const updateSkillDetailsIfNewMilestoneValid = (newMilestone: Milestone, editing: boolean) => () => {
         const valid = title !== "";
 
-        if (!valid) return Alert.alert("Title cannot be empty");
+        if (!valid) return Alert.alert("Milestone title cannot be empty");
 
         if (editing) return updateMilestone(newMilestone);
 
         addMilestone(newMilestone);
 
         function addMilestone(newMilestone: Milestone) {
-            const result = [...milestones, newMilestone];
+            const result = [newMilestone, ...milestones];
             updateMilestonesArray(result);
             closeModal();
         }
@@ -73,14 +74,18 @@ function UpdateMilestoneModal({ closeModal, updateMilestonesArray, milestones, s
             open={open}
             leftHeaderButton={{ onPress: updateSkillDetailsIfNewMilestoneValid(newMilestone, isEditing), title: isEditing ? "Edit" : "Add" }}>
             <>
-                <AppText fontSize={20} style={{ color: "white", fontFamily: "helveticaBold" }}>
-                    Title
+                <AppText fontSize={24} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 5 }}>
+                    Milestone
                 </AppText>
-                <AppTextInput placeholder={"Title"} textState={[title, setTitle]} onlyContainsLettersAndNumbers />
-                <AppText fontSize={20} style={{ color: "white", fontFamily: "helveticaBold", marginTop: 15 }}>
+
+                <AppTextInput placeholder={"Title"} textState={[title, setTitle]} />
+                <AppText fontSize={24} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 5, marginTop: 10 }}>
                     Description
                 </AppText>
-                <AppTextInput placeholder={"Description"} textState={[description, setDescription]} onlyContainsLettersAndNumbers />
+                <AppText fontSize={16} style={{ color: colors.unmarkedText, marginBottom: 20 }}>
+                    Optional
+                </AppText>
+                <AppTextInput placeholder={"Description"} textState={[description, setDescription]} />
                 <RadioInput text="Complete" state={[complete, setComplete]} style={{ marginVertical: 15 }} />
             </>
         </FlingToDismissModal>

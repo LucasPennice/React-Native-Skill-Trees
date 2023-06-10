@@ -5,11 +5,12 @@ import AppTextInput from "../../../components/AppTextInput";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import { SkillLogs, SkillModal } from "../../../types";
 import { getDefaultFns } from "../functions";
+import { colors } from "../../../parameters";
 
 type ModalProps = {
     state: SkillModal<SkillLogs>;
     closeModal: () => void;
-    mutateLogs: (newLogs: SkillLogs[] | undefined) => void;
+    mutateLogs: (newLogs: SkillLogs[]) => void;
     logs: SkillLogs[];
 };
 
@@ -67,10 +68,13 @@ function UpdateLogsModal({ closeModal, logs, mutateLogs, state }: ModalProps) {
             open={open}
             leftHeaderButton={{ onPress: updateSkillDetailsIfNewLogValid(newLog, isEditing), title: isEditing ? "Edit" : "Add" }}>
             <>
-                <AppText fontSize={20} style={{ color: "white", fontFamily: "helveticaBold" }}>
-                    Text
+                <AppText fontSize={24} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 5 }}>
+                    Log Text
                 </AppText>
-                <AppTextInput placeholder={"Text"} textState={[text, setText]} onlyContainsLettersAndNumbers />
+                <AppText fontSize={16} style={{ color: colors.unmarkedText, marginBottom: 20 }}>
+                    Dictating your logs instead of typing is recommended to increase entry frequency
+                </AppText>
+                <AppTextInput placeholder={"Text"} textState={[text, setText]} />
             </>
         </FlingToDismissModal>
     );

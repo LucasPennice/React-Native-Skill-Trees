@@ -55,7 +55,7 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
         <FlingToDismissModal closeModal={closeModal} open={open}>
             <View style={{ flex: 1 }}>
                 <ScrollView>
-                    <AppText style={{ color: "white", marginBottom: 10, fontFamily: "helveticaBold" }} fontSize={24}>
+                    <AppText style={{ color: "#FFFFFF", marginBottom: 10, fontFamily: "helveticaBold" }} fontSize={24}>
                         General Skill Tree Styles
                     </AppText>
                     <AppText style={{ color: colors.unmarkedText, marginBottom: 25 }} fontSize={16}>
@@ -63,7 +63,7 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
                     </AppText>
                     <RadioInput state={[showLabel, updateShowLabel]} text={"Show labels"} style={{ marginBottom: 15 }} />
                     <RadioInput state={[showIcons, updateShowIcons]} text={"Show Icons"} style={{ marginBottom: 15 }} />
-                    <AppText style={{ color: "white", marginBottom: 10, fontFamily: "helveticaBold" }} fontSize={24}>
+                    <AppText style={{ color: "#FFFFFF", marginBottom: 10, fontFamily: "helveticaBold" }} fontSize={24}>
                         Home Skill Tree Styles
                     </AppText>
                     <AppText style={{ color: colors.unmarkedText, marginBottom: 15 }} fontSize={16}>

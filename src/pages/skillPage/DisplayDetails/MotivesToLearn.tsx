@@ -1,22 +1,19 @@
-import { useContext, useRef } from "react";
+import { useRef } from "react";
 import { Dimensions, Pressable, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import Animated, { Layout } from "react-native-reanimated";
 import AppText from "../../../components/AppText";
 import { centerFlex, colors } from "../../../parameters";
+import { generalStyles } from "../../../styles";
 import { MotiveToLearn } from "../../../types";
 import { LeftAction, RightAction } from "./ActionButtons";
-import { SkillColorContext } from "../../../context";
-import { generalStyles } from "../../../styles";
 type Props = {
     motivesToLearn: MotiveToLearn[];
-    mutateMotivesToLearn: (newMotivesToLearn: MotiveToLearn[] | undefined) => void;
+    mutateMotivesToLearn: (newMotivesToLearn: MotiveToLearn[]) => void;
     openModal: (ref: Swipeable | null, data?: MotiveToLearn) => () => void;
 };
 
 function MotivesToLearn({ motivesToLearn, mutateMotivesToLearn, openModal }: Props) {
-    const color = useContext(SkillColorContext);
-
     const deleteMotive = (idToDelete: string) => () => {
         const result = motivesToLearn.filter((motive) => motive.id !== idToDelete);
         mutateMotivesToLearn(result);
@@ -24,20 +21,20 @@ function MotivesToLearn({ motivesToLearn, mutateMotivesToLearn, openModal }: Pro
 
     return (
         <Animated.View layout={Layout.duration(200)} style={[centerFlex, { alignItems: "flex-start", gap: 15, marginBottom: 10 }]}>
-            <AppText fontSize={24} style={{ color: "white", fontFamily: "helveticaBold" }}>
-                Motives To Learn
-            </AppText>
+            <View style={[centerFlex, { flexDirection: "row", justifyContent: "space-between", width: "100%" }]}>
+                <AppText fontSize={24} style={{ color: "#FFFFFF", fontFamily: "helveticaBold" }}>
+                    Motives To Learn
+                </AppText>
+
+                <Pressable onPress={openModal(null, undefined)} style={[generalStyles.btn, { backgroundColor: "transparent" }]}>
+                    <AppText style={{ color: colors.accent }} fontSize={16}>
+                        + Add Motive
+                    </AppText>
+                </Pressable>
+            </View>
             {motivesToLearn.map((motive) => (
                 <MotiveCard openModal={openModal} key={motive.id} data={motive} deleteMotive={deleteMotive(motive.id)} />
             ))}
-
-            <Animated.View layout={Layout.duration(200)}>
-                <Pressable onPress={openModal(null, undefined)} style={generalStyles.btn}>
-                    <AppText style={{ color }} fontSize={16}>
-                        Add Motive
-                    </AppText>
-                </Pressable>
-            </Animated.View>
         </Animated.View>
     );
 }
@@ -76,7 +73,7 @@ function MotiveCard({
                     <View style={[centerFlex, { gap: 5, alignItems: "flex-start" }]}>
                         <AppText
                             fontSize={20}
-                            style={{ color: "white", maxWidth: width - 170 }}
+                            style={{ color: "#FFFFFF", maxWidth: width - 170 }}
                             textProps={{ ellipsizeMode: "tail", numberOfLines: 1 }}>
                             {data.text}
                         </AppText>

@@ -1,13 +1,12 @@
-import { Swipeable } from "react-native-gesture-handler";
-import { SkillLogs } from "../../../types";
+import { useRef } from "react";
 import { Dimensions, Pressable, View } from "react-native";
-import { centerFlex, colors } from "../../../parameters";
-import AppText from "../../../components/AppText";
+import { Swipeable } from "react-native-gesture-handler";
 import Animated, { Layout } from "react-native-reanimated";
-import { useContext, useRef } from "react";
-import { LeftAction, RightAction } from "./ActionButtons";
-import { SkillColorContext } from "../../../context";
+import AppText from "../../../components/AppText";
+import { centerFlex, colors } from "../../../parameters";
 import { generalStyles } from "../../../styles";
+import { SkillLogs } from "../../../types";
+import { LeftAction, RightAction } from "./ActionButtons";
 
 function Logs({
     logs,
@@ -16,10 +15,8 @@ function Logs({
 }: {
     logs: SkillLogs[];
     openModal: (ref: Swipeable | null, data?: SkillLogs) => () => void;
-    mutateLogs: (newLogs: SkillLogs[] | undefined) => void;
+    mutateLogs: (newLogs: SkillLogs[]) => void;
 }) {
-    const color = useContext(SkillColorContext);
-
     const deleteLog = (idToDelete: string) => () => {
         const result = logs.filter((log) => log.id !== idToDelete);
         mutateLogs(result);
@@ -27,20 +24,20 @@ function Logs({
 
     return (
         <Animated.View layout={Layout.duration(200)} style={[centerFlex, { alignItems: "flex-start", gap: 15, marginBottom: 10 }]}>
-            <AppText fontSize={24} style={{ color: "white", fontFamily: "helveticaBold" }}>
-                Logs
-            </AppText>
+            <View style={[centerFlex, { flexDirection: "row", justifyContent: "space-between", width: "100%" }]}>
+                <AppText fontSize={24} style={{ color: "#FFFFFF", fontFamily: "helveticaBold" }}>
+                    Log Entries
+                </AppText>
+
+                <Pressable onPress={openModal(null, undefined)} style={[generalStyles.btn, { backgroundColor: "transparent" }]}>
+                    <AppText style={{ color: colors.accent }} fontSize={16}>
+                        + Add Log
+                    </AppText>
+                </Pressable>
+            </View>
             {logs.map((log) => (
                 <LogCard openModal={openModal} key={log.id} data={log} deleteLog={deleteLog(log.id)} />
             ))}
-
-            <Animated.View layout={Layout.duration(200)}>
-                <Pressable onPress={openModal(null, undefined)} style={generalStyles.btn}>
-                    <AppText style={{ color }} fontSize={16}>
-                        Add Log
-                    </AppText>
-                </Pressable>
-            </Animated.View>
         </Animated.View>
     );
 }
@@ -59,29 +56,31 @@ function LogCard({
     const ref = useRef<Swipeable | null>(null);
     return (
         <Animated.View layout={Layout.duration(200)}>
-            <Swipeable ref={ref} renderLeftActions={LeftAction(openModal(ref.current, data))} renderRightActions={RightAction(deleteLog)}>
+            <Swipeable
+                ref={ref}
+                renderLeftActions={LeftAction(openModal(ref.current, data))}
+                renderRightActions={RightAction(deleteLog)}
+                overshootLeft={false}
+                overshootRight={false}>
                 <View
                     style={[
-                        centerFlex,
                         {
-                            flexDirection: "row",
-                            gap: 15,
                             backgroundColor: colors.darkGray,
                             width: width - 20,
                             paddingHorizontal: 15,
-                            justifyContent: "flex-start",
+                            alignItems: "flex-start",
                             paddingVertical: 15,
                             borderRadius: 10,
                         },
                     ]}>
-                    <AppText fontSize={20} style={{ color: "white", maxWidth: width - 170 }} textProps={{ ellipsizeMode: "tail", numberOfLines: 1 }}>
+                    <AppText fontSize={18} style={{ color: "#FFFFFF" }}>
                         {data.text}
-                    </AppText>
-                    <AppText fontSize={20} style={{ color: "white", maxWidth: width - 170 }} textProps={{ ellipsizeMode: "tail", numberOfLines: 1 }}>
-                        {data.date}
                     </AppText>
                 </View>
             </Swipeable>
+            <AppText fontSize={16} style={{ color: colors.unmarkedText, marginTop: 10 }} textProps={{ ellipsizeMode: "tail", numberOfLines: 1 }}>
+                {data.date}
+            </AppText>
         </Animated.View>
     );
 }

@@ -1,30 +1,26 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Fragment, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ScrollView } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
-import Animated, { FadeOutUp, Layout } from "react-native-reanimated";
 import { StackNavigatorParams } from "../../../App";
 import AppText from "../../components/AppText";
 import { SkillColorContext } from "../../context";
-import { centerFlex, colors } from "../../parameters";
-import { Milestone, MotiveToLearn, Skill, SkillLevel, SkillLogs, SkillModal, SkillResource } from "../../types";
+import { colors } from "../../parameters";
+import { Milestone, MotiveToLearn, Skill, SkillLogs, SkillModal, SkillResource } from "../../types";
 import Logs from "./DisplayDetails/Logs";
 import MotivesToLearn from "./DisplayDetails/MotivesToLearn";
-import SkillLevels from "./DisplayDetails/SkillLevels";
 import SkillResources from "./DisplayDetails/SkillResources";
 import Milestones from "./Milestones";
 import UpdateLogsModal from "./Modals/UpdateLogsModal";
 import UpdateMilestoneModal from "./Modals/UpdateMilestoneModal";
 import UpdateMotivesToLearnModal from "./Modals/UpdateMotivesToLearnModal";
 import UpdateResourcesModal from "./Modals/UpdateResourcesModal";
-import UpdateSkillLevelModal from "./Modals/UpdateSkillLevelModal";
 import { getDefaultFns } from "./functions";
 import useCheckForUnsavedChanges from "./useCheckForUnsavedChanges";
 import useConfirmLeaveScreenWithoutSaving from "./useConfirmLeaveScreenWithoutSaving";
 import useSaveUpdatedSkillToAsyncStorage from "./useUpdateTreeWithNewSkillDetails";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "SkillPage">;
-const SKILL_DETAILS_KEYS: (keyof Skill)[] = ["logs", "motivesToLearn", "isCompleted", "milestones", "skillLevel", "usefulResources"];
 
 function SkillPage({ route, navigation }: Props) {
     const treeNode = route.params;
@@ -39,7 +35,6 @@ function SkillPage({ route, navigation }: Props) {
         data: undefined,
         ref: null,
     });
-    const [editSkillLevelModal, setEditSkillLevelModal] = useState<SkillModal<SkillLevel | undefined>>({ open: false, data: undefined, ref: null });
     const [editResourcesModal, setEditResourcesModal] = useState<SkillModal<SkillResource | undefined>>({ open: false, data: undefined, ref: null });
     //Hooks
     const unsavedChanges = useCheckForUnsavedChanges(skillState, treeNode);
@@ -75,15 +70,7 @@ function SkillPage({ route, navigation }: Props) {
                 return { data: getDefaultFns.motivesToLearn(), open: true, ref: null };
             });
         },
-        skillLevel: (refToSwippeable: Swipeable | null, data?: SkillLevel) => () => {
-            setEditSkillLevelModal((p) => {
-                const dataToEdit = data as SkillLevel | undefined;
 
-                if (dataToEdit !== undefined) return { data: dataToEdit, open: true, ref: refToSwippeable };
-
-                return { data: getDefaultFns.skillLevel(), open: true, ref: null };
-            });
-        },
         usefulResources: (refToSwippeable: Swipeable | null, data?: SkillResource) => () => {
             setEditResourcesModal((p) => {
                 const dataToEdit = data as SkillResource | undefined;
@@ -95,24 +82,25 @@ function SkillPage({ route, navigation }: Props) {
         },
     };
 
+    useEffect(() => {
+        updateSkillDetails();
+    }, [skillState]);
+
     const updateFns = {
-        milestones: (newMilestones: Milestone[] | undefined) =>
+        milestones: (newMilestones: Milestone[]) =>
             setSkillState((p) => {
                 return { ...p, milestones: newMilestones };
             }),
-        logs: (newSkillLogs: SkillLogs[] | undefined) =>
+        logs: (newSkillLogs: SkillLogs[]) =>
             setSkillState((p) => {
                 return { ...p, logs: newSkillLogs };
             }),
-        motivesToLearn: (newMotivesToLearn: MotiveToLearn[] | undefined) =>
+        motivesToLearn: (newMotivesToLearn: MotiveToLearn[]) =>
             setSkillState((p) => {
                 return { ...p, motivesToLearn: newMotivesToLearn };
             }),
-        skillLevel: (newSkillLevel: SkillLevel | undefined) =>
-            setSkillState((p) => {
-                return { ...p, skillLevel: newSkillLevel };
-            }),
-        usefulResources: (newSkillResources: SkillResource[] | undefined) =>
+
+        usefulResources: (newSkillResources: SkillResource[]) =>
             setSkillState((p) => {
                 return { ...p, usefulResources: newSkillResources };
             }),
@@ -137,12 +125,7 @@ function SkillPage({ route, navigation }: Props) {
                 return { ...p, open: false, ref: null };
             });
         },
-        skillLevel: () => {
-            if (editSkillLevelModal.ref !== null) editSkillLevelModal.ref.close();
-            setEditSkillLevelModal((p) => {
-                return { ...p, open: false, ref: null };
-            });
-        },
+
         usefulResources: () => {
             if (editResourcesModal.ref !== null) editResourcesModal.ref.close();
             setEditResourcesModal((p) => {
@@ -153,20 +136,10 @@ function SkillPage({ route, navigation }: Props) {
 
     return (
         <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 10 }}>
-            <View style={[centerFlex, { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", height: 50 }]}>
-                <AppText fontSize={32} style={{ color: "white", fontFamily: "helveticaBold", marginBottom: 5 }}>
-                    {skillState.name}
-                </AppText>
-                {unsavedChanges && (
-                    <Animated.View exiting={FadeOutUp}>
-                        <Pressable onPress={updateSkillDetails} style={[styles.btn]}>
-                            <AppText style={{ color: color.color1 }} fontSize={16}>
-                                Save
-                            </AppText>
-                        </Pressable>
-                    </Animated.View>
-                )}
-            </View>
+            <AppText fontSize={32} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 5 }}>
+                {skillState.name}
+            </AppText>
+
             <AppText fontSize={18} style={{ color: colors.unmarkedText, fontFamily: "helvetica", marginBottom: 5 }}>
                 {skillState.isCompleted ? "Mastered" : "Not Mastered"}
             </AppText>
@@ -177,73 +150,31 @@ function SkillPage({ route, navigation }: Props) {
             {/* Display And Add Details */}
 
             <SkillColorContext.Provider value={color.color1}>
-                {skillState.milestones !== undefined && (
-                    <Milestones milestones={skillState.milestones} openModal={openModalFns.milestones} mutateMilestones={updateFns.milestones} />
-                )}
-                {skillState.logs !== undefined && <Logs logs={skillState.logs} mutateLogs={updateFns.logs} openModal={openModalFns.logs} />}
-                {skillState.motivesToLearn !== undefined && (
-                    <MotivesToLearn
-                        motivesToLearn={skillState.motivesToLearn}
-                        mutateMotivesToLearn={updateFns.motivesToLearn}
-                        openModal={openModalFns.motivesToLearn}
-                    />
-                )}
-
-                {skillState.usefulResources !== undefined && (
-                    <SkillResources
-                        mutateResources={updateFns.usefulResources}
-                        skillResources={skillState.usefulResources}
-                        openModal={openModalFns.usefulResources}
-                    />
-                )}
-
-                {skillState.skillLevel !== undefined && <SkillLevels skillLevels={skillState.skillLevel} openModal={openModalFns.skillLevel} />}
+                <Milestones milestones={skillState.milestones} openModal={openModalFns.milestones} mutateMilestones={updateFns.milestones} />
+                <MotivesToLearn
+                    motivesToLearn={skillState.motivesToLearn}
+                    mutateMotivesToLearn={updateFns.motivesToLearn}
+                    openModal={openModalFns.motivesToLearn}
+                />
+                <SkillResources
+                    mutateResources={updateFns.usefulResources}
+                    skillResources={skillState.usefulResources}
+                    openModal={openModalFns.usefulResources}
+                />
+                <Logs logs={skillState.logs} mutateLogs={updateFns.logs} openModal={openModalFns.logs} />
             </SkillColorContext.Provider>
-
-            {/* Add Detail Section  */}
-
-            <Animated.View layout={Layout.duration(200)}>
-                {SKILL_DETAILS_KEYS.find((detail) => skillState[detail] === undefined) && (
-                    <AppText fontSize={16} style={{ color: "white", fontFamily: "helvetica", marginVertical: 10 }}>
-                        Add these Sections To Your Skill Page
-                    </AppText>
-                )}
-                <View style={{ display: "flex", justifyContent: "flex-start", flexWrap: "wrap", flexDirection: "row", gap: 10 }}>
-                    {SKILL_DETAILS_KEYS.map((detail, idx) => {
-                        const skillDetail = skillState[detail];
-
-                        if (skillDetail !== undefined) return <Fragment key={idx}></Fragment>;
-
-                        const initiateSkillAndOpenItsModal = () => {
-                            initiateSkillState(detail)();
-                            openModalFns[detail]()();
-                        };
-
-                        const uncapitalizedText = detail.split(/(?=[A-Z])/).join(" ");
-                        const text = `${uncapitalizedText[0].toUpperCase()}${uncapitalizedText.slice(1)}`;
-
-                        return (
-                            <Pressable onPress={initiateSkillAndOpenItsModal} style={styles.btn} key={text}>
-                                <AppText style={{ color: color.color1 }} fontSize={16}>
-                                    {text}
-                                </AppText>
-                            </Pressable>
-                        );
-                    })}
-                </View>
-            </Animated.View>
 
             {/* Detail Modal to Edit or Add New Entry */}
 
-            {skillState.milestones !== undefined && editMilestoneModal.data !== undefined && (
+            {editMilestoneModal.data !== undefined && (
                 <UpdateMilestoneModal
                     closeModal={closeModalFns.milestones}
                     state={editMilestoneModal as SkillModal<Milestone>}
-                    milestones={skillState.milestones!}
+                    milestones={skillState.milestones}
                     updateMilestonesArray={updateFns.milestones}
                 />
             )}
-            {skillState.logs !== undefined && editLogsModal.data !== undefined && (
+            {editLogsModal.data !== undefined && (
                 <UpdateLogsModal
                     closeModal={closeModalFns.logs}
                     logs={skillState.logs}
@@ -252,7 +183,7 @@ function SkillPage({ route, navigation }: Props) {
                 />
             )}
 
-            {skillState.motivesToLearn !== undefined && editMotivesToLearnModal.data !== undefined && (
+            {editMotivesToLearnModal.data !== undefined && (
                 <UpdateMotivesToLearnModal
                     motivesToLearn={skillState.motivesToLearn}
                     mutateMotivesToLearn={updateFns.motivesToLearn}
@@ -261,14 +192,7 @@ function SkillPage({ route, navigation }: Props) {
                 />
             )}
 
-            {skillState.skillLevel !== undefined && editSkillLevelModal.data !== undefined && (
-                <UpdateSkillLevelModal
-                    closeModal={closeModalFns.skillLevel}
-                    mutateSkillLevel={updateFns.skillLevel}
-                    state={editSkillLevelModal as SkillModal<SkillLevel>}
-                />
-            )}
-            {skillState.usefulResources !== undefined && editResourcesModal.data !== undefined && (
+            {editResourcesModal.data !== undefined && (
                 <UpdateResourcesModal
                     closeModal={closeModalFns.usefulResources}
                     mutateSkillResources={updateFns.usefulResources}
@@ -278,32 +202,6 @@ function SkillPage({ route, navigation }: Props) {
             )}
         </ScrollView>
     );
-
-    function initiateSkillState(detail: keyof Skill) {
-        return () => {
-            if (detail === "isCompleted" || detail === "name") return;
-
-            let result = { ...skillState };
-
-            if (detail === "logs") result["logs"] = [];
-            if (detail === "milestones") result["milestones"] = [];
-            if (detail === "motivesToLearn") result["motivesToLearn"] = [];
-            if (detail === "skillLevel") result["skillLevel"] = { ideal: "", starting: "" };
-            if (detail === "usefulResources") result["usefulResources"] = [];
-
-            return setSkillState(result);
-        };
-    }
 }
 
 export default SkillPage;
-
-const styles = StyleSheet.create({
-    btn: {
-        alignSelf: "flex-start",
-        backgroundColor: colors.darkGray,
-        paddingHorizontal: 30,
-        paddingVertical: 15,
-        borderRadius: 10,
-    },
-});

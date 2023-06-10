@@ -54,7 +54,7 @@ function TakingScreenshotLoadingScreenModal({
             <>
                 {stage === "TAKING_SCREENSHOT" && (
                     <Animated.View style={[centerFlex, { flex: 1, opacity: 1 }]} entering={FadeInDown} exiting={FadeOutUp}>
-                        <AppText fontSize={24} style={{ color: "white", fontFamily: "helveticaBold", textAlign: "center", marginBottom: 25 }}>
+                        <AppText fontSize={24} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", textAlign: "center", marginBottom: 25 }}>
                             Turning your skill tree into an image
                         </AppText>
                         <View style={{ backgroundColor: `${colors.accent}5D`, height: 8, width: BAR_WIDHT, borderRadius: 5 }}>
@@ -211,7 +211,7 @@ function LayoutSelector({ selectedImage, tree, cancelSharing }: { selectedImage:
     return (
         <Animated.View style={[centerFlex, { flex: 1, justifyContent: "space-between" }]} entering={FadeInDown}>
             <View style={{ width: SCREENSHOT_WIDTH, paddingHorizontal: 15, marginTop: 10 }}>
-                <AppText fontSize={24} style={{ color: "white", fontFamily: "helveticaBold", marginBottom: 10 }}>
+                <AppText fontSize={24} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 10 }}>
                     Edit the layout to your liking
                 </AppText>
                 <AppText fontSize={18} style={{ color: colors.unmarkedText }}>

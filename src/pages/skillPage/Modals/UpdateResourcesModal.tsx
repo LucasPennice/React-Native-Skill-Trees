@@ -9,7 +9,7 @@ import { getDefaultFns } from "../functions";
 type ModalProps = {
     state: SkillModal<SkillResource>;
     closeModal: () => void;
-    mutateSkillResources: (newSkillResources: SkillResource[] | undefined) => void;
+    mutateSkillResources: (newSkillResources: SkillResource[]) => void;
     resources: SkillResource[];
 };
 
@@ -71,18 +71,18 @@ function UpdateResourcesModal({ closeModal, resources, mutateSkillResources, sta
             open={open}
             leftHeaderButton={{ onPress: updateSkillDetailsIfNewLogValid(newSkillResource, isEditing), title: isEditing ? "Edit" : "Add" }}>
             <>
-                <AppText fontSize={20} style={{ color: "white", fontFamily: "helveticaBold" }}>
-                    Title
+                <AppText fontSize={24} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 5 }}>
+                    Resource Name
                 </AppText>
-                <AppTextInput placeholder={"Title"} textState={[title, setTitle]} onlyContainsLettersAndNumbers />
-                <AppText fontSize={20} style={{ color: "white", fontFamily: "helveticaBold" }}>
+                <AppTextInput placeholder={"Youtube Channel"} textState={[title, setTitle]} />
+                <AppText fontSize={24} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 5, marginTop: 10 }}>
                     Description
                 </AppText>
-                <AppTextInput placeholder={"Description"} textState={[description, setDescription]} onlyContainsLettersAndNumbers />
-                <AppText fontSize={20} style={{ color: "white", fontFamily: "helveticaBold" }}>
-                    Url
+                <AppTextInput placeholder={"Software development tutorials"} textState={[description, setDescription]} />
+                <AppText fontSize={24} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 5, marginTop: 10 }}>
+                    Link to Resource
                 </AppText>
-                <AppTextInput placeholder={"Url"} textState={[url ?? "", setUrl]} onlyContainsLettersAndNumbers />
+                <AppTextInput placeholder={"https://url.com"} textState={[url ?? "", setUrl]} />
             </>
         </FlingToDismissModal>
     );
