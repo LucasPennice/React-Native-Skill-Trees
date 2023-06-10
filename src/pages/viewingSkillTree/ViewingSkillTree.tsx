@@ -30,7 +30,7 @@ import useCurrentTree from "../../useCurrentTree";
 import useTentativeNewTree from "../../useTentativeNewTree";
 import AddNodeStateIndicator from "./AddNodeStateIndicator";
 import AddNodeModal from "./modals/AddNodeModal";
-import ChildrenHoistSelectorModal from "./modals/ChildrenHoistSelector";
+import SelectChildrenToHoistWhenDeletingParentModal from "./modals/SelectChildrenToHoistWhenDeletingParentModal";
 
 export type ModalState =
     | "TAKING_SCREENSHOT"
@@ -59,7 +59,7 @@ function ViewingSkillTree({ navigation, route }: Props) {
     //Local State - MODALS
     const [modalState, setModalState] = useState<ModalState>("IDLE");
     //Local State
-    const [candidatesToHoist, setCandidatesToHoist] = useState<Tree<Skill>[] | null>(null);
+    const [nodeToDelete, setNodeToDelete] = useState<Tree<Skill> | null>(null);
     //Derived State
 
     const showDndZones = newNode && !selectedDndZone;
@@ -85,8 +85,8 @@ function ViewingSkillTree({ navigation, route }: Props) {
         setModalState("CONFIRM_NEW_NODE_POSITION");
     };
 
-    const openChildrenHoistSelector = (childrenToHoist: Tree<Skill>[]) => {
-        setCandidatesToHoist(childrenToHoist);
+    const openChildrenHoistSelector = (nodeToDelete: Tree<Skill>) => {
+        setNodeToDelete(nodeToDelete);
         setModalState("CANDIDATES_TO_HOIST");
     };
 
@@ -103,6 +103,12 @@ function ViewingSkillTree({ navigation, route }: Props) {
     const functions: InteractiveTreeFunctions = { onNodeClick, onDndZoneClick };
     //Interactive Tree Props - SelectedNodeMenu
     const menuFunctions = useGetMenuFunctions({ openChildrenHoistSelector, selectedNode, selectedTree, navigation, clearSelectedNode });
+
+    //Select ChildrenToHoistWhenDeletingParentModal
+    const closeChildrenHoistModal = () => {
+        setNodeToDelete(null);
+        setModalState("IDLE");
+    };
 
     return (
         <View style={{ position: "relative", backgroundColor: colors.background, flex: 1, overflow: "hidden" }}>
@@ -158,13 +164,10 @@ function ViewingSkillTree({ navigation, route }: Props) {
 
             {modalState === "IDLE" && <OpenSettingsMenu openModal={() => setModalState("EDITING_CANVAS_SETTINGS")} />}
 
-            <ChildrenHoistSelectorModal
+            <SelectChildrenToHoistWhenDeletingParentModal
                 open={modalState === "CANDIDATES_TO_HOIST"}
-                candidatesToHoist={candidatesToHoist}
-                closeModalAndClearCandidates={() => {
-                    setCandidatesToHoist(null);
-                    setModalState("IDLE");
-                }}
+                nodeToDelete={nodeToDelete}
+                closeModalAndClearState={closeChildrenHoistModal}
             />
             <AddNodeModal
                 open={modalState === "INPUT_DATA_FOR_NEW_NODE"}
@@ -179,7 +182,7 @@ function ViewingSkillTree({ navigation, route }: Props) {
         useEffect(() => {
             return () => {
                 setModalState("IDLE");
-                setCandidatesToHoist(null);
+                setNodeToDelete(null);
                 dispatch(setSelectedNode(null));
                 dispatch(setSelectedDndZone(undefined));
                 dispatch(clearNewNodeState());
