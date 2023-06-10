@@ -1,8 +1,8 @@
 import { View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
-import { Circle, Defs, LinearGradient, Stop, Svg } from "react-native-svg";
 import AppText from "../../components/AppText";
+import NodeView from "../../components/NodeView";
 import { ProgressWheelParams } from "../../components/ProgressIndicatorAndName";
 import { countCompletedSkillNodes, countSkillNodes, treeCompletedSkillPercentage } from "../../functions/extractInformationFromTree";
 import { WHITE_GRADIENT, centerFlex, colors } from "../../parameters";
@@ -24,8 +24,6 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
     const completedSkillsQty = countCompletedSkillNodes(element);
     const skillsQty = countSkillNodes(element);
     const completedPercentage = treeCompletedSkillPercentage(element);
-
-    const result = progressWheelProps.circumference - (progressWheelProps.circumference * completedPercentage) / 100;
 
     const tapGesture = Gesture.Tap().onEnd((e) => {
         runOnJS(changeTreeAndNavigateToViewingTree)();
@@ -85,42 +83,7 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
                         {completedSkillsQty} skills of {skillsQty}
                     </AppText>
                 </View>
-                <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
-                    <Defs>
-                        <LinearGradient id="progressColor" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <Stop offset="0%" stopColor={element.accentColor.color1} stopOpacity="1" />
-                            <Stop offset="100%" stopColor={element.accentColor.color2} stopOpacity="1" />
-                        </LinearGradient>
-                    </Defs>
-                    <Circle
-                        strokeWidth={progressWheelProps.strokeWidth}
-                        cx={progressWheelProps.centerCoordinate}
-                        cy={progressWheelProps.centerCoordinate}
-                        r={progressWheelProps.radius}
-                        stroke={progressWheelProps.backgroundStroke}
-                    />
-                    <Circle
-                        strokeWidth={progressWheelProps.strokeWidth}
-                        cx={progressWheelProps.centerCoordinate}
-                        cy={progressWheelProps.centerCoordinate}
-                        r={progressWheelProps.radius}
-                        stroke={"url(#progressColor)"}
-                        strokeDasharray={progressWheelProps.circumference}
-                        strokeLinecap="round"
-                        strokeDashoffset={result}
-                    />
-                </Svg>
-                <AppText
-                    fontSize={25}
-                    style={{
-                        position: "absolute",
-                        right: isEmojiIcon ? 34 : 41,
-                        color: element.accentColor.color1,
-                        lineHeight: isEmojiIcon ? 28 : undefined,
-                        fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
-                    }}>
-                    {isEmojiIcon ? element.data.icon.text : element.data.icon.text[0]}
-                </AppText>
+                <NodeView node={element} size={60} />
             </Animated.View>
         </GestureDetector>
     );

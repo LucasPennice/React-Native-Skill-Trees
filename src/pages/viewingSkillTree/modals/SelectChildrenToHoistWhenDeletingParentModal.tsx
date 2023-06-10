@@ -1,13 +1,16 @@
 import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Circle, Defs, LinearGradient, Stop, Svg } from "react-native-svg";
 import AppText from "../../../components/AppText";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
+import { ProgressWheelParams } from "../../../components/ProgressIndicatorAndName";
 import { findParentOfNode } from "../../../functions/extractInformationFromTree";
 import { deleteNodeWithChildren } from "../../../functions/mutateTree";
 import { centerFlex, colors } from "../../../parameters";
 import { useAppDispatch } from "../../../redux/reduxHooks";
 import { setSelectedNode, updateUserTrees } from "../../../redux/userTreesSlice";
-import { Skill, Tree } from "../../../types";
+import { ColorGradient, Skill, Tree } from "../../../types";
 import useCurrentTree from "../../../useCurrentTree";
+import NodeView from "../../../components/NodeView";
 
 type Props = {
     nodeToDelete: Tree<Skill> | null;
@@ -55,31 +58,29 @@ function SelectChildrenToHoistWhenDeletingParentModal({ nodeToDelete, closeModal
                 <ScrollView style={[{ flex: 1, width: "100%", marginTop: 20 }]}>
                     {candidatesToHoist.map((children, idx) => {
                         const isComplete = children.data.isCompleted;
+
+                        const blockDelete = checkIfShouldBlockDelete(nodeToDelete, children);
+
+                        const notifyWhyDeleteBlocked = () =>
+                            Alert.alert(
+                                "When this child is hosted skills will be complete without it's parent being complete. Breaking this skill tree's dependencies"
+                            );
+
                         return (
-                            <Pressable key={idx} style={[centerFlex, styles.pressable]} onPress={confirmDeleteNode(children)}>
+                            <Pressable
+                                key={idx}
+                                style={[centerFlex, styles.pressable, { opacity: blockDelete ? 1 : 1 }]}
+                                // style={[centerFlex, styles.pressable, { opacity: blockDelete ? 0.2 : 1 }]}
+                                onPress={blockDelete ? notifyWhyDeleteBlocked : confirmDeleteNode(children)}>
                                 <View>
-                                    <AppText style={{ color: "white", fontFamily: "helveticaBold" }} fontSize={20}>
+                                    <AppText style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 5 }} fontSize={20}>
                                         {children.data.name}
                                     </AppText>
-                                    <AppText style={{ color: "#FFFFFF5D" }} fontSize={20}>
+                                    <AppText style={{ color: "#FFFFFF5D" }} fontSize={18}>
                                         {numberOfChildrenString(children.children.length)}
                                     </AppText>
                                 </View>
-                                <View
-                                    style={[
-                                        centerFlex,
-                                        {
-                                            borderColor: isComplete ? children.accentColor.color1 : colors.line,
-                                            borderWidth: 3,
-                                            width: 40,
-                                            aspectRatio: 1,
-                                            borderRadius: 60,
-                                        },
-                                    ]}>
-                                    <AppText style={{ color: isComplete ? children.accentColor.color1 : "white" }} fontSize={20}>
-                                        {children.data.name[0]}
-                                    </AppText>
-                                </View>
+                                <NodeView node={children} size={60} />
                             </Pressable>
                         );
                     })}
@@ -110,4 +111,39 @@ function numberOfChildrenString(number: number) {
     if (number === 1) return "1 Skill stem from this";
 
     return `${number} Skills stem from this`;
+}
+
+function checkIfShouldBlockDelete(nodeToDelete: Tree<Skill>, candidate: Tree<Skill>) {
+    const newChildrenArrayWithStaleParentId = [...nodeToDelete.children.filter((c) => c.nodeId !== candidate.nodeId), ...candidate.children];
+    const newChildrenArray = newChildrenArrayWithStaleParentId.map((c) => {
+        return { ...c, parentId: candidate.nodeId };
+    });
+
+    const tentativeNewTree: Tree<Skill> = {
+        ...nodeToDelete,
+        nodeId: candidate.nodeId,
+        data: candidate.data,
+        children: newChildrenArray,
+        parentId: nodeToDelete.parentId,
+    };
+
+    return checkIfTreeHasInvalidCompleteDependencies(tentativeNewTree);
+}
+
+function checkIfTreeHasInvalidCompleteDependencies(tree: Tree<Skill>) {
+    //Base case 👇
+
+    if (!tree.children) return undefined;
+
+    //Recursive case 👇
+
+    let result = false;
+
+    for (let i = 0; i < tree.children.length; i++) {
+        const c = tree.children[i];
+        if (!tree.data.isCompleted && c.data.isCompleted) return (result = true);
+        checkIfTreeHasInvalidCompleteDependencies(c);
+    }
+
+    return result;
 }
