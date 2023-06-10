@@ -13,6 +13,7 @@ import Viewing from "./Viewing";
 
 export type SelectedNodeMenuState = {
     selectedNode: Tree<Skill>;
+    parentOfSelectedNode?: Tree<Skill>;
     screenDimensions: ScreenDimentions;
 };
 
@@ -38,7 +39,7 @@ type Props = {
 //THE OTHER NODE TYPES' COMPLETION STATE IS CALCULATED ☢️
 
 function SelectedNodeMenu({ functions, state, allowEdit }: Props) {
-    const { screenDimensions, selectedNode } = state;
+    const { screenDimensions, selectedNode, parentOfSelectedNode } = state;
     const { height } = screenDimensions;
     const { closeMenu, editing, goToSkillPage, goToTreePage } = functions;
     const { menuWidth, styles } = getNodeMenuStyles(screenDimensions);
@@ -87,10 +88,27 @@ function SelectedNodeMenu({ functions, state, allowEdit }: Props) {
                 return updateNode(result);
             },
             handleDeleteSelectedNode: () => handleDeleteNode(selectedNode),
+            checkIfCompleteAllowed: () => {
+                if (!parentOfSelectedNode) return true;
+                if (parentOfSelectedNode.category !== "SKILL") return true;
+                if (parentOfSelectedNode.data.isCompleted) return true;
+
+                return false;
+            },
+            checkIfUnCompleteAllowed: () => {
+                return true;
+            },
         };
     };
 
     const editingFunctions = buildEditingFns();
+
+    const checkToggleCompletionPermissions = editingFunctions
+        ? {
+              checkComplete: editingFunctions.checkIfCompleteAllowed,
+              checkUnComplete: editingFunctions.checkIfUnCompleteAllowed,
+          }
+        : undefined;
 
     return (
         <Animated.View
@@ -112,6 +130,7 @@ function SelectedNodeMenu({ functions, state, allowEdit }: Props) {
                         <Editing
                             newSkillPropsState={[newSkillProps, setNewSkillProps]}
                             handleDeleteSelectedNode={editingFunctions!.handleDeleteSelectedNode}
+                            checkToggleCompletionPermissions={checkToggleCompletionPermissions!}
                         />
                     )}
                     {mode === "VIEWING" && <Viewing selectedNode={selectedNode} functions={{ goToTreePage, goToSkillPage }} />}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TouchableOpacity } from "react-native";
+import { Alert, TouchableOpacity } from "react-native";
 import Animated, { FadeInDown, FadeOutUp, Layout } from "react-native-reanimated";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
@@ -14,11 +14,17 @@ import { SkillPropertiesEditableOnPopMenu } from "../../../types";
 function Editing({
     newSkillPropsState,
     handleDeleteSelectedNode,
+    checkToggleCompletionPermissions,
 }: {
     newSkillPropsState: [SkillPropertiesEditableOnPopMenu, React.Dispatch<React.SetStateAction<SkillPropertiesEditableOnPopMenu>>];
     handleDeleteSelectedNode: () => void;
+    checkToggleCompletionPermissions: {
+        checkComplete: () => boolean;
+        checkUnComplete: () => boolean;
+    };
 }) {
     const { width } = useAppSelector(selectSafeScreenDimentions);
+    const { checkComplete, checkUnComplete } = checkToggleCompletionPermissions;
     const MENU_WIDTH = width - 3 * CIRCLE_SIZE_SELECTED;
 
     const [newSkillProps, setNewSkillProps] = newSkillPropsState;
@@ -32,6 +38,9 @@ function Editing({
     };
 
     const updateSkillCompletion = (isCompleted: boolean) => () => {
+        if (isCompleted && !checkComplete()) return Alert.alert(`Cannot learn ${newName} because the parent skill is not learned`);
+        if (!isCompleted && !checkUnComplete()) return Alert.alert(`Cannot unlearn ${newName}, unlearn it's children skills first`);
+
         setNewSkillProps((prev: SkillPropertiesEditableOnPopMenu) => {
             return { ...prev, isCompleted };
         });

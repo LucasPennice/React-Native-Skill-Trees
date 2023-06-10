@@ -7,7 +7,7 @@ import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeScreenshot";
 import InteractiveTree, { InteractiveNodeState, InteractiveTreeConfig, InteractiveTreeFunctions } from "../../components/treeRelated/InteractiveTree";
-import SelectedNodeMenu from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
+import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import useGetMenuFunctions from "../../components/treeRelated/selectedNodeMenu/useGetMenuFunctions";
 import { findNodeById } from "../../functions/extractInformationFromTree";
 import { mutateEveryTreeNode } from "../../functions/mutateTree";
@@ -43,6 +43,7 @@ function HomepageTree({ navigation }: Props) {
 
     //CHANGE REDUX STATE TO HOLD NODE LATER 😝
     const selectedNode = findNodeById(homepageTree, selectedNodeId);
+
     const clearSelectedNode = () => setSelectedNodeId(null);
 
     //Interactive Tree Props
@@ -51,6 +52,7 @@ function HomepageTree({ navigation }: Props) {
     const functions: InteractiveTreeFunctions = { onNodeClick };
     //Interactive Tree Props - SelectedNodeMenu
     const menuFunctions = useGetMenuFunctions({ selectedNode, navigation, clearSelectedNode });
+    const selectedNodeMenuState: SelectedNodeMenuState = { screenDimensions, selectedNode: selectedNode! };
 
     return (
         <>
@@ -59,7 +61,7 @@ function HomepageTree({ navigation }: Props) {
                 state={state}
                 tree={homepageTree}
                 functions={functions}
-                renderOnSelectedNodeId={<SelectedNodeMenu functions={menuFunctions} state={{ screenDimensions, selectedNode: selectedNode! }} />}
+                renderOnSelectedNodeId={<SelectedNodeMenu functions={menuFunctions} state={selectedNodeMenuState} />}
             />
             <ProgressIndicatorAndName tree={homepageTree} />
             <OpenSettingsMenu openModal={() => setCanvasSettings(true)} />
