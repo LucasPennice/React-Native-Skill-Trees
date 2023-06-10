@@ -61,7 +61,7 @@ function UpdateMilestoneModal({ closeModal, updateMilestonesArray, milestones, s
             return;
         }
 
-        let defaultMilestone = getDefaultFns.milestone();
+        let defaultMilestone = getDefaultFns.milestones();
 
         setTitle(defaultMilestone.title);
         setComplete(defaultMilestone.complete);
@@ -92,7 +92,7 @@ function UpdateMilestoneModal({ closeModal, updateMilestonesArray, milestones, s
     );
 
     function checkIfEditing() {
-        let defaultMilestone = getDefaultFns.milestone();
+        let defaultMilestone = getDefaultFns.milestones();
         let defaultMilestoneWithNoId = {
             complete: defaultMilestone.complete,
             completedOn: defaultMilestone.completedOn,

@@ -33,6 +33,13 @@ export type SkillLevel = {
 
 export type SkillIcon = { text: string; isEmoji: boolean };
 
+export type SkillDetails = {
+    milestones: Milestone[];
+    motivesToLearn: MotiveToLearn[];
+    usefulResources: SkillResource[];
+    logs: SkillLogs[];
+};
+
 export type Skill = {
     name: string;
     isCompleted: boolean;
@@ -136,4 +143,9 @@ export type ColorGradient = {
     label: string;
     color1: string;
     color2: string;
+};
+
+export type ObjectWithId = {
+    id: string;
+    [key: string]: any;
 };
