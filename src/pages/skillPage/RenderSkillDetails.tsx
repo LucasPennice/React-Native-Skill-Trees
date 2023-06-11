@@ -44,7 +44,7 @@ function RenderSwipeableData<T extends ObjectWithId>({
     const ref = useRef<Swipeable | null>(null);
     const { deleteData, openModal } = functions;
     return (
-        <Animated.View layout={Layout.duration(200)} style={{ marginTop: 10 }}>
+        <Animated.View layout={Layout.duration(200)} style={{ marginTop: 10, width: "100%" }}>
             <Swipeable
                 ref={ref}
                 renderLeftActions={LeftAction(openModal(ref.current, data))}

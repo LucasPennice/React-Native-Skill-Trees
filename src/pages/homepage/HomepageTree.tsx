@@ -52,7 +52,7 @@ function HomepageTree({ navigation }: Props) {
     const functions: InteractiveTreeFunctions = { onNodeClick };
     //Interactive Tree Props - SelectedNodeMenu
     const menuFunctions = useGetMenuFunctions({ selectedNode, navigation, clearSelectedNode });
-    const selectedNodeMenuState: SelectedNodeMenuState = { screenDimensions, selectedNode: selectedNode! };
+    const selectedNodeMenuState: SelectedNodeMenuState = { screenDimensions, selectedNode: selectedNode!, selectedTree: homepageTree };
 
     return (
         <>

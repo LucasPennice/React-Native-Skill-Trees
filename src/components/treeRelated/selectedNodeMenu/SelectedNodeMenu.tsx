@@ -10,10 +10,11 @@ import AppText from "../../AppText";
 import SliderToggler from "../../SliderToggler";
 import Editing from "./Editing";
 import Viewing from "./Viewing";
+import { findNodeById } from "../../../functions/extractInformationFromTree";
 
 export type SelectedNodeMenuState = {
     selectedNode: Tree<Skill>;
-    parentOfSelectedNode?: Tree<Skill>;
+    selectedTree: Tree<Skill>;
     screenDimensions: ScreenDimentions;
 };
 
@@ -39,10 +40,12 @@ type Props = {
 //THE OTHER NODE TYPES' COMPLETION STATE IS CALCULATED ☢️
 
 function SelectedNodeMenu({ functions, state, allowEdit }: Props) {
-    const { screenDimensions, selectedNode, parentOfSelectedNode } = state;
+    const { screenDimensions, selectedNode, selectedTree } = state;
     const { height } = screenDimensions;
     const { closeMenu, editing, goToSkillPage, goToTreePage } = functions;
     const { menuWidth, styles } = getNodeMenuStyles(screenDimensions);
+
+    const parentOfSelectedNode = findNodeById(selectedTree, selectedNode.parentId);
 
     //Local State
     const [newSkillProps, setNewSkillProps] = useState<SkillPropertiesEditableOnPopMenu>({
@@ -136,7 +139,9 @@ function SelectedNodeMenu({ functions, state, allowEdit }: Props) {
                             checkToggleCompletionPermissions={checkToggleCompletionPermissions!}
                         />
                     )}
-                    {mode === "VIEWING" && <Viewing selectedNode={selectedNode} functions={{ goToTreePage, goToSkillPage }} />}
+                    {mode === "VIEWING" && (
+                        <Viewing selectedNode={selectedNode} selectedTree={selectedTree} functions={{ goToTreePage, goToSkillPage }} />
+                    )}
                 </Animated.View>
             </GestureDetector>
             <Pressable onPress={closeMenu} style={{ right: 0, width: 134, height, position: "absolute" }}>

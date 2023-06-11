@@ -47,7 +47,7 @@ export type TreeCoordinates = {
     dndZoneCoordinates: DnDZone[];
 };
 
-export type InteractiveTree2Props = {
+export type InteractiveTreeProps = {
     tree: Tree<Skill>;
     config: InteractiveTreeConfig;
     state: InteractiveNodeState;
@@ -55,7 +55,7 @@ export type InteractiveTree2Props = {
     renderOnSelectedNodeId?: JSX.Element;
 };
 
-function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeId }: InteractiveTree2Props) {
+function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeId }: InteractiveTreeProps) {
     const { screenDimensions, selectedNodeId, canvasRef } = state;
     const { isInteractive, renderStyle, showDndZones } = config;
 

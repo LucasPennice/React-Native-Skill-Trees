@@ -94,7 +94,6 @@ function ViewingSkillTree({ navigation, route }: Props) {
 
     //CHANGE REDUX STATE TO HOLD NODE LATER 😝
     const selectedNode = findNodeById(selectedTree, selectedNodeId);
-    const parentOfSelectedNode = selectedNode ? findNodeById(selectedTree, selectedNode.parentId) : undefined;
 
     //Interactive Tree Props
     const config: InteractiveTreeConfig = { canvasDisplaySettings, isInteractive: true, renderStyle: "hierarchy", showDndZones };
@@ -121,7 +120,7 @@ function ViewingSkillTree({ navigation, route }: Props) {
                     renderOnSelectedNodeId={
                         <SelectedNodeMenu
                             functions={menuFunctions}
-                            state={{ screenDimensions, selectedNode: selectedNode!, parentOfSelectedNode }}
+                            state={{ screenDimensions, selectedNode: selectedNode!, selectedTree: selectedTree! }}
                             allowEdit
                         />
                     }

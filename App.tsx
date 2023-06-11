@@ -105,7 +105,6 @@ function AppWithReduxContext() {
             component: SkillPage,
             route: "SkillPage",
             title: "Skill Page",
-            options: { headerShown: false, gestureEnabled: false },
             hideFromNavBar: true,
         },
     ];
