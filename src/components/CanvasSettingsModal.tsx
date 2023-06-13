@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { colors, nodeGradients } from "../parameters";
 import {
@@ -94,4 +94,4 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
     );
 }
 
-export default CanvasSettingsModal;
+export default memo(CanvasSettingsModal);

@@ -152,7 +152,8 @@ function ImportTree({
     const { data, isError, isFetching, refetch: fetchTreeFromImportLink } = importTreeQuery;
     const [treeImportKey, setTreeImportKey] = linkState;
     const { showLabel, showIcons } = useAppSelector(selectCanvasDisplaySettings);
-    const { height, width } = useAppSelector(selectSafeScreenDimentions);
+    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
+    const { height, width } = screenDimensions;
 
     const initialState = !isFetching && data === undefined;
 
@@ -167,7 +168,7 @@ function ImportTree({
     const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
-    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, undefined);
+    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, screenDimensions, undefined);
 
     if (initialState)
         return (

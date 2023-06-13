@@ -1,8 +1,10 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { View } from "react-native";
 import { StackNavigatorParams } from "../../../App";
+import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { useAppSelector } from "../../redux/reduxHooks";
-import { selectTreeSlice } from "../../redux/userTreesSlice";
+import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { selectUserTrees } from "../../redux/userTreesSlice";
 import HomepageTree from "./HomepageTree";
 import WelcomeScreen from "./WelcomeScreen";
 
@@ -10,7 +12,9 @@ type Props = NativeStackScreenProps<StackNavigatorParams, "Home">;
 
 function Homepage(props: Props) {
     const { navigation } = props;
-    const { userTrees } = useAppSelector(selectTreeSlice);
+    const userTrees = useAppSelector(selectUserTrees);
+    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
+    const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
 
     const userTreesChildrenQty = userTrees.length;
 
@@ -22,7 +26,11 @@ function Homepage(props: Props) {
 
     return (
         <View style={{ position: "relative", flex: 1, overflow: "hidden" }}>
-            {userHasAtLestOneTree ? <HomepageTree {...props} /> : <WelcomeScreen openCreateNewTree={openCreateNewTree} />}
+            {userHasAtLestOneTree ? (
+                <HomepageTree n={props} state={{ canvasDisplaySettings, screenDimensions, userTrees }} />
+            ) : (
+                <WelcomeScreen openCreateNewTree={openCreateNewTree} />
+            )}
         </View>
     );
 }

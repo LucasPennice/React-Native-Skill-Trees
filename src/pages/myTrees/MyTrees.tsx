@@ -1,22 +1,22 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useCallback, useEffect } from "react";
 import { ScrollView } from "react-native";
 import { StackNavigatorParams } from "../../../App";
 import AppText from "../../components/AppText";
 import { colors } from "../../parameters";
+import { open } from "../../redux/addTreeModalSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { changeTree, selectTreeSlice } from "../../redux/userTreesSlice";
+import { changeTree, selectUserTrees } from "../../redux/userTreesSlice";
 import TreeCard from "./TreeCard";
 import AddTreeModal from "./modals/AddTreeModal";
 import EditTreeModal from "./modals/EditTreeModal";
-import { open } from "../../redux/addTreeModalSlice";
-import { useCallback, useEffect } from "react";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "MyTrees">;
 
 function MyTrees({ navigation, route }: Props) {
     const { params } = route;
     //Redux Related
-    const { userTrees } = useAppSelector(selectTreeSlice);
+    const userTrees = useAppSelector(selectUserTrees);
     const dispatch = useAppDispatch();
 
     const openNewTreeModal = useCallback(() => {
@@ -60,3 +60,4 @@ function MyTrees({ navigation, route }: Props) {
 }
 
 export default MyTrees;
+// export default memo(MyTrees);

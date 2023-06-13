@@ -2,17 +2,15 @@ import { useEffect, useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
 import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../parameters";
-import { useAppSelector } from "../../../redux/reduxHooks";
-import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { CanvasDimensions, NodeCoordinate } from "../../../types";
+import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
 
 const DEFAULT_SCALE = 1;
 
-function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoordinates?: NodeCoordinate) {
+function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, screenDimensions: ScreenDimentions, foundNodeCoordinates?: NodeCoordinate) {
     const { canvasHeight, canvasWidth } = canvasDimentions;
-    const screenDimentions = useAppSelector(selectSafeScreenDimentions);
 
-    const minScale = screenDimentions.width / canvasWidth;
+    const minScale = screenDimensions.width / canvasWidth;
     const MAX_SCALE = 1.4;
 
     const start = useSharedValue({ x: 0, y: 0 });
@@ -25,7 +23,7 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
     const shouldAnimateTransformation = useShouldAnimateTransformation(foundNodeCoordinates !== undefined);
 
     useEffect(() => {
-        const currentCanvasMinScale = screenDimentions.width / canvasWidth;
+        const currentCanvasMinScale = screenDimensions.width / canvasWidth;
 
         //Avoids being zoomed out more than allowed when switching from a big tree to a small one
         if (!(scale.value >= currentCanvasMinScale && scale.value <= MAX_SCALE)) {
@@ -63,12 +61,12 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
             savedScale.value = scale.value;
         });
 
-    const widthBounds = getWidthBounds(canvasWidth, scale.value, screenDimentions.width);
+    const widthBounds = getWidthBounds(canvasWidth, scale.value, screenDimensions.width);
     const minX = -widthBounds;
     const maxX = widthBounds;
 
-    const minY = -screenDimentions.height / 2 + NAV_HEGIHT;
-    const maxY = screenDimentions.height / 2;
+    const minY = -screenDimensions.height / 2 + NAV_HEGIHT;
+    const maxY = screenDimensions.height / 2;
 
     const canvasPan = Gesture.Pan()
         .onUpdate((e) => {
@@ -108,12 +106,12 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, foundNodeCoor
 
     const transform = useAnimatedStyle(() => {
         if (foundNodeCoordinates) {
-            const alignCanvasLeftSideWithScreenLeftSide = (canvasWidth - screenDimentions.width) / 2;
+            const alignCanvasLeftSideWithScreenLeftSide = (canvasWidth - screenDimensions.width) / 2;
             const foundNodeTranslatedX =
-                alignCanvasLeftSideWithScreenLeftSide - foundNodeCoordinates.x + screenDimentions.width - 1.5 * CIRCLE_SIZE_SELECTED;
+                alignCanvasLeftSideWithScreenLeftSide - foundNodeCoordinates.x + screenDimensions.width - 1.5 * CIRCLE_SIZE_SELECTED;
 
             const deltaY = canvasHeight / 2 - foundNodeCoordinates.y;
-            const foundNodeTranslatedY = canvasHeight / 2 + deltaY - screenDimentions.height / 2 + CIRCLE_SIZE_SELECTED;
+            const foundNodeTranslatedY = canvasHeight / 2 + deltaY - screenDimensions.height / 2 + CIRCLE_SIZE_SELECTED;
 
             return {
                 transform: [

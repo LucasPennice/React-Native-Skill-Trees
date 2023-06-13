@@ -2,22 +2,14 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StackNavigatorParams } from "../../../../App";
 import { treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, editTreeProperties } from "../../../functions/mutateTree";
-import { useAppDispatch } from "../../../redux/reduxHooks";
-import { setSelectedNode, updateUserTrees } from "../../../redux/userTreesSlice";
 import { Skill, Tree } from "../../../types";
-import { SelectedNodeMenuFunctions } from "./SelectedNodeMenu";
 
-function useGetMenuFunctions(params: {
-    selectedNode: Tree<Skill> | undefined;
-    navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree" | "Home", undefined>;
-    openChildrenHoistSelector?: (nodeToDelete: Tree<Skill>) => void;
-    selectedTree?: Tree<Skill> | undefined;
-    clearSelectedNode: () => void;
-}) {
-    const { navigation, openChildrenHoistSelector, selectedNode, selectedTree, clearSelectedNode } = params;
-    const dispatch = useAppDispatch();
-
-    const nonEditingFns = {
+function getMenuNonEditingFunctions(
+    selectedNode: Tree<Skill> | undefined,
+    navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree" | "Home", undefined>,
+    clearSelectedNode: () => void
+) {
+    return {
         closeMenu: clearSelectedNode,
         goToSkillPage: () => {
             if (!selectedNode) throw new Error("No selected node at goToSkillPage");
@@ -28,39 +20,46 @@ function useGetMenuFunctions(params: {
             navigation.navigate("ViewingSkillTree", { treeId: selectedNode.treeId });
         },
     };
-
-    if (!openChildrenHoistSelector || !selectedTree) return nonEditingFns;
-
-    return {
-        ...nonEditingFns,
-        editing: {
-            updateNode: (updatedNode: Tree<Skill>) => {
-                if (!selectedNode) throw new Error("No selected node at updateNode");
-
-                let updatedRootNode = editTreeProperties(selectedTree, selectedNode, updatedNode);
-
-                if (!updatedRootNode) throw new Error("Error saving tree in PopUpMenu");
-
-                const treeSkillCompletion = treeCompletedSkillPercentage(updatedRootNode);
-
-                if (treeSkillCompletion === 100) updatedRootNode = { ...updatedRootNode, data: { ...updatedRootNode.data, isCompleted: true } };
-                if (treeSkillCompletion !== 100) updatedRootNode = { ...updatedRootNode, data: { ...updatedRootNode.data, isCompleted: false } };
-
-                dispatch(updateUserTrees(updatedRootNode));
-            },
-            handleDeleteNode: (node: Tree<Skill>) => {
-                if (!selectedTree) throw new Error("No selectedTree at deleteNode");
-                if (!selectedNode) throw new Error("No selected node at deleteNode");
-
-                if (node.children.length !== 0) return openChildrenHoistSelector(node);
-
-                const result = deleteNodeWithNoChildren(selectedTree, node);
-
-                dispatch(updateUserTrees(result));
-                dispatch(setSelectedNode(null));
-            },
-        },
-    } as SelectedNodeMenuFunctions;
 }
 
-export default useGetMenuFunctions;
+function getMenuEditingFunctions(
+    functions: {
+        openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void;
+        updateUserTrees: (v: Tree<Skill> | undefined) => void;
+        clearSelectedNode: () => void;
+    },
+    state: { selectedTree: Tree<Skill> | undefined; selectedNode: Tree<Skill> | undefined }
+) {
+    const { selectedNode, selectedTree } = state;
+    const { clearSelectedNode, openChildrenHoistSelector, updateUserTrees } = functions;
+
+    return {
+        updateNode: (updatedNode: Tree<Skill>) => {
+            if (!selectedNode) throw new Error("No selected node at updateNode");
+
+            let updatedRootNode = editTreeProperties(selectedTree, selectedNode, updatedNode);
+
+            if (!updatedRootNode) throw new Error("Error saving tree in PopUpMenu");
+
+            const treeSkillCompletion = treeCompletedSkillPercentage(updatedRootNode);
+
+            if (treeSkillCompletion === 100) updatedRootNode = { ...updatedRootNode, data: { ...updatedRootNode.data, isCompleted: true } };
+            if (treeSkillCompletion !== 100) updatedRootNode = { ...updatedRootNode, data: { ...updatedRootNode.data, isCompleted: false } };
+
+            updateUserTrees(updatedRootNode);
+        },
+        handleDeleteNode: (node: Tree<Skill>) => {
+            if (!selectedTree) throw new Error("No selectedTree at deleteNode");
+            if (!selectedNode) throw new Error("No selected node at deleteNode");
+
+            if (node.children.length !== 0) return openChildrenHoistSelector(node);
+
+            const result = deleteNodeWithNoChildren(selectedTree, node);
+
+            updateUserTrees(result);
+            clearSelectedNode();
+        },
+    };
+}
+
+export { getMenuNonEditingFunctions, getMenuEditingFunctions };

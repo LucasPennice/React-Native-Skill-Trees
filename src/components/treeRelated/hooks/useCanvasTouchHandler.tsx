@@ -1,12 +1,12 @@
 import { TouchHandler, TouchInfo, useTouchHandler } from "@shopify/react-native-skia";
 import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, TOUCH_BUFFER } from "../../../parameters";
-import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { selectTreeSlice, setSelectedNode } from "../../../redux/userTreesSlice";
-import { DnDZone, NodeCoordinate, Skill, Tree } from "../../../types";
+import { useAppDispatch } from "../../../redux/reduxHooks";
+import { setSelectedNode } from "../../../redux/userTreesSlice";
+import { DnDZone, NodeCoordinate, SelectedNodeId } from "../../../types";
 
 type Props = {
     nodeCoordinatesCentered: NodeCoordinate[];
-    tree: Tree<Skill>;
+    selectedNodeId: SelectedNodeId;
     onNodeClick?: (nodeId: string) => void;
     onDndZoneClick?: (clickedZone?: DnDZone) => void;
     showDndZones?: boolean;
@@ -17,9 +17,8 @@ export const DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL = CIRCLE_SIZE_SELECTED + 20;
 
 export type CanvasTouchHandler = { touchHandler: TouchHandler };
 
-const useCanvasTouchHandler = ({ nodeCoordinatesCentered, onNodeClick, tree, dragAndDropZones, onDndZoneClick, showDndZones }: Props) => {
+const useCanvasTouchHandler = ({ nodeCoordinatesCentered, onNodeClick, dragAndDropZones, onDndZoneClick, showDndZones, selectedNodeId }: Props) => {
     //Redux
-    const { selectedNode, newNode } = useAppSelector(selectTreeSlice);
     const dispatch = useAppDispatch();
     //
     const touchHandler = useTouchHandler(
@@ -32,19 +31,16 @@ const useCanvasTouchHandler = ({ nodeCoordinatesCentered, onNodeClick, tree, dra
 
                 if (onDndZoneClick && showDndZones) return onDndZoneClick(clickedDndZone);
 
-                //Blocks the select node functionality when adding a new node
-                if (newNode) return;
-
                 const clickedNode = nodeCoordinatesCentered.find(didTapCircle(touchInfo));
 
                 if (clickedNode === undefined) return dispatch(setSelectedNode(null));
 
-                if (selectedNode !== clickedNode.id && onNodeClick) return onNodeClick(clickedNode.id);
+                if (selectedNodeId !== clickedNode.id && onNodeClick) return onNodeClick(clickedNode.id);
 
                 return dispatch(setSelectedNode(null));
             },
         },
-        [selectedNode, nodeCoordinatesCentered]
+        [selectedNodeId, nodeCoordinatesCentered]
     );
 
     return { touchHandler };

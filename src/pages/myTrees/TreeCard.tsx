@@ -3,9 +3,8 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import AppText from "../../components/AppText";
 import NodeView from "../../components/NodeView";
-import { ProgressWheelParams } from "../../components/ProgressIndicatorAndName";
 import { countCompletedSkillNodes, countSkillNodes, treeCompletedSkillPercentage } from "../../functions/extractInformationFromTree";
-import { WHITE_GRADIENT, centerFlex, colors } from "../../parameters";
+import { centerFlex, colors } from "../../parameters";
 import { setTree } from "../../redux/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
@@ -17,9 +16,6 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
     const { width } = useAppSelector(selectSafeScreenDimentions);
     const dispatchSetTree = () => dispatch(setTree(element));
     //
-    const treeAccentColor = element ? element.accentColor : WHITE_GRADIENT;
-
-    const progressWheelProps = new ProgressWheelParams(treeAccentColor.color1, `${treeAccentColor.color1}3D`, 60, 5);
 
     const completedSkillsQty = countCompletedSkillNodes(element);
     const skillsQty = countSkillNodes(element);

@@ -1,18 +1,15 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCanvasRef } from "@shopify/react-native-skia";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 import { StackNavigatorParams } from "../../../App";
 import CanvasSettingsModal from "../../components/CanvasSettingsModal";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import ShareTreeUrl from "../../components/ShareTreeUrl";
-import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeScreenshot";
-import InteractiveTree, { InteractiveNodeState, InteractiveTreeConfig, InteractiveTreeFunctions } from "../../components/treeRelated/InteractiveTree";
-import SelectedNodeMenu from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
-import useGetMenuFunctions from "../../components/treeRelated/selectedNodeMenu/useGetMenuFunctions";
+import ShareTreeScreenshot from "../../components/takingScreenshot/ShareTreeScreenshot";
+import InteractiveTree from "../../components/treeRelated/InteractiveTree";
 import { IsSharingAvailableContext } from "../../context";
-import { findNodeById } from "../../functions/extractInformationFromTree";
 import { colors } from "../../parameters";
 import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
@@ -25,12 +22,13 @@ import {
     setSelectedNode,
     updateUserTreeWithAppendedNode,
 } from "../../redux/userTreesSlice";
-import { DnDZone, Skill, Tree } from "../../types";
+import { Skill, Tree } from "../../types";
 import useCurrentTree from "../../useCurrentTree";
 import useTentativeNewTree from "../../useTentativeNewTree";
 import AddNodeStateIndicator from "./AddNodeStateIndicator";
 import AddNodeModal from "./modals/AddNodeModal";
 import SelectChildrenToHoistWhenDeletingParentModal from "./modals/SelectChildrenToHoistWhenDeletingParentModal";
+import useHandleMemoizedTreeProps from "./useHandleMemoizedTreeProps";
 
 export type ModalState =
     | "TAKING_SCREENSHOT"
@@ -57,7 +55,8 @@ function ViewingSkillTree({ navigation, route }: Props) {
     useRunCleanupOnNavigation();
     useHandleRouteParams(route.params);
     //Local State - MODALS
-    const [modalState, setModalState] = useState<ModalState>("IDLE");
+    const modalUseState = useState<ModalState>("IDLE");
+    const [modalState, setModalState] = modalUseState;
     //Local State
     const [nodeToDelete, setNodeToDelete] = useState<Tree<Skill> | null>(null);
     //Derived State
@@ -67,41 +66,13 @@ function ViewingSkillTree({ navigation, route }: Props) {
 
     useEffect(() => {
         if (selectedNodeId === null) setModalState("IDLE");
+        //eslint-disable-next-line
     }, [selectedNodeId]);
 
-    const onNodeClick = (node: Tree<Skill>) => {
-        if (modalState !== "IDLE") return;
-
-        const nodeId = node.nodeId;
-
-        dispatch(setSelectedNode(nodeId));
-        setModalState("NODE_SELECTED");
-    };
-
-    const onDndZoneClick = (clickedZone: DnDZone | undefined) => {
-        if (modalState !== "PLACING_NEW_NODE") return;
-        if (clickedZone === undefined) return;
-        dispatch(setSelectedDndZone(clickedZone));
-        setModalState("CONFIRM_NEW_NODE_POSITION");
-    };
-
-    const openChildrenHoistSelector = (nodeToDelete: Tree<Skill>) => {
+    const openChildrenHoistSelector = useCallback((nodeToDelete: Tree<Skill>) => {
         setNodeToDelete(nodeToDelete);
         setModalState("CANDIDATES_TO_HOIST");
-    };
-
-    const clearSelectedNode = () => dispatch(setSelectedNode(null));
-
-    //CHANGE REDUX STATE TO HOLD NODE LATER 😝
-    const selectedNode = findNodeById(selectedTree, selectedNodeId);
-
-    //Interactive Tree Props
-    const config: InteractiveTreeConfig = { canvasDisplaySettings, isInteractive: true, renderStyle: "hierarchy", showDndZones };
-    const state: InteractiveNodeState = { screenDimensions, canvasRef, selectedDndZone, selectedNodeId };
-    const tree: Tree<Skill> | undefined = tentativeNewTree ?? selectedTree;
-    const functions: InteractiveTreeFunctions = { onNodeClick, onDndZoneClick };
-    //Interactive Tree Props - SelectedNodeMenu
-    const menuFunctions = useGetMenuFunctions({ openChildrenHoistSelector, selectedNode, selectedTree, navigation, clearSelectedNode });
+    }, []);
 
     //Select ChildrenToHoistWhenDeletingParentModal
     const closeChildrenHoistModal = () => {
@@ -109,44 +80,53 @@ function ViewingSkillTree({ navigation, route }: Props) {
         setModalState("IDLE");
     };
 
+    const { RenderOnSelectedNodeId, config, functions, interactiveTreeState, tree } = useHandleMemoizedTreeProps(
+        { canvasDisplaySettings, modal: modalUseState, screenDimensions, selectedDndZone, selectedTree, showDndZones, tentativeNewTree },
+        selectedNodeId,
+        canvasRef,
+        navigation,
+        openChildrenHoistSelector
+    );
+
+    const addTreeFunctions = useMemo(() => {
+        return {
+            returnToIdleState: () => {
+                setModalState("IDLE");
+                dispatch(clearNewNodeState());
+            },
+            resetNewNodePosition: () => {
+                setModalState("PLACING_NEW_NODE");
+                dispatch(setSelectedDndZone(undefined));
+            },
+            updateUserTree: () => {
+                setModalState("IDLE");
+                if (tentativeNewTree === undefined) return;
+                dispatch(updateUserTreeWithAppendedNode(tentativeNewTree));
+            },
+            openNewNodeModal: () => {
+                if (modalState !== "IDLE") return;
+                setModalState("INPUT_DATA_FOR_NEW_NODE");
+            },
+        };
+    }, [tentativeNewTree]);
+
     return (
         <View style={{ position: "relative", backgroundColor: colors.background, flex: 1, overflow: "hidden" }}>
             {tree && (
                 <InteractiveTree
                     config={config}
-                    state={state}
+                    state={interactiveTreeState}
                     tree={tree}
                     functions={functions}
-                    renderOnSelectedNodeId={
-                        <SelectedNodeMenu
-                            functions={menuFunctions}
-                            state={{ screenDimensions, selectedNode: selectedNode!, selectedTree: selectedTree! }}
-                            allowEdit
-                        />
-                    }
+                    renderOnSelectedNodeId={RenderOnSelectedNodeId}
                 />
             )}
             {selectedTree && <ProgressIndicatorAndName tree={selectedTree} />}
-            <AddNodeStateIndicator
-                mode={modalState}
-                returnToIdleState={() => {
-                    setModalState("IDLE");
-                    dispatch(clearNewNodeState());
-                }}
-                resetNewNodePosition={() => {
-                    setModalState("PLACING_NEW_NODE");
-                    dispatch(setSelectedDndZone(undefined));
-                }}
-                updateUserTree={() => {
-                    setModalState("IDLE");
-                    if (tentativeNewTree === undefined) return;
-                    dispatch(updateUserTreeWithAppendedNode(tentativeNewTree));
-                }}
-                openNewNodeModal={() => setModalState("INPUT_DATA_FOR_NEW_NODE")}
-            />
+
+            {selectedTree && <AddNodeStateIndicator mode={modalState} functions={addTreeFunctions} currentTree={selectedTree} />}
 
             {selectedTree && (
-                <ShareTreeLayout
+                <ShareTreeScreenshot
                     canvasRef={canvasRef}
                     shouldShare={Boolean(shouldRenderShareButton)}
                     takingScreenShotState={[
@@ -159,9 +139,9 @@ function ViewingSkillTree({ navigation, route }: Props) {
                     tree={selectedTree}
                 />
             )}
-            {selectedTree && modalState === "IDLE" && <ShareTreeUrl tree={selectedTree} />}
+            {selectedTree && <ShareTreeUrl tree={selectedTree} show={modalState === "IDLE"} />}
 
-            {modalState === "IDLE" && <OpenSettingsMenu openModal={() => setModalState("EDITING_CANVAS_SETTINGS")} />}
+            <OpenSettingsMenu show={modalState === "IDLE"} openModal={() => setModalState("EDITING_CANVAS_SETTINGS")} />
 
             <SelectChildrenToHoistWhenDeletingParentModal
                 open={modalState === "CANDIDATES_TO_HOIST"}
@@ -194,6 +174,7 @@ function ViewingSkillTree({ navigation, route }: Props) {
             if (!params) return;
 
             dispatch(changeTree(params.treeId));
+            //eslint-disable-next-line
         }, []);
     }
 }

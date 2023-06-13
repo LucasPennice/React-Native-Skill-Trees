@@ -96,5 +96,6 @@ export const {
 } = userTreesSlice.actions;
 
 export const selectTreeSlice = (state: RootState) => state.currentTree;
+export const selectUserTrees = (state: RootState) => state.currentTree.userTrees;
 
 export default userTreesSlice.reducer;

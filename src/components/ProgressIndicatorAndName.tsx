@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { View } from "react-native";
 import Animated, { useAnimatedProps, useSharedValue, withSpring } from "react-native-reanimated";
 import { Circle, Defs, LinearGradient, Stop, Svg, Circle as SvgCircle } from "react-native-svg";
@@ -116,4 +116,4 @@ function ProgressIndicatorAndName({ tree }: { tree: Tree<Skill> }) {
     );
 }
 
-export default ProgressIndicatorAndName;
+export default memo(ProgressIndicatorAndName);

@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Alert, View } from "react-native";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
-import EmojiSelector from "../../../components/EmojiSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import RadioInput from "../../../components/RadioInput";
+import ShowHideEmojiSelector from "../../../components/ShowHideEmojiSelector";
 import { createTree } from "../../../functions/misc";
 import { colors } from "../../../parameters";
 import { useAppDispatch } from "../../../redux/reduxHooks";
@@ -73,15 +73,8 @@ function AddNodeModal({ closeModal, open, confirmAddNewNode }: Props) {
                 <AppText style={{ color: colors.unmarkedText, marginVertical: 10 }} fontSize={16}>
                     If you don't select an icon the first letter of the skill name will be used
                 </AppText>
-                <EmojiSelector
-                    selectedEmoji={icon}
-                    onEmojiClick={(clickedIcon: string) =>
-                        setIcon((p) => {
-                            if (p === clickedIcon && p !== null) return null;
-                            return clickedIcon;
-                        })
-                    }
-                />
+
+                <ShowHideEmojiSelector emojiState={[icon, setIcon]} />
             </View>
         </FlingToDismissModal>
     );

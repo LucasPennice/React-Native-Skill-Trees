@@ -19,17 +19,19 @@ export type SelectedNodeMenuState = {
 };
 
 export type SelectedNodeMenuFunctions = {
-    editing?: {
-        updateNode: (updatedNode: Tree<Skill>) => void;
-        handleDeleteNode: (node: Tree<Skill>) => void;
-    };
     closeMenu: () => void;
     goToSkillPage: () => void;
     goToTreePage: () => void;
 };
 
+export type SelectedNodeMenuMutateFunctions = {
+    updateNode: (updatedNode: Tree<Skill>) => void;
+    handleDeleteNode: (node: Tree<Skill>) => void;
+};
+
 type Props = {
     state: SelectedNodeMenuState;
+    mutateFunctions?: SelectedNodeMenuMutateFunctions;
     functions: SelectedNodeMenuFunctions;
     allowEdit?: boolean;
 };
@@ -39,10 +41,10 @@ type Props = {
 //IS THE SKILL NODES
 //THE OTHER NODE TYPES' COMPLETION STATE IS CALCULATED ☢️
 
-function SelectedNodeMenu({ functions, state, allowEdit }: Props) {
+function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Props) {
     const { screenDimensions, selectedNode, selectedTree } = state;
     const { height } = screenDimensions;
-    const { closeMenu, editing, goToSkillPage, goToTreePage } = functions;
+    const { closeMenu, goToSkillPage, goToTreePage } = functions;
     const { menuWidth, styles } = getNodeMenuStyles(screenDimensions);
 
     const parentOfSelectedNode = findNodeById(selectedTree, selectedNode.parentId);
@@ -55,7 +57,7 @@ function SelectedNodeMenu({ functions, state, allowEdit }: Props) {
     });
     const [mode, setMode] = useState<"EDITING" | "VIEWING">("VIEWING");
 
-    const editingEnabled = Boolean(editing !== undefined) && Boolean(allowEdit) && selectedNode.category === "SKILL";
+    const editingEnabled = Boolean(mutateFunctions !== undefined) && Boolean(allowEdit) && selectedNode.category === "SKILL";
 
     useEffect(() => {
         setNewSkillProps({
@@ -80,9 +82,9 @@ function SelectedNodeMenu({ functions, state, allowEdit }: Props) {
     const toggleMode = () => setMode((p) => (p === "EDITING" ? "VIEWING" : "EDITING"));
 
     const buildEditingFns = () => {
-        if (!editing) return undefined;
+        if (!mutateFunctions) return undefined;
 
-        const { handleDeleteNode, updateNode } = editing;
+        const { handleDeleteNode, updateNode } = mutateFunctions;
 
         return {
             saveUpdates: (selectedNode: Tree<Skill>, newProps: SkillPropertiesEditableOnPopMenu) => () => {

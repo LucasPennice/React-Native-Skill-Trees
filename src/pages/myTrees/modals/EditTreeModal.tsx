@@ -3,17 +3,16 @@ import { Alert, TouchableOpacity } from "react-native";
 import Animated, { Layout } from "react-native-reanimated";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
-import ColorSelector from "../../../components/ColorsSelector";
+import ColorGradientSelector from "../../../components/ColorGradientSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import ShowHideEmojiSelector from "../../../components/ShowHideEmojiSelector";
 import { mutateEveryTree } from "../../../functions/mutateTree";
-import { WHITE_GRADIENT, colors, nodeGradients, possibleTreeColors } from "../../../parameters";
+import { WHITE_GRADIENT, colors, nodeGradients } from "../../../parameters";
 import { selectTreeOptions, setTree } from "../../../redux/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { removeUserTree, updateUserTrees } from "../../../redux/userTreesSlice";
 import { generalStyles } from "../../../styles";
 import { ColorGradient, Skill, Tree } from "../../../types";
-import ColorGradientSelector from "../../../components/ColorGradientSelector";
 
 function EditTreeModal() {
     //Redux State
