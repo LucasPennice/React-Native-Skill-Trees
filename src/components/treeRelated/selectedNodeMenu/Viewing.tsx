@@ -149,7 +149,7 @@ function TreeStats({
                     Completed Percentage
                 </AppText>
                 <AppText style={{ color: selectedNode.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
-                    {completedPercenage}%
+                    {completedPercenage.toFixed(2)}%
                 </AppText>
             </View>
             <View style={[centerFlex, { flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }]}>
@@ -241,7 +241,7 @@ function TreeStats({
                         with
                     </AppText>
                     <AppText style={{ color: selectedNode.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
-                        {maxCompletion}%
+                        {maxCompletion.toFixed(2)}%
                     </AppText>
                     <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
                         completion
