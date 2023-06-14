@@ -67,6 +67,6 @@ export const nodeGradients: ColorGradient[] = [
 ];
 export const WHITE_GRADIENT = { label: "White", color1: "#FFFFFF", color2: "#CAEFD7" };
 
-export const ALLOWED_NODE_SPACING = 0.5;
+export const ALLOWED_NODE_SPACING = 0.65;
 
 export const UNCENTERED_ROOT_COORDINATES = { x: 0, y: 0 };
