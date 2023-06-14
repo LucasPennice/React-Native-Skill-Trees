@@ -80,6 +80,7 @@ const s = StyleSheet.create({
         position: "absolute",
         top: 10,
         right: 10,
+        zIndex: 1,
         backgroundColor: colors.darkGray,
         borderRadius: 10,
         display: "flex",
