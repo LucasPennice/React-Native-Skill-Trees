@@ -141,7 +141,9 @@ export function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill>
 
         let overlapWithinTree = true;
 
-        while (overlapWithinTree) {
+        let limiter = 0;
+
+        while (overlapWithinTree && limiter < 1000) {
             let polarOverlap = checkForOverlap(result);
 
             //Tolerance to avoid loops
@@ -155,6 +157,7 @@ export function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill>
 
                 result = shiftNodesCounterClockWise(result, treesToShift, polarOverlap.biggestOverlapAngle);
             }
+            limiter++;
         }
 
         return result;

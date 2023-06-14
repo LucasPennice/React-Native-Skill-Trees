@@ -17,6 +17,8 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
 
     let levelOverflow: LevelOverflow = undefined;
 
+    let limiter = 0;
+
     let distanceToCenterPerLevel: DistanceToCenterPerLevel = getDistanceToCenterPerLevel(completeTree);
     do {
         result = firstIteration(completeTree, completeTree, distanceToCenterPerLevel);
@@ -28,7 +30,9 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
         levelOverflow = checkForLevelOverflow(result);
 
         if (levelOverflow !== undefined) distanceToCenterPerLevel = updateDistanceToCenterPerLevel(distanceToCenterPerLevel, levelOverflow);
-    } while (levelOverflow);
+
+        limiter++;
+    } while (levelOverflow && limiter < 1000);
 
     let treeCoordinates: CoordinatesWithTreeData[] = [];
     radialTreeToCoordArray(result, treeCoordinates);

@@ -64,7 +64,9 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
         let result: Tree<Skill> = { ...tree };
 
-        while (overlapInTree) {
+        let limiter = 0;
+
+        while (overlapInTree && limiter < 1000) {
             const overlap = checkForOverlap(result);
 
             if (overlap !== undefined) {
@@ -74,6 +76,8 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
             } else {
                 overlapInTree = false;
             }
+
+            limiter++;
         }
 
         return result;
