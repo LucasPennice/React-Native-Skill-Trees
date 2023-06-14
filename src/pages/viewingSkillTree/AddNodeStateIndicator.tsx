@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Dimensions, Pressable, StyleSheet } from "react-native";
-import Animated from "react-native-reanimated";
+import Animated, { FadeIn } from "react-native-reanimated";
 import AppText from "../../components/AppText";
 import { centerFlex, colors } from "../../parameters";
 import { Skill, Tree } from "../../types";
@@ -30,7 +30,7 @@ function AddNodeStateIndicator({ mode, functions }: Props) {
     return (
         <Animated.View style={[styles, opacity, centerFlex, s.container]}>
             {showAddNode && (
-                <Animated.View style={[centerFlex, { flexDirection: "row", gap: 20 }]}>
+                <Animated.View style={[centerFlex, { flexDirection: "row", gap: 20 }]} entering={FadeIn.duration(100)}>
                     <Pressable onPress={openNewNodeModal} style={s.button}>
                         <AppText style={{ color: colors.accent }} textProps={{ ellipsizeMode: "clip", numberOfLines: 1 }} fontSize={15}>
                             Add Node
@@ -39,7 +39,7 @@ function AddNodeStateIndicator({ mode, functions }: Props) {
                 </Animated.View>
             )}
             {mode === "PLACING_NEW_NODE" && (
-                <Animated.View style={[centerFlex, { flexDirection: "row", gap: 20 }]}>
+                <Animated.View style={[centerFlex, { flexDirection: "row", gap: 20 }]} entering={FadeIn.duration(100)}>
                     <AppText style={{ color: colors.unmarkedText, width: width - 130 }} fontSize={13}>
                         Click the square where you want to insert your new skill
                     </AppText>
@@ -51,7 +51,9 @@ function AddNodeStateIndicator({ mode, functions }: Props) {
                 </Animated.View>
             )}
             {mode === "CONFIRM_NEW_NODE_POSITION" && (
-                <Animated.View style={[centerFlex, { flexDirection: "row", justifyContent: "space-between", flex: 1, paddingHorizontal: 10 }]}>
+                <Animated.View
+                    style={[centerFlex, { flexDirection: "row", justifyContent: "space-between", flex: 1, paddingHorizontal: 10 }]}
+                    entering={FadeIn.duration(100)}>
                     <Pressable onPress={resetNewNodePosition} style={s.button}>
                         <AppText style={{ color: colors.red }} fontSize={15}>
                             Change position
@@ -80,7 +82,6 @@ const s = StyleSheet.create({
         position: "absolute",
         top: 10,
         right: 10,
-        zIndex: 1,
         backgroundColor: colors.darkGray,
         borderRadius: 10,
         display: "flex",

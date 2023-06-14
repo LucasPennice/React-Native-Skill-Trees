@@ -123,8 +123,6 @@ function ViewingSkillTree({ navigation, route }: Props) {
             )}
             {selectedTree && <ProgressIndicatorAndName tree={selectedTree} />}
 
-            {selectedTree && <AddNodeStateIndicator mode={modalState} functions={addTreeFunctions} currentTree={selectedTree} />}
-
             {selectedTree && (
                 <ShareTreeScreenshot
                     canvasRef={canvasRef}
@@ -142,6 +140,8 @@ function ViewingSkillTree({ navigation, route }: Props) {
             {selectedTree && <ShareTreeUrl tree={selectedTree} show={modalState === "IDLE"} />}
 
             <OpenSettingsMenu show={modalState === "IDLE"} openModal={() => setModalState("EDITING_CANVAS_SETTINGS")} />
+
+            {selectedTree && <AddNodeStateIndicator mode={modalState} functions={addTreeFunctions} currentTree={selectedTree} />}
 
             <SelectChildrenToHoistWhenDeletingParentModal
                 open={modalState === "CANDIDATES_TO_HOIST"}
