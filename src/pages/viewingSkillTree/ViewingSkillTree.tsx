@@ -29,6 +29,7 @@ import AddNodeStateIndicator from "./AddNodeStateIndicator";
 import AddNodeModal from "./modals/AddNodeModal";
 import SelectChildrenToHoistWhenDeletingParentModal from "./modals/SelectChildrenToHoistWhenDeletingParentModal";
 import useHandleMemoizedTreeProps from "./useHandleMemoizedTreeProps";
+import useNavigationWithoutConfirmNodePosition from "./useNavigationWithoutConfirmNodePosition";
 
 export type ModalState =
     | "TAKING_SCREENSHOT"
@@ -109,6 +110,8 @@ function ViewingSkillTree({ navigation, route }: Props) {
             },
         };
     }, [tentativeNewTree]);
+
+    useNavigationWithoutConfirmNodePosition(navigation, modalState === "CONFIRM_NEW_NODE_POSITION", addTreeFunctions.updateUserTree);
 
     return (
         <View style={{ position: "relative", backgroundColor: colors.background, flex: 1, overflow: "hidden" }}>

@@ -16,8 +16,6 @@ import UpdateMotivesToLearnModal from "./Modals/UpdateMotivesToLearnModal";
 import UpdateResourcesModal from "./Modals/UpdateResourcesModal";
 import RenderSkillDetails from "./RenderSkillDetails";
 import { getDefaultFns } from "./functions";
-import useCheckForUnsavedChanges from "./useCheckForUnsavedChanges";
-import useConfirmLeaveScreenWithoutSaving from "./useConfirmLeaveScreenWithoutSaving";
 import useSaveUpdatedSkillToAsyncStorage from "./useUpdateTreeWithNewSkillDetails";
 
 type Props = NativeStackScreenProps<StackNavigatorParams, "SkillPage">;
@@ -37,8 +35,6 @@ function SkillPage({ route, navigation }: Props) {
     });
     const [editResourcesModal, setEditResourcesModal] = useState<SkillModal<SkillResource | undefined>>({ open: false, data: undefined, ref: null });
     //Hooks
-    const unsavedChanges = useCheckForUnsavedChanges(skillState, treeNode);
-    useConfirmLeaveScreenWithoutSaving(navigation, unsavedChanges);
     const updateSkillDetails = useSaveUpdatedSkillToAsyncStorage(skillState, treeNode);
 
     const openModal =
