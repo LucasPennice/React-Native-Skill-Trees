@@ -1,10 +1,11 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
-import { ScrollView } from "react-native";
+import { Alert, ScrollView } from "react-native";
 import { StackNavigatorParams } from "../../../App";
 import AppText from "../../components/AppText";
 import { colors } from "../../parameters";
 import { open } from "../../redux/addTreeModalSlice";
+import { setTree } from "../../redux/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { changeTree, selectUserTrees } from "../../redux/userTreesSlice";
 import TreeCard from "./TreeCard";
@@ -24,9 +25,23 @@ function MyTrees({ navigation, route }: Props) {
         //eslint-disable-next-line
     }, []);
 
+    const openEditModal = useCallback(() => {
+        if (params && params.editingTreeId) {
+            const treeToEdit = userTrees.find((userTree) => userTree.treeId === params.editingTreeId);
+
+            if (!treeToEdit) return Alert.alert("Could not find the tree");
+
+            dispatch(setTree(treeToEdit));
+        }
+        //eslint-disable-next-line
+    }, []);
+
     useEffect(() => {
         openNewTreeModal();
     }, [openNewTreeModal]);
+    useEffect(() => {
+        openEditModal();
+    }, [openEditModal]);
 
     const factoryChangeTreeAndNavigateToViewingTree = (treeId: string) => () => {
         dispatch(changeTree(treeId));

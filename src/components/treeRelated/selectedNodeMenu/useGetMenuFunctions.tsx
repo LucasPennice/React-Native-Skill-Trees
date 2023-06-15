@@ -19,6 +19,10 @@ function getMenuNonEditingFunctions(
             if (!selectedNode) throw new Error("No selected node at goToTreePage");
             navigation.navigate("ViewingSkillTree", { treeId: selectedNode.treeId });
         },
+        goToEditTreePage: () => {
+            if (!selectedNode) throw new Error("No selected node at goToTreePage");
+            navigation.navigate("MyTrees", { editingTreeId: selectedNode.treeId });
+        },
     };
 }
 

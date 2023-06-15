@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { Easing, FadeInDown, FadeOutDown, FadeOutUp, Layout, runOnJS } from "react-native-reanimated";
+import { findNodeById } from "../../../functions/extractInformationFromTree";
 import { CIRCLE_SIZE_SELECTED, NAV_HEGIHT, colors } from "../../../parameters";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { generalStyles } from "../../../styles";
@@ -10,7 +11,6 @@ import AppText from "../../AppText";
 import SliderToggler from "../../SliderToggler";
 import Editing from "./Editing";
 import Viewing from "./Viewing";
-import { findNodeById } from "../../../functions/extractInformationFromTree";
 
 export type SelectedNodeMenuState = {
     selectedNode: Tree<Skill>;
@@ -22,6 +22,7 @@ export type SelectedNodeMenuFunctions = {
     closeMenu: () => void;
     goToSkillPage: () => void;
     goToTreePage: () => void;
+    goToEditTreePage: () => void;
 };
 
 export type SelectedNodeMenuMutateFunctions = {
@@ -44,7 +45,7 @@ type Props = {
 function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Props) {
     const { screenDimensions, selectedNode, selectedTree } = state;
     const { height } = screenDimensions;
-    const { closeMenu, goToSkillPage, goToTreePage } = functions;
+    const { closeMenu, goToSkillPage, goToTreePage, goToEditTreePage } = functions;
     const { menuWidth, styles } = getNodeMenuStyles(screenDimensions);
 
     const parentOfSelectedNode = findNodeById(selectedTree, selectedNode.parentId);
@@ -142,7 +143,11 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
                         />
                     )}
                     {mode === "VIEWING" && (
-                        <Viewing selectedNode={selectedNode} selectedTree={selectedTree} functions={{ goToTreePage, goToSkillPage }} />
+                        <Viewing
+                            selectedNode={selectedNode}
+                            selectedTree={selectedTree}
+                            functions={{ goToTreePage, goToSkillPage, goToEditTreePage }}
+                        />
                     )}
                 </Animated.View>
             </GestureDetector>

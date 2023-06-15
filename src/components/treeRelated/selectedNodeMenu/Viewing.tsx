@@ -1,20 +1,15 @@
-import { TouchableOpacity } from "react-native-gesture-handler";
-import AppText from "../../AppText";
-import { centerFlex, colors } from "../../../parameters";
-import { generalStyles } from "../../../styles";
-import { Skill, Tree } from "../../../types";
 import { useRoute } from "@react-navigation/native";
+import { Linking, ScrollView, View } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { RouteName } from "../../../../App";
-import { Linking, Pressable, ScrollView, View } from "react-native";
-import { MilestoneCard } from "../../../pages/skillPage/Milestones";
+import { countCompletedSkillNodes, countSkillNodes, treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
 import { LogCard } from "../../../pages/skillPage/DisplayDetails/Logs";
 import { MotivesToLearnCard } from "../../../pages/skillPage/DisplayDetails/MotivesToLearn";
 import { ResourceCard } from "../../../pages/skillPage/DisplayDetails/SkillResources";
-import Animated, { FadeInDown } from "react-native-reanimated";
-import { treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
-import { countCompletedSkillNodes } from "../../../functions/extractInformationFromTree";
-import { countSkillNodes } from "../../../functions/extractInformationFromTree";
-import ChevronRight from "../../Icons/ChevronRight";
+import { MilestoneCard } from "../../../pages/skillPage/Milestones";
+import { centerFlex, colors } from "../../../parameters";
+import { Skill, Tree } from "../../../types";
+import AppText from "../../AppText";
 import GoToPageButton from "../../GoToPageButton";
 
 function Viewing({
@@ -22,7 +17,7 @@ function Viewing({
     selectedNode,
     selectedTree,
 }: {
-    functions: { goToSkillPage: () => void; goToTreePage: () => void };
+    functions: { goToSkillPage: () => void; goToTreePage: () => void; goToEditTreePage: () => void };
     selectedNode: Tree<Skill>;
     selectedTree: Tree<Skill>;
 }) {
@@ -32,7 +27,7 @@ function Viewing({
 
     const isNotOnTreePage = route.name !== treePageRoute;
 
-    const { goToSkillPage, goToTreePage } = functions;
+    const { goToSkillPage, goToTreePage, goToEditTreePage } = functions;
 
     const { category, treeName } = selectedNode;
 
@@ -46,7 +41,7 @@ function Viewing({
 
             {category !== "SKILL" && <TreeStats category={category} selectedTree={selectedTree} selectedNode={selectedNode} />}
 
-            {category === "SKILL_TREE" && <GoToPageButton onPress={() => {}} title={"Edit tree button"} />}
+            {category === "SKILL_TREE" && <GoToPageButton onPress={goToEditTreePage} title={"Edit tree"} />}
 
             {category !== "USER" && isNotOnTreePage && <GoToPageButton onPress={goToTreePage} title={`Skill Tree`} />}
         </Animated.View>
