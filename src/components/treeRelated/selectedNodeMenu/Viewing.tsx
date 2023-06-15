@@ -14,6 +14,8 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
 import { countCompletedSkillNodes } from "../../../functions/extractInformationFromTree";
 import { countSkillNodes } from "../../../functions/extractInformationFromTree";
+import ChevronRight from "../../Icons/ChevronRight";
+import GoToPageButton from "../../GoToPageButton";
 
 function Viewing({
     functions,
@@ -44,21 +46,9 @@ function Viewing({
 
             {category !== "SKILL" && <TreeStats category={category} selectedTree={selectedTree} selectedNode={selectedNode} />}
 
-            {category === "SKILL_TREE" && (
-                <Pressable style={[generalStyles.btn, { backgroundColor: "#282A2C", marginTop: 10 }]}>
-                    <AppText style={{ color: colors.accent }} fontSize={16}>
-                        Edit tree button
-                    </AppText>
-                </Pressable>
-            )}
+            {category === "SKILL_TREE" && <GoToPageButton onPress={() => {}} title={"Edit tree button"} />}
 
-            {category !== "USER" && isNotOnTreePage && (
-                <TouchableOpacity style={[generalStyles.btn, { backgroundColor: "#282A2C", marginVertical: 10 }]} onPress={goToTreePage}>
-                    <AppText style={{ color: colors.accent }} fontSize={16}>
-                        Go To Tree Page
-                    </AppText>
-                </TouchableOpacity>
-            )}
+            {category !== "USER" && isNotOnTreePage && <GoToPageButton onPress={goToTreePage} title={`Skill Tree`} />}
         </Animated.View>
     );
 }
@@ -70,14 +60,8 @@ function SkillDetails({ goToSkillPage, data }: { goToSkillPage: () => void; data
     return (
         <>
             <View style={{ maxHeight: 300 }}>
+                <GoToPageButton onPress={goToSkillPage} title={"Edit Skill Details"} />
                 <ScrollView showsVerticalScrollIndicator={false}>
-                    <TouchableOpacity
-                        style={[generalStyles.btn, { backgroundColor: "#282A2C", marginBottom: 10, width: "100%" }]}
-                        onPress={goToSkillPage}>
-                        <AppText style={{ color: colors.accent }} fontSize={16}>
-                            Go To Skill Page
-                        </AppText>
-                    </TouchableOpacity>
                     {milestones.length !== 0 && (
                         <>
                             <AppText fontSize={18} style={{ color: "#FFFFFF", marginVertical: 10 }}>
