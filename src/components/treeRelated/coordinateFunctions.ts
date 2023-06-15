@@ -32,7 +32,7 @@ export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: 
 
     function scaleCoordinatesAfterReingoldTiltford(coordToScale: CoordinatesWithTreeData[]) {
         return coordToScale.map((f) => {
-            return { ...f, x: f.x * DISTANCE_BETWEEN_CHILDREN + 2 * CIRCLE_SIZE, y: f.y * DISTANCE_BETWEEN_GENERATIONS + CIRCLE_SIZE };
+            return { ...f, x: f.x * DISTANCE_BETWEEN_CHILDREN, y: f.y * DISTANCE_BETWEEN_GENERATIONS };
         });
     }
 
@@ -46,7 +46,7 @@ export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: 
     }
 }
 
-export function treeWidthFromCoordinates(coordinates: NodeCoordinate[]) {
+export function treeWidthFromCoordinates(coordinates: NodeCoordinate[]): { treeWidth: number; minCoordinate: number; maxCoordinate: number } {
     let minCoordinate: number | undefined = undefined,
         maxCoordinate: number | undefined = undefined;
 
@@ -59,10 +59,13 @@ export function treeWidthFromCoordinates(coordinates: NodeCoordinate[]) {
         }
     });
 
-    return Math.abs(maxCoordinate! - minCoordinate!) + 2 * CIRCLE_SIZE;
+    const result = Math.abs(maxCoordinate! - minCoordinate!);
+
+    //@ts-ignore
+    return { treeWidth: result, minCoordinate, maxCoordinate };
 }
 
-export function treeHeightFromCoordinates(coordinates: NodeCoordinate[]) {
+export function treeHeightFromCoordinates(coordinates: NodeCoordinate[]): { treeHeight: number; minCoordinate: number; maxCoordinate: number } {
     let minCoordinate: number | undefined = undefined,
         maxCoordinate: number | undefined = undefined;
 
@@ -75,7 +78,10 @@ export function treeHeightFromCoordinates(coordinates: NodeCoordinate[]) {
         }
     });
 
-    return Math.abs(maxCoordinate! - minCoordinate!) + 4 * CIRCLE_SIZE;
+    const result = Math.abs(maxCoordinate! - minCoordinate!);
+
+    //@ts-ignore
+    return { treeHeight: result, minCoordinate, maxCoordinate };
 }
 
 function dndZonesFromNodeCoord(nodeCoord: NodeCoordinate, dndType: DnDZone["type"]): DnDZone {
@@ -159,57 +165,78 @@ function nodeDoesntHaveChildren(nodeCoordinatesCentered: NodeCoordinate[], pos: 
     return foo === undefined;
 }
 
-export function getCanvasDimensions(coordinates: NodeCoordinate[], screenDimentions: ScreenDimentions): CanvasDimensions {
+export function getCanvasDimensions(coordinates: NodeCoordinate[], screenDimentions: ScreenDimentions, showDepthGuides?: boolean): CanvasDimensions {
     const { height, width } = screenDimentions;
 
     const HEIGHT_WITHOUT_NAV = height - NAV_HEGIHT;
 
-    if (coordinates.length === 0) return { canvasWidth: width, canvasHeight: height };
+    if (coordinates.length === 0)
+        return {
+            canvasWidth: width,
+            canvasHeight: height,
+            heightData: { maxCoordinate: 0, minCoordinate: 0, treeHeight: 0 },
+            widthData: { maxCoordinate: 0, minCoordinate: 0, treeWidth: 0 },
+            extendedForDepthGuides: false,
+        };
 
-    const treeHeight = treeHeightFromCoordinates(coordinates);
-    const treeWidth = treeWidthFromCoordinates(coordinates);
+    const heightData = treeHeightFromCoordinates(coordinates);
+    const { treeHeight, maxCoordinate: maxYCoordinate, minCoordinate: minYCoordinate } = heightData;
+    const biggestYCoordinateAbs = Math.abs(maxYCoordinate) > Math.abs(minYCoordinate) ? Math.abs(maxYCoordinate) : Math.abs(minYCoordinate);
 
-    const canvasWidth = getCanvasWidth(treeWidth, width);
-    const canvasHeight = getCanvasHeight(treeHeight, HEIGHT_WITHOUT_NAV);
+    const widthData = treeWidthFromCoordinates(coordinates);
+    const { treeWidth, maxCoordinate: maxXCoordinate, minCoordinate: minXCoordinate } = widthData;
+    const biggestXCoordinateAbs = Math.abs(maxXCoordinate) > Math.abs(minXCoordinate) ? Math.abs(maxXCoordinate) : Math.abs(minXCoordinate);
 
-    return { canvasWidth, canvasHeight };
+    //We simulate the tree being wider/taller so that getCanvasWidth considers the area with the depth circles as part of the canvas
+    const simulatedTreeRadius = biggestXCoordinateAbs > biggestYCoordinateAbs ? 2 * biggestXCoordinateAbs : 2 * biggestYCoordinateAbs;
+
+    const finalTreeWidth = showDepthGuides ? simulatedTreeRadius : treeWidth;
+    const finalTreeHeight = showDepthGuides ? simulatedTreeRadius : treeHeight;
+
+    const finalWidthData = { ...widthData, treeWidth: finalTreeWidth };
+    const finalHeightData = { ...heightData, treeHeight: finalTreeHeight };
+
+    const canvasWidth = getCanvasWidth(finalTreeWidth, width);
+    const canvasHeight = getCanvasHeight(finalTreeHeight, HEIGHT_WITHOUT_NAV);
+
+    return { canvasWidth, canvasHeight, heightData: finalHeightData, widthData: finalWidthData, extendedForDepthGuides: showDepthGuides ?? false };
 }
 
 function getCanvasWidth(treeWidth: number, screenWidth: number) {
-    const deltaWidthScreen = screenWidth - treeWidth;
+    const minCanvasWidth = treeWidth > screenWidth ? treeWidth : screenWidth;
 
-    if (deltaWidthScreen < 0) return treeWidth + CANVAS_HORIZONTAL_PADDING;
-
-    if (deltaWidthScreen >= 200) return screenWidth;
-
-    return treeWidth + CANVAS_HORIZONTAL_PADDING;
+    return minCanvasWidth + CANVAS_HORIZONTAL_PADDING;
 }
 
 function getCanvasHeight(treeHeight: number, screenHeight: number) {
-    const deltaWidthScreen = screenHeight - treeHeight;
-
-    if (deltaWidthScreen < 0) return treeHeight + CANVAS_VERTICAL_PADDING;
-
-    if (deltaWidthScreen >= 200) return screenHeight;
-
-    return treeHeight + CANVAS_VERTICAL_PADDING;
+    const minCanvasHeight = treeHeight > screenHeight ? treeHeight : screenHeight;
+    return minCanvasHeight + CANVAS_VERTICAL_PADDING;
 }
 
-export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDimentions: CanvasDimensions) {
-    const minXCoord = Math.min(...nodeCoordinates.map((x) => x.x));
+export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDimentions: CanvasDimensions, renderStyle: "hierarchy" | "radial") {
+    const { widthData, heightData, canvasWidth, canvasHeight } = canvasDimentions;
 
-    const treeWidth = treeWidthFromCoordinates(nodeCoordinates);
-    const treeHeight = treeHeightFromCoordinates(nodeCoordinates);
+    const { treeWidth, maxCoordinate: maxX, minCoordinate: minX } = widthData;
+    const treeHorizontalSpan = maxX + minX;
+    const treeWidthExtended = treeHorizontalSpan !== treeWidth;
 
-    const normalizedCoordinates = nodeCoordinates.map((c) => {
-        return { ...c, x: c.x - minXCoord };
-    });
+    const { treeHeight, maxCoordinate: maxY, minCoordinate: minY } = heightData;
+    const treeVerticalSpan = maxY - minY;
+    const treeHeightExtended = treeVerticalSpan !== treeHeight;
 
-    const paddingFromLeftBorder = (canvasDimentions.canvasWidth - treeWidth) / 2;
-    const paddingFromTopBorder = (canvasDimentions.canvasHeight - treeHeight) / 2;
+    //👇 This works for BOTH hierarchical and radial trees
+    const distanceToCenterRootNode = canvasWidth / 2 + (treeWidthExtended ? 0 : -treeHorizontalSpan / 2);
+    //👇 This works ONLY for radial trees
+    const distanceToCenterRootNodeVerticallyRadial = canvasHeight / 2 + (treeHeightExtended ? 0 : treeVerticalSpan / 2);
+    //👇 This works ONLY for hierarchical trees
+    const distanceToCenterRootNodeVerticallyHierarchical = canvasHeight / 2 - treeVerticalSpan / 2;
 
-    return normalizedCoordinates.map((c) => {
-        return { ...c, x: c.x + paddingFromLeftBorder, y: c.y + paddingFromTopBorder };
+    return nodeCoordinates.map((c) => {
+        return {
+            ...c,
+            x: c.x + distanceToCenterRootNode,
+            y: c.y + (renderStyle === "hierarchy" ? distanceToCenterRootNodeVerticallyHierarchical : distanceToCenterRootNodeVerticallyRadial),
+        };
     });
 }
 

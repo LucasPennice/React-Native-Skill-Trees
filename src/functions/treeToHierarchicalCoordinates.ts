@@ -17,13 +17,6 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
     let treeCoordinates: CoordinatesWithTreeData[] = [];
     hierarchicalTreeToCoordArray(result, treeCoordinates);
 
-    const smallestXCoordinate = Math.min(...treeCoordinates.map((c) => c.x));
-
-    if (smallestXCoordinate < 0)
-        treeCoordinates = treeCoordinates.map((c) => {
-            return { ...c, x: c.x + Math.abs(smallestXCoordinate) };
-        });
-
     return treeCoordinates;
 
     function firstIteration(tree: Tree<Skill>, currentTreeMod?: number, childrenIdx?: number) {

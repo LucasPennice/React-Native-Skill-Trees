@@ -110,6 +110,17 @@ export type DnDZone = {
 export type CanvasDimensions = {
     canvasWidth: number;
     canvasHeight: number;
+    heightData: {
+        treeHeight: number;
+        minCoordinate: number;
+        maxCoordinate: number;
+    };
+    widthData: {
+        treeWidth: number;
+        minCoordinate: number;
+        maxCoordinate: number;
+    };
+    extendedForDepthGuides: boolean;
 };
 
 export type PolarCoordinate = { angleInRadians: number; distanceToCenter: number };

@@ -37,18 +37,6 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
     let treeCoordinates: CoordinatesWithTreeData[] = [];
     radialTreeToCoordArray(result, treeCoordinates);
 
-    const smallestXCoordinate = Math.min(...treeCoordinates.map((c) => c.x));
-    const smallestYCoordinate = Math.min(...treeCoordinates.map((c) => c.y));
-
-    if (smallestXCoordinate < 0)
-        treeCoordinates = treeCoordinates.map((c) => {
-            return { ...c, x: c.x + Math.abs(smallestXCoordinate) };
-        });
-    if (smallestYCoordinate < 0)
-        treeCoordinates = treeCoordinates.map((c) => {
-            return { ...c, y: c.y + Math.abs(smallestYCoordinate) };
-        });
-
     return treeCoordinates;
 }
 

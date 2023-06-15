@@ -65,7 +65,7 @@ function AddNodeModal({ closeModal, open, confirmAddNewNode }: Props) {
                 <AppTextInput
                     placeholder={"Skill Name"}
                     textState={[text, onChangeText]}
-                    onlyContainsLettersAndNumbers
+                    pattern={new RegExp(/^[^ ]/)}
                     containerStyles={{ marginBottom: 10 }}
                 />
                 <RadioInput state={[isCompleted, setIsCompleted]} text={"I Mastered This Skill"} style={{ marginBottom: 10 }} />

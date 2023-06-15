@@ -7,56 +7,34 @@ function AppTextInput({
     textState,
     placeholder,
     containerStyles,
-    onlyContainsLettersAndNumbers,
     onBlur,
     inputProps,
+    pattern,
     disable,
 }: {
     textState: [string, (v: string) => void];
     placeholder: string;
     containerStyles?: ViewProps["style"];
-    onlyContainsLettersAndNumbers?: boolean;
     onBlur?: () => void;
     disable?: boolean;
+    pattern?: RegExp;
     inputProps?: TextInputProps;
 }) {
     const [text, setText] = textState;
 
-    const allowOnlyLettersInInput = (setter: (v: string) => void) => (tentativeInput: string) => {
-        //@ts-ignore
-        setter((prev) => {
-            let result = tentativeInput;
-
-            if (result === "") return result;
-
-            const containsSpecialCharacter = !/^[a-zA-Z0-9_ ]*$/.test(result);
-
-            const startWithWhitespace = !/^[^ ]/.test(result);
-
-            if (startWithWhitespace && result !== "") result = result.trimStart();
-
-            const doubleWhitespace = !/^((?!\s{2}).)*$/.test(result);
-
-            if (containsSpecialCharacter || startWithWhitespace || doubleWhitespace) return prev;
-
-            return result;
-        });
-    };
-
     const updateText = (tentativeInput: string) => {
-        if (onlyContainsLettersAndNumbers) return allowOnlyLettersInInput(setText)(tentativeInput);
+        if (pattern && tentativeInput !== "") {
+            const shouldUpdate = pattern.test(tentativeInput);
+
+            if (!shouldUpdate) return;
+        }
 
         return setText(tentativeInput);
     };
 
     return (
         <KeyboardAvoidingView behavior={"height"}>
-            <View
-                style={[
-                    centerFlex,
-                    { flexDirection: "row", position: "relative", backgroundColor: "#282A2C", borderRadius: 10, paddingVertical: 10 },
-                    containerStyles,
-                ]}>
+            <View style={[centerFlex, { flexDirection: "row", position: "relative", backgroundColor: "#282A2C", borderRadius: 10 }, containerStyles]}>
                 <TextInput
                     blurOnSubmit
                     //@ts-ignore
@@ -70,10 +48,10 @@ function AppTextInput({
                     placeholderTextColor={colors.line}
                     style={{
                         fontSize: 20,
+                        paddingTop: 15,
+                        paddingBottom: 15,
                         paddingLeft: 20,
                         fontFamily: "helvetica",
-                        textAlign: "left",
-                        textAlignVertical: "center",
                         color: "#FFFFFF",
                         flex: 1,
                         marginRight: disable ? 20 : 50,

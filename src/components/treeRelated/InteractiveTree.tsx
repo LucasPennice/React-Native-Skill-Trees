@@ -57,13 +57,15 @@ export type InteractiveTreeProps = {
 
 function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeId }: InteractiveTreeProps) {
     const { screenDimensions, selectedNodeId, canvasRef } = state;
-    const { isInteractive, renderStyle, showDndZones } = config;
+    const { isInteractive, renderStyle, showDndZones, canvasDisplaySettings } = config;
+    const { showCircleGuide } = canvasDisplaySettings;
 
     //Derived State
     const { centeredCoordinatedWithTreeData, dndZoneCoordinates, nodeCoordinatesCentered, canvasDimentions } = handleTreeBuild(
         tree,
         screenDimensions,
-        renderStyle
+        renderStyle,
+        showCircleGuide
     );
 
     const foundNodeCoordinates = nodeCoordinatesCentered.find((c) => c.id === selectedNodeId);
@@ -189,12 +191,17 @@ function RadialTreeRendererRender({
     );
 }
 
-function handleTreeBuild(tree: Tree<Skill>, screenDimentions: ScreenDimentions, renderStyle: InteractiveTreeConfig["renderStyle"]) {
+function handleTreeBuild(
+    tree: Tree<Skill>,
+    screenDimentions: ScreenDimentions,
+    renderStyle: InteractiveTreeConfig["renderStyle"],
+    showDepthGuides?: boolean
+) {
     const coordinatesWithTreeData = getNodesCoordinates(tree, renderStyle);
     //
     const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
-    const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions);
-    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
+    const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions, showDepthGuides);
+    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions, renderStyle);
     const dndZoneCoordinates = calculateDragAndDropZones(nodeCoordinatesCentered);
     //
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);

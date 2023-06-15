@@ -72,7 +72,7 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
                     <AppTextInput
                         placeholder="Home Tree Name"
                         textState={[homeTreeName, setHomeTreeName]}
-                        onlyContainsLettersAndNumbers
+                        pattern={new RegExp(/^[^ ]/)}
                         containerStyles={{ marginBottom: 15 }}
                     />
 

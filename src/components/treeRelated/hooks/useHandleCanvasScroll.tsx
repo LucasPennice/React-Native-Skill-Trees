@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
-import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../parameters";
+import { useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { CANVAS_VERTICAL_PADDING, CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../parameters";
 import { CanvasDimensions, NodeCoordinate } from "../../../types";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import useHandleCanvasBounds from "./useHandleCanvasBounds";
 
 const DEFAULT_SCALE = 1;
 
 function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, screenDimensions: ScreenDimentions, foundNodeCoordinates?: NodeCoordinate) {
-    const { canvasHeight, canvasWidth } = canvasDimentions;
+    const { canvasHeight, canvasWidth, extendedForDepthGuides } = canvasDimentions;
 
     const minScale = screenDimensions.width / canvasWidth;
     const MAX_SCALE = 1.4;
@@ -21,6 +22,9 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, screenDimensi
     const savedScale = useSharedValue(DEFAULT_SCALE);
 
     const shouldAnimateTransformation = useShouldAnimateTransformation(foundNodeCoordinates !== undefined);
+
+    const boundsProps = { minScale, scale, screenWidth: screenDimensions.width, canvasWidth };
+    const { xBounds } = useHandleCanvasBounds(boundsProps);
 
     useEffect(() => {
         const currentCanvasMinScale = screenDimensions.width / canvasWidth;
@@ -42,28 +46,30 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, screenDimensi
             const newScaleValue = savedScale.value * e.scale;
 
             scale.value = newScaleValue;
+
+            const xOutOfBounds = !(-xBounds.value <= offsetX.value && offsetX.value <= xBounds.value);
+            if (xOutOfBounds && scale.value > minScale) {
+                if (offsetX.value < xBounds.value) {
+                    offsetX.value = -xBounds.value;
+                    start.value = { ...start.value, x: -xBounds.value };
+                } else if (offsetX.value > xBounds.value) {
+                    offsetX.value = xBounds.value;
+                    start.value = { ...start.value, x: xBounds.value };
+                }
+            }
         })
         .onEnd(() => {
-            //We return scale to safe values here
-
+            //Handle scale out of bounds 👇
             if (scale.value < minScale) {
                 savedScale.value = minScale;
                 scale.value = withSpring(minScale, MENU_HIGH_DAMPENING);
-                return;
-            }
-
-            if (scale.value > MAX_SCALE) {
+            } else if (scale.value > MAX_SCALE) {
                 savedScale.value = MAX_SCALE;
                 scale.value = withSpring(MAX_SCALE, MENU_HIGH_DAMPENING);
-                return;
+            } else {
+                savedScale.value = scale.value;
             }
-
-            savedScale.value = scale.value;
         });
-
-    const widthBounds = getWidthBounds(canvasWidth, scale.value, screenDimensions.width);
-    const minX = -widthBounds;
-    const maxX = widthBounds;
 
     const minY = -screenDimensions.height / 2 + NAV_HEGIHT;
     const maxY = screenDimensions.height / 2;
@@ -79,7 +85,7 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, screenDimensi
             offsetY.value = newYValue;
         })
         .onEnd(() => {
-            const xOutOfBounds = !(minX <= offsetX.value && offsetX.value <= maxX);
+            const xOutOfBounds = !(-xBounds.value <= offsetX.value && offsetX.value <= xBounds.value);
             const yOutOfBounds = !(minY <= offsetY.value && offsetY.value <= maxY);
 
             if (!xOutOfBounds && !yOutOfBounds) return (start.value = { x: offsetX.value, y: offsetY.value });
@@ -88,8 +94,8 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, screenDimensi
             let newY = offsetY.value;
 
             if (xOutOfBounds) {
-                if (offsetX.value < minX) newX = minX;
-                if (offsetX.value > maxX) newX = maxX;
+                if (offsetX.value < xBounds.value) newX = -xBounds.value;
+                if (offsetX.value > xBounds.value) newX = xBounds.value;
             }
 
             if (yOutOfBounds) {
@@ -111,7 +117,8 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, screenDimensi
                 alignCanvasLeftSideWithScreenLeftSide - foundNodeCoordinates.x + screenDimensions.width - 1.5 * CIRCLE_SIZE_SELECTED;
 
             const deltaY = canvasHeight / 2 - foundNodeCoordinates.y;
-            const foundNodeTranslatedY = canvasHeight / 2 + deltaY - screenDimensions.height / 2 + CIRCLE_SIZE_SELECTED;
+            const foundNodeTranslatedY =
+                deltaY + (extendedForDepthGuides ? -CANVAS_VERTICAL_PADDING - 0.5 * CIRCLE_SIZE_SELECTED : -2 * CIRCLE_SIZE_SELECTED);
 
             return {
                 transform: [
@@ -157,7 +164,4 @@ function useShouldAnimateTransformation(popUpMenuOpen: boolean) {
     }, [popUpMenuOpen]);
 
     return result;
-}
-function getWidthBounds(canvasW: number, scale: number, screenW: number) {
-    return (canvasW * scale - screenW) / 2;
 }

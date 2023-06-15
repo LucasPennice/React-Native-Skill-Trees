@@ -64,7 +64,7 @@ function Editing({
             <AppTextInput
                 placeholder="Skill Name"
                 textState={[newName, setNewName]}
-                onlyContainsLettersAndNumbers
+                pattern={new RegExp(/^[^ ]/)}
                 containerStyles={{ marginBottom: 10 }}
             />
 
