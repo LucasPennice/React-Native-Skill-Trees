@@ -46,11 +46,13 @@ function NodeMenu({
     offset,
     canvasDimentions,
     screenDimensions,
+    closeNodeMenu,
 }: {
     data: CoordinatesWithTreeData;
     offset: { x: number; y: number };
     canvasDimentions: CanvasDimensions;
     screenDimensions: ScreenDimentions;
+    closeNodeMenu: () => void;
 }) {
     const { canvasWidth } = canvasDimentions;
 
@@ -63,18 +65,22 @@ function NodeMenu({
     const menuActions = {
         horizontalLeft: () => {
             console.log("hL");
+            closeNodeMenu();
             setHovering(undefined);
         },
         horizontalRight: () => {
             console.log("hR");
+            closeNodeMenu();
             setHovering(undefined);
         },
         verticalDown: () => {
             console.log("vD");
+            closeNodeMenu();
             setHovering(undefined);
         },
         verticalUp: () => {
             console.log("vU");
+            closeNodeMenu();
             setHovering(undefined);
         },
     };

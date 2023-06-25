@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Gesture } from "react-native-gesture-handler";
-import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { Gesture, GestureStateChangeEvent, LongPressGestureHandlerEventPayload } from "react-native-gesture-handler";
+import { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { CANVAS_VERTICAL_PADDING, CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../parameters";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { CanvasDimensions, NodeCoordinate } from "../../../types";
@@ -12,7 +12,12 @@ function useHandleCanvasScroll(
     canvasDimentions: CanvasDimensions,
     screenDimensions: ScreenDimentions,
     foundNodeCoordinates: NodeCoordinate | undefined,
-    foundNodeOfMenu: NodeCoordinate | undefined
+    foundNodeOfMenu: NodeCoordinate | undefined,
+    longPressFn: {
+        onStart: (args: { e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>; offset: [number, number] }) => void;
+        onEnd: (e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>) => void;
+        onScroll: () => void;
+    }
 ) {
     const { canvasHeight, canvasWidth, extendedForDepthGuides } = canvasDimentions;
 
@@ -29,7 +34,7 @@ function useHandleCanvasScroll(
     const selectedNodeMenuOpen = foundNodeCoordinates !== undefined;
     const nodeMenuOpen = foundNodeOfMenu !== undefined;
     const animateFromSelectedNodeMenu = useShouldAnimateTransformation(selectedNodeMenuOpen);
-    const animateFromNodeMenu = useShouldAnimateTransformation(nodeMenuOpen);
+    // const animateFromNodeMenu = useShouldAnimateTransformation(nodeMenuOpen);
 
     const boundsProps = { minScale, scale, screenWidth: screenDimensions.width, canvasWidth };
     const { xBounds } = useHandleCanvasBounds(boundsProps);
@@ -91,6 +96,8 @@ function useHandleCanvasScroll(
 
             offsetX.value = newXValue;
             offsetY.value = newYValue;
+
+            runOnJS(longPressFn.onScroll)();
         })
         .onEnd(() => {
             const xOutOfBounds = !(-xBounds.value <= offsetX.value && offsetX.value <= xBounds.value);
@@ -116,13 +123,21 @@ function useHandleCanvasScroll(
             start.value = { x: newX, y: newY };
         });
 
-    const canvasGestures = Gesture.Race(canvasPan, canvasZoom);
+    const longPress = Gesture.LongPress()
+        .onStart((e) => {
+            runOnJS(longPressFn.onStart)({ e, offset: [offsetX.value, offsetY.value] });
+        })
+        .onEnd((e) => {
+            runOnJS(longPressFn.onEnd)(e);
+        })
+        .minDuration(100);
+
+    const canvasGestures = Gesture.Race(canvasPan, canvasZoom, longPress);
 
     const transform = useAnimatedStyle(() => {
         if (foundNodeCoordinates) return transitionToSelectedNodeStyle();
         if (animateFromSelectedNodeMenu) return transitionFromMenuToNormalScrolling();
         if (foundNodeOfMenu) return transitionToNodeOption();
-        if (animateFromNodeMenu) return transitionFromMenuToNormalScrolling();
 
         //This is the regular scrolling style
         return {
@@ -170,7 +185,7 @@ function useHandleCanvasScroll(
                 ],
             };
         }
-    }, [offsetX, offsetY, scale, foundNodeCoordinates, animateFromSelectedNodeMenu, animateFromNodeMenu, foundNodeOfMenu]);
+    }, [offsetX, offsetY, scale, foundNodeCoordinates, animateFromSelectedNodeMenu, foundNodeOfMenu]);
 
     return { transform, canvasGestures, offset: start.value };
 }
