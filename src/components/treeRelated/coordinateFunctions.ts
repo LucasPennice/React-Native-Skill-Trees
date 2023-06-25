@@ -282,3 +282,13 @@ export function getCoordinatedWithTreeData(
         };
     });
 }
+
+export const distanceFromLeftCanvasEdge = (canvasWidth: number, screenWidth: number, transX: number) => {
+    const range = canvasWidth - screenWidth;
+    const h = range / 2;
+    const m = -1;
+
+    const result = m * transX + h;
+
+    return result;
+};

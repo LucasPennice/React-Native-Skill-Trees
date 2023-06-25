@@ -3,6 +3,7 @@ import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, TOUCH_BUFFER } from "../../../parame
 import { useAppDispatch } from "../../../redux/reduxHooks";
 import { setSelectedNode } from "../../../redux/userTreesSlice";
 import { DnDZone, NodeCoordinate, SelectedNodeId } from "../../../types";
+import { useRef, useState } from "react";
 
 type Props = {
     nodeCoordinatesCentered: NodeCoordinate[];
@@ -15,23 +16,48 @@ type Props = {
 
 export const DISTANCE_FROM_LEFT_MARGIN_ON_SCROLL = CIRCLE_SIZE_SELECTED + 20;
 
+const MIN_DURATION_LONG_PRESS_SEC = 0.25;
+const DISTANCE_TO_INTERRUPT_LONG_PRESS_PX = 20;
+
 export type CanvasTouchHandler = { touchHandler: TouchHandler };
 
 const useCanvasTouchHandler = ({ nodeCoordinatesCentered, onNodeClick, dragAndDropZones, onDndZoneClick, showDndZones, selectedNodeId }: Props) => {
+    const [openMenuOnNode, setOpenMenuOnNode] = useState<NodeCoordinate | undefined>(undefined);
     //Redux
     const dispatch = useAppDispatch();
     //
+    const startingTouchTime = useRef(0);
+    let startingCoord = { x: 0, y: 0 };
+    let interruptLongPress = false;
+
     const touchHandler = useTouchHandler(
         {
+            onStart: (e) => {
+                //Long Press Related 👇
+                startingTouchTime.current = e.timestamp;
+                startingCoord = { x: e.x, y: e.y };
+                interruptLongPress = false;
+                setOpenMenuOnNode(undefined);
+            },
+            onActive: (e) => {
+                //Long Press Related 👇
+                const distanceFromStart = Math.sqrt((e.x - startingCoord.x) ** 2 + (e.y - startingCoord.y) ** 2);
+                if (distanceFromStart >= DISTANCE_TO_INTERRUPT_LONG_PRESS_PX) interruptLongPress = true;
+            },
             onEnd: (touchInfo) => {
                 //Avoids bug on android
                 if (touchInfo.type !== 2) return;
 
+                const validDuration = touchInfo.timestamp - startingTouchTime.current >= MIN_DURATION_LONG_PRESS_SEC;
+                const validDistanceFromStart = true;
+                const longPress = validDuration && validDistanceFromStart && !interruptLongPress && !openMenuOnNode;
                 const clickedDndZone = dragAndDropZones.find(didTapDndZone(touchInfo));
 
                 if (onDndZoneClick && showDndZones) return onDndZoneClick(clickedDndZone);
 
                 const clickedNode = nodeCoordinatesCentered.find(didTapCircle(touchInfo));
+
+                if (longPress && clickedNode) return handleLongPressNode(clickedNode, setOpenMenuOnNode);
 
                 if (clickedNode === undefined) return dispatch(setSelectedNode(null));
 
@@ -40,10 +66,10 @@ const useCanvasTouchHandler = ({ nodeCoordinatesCentered, onNodeClick, dragAndDr
                 return dispatch(setSelectedNode(null));
             },
         },
-        [selectedNodeId, nodeCoordinatesCentered]
+        [selectedNodeId, nodeCoordinatesCentered, openMenuOnNode, startingTouchTime]
     );
 
-    return { touchHandler };
+    return { touchHandler, openMenuOnNode };
 };
 
 export default useCanvasTouchHandler;
@@ -76,4 +102,8 @@ function didTapDndZone(touchInfo: TouchInfo) {
 
         return true;
     };
+}
+
+function handleLongPressNode(clickedNode: NodeCoordinate, setOpenMenuOnNode: (v: NodeCoordinate) => void) {
+    setOpenMenuOnNode(clickedNode);
 }

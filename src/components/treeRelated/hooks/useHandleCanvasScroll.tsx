@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
-import { useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { CANVAS_VERTICAL_PADDING, CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../parameters";
-import { CanvasDimensions, NodeCoordinate } from "../../../types";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { CanvasDimensions, NodeCoordinate } from "../../../types";
 import useHandleCanvasBounds from "./useHandleCanvasBounds";
 
 const DEFAULT_SCALE = 1;
 
-function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, screenDimensions: ScreenDimentions, foundNodeCoordinates?: NodeCoordinate) {
+function useHandleCanvasScroll(
+    canvasDimentions: CanvasDimensions,
+    screenDimensions: ScreenDimentions,
+    foundNodeCoordinates: NodeCoordinate | undefined,
+    foundNodeOfMenu: NodeCoordinate | undefined
+) {
     const { canvasHeight, canvasWidth, extendedForDepthGuides } = canvasDimentions;
 
     const minScale = screenDimensions.width / canvasWidth;
@@ -21,7 +26,10 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, screenDimensi
     const scale = useSharedValue(DEFAULT_SCALE);
     const savedScale = useSharedValue(DEFAULT_SCALE);
 
-    const shouldAnimateTransformation = useShouldAnimateTransformation(foundNodeCoordinates !== undefined);
+    const selectedNodeMenuOpen = foundNodeCoordinates !== undefined;
+    const nodeMenuOpen = foundNodeOfMenu !== undefined;
+    const animateFromSelectedNodeMenu = useShouldAnimateTransformation(selectedNodeMenuOpen);
+    const animateFromNodeMenu = useShouldAnimateTransformation(nodeMenuOpen);
 
     const boundsProps = { minScale, scale, screenWidth: screenDimensions.width, canvasWidth };
     const { xBounds } = useHandleCanvasBounds(boundsProps);
@@ -111,12 +119,32 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, screenDimensi
     const canvasGestures = Gesture.Race(canvasPan, canvasZoom);
 
     const transform = useAnimatedStyle(() => {
-        if (foundNodeCoordinates) {
+        if (foundNodeCoordinates) return transitionToSelectedNodeStyle();
+        if (animateFromSelectedNodeMenu) return transitionFromMenuToNormalScrolling();
+        if (foundNodeOfMenu) return transitionToNodeOption();
+        if (animateFromNodeMenu) return transitionFromMenuToNormalScrolling();
+
+        //This is the regular scrolling style
+        return {
+            transform: [{ translateX: offsetX.value }, { translateY: offsetY.value }, { scale: scale.value }],
+        };
+
+        function transitionToNodeOption() {
+            return {
+                transform: [
+                    { translateX: offsetX.value },
+                    { translateY: offsetY.value },
+                    { scale: withSpring(DEFAULT_SCALE, { damping: 32, stiffness: 350 }) },
+                ],
+            };
+        }
+
+        function transitionToSelectedNodeStyle() {
             const alignCanvasLeftSideWithScreenLeftSide = (canvasWidth - screenDimensions.width) / 2;
             const foundNodeTranslatedX =
-                alignCanvasLeftSideWithScreenLeftSide - foundNodeCoordinates.x + screenDimensions.width - 1.5 * CIRCLE_SIZE_SELECTED;
+                alignCanvasLeftSideWithScreenLeftSide - foundNodeCoordinates!.x + screenDimensions.width - 1.5 * CIRCLE_SIZE_SELECTED;
 
-            const deltaY = canvasHeight / 2 - foundNodeCoordinates.y;
+            const deltaY = canvasHeight / 2 - foundNodeCoordinates!.y;
             const foundNodeTranslatedY =
                 deltaY + (extendedForDepthGuides ? -CANVAS_VERTICAL_PADDING - 0.5 * CIRCLE_SIZE_SELECTED : -2 * CIRCLE_SIZE_SELECTED);
 
@@ -132,7 +160,8 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, screenDimensi
                 ],
             };
         }
-        if (shouldAnimateTransformation)
+
+        function transitionFromMenuToNormalScrolling() {
             return {
                 transform: [
                     { translateX: withSpring(offsetX.value, { damping: 32, stiffness: 350 }) },
@@ -140,28 +169,32 @@ function useHandleCanvasScroll(canvasDimentions: CanvasDimensions, screenDimensi
                     { scale: withSpring(scale.value, { damping: 32, stiffness: 350 }) },
                 ],
             };
-        return {
-            transform: [{ translateX: offsetX.value }, { translateY: offsetY.value }, { scale: scale.value }],
-        };
-    }, [offsetX, offsetY, scale, foundNodeCoordinates, shouldAnimateTransformation]);
+        }
+    }, [offsetX, offsetY, scale, foundNodeCoordinates, animateFromSelectedNodeMenu, animateFromNodeMenu, foundNodeOfMenu]);
 
-    return { transform, canvasGestures };
+    return { transform, canvasGestures, offset: start.value };
 }
 
 export default useHandleCanvasScroll;
 
-function useShouldAnimateTransformation(popUpMenuOpen: boolean) {
-    const [result, setResult] = useState(true);
+function useShouldAnimateTransformation(isMenuOpen: boolean) {
+    const [result, setResult] = useState(false);
 
     useEffect(() => {
-        if (popUpMenuOpen) setResult(true);
+        if (isMenuOpen) setResult(true);
 
-        if (!popUpMenuOpen) {
-            setTimeout(() => {
+        let timeoutId: undefined | NodeJS.Timeout;
+
+        if (!isMenuOpen) {
+            timeoutId = setTimeout(() => {
                 setResult(false);
             }, 200);
         }
-    }, [popUpMenuOpen]);
+
+        return () => {
+            clearTimeout(timeoutId);
+        };
+    }, [isMenuOpen]);
 
     return result;
 }

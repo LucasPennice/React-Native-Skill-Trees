@@ -22,6 +22,7 @@ import DragAndDropZones from "./hierarchical/DragAndDropZones";
 import HierarchicalSkillTree from "./hierarchical/HierarchicalSkillTree";
 import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
 import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
+import NodeMenu from "./nodeMenu/NodeMenu";
 
 export type InteractiveTreeConfig = {
     renderStyle: "hierarchy" | "radial";
@@ -68,7 +69,7 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
         showCircleGuide
     );
 
-    const foundNodeCoordinates = nodeCoordinatesCentered.find((c) => c.id === selectedNodeId);
+    const selectedNodeCoordinates = nodeCoordinatesCentered.find((c) => c.id === selectedNodeId);
 
     const onNodeClickAdapter = (nodeId: string) => {
         if (!functions || !functions.onNodeClick) return;
@@ -89,7 +90,7 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
     };
 
     //Hooks
-    const { touchHandler } = useCanvasTouchHandler({
+    const { touchHandler, openMenuOnNode } = useCanvasTouchHandler({
         selectedNodeId,
         nodeCoordinatesCentered,
         onNodeClick: onNodeClickAdapter,
@@ -97,14 +98,23 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
         showDndZones,
         dragAndDropZones: dndZoneCoordinates,
     });
+    const foundNodeOfMenu = openMenuOnNode ? centeredCoordinatedWithTreeData.find((c) => c.nodeId === openMenuOnNode.id) : undefined;
+    const foundNodeOfMenuWithoutData = openMenuOnNode ? nodeCoordinatesCentered.find((c) => c.id === openMenuOnNode.id) : undefined;
+
     const { canvasHeight, canvasWidth } = canvasDimentions;
-    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, screenDimensions, foundNodeCoordinates);
+    const { canvasGestures, transform, offset } = useHandleCanvasScroll(
+        canvasDimentions,
+        screenDimensions,
+        selectedNodeCoordinates,
+        foundNodeOfMenuWithoutData
+    );
     const blur = useHandleBlurAnimation(tree.treeId);
     //
 
     const treeData = { nodeCoordinates: centeredCoordinatedWithTreeData, dndZoneCoordinates };
 
-    const renderSelectedNodeMenu = foundNodeCoordinates && selectedNodeId && isInteractive;
+    const renderSelectedNodeMenu = selectedNodeCoordinates && selectedNodeId && isInteractive;
+    const renderNodeMenu = foundNodeOfMenu && openMenuOnNode && isInteractive;
 
     return (
         <>
@@ -119,6 +129,9 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
                     </Animated.View>
                 </View>
             </GestureDetector>
+            {renderNodeMenu && (
+                <NodeMenu data={foundNodeOfMenu} offset={offset} canvasDimentions={canvasDimentions} screenDimensions={screenDimensions} />
+            )}
             {renderSelectedNodeMenu && renderOnSelectedNodeId}
         </>
     );
