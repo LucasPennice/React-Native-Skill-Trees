@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { useEffect, useRef, useState } from "react";
-import Animated, { FadeIn, useAnimatedProps, useAnimatedStyle, withDelay, withSequence, withTiming } from "react-native-reanimated";
+import Animated, { Easing, FadeIn, useAnimatedProps, useAnimatedStyle, withDelay, withSequence, withTiming } from "react-native-reanimated";
 import { Svg, Circle as SvgCircle } from "react-native-svg";
 import { colors } from "../../../parameters";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
@@ -57,8 +57,8 @@ function NodeLongPressIndicator({
         const duration = data.state === "INTERRUPTED" ? 0 : MIN_DURATION_LONG_PRESS_MS;
 
         return {
-            strokeDashoffset: withDelay(delay, withTiming(circleCompletion, { duration: duration })),
-            strokeWidth: data.data ? withSequence(withTiming(4, { duration: 0 }), withTiming(16, { duration: 250 })) : 16,
+            strokeDashoffset: withDelay(delay, withTiming(circleCompletion, { duration: duration, easing: Easing.bezierFn(0.76, 0, 0.24, 1) })),
+            strokeWidth: data.data ? withSequence(withTiming(0, { duration: 0 }), withTiming(16, { duration: MIN_DURATION_LONG_PRESS_MS })) : 16,
         };
     }, [data]);
 
