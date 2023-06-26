@@ -30,6 +30,7 @@ export type InteractiveTreeConfig = {
     canvasDisplaySettings: CanvasDisplaySettings;
     showDndZones?: boolean;
     isInteractive: boolean;
+    blockLongPress?: boolean;
 };
 
 export type InteractiveNodeState = {
@@ -60,7 +61,7 @@ export type InteractiveTreeProps = {
 
 function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeId }: InteractiveTreeProps) {
     const { screenDimensions, selectedNodeId, canvasRef } = state;
-    const { isInteractive, renderStyle, showDndZones, canvasDisplaySettings } = config;
+    const { isInteractive, renderStyle, showDndZones, canvasDisplaySettings, blockLongPress } = config;
     const { showCircleGuide } = canvasDisplaySettings;
 
     //Derived State
@@ -104,7 +105,7 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
     const { touchHandler, openMenuOnNode, longPressIndicatorPosition, closeNodeMenu, longPressFn } = useCanvasTouchHandler({
         functions: touchHandlerFunctions,
         state: touchHandlerState,
-        config: { showDndZones },
+        config: { showDndZones, blockLongPress },
     });
     //
 

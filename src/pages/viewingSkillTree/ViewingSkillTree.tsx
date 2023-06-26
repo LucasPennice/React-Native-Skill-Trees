@@ -32,14 +32,12 @@ export type ModalState =
     | "INPUT_DATA_FOR_NEW_NODE"
     | "CANDIDATES_TO_HOIST"
     | "PLACING_NEW_NODE"
-    // | "CONFIRM_NEW_NODE_POSITION"
     | "NODE_SELECTED";
 type Props = NativeStackScreenProps<StackNavigatorParams, "ViewingSkillTree">;
 
 function ViewingSkillTree({ navigation, route }: Props) {
     //Redux State
     const selectedTree = useCurrentTree();
-    // const tentativeNewTree = useTentativeNewTree();
     const { selectedNode: selectedNodeId } = useAppSelector(selectTreeSlice);
     const { selectedDndZone } = useAppSelector(selectNewNodes);
     const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);

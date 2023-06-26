@@ -43,8 +43,14 @@ function useHandleMemoizedTreeProps(
     //Interactive Tree Props
     const config: InteractiveTreeConfig = useMemo(() => {
         const hierarchicalTreeSettings: CanvasDisplaySettings = { ...canvasDisplaySettings, showCircleGuide: false };
-        return { canvasDisplaySettings: hierarchicalTreeSettings, isInteractive: true, renderStyle: "hierarchy", showDndZones };
-    }, [canvasDisplaySettings, showDndZones]);
+        return {
+            canvasDisplaySettings: hierarchicalTreeSettings,
+            isInteractive: true,
+            renderStyle: "hierarchy",
+            showDndZones,
+            blockLongPress: modalState !== "IDLE",
+        };
+    }, [canvasDisplaySettings, modalState, showDndZones]);
 
     const interactiveTreeState: InteractiveNodeState = useMemo(() => {
         return { screenDimensions, canvasRef, selectedDndZone, selectedNodeId };

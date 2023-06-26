@@ -17,6 +17,7 @@ type Props = {
     };
     config: {
         showDndZones?: boolean;
+        blockLongPress?: boolean;
     };
     functions: {
         onNodeClick?: (nodeId: string) => void;
@@ -39,7 +40,7 @@ export const MIN_DURATION_LONG_PRESS_MS = 300;
 export type CanvasTouchHandler = { touchHandler: TouchHandler };
 
 const useCanvasTouchHandler = ({ config, functions, state }: Props) => {
-    const { showDndZones } = config;
+    const { showDndZones, blockLongPress } = config;
     const { onDndZoneClick, onNodeClick } = functions;
     const { dragAndDropZones, nodeCoordinatesCentered, selectedNodeId, canvasWidth, screenWidth } = state;
     //
@@ -72,6 +73,7 @@ const useCanvasTouchHandler = ({ config, functions, state }: Props) => {
 
     const longPressFn = {
         onStart: (args: { e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>; offset: [number, number] }) => {
+            if (blockLongPress) return;
             const { e, offset } = args;
             const [x, y] = offset;
 
@@ -88,6 +90,7 @@ const useCanvasTouchHandler = ({ config, functions, state }: Props) => {
             return setLongPressIndicatorPosition({ data: clickedNode, state: "PRESSING" });
         },
         onEnd: (e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>) => {
+            if (blockLongPress) return;
             if (!longPressIndicatorPosition.data) return resetLongPressIndicator();
 
             if (e.duration >= MIN_DURATION_LONG_PRESS_MS) return handleSuccessfulLongPress(longPressIndicatorPosition.data);
