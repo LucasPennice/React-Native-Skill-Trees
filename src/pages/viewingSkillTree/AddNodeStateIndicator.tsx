@@ -10,22 +10,20 @@ import useHandleStateIndicatorAnimations from "./useHandleStateIndicatorAnimatio
 type Props = {
     functions: {
         openNewNodeModal: () => void;
-        updateUserTree: () => void;
         returnToIdleState: () => void;
-        resetNewNodePosition: () => void;
     };
     mode: ModalState;
     currentTree: Tree<Skill>;
 };
 
 function AddNodeStateIndicator({ mode, functions }: Props) {
-    const { openNewNodeModal, returnToIdleState, updateUserTree, resetNewNodePosition } = functions;
+    const { openNewNodeModal, returnToIdleState } = functions;
     //Redux Store
     const { width } = Dimensions.get("screen");
 
     const { opacity, styles } = useHandleStateIndicatorAnimations(mode);
 
-    const showAddNode = mode !== "PLACING_NEW_NODE" && mode !== "CONFIRM_NEW_NODE_POSITION";
+    const showAddNode = mode !== "PLACING_NEW_NODE";
 
     return (
         <Animated.View style={[styles, opacity, centerFlex, s.container]}>
@@ -41,27 +39,11 @@ function AddNodeStateIndicator({ mode, functions }: Props) {
             {mode === "PLACING_NEW_NODE" && (
                 <Animated.View style={[centerFlex, { flexDirection: "row", gap: 20 }]} entering={FadeIn.duration(100)}>
                     <AppText style={{ color: colors.unmarkedText, width: width - 130 }} fontSize={13}>
-                        Click the square where you want to insert your new skill
+                        Click the square where you want to insert your new skills. Or, long-press a node and choose "add" from the options.
                     </AppText>
                     <Pressable onPress={returnToIdleState} style={s.button}>
                         <AppText style={{ color: colors.red }} fontSize={15}>
                             Cancel
-                        </AppText>
-                    </Pressable>
-                </Animated.View>
-            )}
-            {mode === "CONFIRM_NEW_NODE_POSITION" && (
-                <Animated.View
-                    style={[centerFlex, { flexDirection: "row", justifyContent: "space-between", flex: 1, paddingHorizontal: 10 }]}
-                    entering={FadeIn.duration(100)}>
-                    <Pressable onPress={resetNewNodePosition} style={s.button}>
-                        <AppText style={{ color: colors.red }} fontSize={15}>
-                            Change position
-                        </AppText>
-                    </Pressable>
-                    <Pressable onPress={updateUserTree} style={s.button}>
-                        <AppText style={{ color: colors.accent }} fontSize={15}>
-                            Confirm
                         </AppText>
                     </Pressable>
                 </Animated.View>

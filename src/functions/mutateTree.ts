@@ -141,44 +141,15 @@ export function mutateEveryTree(rootNode: Tree<Skill> | undefined, mutation: (v:
     return result;
 }
 
-export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: Tree<Skill>, newNode: Tree<Skill>) {
+export function insertNodesBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: Tree<Skill>, newNodes: Tree<Skill>[]) {
     const targetNode = findNodeById(currentTree, selectedDndZone.ofNode);
-    if (!targetNode) throw new Error("couldnt find targetNode on getTentativeModifiedTree");
+    if (!targetNode) throw new Error("couldnt find targetNode on insertNodesBasedOnDnDZone");
 
     const treePropertiesToInherit = { accentColor: targetNode.accentColor, treeId: targetNode.treeId, treeName: targetNode.treeName };
 
-    if (selectedDndZone.type === "PARENT") {
-        //The old parent now becomes the child of the new node
-        const oldParent: Tree<Skill> = { ...targetNode, isRoot: false, parentId: newNode.nodeId };
+    if (selectedDndZone.type === "PARENT") return handleInsertNodeAsParent();
 
-        const newProperties: ModifiableProperties<Tree<Skill>> = {
-            ...targetNode,
-            ...newNode,
-            parentId: targetNode.parentId,
-            ...treePropertiesToInherit,
-            children: [oldParent],
-        };
-
-        return editTreeProperties(currentTree, targetNode, newProperties);
-    }
-
-    const newChild: Tree<Skill> = {
-        ...newNode,
-        parentId: targetNode.nodeId,
-        level: targetNode.level + 1,
-        x: targetNode.x,
-        y: targetNode.y + DISTANCE_BETWEEN_GENERATIONS,
-        children: [],
-        isRoot: false,
-        ...treePropertiesToInherit,
-    };
-
-    if (selectedDndZone.type === "ONLY_CHILDREN") {
-        const newProperties: ModifiableProperties<Tree<Skill>> = { ...targetNode, children: [newChild] };
-
-        return editTreeProperties(currentTree, targetNode, newProperties);
-    }
-
+    if (selectedDndZone.type === "ONLY_CHILDREN") return handleInsertNodeAsChildren();
     //From now on we are in the "BROTHERS" cases
 
     const parentOfTargetNode = findParentOfNode(currentTree, targetNode.nodeId);
@@ -186,41 +157,113 @@ export function insertNodeBasedOnDnDZone(selectedDndZone: DnDZone, currentTree: 
     if (!parentOfTargetNode) throw new Error("couldnt find parentOfTargetNode on getTentativeModifiedTree");
     if (!parentOfTargetNode.children) throw new Error("parentOfTargetNode.children is undefined on getTentativeModifiedTree");
 
-    const newChildren: Tree<Skill>[] = [];
+    //The target node for the LEFT or RIGHT case is their sibling
 
-    for (let i = 0; i < parentOfTargetNode.children.length; i++) {
-        const element = parentOfTargetNode.children[i];
+    const childrenToAdd: Tree<Skill>[] = newNodes.map((n) => {
+        return {
+            ...treePropertiesToInherit,
+            category: "SKILL",
+            children: [],
+            data: n.data,
+            isRoot: false,
+            level: targetNode!.level,
+            nodeId: n.nodeId,
+            parentId: parentOfTargetNode!.nodeId,
+            x: 0,
+            y: 0,
+        };
+    });
 
-        if (selectedDndZone.type === "LEFT_BROTHER" && element.nodeId === targetNode.nodeId)
-            newChildren.push({
-                ...targetNode,
-                ...newNode,
-                parentId: targetNode.parentId,
-                level: targetNode.level,
-                x: targetNode.x - DISTANCE_BETWEEN_CHILDREN,
-                y: targetNode.y,
-                children: [],
-                ...treePropertiesToInherit,
-            });
+    if (selectedDndZone.type === "LEFT_BROTHER") return handleInsertNodeAsLeftSibling(childrenToAdd);
 
-        newChildren.push(element);
+    //RIGHT BROTHER CASE
+    return handleInsertNodeAsRightSibling(childrenToAdd);
 
-        if (selectedDndZone.type === "RIGHT_BROTHER" && element.nodeId === targetNode.nodeId)
-            newChildren.push({
-                ...targetNode,
-                ...newNode,
-                parentId: targetNode.parentId,
-                level: targetNode.level,
-                x: targetNode.x + DISTANCE_BETWEEN_CHILDREN,
-                y: targetNode.y,
-                children: [],
-                ...treePropertiesToInherit,
-            });
+    function handleInsertNodeAsParent() {
+        const newParent = newNodes[0];
+        //The old parent now becomes the child of the new node
+        const oldParent: Tree<Skill> = {
+            ...treePropertiesToInherit,
+            category: targetNode!.category,
+            children: targetNode!.children,
+            data: targetNode!.data,
+            level: targetNode!.level + 1,
+            nodeId: targetNode!.nodeId,
+            x: 0,
+            y: 0,
+            isRoot: false,
+            parentId: newParent.nodeId,
+        };
+
+        const newProperties: ModifiableProperties<Tree<Skill>> = {
+            ...treePropertiesToInherit,
+            category: "SKILL",
+            data: newParent.data,
+            isRoot: false,
+            level: targetNode!.level,
+            nodeId: newParent.nodeId,
+            x: 0,
+            y: 0,
+            parentId: targetNode!.parentId,
+            children: [oldParent],
+        };
+
+        return editTreeProperties(currentTree, targetNode!, newProperties);
     }
 
-    const newProperties: ModifiableProperties<Tree<Skill>> = { ...parentOfTargetNode, children: newChildren };
+    function handleInsertNodeAsChildren() {
+        const newChildren: Tree<Skill>[] = newNodes.map((n) => {
+            return {
+                ...treePropertiesToInherit,
+                category: "SKILL",
+                children: [],
+                data: n.data,
+                isRoot: false,
+                level: targetNode!.level + 1,
+                nodeId: n.nodeId,
+                parentId: targetNode!.nodeId,
+                x: 0,
+                y: 0,
+            };
+        });
 
-    return editTreeProperties(currentTree, parentOfTargetNode, newProperties);
+        const newProperties: ModifiableProperties<Tree<Skill>> = { ...targetNode!, children: newChildren };
+
+        return editTreeProperties(currentTree, targetNode!, newProperties);
+    }
+
+    function handleInsertNodeAsLeftSibling(childrenToAdd: Tree<Skill>[]) {
+        const updatedParent: Tree<Skill> = {
+            ...treePropertiesToInherit,
+            category: parentOfTargetNode!.category,
+            children: [...childrenToAdd, ...parentOfTargetNode!.children],
+            data: parentOfTargetNode!.data,
+            isRoot: parentOfTargetNode!.isRoot,
+            level: parentOfTargetNode!.level,
+            nodeId: parentOfTargetNode!.nodeId,
+            parentId: parentOfTargetNode!.parentId,
+            x: 0,
+            y: 0,
+        };
+
+        return editTreeProperties(currentTree, parentOfTargetNode!, updatedParent);
+    }
+    function handleInsertNodeAsRightSibling(childrenToAdd: Tree<Skill>[]) {
+        const updatedParent: Tree<Skill> = {
+            ...treePropertiesToInherit,
+            category: parentOfTargetNode!.category,
+            children: [...parentOfTargetNode!.children, ...childrenToAdd],
+            data: parentOfTargetNode!.data,
+            isRoot: parentOfTargetNode!.isRoot,
+            level: parentOfTargetNode!.level,
+            nodeId: parentOfTargetNode!.nodeId,
+            parentId: parentOfTargetNode!.parentId,
+            x: 0,
+            y: 0,
+        };
+
+        return editTreeProperties(currentTree, parentOfTargetNode!, updatedParent);
+    }
 }
 
 export function mutateEveryTreeNode(rootNode: Tree<Skill> | undefined, mutation: (v: Tree<Skill>) => Tree<Skill>) {

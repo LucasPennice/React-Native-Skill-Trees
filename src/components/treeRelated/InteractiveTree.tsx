@@ -42,6 +42,7 @@ export type InteractiveNodeState = {
 export type InteractiveTreeFunctions = {
     onNodeClick?: (node: Tree<Skill>) => void;
     onDndZoneClick?: (zone: DnDZone) => void;
+    nodeMenu?: {};
 };
 
 export type TreeCoordinates = {

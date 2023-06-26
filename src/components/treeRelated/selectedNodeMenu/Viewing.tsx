@@ -34,7 +34,7 @@ function Viewing({
     return (
         <Animated.View entering={FadeInDown}>
             <AppText style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 10 }} fontSize={24}>
-                {treeName}
+                {category === "SKILL" ? selectedNode.data.name : treeName}
             </AppText>
 
             {category === "SKILL" && <SkillDetails data={selectedNode} goToSkillPage={goToSkillPage} />}

@@ -1,4 +1,4 @@
-import { KeyboardAvoidingView, Pressable, TextInput, TextInputProps, View, ViewProps } from "react-native";
+import { KeyboardAvoidingView, Pressable, StyleProp, TextInput, TextInputProps, TextStyle, View, ViewProps } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { centerFlex, colors } from "../parameters";
 import CloseIcon from "./Icons/CloseIcon";
@@ -8,6 +8,7 @@ function AppTextInput({
     placeholder,
     containerStyles,
     onBlur,
+    textStyle,
     inputProps,
     pattern,
     disable,
@@ -17,6 +18,7 @@ function AppTextInput({
     containerStyles?: ViewProps["style"];
     onBlur?: () => void;
     disable?: boolean;
+    textStyle?: StyleProp<TextStyle>;
     pattern?: RegExp;
     inputProps?: TextInputProps;
 }) {
@@ -46,16 +48,19 @@ function AppTextInput({
                     value={text}
                     allowFontScaling={false}
                     placeholderTextColor={colors.line}
-                    style={{
-                        fontSize: 20,
-                        paddingTop: 15,
-                        paddingBottom: 15,
-                        paddingLeft: 20,
-                        fontFamily: "helvetica",
-                        color: "#FFFFFF",
-                        flex: 1,
-                        marginRight: disable ? 20 : 50,
-                    }}
+                    style={[
+                        {
+                            fontSize: 20,
+                            paddingTop: 15,
+                            paddingBottom: 15,
+                            paddingLeft: 20,
+                            fontFamily: "helvetica",
+                            color: "#FFFFFF",
+                            flex: 1,
+                            marginRight: disable ? 20 : 50,
+                        },
+                        textStyle,
+                    ]}
                     {...inputProps}
                 />
                 {disable !== true && (

@@ -8,7 +8,7 @@ import { ProgressWheelParams } from "./ProgressIndicatorAndName";
 
 function NodeView({ node, size }: { node: Tree<Skill>; size: number }) {
     const gradient = node.accentColor;
-    const progressWheelProps = new ProgressWheelParams(gradient.color1, `${gradient.color1}3D`, size, (8 * size) / 100);
+    const progressWheelProps = new ProgressWheelParams(gradient.color1, `${gradient.color1}3D`, size, (8 * size) / 150);
 
     const skill = node.data;
     const category = node.category;
@@ -89,6 +89,13 @@ function NodeView({ node, size }: { node: Tree<Skill>; size: number }) {
                         cx={progressWheelProps.centerCoordinate}
                         cy={progressWheelProps.centerCoordinate}
                         r={progressWheelProps.radius}
+                        fill={"#000000"}
+                    />
+                    <Circle
+                        strokeWidth={progressWheelProps.strokeWidth}
+                        cx={progressWheelProps.centerCoordinate}
+                        cy={progressWheelProps.centerCoordinate}
+                        r={progressWheelProps.radius}
                         stroke={"url(#progressColor)"}
                         strokeDasharray={progressWheelProps.circumference}
                         strokeLinecap="round"
@@ -100,10 +107,12 @@ function NodeView({ node, size }: { node: Tree<Skill>; size: number }) {
                         style={{
                             position: "absolute",
                             color: category === "SKILL" ? colors.unmarkedText : gradient.color1,
+                            width: size,
+                            textAlign: "center",
                             lineHeight: isEmojiIcon ? 28 : undefined,
                             fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
                         }}>
-                        {isEmojiIcon ? skill.icon.text : skill.icon.text[0]}
+                        {isEmojiIcon ? skill.icon.text : skill.name[0]}
                     </AppText>
                 </View>
             </View>

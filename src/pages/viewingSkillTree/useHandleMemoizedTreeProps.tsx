@@ -18,7 +18,7 @@ function useHandleMemoizedTreeProps(
         screenDimensions: ScreenDimentions;
         canvasDisplaySettings: CanvasDisplaySettings;
         selectedTree: Tree<Skill> | undefined;
-        tentativeNewTree: Tree<Skill> | undefined;
+
         showDndZones: boolean | undefined;
         selectedDndZone: DnDZone | undefined;
         modal: [ModalState, (v: ModalState) => void];
@@ -28,7 +28,7 @@ function useHandleMemoizedTreeProps(
     navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>,
     openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void
 ) {
-    const { canvasDisplaySettings, screenDimensions, selectedTree, showDndZones, tentativeNewTree, selectedDndZone, modal } = state;
+    const { canvasDisplaySettings, screenDimensions, selectedTree, showDndZones, selectedDndZone, modal } = state;
     const [modalState, setModalState] = modal;
     //
     const dispatch = useAppDispatch();
@@ -51,8 +51,8 @@ function useHandleMemoizedTreeProps(
     }, [canvasRef, screenDimensions, selectedDndZone, selectedNodeId]);
 
     const tree: Tree<Skill> | undefined = useMemo(() => {
-        return tentativeNewTree ?? selectedTree;
-    }, [selectedTree, tentativeNewTree]);
+        return selectedTree;
+    }, [selectedTree]);
 
     const functions: InteractiveTreeFunctions = useMemo(() => {
         const onNodeClick = (node: Tree<Skill>) => {
@@ -68,7 +68,7 @@ function useHandleMemoizedTreeProps(
             if (modalRef.current !== "PLACING_NEW_NODE") return;
             if (clickedZone === undefined) return;
             dispatch(setSelectedDndZone(clickedZone));
-            setModalState("CONFIRM_NEW_NODE_POSITION");
+            setModalState("INPUT_DATA_FOR_NEW_NODE");
         };
 
         return { onNodeClick, onDndZoneClick };

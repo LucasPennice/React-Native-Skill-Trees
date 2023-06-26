@@ -6,6 +6,7 @@ import screenDimentionsReducer from "./screenDimentionsSlice";
 import addTreeReducer from "./addTreeModalSlice";
 import treeOptionsReducer from "./editTreeSlice";
 import userReducer from "./userSlice";
+import newNodeReducer from "./newNodeSlice";
 
 export const store = configureStore({
     reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
         addTree: addTreeReducer,
         treeOptions: treeOptionsReducer,
         user: userReducer,
+        newNodes: newNodeReducer,
     },
 });
 
