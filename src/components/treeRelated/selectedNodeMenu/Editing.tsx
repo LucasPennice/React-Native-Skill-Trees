@@ -4,10 +4,7 @@ import Animated, { FadeInDown, Layout } from "react-native-reanimated";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
-import ShowHideEmojiSelector from "../../../components/ShowHideEmojiSelector";
-import { CIRCLE_SIZE_SELECTED, colors } from "../../../parameters";
-import { useAppSelector } from "../../../redux/reduxHooks";
-import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { colors } from "../../../parameters";
 import { generalStyles } from "../../../styles";
 import { SkillPropertiesEditableOnPopMenu } from "../../../types";
 
@@ -23,13 +20,15 @@ function Editing({
         checkUnComplete: () => boolean;
     };
 }) {
-    const { width } = useAppSelector(selectSafeScreenDimentions);
     const { checkComplete, checkUnComplete } = checkToggleCompletionPermissions;
-    const MENU_WIDTH = width - 3 * CIRCLE_SIZE_SELECTED;
 
     const [newSkillProps, setNewSkillProps] = newSkillPropsState;
     const [newName, setNewName] = useState(newSkillProps.name);
-    const [icon, setIcon] = useState(newSkillProps.icon.isEmoji ? newSkillProps.icon.text : null);
+    const [icon, setIcon] = useState("");
+
+    useEffect(() => {
+        if (newSkillProps.icon.isEmoji) setIcon(newSkillProps.icon.text);
+    }, []);
 
     const updateSkillName = (newName: string) => {
         setNewSkillProps((prev: SkillPropertiesEditableOnPopMenu) => {
@@ -46,8 +45,8 @@ function Editing({
         });
     };
 
-    const updateSkillIcon = (tentativeIcon: string | null) => {
-        if (tentativeIcon === null) return setNewSkillProps({ ...newSkillProps, icon: { isEmoji: false, text: newSkillProps.name } });
+    const updateSkillIcon = (tentativeIcon: string) => {
+        if (tentativeIcon === "") return setNewSkillProps({ ...newSkillProps, icon: { isEmoji: false, text: newSkillProps.name[0] } });
 
         return setNewSkillProps({ ...newSkillProps, icon: { isEmoji: true, text: tentativeIcon } });
     };
@@ -75,9 +74,15 @@ function Editing({
                 style={{ marginBottom: 0 }}
             />
 
-            <ShowHideEmojiSelector emojiState={[icon, setIcon]} containerWidth={MENU_WIDTH - 20} />
+            <AppTextInput
+                placeholder={"🧠"}
+                textStyle={{ fontFamily: "emojisMono", fontSize: 40 }}
+                textState={[icon, setIcon]}
+                pattern={new RegExp(/\p{Extended_Pictographic}/u)}
+                containerStyles={{ width: "100%", marginVertical: 10 }}
+            />
 
-            <TouchableOpacity style={[generalStyles.btn, { backgroundColor: "#282A2C" }]} onPress={handleDeleteSelectedNode}>
+            <TouchableOpacity style={[generalStyles.btn, { backgroundColor: "#282A2C", width: "100%" }]} onPress={handleDeleteSelectedNode}>
                 <AppText style={{ color: colors.red }} fontSize={16}>
                     Delete Node
                 </AppText>

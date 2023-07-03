@@ -134,7 +134,7 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
                     <View style={{ flexDirection: "row", marginBottom: 15, justifyContent: "space-between", alignItems: "center" }}>
                         <View style={{ width: width - 160 }}>
                             <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-                                <AppText style={{ color: "#FFFFFF", marginBottom: 5, fontFamily: "helveticaBold" }} fontSize={20}>
+                                <AppText style={{ color: "#FFFFFF", marginBottom: 5 }} fontSize={20}>
                                     Icon
                                 </AppText>
                                 <AppText style={{ color: colors.unmarkedText, marginLeft: 5, marginTop: 2 }} fontSize={16}>

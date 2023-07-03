@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { Alert, TouchableOpacity } from "react-native";
+import { Alert, Dimensions, TouchableOpacity, View } from "react-native";
 import Animated, { Layout } from "react-native-reanimated";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import ColorGradientSelector from "../../../components/ColorGradientSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
-import ShowHideEmojiSelector from "../../../components/ShowHideEmojiSelector";
 import { mutateEveryTree } from "../../../functions/mutateTree";
 import { WHITE_GRADIENT, colors, nodeGradients } from "../../../parameters";
 import { selectTreeOptions, setTree } from "../../../redux/editTreeSlice";
@@ -21,15 +20,17 @@ function EditTreeModal() {
     //Local State
     const [treeName, setTreeName] = useState<string>("");
     const [selectedColor, setSelectedColor] = useState<ColorGradient | undefined>(undefined);
-    const [icon, setIcon] = useState<null | string>(null);
+    const [icon, setIcon] = useState<string>("");
+    //
+    const { width } = Dimensions.get("screen");
 
     useEffect(() => {
         const defaultTreeName = tree ? tree.treeName : "";
         setTreeName(defaultTreeName);
         const defaultAccentColor = tree ? tree.accentColor : WHITE_GRADIENT;
         setSelectedColor(defaultAccentColor);
-        const defaultIcon = tree && tree.data.icon.isEmoji ? tree.data.icon.text : null;
-        setIcon(defaultIcon);
+
+        if (tree && tree.data.icon.isEmoji) setIcon(tree.data.icon.text);
     }, [open]);
 
     const dispatch = useAppDispatch();
@@ -62,8 +63,8 @@ function EditTreeModal() {
 
         if (updatedTree === undefined) return;
 
-        const newIcon = icon ?? treeName[0];
-        const newIsEmoji = icon ? true : false;
+        const newIsEmoji = icon !== "";
+        const newIcon = newIsEmoji ? icon : treeName[0];
 
         updatedTree = { ...updatedTree, data: { ...updatedTree.data, icon: { isEmoji: newIsEmoji, text: newIcon } } };
 
@@ -81,18 +82,39 @@ function EditTreeModal() {
         <FlingToDismissModal closeModal={closeModal} open={open} leftHeaderButton={{ onPress: updateTree(selectedColor, treeName), title: "Save" }}>
             <Animated.View style={{ flex: 1 }} layout={Layout.stiffness(300).damping(26)}>
                 <AppTextInput placeholder={"Tree Name"} textState={[treeName, setTreeName]} containerStyles={{ marginVertical: 20 }} />
-                <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
-                    Select an accent color for your new tree
+                <View style={{ flexDirection: "row", marginBottom: 15, justifyContent: "space-between", alignItems: "center" }}>
+                    <View style={{ width: width - 160 }}>
+                        <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+                            <AppText style={{ color: "#FFFFFF", marginBottom: 5 }} fontSize={20}>
+                                Icon
+                            </AppText>
+                            <AppText style={{ color: colors.unmarkedText, marginLeft: 5, marginTop: 2 }} fontSize={16}>
+                                (optional)
+                            </AppText>
+                        </View>
+                        <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }} fontSize={14}>
+                            Your keyboard can switch to an emoji mode. To access it, look for a button located near the bottom left of your keyboard.
+                        </AppText>
+                    </View>
+                    <AppTextInput
+                        placeholder={"🧠"}
+                        textStyle={{ fontFamily: "emojisMono", fontSize: 40 }}
+                        textState={[icon, setIcon]}
+                        pattern={new RegExp(/\p{Extended_Pictographic}/u)}
+                        containerStyles={{ width: 130 }}
+                    />
+                </View>
+                <AppText fontSize={18} style={{ color: "#FFFFFF", marginBottom: 10 }}>
+                    Tree Color
                 </AppText>
-                <AppText fontSize={16} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
+                <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 5 }}>
                     Completed skills and progress bars will show with this color
                 </AppText>
-                <AppText fontSize={16} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
+                <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
                     Scroll to see more colors
                 </AppText>
-                <ColorGradientSelector colorsArray={nodeGradients} state={[selectedColor, setSelectedColor]} />
 
-                <ShowHideEmojiSelector emojiState={[icon, setIcon]} />
+                <ColorGradientSelector colorsArray={nodeGradients} state={[selectedColor, setSelectedColor]} />
 
                 <TouchableOpacity style={[generalStyles.btn, { backgroundColor: "#282A2C" }]} onPress={confirmDeleteTree}>
                     <AppText fontSize={16} style={{ color: colors.red }}>

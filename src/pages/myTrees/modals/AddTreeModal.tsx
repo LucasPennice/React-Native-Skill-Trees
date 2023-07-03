@@ -11,7 +11,6 @@ import AppTextInput from "../../../components/AppTextInput";
 import ColorGradientSelector from "../../../components/ColorGradientSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import LoadingIcon from "../../../components/LoadingIcon";
-import ShowHideEmojiSelector from "../../../components/ShowHideEmojiSelector";
 import {
     centerNodesInCanvas,
     getCanvasDimensions,
@@ -37,7 +36,7 @@ function AddTreeModal() {
     const { width } = Dimensions.get("screen");
     //Local State
     const [treeName, setTreeName] = useState("");
-    const [icon, setIcon] = useState<null | string>(null);
+    const [icon, setIcon] = useState<string>("");
     const [treeImportKey, setTreeImportKey] = useState("");
     const [selectedColorGradient, setSelectedColorGradient] = useState<ColorGradient | undefined>(undefined);
     const [mode, setMode] = useState<"CREATE_TREE" | "IMPORT_TREE">("CREATE_TREE");
@@ -69,7 +68,7 @@ function AddTreeModal() {
         if (treeName === "" || !selectedColorGradient) return Alert.alert("Please fill all of the fields");
 
         const iconText = icon ?? treeName;
-        const isEmoji = icon === null ? false : true;
+        const isEmoji = icon === "" ? false : true;
 
         const newTree = createTree(
             treeName,
@@ -116,18 +115,40 @@ function AddTreeModal() {
                             pattern={new RegExp(/^[^ ]/)}
                             containerStyles={{ marginVertical: 20 }}
                         />
-                        <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
-                            Select an accent color for your new tree
+                        <View style={{ flexDirection: "row", marginBottom: 15, justifyContent: "space-between", alignItems: "center" }}>
+                            <View style={{ width: width - 160 }}>
+                                <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+                                    <AppText style={{ color: "#FFFFFF", marginBottom: 5 }} fontSize={20}>
+                                        Icon
+                                    </AppText>
+                                    <AppText style={{ color: colors.unmarkedText, marginLeft: 5, marginTop: 2 }} fontSize={16}>
+                                        (optional)
+                                    </AppText>
+                                </View>
+                                <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }} fontSize={14}>
+                                    Your keyboard can switch to an emoji mode. To access it, look for a button located near the bottom left of your
+                                    keyboard.
+                                </AppText>
+                            </View>
+                            <AppTextInput
+                                placeholder={"🧠"}
+                                textStyle={{ fontFamily: "emojisMono", fontSize: 40 }}
+                                textState={[icon, setIcon]}
+                                pattern={new RegExp(/\p{Extended_Pictographic}/u)}
+                                containerStyles={{ width: 130 }}
+                            />
+                        </View>
+                        <AppText fontSize={18} style={{ color: "#FFFFFF", marginBottom: 10 }}>
+                            Tree Color
                         </AppText>
-                        <AppText fontSize={16} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
+                        <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 5 }}>
                             Completed skills and progress bars will show with this color
                         </AppText>
-                        <AppText fontSize={16} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
+                        <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
                             Scroll to see more colors
                         </AppText>
-                        <ColorGradientSelector colorsArray={nodeGradients} state={[selectedColorGradient, setSelectedColorGradient]} />
 
-                        <ShowHideEmojiSelector emojiState={[icon, setIcon]} />
+                        <ColorGradientSelector colorsArray={nodeGradients} state={[selectedColorGradient, setSelectedColorGradient]} />
                     </Animated.View>
                 )}
                 {mode === "IMPORT_TREE" && (
