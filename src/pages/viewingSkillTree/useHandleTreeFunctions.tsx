@@ -85,6 +85,7 @@ function useHandleTreeFunctions(
                 dispatch(updateUserTrees(updatedTree));
             },
             openAddSkillModal: (zoneType: "PARENT" | "CHILDREN" | "LEFT_BROTHER" | "RIGHT_BROTHER", node: Tree<Skill>) => {
+                console.log(zoneType, node);
                 const dndZone = dndZoneCoordinatesCopy.find((zone) => zone.ofNode === node.nodeId && zone.type === zoneType);
 
                 if (!dndZone) throw new Error("couldn't find dndZone in runOnTreeRender");

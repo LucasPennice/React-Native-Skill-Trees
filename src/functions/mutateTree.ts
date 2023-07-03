@@ -177,6 +177,13 @@ export function insertNodesBasedOnDnDZone(selectedDndZone: DnDZone, currentTree:
         };
     });
 
+    const indexOfTargetNode = parentOfTargetNode.children.findIndex((n) => n.nodeId === targetNode.nodeId);
+
+    if (indexOfTargetNode === -1) throw new Error("indexOfTargetNode couldn't be found at insertNodesBasedOnDnDZone");
+
+    const leftSiblingsOfTargetNode = parentOfTargetNode.children.slice(0, indexOfTargetNode);
+    const rightSiblingsOfTargetNode = parentOfTargetNode.children.slice(indexOfTargetNode + 1, parentOfTargetNode.children.length);
+
     if (selectedDndZone.type === "LEFT_BROTHER") return handleInsertNodeAsLeftSibling(childrenToAdd);
 
     //RIGHT BROTHER CASE
@@ -241,7 +248,7 @@ export function insertNodesBasedOnDnDZone(selectedDndZone: DnDZone, currentTree:
         const updatedParent: Tree<Skill> = {
             ...treePropertiesToInherit,
             category: parentOfTargetNode!.category,
-            children: [...childrenToAdd, ...parentOfTargetNode!.children],
+            children: [...leftSiblingsOfTargetNode, ...childrenToAdd, targetNode!, ...rightSiblingsOfTargetNode],
             data: parentOfTargetNode!.data,
             isRoot: parentOfTargetNode!.isRoot,
             level: parentOfTargetNode!.level,
@@ -257,7 +264,7 @@ export function insertNodesBasedOnDnDZone(selectedDndZone: DnDZone, currentTree:
         const updatedParent: Tree<Skill> = {
             ...treePropertiesToInherit,
             category: parentOfTargetNode!.category,
-            children: [...parentOfTargetNode!.children, ...childrenToAdd],
+            children: [...leftSiblingsOfTargetNode, targetNode!, ...childrenToAdd, ...rightSiblingsOfTargetNode],
             data: parentOfTargetNode!.data,
             isRoot: parentOfTargetNode!.isRoot,
             level: parentOfTargetNode!.level,
