@@ -82,7 +82,7 @@ function ViewingSkillTree({ navigation, route }: Props) {
         navigation,
         openChildrenHoistSelector
     );
-    const functions = useHandleTreeFunctions({ modal: modalUseState, params: route.params }, navigation);
+    const functions = useHandleTreeFunctions({ modal: modalUseState, params: route.params }, { openChildrenHoistSelector }, navigation);
 
     const addTreeFunctions = useMemo(() => {
         return {

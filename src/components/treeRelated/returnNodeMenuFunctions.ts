@@ -15,7 +15,7 @@ function returnNodeMenuFunctions(
 
     const { confirmDeleteTree, navigate, openAddSkillModal, openCanvasSettingsModal, toggleCompletionOfSkill } = functions;
 
-    if (foundNodeOfMenu.category === "SKILL") return menuSkillFunctions();
+    if (foundNodeOfMenu.category === "SKILL") return menuFunctionsForSkillNode();
 
     if (foundNodeOfMenu.category === "SKILL_TREE")
         return {
@@ -38,7 +38,7 @@ function returnNodeMenuFunctions(
         selectingPosition: {},
     };
 
-    function menuSkillFunctions() {
+    function menuFunctionsForSkillNode() {
         const parentOfNode = centeredCoordinatedWithTreeData.find((n) => n.nodeId === foundNodeOfMenu!.parentId);
         const nodeInTree = findNodeById(tree, foundNodeOfMenu!.nodeId);
 
@@ -94,9 +94,9 @@ function returnNodeMenuFunctions(
                 return toggleCompletionOfSkill(tree, nodeInTree);
             };
 
-            result.idle.verticalDown = () => {
-                console.log("eliminar el nodo");
-            };
+            result.idle.verticalDown = () => functions?.confirmDeleteNode(tree, nodeInTree);
+
+            result.idle.horizontalLeft = () => functions?.selectNode(nodeInTree.nodeId);
         }
 
         return result;

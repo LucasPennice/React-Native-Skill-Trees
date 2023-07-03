@@ -1,9 +1,9 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { StackNavigatorParams } from "../../../App";
 import { InteractiveTreeFunctions } from "../../components/treeRelated/InteractiveTree";
-import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
+import { deleteNodeWithNoChildren, updateNodeAndTreeCompletion } from "../../functions/mutateTree";
 import { useAppDispatch } from "../../redux/reduxHooks";
 import { removeUserTree, setSelectedDndZone, setSelectedNode, updateUserTrees } from "../../redux/userTreesSlice";
 import { DnDZone, Skill, Tree } from "../../types";
@@ -13,6 +13,9 @@ function useHandleTreeFunctions(
     state: {
         params: StackNavigatorParams["ViewingSkillTree"];
         modal: [ModalState, (v: ModalState) => void];
+    },
+    functions: {
+        openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void;
     },
     navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>
 ) {
@@ -25,7 +28,11 @@ function useHandleTreeFunctions(
     //This is a copy of the Dnd zones inside InteractiveTree 👇
     const [dndZoneCoordinatesCopy, setDndZoneCoordinatesCopy] = useState<DnDZone[]>([]);
 
-    const functions: InteractiveTreeFunctions = useMemo(() => {
+    useEffect(() => {
+        modalRef.current = modalState;
+    }, [modalState]);
+
+    const result: InteractiveTreeFunctions = useMemo(() => {
         const onNodeClick = (node: Tree<Skill>) => {
             if (modalRef.current !== "IDLE") return;
 
@@ -44,6 +51,14 @@ function useHandleTreeFunctions(
 
         const nodeMenu: InteractiveTreeFunctions["nodeMenu"] = {
             navigate: navigation.navigate,
+            confirmDeleteNode: (tree: Tree<Skill>, node: Tree<Skill>) => {
+                if (node.children.length !== 0) return functions.openChildrenHoistSelector(node);
+
+                const result = deleteNodeWithNoChildren(tree, node);
+
+                dispatch(updateUserTrees(result));
+            },
+            selectNode: (nodeId: string) => dispatch(setSelectedNode(nodeId)),
             confirmDeleteTree: (treeId: string) => {
                 Alert.alert(
                     "Delete this tree?",
@@ -88,9 +103,9 @@ function useHandleTreeFunctions(
         };
 
         return { onNodeClick, onDndZoneClick, nodeMenu, runOnTreeRender };
-    }, [dispatch, dndZoneCoordinatesCopy, navigation.navigate, params, setModalState]);
+    }, [dispatch, dndZoneCoordinatesCopy, functions, navigation.navigate, params, setModalState]);
 
-    return functions;
+    return result;
 }
 
 export default useHandleTreeFunctions;

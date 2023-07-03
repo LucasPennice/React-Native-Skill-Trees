@@ -47,6 +47,7 @@ function useHandleMemoizedTreeProps(
             renderStyle: "hierarchy",
             showDndZones,
             blockLongPress: modalState !== "IDLE",
+            editTreeFromNodeMenu: true,
         };
     }, [canvasDisplaySettings, modalState, showDndZones]);
 
