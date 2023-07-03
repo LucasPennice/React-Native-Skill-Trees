@@ -69,19 +69,22 @@ function HomepageTree({ n: { navigation, route }, state }: Props) {
 export default HomepageTree;
 
 function buildHomepageTree(userTrees: Tree<Skill>[], canvasDisplaySettings: CanvasDisplaySettings) {
-    const { homepageTreeColor, homepageTreeName } = canvasDisplaySettings;
+    const { homepageTreeColor, homepageTreeName, homepageTreeIcon } = canvasDisplaySettings;
     const ROOT_ID = "homepageRoot";
 
     const modifiedUserTrees = userTrees.map((tree) => {
         return { ...tree, isRoot: false, parentId: ROOT_ID };
     });
 
+    const isEmoji = homepageTreeIcon !== "";
+    const text = isEmoji ? homepageTreeIcon : homepageTreeName[0];
+
     const result: Tree<Skill> = {
         accentColor: homepageTreeColor,
         nodeId: ROOT_ID,
         isRoot: true,
         children: modifiedUserTrees,
-        data: getDefaultSkillValue(homepageTreeName, false, { isEmoji: false, text: "S" }),
+        data: getDefaultSkillValue(homepageTreeName, false, { isEmoji, text }),
         level: 0,
         parentId: null,
         treeId: "HomepageTree",

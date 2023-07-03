@@ -11,6 +11,7 @@ export type CanvasDisplaySettings = {
     showIcons: boolean;
     homepageTreeColor: ColorGradient;
     homepageTreeName: string;
+    homepageTreeIcon: string;
 };
 
 // Define the initial state using that type
@@ -20,6 +21,7 @@ export const defaultCanvasDisplaySettings: CanvasDisplaySettings = {
     showCircleGuide: false,
     showIcons: true,
     homepageTreeColor: WHITE_GRADIENT,
+    homepageTreeIcon: "L",
     homepageTreeName: "Life Skills",
 };
 
@@ -42,6 +44,9 @@ export const canvasDisplaySettingsSlice = createSlice({
         setHomepageTreeColor: (state, action: PayloadAction<ColorGradient>) => {
             state.homepageTreeColor = action.payload;
         },
+        setHomepageTreeIcon: (state, action: PayloadAction<string>) => {
+            state.homepageTreeIcon = action.payload;
+        },
         setOneColorPerTree: (state, action: PayloadAction<boolean>) => {
             state.oneColorPerTree = action.payload;
         },
@@ -58,6 +63,7 @@ export const {
     setHomepageTreeColor,
     setOneColorPerTree,
     setShowCircleGuide,
+    setHomepageTreeIcon,
     setShowLabel,
     populateCanvasDisplaySettings,
     setShowIcons,

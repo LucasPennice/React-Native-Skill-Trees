@@ -5,6 +5,7 @@ import { centerFlex, colors, nodeGradients } from "../parameters";
 import {
     selectCanvasDisplaySettings,
     setHomepageTreeColor,
+    setHomepageTreeIcon,
     setHomepageTreeName,
     setOneColorPerTree,
     setShowCircleGuide,
@@ -45,9 +46,11 @@ const NODE_SIZE = 57;
 function CanvasSettingsModal({ closeModal, open }: Props) {
     const { oneColorPerTree, showCircleGuide, showLabel, homepageTreeColor, showIcons, homepageTreeName } =
         useAppSelector(selectCanvasDisplaySettings);
+    const { width } = Dimensions.get("screen");
     const dispatch = useAppDispatch();
 
     const [homeTreeName, setHomeTreeName] = useState(homepageTreeName);
+    const [icon, setIcon] = useState("");
 
     const updateOneColorPerTree = (v: boolean) => {
         dispatch(setOneColorPerTree(v));
@@ -70,7 +73,19 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
         dispatch(setHomepageTreeName(homeTreeName));
     }, [homeTreeName]);
 
-    const state = { showCircleGuide, showLabel, homeTreeName, homepageTreeColor, oneColorPerTree, showIcons };
+    useEffect(() => {
+        dispatch(setHomepageTreeIcon(icon));
+    }, [icon]);
+
+    const state = {
+        showCircleGuide,
+        showLabel,
+        homepageTreeIcon: icon,
+        homepageTreeColor,
+        oneColorPerTree,
+        showIcons,
+        homepageTreeName: homeTreeName,
+    };
 
     return (
         <FlingToDismissModal closeModal={closeModal} open={open}>
@@ -116,6 +131,30 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
                         containerStyles={{ marginBottom: 15 }}
                     />
 
+                    <View style={{ flexDirection: "row", marginBottom: 15, justifyContent: "space-between", alignItems: "center" }}>
+                        <View style={{ width: width - 160 }}>
+                            <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+                                <AppText style={{ color: "#FFFFFF", marginBottom: 5, fontFamily: "helveticaBold" }} fontSize={20}>
+                                    Icon
+                                </AppText>
+                                <AppText style={{ color: colors.unmarkedText, marginLeft: 5, marginTop: 2 }} fontSize={16}>
+                                    (optional)
+                                </AppText>
+                            </View>
+                            <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }} fontSize={14}>
+                                Your keyboard can switch to an emoji mode. To access it, look for a button located near the bottom left of your
+                                keyboard.
+                            </AppText>
+                        </View>
+                        <AppTextInput
+                            placeholder={"🧠"}
+                            textStyle={{ fontFamily: "emojisMono", fontSize: 40 }}
+                            textState={[icon, setIcon]}
+                            pattern={new RegExp(/\p{Extended_Pictographic}/u)}
+                            containerStyles={{ width: 130 }}
+                        />
+                    </View>
+
                     <RadioInput state={[oneColorPerTree, updateOneColorPerTree]} text={"Monochromatic"} style={{ marginBottom: 15 }} />
                     <RadioInput state={[showCircleGuide, updateShowCircleGuide]} text={"Show depth guides"} />
                     <AppText fontSize={18} style={{ color: "#FFFFFF", marginBottom: 10 }}>
@@ -134,10 +173,21 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
     );
 }
 
-function Node1({ homepageTreeColor, showIcons }: { homepageTreeColor: ColorGradient; showIcons: boolean }) {
+function Node1({ state }: { state: { homepageTreeColor: ColorGradient; showIcons: boolean; homepageTreeName: string; homepageTreeIcon: string } }) {
+    const { homepageTreeColor, showIcons, homepageTreeIcon, homepageTreeName } = state;
+
     const Node = useMemo(() => {
-        return <NodeView node={{ ...MockNode, accentColor: homepageTreeColor, category: "USER" }} size={NODE_SIZE} hideIcon={!showIcons} />;
-    }, [homepageTreeColor, showIcons]);
+        const isEmoji = homepageTreeIcon !== "";
+
+        const node: Tree<Skill> = {
+            ...MockNode,
+            accentColor: homepageTreeColor,
+            category: "USER",
+            data: { ...MockNode.data, icon: { isEmoji, text: isEmoji ? homepageTreeIcon : homepageTreeName[0] }, name: homepageTreeName },
+        };
+
+        return <NodeView node={node} size={NODE_SIZE} hideIcon={!showIcons} />;
+    }, [homepageTreeIcon, homepageTreeColor, homepageTreeName[0], showIcons]);
     return (
         <View style={{ gap: 7 }}>
             <View style={centerFlex}>{Node}</View>
@@ -190,7 +240,8 @@ function HomePageTreeExample({
     state: {
         showCircleGuide: boolean;
         showLabel: boolean;
-        homeTreeName: string;
+        homepageTreeIcon: string;
+        homepageTreeName: string;
         homepageTreeColor: ColorGradient;
         oneColorPerTree: boolean;
         showIcons: boolean;
@@ -198,7 +249,7 @@ function HomePageTreeExample({
 }) {
     const { width } = Dimensions.get("window");
 
-    const { homeTreeName, homepageTreeColor, oneColorPerTree, showCircleGuide, showIcons, showLabel } = state;
+    const { homepageTreeIcon, homepageTreeColor, oneColorPerTree, showCircleGuide, showIcons, showLabel, homepageTreeName } = state;
 
     return (
         <View style={[centerFlex, { marginBottom: 15, height: 100, flexDirection: "row", justifyContent: "space-between", overflow: "hidden" }]}>
@@ -218,7 +269,7 @@ function HomePageTreeExample({
             )}
             <View style={{ position: "absolute", top: 38, width: width - 60, left: 20, height: 2, backgroundColor: colors.line }} />
 
-            <Node1 homepageTreeColor={homepageTreeColor} showIcons={showIcons} />
+            <Node1 state={{ homepageTreeColor, homepageTreeIcon, homepageTreeName, showIcons }} />
             <Node2 state={{ homepageTreeColor, oneColorPerTree, showIcons, showLabel }} />
         </View>
     );
