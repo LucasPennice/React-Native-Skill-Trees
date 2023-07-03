@@ -125,7 +125,7 @@ function TreeStats({
         <View style={{ borderTopColor: colors.line, borderColor: "transparent", borderWidth: 1, paddingTop: 15 }}>
             <View style={[centerFlex, { flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }]}>
                 <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
-                    Completed Percentage
+                    Completed (%)
                 </AppText>
                 <AppText style={{ color: selectedNode.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
                     {completedPercenage.toFixed(2)}%
