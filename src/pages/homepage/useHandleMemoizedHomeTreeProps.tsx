@@ -4,7 +4,7 @@ import { useCallback, useMemo } from "react";
 import { Alert } from "react-native";
 import { StackNavigatorParams } from "../../../App";
 import { InteractiveNodeState, InteractiveTreeConfig, InteractiveTreeFunctions } from "../../components/treeRelated/InteractiveTree";
-import SelectedNodeMenu from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
+import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { getMenuNonEditingFunctions } from "../../components/treeRelated/selectedNodeMenu/useGetMenuFunctions";
 import { findNodeById } from "../../functions/extractInformationFromTree";
 import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
@@ -67,6 +67,8 @@ function useHandleMemoizedHomeTreeProps(
                         { cancelable: true }
                     );
                 },
+                selectNode: () => {},
+                confirmDeleteNode: () => {},
                 toggleCompletionOfSkill: (treeToUpdate: Tree<Skill>, node: Tree<Skill>) => {
                     let updatedNode: Tree<Skill> = { ...node, data: { ...node.data, isCompleted: !node.data.isCompleted } };
 
@@ -86,7 +88,12 @@ function useHandleMemoizedHomeTreeProps(
     const RenderOnSelectedNodeId = useMemo(() => {
         const nonEditingMenuFunctions = getMenuNonEditingFunctions(selectedNode, navigation, clearSelectedNode);
 
-        const selectedNodeMenuState = { screenDimensions, selectedNode: selectedNode!, selectedTree: homepageTree };
+        const selectedNodeMenuState: SelectedNodeMenuState = {
+            screenDimensions,
+            selectedNode: selectedNode!,
+            selectedTree: homepageTree,
+            initialMode: "VIEWING",
+        };
 
         return <SelectedNodeMenu functions={nonEditingMenuFunctions} state={selectedNodeMenuState} />;
         //eslint-disable-next-line

@@ -7,6 +7,7 @@ type UserTreesSlice = {
     userTrees: Tree<Skill>[];
     currentTreeId: string | undefined;
     selectedNode: string | null;
+    selectedNodeMenuMode: "EDITING" | "VIEWING";
     selectedDndZone: DnDZone | undefined;
     newNode: Tree<Skill> | undefined;
 };
@@ -18,6 +19,7 @@ const initialState: UserTreesSlice = {
     selectedNode: null,
     selectedDndZone: undefined,
     newNode: undefined,
+    selectedNodeMenuMode: "VIEWING",
 };
 
 export type ModifiableNodeProperties = { name?: string; isCompleted?: boolean };
@@ -57,8 +59,13 @@ export const userTreesSlice = createSlice({
 
             state.userTrees = state.userTrees.filter((t) => t.treeId !== treeToDeleteId);
         },
-        setSelectedNode: (state, action: PayloadAction<string | null>) => {
-            state.selectedNode = action.payload;
+        setSelectedNode: (state, action: PayloadAction<{ nodeId: string | null; menuMode: "EDITING" | "VIEWING" }>) => {
+            state.selectedNode = action.payload.nodeId;
+            state.selectedNodeMenuMode = action.payload.menuMode;
+        },
+        clearSelectedNode: (state) => {
+            state.selectedNode = null;
+            state.selectedNodeMenuMode = initialState.selectedNodeMenuMode;
         },
         setSelectedDndZone: (state, action: PayloadAction<DnDZone | undefined>) => {
             state.selectedDndZone = action.payload;
@@ -91,6 +98,7 @@ export const {
     setSelectedNode,
     updateUserTreeWithAppendedNode,
     setSelectedDndZone,
+    clearSelectedNode,
     clearNewNodeState,
     setNewNode,
 } = userTreesSlice.actions;

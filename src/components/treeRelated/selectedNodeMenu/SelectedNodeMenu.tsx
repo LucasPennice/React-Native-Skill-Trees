@@ -15,6 +15,7 @@ import Viewing from "./Viewing";
 export type SelectedNodeMenuState = {
     selectedNode: Tree<Skill>;
     selectedTree: Tree<Skill>;
+    initialMode: "EDITING" | "VIEWING";
     screenDimensions: ScreenDimentions;
 };
 
@@ -43,7 +44,7 @@ type Props = {
 //THE OTHER NODE TYPES' COMPLETION STATE IS CALCULATED ☢️
 
 function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Props) {
-    const { screenDimensions, selectedNode, selectedTree } = state;
+    const { screenDimensions, selectedNode, selectedTree, initialMode } = state;
     const { height } = screenDimensions;
     const { closeMenu, goToSkillPage, goToTreePage, goToEditTreePage } = functions;
     const { menuWidth, styles } = getNodeMenuStyles(screenDimensions);
@@ -56,7 +57,7 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
         isCompleted: selectedNode.data.isCompleted,
         name: selectedNode.data.name,
     });
-    const [mode, setMode] = useState<"EDITING" | "VIEWING">("VIEWING");
+    const [mode, setMode] = useState<"EDITING" | "VIEWING">(initialMode);
 
     const editingEnabled = Boolean(mutateFunctions !== undefined) && Boolean(allowEdit) && selectedNode.category === "SKILL";
 
@@ -69,7 +70,9 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
     }, [mode]);
 
     useEffect(() => {
-        setMode("VIEWING");
+        return () => {
+            setMode(initialMode);
+        };
     }, []);
 
     const showSaveChangesBtn = mode === "EDITING" && checkForSave(newSkillProps, selectedNode);

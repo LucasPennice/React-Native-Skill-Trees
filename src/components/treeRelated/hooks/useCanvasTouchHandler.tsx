@@ -3,7 +3,7 @@ import { useState } from "react";
 import { GestureStateChangeEvent, LongPressGestureHandlerEventPayload } from "react-native-gesture-handler";
 import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, TOUCH_BUFFER } from "../../../parameters";
 import { useAppDispatch } from "../../../redux/reduxHooks";
-import { setSelectedNode } from "../../../redux/userTreesSlice";
+import { setSelectedNode, clearSelectedNode } from "../../../redux/userTreesSlice";
 import { CartesianCoordinate, DnDZone, NodeCoordinate, SelectedNodeId } from "../../../types";
 import { distanceFromLeftCanvasEdge } from "../coordinateFunctions";
 
@@ -118,11 +118,11 @@ const useCanvasTouchHandler = ({ config, functions, state }: Props) => {
 
                 const clickedNode = nodeCoordinatesCentered.find(didTapCircle(touchInfo));
 
-                if (clickedNode === undefined) return dispatch(setSelectedNode(null));
+                if (clickedNode === undefined) return dispatch(clearSelectedNode());
 
                 if (selectedNodeId !== clickedNode.id && onNodeClick) return onNodeClick(clickedNode.id);
 
-                return dispatch(setSelectedNode(null));
+                return dispatch(clearSelectedNode());
             },
         },
         [selectedNodeId, nodeCoordinatesCentered, openMenuOnNode]

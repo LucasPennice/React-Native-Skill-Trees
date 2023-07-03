@@ -6,7 +6,7 @@ import { checkIfTreeHasInvalidCompleteDependencies, findParentOfNode } from "../
 import { deleteNodeWithChildren } from "../../../functions/mutateTree";
 import { centerFlex, colors } from "../../../parameters";
 import { useAppDispatch } from "../../../redux/reduxHooks";
-import { setSelectedNode, updateUserTrees } from "../../../redux/userTreesSlice";
+import { clearSelectedNode, setSelectedNode, updateUserTrees } from "../../../redux/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 import useCurrentTree from "../../../useCurrentTree";
 
@@ -31,7 +31,7 @@ function SelectChildrenToHoistWhenDeletingParentModal({ nodeToDelete, closeModal
 
         closeModalAndClearState();
 
-        dispatch(setSelectedNode(null));
+        dispatch(clearSelectedNode());
     };
 
     const confirmDeleteNode = (children: Tree<Skill>) => () => {

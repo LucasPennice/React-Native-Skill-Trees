@@ -17,7 +17,7 @@ import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSl
 import { clearSelectedDndZone, selectNewNodes } from "../../redux/newNodeSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { changeTree, selectTreeSlice, setSelectedNode, updateUserTreeWithAppendedNode } from "../../redux/userTreesSlice";
+import { changeTree, clearSelectedNode, selectTreeSlice, setSelectedNode, updateUserTreeWithAppendedNode } from "../../redux/userTreesSlice";
 import { DnDZone, Skill, Tree } from "../../types";
 import useCurrentTree from "../../useCurrentTree";
 import AddNodeStateIndicator from "./AddNodeStateIndicator";
@@ -39,7 +39,7 @@ type Props = NativeStackScreenProps<StackNavigatorParams, "ViewingSkillTree">;
 function ViewingSkillTree({ navigation, route }: Props) {
     //Redux State
     const selectedTree = useCurrentTree();
-    const { selectedNode: selectedNodeId } = useAppSelector(selectTreeSlice);
+    const { selectedNode: selectedNodeId, selectedNodeMenuMode } = useAppSelector(selectTreeSlice);
     const { selectedDndZone } = useAppSelector(selectNewNodes);
     const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
@@ -76,7 +76,7 @@ function ViewingSkillTree({ navigation, route }: Props) {
     };
 
     const { RenderOnSelectedNodeId, config, interactiveTreeState, tree } = useHandleMemoizedTreeProps(
-        { canvasDisplaySettings, modalState, screenDimensions, selectedDndZone, selectedTree, showDndZones },
+        { canvasDisplaySettings, modalState, screenDimensions, selectedDndZone, selectedTree, showDndZones, selectedNodeMenuMode },
         selectedNodeId,
         canvasRef,
         navigation,
@@ -171,7 +171,7 @@ function ViewingSkillTree({ navigation, route }: Props) {
             return () => {
                 setModalState("IDLE");
                 setNodeToDelete(null);
-                dispatch(setSelectedNode(null));
+                dispatch(clearSelectedNode());
                 dispatch(clearSelectedDndZone());
             };
         }, []);
@@ -187,7 +187,7 @@ function ViewingSkillTree({ navigation, route }: Props) {
 
             if (!params.selectedNodeId) return;
 
-            dispatch(setSelectedNode(params.selectedNodeId));
+            dispatch(setSelectedNode({ nodeId: params.selectedNodeId, menuMode: params.selectedNodeMenuMode ?? "VIEWING" }));
             //eslint-disable-next-line
         }, []);
     }

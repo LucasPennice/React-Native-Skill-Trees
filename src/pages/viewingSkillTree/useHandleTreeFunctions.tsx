@@ -38,7 +38,7 @@ function useHandleTreeFunctions(
 
             const nodeId = node.nodeId;
 
-            dispatch(setSelectedNode(nodeId));
+            dispatch(setSelectedNode({ nodeId, menuMode: "VIEWING" }));
             setModalState("NODE_SELECTED");
         };
 
@@ -58,7 +58,7 @@ function useHandleTreeFunctions(
 
                 dispatch(updateUserTrees(result));
             },
-            selectNode: (nodeId: string) => dispatch(setSelectedNode(nodeId)),
+            selectNode: (nodeId: string) => dispatch(setSelectedNode({ nodeId, menuMode: params?.selectedNodeMenuMode ?? "VIEWING" })),
             confirmDeleteTree: (treeId: string) => {
                 Alert.alert(
                     "Delete this tree?",
