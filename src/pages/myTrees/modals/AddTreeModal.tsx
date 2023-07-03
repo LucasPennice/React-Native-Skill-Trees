@@ -67,8 +67,8 @@ function AddTreeModal() {
     const createNewTree = () => {
         if (treeName === "" || !selectedColorGradient) return Alert.alert("Please fill all of the fields");
 
-        const iconText = icon ?? treeName;
         const isEmoji = icon === "" ? false : true;
+        const iconText = isEmoji ? icon : treeName[0];
 
         const newTree = createTree(
             treeName,

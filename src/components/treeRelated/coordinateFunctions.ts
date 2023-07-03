@@ -150,10 +150,10 @@ export function calculateDragAndDropZones(nodeCoordinatesCentered: NodeCoordinat
             result.push(rightBrotherDndZone);
         }
 
-        if (nodeDoesntHaveChildren(nodeCoordinatesCentered, pos)) {
-            const onlyChildrenDndZone = dndZonesFromNodeCoord(pos, "ONLY_CHILDREN");
-            result.push(onlyChildrenDndZone);
-        }
+        // if (nodeDoesntHaveChildren(nodeCoordinatesCentered, pos)) {
+        const onlyChildrenDndZone = dndZonesFromNodeCoord(pos, "ONLY_CHILDREN");
+        result.push(onlyChildrenDndZone);
+        // }
     }
 
     return result;
