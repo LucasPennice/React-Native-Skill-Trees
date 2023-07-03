@@ -152,7 +152,7 @@ export function insertNodesBasedOnDnDZone(selectedDndZone: DnDZone, currentTree:
 
     if (selectedDndZone.type === "PARENT") return handleInsertNodeAsParent();
 
-    if (selectedDndZone.type === "ONLY_CHILDREN") return handleInsertNodeAsChildren();
+    if (selectedDndZone.type === "CHILDREN") return handleInsertNodeAsChildren();
     //From now on we are in the "BROTHERS" cases
 
     const parentOfTargetNode = findParentOfNode(currentTree, targetNode.nodeId);
@@ -219,7 +219,9 @@ export function insertNodesBasedOnDnDZone(selectedDndZone: DnDZone, currentTree:
             return {
                 ...treePropertiesToInherit,
                 category: "SKILL",
-                children: [],
+                children: targetNode!.children.map((c) => {
+                    return { ...c, parentId: n.nodeId };
+                }),
                 data: n.data,
                 isRoot: false,
                 level: targetNode!.level + 1,

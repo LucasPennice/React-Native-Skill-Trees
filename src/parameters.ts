@@ -17,7 +17,7 @@ export const MENU_DAMPENING = { damping: 20, stiffness: 300 };
 export const MENU_HIGH_DAMPENING = { damping: 26, stiffness: 300 };
 
 export const PARENT_DND_ZONE_DIMENTIONS = { width: 4 * CIRCLE_SIZE, height: 75 / 2 };
-export const ONLY_CHILDREN_DND_ZONE_DIMENTIONS = { ...PARENT_DND_ZONE_DIMENTIONS, height: 75 / 2 };
+export const CHILD_DND_ZONE_DIMENTIONS = { ...PARENT_DND_ZONE_DIMENTIONS, height: 75 / 2 };
 export const BROTHER_DND_ZONE_HEIGHT = 3 * CIRCLE_SIZE;
 
 export const CANVAS_HORIZONTAL_PADDING = 200;

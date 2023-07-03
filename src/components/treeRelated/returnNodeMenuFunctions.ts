@@ -53,7 +53,7 @@ function returnNodeMenuFunctions(
 
         result.selectingPosition = {
             verticalUp: () => openAddSkillModal("PARENT", nodeInTree),
-            verticalDown: () => openAddSkillModal("ONLY_CHILDREN", nodeInTree),
+            verticalDown: () => openAddSkillModal("CHILDREN", nodeInTree),
             horizontalLeft: () => openAddSkillModal("LEFT_BROTHER", nodeInTree),
             horizontalRight: () => openAddSkillModal("RIGHT_BROTHER", nodeInTree),
         };
@@ -103,7 +103,7 @@ function returnNodeMenuFunctions(
                 horizontalLeft: () => navigate("MyTrees", { editingTreeId: foundNodeOfMenu!.treeId }),
             },
             selectingPosition: {
-                verticalDown: () => openAddSkillModal("ONLY_CHILDREN", nodeInTree),
+                verticalDown: () => openAddSkillModal("CHILDREN", nodeInTree),
             },
         };
     }

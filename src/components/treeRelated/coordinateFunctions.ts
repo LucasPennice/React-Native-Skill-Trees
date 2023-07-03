@@ -8,7 +8,7 @@ import {
     DISTANCE_BETWEEN_CHILDREN,
     DISTANCE_BETWEEN_GENERATIONS,
     NAV_HEGIHT,
-    ONLY_CHILDREN_DND_ZONE_DIMENTIONS,
+    CHILD_DND_ZONE_DIMENTIONS,
     PARENT_DND_ZONE_DIMENTIONS,
 } from "../../parameters";
 import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
@@ -118,13 +118,13 @@ function dndZonesFromNodeCoord(nodeCoord: NodeCoordinate, dndType: DnDZone["type
             ofNode: nodeCoord.id,
         };
 
-    if (dndType === "ONLY_CHILDREN")
+    if (dndType === "CHILDREN")
         return {
-            height: ONLY_CHILDREN_DND_ZONE_DIMENTIONS.height,
-            width: ONLY_CHILDREN_DND_ZONE_DIMENTIONS.width,
-            x: nodeCoord.x - ONLY_CHILDREN_DND_ZONE_DIMENTIONS.width / 2,
+            height: CHILD_DND_ZONE_DIMENTIONS.height,
+            width: CHILD_DND_ZONE_DIMENTIONS.width,
+            x: nodeCoord.x - CHILD_DND_ZONE_DIMENTIONS.width / 2,
             y: nodeCoord.y + 1.5 * CIRCLE_SIZE,
-            type: "ONLY_CHILDREN",
+            type: "CHILDREN",
             ofNode: nodeCoord.id,
         };
 
@@ -150,19 +150,11 @@ export function calculateDragAndDropZones(nodeCoordinatesCentered: NodeCoordinat
             result.push(rightBrotherDndZone);
         }
 
-        // if (nodeDoesntHaveChildren(nodeCoordinatesCentered, pos)) {
-        const onlyChildrenDndZone = dndZonesFromNodeCoord(pos, "ONLY_CHILDREN");
+        const onlyChildrenDndZone = dndZonesFromNodeCoord(pos, "CHILDREN");
         result.push(onlyChildrenDndZone);
-        // }
     }
 
     return result;
-}
-
-function nodeDoesntHaveChildren(nodeCoordinatesCentered: NodeCoordinate[], pos: NodeCoordinate) {
-    const foo = nodeCoordinatesCentered.find((x) => x.parentId === pos.id);
-
-    return foo === undefined;
 }
 
 export function getCanvasDimensions(coordinates: NodeCoordinate[], screenDimentions: ScreenDimentions, showDepthGuides?: boolean): CanvasDimensions {

@@ -99,7 +99,7 @@ export type ModifiableProperties<T> = {
 export type HierarchicalContour = { leftNode: { coord: number; id: string }; rightNode: { coord: number; id: string } };
 
 export type DnDZone = {
-    type: "PARENT" | "ONLY_CHILDREN" | "LEFT_BROTHER" | "RIGHT_BROTHER";
+    type: "PARENT" | "CHILDREN" | "LEFT_BROTHER" | "RIGHT_BROTHER";
     ofNode: string;
     x: number;
     y: number;

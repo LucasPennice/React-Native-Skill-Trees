@@ -28,7 +28,7 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
 
     let parentNode = nodeOfDnDZone;
 
-    if (dnDZone.type !== "ONLY_CHILDREN") {
+    if (dnDZone.type !== "CHILDREN") {
         const n = findNodeById(selectedTree, nodeOfDnDZone!.parentId);
         if (!n) throw new Error("undefined n at AddNodeModal");
         parentNode = n;
@@ -40,7 +40,7 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
     const [currentNode, setCurrentNode] = useState<Tree<Skill>>(getInitialCurrentSkillValue());
     const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>(undefined);
 
-    const shouldBlockAddButton = dnDZone.type === "PARENT" && nodesToAdd.length >= 1 && selectedNodeId === undefined;
+    const shouldBlockAddButton = getShouldBlockAddButton();
 
     useEffect(() => {
         if (!selectedNodeId) return setCurrentNode(getInitialCurrentSkillValue());
@@ -254,6 +254,13 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
         };
 
         return tree;
+    }
+
+    function getShouldBlockAddButton() {
+        if (dnDZone.type === "PARENT" && nodesToAdd.length >= 1 && selectedNodeId === undefined) return true;
+        if (dnDZone.type === "CHILDREN" && nodesToAdd.length >= 1 && nodeOfDnDZone!.children.length > 0 && selectedNodeId === undefined) return true;
+
+        return false;
     }
 }
 
