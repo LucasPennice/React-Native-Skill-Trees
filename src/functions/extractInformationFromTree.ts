@@ -356,3 +356,20 @@ export function checkIfTreeHasInvalidCompleteDependencies(tree: Tree<Skill>) {
 
     return result;
 }
+
+export function checkIfCompletionIsAllowedForNode<T extends { category: Tree<Skill>["category"]; data: Skill }>(parentOfNode: T | undefined) {
+    if (!parentOfNode) return true;
+    if (parentOfNode.category !== "SKILL") return true;
+    if (parentOfNode.data.isCompleted) return true;
+
+    return false;
+}
+
+export function checkIfUncompletionIsAllowedForNode(nodeToCheck: Tree<Skill>) {
+    if (nodeToCheck.children.length === 0) return true;
+
+    const immediateChildrenComplete = nodeToCheck.children.find((c) => c.data.isCompleted === true);
+    if (immediateChildrenComplete !== undefined) return false;
+
+    return true;
+}

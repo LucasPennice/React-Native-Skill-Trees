@@ -1,7 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StackNavigatorParams } from "../../../../App";
-import { treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
-import { deleteNodeWithNoChildren, editTreeProperties } from "../../../functions/mutateTree";
+import { deleteNodeWithNoChildren, updateNodeAndTreeCompletion } from "../../../functions/mutateTree";
 import { Skill, Tree } from "../../../types";
 
 function getMenuNonEditingFunctions(
@@ -39,18 +38,15 @@ function getMenuEditingFunctions(
 
     return {
         updateNode: (updatedNode: Tree<Skill>) => {
-            if (!selectedNode) throw new Error("No selected node at updateNode");
+            try {
+                if (!selectedNode) throw new Error("No selected node at updateNode");
 
-            let updatedRootNode = editTreeProperties(selectedTree, selectedNode, updatedNode);
+                const updatedRootNode = updateNodeAndTreeCompletion(selectedTree, updatedNode);
 
-            if (!updatedRootNode) throw new Error("Error saving tree in PopUpMenu");
-
-            const treeSkillCompletion = treeCompletedSkillPercentage(updatedRootNode);
-
-            if (treeSkillCompletion === 100) updatedRootNode = { ...updatedRootNode, data: { ...updatedRootNode.data, isCompleted: true } };
-            if (treeSkillCompletion !== 100) updatedRootNode = { ...updatedRootNode, data: { ...updatedRootNode.data, isCompleted: false } };
-
-            updateUserTrees(updatedRootNode);
+                updateUserTrees(updatedRootNode);
+            } catch (error) {
+                console.error(error);
+            }
         },
         handleDeleteNode: (node: Tree<Skill>) => {
             if (!selectedTree) throw new Error("No selectedTree at deleteNode");
@@ -66,4 +62,4 @@ function getMenuEditingFunctions(
     };
 }
 
-export { getMenuNonEditingFunctions, getMenuEditingFunctions };
+export { getMenuEditingFunctions, getMenuNonEditingFunctions };

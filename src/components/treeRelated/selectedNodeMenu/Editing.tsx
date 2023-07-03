@@ -39,7 +39,7 @@ function Editing({
 
     const updateSkillCompletion = (isCompleted: boolean) => () => {
         if (isCompleted && !checkComplete()) return Alert.alert(`Cannot learn ${newName} because the parent skill is not learned`);
-        if (!isCompleted && !checkUnComplete()) return Alert.alert(`Cannot unlearn ${newName}, unlearn it's children skills first`);
+        if (!isCompleted && !checkUnComplete()) return Alert.alert(`Cannot unlearn ${newName}, please unlearn it's children skills first`);
 
         setNewSkillProps((prev: SkillPropertiesEditableOnPopMenu) => {
             return { ...prev, isCompleted };

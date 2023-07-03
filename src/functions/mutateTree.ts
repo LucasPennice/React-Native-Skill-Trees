@@ -1,6 +1,5 @@
-import { DISTANCE_BETWEEN_CHILDREN, DISTANCE_BETWEEN_GENERATIONS } from "../parameters";
 import { DnDZone, ModifiableProperties, Skill, Tree } from "../types";
-import { findNodeById, findParentOfNode } from "./extractInformationFromTree";
+import { findNodeById, findParentOfNode, treeCompletedSkillPercentage } from "./extractInformationFromTree";
 
 export function deleteNodeWithNoChildren(rootNode: Tree<Skill> | undefined, nodeToDelete: Tree<Skill>) {
     if (!rootNode) return undefined;
@@ -84,7 +83,11 @@ export function deleteNodeWithChildren(rootNode: Tree<Skill> | undefined, nodeTo
     }
 }
 
-export function editTreeProperties(rootNode: Tree<Skill> | undefined, targetNode: Tree<Skill>, newProperties: ModifiableProperties<Tree<Skill>>) {
+export function editTreeProperties<T extends { nodeId: string }>(
+    rootNode: Tree<Skill> | undefined,
+    targetNode: T,
+    newProperties: ModifiableProperties<Tree<Skill>>
+) {
     if (!rootNode) return undefined;
 
     //Base Case 👇
@@ -289,4 +292,17 @@ export function mutateEveryTreeNode(rootNode: Tree<Skill> | undefined, mutation:
     result.children = updatedChildren;
 
     return result;
+}
+
+export function updateNodeAndTreeCompletion(tree: Tree<Skill> | undefined, updatedNode: Tree<Skill>) {
+    let updatedRootNode = editTreeProperties(tree, { nodeId: updatedNode.nodeId }, updatedNode);
+
+    if (!updatedRootNode) throw new Error("Error saving tree in updateNodeAndTreeCompletion");
+
+    const treeSkillCompletion = treeCompletedSkillPercentage(updatedRootNode);
+
+    if (treeSkillCompletion === 100) updatedRootNode = { ...updatedRootNode, data: { ...updatedRootNode.data, isCompleted: true } };
+    if (treeSkillCompletion !== 100) updatedRootNode = { ...updatedRootNode, data: { ...updatedRootNode.data, isCompleted: false } };
+
+    return updatedRootNode;
 }

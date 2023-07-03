@@ -75,7 +75,7 @@ function ViewingSkillTree({ navigation, route }: Props) {
     };
 
     const { RenderOnSelectedNodeId, config, functions, interactiveTreeState, tree } = useHandleMemoizedTreeProps(
-        { canvasDisplaySettings, modal: modalUseState, screenDimensions, selectedDndZone, selectedTree, showDndZones },
+        { canvasDisplaySettings, modal: modalUseState, screenDimensions, selectedDndZone, selectedTree, showDndZones, params: route.params },
         selectedNodeId,
         canvasRef,
         navigation,
@@ -180,6 +180,12 @@ function ViewingSkillTree({ navigation, route }: Props) {
             if (!params) return;
 
             dispatch(changeTree(params.treeId));
+
+            //Add Node Modal param is handled inside useHandleMemoizedTreeProps
+
+            if (!params.selectedNodeId) return;
+
+            dispatch(setSelectedNode(params.selectedNodeId));
             //eslint-disable-next-line
         }, []);
     }

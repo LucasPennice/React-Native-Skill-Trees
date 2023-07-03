@@ -1,4 +1,3 @@
-import * as Haptics from "expo-haptics";
 import { useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 import Animated, {
@@ -27,6 +26,7 @@ import { CanvasDimensions, CoordinatesWithTreeData } from "../../../types";
 import AppText from "../../AppText";
 import DirectionMenu, { Config } from "../../DirectionMenu";
 import { distanceFromLeftCanvasEdge } from "../coordinateFunctions";
+import useWrapNodeMenuFunctions from "./useWrapNodeMenuFunctions";
 
 const nodeMenuConfig: Config = {
     horizontalSize: 150,
@@ -43,92 +43,46 @@ const nodeMenuConfig: Config = {
 const MENU_WIDTH = 300;
 const JOYSTICK_WIDTH = 50;
 
+export type NodeMenuFunctions = {
+    idle: {
+        horizontalLeft?: () => void;
+        horizontalRight?: () => void;
+        verticalUp?: () => void;
+        verticalDown?: () => void;
+    };
+    selectingPosition: {
+        horizontalLeft?: () => void;
+        horizontalRight?: () => void;
+        verticalUp?: () => void;
+        verticalDown?: () => void;
+    };
+};
+
 function NodeMenu({
     data,
     offset,
     canvasDimentions,
     screenDimensions,
     closeNodeMenu,
+    functions,
 }: {
     data: CoordinatesWithTreeData;
     offset: { x: number; y: number };
     canvasDimentions: CanvasDimensions;
     screenDimensions: ScreenDimentions;
     closeNodeMenu: () => void;
+    functions: NodeMenuFunctions;
 }) {
     const { canvasWidth } = canvasDimentions;
+    const { idle, selectingPosition } = functions;
 
     const leftCanvasEdgeOffset = distanceFromLeftCanvasEdge(canvasWidth, screenDimensions.width, offset.x);
 
     const position = { x: data.x - leftCanvasEdgeOffset - MENU_WIDTH / 4, y: data.y + offset.y - MENU_WIDTH / 4 };
 
-    const [hovering, setHovering] = useState<"LEFT" | "UP" | "RIGHT" | "DOWN" | undefined>(undefined);
     const [menuMode, setMenuMode] = useState<"NORMAL" | "SELECTING_NODE_POSITION">("NORMAL");
 
-    const menuActions = {
-        horizontalLeft: () => {
-            console.log("hL");
-            closeNodeMenu();
-            setHovering(undefined);
-        },
-        horizontalRight: () => {
-            setMenuMode("SELECTING_NODE_POSITION");
-            setHovering(undefined);
-        },
-        verticalDown: () => {
-            console.log("vD");
-            closeNodeMenu();
-            setHovering(undefined);
-        },
-        verticalUp: () => {
-            console.log("vU");
-            closeNodeMenu();
-            setHovering(undefined);
-        },
-    };
-
-    const selectingNodeActions = {
-        horizontalLeft: () => {
-            console.log("node as left sibling");
-            closeNodeMenu();
-            setHovering(undefined);
-        },
-        horizontalRight: () => {
-            console.log("node as right sibling");
-            closeNodeMenu();
-            setHovering(undefined);
-        },
-        verticalDown: () => {
-            console.log("node as child");
-            closeNodeMenu();
-            setHovering(undefined);
-        },
-        verticalUp: () => {
-            console.log("node as parent");
-            closeNodeMenu();
-            setHovering(undefined);
-        },
-    };
-
-    const onHoverActions = {
-        horizontalLeft: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-            setHovering("LEFT");
-        },
-        horizontalRight: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-            setHovering("RIGHT");
-        },
-        verticalDown: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-            setHovering("DOWN");
-        },
-        verticalUp: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-            setHovering("UP");
-        },
-        clearHover: () => setHovering(undefined),
-    };
+    const { hovering, idleActions, onHoverActions, selectNodePositionAction } = useWrapNodeMenuFunctions(functions, closeNodeMenu, setMenuMode);
 
     //Avoids "enter" animation triggering twice when hovering state changes
     const MemoedJoystick = useMemo(() => {
@@ -168,11 +122,11 @@ function NodeMenu({
                 <ArrowDownLeftTopRight />
                 <InnerCircle mode={menuMode} />
                 <HoveringEffect hovering={hovering} />
-                {menuMode === "NORMAL" && <ActionLabel />}
-                {menuMode === "SELECTING_NODE_POSITION" && <PositionLabel />}
+                {menuMode === "NORMAL" && <ActionLabel actions={idle} />}
+                {menuMode === "SELECTING_NODE_POSITION" && <PositionLabel actions={selectingPosition} />}
 
                 <DirectionMenu
-                    action={menuMode === "NORMAL" ? menuActions : selectingNodeActions}
+                    action={menuMode === "NORMAL" ? idleActions : selectNodePositionAction}
                     onHoverActions={onHoverActions}
                     config={nodeMenuConfig}>
                     {MemoedJoystick}
@@ -272,16 +226,16 @@ function Joystick() {
     );
 }
 
-function ActionLabel() {
+function ActionLabel({ actions }: { actions: NodeMenuFunctions["idle"] }) {
     return (
         <>
             <Animated.View style={{ position: "absolute", left: 51, top: 15 }} entering={FadeInDown} exiting={FadeOutDown.duration(150)}>
-                <AppText fontSize={12} style={{ color: "#FFFFFF" }}>
+                <AppText fontSize={12} style={{ color: "#FFFFFF", opacity: actions.verticalUp ? 1 : 0.5 }}>
                     CHECK
                 </AppText>
             </Animated.View>
             <Animated.View style={{ position: "absolute", left: 5, top: 70 }} entering={FadeInRight} exiting={FadeOutRight.duration(150)}>
-                <AppText fontSize={12} style={{ color: "#FFFFFF" }}>
+                <AppText fontSize={12} style={{ color: "#FFFFFF", opacity: actions.horizontalLeft ? 1 : 0.5 }}>
                     EDIT
                 </AppText>
             </Animated.View>
@@ -291,7 +245,7 @@ function ActionLabel() {
                 </AppText>
             </Animated.View>
             <Animated.View style={{ position: "absolute", left: 51, top: 125 }} entering={FadeInUp} exiting={FadeOutUp.duration(150)}>
-                <AppText fontSize={12} style={{ color: "#FFFFFF" }}>
+                <AppText fontSize={12} style={{ color: "#FFFFFF", opacity: actions.verticalDown ? 1 : 0.5 }}>
                     DELETE
                 </AppText>
             </Animated.View>
@@ -299,14 +253,14 @@ function ActionLabel() {
     );
 }
 
-function PositionLabel() {
+function PositionLabel({ actions }: { actions: NodeMenuFunctions["selectingPosition"] }) {
     return (
         <>
             <Animated.View
                 style={{ position: "absolute", left: 52, top: 15 }}
                 entering={FadeInDown.duration(250)}
                 exiting={FadeOutDown.duration(150)}>
-                <AppText fontSize={12} style={{ color: "#FFFFFF" }}>
+                <AppText fontSize={12} style={{ color: "#FFFFFF", opacity: actions.verticalUp ? 1 : 0.5 }}>
                     PARENT
                 </AppText>
             </Animated.View>
@@ -314,7 +268,7 @@ function PositionLabel() {
                 style={{ position: "absolute", left: 8, top: 70 }}
                 entering={FadeInRight.duration(250)}
                 exiting={FadeOutRight.duration(150)}>
-                <AppText fontSize={12} style={{ color: "#FFFFFF" }}>
+                <AppText fontSize={12} style={{ color: "#FFFFFF", opacity: actions.horizontalLeft ? 1 : 0.5 }}>
                     LEFT
                 </AppText>
             </Animated.View>
@@ -322,12 +276,12 @@ function PositionLabel() {
                 style={{ position: "absolute", left: 107, top: 70 }}
                 entering={FadeInLeft.duration(250)}
                 exiting={FadeOutLeft.duration(150)}>
-                <AppText fontSize={12} style={{ color: "#FFFFFF" }}>
+                <AppText fontSize={12} style={{ color: "#FFFFFF", opacity: actions.horizontalRight ? 1 : 0.5 }}>
                     RIGHT
                 </AppText>
             </Animated.View>
             <Animated.View style={{ position: "absolute", left: 58, top: 125 }} entering={FadeInUp.duration(250)} exiting={FadeOutUp.duration(150)}>
-                <AppText fontSize={12} style={{ color: "#FFFFFF" }}>
+                <AppText fontSize={12} style={{ color: "#FFFFFF", opacity: actions.verticalDown ? 1 : 0.5 }}>
                     CHILD
                 </AppText>
             </Animated.View>

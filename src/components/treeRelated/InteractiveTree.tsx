@@ -1,8 +1,10 @@
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Blur, Canvas, SkiaDomView, runTiming, useValue } from "@shopify/react-native-skia";
-import { MutableRefObject, memo, useEffect } from "react";
+import { MutableRefObject, memo, useCallback, useEffect } from "react";
 import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
+import { StackNavigatorParams } from "../../../App";
 import { findNodeById } from "../../functions/extractInformationFromTree";
 import RadialSkillTree from "../../pages/homepage/RadialSkillTree";
 import { centerFlex } from "../../parameters";
@@ -18,12 +20,17 @@ import {
     getNodesCoordinates,
     removeTreeDataFromCoordinate,
 } from "./coordinateFunctions";
+import NodeLongPressIndicator from "./general/NodeLongPressIndicator";
 import DragAndDropZones from "./hierarchical/DragAndDropZones";
 import HierarchicalSkillTree from "./hierarchical/HierarchicalSkillTree";
 import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
 import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
 import NodeMenu from "./nodeMenu/NodeMenu";
-import NodeLongPressIndicator from "./general/NodeLongPressIndicator";
+import returnNodeMenuFunctions from "./returnNodeMenuFunctions";
+
+type NavigateFunction =
+    | NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>["navigate"]
+    | NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>["navigate"];
 
 export type InteractiveTreeConfig = {
     renderStyle: "hierarchy" | "radial";
@@ -31,6 +38,7 @@ export type InteractiveTreeConfig = {
     showDndZones?: boolean;
     isInteractive: boolean;
     blockLongPress?: boolean;
+    editTreeFromNodeMenu?: boolean;
 };
 
 export type InteractiveNodeState = {
@@ -43,7 +51,14 @@ export type InteractiveNodeState = {
 export type InteractiveTreeFunctions = {
     onNodeClick?: (node: Tree<Skill>) => void;
     onDndZoneClick?: (zone: DnDZone) => void;
-    nodeMenu?: {};
+    nodeMenu: {
+        navigate: NavigateFunction;
+        openCanvasSettingsModal?: () => void;
+        confirmDeleteTree: (treeId: string) => void;
+        openAddSkillModal: (zoneType: DnDZone["type"], node: Tree<Skill>) => void;
+        toggleCompletionOfSkill: (tree: Tree<Skill>, node: Tree<Skill>) => void;
+    };
+    runOnTreeRender?: (dndZoneCoordinates: DnDZone[]) => void;
 };
 
 export type TreeCoordinates = {
@@ -61,7 +76,7 @@ export type InteractiveTreeProps = {
 
 function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeId }: InteractiveTreeProps) {
     const { screenDimensions, selectedNodeId, canvasRef } = state;
-    const { isInteractive, renderStyle, showDndZones, canvasDisplaySettings, blockLongPress } = config;
+    const { isInteractive, renderStyle, showDndZones, canvasDisplaySettings, blockLongPress, editTreeFromNodeMenu } = config;
     const { showCircleGuide } = canvasDisplaySettings;
 
     //Derived State
@@ -92,6 +107,13 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
 
         functions.onDndZoneClick(zone);
     };
+
+    useEffect(() => {
+        if (!functions || !functions.runOnTreeRender) return;
+
+        functions.runOnTreeRender(dndZoneCoordinates);
+        //eslint-disable-next-line
+    }, []);
 
     //Hooks
     const touchHandlerState = {
@@ -127,6 +149,14 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
     const renderSelectedNodeMenu = selectedNodeCoordinates && selectedNodeId && isInteractive;
     const renderNodeMenu = foundNodeOfMenu && openMenuOnNode && isInteractive;
 
+    const nodeMenuFunctions = returnNodeMenuFunctions(
+        foundNodeOfMenu,
+        centeredCoordinatedWithTreeData,
+        tree,
+        editTreeFromNodeMenu,
+        functions?.nodeMenu
+    );
+
     return (
         <>
             <GestureDetector gesture={canvasGestures}>
@@ -149,6 +179,7 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
             />
             {renderNodeMenu && (
                 <NodeMenu
+                    functions={nodeMenuFunctions}
                     data={foundNodeOfMenu}
                     offset={offset}
                     canvasDimentions={canvasDimentions}

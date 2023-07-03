@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { Easing, FadeInDown, FadeOutDown, FadeOutUp, Layout, runOnJS } from "react-native-reanimated";
-import { findNodeById } from "../../../functions/extractInformationFromTree";
+import { checkIfCompletionIsAllowedForNode, checkIfUncompletionIsAllowedForNode, findNodeById } from "../../../functions/extractInformationFromTree";
 import { CIRCLE_SIZE_SELECTED, NAV_HEGIHT, colors } from "../../../parameters";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { generalStyles } from "../../../styles";
@@ -97,16 +97,8 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
                 return updateNode(result);
             },
             handleDeleteSelectedNode: () => handleDeleteNode(selectedNode),
-            checkIfCompleteAllowed: () => {
-                if (!parentOfSelectedNode) return true;
-                if (parentOfSelectedNode.category !== "SKILL") return true;
-                if (parentOfSelectedNode.data.isCompleted) return true;
-
-                return false;
-            },
-            checkIfUnCompleteAllowed: () => {
-                return true;
-            },
+            checkIfCompleteAllowed: () => checkIfCompletionIsAllowedForNode(parentOfSelectedNode),
+            checkIfUnCompleteAllowed: () => checkIfUncompletionIsAllowedForNode(selectedNode),
         };
     };
 

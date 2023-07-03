@@ -1,0 +1,106 @@
+import { Alert } from "react-native";
+import { checkIfCompletionIsAllowedForNode, checkIfUncompletionIsAllowedForNode, findNodeById } from "../../functions/extractInformationFromTree";
+import { CoordinatesWithTreeData, Skill, Tree } from "../../types";
+import { InteractiveTreeFunctions } from "./InteractiveTree";
+import { NodeMenuFunctions } from "./nodeMenu/NodeMenu";
+
+function returnNodeMenuFunctions(
+    foundNodeOfMenu: CoordinatesWithTreeData | undefined,
+    centeredCoordinatedWithTreeData: CoordinatesWithTreeData[],
+    tree: Tree<Skill>,
+    editTreeFromNodeMenu: boolean | undefined,
+    functions?: InteractiveTreeFunctions["nodeMenu"]
+) {
+    if (!foundNodeOfMenu || !functions) return { idle: {}, selectingPosition: {} };
+
+    const { confirmDeleteTree, navigate, openAddSkillModal, openCanvasSettingsModal, toggleCompletionOfSkill } = functions;
+
+    if (foundNodeOfMenu.category === "SKILL") return menuSkillFunctions();
+
+    if (foundNodeOfMenu.category === "SKILL_TREE")
+        return {
+            idle: {
+                verticalDown: () => confirmDeleteTree(foundNodeOfMenu.treeId),
+                horizontalLeft: () => navigate("MyTrees", { editingTreeId: foundNodeOfMenu.treeId }),
+            },
+            selectingPosition: {
+                verticalDown: () => console.log("añadir un arbol como hijo de este pinche pendejo"),
+            },
+        };
+
+    //USER NODE CASE 👇
+
+    return {
+        idle: {
+            horizontalRight: () => navigate("MyTrees", { openNewTreeModal: true }),
+            horizontalLeft: openCanvasSettingsModal,
+        },
+        selectingPosition: {},
+    };
+
+    function menuSkillFunctions() {
+        const parentOfNode = centeredCoordinatedWithTreeData.find((n) => n.nodeId === foundNodeOfMenu!.parentId);
+        const nodeInTree = findNodeById(tree, foundNodeOfMenu!.nodeId);
+
+        if (!nodeInTree) throw new Error("Node not in tree in returnNodeMenuFunctions");
+
+        let result: NodeMenuFunctions = { idle: {}, selectingPosition: {} };
+
+        result.idle.verticalUp = () =>
+            functions?.navigate("ViewingSkillTree", {
+                treeId: nodeInTree.treeId,
+                selectedNodeId: nodeInTree.nodeId,
+                selectedNodeMenuMode: "EDITING",
+            });
+
+        result.idle.horizontalLeft = () =>
+            functions?.navigate("ViewingSkillTree", {
+                treeId: nodeInTree.treeId,
+                selectedNodeId: nodeInTree.nodeId,
+                selectedNodeMenuMode: "EDITING",
+            });
+
+        result.selectingPosition = {
+            verticalUp: () => openAddSkillModal("PARENT", nodeInTree),
+            verticalDown: () => openAddSkillModal("ONLY_CHILDREN", nodeInTree),
+            horizontalLeft: () => openAddSkillModal("LEFT_BROTHER", nodeInTree),
+            horizontalRight: () => openAddSkillModal("RIGHT_BROTHER", nodeInTree),
+        };
+
+        result.idle.verticalDown = () =>
+            functions?.navigate("ViewingSkillTree", {
+                treeId: nodeInTree.treeId,
+                selectedNodeId: nodeInTree.nodeId,
+                selectedNodeMenuMode: "EDITING",
+            });
+
+        //👇 Add functions to edit nodes from the node menu
+        if (editTreeFromNodeMenu) {
+            result.idle.verticalUp = () => {
+                if (nodeInTree.data.isCompleted) {
+                    const canUnComplete = checkIfUncompletionIsAllowedForNode(nodeInTree);
+
+                    if (!canUnComplete) return Alert.alert(`Cannot unlearn ${nodeInTree.data.name}, please unlearn it's children skills first`);
+
+                    return toggleCompletionOfSkill(tree, nodeInTree);
+                }
+
+                //NODE IS NOT COMPLETE CASE 👇
+
+                const canComplete = checkIfCompletionIsAllowedForNode(parentOfNode);
+
+                if (!canComplete) return Alert.alert(`Cannot learn ${nodeInTree.data.name} because the parent skill is not learned`);
+
+                return toggleCompletionOfSkill(tree, nodeInTree);
+            };
+
+            result.idle.verticalDown = () => {
+                console.log("eliminar el nodo");
+            };
+        }
+
+        return result;
+    }
+}
+
+export default returnNodeMenuFunctions;

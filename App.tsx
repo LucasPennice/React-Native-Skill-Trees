@@ -25,13 +25,21 @@ import { store } from "./src/redux/reduxStore";
 import { updateSafeScreenDimentions } from "./src/redux/screenDimentionsSlice";
 import { populateUserId } from "./src/redux/userSlice";
 import { populateUserTrees } from "./src/redux/userTreesSlice";
-import { Skill, Tree } from "./src/types";
+import { DnDZone, Skill, Tree } from "./src/types";
 import useIsSharingAvailable from "./src/useIsSharingAvailable";
 import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
 
 export type StackNavigatorParams = {
     Home: undefined;
-    ViewingSkillTree?: { treeId: string };
+    ViewingSkillTree?: {
+        treeId: string;
+        selectedNodeId?: string;
+        selectedNodeMenuMode?: "EDITING" | "VIEWING";
+        addNodeModal?: {
+            nodeId: string;
+            dnDZoneType: DnDZone["type"];
+        };
+    };
     MyTrees: { openNewTreeModal?: boolean; editingTreeId?: string };
     Settings: undefined;
     SkillPage: Tree<Skill>;

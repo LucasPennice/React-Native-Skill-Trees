@@ -9,16 +9,18 @@ import { findNodeById } from "../../functions/extractInformationFromTree";
 import { CanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch } from "../../redux/reduxHooks";
 import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { setSelectedDndZone, setSelectedNode, updateUserTrees } from "../../redux/userTreesSlice";
+import { removeUserTree, setSelectedDndZone, setSelectedNode, updateUserTrees } from "../../redux/userTreesSlice";
 import { DnDZone, SelectedNodeId, Skill, Tree } from "../../types";
 import { ModalState } from "./ViewingSkillTree";
+import { Alert } from "react-native";
+import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
 
 function useHandleMemoizedTreeProps(
     state: {
         screenDimensions: ScreenDimentions;
         canvasDisplaySettings: CanvasDisplaySettings;
         selectedTree: Tree<Skill> | undefined;
-
+        params: StackNavigatorParams["ViewingSkillTree"];
         showDndZones: boolean | undefined;
         selectedDndZone: DnDZone | undefined;
         modal: [ModalState, (v: ModalState) => void];
@@ -28,7 +30,7 @@ function useHandleMemoizedTreeProps(
     navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>,
     openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void
 ) {
-    const { canvasDisplaySettings, screenDimensions, selectedTree, showDndZones, selectedDndZone, modal } = state;
+    const { canvasDisplaySettings, screenDimensions, selectedTree, showDndZones, selectedDndZone, modal, params } = state;
     const [modalState, setModalState] = modal;
     //
     const dispatch = useAppDispatch();
@@ -77,7 +79,43 @@ function useHandleMemoizedTreeProps(
             setModalState("INPUT_DATA_FOR_NEW_NODE");
         };
 
-        return { onNodeClick, onDndZoneClick };
+        const nodeMenu: InteractiveTreeFunctions["nodeMenu"] = {
+            navigate: navigation.navigate,
+            confirmDeleteTree: (treeId: string) => {
+                Alert.alert(
+                    "Delete this tree?",
+                    "",
+                    [
+                        { text: "No", style: "cancel" },
+                        { text: "Yes", onPress: () => dispatch(removeUserTree(treeId)), style: "destructive" },
+                    ],
+                    { cancelable: true }
+                );
+            },
+            toggleCompletionOfSkill: (treeToUpdate: Tree<Skill>, node: Tree<Skill>) => {
+                let updatedNode: Tree<Skill> = { ...node, data: { ...node.data, isCompleted: !node.data.isCompleted } };
+
+                const updatedTree = updateNodeAndTreeCompletion(treeToUpdate, updatedNode);
+
+                dispatch(updateUserTrees(updatedTree));
+            },
+            openAddSkillModal: () => {},
+        };
+
+        const runOnTreeRender = (dndZoneCoordinates: DnDZone[]) => {
+            if (!params || !params.addNodeModal) return;
+
+            const { dnDZoneType, nodeId } = params.addNodeModal;
+
+            const dndZone = dndZoneCoordinates.find((zone) => zone.ofNode === nodeId && zone.type === dnDZoneType);
+
+            if (!dndZone) throw new Error("couldn't find dndZone in runOnTreeRender");
+
+            dispatch(setSelectedDndZone(dndZone));
+            setModalState("INPUT_DATA_FOR_NEW_NODE");
+        };
+
+        return { onNodeClick, onDndZoneClick, nodeMenu, runOnTreeRender };
         //eslint-disable-next-line
     }, [dispatch]);
 

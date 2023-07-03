@@ -7,11 +7,10 @@ import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeScreenshot";
 import InteractiveTree from "../../components/treeRelated/InteractiveTree";
-import { mutateEveryTreeNode } from "../../functions/mutateTree";
 import { CanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { Skill, Tree, getDefaultSkillValue } from "../../types";
-import useHandleMemoizedTreeProps from "./useHandleMemoizedTreeProps";
+import useHandleMemoizedHomeTreeProps from "./useHandleMemoizedHomeTreeProps";
 
 type Props = {
     n: NativeStackScreenProps<StackNavigatorParams, "Home">;
@@ -28,12 +27,21 @@ function HomepageTree({ n: { navigation, route }, state }: Props) {
     const [isTakingScreenshot, setIsTakingScreenshot] = useState(false);
     const [canvasSettings, setCanvasSettings] = useState(false);
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+    const openCanvasSettings = () => setCanvasSettings(true);
     //Derived State
     const homepageTree = useMemo(() => buildHomepageTree(userTrees, canvasDisplaySettings), [canvasDisplaySettings, userTrees]);
 
     const canvasRef = useCanvasRef();
 
-    const interactiveTreeProps = useHandleMemoizedTreeProps(state, [selectedNodeId, setSelectedNodeId], canvasRef, homepageTree, navigation);
+    const interactiveTreeProps = useHandleMemoizedHomeTreeProps(
+        state,
+        [selectedNodeId, setSelectedNodeId],
+        canvasRef,
+        homepageTree,
+        navigation,
+        openCanvasSettings
+    );
     const { RenderOnSelectedNodeId, config, functions, interactiveTreeState } = interactiveTreeProps;
 
     return (
@@ -64,12 +72,8 @@ function buildHomepageTree(userTrees: Tree<Skill>[], canvasDisplaySettings: Canv
     const { homepageTreeColor, homepageTreeName } = canvasDisplaySettings;
     const ROOT_ID = "homepageRoot";
 
-    const modifiedUserTrees = userTrees.map((uT) => {
-        const treeWithUpdatedLevel = mutateEveryTreeNode(uT, increaseLevelByOne);
-
-        if (!treeWithUpdatedLevel) throw new Error("buildHomepageTree not treeWithUpdatedLevel");
-
-        return { ...treeWithUpdatedLevel, isRoot: false, parentId: ROOT_ID };
+    const modifiedUserTrees = userTrees.map((tree) => {
+        return { ...tree, isRoot: false, parentId: ROOT_ID };
     });
 
     const result: Tree<Skill> = {
@@ -88,8 +92,4 @@ function buildHomepageTree(userTrees: Tree<Skill>[], canvasDisplaySettings: Canv
     };
 
     return result;
-
-    function increaseLevelByOne(tree: Tree<Skill>): Tree<Skill> {
-        return { ...tree, level: tree.level + 1 };
-    }
 }
