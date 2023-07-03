@@ -96,7 +96,6 @@ function useHandleTreeFunctions(
 
         const runOnTreeRender = (dndZoneCoordinates: DnDZone[]) => {
             setDndZoneCoordinatesCopy(dndZoneCoordinates);
-
             if (!params || !params.addNodeModal) return;
 
             const { dnDZoneType, nodeId } = params.addNodeModal;

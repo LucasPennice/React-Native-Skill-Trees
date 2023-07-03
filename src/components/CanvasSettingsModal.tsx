@@ -1,14 +1,15 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import { Dimensions, ScrollView, View } from "react-native";
-import { WHITE_GRADIENT, centerFlex, colors, nodeGradients } from "../parameters";
+import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
+import { centerFlex, colors, nodeGradients } from "../parameters";
 import {
     selectCanvasDisplaySettings,
     setHomepageTreeColor,
+    setHomepageTreeName,
     setOneColorPerTree,
     setShowCircleGuide,
     setShowIcons,
     setShowLabel,
-    setHomepageTreeName,
 } from "../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../redux/reduxHooks";
 import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "../types";
@@ -16,9 +17,8 @@ import AppText from "./AppText";
 import AppTextInput from "./AppTextInput";
 import ColorGradientSelector from "./ColorGradientSelector";
 import FlingToDismissModal from "./FlingToDismissModal";
-import RadioInput from "./RadioInput";
 import NodeView from "./NodeView";
-import Animated, { FadeInDown, FadeOutDown, FadeOutUp } from "react-native-reanimated";
+import RadioInput from "./RadioInput";
 
 type Props = {
     closeModal: () => void;
