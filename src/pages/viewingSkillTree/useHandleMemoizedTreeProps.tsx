@@ -2,36 +2,32 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SkiaDomView } from "@shopify/react-native-skia";
 import { useEffect, useMemo, useRef } from "react";
 import { StackNavigatorParams } from "../../../App";
-import { InteractiveNodeState, InteractiveTreeConfig, InteractiveTreeFunctions } from "../../components/treeRelated/InteractiveTree";
+import { InteractiveNodeState, InteractiveTreeConfig } from "../../components/treeRelated/InteractiveTree";
 import SelectedNodeMenu from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { getMenuEditingFunctions, getMenuNonEditingFunctions } from "../../components/treeRelated/selectedNodeMenu/useGetMenuFunctions";
 import { findNodeById } from "../../functions/extractInformationFromTree";
 import { CanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { useAppDispatch } from "../../redux/reduxHooks";
 import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { removeUserTree, setSelectedDndZone, setSelectedNode, updateUserTrees } from "../../redux/userTreesSlice";
+import { setSelectedNode, updateUserTrees } from "../../redux/userTreesSlice";
 import { DnDZone, SelectedNodeId, Skill, Tree } from "../../types";
 import { ModalState } from "./ViewingSkillTree";
-import { Alert } from "react-native";
-import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
 
 function useHandleMemoizedTreeProps(
     state: {
         screenDimensions: ScreenDimentions;
         canvasDisplaySettings: CanvasDisplaySettings;
         selectedTree: Tree<Skill> | undefined;
-        params: StackNavigatorParams["ViewingSkillTree"];
         showDndZones: boolean | undefined;
         selectedDndZone: DnDZone | undefined;
-        modal: [ModalState, (v: ModalState) => void];
+        modalState: ModalState;
     },
     selectedNodeId: SelectedNodeId,
     canvasRef: React.RefObject<SkiaDomView>,
     navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>,
     openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void
 ) {
-    const { canvasDisplaySettings, screenDimensions, selectedTree, showDndZones, selectedDndZone, modal, params } = state;
-    const [modalState, setModalState] = modal;
+    const { canvasDisplaySettings, screenDimensions, selectedTree, showDndZones, selectedDndZone, modalState } = state;
     //
     const dispatch = useAppDispatch();
     const modalRef = useRef<ModalState>(modalState);
@@ -62,63 +58,6 @@ function useHandleMemoizedTreeProps(
         return selectedTree;
     }, [selectedTree]);
 
-    const functions: InteractiveTreeFunctions = useMemo(() => {
-        const onNodeClick = (node: Tree<Skill>) => {
-            if (modalRef.current !== "IDLE") return;
-
-            const nodeId = node.nodeId;
-
-            dispatch(setSelectedNode(nodeId));
-            setModalState("NODE_SELECTED");
-        };
-
-        const onDndZoneClick = (clickedZone: DnDZone | undefined) => {
-            if (modalRef.current !== "PLACING_NEW_NODE") return;
-            if (clickedZone === undefined) return;
-            dispatch(setSelectedDndZone(clickedZone));
-            setModalState("INPUT_DATA_FOR_NEW_NODE");
-        };
-
-        const nodeMenu: InteractiveTreeFunctions["nodeMenu"] = {
-            navigate: navigation.navigate,
-            confirmDeleteTree: (treeId: string) => {
-                Alert.alert(
-                    "Delete this tree?",
-                    "",
-                    [
-                        { text: "No", style: "cancel" },
-                        { text: "Yes", onPress: () => dispatch(removeUserTree(treeId)), style: "destructive" },
-                    ],
-                    { cancelable: true }
-                );
-            },
-            toggleCompletionOfSkill: (treeToUpdate: Tree<Skill>, node: Tree<Skill>) => {
-                let updatedNode: Tree<Skill> = { ...node, data: { ...node.data, isCompleted: !node.data.isCompleted } };
-
-                const updatedTree = updateNodeAndTreeCompletion(treeToUpdate, updatedNode);
-
-                dispatch(updateUserTrees(updatedTree));
-            },
-            openAddSkillModal: () => {},
-        };
-
-        const runOnTreeRender = (dndZoneCoordinates: DnDZone[]) => {
-            if (!params || !params.addNodeModal) return;
-
-            const { dnDZoneType, nodeId } = params.addNodeModal;
-
-            const dndZone = dndZoneCoordinates.find((zone) => zone.ofNode === nodeId && zone.type === dnDZoneType);
-
-            if (!dndZone) throw new Error("couldn't find dndZone in runOnTreeRender");
-
-            dispatch(setSelectedDndZone(dndZone));
-            setModalState("INPUT_DATA_FOR_NEW_NODE");
-        };
-
-        return { onNodeClick, onDndZoneClick, nodeMenu, runOnTreeRender };
-        //eslint-disable-next-line
-    }, [dispatch]);
-
     //Interactive Tree Props - SelectedNodeMenu
     const RenderOnSelectedNodeId = useMemo(() => {
         const clearSelectedNode = () => dispatch(setSelectedNode(null));
@@ -140,7 +79,7 @@ function useHandleMemoizedTreeProps(
         );
     }, [dispatch, navigation, openChildrenHoistSelector, screenDimensions, selectedNode, selectedTree]);
 
-    return { RenderOnSelectedNodeId, functions, tree, interactiveTreeState, config };
+    return { RenderOnSelectedNodeId, tree, interactiveTreeState, config };
 }
 
 export default useHandleMemoizedTreeProps;

@@ -1,0 +1,96 @@
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useMemo, useRef, useState } from "react";
+import { Alert } from "react-native";
+import { StackNavigatorParams } from "../../../App";
+import { InteractiveTreeFunctions } from "../../components/treeRelated/InteractiveTree";
+import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
+import { useAppDispatch } from "../../redux/reduxHooks";
+import { removeUserTree, setSelectedDndZone, setSelectedNode, updateUserTrees } from "../../redux/userTreesSlice";
+import { DnDZone, Skill, Tree } from "../../types";
+import { ModalState } from "./ViewingSkillTree";
+
+function useHandleTreeFunctions(
+    state: {
+        params: StackNavigatorParams["ViewingSkillTree"];
+        modal: [ModalState, (v: ModalState) => void];
+    },
+    navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>
+) {
+    //State
+    const { modal, params } = state;
+    const [modalState, setModalState] = modal;
+    //Hooks
+    const dispatch = useAppDispatch();
+    const modalRef = useRef<ModalState>(modalState);
+    //This is a copy of the Dnd zones inside InteractiveTree 👇
+    const [dndZoneCoordinatesCopy, setDndZoneCoordinatesCopy] = useState<DnDZone[]>([]);
+
+    const functions: InteractiveTreeFunctions = useMemo(() => {
+        const onNodeClick = (node: Tree<Skill>) => {
+            if (modalRef.current !== "IDLE") return;
+
+            const nodeId = node.nodeId;
+
+            dispatch(setSelectedNode(nodeId));
+            setModalState("NODE_SELECTED");
+        };
+
+        const onDndZoneClick = (clickedZone: DnDZone | undefined) => {
+            if (modalRef.current !== "PLACING_NEW_NODE") return;
+            if (clickedZone === undefined) return;
+            dispatch(setSelectedDndZone(clickedZone));
+            setModalState("INPUT_DATA_FOR_NEW_NODE");
+        };
+
+        const nodeMenu: InteractiveTreeFunctions["nodeMenu"] = {
+            navigate: navigation.navigate,
+            confirmDeleteTree: (treeId: string) => {
+                Alert.alert(
+                    "Delete this tree?",
+                    "",
+                    [
+                        { text: "No", style: "cancel" },
+                        { text: "Yes", onPress: () => dispatch(removeUserTree(treeId)), style: "destructive" },
+                    ],
+                    { cancelable: true }
+                );
+            },
+            toggleCompletionOfSkill: (treeToUpdate: Tree<Skill>, node: Tree<Skill>) => {
+                let updatedNode: Tree<Skill> = { ...node, data: { ...node.data, isCompleted: !node.data.isCompleted } };
+
+                const updatedTree = updateNodeAndTreeCompletion(treeToUpdate, updatedNode);
+
+                dispatch(updateUserTrees(updatedTree));
+            },
+            openAddSkillModal: (zoneType: "PARENT" | "ONLY_CHILDREN" | "LEFT_BROTHER" | "RIGHT_BROTHER", node: Tree<Skill>) => {
+                const dndZone = dndZoneCoordinatesCopy.find((zone) => zone.ofNode === node.nodeId && zone.type === zoneType);
+
+                if (!dndZone) throw new Error("couldn't find dndZone in runOnTreeRender");
+
+                dispatch(setSelectedDndZone(dndZone));
+                setModalState("INPUT_DATA_FOR_NEW_NODE");
+            },
+        };
+
+        const runOnTreeRender = (dndZoneCoordinates: DnDZone[]) => {
+            setDndZoneCoordinatesCopy(dndZoneCoordinates);
+
+            if (!params || !params.addNodeModal) return;
+
+            const { dnDZoneType, nodeId } = params.addNodeModal;
+
+            const dndZone = dndZoneCoordinates.find((zone) => zone.ofNode === nodeId && zone.type === dnDZoneType);
+
+            if (!dndZone) throw new Error("couldn't find dndZone in runOnTreeRender");
+
+            dispatch(setSelectedDndZone(dndZone));
+            setModalState("INPUT_DATA_FOR_NEW_NODE");
+        };
+
+        return { onNodeClick, onDndZoneClick, nodeMenu, runOnTreeRender };
+    }, [dispatch, dndZoneCoordinatesCopy, navigation.navigate, params, setModalState]);
+
+    return functions;
+}
+
+export default useHandleTreeFunctions;

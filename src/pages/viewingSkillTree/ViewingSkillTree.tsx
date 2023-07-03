@@ -24,6 +24,7 @@ import AddNodeStateIndicator from "./AddNodeStateIndicator";
 import AddNodeModal from "./modals/AddNodeModal";
 import SelectChildrenToHoistWhenDeletingParentModal from "./modals/SelectChildrenToHoistWhenDeletingParentModal";
 import useHandleMemoizedTreeProps from "./useHandleMemoizedTreeProps";
+import useHandleTreeFunctions from "./useHandleTreeFunctions";
 
 export type ModalState =
     | "TAKING_SCREENSHOT"
@@ -74,13 +75,14 @@ function ViewingSkillTree({ navigation, route }: Props) {
         setModalState("IDLE");
     };
 
-    const { RenderOnSelectedNodeId, config, functions, interactiveTreeState, tree } = useHandleMemoizedTreeProps(
-        { canvasDisplaySettings, modal: modalUseState, screenDimensions, selectedDndZone, selectedTree, showDndZones, params: route.params },
+    const { RenderOnSelectedNodeId, config, interactiveTreeState, tree } = useHandleMemoizedTreeProps(
+        { canvasDisplaySettings, modalState, screenDimensions, selectedDndZone, selectedTree, showDndZones },
         selectedNodeId,
         canvasRef,
         navigation,
         openChildrenHoistSelector
     );
+    const functions = useHandleTreeFunctions({ modal: modalUseState, params: route.params }, navigation);
 
     const addTreeFunctions = useMemo(() => {
         return {
