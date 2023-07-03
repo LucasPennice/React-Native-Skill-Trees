@@ -17,16 +17,7 @@ function returnNodeMenuFunctions(
 
     if (foundNodeOfMenu.category === "SKILL") return menuFunctionsForSkillNode();
 
-    if (foundNodeOfMenu.category === "SKILL_TREE")
-        return {
-            idle: {
-                verticalDown: () => confirmDeleteTree(foundNodeOfMenu.treeId),
-                horizontalLeft: () => navigate("MyTrees", { editingTreeId: foundNodeOfMenu.treeId }),
-            },
-            selectingPosition: {
-                verticalDown: () => console.log("añadir un arbol como hijo de este pinche pendejo"),
-            },
-        };
+    if (foundNodeOfMenu.category === "SKILL_TREE") return menuFunctionsForSkillTreeNode();
 
     //USER NODE CASE 👇
 
@@ -42,7 +33,7 @@ function returnNodeMenuFunctions(
         const parentOfNode = centeredCoordinatedWithTreeData.find((n) => n.nodeId === foundNodeOfMenu!.parentId);
         const nodeInTree = findNodeById(tree, foundNodeOfMenu!.nodeId);
 
-        if (!nodeInTree) throw new Error("Node not in tree in returnNodeMenuFunctions");
+        if (!nodeInTree) throw new Error("Node not in tree in menuFunctionsForSkillNode");
 
         let result: NodeMenuFunctions = { idle: {}, selectingPosition: {} };
 
@@ -100,6 +91,21 @@ function returnNodeMenuFunctions(
         }
 
         return result;
+    }
+
+    function menuFunctionsForSkillTreeNode() {
+        const nodeInTree = findNodeById(tree, foundNodeOfMenu!.nodeId);
+        if (!nodeInTree) throw new Error("Node not in tree in menuFunctionsForSkillNode");
+
+        return {
+            idle: {
+                verticalDown: () => confirmDeleteTree(foundNodeOfMenu!.treeId),
+                horizontalLeft: () => navigate("MyTrees", { editingTreeId: foundNodeOfMenu!.treeId }),
+            },
+            selectingPosition: {
+                verticalDown: () => openAddSkillModal("ONLY_CHILDREN", nodeInTree),
+            },
+        };
     }
 }
 

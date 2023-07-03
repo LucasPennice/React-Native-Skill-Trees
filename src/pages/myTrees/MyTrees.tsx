@@ -23,7 +23,7 @@ function MyTrees({ navigation, route }: Props) {
     const openNewTreeModal = useCallback(() => {
         if (params && params.openNewTreeModal) dispatch(open());
         //eslint-disable-next-line
-    }, []);
+    }, [params]);
 
     const openEditModal = useCallback(() => {
         if (params && params.editingTreeId) {
@@ -34,7 +34,7 @@ function MyTrees({ navigation, route }: Props) {
             dispatch(setTree(treeToEdit));
         }
         //eslint-disable-next-line
-    }, []);
+    }, [params]);
 
     useEffect(() => {
         openNewTreeModal();

@@ -65,7 +65,14 @@ function useHandleTreeFunctions(
                     "",
                     [
                         { text: "No", style: "cancel" },
-                        { text: "Yes", onPress: () => dispatch(removeUserTree(treeId)), style: "destructive" },
+                        {
+                            text: "Yes",
+                            onPress: () => {
+                                navigation.navigate("MyTrees", {});
+                                dispatch(removeUserTree(treeId));
+                            },
+                            style: "destructive",
+                        },
                     ],
                     { cancelable: true }
                 );
