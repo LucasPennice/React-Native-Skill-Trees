@@ -205,29 +205,44 @@ function getCanvasHeight(treeHeight: number, screenHeight: number) {
     return minCanvasHeight + CANVAS_VERTICAL_PADDING;
 }
 
-export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDimentions: CanvasDimensions, renderStyle: "hierarchy" | "radial") {
+export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDimentions: CanvasDimensions) {
     const { widthData, heightData, canvasWidth, canvasHeight } = canvasDimentions;
 
-    const { treeWidth, maxCoordinate: maxX, minCoordinate: minX } = widthData;
-    const treeHorizontalSpan = maxX + minX;
-    const treeWidthExtended = treeHorizontalSpan !== treeWidth;
+    const { treeWidth, maxCoordinate: maxX } = widthData;
 
-    const { treeHeight, maxCoordinate: maxY, minCoordinate: minY } = heightData;
-    const treeVerticalSpan = maxY - minY;
-    const treeHeightExtended = treeVerticalSpan !== treeHeight;
+    const { treeHeight, maxCoordinate: maxY } = heightData;
 
-    //👇 This works for BOTH hierarchical and radial trees
-    const distanceToCenterRootNode = canvasWidth / 2 + (treeWidthExtended ? 0 : -treeHorizontalSpan / 2);
-    //👇 This works ONLY for radial trees
-    const distanceToCenterRootNodeVerticallyRadial = canvasHeight / 2 + (treeHeightExtended ? 0 : treeVerticalSpan / 2);
-    //👇 This works ONLY for hierarchical trees
-    const distanceToCenterRootNodeVerticallyHierarchical = canvasHeight / 2 - treeVerticalSpan / 2;
+    const alignTreeRightWithLeftCorner = -maxX - CIRCLE_SIZE;
+    const treeWidthWithCircleSizeAccounted = treeWidth + 2 * CIRCLE_SIZE;
+    const horizontalPadding = (canvasWidth - treeWidthWithCircleSizeAccounted) / 2;
+    const distanceToCenterRootNodeHorizontallyWithoutCirlceGuide =
+        alignTreeRightWithLeftCorner + treeWidthWithCircleSizeAccounted + horizontalPadding;
+    //
+    const alignExtendedTreeRightWithLeftCorner = -treeWidth / 2 - CIRCLE_SIZE;
+    const distanceToCenterRootNodeHorizontallyWithCirlceGuide =
+        alignExtendedTreeRightWithLeftCorner + treeWidthWithCircleSizeAccounted + horizontalPadding;
+    const distanceToCenterRootNode = canvasDimentions.extendedForDepthGuides
+        ? distanceToCenterRootNodeHorizontallyWithCirlceGuide
+        : distanceToCenterRootNodeHorizontallyWithoutCirlceGuide;
+
+    const alignTreeBottomWithTopCorner = -maxY - CIRCLE_SIZE;
+    const treeHeightWithCircleSizeAccounted = treeHeight + 2 * CIRCLE_SIZE;
+    const verticalPadding = (canvasHeight - treeHeightWithCircleSizeAccounted) / 2;
+    const distanceToCenterRootNodeVerticallyWithoutCirlceGuide = treeHeightWithCircleSizeAccounted + alignTreeBottomWithTopCorner + verticalPadding;
+    //
+    const alignExtendedTreeBottomWithTopCorner = -treeHeight / 2 - CIRCLE_SIZE;
+    const distanceToCenterRootNodeVerticallyWithCirlceGuide =
+        treeHeightWithCircleSizeAccounted + alignExtendedTreeBottomWithTopCorner + verticalPadding;
+
+    const distanceToCenterRootNodeVertically = canvasDimentions.extendedForDepthGuides
+        ? distanceToCenterRootNodeVerticallyWithCirlceGuide
+        : distanceToCenterRootNodeVerticallyWithoutCirlceGuide;
 
     return nodeCoordinates.map((c) => {
         return {
             ...c,
             x: c.x + distanceToCenterRootNode,
-            y: c.y + (renderStyle === "hierarchy" ? distanceToCenterRootNodeVerticallyHierarchical : distanceToCenterRootNodeVerticallyRadial),
+            y: c.y + distanceToCenterRootNodeVertically,
         };
     });
 }

@@ -160,8 +160,7 @@ function useHandleCanvasScroll(
                 alignCanvasLeftSideWithScreenLeftSide - foundNodeCoordinates!.x + screenDimensions.width - 1.5 * CIRCLE_SIZE_SELECTED;
 
             const deltaY = canvasHeight / 2 - foundNodeCoordinates!.y;
-            const foundNodeTranslatedY =
-                deltaY + (extendedForDepthGuides ? -CANVAS_VERTICAL_PADDING - 0.5 * CIRCLE_SIZE_SELECTED : -2 * CIRCLE_SIZE_SELECTED);
+            const foundNodeTranslatedY = deltaY - 2 * CIRCLE_SIZE_SELECTED;
 
             return {
                 transform: [

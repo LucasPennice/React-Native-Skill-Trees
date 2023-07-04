@@ -186,7 +186,7 @@ function ImportTree({
     const coordinatesWithTreeData = getNodesCoordinates(data as Tree<Skill>, "hierarchy");
     const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
     const canvasDimentions = getCanvasDimensions(nodeCoordinates, { width: WIDTH, height: HEIGHT });
-    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions, "hierarchy");
+    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
     const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, screenDimensions, undefined, undefined, {
