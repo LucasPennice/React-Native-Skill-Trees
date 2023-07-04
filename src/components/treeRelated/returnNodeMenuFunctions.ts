@@ -87,7 +87,7 @@ function returnNodeMenuFunctions(
 
             result.idle.verticalDown = () => functions?.confirmDeleteNode(tree, nodeInTree);
 
-            result.idle.horizontalLeft = () => functions?.selectNode(nodeInTree.nodeId);
+            result.idle.horizontalLeft = () => functions?.selectNode(nodeInTree.nodeId, "EDITING");
         }
 
         return result;

@@ -58,7 +58,7 @@ function useHandleTreeFunctions(
 
                 dispatch(updateUserTrees(result));
             },
-            selectNode: (nodeId: string) => dispatch(setSelectedNode({ nodeId, menuMode: params?.selectedNodeMenuMode ?? "VIEWING" })),
+            selectNode: (nodeId: string, menuMode: "VIEWING" | "EDITING") => dispatch(setSelectedNode({ nodeId, menuMode })),
             confirmDeleteTree: (treeId: string) => {
                 Alert.alert(
                     "Delete this tree?",

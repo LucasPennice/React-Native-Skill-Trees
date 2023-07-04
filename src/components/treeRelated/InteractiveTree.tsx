@@ -56,7 +56,7 @@ export type InteractiveTreeFunctions = {
         openCanvasSettingsModal?: () => void;
         confirmDeleteTree: (treeId: string) => void;
         confirmDeleteNode: (tree: Tree<Skill>, node: Tree<Skill>) => void;
-        selectNode: (nodeId: string) => void;
+        selectNode: (nodeId: string, menuMode: "EDITING" | "VIEWING") => void;
         openAddSkillModal: (zoneType: DnDZone["type"], node: Tree<Skill>) => void;
         toggleCompletionOfSkill: (tree: Tree<Skill>, node: Tree<Skill>) => void;
     };
