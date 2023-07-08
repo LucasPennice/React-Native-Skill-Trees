@@ -164,10 +164,7 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
             <GestureDetector gesture={canvasGestures}>
                 <View style={[centerFlex, { width: screenDimensions.width, flex: 1 }]}>
                     <Animated.View style={[transform, { flex: 1 }]}>
-                        <Canvas
-                            onTouch={touchHandler}
-                            style={{ width: canvasWidth, height: canvasHeight, backgroundColor: "#1231233D" }}
-                            ref={canvasRef}>
+                        <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight }} ref={canvasRef}>
                             {renderStyle === "hierarchy" && <HierarchicalSkillTreeRender state={state} config={config} treeData={treeData} />}
                             {renderStyle === "radial" && <RadialTreeRendererRender state={state} config={config} treeData={treeData} />}
                             <Blur blur={blur} />

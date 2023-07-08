@@ -2,8 +2,6 @@ import { PlotTreeReingoldTiltfordAlgorithm } from "../../functions/treeToHierarc
 import { PlotCircularTree } from "../../functions/treeToRadialCoordinates/general";
 import {
     BROTHER_DND_ZONE_HEIGHT,
-    CANVAS_HORIZONTAL_PADDING,
-    CANVAS_VERTICAL_PADDING,
     CIRCLE_SIZE,
     DISTANCE_BETWEEN_CHILDREN,
     DISTANCE_BETWEEN_GENERATIONS,
@@ -188,21 +186,24 @@ export function getCanvasDimensions(coordinates: NodeCoordinate[], screenDimenti
     const finalWidthData = { ...widthData, treeWidth: finalTreeWidth };
     const finalHeightData = { ...heightData, treeHeight: finalTreeHeight };
 
-    const canvasWidth = getCanvasWidth(finalTreeWidth, width);
-    const canvasHeight = getCanvasHeight(finalTreeHeight, HEIGHT_WITHOUT_NAV);
+    const canvasHorizontalPadding = screenDimentions.width;
+    const canvasVerticalPadding = screenDimentions.width;
+
+    const canvasWidth = getCanvasWidth(finalTreeWidth, width, canvasHorizontalPadding);
+    const canvasHeight = getCanvasHeight(finalTreeHeight, HEIGHT_WITHOUT_NAV, canvasVerticalPadding);
 
     return { canvasWidth, canvasHeight, heightData: finalHeightData, widthData: finalWidthData, extendedForDepthGuides: showDepthGuides ?? false };
 }
 
-function getCanvasWidth(treeWidth: number, screenWidth: number) {
+function getCanvasWidth(treeWidth: number, screenWidth: number, padding: number) {
     const minCanvasWidth = treeWidth > screenWidth ? treeWidth : screenWidth;
 
-    return minCanvasWidth + CANVAS_HORIZONTAL_PADDING;
+    return minCanvasWidth + padding;
 }
 
-function getCanvasHeight(treeHeight: number, screenHeight: number) {
+function getCanvasHeight(treeHeight: number, screenHeight: number, padding: number) {
     const minCanvasHeight = treeHeight > screenHeight ? treeHeight : screenHeight;
-    return minCanvasHeight + CANVAS_VERTICAL_PADDING;
+    return minCanvasHeight + padding;
 }
 
 export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDimentions: CanvasDimensions) {
@@ -292,6 +293,16 @@ export function getCoordinatedWithTreeData(
 
 export const distanceFromLeftCanvasEdge = (canvasWidth: number, screenWidth: number, transX: number) => {
     const range = canvasWidth - screenWidth;
+    const h = range / 2;
+    const m = -1;
+
+    const result = m * transX + h;
+
+    return result;
+};
+
+export const distanceFromLeftCanvasEdge2 = (canvasWidth: number, screenWidth: number, transX: number, scale: number) => {
+    const range = canvasWidth - screenWidth * (1 / scale);
     const h = range / 2;
     const m = -1;
 

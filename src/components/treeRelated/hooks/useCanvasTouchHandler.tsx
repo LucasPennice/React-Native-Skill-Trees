@@ -5,7 +5,7 @@ import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, TOUCH_BUFFER } from "../../../parame
 import { useAppDispatch } from "../../../redux/reduxHooks";
 import { setSelectedNode, clearSelectedNode } from "../../../redux/userTreesSlice";
 import { CartesianCoordinate, DnDZone, NodeCoordinate, SelectedNodeId } from "../../../types";
-import { distanceFromLeftCanvasEdge } from "../coordinateFunctions";
+import { distanceFromLeftCanvasEdge, distanceFromLeftCanvasEdge2 } from "../coordinateFunctions";
 
 type Props = {
     state: {
@@ -72,10 +72,13 @@ const useCanvasTouchHandler = ({ config, functions, state }: Props) => {
     }
 
     const longPressFn = {
-        onStart: (args: { e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>; offset: [number, number] }) => {
+        onStart: (args: { e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>; offset: [number, number, number] }) => {
             if (blockLongPress) return;
             const { e, offset } = args;
-            const [x, y] = offset;
+            const [x, y, scale] = offset;
+
+            // console.log("OFFSETS", x, y, scale);
+            // console.log("AND MY ATTEMP IS", e.absoluteX, e.y, scale);
 
             const leftCanvasEdgeOffset = distanceFromLeftCanvasEdge(canvasWidth, screenWidth, x);
             const simulatedCanvasTouchCoordX = leftCanvasEdgeOffset + e.x;
