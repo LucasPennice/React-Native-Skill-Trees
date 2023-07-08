@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Gesture, GestureStateChangeEvent, LongPressGestureHandlerEventPayload } from "react-native-gesture-handler";
-import { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING } from "../../../parameters";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { CanvasDimensions, NodeCoordinate } from "../../../types";
@@ -14,7 +14,7 @@ function useHandleCanvasScroll(
     foundNodeCoordinates: NodeCoordinate | undefined,
     foundNodeOfMenu: NodeCoordinate | undefined,
     longPressFn: {
-        onStart: (args: { e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>; offset: [number, number, number] }) => void;
+        onStart: (e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>) => void;
         onEnd: (e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>) => void;
         onScroll: () => void;
     }
@@ -34,12 +34,21 @@ function useHandleCanvasScroll(
     const savedScale = useSharedValue(DEFAULT_SCALE);
 
     const selectedNodeMenuOpen = foundNodeCoordinates !== undefined;
-    const nodeMenuOpen = foundNodeOfMenu !== undefined;
     const animateFromSelectedNodeMenu = useShouldAnimateTransformation(selectedNodeMenuOpen);
     // const animateFromNodeMenu = useShouldAnimateTransformation(nodeMenuOpen);
 
     const boundsProps = { minScale, scale, screenWidth: screenDimensions.width, canvasWidth, canvasHeight, screenHeight: screenDimensions.height };
     const { maxXBound, minXBound, maxYBound, minYBound } = useHandleCanvasBounds(boundsProps);
+
+    const [scaleState, setScaleState] = useState(0);
+
+    useAnimatedReaction(
+        () => scale.value,
+        (scaleValue: number) => {
+            runOnJS(setScaleState)(scaleValue);
+        },
+        [scale]
+    );
 
     useEffect(() => {
         const currentCanvasMinScale = screenDimensions.width / canvasWidth;
@@ -137,7 +146,7 @@ function useHandleCanvasScroll(
 
     const longPress = Gesture.LongPress()
         .onStart((e) => {
-            runOnJS(longPressFn.onStart)({ e, offset: [offsetX.value, offsetY.value, scale.value] });
+            runOnJS(longPressFn.onStart)(e);
         })
         .onEnd((e) => {
             runOnJS(longPressFn.onEnd)(e);
@@ -149,22 +158,12 @@ function useHandleCanvasScroll(
     const transform = useAnimatedStyle(() => {
         if (foundNodeCoordinates) return transitionToSelectedNodeStyle();
         if (animateFromSelectedNodeMenu) return transitionFromMenuToNormalScrolling();
-        if (foundNodeOfMenu) return transitionToNodeOption();
+        // if (foundNodeOfMenu) return transitionToNodeOption();
 
         //This is the regular scrolling style
         return {
             transform: [{ translateX: offsetX.value }, { translateY: offsetY.value }, { scale: scale.value }],
         };
-
-        function transitionToNodeOption() {
-            return {
-                transform: [
-                    { translateX: offsetX.value },
-                    { translateY: offsetY.value },
-                    { scale: withSpring(DEFAULT_SCALE, { damping: 32, stiffness: 350 }) },
-                ],
-            };
-        }
 
         function transitionToSelectedNodeStyle() {
             const alignCanvasLeftSideWithScreenLeftSide = (canvasWidth - screenDimensions.width) / 2;
@@ -198,7 +197,7 @@ function useHandleCanvasScroll(
         }
     }, [offsetX, offsetY, scale, foundNodeCoordinates, animateFromSelectedNodeMenu, foundNodeOfMenu]);
 
-    return { transform, canvasGestures, offset: start.value };
+    return { transform, canvasGestures, scale: scaleState };
 }
 
 export default useHandleCanvasScroll;

@@ -7,7 +7,7 @@ import Animated from "react-native-reanimated";
 import { StackNavigatorParams } from "../../../App";
 import { findNodeById } from "../../functions/extractInformationFromTree";
 import RadialSkillTree from "../../pages/homepage/RadialSkillTree";
-import { centerFlex } from "../../parameters";
+import { NAV_HEGIHT, centerFlex } from "../../parameters";
 import { CanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { CoordinatesWithTreeData, DnDZone, SelectedDnDZone, SelectedNodeId, Skill, Tree } from "../../types";
@@ -118,13 +118,7 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
     }, []);
 
     //Hooks
-    const touchHandlerState = {
-        selectedNodeId,
-        nodeCoordinatesCentered,
-        dragAndDropZones: dndZoneCoordinates,
-        canvasWidth,
-        screenWidth: screenDimensions.width,
-    };
+    const touchHandlerState = { selectedNodeId, nodeCoordinatesCentered, dragAndDropZones: dndZoneCoordinates };
     const touchHandlerFunctions = { onNodeClick: onNodeClickAdapter, onDndZoneClick: onDndZoneClickAdapter };
     const { touchHandler, openMenuOnNode, longPressIndicatorPosition, closeNodeMenu, longPressFn } = useCanvasTouchHandler({
         functions: touchHandlerFunctions,
@@ -136,13 +130,14 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
     const foundNodeOfMenu = openMenuOnNode ? centeredCoordinatedWithTreeData.find((c) => c.nodeId === openMenuOnNode.id) : undefined;
     const foundNodeOfMenuWithoutData = openMenuOnNode ? nodeCoordinatesCentered.find((c) => c.id === openMenuOnNode.id) : undefined;
 
-    const { canvasGestures, transform, offset } = useHandleCanvasScroll(
+    const { canvasGestures, transform, scale } = useHandleCanvasScroll(
         canvasDimentions,
         screenDimensions,
         selectedNodeCoordinates,
         foundNodeOfMenuWithoutData,
         longPressFn
     );
+
     const blur = useHandleBlurAnimation(tree.treeId);
     //
 
@@ -162,35 +157,23 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
     return (
         <>
             <GestureDetector gesture={canvasGestures}>
-                <View style={[centerFlex, { width: screenDimensions.width, flex: 1 }]}>
+                <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative" }]}>
                     <Animated.View style={[transform, { flex: 1 }]}>
                         <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight }} ref={canvasRef}>
                             {renderStyle === "hierarchy" && <HierarchicalSkillTreeRender state={state} config={config} treeData={treeData} />}
                             {renderStyle === "radial" && <RadialTreeRendererRender state={state} config={config} treeData={treeData} />}
                             <Blur blur={blur} />
                         </Canvas>
+                        {/* Long press Node related 👇 */}
+                        <NodeLongPressIndicator data={longPressIndicatorPosition} scale={scale} />
+                        {renderNodeMenu && (
+                            <NodeMenu functions={nodeMenuFunctions} data={foundNodeOfMenu} scale={scale} closeNodeMenu={closeNodeMenu} />
+                        )}
+                        {/* Long press Node related 👆 */}
                     </Animated.View>
                 </View>
             </GestureDetector>
-            {/* Long press Node related 👇 */}
-            <NodeLongPressIndicator
-                data={longPressIndicatorPosition}
-                offset={offset}
-                canvasDimentions={canvasDimentions}
-                screenDimensions={screenDimensions}
-            />
-            {renderNodeMenu && (
-                <NodeMenu
-                    functions={nodeMenuFunctions}
-                    data={foundNodeOfMenu}
-                    offset={offset}
-                    canvasDimentions={canvasDimentions}
-                    screenDimensions={screenDimensions}
-                    closeNodeMenu={closeNodeMenu}
-                />
-            )}
 
-            {/* Long press Node related 👆 */}
             {renderSelectedNodeMenu && renderOnSelectedNodeId}
         </>
     );

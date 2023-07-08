@@ -1,19 +1,16 @@
 import { TouchHandler, TouchInfo, useTouchHandler } from "@shopify/react-native-skia";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { GestureStateChangeEvent, LongPressGestureHandlerEventPayload } from "react-native-gesture-handler";
 import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, TOUCH_BUFFER } from "../../../parameters";
 import { useAppDispatch } from "../../../redux/reduxHooks";
-import { setSelectedNode, clearSelectedNode } from "../../../redux/userTreesSlice";
+import { clearSelectedNode } from "../../../redux/userTreesSlice";
 import { CartesianCoordinate, DnDZone, NodeCoordinate, SelectedNodeId } from "../../../types";
-import { distanceFromLeftCanvasEdge, distanceFromLeftCanvasEdge2 } from "../coordinateFunctions";
 
 type Props = {
     state: {
         nodeCoordinatesCentered: NodeCoordinate[];
         selectedNodeId: SelectedNodeId;
         dragAndDropZones: DnDZone[];
-        canvasWidth: number;
-        screenWidth: number;
     };
     config: {
         showDndZones?: boolean;
@@ -42,7 +39,7 @@ export type CanvasTouchHandler = { touchHandler: TouchHandler };
 const useCanvasTouchHandler = ({ config, functions, state }: Props) => {
     const { showDndZones, blockLongPress } = config;
     const { onDndZoneClick, onNodeClick } = functions;
-    const { dragAndDropZones, nodeCoordinatesCentered, selectedNodeId, canvasWidth, screenWidth } = state;
+    const { dragAndDropZones, nodeCoordinatesCentered, selectedNodeId } = state;
     //
     const [openMenuOnNode, setOpenMenuOnNode] = useState<NodeCoordinate | undefined>(undefined);
     const [longPressIndicatorPosition, setLongPressIndicatorPosition] = useState<{
@@ -53,6 +50,8 @@ const useCanvasTouchHandler = ({ config, functions, state }: Props) => {
     //Redux
     const dispatch = useAppDispatch();
     //
+
+    const touchInfoRef = useRef<TouchInfo | null>(null);
 
     const interruptLongPress = () => {
         return setLongPressIndicatorPosition((p) => {
@@ -72,21 +71,12 @@ const useCanvasTouchHandler = ({ config, functions, state }: Props) => {
     }
 
     const longPressFn = {
-        onStart: (args: { e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>; offset: [number, number, number] }) => {
+        onStart: (e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>) => {
             if (blockLongPress) return;
-            const { e, offset } = args;
-            const [x, y, scale] = offset;
 
-            // console.log("OFFSETS", x, y, scale);
-            // console.log("AND MY ATTEMP IS", e.absoluteX, e.y, scale);
+            const { x, y } = e;
 
-            const leftCanvasEdgeOffset = distanceFromLeftCanvasEdge(canvasWidth, screenWidth, x);
-            const simulatedCanvasTouchCoordX = leftCanvasEdgeOffset + e.x;
-            const simulatedCanvasTouchCoordY = e.y - y;
-
-            const touchCoord = { x: simulatedCanvasTouchCoordX, y: simulatedCanvasTouchCoordY };
-
-            const clickedNode = nodeCoordinatesCentered.find(didTapCircle(touchCoord));
+            const clickedNode = nodeCoordinatesCentered.find(didTapCircle(touchInfoRef.current!));
 
             if (!clickedNode) return setLongPressIndicatorPosition({ data: undefined, state: "IDLE" });
 
@@ -110,7 +100,10 @@ const useCanvasTouchHandler = ({ config, functions, state }: Props) => {
 
     const touchHandler = useTouchHandler(
         {
-            onStart: () => closeNodeMenu(),
+            onStart: (e) => {
+                touchInfoRef.current = e;
+                closeNodeMenu();
+            },
             onEnd: (touchInfo) => {
                 //Avoids bug on android
                 if (touchInfo.type !== 2) return;

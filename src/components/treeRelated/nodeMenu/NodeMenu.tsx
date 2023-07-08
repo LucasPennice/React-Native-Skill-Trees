@@ -27,6 +27,7 @@ import AppText from "../../AppText";
 import DirectionMenu, { Config } from "../../DirectionMenu";
 import { distanceFromLeftCanvasEdge } from "../coordinateFunctions";
 import useWrapNodeMenuFunctions from "./useWrapNodeMenuFunctions";
+import { adjustedScale } from "../general/NodeLongPressIndicator";
 
 const nodeMenuConfig: Config = {
     horizontalSize: 150,
@@ -60,25 +61,18 @@ export type NodeMenuFunctions = {
 
 function NodeMenu({
     data,
-    offset,
-    canvasDimentions,
-    screenDimensions,
+    scale,
     closeNodeMenu,
     functions,
 }: {
     data: CoordinatesWithTreeData;
-    offset: { x: number; y: number };
-    canvasDimentions: CanvasDimensions;
-    screenDimensions: ScreenDimentions;
+    scale: number;
     closeNodeMenu: () => void;
     functions: NodeMenuFunctions;
 }) {
-    const { canvasWidth } = canvasDimentions;
     const { idle, selectingPosition } = functions;
 
-    const leftCanvasEdgeOffset = distanceFromLeftCanvasEdge(canvasWidth, screenDimensions.width, offset.x);
-
-    const position = { x: data.x - leftCanvasEdgeOffset - MENU_WIDTH / 4, y: data.y + offset.y - MENU_WIDTH / 4 };
+    const position = { x: data.x - MENU_WIDTH / 4, y: data.y - MENU_WIDTH / 4 };
 
     const [menuMode, setMenuMode] = useState<"NORMAL" | "SELECTING_NODE_POSITION">("NORMAL");
 
@@ -101,11 +95,17 @@ function NodeMenu({
         };
     }, [menuMode]);
 
+    const animatedScale = useAnimatedStyle(() => {
+        const newScale = adjustedScale(scale);
+
+        return { transform: [{ scale: newScale }] };
+    }, [scale]);
+
     return (
         <Animated.View
             entering={FadeIn.duration(150)}
             exiting={FadeOut.duration(150)}
-            style={{ position: "absolute", top: position.y, left: position.x }}>
+            style={[animatedScale, { position: "absolute", top: position.y, left: position.x }]}>
             <Animated.View
                 style={[
                     styles,

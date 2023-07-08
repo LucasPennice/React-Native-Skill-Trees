@@ -3,10 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import Animated, { Easing, FadeIn, useAnimatedProps, useAnimatedStyle, withDelay, withSequence, withTiming } from "react-native-reanimated";
 import { Svg, Circle as SvgCircle } from "react-native-svg";
 import { colors } from "../../../parameters";
-import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { CanvasDimensions, NodeCoordinate } from "../../../types";
+import { NodeCoordinate } from "../../../types";
 import { ProgressWheelParams } from "../../ProgressIndicatorAndName";
-import { distanceFromLeftCanvasEdge } from "../coordinateFunctions";
 import { MIN_DURATION_LONG_PRESS_MS } from "../hooks/useCanvasTouchHandler";
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
@@ -14,20 +12,14 @@ const progressWheelProps = new ProgressWheelParams("#FFFFFF", `#FFFFFF3D`, 150, 
 
 function NodeLongPressIndicator({
     data,
-    canvasDimentions,
-    offset,
-    screenDimensions,
+    scale,
 }: {
     data: {
         data: NodeCoordinate | undefined;
         state: "INTERRUPTED" | "SUCCESS" | "PRESSING" | "IDLE";
     };
-    offset: { x: number; y: number };
-    canvasDimentions: CanvasDimensions;
-    screenDimensions: ScreenDimentions;
+    scale: number;
 }) {
-    const { canvasWidth } = canvasDimentions;
-
     const [lastX, setLastX] = useState(0);
     const [lastY, setLastY] = useState(0);
 
@@ -40,8 +32,6 @@ function NodeLongPressIndicator({
         }
         prevState.current = data.state;
     }, [data]);
-
-    const leftCanvasEdgeOffset = distanceFromLeftCanvasEdge(canvasWidth, screenDimensions.width, offset.x);
 
     const animatedProps = useAnimatedProps(() => {
         const emptyCircle = progressWheelProps.circumference - (progressWheelProps.circumference * 0) / 100;
@@ -81,12 +71,18 @@ function NodeLongPressIndicator({
         };
     }, [data]);
 
-    const position = { x: lastX - leftCanvasEdgeOffset - 75, y: lastY + offset.y - 75 };
+    const position = { x: lastX - 75, y: lastY - 75 };
+
+    const animatedScale = useAnimatedStyle(() => {
+        const newScale = adjustedScale(scale);
+
+        return { transform: [{ scale: newScale }] };
+    }, [scale]);
 
     return (
         <Animated.View
             entering={FadeIn}
-            style={[containerStyles, { left: position.x, top: position.y, position: "absolute" }]}
+            style={[containerStyles, { left: position.x, top: position.y, position: "absolute" }, animatedScale]}
             pointerEvents={"none"}>
             <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
                 <AnimatedCircle
@@ -104,3 +100,12 @@ function NodeLongPressIndicator({
 }
 
 export default NodeLongPressIndicator;
+
+export function adjustedScale(scale: number) {
+    "worklet";
+
+    //Just to make sure I notice an invalid value
+    if (scale === 0) return 5;
+
+    return 1 / scale;
+}
