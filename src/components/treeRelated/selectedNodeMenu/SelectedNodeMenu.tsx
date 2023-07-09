@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
-import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { Easing, FadeInDown, FadeOutDown, FadeOutUp, Layout, runOnJS } from "react-native-reanimated";
+import Animated, { Easing, FadeInDown, FadeOutDown, FadeOutUp, Layout } from "react-native-reanimated";
 import { checkIfCompletionIsAllowedForNode, checkIfUncompletionIsAllowedForNode, findNodeById } from "../../../functions/extractInformationFromTree";
-import { CIRCLE_SIZE_SELECTED, NAV_HEGIHT, colors } from "../../../parameters";
+import { CIRCLE_SIZE_SELECTED, NAV_HEGIHT, centerFlex, colors } from "../../../parameters";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { generalStyles } from "../../../styles";
 import { Skill, SkillPropertiesEditableOnPopMenu, Tree } from "../../../types";
 import AppText from "../../AppText";
+import DirectionMenu, { Config } from "../../DirectionMenu";
 import SliderToggler from "../../SliderToggler";
 import Editing from "./Editing";
 import Viewing from "./Viewing";
@@ -45,7 +45,7 @@ type Props = {
 
 function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Props) {
     const { screenDimensions, selectedNode, selectedTree, initialMode } = state;
-    const { height } = screenDimensions;
+    const { height, width } = screenDimensions;
     const { closeMenu, goToSkillPage, goToTreePage, goToEditTreePage } = functions;
     const { menuWidth, styles } = getNodeMenuStyles(screenDimensions);
 
@@ -76,12 +76,6 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
     }, []);
 
     const showSaveChangesBtn = mode === "EDITING" && checkForSave(newSkillProps, selectedNode);
-
-    const flingGesture = Gesture.Fling()
-        .direction(Directions.DOWN)
-        .onStart((e) => {
-            runOnJS(closeMenu)();
-        });
 
     const toggleMode = () => setMode((p) => (p === "EDITING" ? "VIEWING" : "EDITING"));
 
@@ -114,40 +108,79 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
           }
         : undefined;
 
+    const nodeMenuConfig: Config = {
+        horizontalSize: menuWidth,
+        verticalSize: 400,
+        circular: false,
+        directions: ["vertical"],
+        triggerZoneSize: 0.9,
+        allowFling: true,
+    };
     return (
         <Animated.View
             entering={FadeInDown.easing(Easing.elastic()).duration(300)}
             exiting={FadeOutDown.easing(Easing.elastic()).duration(300)}
-            style={[styles.container]}>
-            <GestureDetector gesture={flingGesture}>
-                <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "position"} style={{ flex: 1 }} keyboardVerticalOffset={60}>
-                    <Animated.View style={styles.interactiveContainer} layout={Layout.stiffness(200).damping(26)}>
-                        <View style={styles.dragLine} />
-                        <AppText style={{ color: colors.line, marginBottom: 10 }} fontSize={12}>
-                            Drag me down or click the cirlcle to close
-                        </AppText>
+            style={[
+                centerFlex,
+                {
+                    backgroundColor: "#1231233D",
+                    left: 0,
+                    top: 0,
+                    zIndex: 2,
+                    position: "absolute",
+                    height: height - NAV_HEGIHT,
+                    width,
+                    alignItems: "flex-start",
+                },
+            ]}>
+            <DirectionMenu action={{ verticalDown: closeMenu }} config={nodeMenuConfig}>
+                <Animated.View
+                    style={[
+                        {
+                            zIndex: 2,
+                            width: menuWidth,
+                            minHeight: 100,
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            shadowColor: "#000",
+                            shadowOffset: {
+                                width: 0,
+                                height: 0,
+                            },
+                            shadowOpacity: 0.7,
+                            elevation: 5,
+                        },
+                    ]}>
+                    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "position"} style={{ flex: 1 }} keyboardVerticalOffset={60}>
+                        <Animated.View style={styles.interactiveContainer} layout={Layout.stiffness(200).damping(26)}>
+                            <View style={styles.dragLine} />
+                            <AppText style={{ color: colors.line, marginBottom: 10 }} fontSize={12}>
+                                Drag me down or click the cirlcle to close
+                            </AppText>
 
-                        {editingEnabled && (
-                            <SliderToggler containerWidth={menuWidth / 2 - 10} isLeftSelected={mode === "VIEWING"} toggleMode={toggleMode} />
-                        )}
+                            {editingEnabled && (
+                                <SliderToggler containerWidth={menuWidth / 2 - 10} isLeftSelected={mode === "VIEWING"} toggleMode={toggleMode} />
+                            )}
 
-                        {mode === "EDITING" && editingEnabled && (
-                            <Editing
-                                newSkillPropsState={[newSkillProps, setNewSkillProps]}
-                                handleDeleteSelectedNode={editingFunctions!.handleDeleteSelectedNode}
-                                checkToggleCompletionPermissions={checkToggleCompletionPermissions!}
-                            />
-                        )}
-                        {mode === "VIEWING" && (
-                            <Viewing
-                                selectedNode={selectedNode}
-                                selectedTree={selectedTree}
-                                functions={{ goToTreePage, goToSkillPage, goToEditTreePage }}
-                            />
-                        )}
-                    </Animated.View>
-                </KeyboardAvoidingView>
-            </GestureDetector>
+                            {mode === "EDITING" && editingEnabled && (
+                                <Editing
+                                    newSkillPropsState={[newSkillProps, setNewSkillProps]}
+                                    handleDeleteSelectedNode={editingFunctions!.handleDeleteSelectedNode}
+                                    checkToggleCompletionPermissions={checkToggleCompletionPermissions!}
+                                />
+                            )}
+                            {mode === "VIEWING" && (
+                                <Viewing
+                                    selectedNode={selectedNode}
+                                    selectedTree={selectedTree}
+                                    functions={{ goToTreePage, goToSkillPage, goToEditTreePage }}
+                                />
+                            )}
+                        </Animated.View>
+                    </KeyboardAvoidingView>
+                </Animated.View>
+            </DirectionMenu>
             <Pressable onPress={closeMenu} style={{ right: 0, width: 134, height, position: "absolute" }}>
                 {showSaveChangesBtn && (
                     <Animated.View

@@ -1,13 +1,13 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Blur, Canvas, SkiaDomView, runTiming, useValue } from "@shopify/react-native-skia";
-import { MutableRefObject, memo, useCallback, useEffect } from "react";
+import { MutableRefObject, memo, useEffect } from "react";
 import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import { StackNavigatorParams } from "../../../App";
 import { findNodeById } from "../../functions/extractInformationFromTree";
 import RadialSkillTree from "../../pages/homepage/RadialSkillTree";
-import { NAV_HEGIHT, centerFlex } from "../../parameters";
+import { centerFlex } from "../../parameters";
 import { CanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { CoordinatesWithTreeData, DnDZone, SelectedDnDZone, SelectedNodeId, Skill, Tree } from "../../types";

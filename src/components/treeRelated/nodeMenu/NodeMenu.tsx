@@ -21,13 +21,11 @@ import Animated, {
 } from "react-native-reanimated";
 import { Defs, LinearGradient, Path, Stop, Svg } from "react-native-svg";
 import { CIRCLE_SIZE } from "../../../parameters";
-import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { CanvasDimensions, CoordinatesWithTreeData } from "../../../types";
+import { CoordinatesWithTreeData } from "../../../types";
 import AppText from "../../AppText";
 import DirectionMenu, { Config } from "../../DirectionMenu";
-import { distanceFromLeftCanvasEdge } from "../coordinateFunctions";
-import useWrapNodeMenuFunctions from "./useWrapNodeMenuFunctions";
 import { adjustedScale } from "../general/NodeLongPressIndicator";
+import useWrapNodeMenuFunctions from "./useWrapNodeMenuFunctions";
 
 const nodeMenuConfig: Config = {
     horizontalSize: 150,
