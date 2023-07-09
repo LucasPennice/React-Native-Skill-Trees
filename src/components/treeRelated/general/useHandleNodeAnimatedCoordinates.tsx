@@ -1,4 +1,6 @@
-import { SkFont, Skia, useComputedValue } from "@shopify/react-native-skia";
+import { SkFont, Skia } from "@shopify/react-native-skia";
+import { useEffect } from "react";
+import { useDerivedValue } from "react-native-reanimated";
 import { CIRCLE_SIZE } from "../../../parameters";
 import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
 
@@ -16,10 +18,16 @@ function useHandleNodeAnimatedCoordinates(
     const x = useAnimateSkiaValue({ initialValue: cx, stateToAnimate: cx });
     const y = useAnimateSkiaValue({ initialValue: cy, stateToAnimate: cy });
 
-    const textX = useComputedValue(() => x.value - textWidth / 2, [x, textWidth]);
-    const textY = useComputedValue(() => y.value + getHeightForFont(NODE_ICON_FONT_SIZE) / 4 + 1, [y]);
+    const textX = useDerivedValue(() => x.value - textWidth / 2, [x, textWidth]);
+    const textY = useDerivedValue(() => {
+        function getHeightForFont(fontSize: number) {
+            return (fontSize * 125.5) / 110;
+        }
 
-    const path = useComputedValue(() => {
+        return y.value + getHeightForFont(NODE_ICON_FONT_SIZE) / 4 + 1;
+    }, [y]);
+
+    const path = useDerivedValue(() => {
         const strokeWidth = 2;
         const radius = CIRCLE_SIZE + strokeWidth / 2;
         const p = Skia.Path.Make();
@@ -32,10 +40,6 @@ function useHandleNodeAnimatedCoordinates(
     }, [x, y]);
 
     return { path, textX, textY, x, y };
-
-    function getHeightForFont(fontSize: number) {
-        return (fontSize * 125.5) / 110;
-    }
 
     function getTextWidth() {
         if (text.isEmoji) return font.getTextWidth(text.letter);

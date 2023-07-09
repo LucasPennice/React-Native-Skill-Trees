@@ -1,5 +1,5 @@
 import { Circle, DiffRect, LinearGradient, Path, SkFont, SkPath, SkiaValue, Text, vec } from "@shopify/react-native-skia";
-import { SharedValue } from "react-native-reanimated";
+import Animated, { SharedValue } from "react-native-reanimated";
 import { interpolateColors } from "../../../functions/misc";
 import { CIRCLE_SIZE, colors } from "../../../parameters";
 import { ColorGradient } from "../../../types";
@@ -11,13 +11,13 @@ type NodeProps = {
     font: SkFont;
     text: string;
     accentColor: ColorGradient;
-    textCoordinates: { textX: SkiaValue<number>; textY: SkiaValue<number> };
+    textCoordinates: { textX: Readonly<Animated.SharedValue<number>>; textY: Readonly<Animated.SharedValue<number>> };
     showIcons: boolean;
 };
 
 type SkillNodeProps = {
     nodeState: NodeProps;
-    path: SkiaValue<SkPath>;
+    path: Readonly<Animated.SharedValue<SkPath>>;
     isComplete: boolean;
 };
 
@@ -76,7 +76,7 @@ function SkillNode({ path, isComplete, nodeState }: SkillNodeProps) {
 
 type SkillTreeNodeProps = {
     nodeState: NodeProps;
-    path: SkiaValue<SkPath>;
+    path: Readonly<Animated.SharedValue<SkPath>>;
     isComplete: boolean;
     treeCompletedPercentage: number;
 };

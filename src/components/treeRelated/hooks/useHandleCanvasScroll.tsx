@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Gesture, GestureStateChangeEvent, LongPressGestureHandlerEventPayload } from "react-native-gesture-handler";
 import { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING } from "../../../parameters";
+import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../parameters";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { CanvasDimensions, NodeCoordinate } from "../../../types";
 import { getXBounds, getYBounds, useHandleCanvasBounds } from "./useHandleCanvasBounds";
@@ -170,8 +170,8 @@ function useHandleCanvasScroll(
             const foundNodeTranslatedX =
                 alignCanvasLeftSideWithScreenLeftSide - foundNodeCoordinates!.x + screenDimensions.width - 1.5 * CIRCLE_SIZE_SELECTED;
 
-            const deltaY = canvasHeight / 2 - foundNodeCoordinates!.y;
-            const foundNodeTranslatedY = deltaY - 2 * CIRCLE_SIZE_SELECTED;
+            const deltaY = (screenDimensions.height - NAV_HEGIHT) / 2 - foundNodeCoordinates!.y;
+            const foundNodeTranslatedY = deltaY;
 
             return {
                 transform: [

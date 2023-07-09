@@ -1,4 +1,5 @@
-import { Path, Skia, useComputedValue } from "@shopify/react-native-skia";
+import { Path } from "@shopify/react-native-skia";
+import { useDerivedValue } from "react-native-reanimated";
 import { CIRCLE_SIZE } from "../../../parameters";
 import { CartesianCoordinate } from "../../../types";
 import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
@@ -17,21 +18,18 @@ function HierarchicalCanvasPath({ coordinates, pathColor, isRoot }: { coordinate
     const p2x = useAnimateSkiaValue({ initialValue: pathInitialPoint.x, stateToAnimate: pathInitialPoint.x });
     const p2y = useAnimateSkiaValue({ initialValue: pathInitialPoint.y, stateToAnimate: pathInitialPoint.y });
 
-    const path = useComputedValue(() => {
-        const p = Skia.Path.Make();
+    const path = useDerivedValue(() => {
+        let result = "";
 
-        p.moveTo(p1x.value, p1y.value - CIRCLE_SIZE);
+        //MOVE INSTRUCTION
+        result += `M${p1x.value} ${p1y.value - CIRCLE_SIZE}`;
 
-        p.cubicTo(
-            p1x.value,
-            p1y.value - 0.87 * (p1y.value - p2y.value),
-            p2x.value,
-            p2y.value - 0.43 * (p2y.value - p1y.value),
-            p2x.value,
-            p2y.value + CIRCLE_SIZE
-        );
+        //CUBIC TO INSTRUCTION
+        result += `C${p1x.value} ${p1y.value - 0.87 * (p1y.value - p2y.value)} ${p2x.value} ${p2y.value - 0.43 * (p2y.value - p1y.value)} ${
+            p2x.value
+        } ${p2y.value + CIRCLE_SIZE}`;
 
-        return p;
+        return result;
     }, [p1x, p1y, p2x, p2y]);
 
     if (isRoot) return <></>;

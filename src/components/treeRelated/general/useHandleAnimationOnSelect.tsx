@@ -12,7 +12,7 @@ function useHandleAnimationOnSelect(selectedNodeId: string | null, nodeId: strin
     const isFirstRender = useIsFirstRender();
 
     useEffect(() => {
-        if (isFirstRender) return;
+        if (isFirstRender && !shouldActivate) return;
 
         //Scale
         const activeAnimation = withSequence(withTiming(0.8, { duration: 100 }), withSpring(3, { damping: 22, stiffness: 250 }));
