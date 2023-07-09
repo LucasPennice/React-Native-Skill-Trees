@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCanvasRef } from "@shopify/react-native-skia";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StackNavigatorParams } from "../../../App";
 import CanvasSettingsModal from "../../components/CanvasSettingsModal";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
@@ -43,6 +43,13 @@ function HomepageTree({ n: { navigation, route }, state }: Props) {
         openCanvasSettings
     );
     const { RenderOnSelectedNodeId, config, functions, interactiveTreeState } = interactiveTreeProps;
+
+    useEffect(() => {
+        navigation.addListener("state", (_) => setSelectedNodeId(null));
+        return () => {
+            navigation.removeListener("state", (_) => setSelectedNodeId(null));
+        };
+    }, []);
 
     return (
         <>

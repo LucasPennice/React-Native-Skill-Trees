@@ -20,7 +20,8 @@ function GoToPageButton({ onPress, title }: { onPress: () => void; title: string
                     width: "100%",
                 },
             ]}
-            onPress={onPress}>
+            onPressIn={onPress}
+            delayPressIn={80}>
             <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
                 {title}
             </AppText>

@@ -110,7 +110,7 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
 
     const nodeMenuConfig: Config = {
         horizontalSize: menuWidth,
-        verticalSize: 400,
+        verticalSize: height - NAV_HEGIHT,
         circular: false,
         directions: ["vertical"],
         triggerZoneSize: 0.9,
@@ -119,7 +119,7 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
     return (
         <Animated.View
             entering={FadeInDown.easing(Easing.elastic()).duration(300)}
-            exiting={FadeOutDown.easing(Easing.elastic()).duration(300)}
+            exiting={FadeOutDown.easing(Easing.elastic()).duration(200)}
             style={[
                 centerFlex,
                 {
@@ -143,13 +143,6 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
                             display: "flex",
                             flexDirection: "row",
                             alignItems: "center",
-                            shadowColor: "#000",
-                            shadowOffset: {
-                                width: 0,
-                                height: 0,
-                            },
-                            shadowOpacity: 0.7,
-                            elevation: 5,
                         },
                     ]}>
                     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "position"} style={{ flex: 1 }} keyboardVerticalOffset={60}>
