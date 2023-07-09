@@ -90,3 +90,28 @@ export function getLabelTextColor(treeAccentColor: string) {
 
     return colors.background;
 }
+
+export function getWheelParams(progressColor: string, backgroundColor: string, size?: number, strokeWidth?: number) {
+    let result = {
+        size: 65,
+        strokeWidth: 7,
+        centerCoordinate: 0,
+        radius: 0,
+        circumference: 0,
+        strokeDasharray: 0,
+        progressStroke: "",
+        backgroundStroke: "",
+    };
+
+    if (size) result.size = size;
+    if (strokeWidth) result.strokeWidth = strokeWidth;
+
+    result.centerCoordinate = result.size / 2;
+    result.radius = result.size / 2 - result.strokeWidth / 2;
+    result.progressStroke = progressColor;
+    result.backgroundStroke = backgroundColor;
+    result.circumference = 2 * Math.PI * result.radius;
+    result.strokeDasharray = 2 * Math.PI * result.radius;
+
+    return result;
+}

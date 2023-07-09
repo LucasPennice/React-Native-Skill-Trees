@@ -1,16 +1,16 @@
+import { memo } from "react";
 import { View } from "react-native";
+import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import { Circle, Defs, LinearGradient, Stop, Svg } from "react-native-svg";
 import { treeCompletedSkillPercentage } from "../functions/extractInformationFromTree";
+import { getWheelParams } from "../functions/misc";
 import { centerFlex, colors } from "../parameters";
 import { Skill, Tree } from "../types";
 import AppText from "./AppText";
-import { ProgressWheelParams } from "./ProgressIndicatorAndName";
-import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
-import { memo } from "react";
 
 function NodeView({ node, size, hideIcon }: { node: Tree<Skill>; size: number; hideIcon?: boolean }) {
     const gradient = node.accentColor;
-    const progressWheelProps = new ProgressWheelParams(gradient.color1, `${gradient.color1}3D`, size, (8 * size) / 150);
+    const progressWheelProps = getWheelParams(gradient.color1, `${gradient.color1}3D`, size, (8 * size) / 150);
 
     const skill = node.data;
     const category = node.category;
@@ -56,6 +56,7 @@ function NodeView({ node, size, hideIcon }: { node: Tree<Skill>; size: number; h
                         cy={progressWheelProps.centerCoordinate}
                         r={progressWheelProps.radius}
                         stroke={"url(#progressColor)"}
+                        fillOpacity={0}
                         strokeDasharray={progressWheelProps.circumference}
                         strokeLinecap="round"
                     />
@@ -97,6 +98,7 @@ function NodeView({ node, size, hideIcon }: { node: Tree<Skill>; size: number; h
                             strokeWidth={progressWheelProps.strokeWidth}
                             cx={progressWheelProps.centerCoordinate}
                             cy={progressWheelProps.centerCoordinate}
+                            fillOpacity={0}
                             r={progressWheelProps.radius}
                             stroke={progressWheelProps.backgroundStroke}
                         />
@@ -106,6 +108,7 @@ function NodeView({ node, size, hideIcon }: { node: Tree<Skill>; size: number; h
                         cx={progressWheelProps.centerCoordinate}
                         cy={progressWheelProps.centerCoordinate}
                         r={progressWheelProps.radius}
+                        fillOpacity={0}
                         stroke={"url(#progressColor)"}
                         strokeDasharray={progressWheelProps.circumference}
                         strokeLinecap="round"
@@ -160,6 +163,7 @@ function NodeView({ node, size, hideIcon }: { node: Tree<Skill>; size: number; h
                         cy={progressWheelProps.centerCoordinate}
                         r={progressWheelProps.radius}
                         stroke={"url(#progressColor)"}
+                        fillOpacity={0}
                         strokeDasharray={progressWheelProps.circumference}
                         strokeLinecap="round"
                     />

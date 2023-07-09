@@ -1,4 +1,3 @@
-import { useSharedValueEffect, useValue } from "@shopify/react-native-skia";
 import { useEffect } from "react";
 import { useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import { CANVAS_SPRING } from "../../../parameters";
@@ -11,7 +10,6 @@ type Props<T> = {
 };
 
 function useAnimateSkiaValue<T extends string | number>({ initialValue, stateToAnimate, delay, duration }: Props<T>) {
-    const skiaValue = useValue(initialValue);
     const sharedValue = useSharedValue(initialValue);
 
     useEffect(() => {
@@ -30,11 +28,7 @@ function useAnimateSkiaValue<T extends string | number>({ initialValue, stateToA
         }
     }, [stateToAnimate]);
 
-    useSharedValueEffect(() => {
-        skiaValue.current = sharedValue.value;
-    }, sharedValue);
-
-    return skiaValue;
+    return sharedValue;
 }
 
 export default useAnimateSkiaValue;

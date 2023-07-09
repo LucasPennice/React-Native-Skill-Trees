@@ -1,11 +1,11 @@
 import Animated, { useAnimatedProps, useAnimatedStyle, withRepeat, withSequence, withSpring, withTiming } from "react-native-reanimated";
 import { Circle, Svg } from "react-native-svg";
-import { ProgressWheelParams } from "./ProgressIndicatorAndName";
+import { getWheelParams } from "../functions/misc";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 function LoadingIcon() {
-    const progressWheelProps = new ProgressWheelParams("#FFFFFF", `#FFFFFF00`, 100, 10);
+    const progressWheelProps = getWheelParams("#FFFFFF", `#FFFFFF00`, 100, 10);
 
     const animatedProps = useAnimatedProps(() => {
         const result = progressWheelProps.circumference - (progressWheelProps.circumference * 50) / 100;

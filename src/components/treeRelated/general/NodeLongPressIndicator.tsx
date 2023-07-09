@@ -2,13 +2,13 @@ import * as Haptics from "expo-haptics";
 import { useEffect, useRef, useState } from "react";
 import Animated, { Easing, FadeIn, useAnimatedProps, useAnimatedStyle, withDelay, withSequence, withTiming } from "react-native-reanimated";
 import { Svg, Circle as SvgCircle } from "react-native-svg";
+import { getWheelParams } from "../../../functions/misc";
 import { colors } from "../../../parameters";
 import { NodeCoordinate } from "../../../types";
-import { ProgressWheelParams } from "../../ProgressIndicatorAndName";
 import { MIN_DURATION_LONG_PRESS_MS } from "../hooks/useCanvasTouchHandler";
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
-const progressWheelProps = new ProgressWheelParams("#FFFFFF", `#FFFFFF3D`, 150, 16);
+const progressWheelProps = getWheelParams("#FFFFFF", `#FFFFFF3D`, 150, 16);
 
 function NodeLongPressIndicator({
     data,
@@ -89,6 +89,7 @@ function NodeLongPressIndicator({
                     cx={progressWheelProps.centerCoordinate}
                     cy={progressWheelProps.centerCoordinate}
                     r={progressWheelProps.radius}
+                    fillOpacity={0}
                     stroke={`${colors.unmarkedText}7D`}
                     strokeDasharray={progressWheelProps.circumference}
                     strokeLinecap="round"

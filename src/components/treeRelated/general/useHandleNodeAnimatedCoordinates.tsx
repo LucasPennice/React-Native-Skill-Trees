@@ -16,16 +16,16 @@ function useHandleNodeAnimatedCoordinates(
     const x = useAnimateSkiaValue({ initialValue: cx, stateToAnimate: cx });
     const y = useAnimateSkiaValue({ initialValue: cy, stateToAnimate: cy });
 
-    const textX = useComputedValue(() => x.current - textWidth / 2, [x, textWidth]);
-    const textY = useComputedValue(() => y.current + getHeightForFont(NODE_ICON_FONT_SIZE) / 4 + 1, [y]);
+    const textX = useComputedValue(() => x.value - textWidth / 2, [x, textWidth]);
+    const textY = useComputedValue(() => y.value + getHeightForFont(NODE_ICON_FONT_SIZE) / 4 + 1, [y]);
 
     const path = useComputedValue(() => {
         const strokeWidth = 2;
         const radius = CIRCLE_SIZE + strokeWidth / 2;
         const p = Skia.Path.Make();
 
-        p.moveTo(x.current, y.current);
-        p.addCircle(x.current, y.current, radius);
+        p.moveTo(x.value, y.value);
+        p.addCircle(x.value, y.value, radius);
         p.simplify();
 
         return p;

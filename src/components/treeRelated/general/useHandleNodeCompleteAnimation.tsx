@@ -1,4 +1,4 @@
-import { rect, rrect, useComputedValue, useSharedValueEffect, useValue } from "@shopify/react-native-skia";
+import { rect, rrect, useComputedValue } from "@shopify/react-native-skia";
 import { useEffect } from "react";
 import { useSharedValue, withDelay, withTiming } from "react-native-reanimated";
 import { CIRCLE_SIZE } from "../../../parameters";
@@ -28,10 +28,6 @@ function useHandleNodeCompleteAnimation(coord: { cx: number; cy: number }, isCom
     const outerRectSizeInitial = 0;
     const outerRectSizeOnComplete = 2 * CIRCLE_SIZE;
 
-    const outerRectX = useValue(cx);
-    const outerRectY = useValue(cy);
-    const outerRectSize = useValue(outerRectSizeInitial);
-
     const outerRectXSharedValue = useSharedValue(cx);
     const outerRectYSharedValue = useSharedValue(cy);
     const outerRectSizeSharedValue = useSharedValue(outerRectSizeInitial);
@@ -39,12 +35,8 @@ function useHandleNodeCompleteAnimation(coord: { cx: number; cy: number }, isCom
     useEffect(() => {
         outerRectXSharedValue.value = cx;
         outerRectYSharedValue.value = cy;
-        outerRectX.current = cx;
-        outerRectY.current = cy;
         innerRectXSharedValue.value = cx;
         innerRectYSharedValue.value = cy;
-        innerRectX.current = cx;
-        innerRectY.current = cy;
     }, [cx, cy]);
 
     const isFirstRender = useIsFirstRender();
@@ -69,33 +61,17 @@ function useHandleNodeCompleteAnimation(coord: { cx: number; cy: number }, isCom
         outerRectSizeSharedValue.value = withDelay(delayAfterOvershoot, withTiming(size, { duration: remainingAnimationDuration }));
     }, [isComplete]);
 
-    useSharedValueEffect(() => {
-        outerRectX.current = outerRectXSharedValue.value;
-    }, outerRectXSharedValue);
-
-    useSharedValueEffect(() => {
-        outerRectY.current = outerRectYSharedValue.value;
-    }, outerRectYSharedValue);
-
-    useSharedValueEffect(() => {
-        outerRectSize.current = outerRectSizeSharedValue.value;
-    }, outerRectSizeSharedValue);
-
     const animatedOuterRect = useComputedValue(() => {
         return rrect(
-            rect(outerRectX.current, outerRectY.current, outerRectSize.current, outerRectSize.current),
-            outerRectSize.current,
-            outerRectSize.current
+            rect(outerRectXSharedValue.value, outerRectYSharedValue.value, outerRectSizeSharedValue.value, outerRectSizeSharedValue.value),
+            outerRectSizeSharedValue.value,
+            outerRectSizeSharedValue.value
         );
-    }, [outerRectX, outerRectY, outerRectSize]);
+    }, [outerRectXSharedValue, outerRectYSharedValue, outerRectSizeSharedValue]);
 
     //INNER RECTANGLE
     const innerRectSizeInitial = 0;
     const innerRectSizeOnComplete = 2 * CIRCLE_SIZE;
-
-    const innerRectX = useValue(cx);
-    const innerRectY = useValue(cy);
-    const innerRectSize = useValue(innerRectSizeInitial);
 
     const innerRectXSharedValue = useSharedValue(cx);
     const innerRectYSharedValue = useSharedValue(cy);
@@ -110,25 +86,13 @@ function useHandleNodeCompleteAnimation(coord: { cx: number; cy: number }, isCom
         innerRectSizeSharedValue.value = withDelay(delayAfterOvershoot, withTiming(size, { duration: remainingAnimationDuration }));
     }, [isComplete, cx, cy]);
 
-    useSharedValueEffect(() => {
-        innerRectX.current = innerRectXSharedValue.value;
-    }, innerRectXSharedValue);
-
-    useSharedValueEffect(() => {
-        innerRectY.current = innerRectYSharedValue.value;
-    }, innerRectYSharedValue);
-
-    useSharedValueEffect(() => {
-        innerRectSize.current = innerRectSizeSharedValue.value;
-    }, innerRectSizeSharedValue);
-
     const animatedinnerRect = useComputedValue(() => {
         return rrect(
-            rect(innerRectX.current, innerRectY.current, innerRectSize.current, innerRectSize.current),
-            innerRectSize.current,
-            innerRectSize.current
+            rect(innerRectXSharedValue.value, innerRectYSharedValue.value, innerRectSizeSharedValue.value, innerRectSizeSharedValue.value),
+            innerRectSizeSharedValue.value,
+            innerRectSizeSharedValue.value
         );
-    }, [innerRectX, innerRectY, innerRectSize]);
+    }, [innerRectXSharedValue, innerRectYSharedValue, innerRectSizeSharedValue]);
 
     const timing = { overshootDuration, delayAfterOvershoot, remainingAnimationDuration };
     const animatedRectangles = { inner: animatedinnerRect, outer: animatedOuterRect };

@@ -1,4 +1,5 @@
-import { Circle, DiffRect, LinearGradient, Path, SkFont, SkPath, SkiaMutableValue, SkiaValue, Text, vec } from "@shopify/react-native-skia";
+import { Circle, DiffRect, LinearGradient, Path, SkFont, SkPath, SkiaValue, Text, vec } from "@shopify/react-native-skia";
+import { SharedValue } from "react-native-reanimated";
 import { interpolateColors } from "../../../functions/misc";
 import { CIRCLE_SIZE, colors } from "../../../parameters";
 import { ColorGradient } from "../../../types";
@@ -6,7 +7,7 @@ import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
 import useHandleNodeCompleteAnimation, { ANIMATION_CONSTANTS_ON_COMPLETE } from "./useHandleNodeCompleteAnimation";
 
 type NodeProps = {
-    animatedCoordinates: { x: SkiaMutableValue<number>; y: SkiaMutableValue<number> };
+    animatedCoordinates: { x: SharedValue<number>; y: SharedValue<number> };
     font: SkFont;
     text: string;
     accentColor: ColorGradient;
@@ -26,7 +27,7 @@ function SkillNode({ path, isComplete, nodeState }: SkillNodeProps) {
 
     const { textX, textY } = textCoordinates;
 
-    const { animatedRectangles } = useHandleNodeCompleteAnimation({ cx: x.current, cy: y.current }, isComplete);
+    const { animatedRectangles } = useHandleNodeCompleteAnimation({ cx: x.value, cy: y.value }, isComplete);
     const { inner, outer } = animatedRectangles;
 
     const startTrim = isComplete ? 0 : 1;
@@ -44,8 +45,8 @@ function SkillNode({ path, isComplete, nodeState }: SkillNodeProps) {
             {/* eslint-disable-next-line */}
             <Path path={path} style="stroke" strokeWidth={2}>
                 <LinearGradient
-                    start={vec(x.current - CIRCLE_SIZE, y.current)}
-                    end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                    start={vec(x.value - CIRCLE_SIZE, y.value)}
+                    end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
                     colors={["#515053", "#2C2C2D"]}
                 />
             </Path>
@@ -53,8 +54,8 @@ function SkillNode({ path, isComplete, nodeState }: SkillNodeProps) {
             {/* eslint-disable-next-line */}
             <Path path={path} style="stroke" start={start} strokeCap={"round"} strokeWidth={2}>
                 <LinearGradient
-                    start={vec(x.current - CIRCLE_SIZE, y.current)}
-                    end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                    start={vec(x.value - CIRCLE_SIZE, y.value)}
+                    end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
                     colors={[accentColor.color1, accentColor.color2]}
                 />
             </Path>
@@ -62,8 +63,8 @@ function SkillNode({ path, isComplete, nodeState }: SkillNodeProps) {
                 <Text x={textX} y={textY} text={text} font={font} color={colors.unmarkedText}>
                     {!isComplete && (
                         <LinearGradient
-                            start={vec(x.current - CIRCLE_SIZE, y.current)}
-                            end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                            start={vec(x.value - CIRCLE_SIZE, y.value)}
+                            end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
                             colors={["#515053", "#2C2C2D"]}
                         />
                     )}
@@ -99,24 +100,24 @@ function SkillTreeNode({ isComplete, nodeState, path, treeCompletedPercentage }:
             {/* eslint-disable-next-line */}
             <Path path={path} style="stroke" strokeWidth={2}>
                 <LinearGradient
-                    start={vec(x.current - CIRCLE_SIZE, y.current)}
-                    end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                    start={vec(x.value - CIRCLE_SIZE, y.value)}
+                    end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
                     colors={["#515053", "#2C2C2D"]}
                 />
             </Path>
             {/* eslint-disable-next-line */}
             <Path path={path} end={end} style={"stroke"} strokeCap={"round"} strokeWidth={2}>
                 <LinearGradient
-                    start={vec(x.current - CIRCLE_SIZE, y.current)}
-                    end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                    start={vec(x.value - CIRCLE_SIZE, y.value)}
+                    end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
                     colors={[accentColor.color1, accentColor.color2]}
                 />
             </Path>
             {showIcons && (
                 <Text x={textX} y={textY} text={text} font={font}>
                     <LinearGradient
-                        start={vec(x.current - CIRCLE_SIZE, y.current)}
-                        end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                        start={vec(x.value - CIRCLE_SIZE, y.value)}
+                        end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
                         colors={[accentColor.color1, accentColor.color2]}
                     />
                 </Text>
@@ -142,8 +143,8 @@ function UserNode({ nodeState, textColor }: UserNodeProps) {
             {/* eslint-disable-next-line */}
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={accentColor.color1} style={"fill"} strokeWidth={2}>
                 <LinearGradient
-                    start={vec(x.current - CIRCLE_SIZE, y.current)}
-                    end={vec(x.current + CIRCLE_SIZE, y.current + CIRCLE_SIZE)}
+                    start={vec(x.value - CIRCLE_SIZE, y.value)}
+                    end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
                     colors={[accentColor.color1, accentColor.color2]}
                 />
             </Circle>
@@ -152,4 +153,4 @@ function UserNode({ nodeState, textColor }: UserNodeProps) {
     );
 }
 
-export { UserNode, SkillNode, SkillTreeNode, NodeProps };
+export { NodeProps, SkillNode, SkillTreeNode, UserNode };

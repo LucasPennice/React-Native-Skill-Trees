@@ -20,15 +20,15 @@ function HierarchicalCanvasPath({ coordinates, pathColor, isRoot }: { coordinate
     const path = useComputedValue(() => {
         const p = Skia.Path.Make();
 
-        p.moveTo(p1x.current, p1y.current - CIRCLE_SIZE);
+        p.moveTo(p1x.value, p1y.value - CIRCLE_SIZE);
 
         p.cubicTo(
-            p1x.current,
-            p1y.current - 0.87 * (p1y.current - p2y.current),
-            p2x.current,
-            p2y.current - 0.43 * (p2y.current - p1y.current),
-            p2x.current,
-            p2y.current + CIRCLE_SIZE
+            p1x.value,
+            p1y.value - 0.87 * (p1y.value - p2y.value),
+            p2x.value,
+            p2y.value - 0.43 * (p2y.value - p1y.value),
+            p2x.value,
+            p2y.value + CIRCLE_SIZE
         );
 
         return p;

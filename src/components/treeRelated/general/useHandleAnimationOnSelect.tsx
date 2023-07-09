@@ -1,25 +1,39 @@
-import { mix, useComputedValue, useSharedValueEffect, useValue } from "@shopify/react-native-skia";
+import { AnimatedProp, Transforms2d } from "@shopify/react-native-skia";
 import { useEffect } from "react";
-import { useSharedValue, withSpring } from "react-native-reanimated";
+import { useDerivedValue, useSharedValue, withSequence, withSpring, withTiming } from "react-native-reanimated";
+import useIsFirstRender from "../../../useIsFirstRender";
 
 function useHandleAnimationOnSelect(selectedNodeId: string | null, nodeId: string) {
-    const shouldTransform = useValue(0);
+    const scale = useSharedValue(1);
+    const blur = useSharedValue(0);
 
-    const isActive = useSharedValue(0);
+    const shouldActivate = selectedNodeId === nodeId;
+
+    const isFirstRender = useIsFirstRender();
 
     useEffect(() => {
-        const shouldActivate = selectedNodeId === nodeId;
+        if (isFirstRender) return;
 
-        isActive.value = withSpring(shouldActivate ? 1 : 0, { damping: 18, stiffness: 300 });
-    }, [selectedNodeId]);
+        //Scale
+        const activeAnimation = withSequence(withTiming(0.8, { duration: 100 }), withSpring(3, { damping: 22, stiffness: 250 }));
 
-    useSharedValueEffect(() => {
-        shouldTransform.current = mix(isActive.value, 0, 1);
-    }, isActive);
+        const inactiveAnimation = withSpring(1, { damping: 22, stiffness: 300 });
 
-    const groupTransform = useComputedValue(() => [{ scale: mix(shouldTransform.current, 1, 3) }], [shouldTransform]);
+        scale.value = shouldActivate ? activeAnimation : inactiveAnimation;
 
-    return { groupTransform };
+        //Blur
+        const activeBlur = withSequence(withTiming(2, { duration: 50 }), withSpring(0, { damping: 25, stiffness: 150 }));
+
+        const inactiveBlur = withSequence(withTiming(2, { duration: 50 }), withSpring(0, { damping: 22, stiffness: 300 }));
+
+        blur.value = shouldActivate ? activeBlur : inactiveBlur;
+    }, [shouldActivate]);
+
+    const groupTransform: AnimatedProp<Transforms2d | undefined, any> = useDerivedValue(() => {
+        return [{ scale: scale.value }];
+    }, [scale]);
+
+    return { groupTransform, blur };
 }
 
 export default useHandleAnimationOnSelect;

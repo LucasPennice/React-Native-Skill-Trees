@@ -1,4 +1,4 @@
-import { Group, SkFont, SkiaMutableValue } from "@shopify/react-native-skia";
+import { Blur, Group, SkFont, SkiaMutableValue } from "@shopify/react-native-skia";
 import { ColorGradient, NodeCategory } from "../../../types";
 import { NodeProps, SkillNode, SkillTreeNode, UserNode } from "./NodeCategories";
 import useHandleAnimationOnSelect from "./useHandleAnimationOnSelect";
@@ -33,7 +33,8 @@ function Node({
     const { cx, cy } = coord;
 
     const { path, textX, textY, x, y } = useHandleNodeAnimatedCoordinates(coord, text, font);
-    const { groupTransform } = useHandleAnimationOnSelect(selectedNodeId, nodeId);
+
+    const { groupTransform, blur } = useHandleAnimationOnSelect(selectedNodeId, nodeId);
 
     const nodeIcon = text.isEmoji ? text.letter : text.letter.toUpperCase();
 
@@ -51,6 +52,8 @@ function Node({
             )}
 
             {category === "USER" && <UserNode nodeState={nodeState} textColor={text.color} treeCompletedPercentage={treeCompletedPercentage} />}
+
+            <Blur blur={blur} />
         </Group>
     );
 }

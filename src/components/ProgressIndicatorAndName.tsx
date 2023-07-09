@@ -8,29 +8,7 @@ import { useAppSelector } from "../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../redux/screenDimentionsSlice";
 import { Skill, Tree } from "../types";
 import AppText from "./AppText";
-
-export class ProgressWheelParams {
-    size = 65;
-    strokeWidth = 7;
-    centerCoordinate: number;
-    radius: number;
-    circumference: number;
-    strokeDasharray: number;
-    progressStroke: string;
-    backgroundStroke: string;
-
-    constructor(progressColor: string, backgroundColor: string, size?: number, strokeWidth?: number) {
-        if (size) this.size = size;
-        if (strokeWidth) this.strokeWidth = strokeWidth;
-
-        this.centerCoordinate = this.size / 2;
-        this.radius = this.size / 2 - this.strokeWidth / 2;
-        this.progressStroke = progressColor;
-        this.backgroundStroke = backgroundColor;
-        this.circumference = 2 * Math.PI * this.radius;
-        this.strokeDasharray = 2 * Math.PI * this.radius;
-    }
-}
+import { getWheelParams } from "../functions/misc";
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
 
@@ -39,7 +17,7 @@ function ProgressIndicatorAndName({ tree }: { tree: Tree<Skill> }) {
 
     const treeAccentColor = tree.accentColor;
 
-    const progressWheelProps = new ProgressWheelParams(treeAccentColor.color1, `${treeAccentColor.color1}3D`, 30, 4);
+    const progressWheelProps = getWheelParams(treeAccentColor.color1, `${treeAccentColor.color1}3D`, 30, 4);
 
     const completedPercentage = useSharedValue(0);
 
@@ -92,6 +70,7 @@ function ProgressIndicatorAndName({ tree }: { tree: Tree<Skill> }) {
                     cx={progressWheelProps.centerCoordinate}
                     cy={progressWheelProps.centerCoordinate}
                     r={progressWheelProps.radius}
+                    fillOpacity={0}
                     stroke={progressWheelProps.backgroundStroke}
                 />
                 <AnimatedCircle
@@ -100,6 +79,7 @@ function ProgressIndicatorAndName({ tree }: { tree: Tree<Skill> }) {
                     cy={progressWheelProps.centerCoordinate}
                     r={progressWheelProps.radius}
                     stroke={"url(#progressColor)"}
+                    fillOpacity={0}
                     strokeDasharray={progressWheelProps.circumference}
                     strokeLinecap="round"
                     animatedProps={animatedProps}
