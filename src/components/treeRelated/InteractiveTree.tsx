@@ -1,17 +1,16 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Blur, Canvas, SkiaDomView, runTiming, useValue } from "@shopify/react-native-skia";
+import { SkiaDomView } from "@shopify/react-native-skia";
 import { MutableRefObject, memo, useEffect } from "react";
 import { View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import { StackNavigatorParams } from "../../../App";
 import { findNodeById } from "../../functions/extractInformationFromTree";
-import RadialSkillTree from "../../pages/homepage/RadialSkillTree";
 import { centerFlex } from "../../parameters";
 import { CanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { CoordinatesWithTreeData, DnDZone, SelectedDnDZone, SelectedNodeId, Skill, Tree } from "../../types";
-import RadialTreeLevelCircles from "./RadialTreeLevelCircles";
+import TreeCanvas from "./TreeCanvas";
 import {
     calculateDragAndDropZones,
     centerNodesInCanvas,
@@ -21,8 +20,6 @@ import {
     removeTreeDataFromCoordinate,
 } from "./coordinateFunctions";
 import NodeLongPressIndicator from "./general/NodeLongPressIndicator";
-import DragAndDropZones from "./hierarchical/DragAndDropZones";
-import HierarchicalSkillTree from "./hierarchical/HierarchicalSkillTree";
 import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
 import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
 import NodeMenu from "./nodeMenu/NodeMenu";
@@ -138,9 +135,6 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
         longPressFn
     );
 
-    const blur = useHandleBlurAnimation(tree.treeId);
-    //
-
     const treeData = { nodeCoordinates: centeredCoordinatedWithTreeData, dndZoneCoordinates };
 
     const renderSelectedNodeMenu = selectedNodeCoordinates && selectedNodeId && isInteractive;
@@ -159,11 +153,16 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
             <GestureDetector gesture={canvasGestures}>
                 <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative" }]}>
                     <Animated.View style={[transform, { flex: 1 }]}>
-                        <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight }} ref={canvasRef}>
-                            {renderStyle === "hierarchy" && <HierarchicalSkillTreeRender state={state} config={config} treeData={treeData} />}
-                            {renderStyle === "radial" && <RadialTreeRendererRender state={state} config={config} treeData={treeData} />}
-                            <Blur blur={blur} />
-                        </Canvas>
+                        <TreeCanvas
+                            canvasHeight={canvasHeight}
+                            canvasRef={canvasRef}
+                            canvasWidth={canvasWidth}
+                            config={config}
+                            renderStyle={renderStyle}
+                            state={state}
+                            touchHandler={touchHandler}
+                            treeData={treeData}
+                        />
                         {/* Long press Node related 👇 */}
                         <NodeLongPressIndicator data={longPressIndicatorPosition} scale={scale} />
                         {renderNodeMenu && (
@@ -180,71 +179,6 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
 }
 
 export default memo(InteractiveTree);
-
-function useHandleBlurAnimation(treeId: string) {
-    useEffect(() => {
-        runBlurAnimation();
-        //eslint-disable-next-line
-    }, [treeId]);
-
-    const blur = useValue(4);
-
-    const runBlurAnimation = () => runTiming(blur, { from: 4, to: 0 }, { duration: 600 });
-
-    return blur;
-}
-
-function HierarchicalSkillTreeRender({
-    state,
-    treeData,
-    config,
-}: {
-    state: InteractiveNodeState;
-    treeData: TreeCoordinates;
-    config: InteractiveTreeConfig;
-}) {
-    const { selectedDndZone, selectedNodeId } = state;
-    const { dndZoneCoordinates, nodeCoordinates } = treeData;
-    const { isInteractive, showDndZones, canvasDisplaySettings } = config;
-    const { showLabel, showIcons } = canvasDisplaySettings;
-
-    return (
-        <>
-            <HierarchicalSkillTree
-                nodeCoordinatesCentered={nodeCoordinates}
-                selectedNode={selectedNodeId ?? null}
-                settings={{ showIcons, showLabel }}
-            />
-            {isInteractive && showDndZones && <DragAndDropZones data={dndZoneCoordinates} selectedDndZone={selectedDndZone} />}
-        </>
-    );
-}
-
-function RadialTreeRendererRender({
-    treeData,
-    config,
-    state,
-}: {
-    treeData: TreeCoordinates;
-    config: InteractiveTreeConfig;
-    state: InteractiveNodeState;
-}) {
-    const { nodeCoordinates } = treeData;
-    const { canvasDisplaySettings } = config;
-    const { showLabel, oneColorPerTree, showCircleGuide, showIcons } = canvasDisplaySettings;
-    const { selectedNodeId } = state;
-
-    return (
-        <>
-            {showCircleGuide && <RadialTreeLevelCircles nodeCoordinates={nodeCoordinates} />}
-            <RadialSkillTree
-                nodeCoordinatesCentered={nodeCoordinates}
-                selectedNode={selectedNodeId ?? null}
-                settings={{ showLabel, oneColorPerTree, showIcons }}
-            />
-        </>
-    );
-}
 
 function handleTreeBuild(
     tree: Tree<Skill>,

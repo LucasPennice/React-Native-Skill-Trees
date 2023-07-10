@@ -1,5 +1,5 @@
 import * as Haptics from "expo-haptics";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import Animated, { Easing, FadeIn, useAnimatedProps, useAnimatedStyle, withDelay, withSequence, withTiming } from "react-native-reanimated";
 import { Svg, Circle as SvgCircle } from "react-native-svg";
 import { getWheelParams } from "../../../functions/misc";
@@ -100,7 +100,7 @@ function NodeLongPressIndicator({
     );
 }
 
-export default NodeLongPressIndicator;
+export default memo(NodeLongPressIndicator);
 
 export function adjustedScale(scale: number) {
     "worklet";
