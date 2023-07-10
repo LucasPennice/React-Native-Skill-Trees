@@ -1,9 +1,9 @@
 {
     "expo": {
-        "name": "skilltrees",
-        "slug": "skilltrees",
-        "scheme": "skilltrees",
-        "version": "1.0.2",
+        "name": "Skill Trees",
+        "slug": "SkillTrees",
+        "scheme": "skillTree",
+        "version": "1.0.3",
         "orientation": "portrait",
         "icon": "./assets/icon.png",
         "userInterfaceStyle": "light",
@@ -31,7 +31,7 @@
                 "android.permission.WRITE_EXTERNAL_STORAGE",
                 "android.permission.ACCESS_MEDIA_LOCATION"
             ],
-            "versionCode": 3,
+            "versionCode": 4,
             "package": "com.lucaspennice.skilltrees"
         },
         "web": {
