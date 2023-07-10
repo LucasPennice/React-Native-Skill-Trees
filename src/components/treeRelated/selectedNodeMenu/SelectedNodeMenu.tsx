@@ -123,7 +123,6 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
             style={[
                 centerFlex,
                 {
-                    backgroundColor: "#1231233D",
                     left: 0,
                     top: 0,
                     zIndex: 2,
