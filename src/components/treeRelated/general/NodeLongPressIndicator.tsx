@@ -6,9 +6,11 @@ import { getWheelParams } from "../../../functions/misc";
 import { colors } from "../../../parameters";
 import { NodeCoordinate } from "../../../types";
 import { MIN_DURATION_LONG_PRESS_MS } from "../hooks/useCanvasTouchHandler";
+import { Platform } from "react-native";
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
-const progressWheelProps = getWheelParams("#FFFFFF", `#FFFFFF3D`, 150, 16);
+const indicatorSize = Platform.OS === "android" ? 143 : 150;
+const progressWheelProps = getWheelParams("#FFFFFF", `#FFFFFF3D`, indicatorSize, 16);
 
 function NodeLongPressIndicator({
     data,
@@ -71,7 +73,7 @@ function NodeLongPressIndicator({
         };
     }, [data]);
 
-    const position = { x: lastX - 75, y: lastY - 75 };
+    const position = { x: lastX - indicatorSize / 2, y: lastY - indicatorSize / 2 };
 
     const animatedScale = useAnimatedStyle(() => {
         const newScale = adjustedScale(scale);
