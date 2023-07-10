@@ -7,6 +7,7 @@ import { CanvasDimensions, NodeCoordinate } from "../../../types";
 import { getXBounds, getYBounds, useHandleCanvasBounds } from "./useHandleCanvasBounds";
 
 const DEFAULT_SCALE = 1;
+const deaccelerationFactor = 2500;
 
 function useHandleCanvasScroll(
     canvasDimentions: CanvasDimensions,
@@ -27,6 +28,9 @@ function useHandleCanvasScroll(
     const MAX_SCALE = 1.4;
 
     const start = useSharedValue({ x: 0, y: 0 });
+    //We don't want to update the start value while panning (normal scrolling, NOT the slide after the scrolling) because the offsetX is calculated
+    //based on the start value, if we update it while panning it causes exponential growth in the offset variables
+    const shouldUpdateStartValue = useSharedValue(false);
     const offsetX = useSharedValue(0);
     const offsetY = useSharedValue(0);
 
@@ -50,6 +54,24 @@ function useHandleCanvasScroll(
         [scale]
     );
 
+    useAnimatedReaction(
+        () => offsetX.value,
+        (offsetX: number) => {
+            if (shouldUpdateStartValue.value !== true) return;
+            start.value = { x: offsetX, y: start.value.y };
+        },
+        [offsetX, shouldUpdateStartValue]
+    );
+
+    useAnimatedReaction(
+        () => offsetY.value,
+        (offsetY: number) => {
+            if (shouldUpdateStartValue.value !== true) return;
+            start.value = { x: start.value.x, y: offsetY };
+        },
+        [offsetY, shouldUpdateStartValue]
+    );
+
     useEffect(() => {
         const currentCanvasMinScale = screenDimensions.width / canvasWidth;
 
@@ -59,9 +81,9 @@ function useHandleCanvasScroll(
             savedScale.value = currentCanvasMinScale;
         }
 
+        shouldUpdateStartValue.value = true;
         offsetX.value = 0;
         offsetY.value = 0;
-        start.value = { x: 0, y: 0 };
     }, [canvasDimentions.canvasHeight, canvasDimentions.canvasWidth]);
 
     const canvasZoom = Gesture.Pinch()
@@ -102,14 +124,16 @@ function useHandleCanvasScroll(
                 bounds: { x: xBounds, y: yBounds },
             });
 
+            shouldUpdateStartValue.value = true;
+
             if (outOfBounds.x) {
                 offsetX.value = withSpring(safeX, MENU_HIGH_DAMPENING);
-                start.value = { y: start.value.y, x: safeX };
+                // start.value = { y: start.value.y, x: safeX };
             }
 
             if (outOfBounds.y) {
                 offsetY.value = withSpring(safeY, MENU_HIGH_DAMPENING);
-                start.value = { x: start.value.x, y: safeY };
+                // start.value = { x: start.value.x, y: safeY };
             }
         });
 
@@ -120,18 +144,20 @@ function useHandleCanvasScroll(
             const newXValue = e.translationX + start.value.x;
             const newYValue = e.translationY + start.value.y;
 
+            shouldUpdateStartValue.value = false;
+
             offsetX.value = newXValue;
             offsetY.value = newYValue;
 
             runOnJS(longPressFn.onScroll)();
         })
-        .onEnd(() => {
+        .onEnd((e) => {
+            shouldUpdateStartValue.value = true;
+
             const outOfBounds = checkIfScrollOutOfBounds({
                 offset: { x: offsetX.value, y: offsetY.value },
                 bounds: { x: [minXBound.value, maxXBound.value], y: [minYBound.value, maxYBound.value] },
             });
-
-            if (!outOfBounds.x && !outOfBounds.y) return (start.value = { x: offsetX.value, y: offsetY.value });
 
             const { x: safeX, y: safeY } = returnSafeOffset({
                 offset: { x: offsetX.value, y: offsetY.value },
@@ -139,9 +165,53 @@ function useHandleCanvasScroll(
                 bounds: { x: [minXBound.value, maxXBound.value], y: [minYBound.value, maxYBound.value] },
             });
 
-            offsetX.value = withSpring(safeX, MENU_HIGH_DAMPENING);
-            offsetY.value = withSpring(safeY, MENU_HIGH_DAMPENING);
-            start.value = { x: safeX, y: safeY };
+            if (outOfBounds.x) {
+                offsetX.value = withSpring(safeX, MENU_HIGH_DAMPENING);
+            } else {
+                const aX = e.velocityX > 0 ? -deaccelerationFactor : deaccelerationFactor;
+                const timeX = (0 - e.velocityX) / aX;
+                const xCoordAfterFling = offsetX.value + e.velocityX * timeX + 0.5 * aX * timeX ** 2;
+
+                const { x: xAfterSlideOutOfBounds } = checkIfScrollOutOfBounds({
+                    offset: { x: xCoordAfterFling, y: 0 },
+                    bounds: { x: [minXBound.value, maxXBound.value], y: [0, 0] },
+                });
+
+                if (xAfterSlideOutOfBounds) {
+                    const { x: safeXAfterSlide } = returnSafeOffset({
+                        offset: { x: xCoordAfterFling, y: 0 },
+                        outOfBounds: { x: xAfterSlideOutOfBounds, y: false },
+                        bounds: { x: [minXBound.value, maxXBound.value], y: [0, 0] },
+                    });
+                    offsetX.value = withSpring(safeXAfterSlide, { velocity: e.velocityX, stiffness: 10, dampingRatio: 1 });
+                } else {
+                    offsetX.value = withSpring(xCoordAfterFling, { velocity: e.velocityX, stiffness: 10, dampingRatio: 1 });
+                }
+            }
+
+            if (outOfBounds.y) {
+                offsetY.value = withSpring(safeY, MENU_HIGH_DAMPENING);
+            } else {
+                const aY = e.velocityY > 0 ? -deaccelerationFactor : deaccelerationFactor;
+                const timeY = (0 - e.velocityY) / aY;
+                const yCoordAfterFling = offsetY.value + e.velocityY * timeY + 0.5 * aY * timeY ** 2;
+
+                const { y: yAfterSlideOutOfBounds } = checkIfScrollOutOfBounds({
+                    offset: { x: 0, y: yCoordAfterFling },
+                    bounds: { x: [0, 0], y: [minYBound.value, maxYBound.value] },
+                });
+
+                if (yAfterSlideOutOfBounds) {
+                    const { y: safeYAfterSlide } = returnSafeOffset({
+                        offset: { x: 0, y: yCoordAfterFling },
+                        outOfBounds: { x: false, y: yAfterSlideOutOfBounds },
+                        bounds: { x: [0, 0], y: [minYBound.value, maxYBound.value] },
+                    });
+                    offsetY.value = withSpring(safeYAfterSlide, { velocity: e.velocityY, stiffness: 10, dampingRatio: 1 });
+                } else {
+                    offsetY.value = withSpring(yCoordAfterFling, { velocity: e.velocityY, stiffness: 10, dampingRatio: 1 });
+                }
+            }
         });
 
     const longPress = Gesture.LongPress()
@@ -277,4 +347,8 @@ function returnSafeOffset(args: {
     }
 
     return result;
+}
+
+function handleScrollDeacceleration() {
+    "worklet";
 }
