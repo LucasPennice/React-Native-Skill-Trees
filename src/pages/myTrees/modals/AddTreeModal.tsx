@@ -3,7 +3,7 @@ import { UseQueryResult } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Alert, Dimensions, Pressable, View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
-import Animated, { FadeInDown, FadeOutUp, useAnimatedStyle, withSpring } from "react-native-reanimated";
+import Animated, { FadeInDown, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import axiosClient from "../../../../axiosClient";
 import { useRequestProcessor } from "../../../../requestProcessor";
 import AppText from "../../../components/AppText";
@@ -108,7 +108,7 @@ function AddTreeModal() {
                     </Pressable>
                 </View>
                 {mode === "CREATE_TREE" && (
-                    <Animated.View entering={FadeInDown} exiting={FadeOutUp.duration(50)}>
+                    <Animated.View entering={FadeInDown}>
                         <AppTextInput
                             placeholder={"Tree Name"}
                             textState={[treeName, setTreeName]}
@@ -152,7 +152,7 @@ function AddTreeModal() {
                     </Animated.View>
                 )}
                 {mode === "IMPORT_TREE" && (
-                    <Animated.View entering={FadeInDown} exiting={FadeOutUp.duration(50)}>
+                    <Animated.View entering={FadeInDown}>
                         <ImportTree importTreeQuery={importTreeQuery} linkState={[treeImportKey, setTreeImportKey]} closeModal={closeModal} />
                     </Animated.View>
                 )}

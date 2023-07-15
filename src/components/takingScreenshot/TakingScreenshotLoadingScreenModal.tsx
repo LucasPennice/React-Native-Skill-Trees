@@ -3,7 +3,7 @@ import { shareAsync } from "expo-sharing";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, Dimensions, Pressable, View } from "react-native";
 import { Gesture, GestureDetector, gestureHandlerRootHOC } from "react-native-gesture-handler";
-import Animated, { Easing, FadeInDown, FadeOutUp, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, { Easing, FadeInDown, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import ViewShot from "react-native-view-shot";
 import { centerFlex, colors } from "../../parameters";
 import { generalStyles } from "../../styles";
@@ -53,7 +53,7 @@ function TakingScreenshotLoadingScreenModal({
         <FlingToDismissModal closeModal={closeModal} open={open}>
             <>
                 {stage === "TAKING_SCREENSHOT" && (
-                    <Animated.View style={[centerFlex, { flex: 1, opacity: 1 }]} entering={FadeInDown} exiting={FadeOutUp}>
+                    <Animated.View style={[centerFlex, { flex: 1, opacity: 1 }]} entering={FadeInDown}>
                         <AppText fontSize={24} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", textAlign: "center", marginBottom: 25 }}>
                             Turning your skill tree into an image
                         </AppText>

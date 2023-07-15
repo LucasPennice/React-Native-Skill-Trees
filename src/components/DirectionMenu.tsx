@@ -204,10 +204,11 @@ function DirectionMenu({ action, config, children, onHoverActions }: Props) {
             y.value = withSpring(0, { damping: 26, stiffness: 300, velocity: velocityY });
             lastExecutedAction.value = undefined;
         })
+        .activateAfterLongPress(40)
         .shouldCancelWhenOutside(true);
 
     const tap = Gesture.Tap()
-        .maxDuration(80)
+        .maxDuration(40)
         .onStart((e) => {
             if (!allowTap) return;
             if (!action) return;
