@@ -87,6 +87,9 @@ function useHandleCanvasScroll(
     }, [canvasDimentions.canvasHeight, canvasDimentions.canvasWidth]);
 
     const canvasZoom = Gesture.Pinch()
+        .onBegin(() => {
+            shouldUpdateStartValue.value = false;
+        })
         .onUpdate((e) => {
             if (foundNodeCoordinates) return;
             const newScaleValue = savedScale.value * e.scale;
@@ -138,9 +141,12 @@ function useHandleCanvasScroll(
         });
 
     const canvasPan = Gesture.Pan()
+        .onBegin(() => {
+            shouldUpdateStartValue.value = false;
+            offsetX.value = start.value.x;
+            offsetY.value = start.value.y;
+        })
         .onUpdate((e) => {
-            console.log("scrolling", Math.random());
-
             if (foundNodeCoordinates) return;
 
             const newXValue = e.translationX + start.value.x;
@@ -225,7 +231,7 @@ function useHandleCanvasScroll(
         })
         .minDuration(100);
 
-    const canvasGestures = Gesture.Race(canvasPan, canvasZoom, longPress);
+    const canvasGestures = Gesture.Simultaneous(canvasPan, canvasZoom, longPress);
 
     const transform = useAnimatedStyle(() => {
         if (foundNodeCoordinates) return transitionToSelectedNodeStyle();

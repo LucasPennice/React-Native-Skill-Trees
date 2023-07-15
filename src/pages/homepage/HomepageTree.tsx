@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCanvasRef } from "@shopify/react-native-skia";
 import { useEffect, useMemo, useState } from "react";
 import { StackNavigatorParams } from "../../../App";
-import CanvasSettingsModal from "../../components/CanvasSettingsModal";
+import CanvasSettingsModal from "../../components/treeRelated/canvasSettingsModal/CanvasSettingsModal";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeScreenshot";
@@ -51,19 +51,15 @@ function HomepageTree({ n: { navigation, route }, state }: Props) {
         };
     }, []);
 
-    useEffect(() => {
-        console.log(canvasSettings);
-    }, [canvasSettings]);
-
     return (
         <>
-            {/* <InteractiveTree
+            <InteractiveTree
                 config={config}
                 state={interactiveTreeState}
                 tree={homepageTree}
                 functions={functions}
                 renderOnSelectedNodeId={RenderOnSelectedNodeId}
-            /> */}
+            />
             <ProgressIndicatorAndName tree={homepageTree} />
             <OpenSettingsMenu openModal={() => setCanvasSettings(true)} show={selectedNodeId === null} />
             <ShareTreeLayout

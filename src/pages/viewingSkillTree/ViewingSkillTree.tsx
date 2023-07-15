@@ -3,7 +3,7 @@ import { useCanvasRef } from "@shopify/react-native-skia";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 import { StackNavigatorParams } from "../../../App";
-import CanvasSettingsModal from "../../components/CanvasSettingsModal";
+import CanvasSettingsModal from "../../components/treeRelated/canvasSettingsModal/CanvasSettingsModal";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import ShareTreeUrl from "../../components/ShareTreeUrl";

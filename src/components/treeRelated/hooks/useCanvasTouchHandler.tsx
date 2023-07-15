@@ -101,12 +101,10 @@ const useCanvasTouchHandler = ({ config, functions, state }: Props) => {
     const touchHandler = useTouchHandler(
         {
             onStart: (e) => {
-                console.log("balls");
                 touchInfoRef.current = e;
                 closeNodeMenu();
             },
             onEnd: (touchInfo) => {
-                console.log("hola");
                 //Avoids bug on android
                 if (touchInfo.type !== 2) return;
 

@@ -1,12 +1,13 @@
 import { memo } from "react";
 import { View } from "react-native";
-import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Circle, Defs, LinearGradient, Stop, Svg } from "react-native-svg";
 import { treeCompletedSkillPercentage } from "../functions/extractInformationFromTree";
 import { getWheelParams } from "../functions/misc";
 import { centerFlex, colors } from "../parameters";
 import { Skill, Tree } from "../types";
 import AppText from "./AppText";
+import useShowHideStylesWithoutTransitionView from "./treeRelated/hooks/useShowHideStylesWithoutTransitionView";
 
 function NodeView({ node, size, hideIcon }: { node: Tree<Skill>; size: number; hideIcon?: boolean }) {
     const gradient = node.accentColor;
@@ -18,6 +19,8 @@ function NodeView({ node, size, hideIcon }: { node: Tree<Skill>; size: number; h
 
     const completedPercentage = treeCompletedSkillPercentage(node);
     const result = progressWheelProps.circumference - (progressWheelProps.circumference * completedPercentage) / 100;
+
+    const showIcon = useShowHideStylesWithoutTransitionView(!hideIcon);
 
     if (category === "SKILL") return <Skill />;
 
@@ -61,25 +64,20 @@ function NodeView({ node, size, hideIcon }: { node: Tree<Skill>; size: number; h
                         strokeLinecap="round"
                     />
                 </Svg>
-                {!hideIcon && (
-                    <Animated.View
-                        entering={FadeInDown}
-                        exiting={FadeOutDown}
-                        style={[centerFlex, { width: size, height: size, position: "absolute", right: 0, overflow: "hidden" }]}>
-                        <AppText
-                            fontSize={25}
-                            style={{
-                                position: "absolute",
-                                color: "#000000",
-                                width: size,
-                                textAlign: "center",
-                                lineHeight: isEmojiIcon ? 28 : undefined,
-                                fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
-                            }}>
-                            {isEmojiIcon ? skill.icon.text : skill.name[0]}
-                        </AppText>
-                    </Animated.View>
-                )}
+                <Animated.View style={[centerFlex, showIcon, { width: size, height: size, position: "absolute", right: 0, overflow: "hidden" }]}>
+                    <AppText
+                        fontSize={25}
+                        style={{
+                            position: "absolute",
+                            color: "#000000",
+                            width: size,
+                            textAlign: "center",
+                            lineHeight: isEmojiIcon ? 28 : undefined,
+                            fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
+                        }}>
+                        {isEmojiIcon ? skill.icon.text : skill.name[0]}
+                    </AppText>
+                </Animated.View>
             </View>
         );
     }
@@ -115,20 +113,18 @@ function NodeView({ node, size, hideIcon }: { node: Tree<Skill>; size: number; h
                         strokeDashoffset={result}
                     />
                 </Svg>
-                {!hideIcon && (
-                    <View style={[centerFlex, { width: size, height: size, position: "absolute", right: 0, overflow: "hidden" }]}>
-                        <AppText
-                            fontSize={25}
-                            style={{
-                                position: "absolute",
-                                color: category === "SKILL" ? colors.unmarkedText : gradient.color1,
-                                lineHeight: isEmojiIcon ? 28 : undefined,
-                                fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
-                            }}>
-                            {isEmojiIcon ? skill.icon.text : skill.icon.text[0]}
-                        </AppText>
-                    </View>
-                )}
+                <View style={[centerFlex, { width: size, height: size, position: "absolute", right: 0, overflow: "hidden" }]}>
+                    <AppText
+                        fontSize={25}
+                        style={{
+                            position: "absolute",
+                            color: category === "SKILL" ? colors.unmarkedText : gradient.color1,
+                            lineHeight: isEmojiIcon ? 28 : undefined,
+                            fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
+                        }}>
+                        {isEmojiIcon ? skill.icon.text : skill.icon.text[0]}
+                    </AppText>
+                </View>
             </View>
         );
     }
@@ -168,25 +164,20 @@ function NodeView({ node, size, hideIcon }: { node: Tree<Skill>; size: number; h
                         strokeLinecap="round"
                     />
                 </Svg>
-                {!hideIcon && (
-                    <Animated.View
-                        entering={FadeInDown}
-                        exiting={FadeOutDown}
-                        style={[centerFlex, { width: size, height: size, position: "absolute", right: 0, overflow: "hidden" }]}>
-                        <AppText
-                            fontSize={25}
-                            style={{
-                                position: "absolute",
-                                color: category === "SKILL" ? colors.unmarkedText : gradient.color1,
-                                width: size,
-                                textAlign: "center",
-                                lineHeight: isEmojiIcon ? 28 : undefined,
-                                fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
-                            }}>
-                            {isEmojiIcon ? skill.icon.text : skill.name[0]}
-                        </AppText>
-                    </Animated.View>
-                )}
+                <Animated.View style={[centerFlex, showIcon, { width: size, height: size, position: "absolute", right: 0, overflow: "hidden" }]}>
+                    <AppText
+                        fontSize={25}
+                        style={{
+                            position: "absolute",
+                            color: category === "SKILL" ? colors.unmarkedText : gradient.color1,
+                            width: size,
+                            textAlign: "center",
+                            lineHeight: isEmojiIcon ? 28 : undefined,
+                            fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
+                        }}>
+                        {isEmojiIcon ? skill.icon.text : skill.name[0]}
+                    </AppText>
+                </Animated.View>
             </View>
         );
     }

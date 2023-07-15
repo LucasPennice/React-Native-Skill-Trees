@@ -1,17 +1,17 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
 import { Alert, Dimensions, Pressable, View } from "react-native";
-import Animated, { Easing, FadeInDown, FadeOutUp, Layout, ZoomIn, ZoomOut, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
+import Animated, { Easing, FadeInDown, Layout, ZoomIn, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import { Line, Rect, Svg } from "react-native-svg";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import NodeView from "../../../components/NodeView";
 import RadioInput from "../../../components/RadioInput";
+import { findNodeById } from "../../../functions/extractInformationFromTree";
 import { makeid } from "../../../functions/misc";
 import { centerFlex, colors } from "../../../parameters";
 import { DnDZone, Skill, Tree, getDefaultSkillValue } from "../../../types";
-import { findNodeById } from "../../../functions/extractInformationFromTree";
 
 type Props = {
     closeModal: () => void;
@@ -305,14 +305,13 @@ function SelectableNodeView({
                     elevation: 5,
                 },
             ]}
-            entering={FadeInDown}
-            exiting={FadeOutUp}>
+            entering={FadeInDown}>
             <Pressable onPress={selectNode} style={[centerFlex, { height: 90, width: 90 }]}>
                 <NodeView node={n} size={65} />
 
                 {isSelected && (
                     <Pressable style={{ position: "absolute", top: 5, right: 5, zIndex: 2 }} onPress={deleteNode}>
-                        <Animated.View exiting={ZoomOut} entering={ZoomIn.springify().stiffness(150).damping(16)}>
+                        <Animated.View entering={ZoomIn.springify().stiffness(150).damping(16)}>
                             <Svg width="39" height="39" viewBox="0 0 39 39" fill="none">
                                 <Rect width="39" height="39" rx="19.5" fill="#181A1C" />
                                 <Line x1="11.9006" y1="10.6478" x2="27.2555" y2="26.0026" stroke="#FE453A" strokeWidth="2" />
