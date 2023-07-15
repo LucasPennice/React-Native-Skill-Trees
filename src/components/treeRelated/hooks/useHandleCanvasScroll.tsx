@@ -139,6 +139,8 @@ function useHandleCanvasScroll(
 
     const canvasPan = Gesture.Pan()
         .onUpdate((e) => {
+            console.log("scrolling", Math.random());
+
             if (foundNodeCoordinates) return;
 
             const newXValue = e.translationX + start.value.x;

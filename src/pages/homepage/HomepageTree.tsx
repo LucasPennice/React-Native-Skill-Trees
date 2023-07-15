@@ -51,15 +51,19 @@ function HomepageTree({ n: { navigation, route }, state }: Props) {
         };
     }, []);
 
+    useEffect(() => {
+        console.log(canvasSettings);
+    }, [canvasSettings]);
+
     return (
         <>
-            <InteractiveTree
+            {/* <InteractiveTree
                 config={config}
                 state={interactiveTreeState}
                 tree={homepageTree}
                 functions={functions}
                 renderOnSelectedNodeId={RenderOnSelectedNodeId}
-            />
+            /> */}
             <ProgressIndicatorAndName tree={homepageTree} />
             <OpenSettingsMenu openModal={() => setCanvasSettings(true)} show={selectedNodeId === null} />
             <ShareTreeLayout

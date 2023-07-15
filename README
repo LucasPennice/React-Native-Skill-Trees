@@ -1,3 +1,5 @@
+BE SURE TO INCREASE THE APP AND ANDROID RELEASE VERSION
+
 CREATE A NEW ANDROID BUILD
 
 eas build --platform android
@@ -6,4 +8,7 @@ UPLOAD THE NEW UPDATE
 
 eas submit -p android --latest
 
-BE SURE TO INCREASE THE APP AND ANDROID RELEASE VERSION
+☢️ BEFORE RELEASING A NEW VERSION ☢️
+
+- Using the list of features added/modified in this version, test all of them to check if they are still working correctly
+

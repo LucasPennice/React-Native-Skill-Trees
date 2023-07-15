@@ -23,7 +23,7 @@ type Props = {
 
 function TreeCanvas({ canvasHeight, canvasRef, canvasWidth, config, renderStyle, state, touchHandler, treeData }: Props) {
     return (
-        <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight }} ref={canvasRef}>
+        <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight, backgroundColor: "green" }} ref={canvasRef}>
             {renderStyle === "hierarchy" && <HierarchicalSkillTreeRender state={state} config={config} treeData={treeData} />}
             {renderStyle === "radial" && <RadialTreeRendererRender state={state} config={config} treeData={treeData} />}
         </Canvas>

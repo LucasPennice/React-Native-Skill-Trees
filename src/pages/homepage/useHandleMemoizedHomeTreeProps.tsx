@@ -82,7 +82,7 @@ function useHandleMemoizedHomeTreeProps(
                 openCanvasSettingsModal: openCanvasSettings,
             },
         };
-    }, [onNodeClick]);
+    }, [dispatch, navigation, onNodeClick, openCanvasSettings]);
 
     //Interactive Tree Props - SelectedNodeMenu
     const RenderOnSelectedNodeId = useMemo(() => {

@@ -151,9 +151,9 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
     return (
         <>
             <GestureDetector gesture={canvasGestures}>
-                <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative" }]}>
+                <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative", backgroundColor: "red" }]}>
                     <Animated.View style={[transform, { flex: 1 }]}>
-                        <TreeCanvas
+                        {/* <TreeCanvas
                             canvasHeight={canvasHeight}
                             canvasRef={canvasRef}
                             canvasWidth={canvasWidth}
@@ -162,7 +162,7 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
                             state={state}
                             touchHandler={touchHandler}
                             treeData={treeData}
-                        />
+                        /> */}
                         {/* Long press Node related 👇 */}
                         <NodeLongPressIndicator data={longPressIndicatorPosition} scale={scale} />
                         {renderNodeMenu && (
