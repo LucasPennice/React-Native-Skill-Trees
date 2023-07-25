@@ -19,7 +19,7 @@ import {
     removeTreeDataFromCoordinate,
 } from "../../../components/treeRelated/coordinateFunctions";
 import HierarchicalSkillTree from "../../../components/treeRelated/hierarchical/HierarchicalSkillTree";
-import useHandleCanvasScroll from "../../../components/treeRelated/hooks/useHandleCanvasScroll";
+import useHandleCanvasScroll from "../../../components/treeRelated/hooks/useHandleCanvasScrollAndZoom";
 import { createTree } from "../../../functions/misc";
 import { MENU_HIGH_DAMPENING, centerFlex, colors, nodeGradients } from "../../../parameters";
 import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
@@ -189,11 +189,7 @@ function ImportTree({
     const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
-    const { canvasGestures, transform } = useHandleCanvasScroll(canvasDimentions, screenDimensions, undefined, undefined, {
-        onEnd: () => {},
-        onScroll: () => {},
-        onStart: () => {},
-    });
+    const { canvasScrollAndZoom, transform } = useHandleCanvasScroll(canvasDimentions, screenDimensions, undefined, undefined, () => {});
 
     if (initialState)
         return (
@@ -224,7 +220,7 @@ function ImportTree({
 
     return (
         <Animated.View entering={FadeInDown} style={[centerFlex, { marginTop: 15, justifyContent: "space-between" }]}>
-            <GestureDetector gesture={canvasGestures}>
+            <GestureDetector gesture={canvasScrollAndZoom}>
                 <View style={[{ width: WIDTH, height: HEIGHT, overflow: "hidden", borderRadius: 10, backgroundColor: colors.background }]}>
                     <Animated.View style={[transform]}>
                         <Canvas

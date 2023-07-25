@@ -87,14 +87,14 @@ function useHandleTreeFunctions(
             openAddSkillModal: (zoneType: "PARENT" | "CHILDREN" | "LEFT_BROTHER" | "RIGHT_BROTHER", node: Tree<Skill>) => {
                 const dndZone = dndZoneCoordinatesCopy.find((zone) => zone.ofNode === node.nodeId && zone.type === zoneType);
 
-                if (!dndZone) throw new Error("couldn't find dndZone in runOnTreeRender");
+                if (!dndZone) throw new Error("couldn't find dndZone in openAddSkillModal");
 
                 dispatch(setSelectedDndZone(dndZone));
                 setModalState("INPUT_DATA_FOR_NEW_NODE");
             },
         };
 
-        const runOnTreeRender = (dndZoneCoordinates: DnDZone[]) => {
+        const runOnTreeUpdate = (dndZoneCoordinates: DnDZone[]) => {
             setDndZoneCoordinatesCopy(dndZoneCoordinates);
             if (!params || !params.addNodeModal) return;
 
@@ -102,13 +102,13 @@ function useHandleTreeFunctions(
 
             const dndZone = dndZoneCoordinates.find((zone) => zone.ofNode === nodeId && zone.type === dnDZoneType);
 
-            if (!dndZone) throw new Error("couldn't find dndZone in runOnTreeRender");
+            if (!dndZone) throw new Error("couldn't find dndZone in runOnTreeUpdate");
 
             dispatch(setSelectedDndZone(dndZone));
             setModalState("INPUT_DATA_FOR_NEW_NODE");
         };
 
-        return { onNodeClick, onDndZoneClick, nodeMenu, runOnTreeRender };
+        return { onNodeClick, onDndZoneClick, nodeMenu, runOnTreeUpdate };
     }, [dispatch, dndZoneCoordinatesCopy, functions, navigation.navigate, params, setModalState]);
 
     return result;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Gesture, GestureStateChangeEvent, LongPressGestureHandlerEventPayload } from "react-native-gesture-handler";
+import { Gesture } from "react-native-gesture-handler";
 import { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../parameters";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
@@ -9,16 +9,12 @@ import { getXBounds, getYBounds, useHandleCanvasBounds } from "./useHandleCanvas
 const DEFAULT_SCALE = 1;
 const deaccelerationFactor = 2500;
 
-function useHandleCanvasScroll(
+function useHandleCanvasScrollAndZoom(
     canvasDimentions: CanvasDimensions,
     screenDimensions: ScreenDimentions,
     foundNodeCoordinates: NodeCoordinate | undefined,
     foundNodeOfMenu: NodeCoordinate | undefined,
-    longPressFn: {
-        onStart: (e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>) => void;
-        onEnd: (e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>) => void;
-        onScroll: () => void;
-    }
+    onScroll: () => void
 ) {
     const { canvasHeight, canvasWidth } = canvasDimentions;
 
@@ -145,6 +141,7 @@ function useHandleCanvasScroll(
             shouldUpdateStartValue.value = false;
             offsetX.value = start.value.x;
             offsetY.value = start.value.y;
+            runOnJS(onScroll)();
         })
         .onUpdate((e) => {
             if (foundNodeCoordinates) return;
@@ -156,8 +153,6 @@ function useHandleCanvasScroll(
 
             offsetX.value = newXValue;
             offsetY.value = newYValue;
-
-            runOnJS(longPressFn.onScroll)();
         })
         .onEnd((e) => {
             shouldUpdateStartValue.value = true;
@@ -222,16 +217,7 @@ function useHandleCanvasScroll(
             }
         });
 
-    const longPress = Gesture.LongPress()
-        .onStart((e) => {
-            runOnJS(longPressFn.onStart)(e);
-        })
-        .onEnd((e) => {
-            runOnJS(longPressFn.onEnd)(e);
-        })
-        .minDuration(100);
-
-    const canvasGestures = Gesture.Simultaneous(canvasPan, canvasZoom, longPress);
+    const canvasScrollAndZoom = Gesture.Simultaneous(canvasPan, canvasZoom);
 
     const transform = useAnimatedStyle(() => {
         if (foundNodeCoordinates) return transitionToSelectedNodeStyle();
@@ -275,10 +261,10 @@ function useHandleCanvasScroll(
         }
     }, [offsetX, offsetY, scale, foundNodeCoordinates, animateFromSelectedNodeMenu, foundNodeOfMenu]);
 
-    return { transform, canvasGestures, scale: scaleState };
+    return { transform, canvasScrollAndZoom, scale: scaleState };
 }
 
-export default useHandleCanvasScroll;
+export default useHandleCanvasScrollAndZoom;
 
 function useShouldAnimateTransformation(isMenuOpen: boolean) {
     const [result, setResult] = useState(false);
@@ -355,8 +341,4 @@ function returnSafeOffset(args: {
     }
 
     return result;
-}
-
-function handleScrollDeacceleration() {
-    "worklet";
 }

@@ -1,5 +1,6 @@
-import { Canvas, SkiaDomView, TouchHandler } from "@shopify/react-native-skia";
+import { Canvas, SkiaDomView } from "@shopify/react-native-skia";
 import { MutableRefObject, memo } from "react";
+import { GestureDetector, SimultaneousGesture } from "react-native-gesture-handler";
 import RadialSkillTree from "../../pages/homepage/RadialSkillTree";
 import { CoordinatesWithTreeData, DnDZone } from "../../types";
 import { InteractiveNodeState, InteractiveTreeConfig, TreeCoordinates } from "./InteractiveTree";
@@ -8,7 +9,7 @@ import DragAndDropZones from "./hierarchical/DragAndDropZones";
 import HierarchicalSkillTree from "./hierarchical/HierarchicalSkillTree";
 
 type Props = {
-    touchHandler: TouchHandler;
+    canvasGestures: SimultaneousGesture;
     canvasWidth: number;
     canvasHeight: number;
     renderStyle: "hierarchy" | "radial";
@@ -21,12 +22,14 @@ type Props = {
     };
 };
 
-function TreeCanvas({ canvasHeight, canvasRef, canvasWidth, config, renderStyle, state, touchHandler, treeData }: Props) {
+function TreeCanvas({ canvasHeight, canvasRef, canvasWidth, config, renderStyle, state, canvasGestures, treeData }: Props) {
     return (
-        <Canvas onTouch={touchHandler} style={{ width: canvasWidth, height: canvasHeight }} ref={canvasRef}>
-            {renderStyle === "hierarchy" && <HierarchicalSkillTreeRender state={state} config={config} treeData={treeData} />}
-            {renderStyle === "radial" && <RadialTreeRendererRender state={state} config={config} treeData={treeData} />}
-        </Canvas>
+        <GestureDetector gesture={canvasGestures}>
+            <Canvas style={{ width: canvasWidth, height: canvasHeight }} ref={canvasRef}>
+                {renderStyle === "hierarchy" && <HierarchicalSkillTreeRender state={state} config={config} treeData={treeData} />}
+                {renderStyle === "radial" && <RadialTreeRendererRender state={state} config={config} treeData={treeData} />}
+            </Canvas>
+        </GestureDetector>
     );
 }
 

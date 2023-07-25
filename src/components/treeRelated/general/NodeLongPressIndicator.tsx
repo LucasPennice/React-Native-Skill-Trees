@@ -5,7 +5,7 @@ import { Svg, Circle as SvgCircle } from "react-native-svg";
 import { getWheelParams } from "../../../functions/misc";
 import { colors } from "../../../parameters";
 import { NodeCoordinate } from "../../../types";
-import { MIN_DURATION_LONG_PRESS_MS } from "../hooks/useCanvasTouchHandler";
+import { MIN_DURATION_LONG_PRESS_MS } from "../hooks/useCanvasPressAndLongPress";
 import { Platform } from "react-native";
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);

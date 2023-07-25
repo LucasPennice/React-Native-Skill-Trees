@@ -2,7 +2,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SkiaDomView } from "@shopify/react-native-skia";
 import { MutableRefObject, memo, useEffect } from "react";
 import { View } from "react-native";
-import { GestureDetector } from "react-native-gesture-handler";
+import { Gesture } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import { StackNavigatorParams } from "../../../App";
 import { findNodeById } from "../../functions/extractInformationFromTree";
@@ -20,8 +20,8 @@ import {
     removeTreeDataFromCoordinate,
 } from "./coordinateFunctions";
 import NodeLongPressIndicator from "./general/NodeLongPressIndicator";
-import useCanvasTouchHandler from "./hooks/useCanvasTouchHandler";
-import useHandleCanvasScroll from "./hooks/useHandleCanvasScroll";
+import useCanvasPressAndLongPress from "./hooks/useCanvasPressAndLongPress";
+import useHandleCanvasScrollAndZoom from "./hooks/useHandleCanvasScrollAndZoom";
 import NodeMenu from "./nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "./returnNodeMenuFunctions";
 
@@ -57,7 +57,7 @@ export type InteractiveTreeFunctions = {
         openAddSkillModal: (zoneType: DnDZone["type"], node: Tree<Skill>) => void;
         toggleCompletionOfSkill: (tree: Tree<Skill>, node: Tree<Skill>) => void;
     };
-    runOnTreeRender?: (dndZoneCoordinates: DnDZone[]) => void;
+    runOnTreeUpdate?: (dndZoneCoordinates: DnDZone[]) => void;
 };
 
 export type TreeCoordinates = {
@@ -108,16 +108,16 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
     };
 
     useEffect(() => {
-        if (!functions || !functions.runOnTreeRender) return;
+        if (!functions || !functions.runOnTreeUpdate) return;
 
-        functions.runOnTreeRender(dndZoneCoordinates);
+        functions.runOnTreeUpdate(dndZoneCoordinates);
         //eslint-disable-next-line
-    }, []);
+    }, [tree]);
 
     //Hooks
     const touchHandlerState = { selectedNodeId, nodeCoordinatesCentered, dragAndDropZones: dndZoneCoordinates };
     const touchHandlerFunctions = { onNodeClick: onNodeClickAdapter, onDndZoneClick: onDndZoneClickAdapter };
-    const { touchHandler, openMenuOnNode, longPressIndicatorPosition, closeNodeMenu, longPressFn } = useCanvasTouchHandler({
+    const { canvasPressAndLongPress, openMenuOnNode, longPressIndicatorPosition, closeNodeMenu, onScroll } = useCanvasPressAndLongPress({
         functions: touchHandlerFunctions,
         state: touchHandlerState,
         config: { showDndZones, blockLongPress },
@@ -127,12 +127,12 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
     const foundNodeOfMenu = openMenuOnNode ? centeredCoordinatedWithTreeData.find((c) => c.nodeId === openMenuOnNode.id) : undefined;
     const foundNodeOfMenuWithoutData = openMenuOnNode ? nodeCoordinatesCentered.find((c) => c.id === openMenuOnNode.id) : undefined;
 
-    const { canvasGestures, transform, scale } = useHandleCanvasScroll(
+    const { canvasScrollAndZoom, transform, scale } = useHandleCanvasScrollAndZoom(
         canvasDimentions,
         screenDimensions,
         selectedNodeCoordinates,
         foundNodeOfMenuWithoutData,
-        longPressFn
+        onScroll
     );
 
     const treeData = { nodeCoordinates: centeredCoordinatedWithTreeData, dndZoneCoordinates };
@@ -148,30 +148,28 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
         functions?.nodeMenu
     );
 
+    const canvasGestures = Gesture.Simultaneous(canvasScrollAndZoom, canvasPressAndLongPress);
+
     return (
         <>
-            <GestureDetector gesture={canvasGestures}>
-                <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative" }]}>
-                    <Animated.View style={[transform, { flex: 1 }]}>
-                        <TreeCanvas
-                            canvasHeight={canvasHeight}
-                            canvasRef={canvasRef}
-                            canvasWidth={canvasWidth}
-                            config={config}
-                            renderStyle={renderStyle}
-                            state={state}
-                            touchHandler={touchHandler}
-                            treeData={treeData}
-                        />
-                        {/* Long press Node related 👇 */}
-                        <NodeLongPressIndicator data={longPressIndicatorPosition} scale={scale} />
-                        {renderNodeMenu && (
-                            <NodeMenu functions={nodeMenuFunctions} data={foundNodeOfMenu} scale={scale} closeNodeMenu={closeNodeMenu} />
-                        )}
-                        {/* Long press Node related 👆 */}
-                    </Animated.View>
-                </View>
-            </GestureDetector>
+            <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative" }]}>
+                <Animated.View style={[transform, { flex: 1 }]}>
+                    <TreeCanvas
+                        canvasHeight={canvasHeight}
+                        canvasRef={canvasRef}
+                        canvasWidth={canvasWidth}
+                        config={config}
+                        renderStyle={renderStyle}
+                        state={state}
+                        canvasGestures={canvasGestures}
+                        treeData={treeData}
+                    />
+                    {/* Long press Node related 👇 */}
+                    <NodeLongPressIndicator data={longPressIndicatorPosition} scale={scale} />
+                    {renderNodeMenu && <NodeMenu functions={nodeMenuFunctions} data={foundNodeOfMenu} scale={scale} closeNodeMenu={closeNodeMenu} />}
+                    {/* Long press Node related 👆 */}
+                </Animated.View>
+            </View>
 
             {renderSelectedNodeMenu && renderOnSelectedNodeId}
         </>
