@@ -39,7 +39,7 @@ function AddNodeStateIndicator({ mode, functions }: Props) {
             {mode === "PLACING_NEW_NODE" && (
                 <Animated.View style={[centerFlex, { flexDirection: "row", gap: 20 }]} entering={FadeIn.duration(100)}>
                     <AppText style={{ color: colors.unmarkedText, width: width - 130 }} fontSize={13}>
-                        Click the square where you want to insert your new skills. Or, long-press a node and choose "add" from the options.
+                        Click the position where you want to insert your new skills. Or, long-press a node and choose "add" from the options.
                     </AppText>
                     <Pressable onPress={returnToIdleState} style={s.button}>
                         <AppText style={{ color: colors.red }} fontSize={15}>

@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
-import { Alert, Dimensions, Pressable, View } from "react-native";
-import Animated, { Easing, FadeInDown, Layout, ZoomIn, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
+import { Alert, Dimensions, Keyboard, Platform, Pressable, View } from "react-native";
+import Animated, { Easing, FadeInDown, Layout, ZoomIn, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { Line, Rect, Svg } from "react-native-svg";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
@@ -40,6 +40,8 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
     const [currentNode, setCurrentNode] = useState<Tree<Skill>>(getInitialCurrentSkillValue());
     const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>(undefined);
 
+    const isEditing = selectedNodeId !== undefined;
+
     const shouldBlockAddButton = getShouldBlockAddButton();
 
     useEffect(() => {
@@ -60,8 +62,7 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
 
     const setName = (v: string) => {
         setCurrentNode((p) => {
-            let result = { ...p };
-            result.data.name = v;
+            let result: Tree<Skill> = { ...p, data: { ...p.data, name: v } };
             return result;
         });
     };
@@ -70,8 +71,7 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
             return Alert.alert(`Complete ${parentNode.data.name} before completing this skill`);
 
         setCurrentNode((p) => {
-            let result = { ...p };
-            result.data.isCompleted = v;
+            let result: Tree<Skill> = { ...p, data: { ...p.data, isCompleted: v } };
             return result;
         });
     };
@@ -80,40 +80,44 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
         const emoji = v.match(/\p{Extended_Pictographic}/gu);
 
         setCurrentNode((p) => {
-            let result = { ...p };
-
             if (v === "") {
-                result.data.icon = { isEmoji: false, text: "" };
-                return result;
+                return { ...p, data: { ...p.data, icon: { isEmoji: false, text: "" } } };
             }
 
             if (!emoji) return p;
 
-            result.data.icon = { isEmoji: true, text: emoji[0] };
-
-            return result;
+            return { ...p, data: { ...p.data, icon: { isEmoji: true, text: emoji[0] } } };
         });
     };
 
     const updateAddNodeList = (nodeToUpdate: Tree<Skill>) => {
         const isValid = validateNodeToUpdate(nodeToUpdate);
 
-        if (!isValid) return;
+        let result: Tree<Skill>[] = [];
+
+        if (!isValid) return result;
 
         setNodesToAdd((p) => {
             const isTreeInList = p.find((n) => n.nodeId === nodeToUpdate.nodeId);
 
-            if (!isTreeInList) return [...p, nodeToUpdate];
+            if (!isTreeInList) {
+                result = [...p, nodeToUpdate];
+                return result;
+            }
 
-            return p.map((n) => {
+            result = p.map((n) => {
                 if (n.nodeId === nodeToUpdate.nodeId) return nodeToUpdate;
 
                 return n;
             });
+
+            return result;
         });
 
         setCurrentNode(getInitialCurrentSkillValue());
         setSelectedNodeId(undefined);
+
+        return result;
     };
 
     function validateNodeToUpdate(nodeToUpdate: Tree<Skill>) {
@@ -141,39 +145,65 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
         });
     };
 
+    const checkIfInputsValid = () => {
+        if (currentNode.data.name.trim() !== "") return true;
+
+        return false;
+    };
+
+    const handleAddNodeToList = () => {
+        if (shouldBlockAddButton) {
+            Alert.alert(
+                "You can have only one parent node. To add multiple nodes at once, choose either LEFT, RIGHT, or CHILDREN from the ADD menu. Simply long-press a node and select 'add' to access the menu."
+            );
+            return [];
+        }
+
+        return updateAddNodeList(currentNode);
+    };
+
+    const handleConfirm = () => {
+        if (isEditing) {
+            if (checkIfInputsValid()) return addNodeToListAndSave();
+
+            return Alert.alert("Please enter a name for the new skill");
+        }
+
+        const inputsEmpty = currentNode.data.name === "" && currentNode.data.icon.text === "";
+
+        if (inputsEmpty) return saveToTreeElementsOfArray(nodesToAdd);
+
+        if (checkIfInputsValid()) return addNodeToListAndSave();
+
+        return Alert.alert("Please enter a name for the new skill");
+
+        function addNodeToListAndSave() {
+            const updatedList = handleAddNodeToList();
+            saveToTreeElementsOfArray(updatedList);
+        }
+        function saveToTreeElementsOfArray(nodesToAdd: Tree<Skill>[]) {
+            if (nodesToAdd.length === 0) return closeModal();
+
+            return addNodes(nodesToAdd, dnDZone);
+        }
+    };
+
+    const nodeListStyles = useAnimatedStyle(() => {
+        return {
+            backgroundColor: withTiming(nodesToAdd.length === 0 ? colors.darkGray : "#282A2C"),
+        };
+    }, [nodesToAdd]);
+
     return (
-        <FlingToDismissModal
-            closeModal={closeModal}
-            open={open}
-            leftHeaderButton={{ onPress: () => addNodes(nodesToAdd, dnDZone), title: "Confirm" }}>
-            <View style={[centerFlex, { flex: 1, justifyContent: "space-between" }]}>
-                <View>
-                    <View style={{ paddingHorizontal: 10, marginBottom: 10 }}>
-                        <AppText style={{ color: "#FFFFFF", marginBottom: 10, fontFamily: "helveticaBold" }} fontSize={24}>
-                            Add Skills
-                        </AppText>
-                        <AppText style={{ color: colors.unmarkedText, marginBottom: 5 }} fontSize={16}>
-                            Add as many nodes as you want, then hit “confirm”. Tap a node to edit it
-                        </AppText>
-                    </View>
-                    <View style={{ height: 90, width, backgroundColor: "#282A2C", justifyContent: "center" }}>
-                        <Animated.ScrollView
-                            horizontal
-                            layout={Layout}
-                            showsHorizontalScrollIndicator={false}
-                            style={{ overflow: "visible" }}
-                            contentContainerStyle={{ paddingLeft: 10 }}>
-                            {nodesToAdd.map((n) => (
-                                <SelectableNodeView
-                                    n={n}
-                                    key={n.nodeId}
-                                    isSelected={n.nodeId === selectedNodeId}
-                                    selectNode={selectNode(n.nodeId)}
-                                    deleteNode={deleteNode(n.nodeId)}
-                                />
-                            ))}
-                        </Animated.ScrollView>
-                    </View>
+        <FlingToDismissModal closeModal={closeModal} open={open} leftHeaderButton={{ onPress: handleConfirm, title: "Add to Tree" }}>
+            <View style={[centerFlex, { flex: 1, justifyContent: "flex-start", alignItems: "flex-start" }]}>
+                <View style={{ marginBottom: 10 }}>
+                    <AppText style={{ color: "#FFFFFF", marginBottom: 10, fontFamily: "helveticaBold" }} fontSize={24}>
+                        Add Skills
+                    </AppText>
+                    <AppText style={{ color: colors.unmarkedText, marginBottom: 5 }} fontSize={16}>
+                        Add as many skills as you want, then hit “Add to Tree". Tap a node to edit it
+                    </AppText>
                 </View>
 
                 <View style={{ width: "100%" }}>
@@ -213,26 +243,27 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
                     <RadioInput state={[currentNode.data.isCompleted, setCompletion]} text={"Complete"} style={{ marginBottom: 10 }} />
                 </View>
 
-                <LinearGradient
-                    colors={["#BF5AF2", "#5A7BF2"]}
-                    start={{ x: 0, y: 0.5 }}
-                    end={{ x: 1, y: 0.5 }}
-                    style={{ height: 60, width: "100%", borderRadius: 10, opacity: shouldBlockAddButton ? 0.5 : 1 }}>
-                    <Pressable
-                        style={[centerFlex, { height: 60, width: "100%" }]}
-                        onPress={
-                            shouldBlockAddButton
-                                ? () =>
-                                      Alert.alert(
-                                          "You can have only one parent node. To add multiple nodes at once, choose either LEFT, RIGHT, or CHILDREN from the ADD menu. Simply long-press a node and select 'add' to access the menu."
-                                      )
-                                : () => updateAddNodeList(currentNode)
-                        }>
-                        <AppText style={{ color: "#FFFFFF" }} fontSize={20}>
-                            {selectedNodeId ? "Edit" : "Add"}
-                        </AppText>
-                    </Pressable>
-                </LinearGradient>
+                <Animated.View
+                    style={[nodeListStyles, { height: 90, width, justifyContent: "center", transform: [{ translateX: -10 }], marginTop: 10 }]}>
+                    <Animated.ScrollView
+                        horizontal
+                        layout={Layout}
+                        showsHorizontalScrollIndicator={false}
+                        style={{ overflow: "visible" }}
+                        contentContainerStyle={{ paddingLeft: 10 }}>
+                        {nodesToAdd.map((n) => (
+                            <SelectableNodeView
+                                n={n}
+                                key={n.nodeId}
+                                isSelected={n.nodeId === selectedNodeId}
+                                selectNode={selectNode(n.nodeId)}
+                                deleteNode={deleteNode(n.nodeId)}
+                            />
+                        ))}
+                    </Animated.ScrollView>
+                </Animated.View>
+
+                <AddAndEditButton handleAddNodeToList={handleAddNodeToList} isEditing={isEditing} shouldBlockAddButton={shouldBlockAddButton} />
             </View>
         </FlingToDismissModal>
     );
@@ -322,6 +353,37 @@ function SelectableNodeView({
                 )}
             </Pressable>
         </Animated.View>
+    );
+}
+
+function AddAndEditButton({
+    handleAddNodeToList,
+    isEditing,
+    shouldBlockAddButton,
+}: {
+    shouldBlockAddButton: boolean;
+    handleAddNodeToList: () => void;
+    isEditing: boolean;
+}) {
+    return (
+        <View style={{ position: "absolute", bottom: Platform.OS === "ios" ? 65 : 0, right: 0 }}>
+            <LinearGradient
+                colors={["#BF5AF2", "#5A7BF2"]}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                style={{ height: 60, width: "100%", borderRadius: 40, opacity: shouldBlockAddButton ? 0.5 : 1 }}>
+                <Pressable
+                    style={[centerFlex, { height: 60, width: "100%", paddingHorizontal: 20 }]}
+                    onPress={() => {
+                        Keyboard.dismiss();
+                        handleAddNodeToList();
+                    }}>
+                    <AppText style={{ color: "#FFFFFF" }} fontSize={20}>
+                        {isEditing ? "Edit Skill" : "Add Skill"}
+                    </AppText>
+                </Pressable>
+            </LinearGradient>
+        </View>
     );
 }
 

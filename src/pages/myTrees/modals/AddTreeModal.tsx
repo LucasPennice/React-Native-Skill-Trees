@@ -65,7 +65,8 @@ function AddTreeModal() {
     const closeModal = () => dispatch(close());
 
     const createNewTree = () => {
-        if (treeName === "" || !selectedColorGradient) return Alert.alert("Please fill all of the fields");
+        if (treeName === "") return Alert.alert("Please give the tree a name");
+        if (!selectedColorGradient) return Alert.alert("Please select a color");
 
         const isEmoji = icon === "" ? false : true;
         const iconText = isEmoji ? icon : treeName[0];
@@ -138,9 +139,14 @@ function AddTreeModal() {
                                 containerStyles={{ width: 130 }}
                             />
                         </View>
-                        <AppText fontSize={18} style={{ color: "#FFFFFF", marginBottom: 10 }}>
-                            Tree Color
-                        </AppText>
+                        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10, gap: 5 }}>
+                            <AppText fontSize={18} style={{ color: "#FFFFFF" }}>
+                                Tree Color
+                            </AppText>
+                            <AppText fontSize={14} style={{ color: colors.unmarkedText }}>
+                                (Required)
+                            </AppText>
+                        </View>
                         <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 5 }}>
                             Completed skills and progress bars will show with this color
                         </AppText>

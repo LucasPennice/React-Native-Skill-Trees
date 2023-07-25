@@ -1,4 +1,4 @@
-import { KeyboardAvoidingView, Platform, Pressable, StyleProp, TextInput, TextInputProps, TextStyle, View, ViewProps } from "react-native";
+import { Pressable, StyleProp, TextInput, TextInputProps, TextStyle, View, ViewProps } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { centerFlex, colors } from "../parameters";
 import CloseIcon from "./Icons/CloseIcon";

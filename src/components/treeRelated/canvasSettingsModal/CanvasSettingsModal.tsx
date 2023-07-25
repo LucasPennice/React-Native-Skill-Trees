@@ -129,9 +129,14 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
 
                     <RadioInput state={[oneColorPerTree, updateOneColorPerTree]} text={"Monochromatic"} style={{ marginBottom: 15 }} />
                     <RadioInput state={[showCircleGuide, updateShowCircleGuide]} text={"Show depth guides"} />
-                    <AppText fontSize={18} style={{ color: "#FFFFFF", marginBottom: 10 }}>
-                        Tree Color
-                    </AppText>
+                    <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10, gap: 5 }}>
+                        <AppText fontSize={18} style={{ color: "#FFFFFF" }}>
+                            Tree Color
+                        </AppText>
+                        <AppText fontSize={14} style={{ color: colors.unmarkedText }}>
+                            (Required)
+                        </AppText>
+                    </View>
                     <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 5 }}>
                         Completed skills and progress bars will show with this color
                     </AppText>

@@ -42,7 +42,7 @@ function HierarchicalSkillTreeRender({
     treeData: TreeCoordinates;
     config: InteractiveTreeConfig;
 }) {
-    const { selectedDndZone, selectedNodeId } = state;
+    const { selectedNodeId, selectedDndZone } = state;
     const { dndZoneCoordinates, nodeCoordinates } = treeData;
     const { isInteractive, showDndZones, canvasDisplaySettings } = config;
     const { showLabel, showIcons } = canvasDisplaySettings;
