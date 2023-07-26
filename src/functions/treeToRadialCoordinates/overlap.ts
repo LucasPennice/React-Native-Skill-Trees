@@ -1,10 +1,11 @@
 import { ALLOWED_NODE_SPACING, UNCENTERED_ROOT_COORDINATES } from "../../parameters";
 import { LevelOverflow, PolarContour, PolarContourByLevel, PolarCoordinate, PolarOverlapCheck, Skill, Tree } from "../../types";
 import {
-    angleBetweenPolarCoordinates,
+    angleFromLeftToRightCounterClockWise,
     arcToAngleRadians,
     cartesianToPositivePolarCoordinates,
     polarToCartesianCoordinates,
+    round3Decimals,
 } from "../coordinateSystem";
 import {
     extractTreeIds,
@@ -143,9 +144,7 @@ export function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill>
 
         let limiter = 0;
 
-        console.log("-----");
-        while (overlapWithinTree && limiter < 100) {
-            // while (overlapWithinTree && limiter < 1000) {
+        while (overlapWithinTree && limiter < 1000) {
             let polarOverlap = checkForOverlap(result);
 
             //Tolerance to avoid loops
@@ -157,7 +156,7 @@ export function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill>
                 const subTreeWithRootNode = { ...tree, children: [subTree] };
                 const treesToShift = getTreesToShiftForCircularTree(subTreeWithRootNode, polarOverlap.nodesInConflict);
 
-                // result = shiftNodesCounterClockWise(result, treesToShift, polarOverlap.biggestOverlapAngle);
+                result = shiftNodesCounterClockWise(result, treesToShift, polarOverlap.biggestOverlapAngle);
             }
             limiter++;
         }
@@ -224,8 +223,6 @@ function getLevelBiggestOverlap(levelContour: PolarContour[], originalDistanceTo
         const overlapBetweenThisAndNextContour = checkForOverlapBetweenNodes(nextContour.leftNode, currentContour.rightNode);
         const poorSpacing = checkForPoorSpacing(nextContour.leftNode, currentContour.rightNode);
 
-        console.log(nextContour.leftNode, currentContour.rightNode, overlapBetweenThisAndNextContour, poorSpacing);
-
         if (overlapBetweenThisAndNextContour && (!result || overlapBetweenThisAndNextContour > result.biggestOverlapAngle)) {
             result = {
                 biggestOverlapAngle: overlapBetweenThisAndNextContour,
@@ -233,20 +230,22 @@ function getLevelBiggestOverlap(levelContour: PolarContour[], originalDistanceTo
             };
         }
 
-        if (!overlapBetweenThisAndNextContour && poorSpacing && (!result || poorSpacing > result.biggestOverlapAngle)) {
+        if (!overlapBetweenThisAndNextContour && poorSpacing !== undefined && (!result || poorSpacing > result.biggestOverlapAngle)) {
             result = {
                 biggestOverlapAngle: arcToAngleRadians(ALLOWED_NODE_SPACING, originalDistanceToCenter) - poorSpacing,
                 nodesInConflict: [currentContour.rightNode.id, nextContour.leftNode.id],
             };
         }
     }
-
     return result;
 
     function checkForOverlapBetweenNodes(nextContourLeftNode: PolarCoordinate, currentContourRightNode: PolarCoordinate): undefined | number {
         //If the rightToLeft angle is larger than leftToRight then we have overlap
-        const rightToLeftAngle = angleBetweenPolarCoordinates(currentContourRightNode, nextContourLeftNode);
-        const leftToRightAngle = 2 * Math.PI - rightToLeftAngle;
+        const leftToRightAngle = angleFromLeftToRightCounterClockWise(nextContourLeftNode, currentContourRightNode);
+        const rightToLeftAngle = 2 * Math.PI - leftToRightAngle;
+
+        if (rightToLeftAngle > 2 * Math.PI || leftToRightAngle > 2 * Math.PI)
+            throw new Error("Angle greater than 2PI in checkForOverlapBetweenNodes");
 
         const overlap = rightToLeftAngle < leftToRightAngle;
 
@@ -256,11 +255,13 @@ function getLevelBiggestOverlap(levelContour: PolarContour[], originalDistanceTo
     }
 
     function checkForPoorSpacing(nextContourLeftNode: PolarCoordinate, currentContourRightNode: PolarCoordinate): undefined | number {
-        const deltaAngle = angleBetweenPolarCoordinates(currentContourRightNode, nextContourLeftNode);
+        const separationAngle = angleFromLeftToRightCounterClockWise(nextContourLeftNode, currentContourRightNode);
 
-        const roundedDelta = parseFloat(deltaAngle.toFixed(5));
+        const roundedSeparationAngle = round3Decimals(separationAngle);
 
-        if (roundedDelta < arcToAngleRadians(ALLOWED_NODE_SPACING, originalDistanceToCenter)) return roundedDelta;
+        const minimumSeparationAngle = arcToAngleRadians(ALLOWED_NODE_SPACING, originalDistanceToCenter);
+
+        if (roundedSeparationAngle < minimumSeparationAngle) return roundedSeparationAngle;
 
         return undefined;
     }

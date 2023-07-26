@@ -1,4 +1,5 @@
 import { CoordinatesWithTreeData, LevelOverflow, NodeCategory, Skill, Tree } from "../../types";
+import { round3Decimals } from "../coordinateSystem";
 
 import { firstIteration } from "./firstInstance";
 import { checkForLevelOverflow } from "./levelOverflow";
@@ -25,9 +26,9 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
 
         result = fixOverlapWithinSubTreesOfLevel1(result);
 
-        // result = shiftSubTreeToFinalAngle(result);
+        result = shiftSubTreeToFinalAngle(result);
 
-        // levelOverflow = checkForLevelOverflow(result);
+        levelOverflow = checkForLevelOverflow(result);
 
         if (levelOverflow !== undefined) distanceToCenterPerLevel = updateDistanceToCenterPerLevel(distanceToCenterPerLevel, levelOverflow);
 
@@ -59,8 +60,8 @@ function radialTreeToCoordArray(tree: Tree<Skill>, result: CoordinatesWithTreeDa
         nodeId: tree.nodeId,
         treeId: tree.treeId,
         treeName: tree.treeName,
-        x: tree.x,
-        y: tree.y,
+        x: round3Decimals(tree.x),
+        y: round3Decimals(tree.y),
         level: tree.level,
         parentId: tree.parentId,
     });

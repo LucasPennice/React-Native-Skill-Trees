@@ -64,8 +64,8 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings }: Tr
                     return (
                         <RadialLabel
                             key={idx}
-                            text={node.nodeId}
-                            // text={node.data.name}
+                            // text={node.nodeId}
+                            text={node.data.name}
                             color={{ rect: rectColor.color1, text: labelTextColor }}
                             coord={{ x: node.x, y: node.y }}
                             rootCoord={rootCoordinates}
