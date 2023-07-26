@@ -290,23 +290,3 @@ export function getCoordinatedWithTreeData(
         };
     });
 }
-
-export const distanceFromLeftCanvasEdge = (canvasWidth: number, screenWidth: number, transX: number) => {
-    const range = canvasWidth - screenWidth;
-    const h = range / 2;
-    const m = -1;
-
-    const result = m * transX + h;
-
-    return result;
-};
-
-export const distanceFromLeftCanvasEdge2 = (canvasWidth: number, screenWidth: number, transX: number, scale: number) => {
-    const range = canvasWidth - screenWidth * (1 / scale);
-    const h = range / 2;
-    const m = -1;
-
-    const result = m * transX + h;
-
-    return result;
-};

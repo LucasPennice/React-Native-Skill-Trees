@@ -25,9 +25,9 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
 
         result = fixOverlapWithinSubTreesOfLevel1(result);
 
-        result = shiftSubTreeToFinalAngle(result);
+        // result = shiftSubTreeToFinalAngle(result);
 
-        levelOverflow = checkForLevelOverflow(result);
+        // levelOverflow = checkForLevelOverflow(result);
 
         if (levelOverflow !== undefined) distanceToCenterPerLevel = updateDistanceToCenterPerLevel(distanceToCenterPerLevel, levelOverflow);
 

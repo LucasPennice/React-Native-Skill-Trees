@@ -143,7 +143,9 @@ export function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill>
 
         let limiter = 0;
 
-        while (overlapWithinTree && limiter < 1000) {
+        console.log("-----");
+        while (overlapWithinTree && limiter < 100) {
+            // while (overlapWithinTree && limiter < 1000) {
             let polarOverlap = checkForOverlap(result);
 
             //Tolerance to avoid loops
@@ -155,7 +157,7 @@ export function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill>
                 const subTreeWithRootNode = { ...tree, children: [subTree] };
                 const treesToShift = getTreesToShiftForCircularTree(subTreeWithRootNode, polarOverlap.nodesInConflict);
 
-                result = shiftNodesCounterClockWise(result, treesToShift, polarOverlap.biggestOverlapAngle);
+                // result = shiftNodesCounterClockWise(result, treesToShift, polarOverlap.biggestOverlapAngle);
             }
             limiter++;
         }
@@ -221,6 +223,8 @@ function getLevelBiggestOverlap(levelContour: PolarContour[], originalDistanceTo
         //I define two nodes perfectly overlapping as poor spacing and not overlap
         const overlapBetweenThisAndNextContour = checkForOverlapBetweenNodes(nextContour.leftNode, currentContour.rightNode);
         const poorSpacing = checkForPoorSpacing(nextContour.leftNode, currentContour.rightNode);
+
+        console.log(nextContour.leftNode, currentContour.rightNode, overlapBetweenThisAndNextContour, poorSpacing);
 
         if (overlapBetweenThisAndNextContour && (!result || overlapBetweenThisAndNextContour > result.biggestOverlapAngle)) {
             result = {
