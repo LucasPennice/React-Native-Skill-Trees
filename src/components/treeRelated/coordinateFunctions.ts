@@ -2,11 +2,11 @@ import { PlotTreeReingoldTiltfordAlgorithm } from "../../functions/treeToHierarc
 import { PlotCircularTree } from "../../functions/treeToRadialCoordinates/general";
 import {
     BROTHER_DND_ZONE_HEIGHT,
+    CHILD_DND_ZONE_DIMENTIONS,
     CIRCLE_SIZE,
     DISTANCE_BETWEEN_CHILDREN,
     DISTANCE_BETWEEN_GENERATIONS,
     NAV_HEGIHT,
-    CHILD_DND_ZONE_DIMENTIONS,
     PARENT_DND_ZONE_DIMENTIONS,
 } from "../../parameters";
 import { ScreenDimentions } from "../../redux/screenDimentionsSlice";

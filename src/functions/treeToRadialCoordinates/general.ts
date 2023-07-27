@@ -14,7 +14,8 @@ import {
 //☢️ The canvas has the positive y axis pointing downwards, this changes how calculations are to be made ☢️
 
 export function PlotCircularTree(completeTree: Tree<Skill>) {
-    let result: Tree<Skill> = { ...completeTree };
+    //We invert the tree because the Skia canvas is mirrored vertically
+    let result: Tree<Skill> = invertTree(completeTree);
 
     let levelOverflow: LevelOverflow = undefined;
 
@@ -22,7 +23,7 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
 
     let distanceToCenterPerLevel: DistanceToCenterPerLevel = getDistanceToCenterPerLevel(completeTree);
     do {
-        result = firstIteration(completeTree, completeTree, distanceToCenterPerLevel);
+        result = firstIteration(result, result, distanceToCenterPerLevel);
 
         result = fixOverlapWithinSubTreesOfLevel1(result);
 
@@ -73,4 +74,23 @@ function radialTreeToCoordArray(tree: Tree<Skill>, result: CoordinatesWithTreeDa
 
         return "SKILL";
     }
+}
+
+export function invertTree<T extends { children: T[] }>(rootNode: T) {
+    //Base Case 👇
+    if (!rootNode.children.length) return rootNode;
+
+    //Recursive Case 👇
+
+    let result: T = { ...rootNode, children: [] };
+
+    for (let idx = rootNode.children.length - 1; idx !== -1; idx--) {
+        const element = rootNode.children[idx];
+
+        const d = invertTree(element);
+
+        result.children.push(d);
+    }
+
+    return result;
 }
