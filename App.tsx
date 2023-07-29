@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DarkTheme, NavigationContainer } from "@react-navigation/native";
 import { CardStyleInterpolators, StackNavigationOptions, createStackNavigator } from "@react-navigation/stack";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -9,25 +8,22 @@ import { useCallback } from "react";
 import { Platform, SafeAreaView, StatusBar, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
 import AppText from "./src/components/AppText";
 import NavigationBar from "./src/components/NavigationBar";
 import { IsSharingAvailableContext } from "./src/context";
-import { makeid } from "./src/functions/misc";
 import Homepage from "./src/pages/homepage/Homepage";
 import MyTrees from "./src/pages/myTrees/MyTrees";
 import SkillPage from "./src/pages/skillPage/SkillPage";
 import ViewingSkillTree from "./src/pages/viewingSkillTree/ViewingSkillTree";
 import { centerFlex, colors } from "./src/parameters";
 import { open } from "./src/redux/addTreeModalSlice";
-import { populateCanvasDisplaySettings } from "./src/redux/canvasDisplaySettingsSlice";
 import { useAppDispatch } from "./src/redux/reduxHooks";
-import { store } from "./src/redux/reduxStore";
+import { persistor, store } from "./src/redux/reduxStore";
 import { updateSafeScreenDimentions } from "./src/redux/screenDimentionsSlice";
-import { populateUserId } from "./src/redux/userSlice";
-import { populateUserTrees } from "./src/redux/userTreesSlice";
 import { DnDZone, Skill, Tree } from "./src/types";
+import useHandleUserId from "./src/useHandleUserId";
 import useIsSharingAvailable from "./src/useIsSharingAvailable";
-import useKeepAsyncStorageUpdated from "./src/useKeepAsyncStorageUpdated";
 
 export type StackNavigatorParams = {
     Home: undefined;
@@ -67,14 +63,16 @@ export default function App() {
         <GestureHandlerRootView style={{ flex: 1 }}>
             <QueryClientProvider client={queryClient}>
                 <Provider store={store}>
-                    <IsSharingAvailableContext.Provider value={isSharingAvailable}>
-                        <NavigationContainer theme={DarkTheme}>
-                            <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-                                {Platform.OS === "android" && <StatusBar />}
-                                <AppWithReduxContext />
-                            </SafeAreaView>
-                        </NavigationContainer>
-                    </IsSharingAvailableContext.Provider>
+                    <PersistGate loading={null} persistor={persistor}>
+                        <IsSharingAvailableContext.Provider value={isSharingAvailable}>
+                            <NavigationContainer theme={DarkTheme}>
+                                <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+                                    {Platform.OS === "android" && <StatusBar />}
+                                    <AppWithReduxContext />
+                                </SafeAreaView>
+                            </NavigationContainer>
+                        </IsSharingAvailableContext.Provider>
+                    </PersistGate>
                 </Provider>
             </QueryClientProvider>
         </GestureHandlerRootView>
@@ -83,7 +81,7 @@ export default function App() {
 
 function AppWithReduxContext() {
     const dispatch = useAppDispatch();
-
+    useHandleUserId();
     //This is the constant that should be edited when adding a new screen
     const APP_ROUTES: Routes = [
         { component: Homepage, route: "Home", options: { headerShown: false }, title: "Me" },
@@ -123,45 +121,13 @@ function AppWithReduxContext() {
         emojisMono: require("./assets/NotoEmoji-Regular.ttf"),
     });
 
-    const populateReduxStore = async () => {
-        try {
-            const [userTreesKeyValue, canvasDisplaySettingsKeyValue, userInfoKeyValue] = await AsyncStorage.multiGet([
-                "@roadmaps",
-                "@canvasDisplaySettings",
-                "@userId",
-            ]);
-
-            const userTrees = userTreesKeyValue[1];
-            const canvasDisplaySettings = canvasDisplaySettingsKeyValue[1];
-            const userId = userInfoKeyValue[1];
-
-            if (userTrees !== null && userTrees !== "") {
-                dispatch(populateUserTrees(JSON.parse(userTrees)));
-            }
-
-            if (canvasDisplaySettings !== null && canvasDisplaySettings !== "") {
-                dispatch(populateCanvasDisplaySettings(JSON.parse(canvasDisplaySettings)));
-            }
-
-            if (userId !== null && userId !== "") {
-                dispatch(populateUserId(userId));
-            } else {
-                dispatch(populateUserId(makeid(24)));
-            }
-        } catch (e) {
-            console.log("There has been an error getting the user's roadmaps");
-        }
-    };
-
     const onLayoutRootView = useCallback(async () => {
-        await populateReduxStore();
+        // await populateReduxStore();
 
         if (fontsLoaded) {
             await SplashScreen.hideAsync();
         }
     }, [fontsLoaded]);
-
-    useKeepAsyncStorageUpdated();
 
     if (!fontsLoaded) return null;
 

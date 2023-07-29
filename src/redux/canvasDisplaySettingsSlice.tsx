@@ -50,25 +50,11 @@ export const canvasDisplaySettingsSlice = createSlice({
         setOneColorPerTree: (state, action: PayloadAction<boolean>) => {
             state.oneColorPerTree = action.payload;
         },
-        populateCanvasDisplaySettings: (state, action: PayloadAction<CanvasDisplaySettings>) => {
-            state.homepageTreeColor = action.payload.homepageTreeColor;
-            state.oneColorPerTree = action.payload.oneColorPerTree;
-            state.showCircleGuide = action.payload.showCircleGuide;
-            state.showLabel = action.payload.showLabel;
-        },
     },
 });
 
-export const {
-    setHomepageTreeColor,
-    setOneColorPerTree,
-    setShowCircleGuide,
-    setHomepageTreeIcon,
-    setShowLabel,
-    populateCanvasDisplaySettings,
-    setShowIcons,
-    setHomepageTreeName,
-} = canvasDisplaySettingsSlice.actions;
+export const { setHomepageTreeColor, setOneColorPerTree, setShowCircleGuide, setHomepageTreeIcon, setShowLabel, setShowIcons, setHomepageTreeName } =
+    canvasDisplaySettingsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectCanvasDisplaySettings = (state: RootState) => state.canvasDisplaySettings;

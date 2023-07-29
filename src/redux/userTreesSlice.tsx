@@ -35,9 +35,6 @@ export const userTreesSlice = createSlice({
             state.currentTreeId = undefined;
         },
 
-        populateUserTrees: (state, action: PayloadAction<Tree<Skill>[]>) => {
-            state.userTrees = action.payload;
-        },
         updateUserTrees: (state, action: PayloadAction<Tree<Skill> | undefined>) => {
             //We pass the new value of the mutated tree
             //And then update the value of userTrees with the new state
@@ -92,7 +89,6 @@ export const {
     changeTree,
     unselectTree,
     updateUserTrees,
-    populateUserTrees,
     appendToUserTree,
     removeUserTree,
     setSelectedNode,
