@@ -18,8 +18,10 @@ function useHandleCanvasScrollAndZoom(
 ) {
     const { canvasHeight, canvasWidth } = canvasDimentions;
 
+    const screenHeightWithNavAccounted = screenDimensions.height - NAV_HEGIHT;
+
     const minScaleX = screenDimensions.width / canvasWidth;
-    const minScaleY = screenDimensions.height / canvasHeight;
+    const minScaleY = screenHeightWithNavAccounted / canvasHeight;
     const minScale = minScaleX < minScaleY ? minScaleY : minScaleX;
     const MAX_SCALE = 1.4;
 
@@ -37,7 +39,15 @@ function useHandleCanvasScrollAndZoom(
     const animateFromSelectedNodeMenu = useShouldAnimateTransformation(selectedNodeMenuOpen);
     // const animateFromNodeMenu = useShouldAnimateTransformation(nodeMenuOpen);
 
-    const boundsProps = { minScale, scale, screenWidth: screenDimensions.width, canvasWidth, canvasHeight, screenHeight: screenDimensions.height };
+    const boundsProps = {
+        minScale,
+        scale,
+        screenWidth: screenDimensions.width,
+        canvasWidth,
+        canvasHeight,
+        screenHeight: screenDimensions.height,
+        maxScale: MAX_SCALE,
+    };
     const { maxXBound, minXBound, maxYBound, minYBound } = useHandleCanvasBounds(boundsProps);
 
     const [scaleState, setScaleState] = useState(0);
@@ -108,7 +118,7 @@ function useHandleCanvasScrollAndZoom(
             }
 
             const xBounds = getXBounds(safeScale, canvasWidth, screenDimensions.width);
-            const yBounds = getYBounds(safeScale, canvasHeight, screenDimensions.height);
+            const yBounds = getYBounds(safeScale, canvasHeight, screenHeightWithNavAccounted);
 
             const outOfBounds = checkIfScrollOutOfBounds({
                 offset: { x: offsetX.value, y: offsetY.value },
@@ -127,12 +137,10 @@ function useHandleCanvasScrollAndZoom(
 
             if (outOfBounds.x) {
                 offsetX.value = withSpring(safeX, MENU_HIGH_DAMPENING);
-                // start.value = { y: start.value.y, x: safeX };
             }
 
             if (outOfBounds.y) {
                 offsetY.value = withSpring(safeY, MENU_HIGH_DAMPENING);
-                // start.value = { x: start.value.x, y: safeY };
             }
         });
 
