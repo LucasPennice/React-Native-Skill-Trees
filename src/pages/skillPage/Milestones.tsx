@@ -1,4 +1,4 @@
-import { Dimensions, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import AppText from "../../components/AppText";
 import { centerFlex, colors } from "../../parameters";
 import { generalStyles } from "../../styles";

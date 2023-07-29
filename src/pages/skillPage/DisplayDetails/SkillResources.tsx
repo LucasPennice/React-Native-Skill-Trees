@@ -1,4 +1,4 @@
-import { Dimensions, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import AppText from "../../../components/AppText";
 import { centerFlex, colors } from "../../../parameters";
 import { generalStyles } from "../../../styles";
@@ -63,4 +63,4 @@ function ResourceCard({ data, onPress, backgroundColor }: { data: SkillResource;
     );
 }
 
-export { ResourceHeader, ResourceCard };
+export { ResourceCard, ResourceHeader };

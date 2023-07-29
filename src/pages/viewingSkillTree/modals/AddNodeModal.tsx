@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
 import { Alert, Dimensions, Keyboard, Platform, Pressable, View } from "react-native";
-import Animated, { Easing, FadeInDown, Layout, ZoomIn, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
+import Animated, { Easing, FadeInDown, Layout, ZoomIn, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import { Line, Rect, Svg } from "react-native-svg";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";

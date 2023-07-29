@@ -1,6 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { RootState } from "./reduxStore";
+import { createSlice } from "@reduxjs/toolkit";
 import { makeid } from "../functions/misc";
+import type { RootState } from "./reduxStore";
 
 // Define a type for the slice state
 type UserSlice = {

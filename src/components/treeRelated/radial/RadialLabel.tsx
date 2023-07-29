@@ -1,4 +1,4 @@
-import { Group, RoundedRect, Text, useFont } from "@shopify/react-native-skia";
+import { Group, Text, useFont } from "@shopify/react-native-skia";
 import { CIRCLE_SIZE } from "../../../parameters";
 import { CartesianCoordinate } from "../../../types";
 

@@ -7,7 +7,8 @@
         "ios": "expo run:ios",
         "test": "jest",
         "web": "expo start --web",
-        "devtools": "react-devtools"
+        "devtools": "react-devtools",
+        "linter": "npx eslint 'src/**'"
     },
     "dependencies": {
         "@react-native-async-storage/async-storage": "1.18.2",
@@ -50,6 +51,7 @@
     },
     "devDependencies": {
         "@babel/core": "^7.20.0",
+        "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
         "@babel/preset-typescript": "^7.22.5",
         "@jest/globals": "^29.6.1",
         "eslint": "^8.41.0",

@@ -47,8 +47,6 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
 
     const gestures = Gesture.Exclusive(tapGesture, longPressGesture);
 
-    const isEmojiIcon = element.data.icon.isEmoji;
-
     return (
         <GestureDetector gesture={gestures}>
             <Animated.View

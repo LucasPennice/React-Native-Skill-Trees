@@ -1,5 +1,4 @@
 import { SkFont, Skia } from "@shopify/react-native-skia";
-import { useEffect } from "react";
 import { useDerivedValue } from "react-native-reanimated";
 import { CIRCLE_SIZE } from "../../../parameters";
 import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";

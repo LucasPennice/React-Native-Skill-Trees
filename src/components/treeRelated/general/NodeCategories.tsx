@@ -1,4 +1,4 @@
-import { Circle, DiffRect, LinearGradient, Path, SkFont, SkPath, SkiaValue, Text, vec } from "@shopify/react-native-skia";
+import { Circle, DiffRect, LinearGradient, Path, SkFont, SkPath, Text, vec } from "@shopify/react-native-skia";
 import Animated, { SharedValue } from "react-native-reanimated";
 import { interpolateColors } from "../../../functions/misc";
 import { CIRCLE_SIZE, colors } from "../../../parameters";
