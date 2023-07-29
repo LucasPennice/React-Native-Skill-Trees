@@ -37,6 +37,7 @@ const nodeMenuConfig: Config = {
     allowTap: true,
     runActionOnTouchUp: true,
     showBounds: false,
+    maxTapDuration: 80,
 };
 
 const MENU_WIDTH = 300;

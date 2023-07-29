@@ -4,6 +4,7 @@ import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 
 
 export type Config = {
     directions: ("horizontal" | "vertical")[];
+    maxTapDuration: number;
     //Values should be between 0 and 1, where 1 is the largest trigger zone
     triggerZoneSize: number;
     horizontalSize: number;
@@ -33,7 +34,18 @@ type Props = {
 type ActionType = "verticalUp" | "verticalDown" | "horizontalLeft" | "horizontalRight";
 
 function DirectionMenu({ action, config, children, onHoverActions }: Props) {
-    const { directions, horizontalSize, showBounds, triggerZoneSize, allowFling, allowTap, circular, runActionOnTouchUp, verticalSize } = config;
+    const {
+        directions,
+        horizontalSize,
+        showBounds,
+        triggerZoneSize,
+        allowFling,
+        allowTap,
+        circular,
+        runActionOnTouchUp,
+        verticalSize,
+        maxTapDuration,
+    } = config;
 
     //The deacceleration reduces the allowed translation value by 2
     const realVertical = verticalSize * 2;
@@ -204,11 +216,11 @@ function DirectionMenu({ action, config, children, onHoverActions }: Props) {
             y.value = withSpring(0, { damping: 26, stiffness: 300, velocity: velocityY });
             lastExecutedAction.value = undefined;
         })
-        .activateAfterLongPress(40)
+        .activateAfterLongPress(maxTapDuration)
         .shouldCancelWhenOutside(true);
 
     const tap = Gesture.Tap()
-        .maxDuration(40)
+        .maxDuration(maxTapDuration)
         .onStart((e) => {
             if (!allowTap) return;
             if (!action) return;

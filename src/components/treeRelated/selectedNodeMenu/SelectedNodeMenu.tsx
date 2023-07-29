@@ -115,6 +115,7 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
         directions: ["vertical"],
         triggerZoneSize: 0.9,
         allowFling: true,
+        maxTapDuration: 80,
     };
     return (
         <Animated.View
