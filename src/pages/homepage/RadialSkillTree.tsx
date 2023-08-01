@@ -8,6 +8,7 @@ import { completedSkillPercentageFromCoords } from "../../functions/extractInfor
 import { getLabelTextColor } from "../../functions/misc";
 import { colors } from "../../parameters";
 import { CartesianCoordinate, CoordinatesWithTreeData } from "../../types";
+import { SharedValue } from "react-native-reanimated";
 
 type TreeProps = {
     nodeCoordinatesCentered: CoordinatesWithTreeData[];
@@ -17,9 +18,14 @@ type TreeProps = {
         oneColorPerTree: boolean;
         showIcons: boolean;
     };
+    drag: {
+        x: SharedValue<number>;
+        y: SharedValue<number>;
+        nodesToDragId: string[];
+    };
 };
 
-function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings }: TreeProps) {
+function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag }: TreeProps) {
     const labelFont = useFont(require("../../../assets/Helvetica.ttf"), 12);
     const nodeLetterFont = useFont(require("../../../assets/Helvetica.ttf"), 17);
     const emojiFont = useFont(require("../../../assets/NotoEmoji-Regular.ttf"), 17);
@@ -107,7 +113,9 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings }: Tr
                     showIcons: settings.showIcons,
                 };
 
-                return <Node state={state} key={`${node.nodeId}_node`} nodeData={nodeData} />;
+                const nodeDrag = drag.nodesToDragId.includes(node.nodeId) ? drag : undefined;
+
+                return <Node state={state} key={`${node.nodeId}_node`} nodeData={nodeData} nodeDrag={nodeDrag} />;
             })}
         </>
     );

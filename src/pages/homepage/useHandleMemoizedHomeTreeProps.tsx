@@ -46,7 +46,7 @@ function useHandleMemoizedHomeTreeProps(
 
     //Interactive Tree Props
     const config: InteractiveTreeConfig = useMemo(() => {
-        return { canvasDisplaySettings, isInteractive: true, renderStyle: "radial", editTreeFromNodeMenu: false };
+        return { canvasDisplaySettings, isInteractive: true, renderStyle: "radial", editTreeFromNodeMenu: false, blockDragAndDrop: true };
     }, [canvasDisplaySettings]);
     const interactiveTreeState: InteractiveNodeState = useMemo(() => {
         return { screenDimensions, canvasRef, selectedNodeId };

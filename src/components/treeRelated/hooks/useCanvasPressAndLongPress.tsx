@@ -5,7 +5,8 @@ import { runOnJS } from "react-native-reanimated";
 import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, TOUCH_BUFFER } from "../../../parameters";
 import { useAppDispatch } from "../../../redux/reduxHooks";
 import { clearSelectedNode } from "../../../redux/userTreesSlice";
-import { CartesianCoordinate, DnDZone, NodeCoordinate, SelectedNodeId } from "../../../types";
+import { CartesianCoordinate, DnDZone, GestureHandlerState, NodeCoordinate, SelectedNodeId } from "../../../types";
+import { NODE_MENU_SIZE } from "../nodeMenu/NodeMenu";
 
 type Props = {
     state: {
@@ -16,10 +17,12 @@ type Props = {
     config: {
         showDndZones?: boolean;
         blockLongPress?: boolean;
+        blockDragAndDrop?: boolean;
     };
     functions: {
         onNodeClick?: (nodeId: string) => void;
         onDndZoneClick?: (clickedZone?: DnDZone) => void;
+        setDraggingNode: (v: boolean) => void;
     };
 };
 
@@ -38,8 +41,8 @@ export const MIN_DURATION_LONG_PRESS_MS = 300;
 export type CanvasTouchHandler = { touchHandler: TouchHandler };
 
 const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
-    const { showDndZones, blockLongPress } = config;
-    const { onDndZoneClick, onNodeClick } = functions;
+    const { showDndZones, blockLongPress, blockDragAndDrop } = config;
+    const { onDndZoneClick, onNodeClick, setDraggingNode } = functions;
     const { dragAndDropZones, nodeCoordinatesCentered, selectedNodeId } = state;
     //
     const [openMenuOnNode, setOpenMenuOnNode] = useState<NodeCoordinate | undefined>(undefined);
@@ -107,12 +110,30 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
 
             const clickedNode = nodeCoordinatesCentered.find(didTapCircle(e));
             if (!clickedNode) return setLongPressIndicatorPosition({ data: undefined, state: "IDLE" });
+
+            if (clickedNode !== undefined) setDraggingNode(true);
+
             return setLongPressIndicatorPosition({ data: clickedNode, state: "PRESSING" });
         },
         handleOnEnd: (e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>) => {
             if (blockLongPress) return;
 
-            const gestureSuccessful = e.duration >= MIN_DURATION_LONG_PRESS_MS;
+            const correctDuration = e.duration >= MIN_DURATION_LONG_PRESS_MS;
+
+            if (!correctDuration) return;
+            const stateCode = e.state;
+
+            const gestureSuccessful = GestureHandlerState.END === stateCode && correctDuration;
+
+            const fingerMovedOutsideAllowedZone = GestureHandlerState.CANCELLED === stateCode;
+
+            const longPressingNode = longPressIndicatorPosition.data !== undefined;
+
+            const shouldDragAndDrop = !blockDragAndDrop && longPressingNode && fingerMovedOutsideAllowedZone && correctDuration;
+
+            if (shouldDragAndDrop) return resetLongPressIndicator();
+
+            setDraggingNode(false);
 
             if (!longPressIndicatorPosition.data) return resetLongPressIndicator();
 
@@ -131,7 +152,8 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
         .onEnd((touchEvent) => {
             runOnJS(longPressGesture.handleOnEnd)(touchEvent);
         })
-        .minDuration(MAX_TAP_DURATION);
+        .minDuration(MAX_TAP_DURATION)
+        .maxDistance(NODE_MENU_SIZE / 2);
 
     const canvasPressAndLongPress = Gesture.Exclusive(canvasLongPress, canvasTouch);
 

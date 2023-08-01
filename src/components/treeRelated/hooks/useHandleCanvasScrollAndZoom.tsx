@@ -8,13 +8,15 @@ import { getXBounds, getYBounds, useHandleCanvasBounds } from "./useHandleCanvas
 
 const DEFAULT_SCALE = 1;
 const deaccelerationFactor = 2500;
+const ANIMATION_DURATION_AFTER_FAILED_LONG_PRESS_MS = 1000;
 
 function useHandleCanvasScrollAndZoom(
     canvasDimentions: CanvasDimensions,
     screenDimensions: ScreenDimentions,
     foundNodeCoordinates: NodeCoordinate | undefined,
     foundNodeOfMenu: NodeCoordinate | undefined,
-    onScroll: () => void
+    onScroll: () => void,
+    draggingNode: { state: boolean; endDragging: () => void }
 ) {
     const { canvasHeight, canvasWidth } = canvasDimentions;
 
@@ -38,6 +40,9 @@ function useHandleCanvasScrollAndZoom(
     const selectedNodeMenuOpen = foundNodeCoordinates !== undefined;
     const animateFromSelectedNodeMenu = useShouldAnimateTransformation(selectedNodeMenuOpen);
     // const animateFromNodeMenu = useShouldAnimateTransformation(nodeMenuOpen);
+
+    const dragX = useSharedValue(0);
+    const dragY = useSharedValue(0);
 
     const boundsProps = {
         minScale,
@@ -144,25 +149,53 @@ function useHandleCanvasScrollAndZoom(
             }
         });
 
+    const animatePan = useSharedValue(false);
+
+    const updateAnimatePan = () => {
+        setTimeout(() => {
+            animatePan.value = false;
+        }, ANIMATION_DURATION_AFTER_FAILED_LONG_PRESS_MS);
+    };
+
     const canvasPan = Gesture.Pan()
-        .onBegin(() => {
+        .onStart(() => {
+            if (draggingNode) return (animatePan.value = true);
+
             shouldUpdateStartValue.value = false;
             offsetX.value = start.value.x;
             offsetY.value = start.value.y;
             runOnJS(onScroll)();
         })
         .onUpdate((e) => {
+            //Handles node dragging 👇
+            if (draggingNode.state) {
+                dragX.value = e.translationX;
+                dragY.value = e.translationY;
+                return;
+            }
+
             if (foundNodeCoordinates) return;
+
+            //Handles scrolling 👇
 
             const newXValue = e.translationX + start.value.x;
             const newYValue = e.translationY + start.value.y;
 
             shouldUpdateStartValue.value = false;
 
-            offsetX.value = newXValue;
-            offsetY.value = newYValue;
+            if (animatePan.value) {
+                offsetX.value = withSpring(newXValue, { duration: ANIMATION_DURATION_AFTER_FAILED_LONG_PRESS_MS });
+                offsetY.value = withSpring(newYValue, { duration: ANIMATION_DURATION_AFTER_FAILED_LONG_PRESS_MS });
+
+                runOnJS(updateAnimatePan)();
+            } else {
+                offsetX.value = newXValue;
+                offsetY.value = newYValue;
+            }
         })
         .onEnd((e) => {
+            if (draggingNode.state) return runOnJS(draggingNode.endDragging)();
+
             shouldUpdateStartValue.value = true;
 
             const outOfBounds = checkIfScrollOutOfBounds({
@@ -269,7 +302,9 @@ function useHandleCanvasScrollAndZoom(
         }
     }, [offsetX, offsetY, scale, foundNodeCoordinates, animateFromSelectedNodeMenu, foundNodeOfMenu]);
 
-    return { transform, canvasScrollAndZoom, scale: scaleState };
+    const dragDelta = { x: dragX, y: dragY };
+
+    return { transform, canvasScrollAndZoom, scale: scaleState, dragDelta };
 }
 
 export default useHandleCanvasScrollAndZoom;

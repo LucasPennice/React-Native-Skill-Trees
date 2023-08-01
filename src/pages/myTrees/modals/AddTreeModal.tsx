@@ -3,7 +3,7 @@ import { UseQueryResult } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Alert, Dimensions, Pressable, View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
-import Animated, { FadeInDown, useAnimatedStyle, withSpring } from "react-native-reanimated";
+import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import axiosClient from "../../../../axiosClient";
 import { useRequestProcessor } from "../../../../requestProcessor";
 import AppText from "../../../components/AppText";
@@ -195,7 +195,16 @@ function ImportTree({
     const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
-    const { canvasScrollAndZoom, transform } = useHandleCanvasScroll(canvasDimentions, screenDimensions, undefined, undefined, () => {});
+    const { canvasScrollAndZoom, transform } = useHandleCanvasScroll(canvasDimentions, screenDimensions, undefined, undefined, () => {}, {
+        state: false,
+        endDragging: () => {},
+    });
+
+    const mockDrag = {
+        x: useSharedValue(0),
+        y: useSharedValue(0),
+        nodesToDragId: [],
+    };
 
     if (initialState)
         return (
@@ -238,6 +247,7 @@ function ImportTree({
                                 nodeCoordinatesCentered={centeredCoordinatedWithTreeData}
                                 selectedNode={null}
                                 settings={{ showIcons, showLabel }}
+                                drag={mockDrag}
                             />
                         </Canvas>
                     </Animated.View>

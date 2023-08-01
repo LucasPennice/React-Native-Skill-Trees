@@ -7,6 +7,7 @@ import { InteractiveNodeState, InteractiveTreeConfig, TreeCoordinates } from "./
 import RadialTreeLevelCircles from "./RadialTreeLevelCircles";
 import DragAndDropZones from "./hierarchical/DragAndDropZones";
 import HierarchicalSkillTree from "./hierarchical/HierarchicalSkillTree";
+import { SharedValue } from "react-native-reanimated";
 
 type Props = {
     canvasGestures: SimultaneousGesture;
@@ -20,14 +21,19 @@ type Props = {
         nodeCoordinates: CoordinatesWithTreeData[];
         dndZoneCoordinates: DnDZone[];
     };
+    drag: {
+        x: SharedValue<number>;
+        y: SharedValue<number>;
+        nodesToDragId: string[];
+    };
 };
 
-function TreeCanvas({ canvasHeight, canvasRef, canvasWidth, config, renderStyle, state, canvasGestures, treeData }: Props) {
+function TreeCanvas({ canvasHeight, canvasRef, canvasWidth, config, renderStyle, state, canvasGestures, treeData, drag }: Props) {
     return (
         <GestureDetector gesture={canvasGestures}>
             <Canvas style={{ width: canvasWidth, height: canvasHeight }} ref={canvasRef}>
-                {renderStyle === "hierarchy" && <HierarchicalSkillTreeRender state={state} config={config} treeData={treeData} />}
-                {renderStyle === "radial" && <RadialTreeRendererRender state={state} config={config} treeData={treeData} />}
+                {renderStyle === "hierarchy" && <HierarchicalSkillTreeRender state={state} config={config} treeData={treeData} drag={drag} />}
+                {renderStyle === "radial" && <RadialTreeRendererRender state={state} config={config} treeData={treeData} drag={drag} />}
             </Canvas>
         </GestureDetector>
     );
@@ -37,10 +43,16 @@ function HierarchicalSkillTreeRender({
     state,
     treeData,
     config,
+    drag,
 }: {
     state: InteractiveNodeState;
     treeData: TreeCoordinates;
     config: InteractiveTreeConfig;
+    drag: {
+        x: SharedValue<number>;
+        y: SharedValue<number>;
+        nodesToDragId: string[];
+    };
 }) {
     const { selectedNodeId, selectedDndZone } = state;
     const { dndZoneCoordinates, nodeCoordinates } = treeData;
@@ -53,6 +65,7 @@ function HierarchicalSkillTreeRender({
                 nodeCoordinatesCentered={nodeCoordinates}
                 selectedNode={selectedNodeId ?? null}
                 settings={{ showIcons, showLabel }}
+                drag={drag}
             />
             {isInteractive && showDndZones && <DragAndDropZones data={dndZoneCoordinates} selectedDndZone={selectedDndZone} />}
         </>
@@ -63,10 +76,16 @@ function RadialTreeRendererRender({
     treeData,
     config,
     state,
+    drag,
 }: {
     treeData: TreeCoordinates;
     config: InteractiveTreeConfig;
     state: InteractiveNodeState;
+    drag: {
+        x: SharedValue<number>;
+        y: SharedValue<number>;
+        nodesToDragId: string[];
+    };
 }) {
     const { nodeCoordinates } = treeData;
     const { canvasDisplaySettings } = config;
@@ -80,6 +99,7 @@ function RadialTreeRendererRender({
                 nodeCoordinatesCentered={nodeCoordinates}
                 selectedNode={selectedNodeId ?? null}
                 settings={{ showLabel, oneColorPerTree, showIcons }}
+                drag={drag}
             />
         </>
     );

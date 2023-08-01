@@ -1,8 +1,9 @@
 import { Blur, Group, SkFont, SkiaMutableValue } from "@shopify/react-native-skia";
 import { ColorGradient, NodeCategory } from "../../../types";
 import { NodeProps, SkillNode, SkillTreeNode, UserNode } from "./NodeCategories";
-import useHandleAnimationOnSelect from "./useHandleAnimationOnSelect";
+import useHandleGroupTransform from "./useHandleGroupTransform";
 import useHandleNodeAnimatedCoordinates from "./useHandleNodeAnimatedCoordinates";
+import { SharedValue } from "react-native-reanimated";
 
 export type CanvasNodeData = {
     isComplete: boolean;
@@ -17,6 +18,7 @@ function Node({
     nodeData,
     circleBlurOnInactive,
     state,
+    nodeDrag,
 }: {
     state: {
         font: SkFont;
@@ -26,6 +28,13 @@ function Node({
     };
     circleBlurOnInactive?: SkiaMutableValue<number>;
     nodeData: CanvasNodeData;
+    nodeDrag:
+        | {
+              x: SharedValue<number>;
+              y: SharedValue<number>;
+              nodesToDragId: string[];
+          }
+        | undefined;
 }) {
     const { category, coord, isComplete, text, treeAccentColor, nodeId } = nodeData;
     const { font, treeCompletedPercentage, selectedNodeId, showIcons } = state;
@@ -34,7 +43,7 @@ function Node({
 
     const { path, textX, textY, x, y } = useHandleNodeAnimatedCoordinates(coord, text, font);
 
-    const { groupTransform, blur } = useHandleAnimationOnSelect(selectedNodeId, nodeId);
+    const { groupTransform, blur } = useHandleGroupTransform(selectedNodeId, nodeId, nodeDrag);
 
     const nodeIcon = text.isEmoji ? text.letter : text.letter.toUpperCase();
 

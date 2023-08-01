@@ -27,9 +27,12 @@ import DirectionMenu, { Config } from "../../DirectionMenu";
 import { adjustedScale } from "../general/NodeLongPressIndicator";
 import useWrapNodeMenuFunctions from "./useWrapNodeMenuFunctions";
 
+export const NODE_MENU_SIZE = 150;
+const JOYSTICK_WIDTH = 50;
+
 const nodeMenuConfig: Config = {
-    horizontalSize: 150,
-    verticalSize: 150,
+    horizontalSize: NODE_MENU_SIZE,
+    verticalSize: NODE_MENU_SIZE,
     circular: true,
     directions: ["horizontal", "vertical"],
     triggerZoneSize: 0.7,
@@ -39,9 +42,6 @@ const nodeMenuConfig: Config = {
     showBounds: false,
     maxTapDuration: 80,
 };
-
-const MENU_WIDTH = 300;
-const JOYSTICK_WIDTH = 50;
 
 export type NodeMenuFunctions = {
     idle: {
@@ -71,7 +71,7 @@ function NodeMenu({
 }) {
     const { idle, selectingPosition } = functions;
 
-    const position = { x: data.x - MENU_WIDTH / 4, y: data.y - MENU_WIDTH / 4 };
+    const position = { x: data.x - NODE_MENU_SIZE / 2, y: data.y - NODE_MENU_SIZE / 2 };
 
     const [menuMode, setMenuMode] = useState<"NORMAL" | "SELECTING_NODE_POSITION">("NORMAL");
 
@@ -109,11 +109,11 @@ function NodeMenu({
                 style={[
                     styles,
                     {
-                        height: MENU_WIDTH / 2,
-                        width: MENU_WIDTH / 2,
+                        height: NODE_MENU_SIZE,
+                        width: NODE_MENU_SIZE,
                         borderColor: "#B1B2B220",
                         borderWidth: 1,
-                        borderRadius: MENU_WIDTH / 2,
+                        borderRadius: NODE_MENU_SIZE,
                         position: "relative",
                     },
                 ]}>
@@ -144,7 +144,7 @@ function ArrowTopLeftDownRight() {
                 position: "absolute",
                 top: 0,
                 left: 0,
-                width: MENU_WIDTH / 2,
+                width: NODE_MENU_SIZE,
                 transform: [{ rotate: "45deg" }, { translateX: 53 }, { translateY: 52 }],
             }}
         />
@@ -158,7 +158,7 @@ function ArrowDownLeftTopRight() {
                 borderTopWidth: 1,
                 borderTopColor: "#B1B2B220",
                 position: "absolute",
-                width: MENU_WIDTH / 2,
+                width: NODE_MENU_SIZE,
                 top: 0,
                 left: 0,
                 transform: [{ rotate: "-45deg" }, { translateX: -53 }, { translateY: 52 }],
@@ -185,8 +185,8 @@ function InnerCircle({ mode }: { mode: "NORMAL" | "SELECTING_NODE_POSITION" }) {
                     backgroundColor: "#181A1C",
                     borderWidth: 1,
                     position: "absolute",
-                    top: (MENU_WIDTH / 2 - 118) / 2,
-                    left: (MENU_WIDTH / 2 - 118) / 2,
+                    top: (NODE_MENU_SIZE - 118) / 2,
+                    left: (NODE_MENU_SIZE - 118) / 2,
                     borderRadius: 118,
                 },
             ]}
@@ -290,7 +290,7 @@ function PositionLabel({ actions }: { actions: NodeMenuFunctions["selectingPosit
 
 function HoveringEffect({ hovering }: { hovering: "LEFT" | "UP" | "RIGHT" | "DOWN" | undefined }) {
     return (
-        <View pointerEvents={"none"} style={{ height: MENU_WIDTH / 2, width: MENU_WIDTH / 2, position: "absolute" }}>
+        <View pointerEvents={"none"} style={{ height: NODE_MENU_SIZE, width: NODE_MENU_SIZE, position: "absolute" }}>
             {hovering === "UP" && (
                 <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(150)} style={{ position: "absolute", top: 0, left: 21 }}>
                     <Svg width="106" height="48" viewBox="0 0 106 48" fill="none">
