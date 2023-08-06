@@ -20,14 +20,13 @@ import Animated, {
     withTiming,
 } from "react-native-reanimated";
 import { Defs, LinearGradient, Path, Stop, Svg } from "react-native-svg";
-import { CIRCLE_SIZE } from "../../../parameters";
+import { CIRCLE_SIZE, NODE_MENU_SIZE } from "../../../parameters";
 import { CoordinatesWithTreeData } from "../../../types";
 import AppText from "../../AppText";
 import DirectionMenu, { Config } from "../../DirectionMenu";
 import { adjustedScale } from "../general/NodeLongPressIndicator";
 import useWrapNodeMenuFunctions from "./useWrapNodeMenuFunctions";
 
-export const NODE_MENU_SIZE = 150;
 const JOYSTICK_WIDTH = 50;
 
 const nodeMenuConfig: Config = {

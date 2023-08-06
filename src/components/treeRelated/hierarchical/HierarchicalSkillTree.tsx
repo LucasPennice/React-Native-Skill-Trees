@@ -3,11 +3,10 @@ import { Fragment } from "react";
 import { completedSkillPercentageFromCoords } from "../../../functions/extractInformationFromTree";
 import { getLabelTextColor } from "../../../functions/misc";
 import { colors } from "../../../parameters";
-import { CartesianCoordinate, CoordinatesWithTreeData } from "../../../types";
+import { CartesianCoordinate, CoordinatesWithTreeData, DragObject } from "../../../types";
 import Label from "../general/Label";
 import Node, { CanvasNodeData } from "../general/Node";
 import HierarchicalCanvasPath from "./HierarchicalCanvasPath";
-import { SharedValue } from "react-native-reanimated";
 
 type TreeProps = {
     nodeCoordinatesCentered: CoordinatesWithTreeData[];
@@ -16,14 +15,10 @@ type TreeProps = {
         showLabel: boolean;
         showIcons: boolean;
     };
-    drag: {
-        x: SharedValue<number>;
-        y: SharedValue<number>;
-        nodesToDragId: string[];
-    };
+    dragObject: DragObject;
 };
 
-function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag }: TreeProps) {
+function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, settings, dragObject }: TreeProps) {
     const nodeLetterFont = useFont(require("../../../../assets/Helvetica.ttf"), 17);
     const emojiFont = useFont(require("../../../../assets/NotoEmoji-Regular.ttf"), 17);
 
@@ -87,7 +82,7 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, settings
 
                 const state = { font, treeCompletedPercentage, selectedNodeId: selectedNode, showIcons };
 
-                const nodeDrag = drag.nodesToDragId.includes(node.nodeId) ? drag : undefined;
+                const nodeDrag = dragObject.state.nodesToDrag.includes(node.nodeId) ? dragObject.sharedValues : undefined;
 
                 return <Node key={`${node.nodeId}_node`} state={state} nodeData={nodeData} nodeDrag={nodeDrag} />;
             })}

@@ -20,6 +20,7 @@ import {
 } from "../../../components/treeRelated/coordinateFunctions";
 import HierarchicalSkillTree from "../../../components/treeRelated/hierarchical/HierarchicalSkillTree";
 import useHandleCanvasScroll from "../../../components/treeRelated/hooks/useHandleCanvasScrollAndZoom";
+import useDragState from "../../../components/treeRelated/useDragState";
 import { createTree } from "../../../functions/misc";
 import { MENU_HIGH_DAMPENING, centerFlex, colors, nodeGradients } from "../../../parameters";
 import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
@@ -28,7 +29,7 @@ import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { appendToUserTree } from "../../../redux/userTreesSlice";
 import { generalStyles } from "../../../styles";
-import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "../../../types";
+import { ColorGradient, DragObject, Skill, Tree, getDefaultSkillValue } from "../../../types";
 import useHandleImportTree from "./useHandleImportTree";
 
 function AddTreeModal() {
@@ -195,15 +196,13 @@ function ImportTree({
     const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
-    const { canvasScrollAndZoom, transform } = useHandleCanvasScroll(canvasDimentions, screenDimensions, undefined, undefined, () => {}, {
-        state: false,
-        endDragging: () => {},
-    });
+    const dragReducer = useDragState();
 
-    const mockDrag = {
-        x: useSharedValue(0),
-        y: useSharedValue(0),
-        nodesToDragId: [],
+    const { canvasScrollAndZoom, transform } = useHandleCanvasScroll(canvasDimentions, screenDimensions, undefined, undefined, () => {}, dragReducer);
+
+    const mockDragObject: DragObject = {
+        state: { isDragging: false, isOutsideNodeMenuZone: false, nodeId: null, nodesToDrag: [] },
+        sharedValues: { x: useSharedValue(0), y: useSharedValue(0) },
     };
 
     if (initialState)
@@ -247,7 +246,7 @@ function ImportTree({
                                 nodeCoordinatesCentered={centeredCoordinatedWithTreeData}
                                 selectedNode={null}
                                 settings={{ showIcons, showLabel }}
-                                drag={mockDrag}
+                                dragObject={mockDragObject}
                             />
                         </Canvas>
                     </Animated.View>

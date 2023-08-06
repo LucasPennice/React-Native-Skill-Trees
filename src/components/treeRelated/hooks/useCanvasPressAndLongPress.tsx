@@ -1,12 +1,12 @@
 import { TouchHandler } from "@shopify/react-native-skia";
 import { useState } from "react";
 import { Gesture, GestureStateChangeEvent, LongPressGestureHandlerEventPayload, TapGestureHandlerEventPayload } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
-import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, TOUCH_BUFFER } from "../../../parameters";
+import { runOnJS, useSharedValue } from "react-native-reanimated";
+import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, NODE_MENU_SIZE, TOUCH_BUFFER } from "../../../parameters";
 import { useAppDispatch } from "../../../redux/reduxHooks";
 import { clearSelectedNode } from "../../../redux/userTreesSlice";
 import { CartesianCoordinate, DnDZone, GestureHandlerState, NodeCoordinate, SelectedNodeId } from "../../../types";
-import { NODE_MENU_SIZE } from "../nodeMenu/NodeMenu";
+import { DragStateDispatch, DragValuesAndSetters } from "../useDragState";
 
 type Props = {
     state: {
@@ -22,7 +22,8 @@ type Props = {
     functions: {
         onNodeClick?: (nodeId: string) => void;
         onDndZoneClick?: (clickedZone?: DnDZone) => void;
-        setDraggingNode: (v: boolean) => void;
+        dispatchDragState: DragStateDispatch;
+        resetDragValues: DragValuesAndSetters["resetDragValues"];
     };
 };
 
@@ -42,7 +43,7 @@ export type CanvasTouchHandler = { touchHandler: TouchHandler };
 
 const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
     const { showDndZones, blockLongPress, blockDragAndDrop } = config;
-    const { onDndZoneClick, onNodeClick, setDraggingNode } = functions;
+    const { onDndZoneClick, onNodeClick, dispatchDragState, resetDragValues } = functions;
     const { dragAndDropZones, nodeCoordinatesCentered, selectedNodeId } = state;
     //
     const [openMenuOnNode, setOpenMenuOnNode] = useState<NodeCoordinate | undefined>(undefined);
@@ -55,6 +56,8 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
     const dispatch = useAppDispatch();
     //
 
+    let startDraggingTimeoutID = useSharedValue<NodeJS.Timeout | undefined>(undefined);
+
     const resetLongPressIndicator = () => setLongPressIndicatorPosition({ data: undefined, state: "IDLE" });
 
     function handleSuccessfulLongPress(clickedNode: NodeCoordinate) {
@@ -65,6 +68,7 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
     const onScroll = () => {
         closeNodeMenu();
         interruptLongPress();
+        if (startDraggingTimeoutID.value) clearTimeout(startDraggingTimeoutID.value);
 
         function interruptLongPress() {
             return setLongPressIndicatorPosition((p) => {
@@ -111,12 +115,16 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
             const clickedNode = nodeCoordinatesCentered.find(didTapCircle(e));
             if (!clickedNode) return setLongPressIndicatorPosition({ data: undefined, state: "IDLE" });
 
-            if (clickedNode !== undefined) setDraggingNode(true);
+            startDraggingTimeoutID.value = setTimeout(() => {
+                dispatchDragState({ type: "START_DRAGGING", payload: { nodeId: clickedNode.id } });
+            }, MIN_DURATION_LONG_PRESS_MS);
 
             return setLongPressIndicatorPosition({ data: clickedNode, state: "PRESSING" });
         },
         handleOnEnd: (e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>) => {
             if (blockLongPress) return;
+
+            if (startDraggingTimeoutID.value) clearTimeout(startDraggingTimeoutID.value);
 
             const correctDuration = e.duration >= MIN_DURATION_LONG_PRESS_MS;
 
@@ -131,9 +139,13 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
 
             const shouldDragAndDrop = !blockDragAndDrop && longPressingNode && fingerMovedOutsideAllowedZone && correctDuration;
 
-            if (shouldDragAndDrop) return resetLongPressIndicator();
+            if (shouldDragAndDrop) {
+                dispatchDragState({ type: "UPDATE_IS_OUTSIDE_NODE_MENU_ZONE", payload: {} });
+                return resetLongPressIndicator();
+            }
 
-            setDraggingNode(false);
+            resetDragValues();
+            dispatchDragState({ type: "END_DRAGGING", payload: {} });
 
             if (!longPressIndicatorPosition.data) return resetLongPressIndicator();
 

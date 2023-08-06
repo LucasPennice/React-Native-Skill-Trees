@@ -1,19 +1,9 @@
 import { AnimatedProp, Transforms2d } from "@shopify/react-native-skia";
 import { useEffect } from "react";
-import { SharedValue, useDerivedValue, useSharedValue, withSequence, withSpring, withTiming } from "react-native-reanimated";
+import { useDerivedValue, useSharedValue, withSequence, withSpring, withTiming } from "react-native-reanimated";
 import useIsFirstRender from "../../../useIsFirstRender";
 
-function useHandleGroupTransform(
-    selectedNodeId: string | null,
-    nodeId: string,
-    nodeDrag:
-        | {
-              x: SharedValue<number>;
-              y: SharedValue<number>;
-              nodesToDragId: string[];
-          }
-        | undefined
-) {
+function useHandleGroupTransform(selectedNodeId: string | null, nodeId: string) {
     const scale = useSharedValue(1);
     const blur = useSharedValue(0);
 
@@ -40,11 +30,8 @@ function useHandleGroupTransform(
     }, [shouldActivate]);
 
     const groupTransform: AnimatedProp<Transforms2d | undefined, any> = useDerivedValue(() => {
-        const dragX = nodeDrag !== undefined ? nodeDrag.x.value : 0;
-        const dragY = nodeDrag !== undefined ? nodeDrag.y.value : 0;
-
-        return [{ scale: scale.value }, { translateX: dragX }, { translateY: dragY }];
-    }, [scale, nodeDrag]);
+        return [{ scale: scale.value }];
+    }, [scale]);
 
     return { groupTransform, blur };
 }

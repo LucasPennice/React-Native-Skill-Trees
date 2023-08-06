@@ -1,21 +1,43 @@
 import { SkFont, Skia } from "@shopify/react-native-skia";
-import { useDerivedValue } from "react-native-reanimated";
+import { useAnimatedReaction, useDerivedValue, useSharedValue } from "react-native-reanimated";
 import { CIRCLE_SIZE } from "../../../parameters";
-import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
+import { DragObject } from "../../../types";
 
 const NODE_ICON_FONT_SIZE = 17;
 
 function useHandleNodeAnimatedCoordinates(
     coordinates: { cx: number; cy: number },
     text: { color: string; letter: string; isEmoji: boolean },
-    font: SkFont
+    font: SkFont,
+    nodeDrag: DragObject["sharedValues"] | undefined
 ) {
     const { cx, cy } = coordinates;
 
     const textWidth = getTextWidth();
 
-    const x = useAnimateSkiaValue({ initialValue: cx, stateToAnimate: cx });
-    const y = useAnimateSkiaValue({ initialValue: cy, stateToAnimate: cy });
+    const x = useSharedValue(cx);
+    const y = useSharedValue(cy);
+
+    useAnimatedReaction(
+        () => {
+            return [nodeDrag, coordinates] as const;
+        },
+        (arr, _) => {
+            const [nodeDrag, coordinates] = arr;
+
+            let updatedX = coordinates.cx;
+            let updatedY = coordinates.cy;
+
+            if (nodeDrag !== undefined) {
+                updatedX += nodeDrag.x.value;
+                updatedY += nodeDrag.y.value;
+            }
+
+            x.value = updatedX;
+            y.value = updatedY;
+        },
+        [coordinates, nodeDrag]
+    );
 
     const textX = useDerivedValue(() => x.value - textWidth / 2, [x, textWidth]);
     const textY = useDerivedValue(() => {

@@ -1,4 +1,5 @@
 import { Swipeable } from "react-native-gesture-handler";
+import { SharedValue } from "react-native-reanimated";
 
 export type Milestone = {
     complete: boolean;
@@ -169,3 +170,13 @@ export enum GestureHandlerState {
     ACTIVE = 4,
     END = 5,
 }
+
+export type DragState = { isDragging: boolean; isOutsideNodeMenuZone: boolean; nodeId: null | string; nodesToDrag: string[] };
+
+export type DragObject = {
+    state: DragState;
+    sharedValues: {
+        x: SharedValue<number>;
+        y: SharedValue<number>;
+    };
+};

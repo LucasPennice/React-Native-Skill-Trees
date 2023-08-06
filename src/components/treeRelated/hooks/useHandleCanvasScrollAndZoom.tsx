@@ -3,8 +3,9 @@ import { Gesture } from "react-native-gesture-handler";
 import { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../parameters";
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { CanvasDimensions, NodeCoordinate } from "../../../types";
+import { CanvasDimensions, DragState, NodeCoordinate } from "../../../types";
 import { getXBounds, getYBounds, useHandleCanvasBounds } from "./useHandleCanvasBounds";
+import { DragStateDispatch, DragValuesAndSetters } from "../useDragState";
 
 const DEFAULT_SCALE = 1;
 const deaccelerationFactor = 2500;
@@ -16,8 +17,10 @@ function useHandleCanvasScrollAndZoom(
     foundNodeCoordinates: NodeCoordinate | undefined,
     foundNodeOfMenu: NodeCoordinate | undefined,
     onScroll: () => void,
-    draggingNode: { state: boolean; endDragging: () => void }
+    dragReducer: readonly [DragState, DragStateDispatch, DragValuesAndSetters]
 ) {
+    const [dragState, dispatchDragState, dragValues] = dragReducer;
+
     const { canvasHeight, canvasWidth } = canvasDimentions;
 
     const screenHeightWithNavAccounted = screenDimensions.height - NAV_HEGIHT;
@@ -39,10 +42,6 @@ function useHandleCanvasScrollAndZoom(
 
     const selectedNodeMenuOpen = foundNodeCoordinates !== undefined;
     const animateFromSelectedNodeMenu = useShouldAnimateTransformation(selectedNodeMenuOpen);
-    // const animateFromNodeMenu = useShouldAnimateTransformation(nodeMenuOpen);
-
-    const dragX = useSharedValue(0);
-    const dragY = useSharedValue(0);
 
     const boundsProps = {
         minScale,
@@ -159,7 +158,7 @@ function useHandleCanvasScrollAndZoom(
 
     const canvasPan = Gesture.Pan()
         .onStart(() => {
-            if (draggingNode) return (animatePan.value = true);
+            if (dragState.isDragging) return (animatePan.value = true);
 
             shouldUpdateStartValue.value = false;
             offsetX.value = start.value.x;
@@ -168,9 +167,8 @@ function useHandleCanvasScrollAndZoom(
         })
         .onUpdate((e) => {
             //Handles node dragging 👇
-            if (draggingNode.state) {
-                dragX.value = e.translationX;
-                dragY.value = e.translationY;
+            if (dragState.isDragging) {
+                dragValues.update(e.translationX, e.translationY);
                 return;
             }
 
@@ -194,7 +192,10 @@ function useHandleCanvasScrollAndZoom(
             }
         })
         .onEnd((e) => {
-            if (draggingNode.state) return runOnJS(draggingNode.endDragging)();
+            if (dragState.isDragging) {
+                dragValues.resetDragValues();
+                return runOnJS(dispatchDragState)({ type: "END_DRAGGING", payload: {} });
+            }
 
             shouldUpdateStartValue.value = true;
 
@@ -263,7 +264,6 @@ function useHandleCanvasScrollAndZoom(
     const transform = useAnimatedStyle(() => {
         if (foundNodeCoordinates) return transitionToSelectedNodeStyle();
         if (animateFromSelectedNodeMenu) return transitionFromMenuToNormalScrolling();
-        // if (foundNodeOfMenu) return transitionToNodeOption();
 
         //This is the regular scrolling style
         return {
@@ -302,7 +302,7 @@ function useHandleCanvasScrollAndZoom(
         }
     }, [offsetX, offsetY, scale, foundNodeCoordinates, animateFromSelectedNodeMenu, foundNodeOfMenu]);
 
-    const dragDelta = { x: dragX, y: dragY };
+    const dragDelta = { x: dragValues.x, y: dragValues.y };
 
     return { transform, canvasScrollAndZoom, scale: scaleState, dragDelta };
 }
