@@ -17,6 +17,7 @@ import {
     getCanvasDimensions,
     getCoordinatedWithTreeData,
     getNodesCoordinates,
+    minifyDragAndDropZones,
     removeTreeDataFromCoordinate,
 } from "./coordinateFunctions";
 import NodeLongPressIndicator from "./general/NodeLongPressIndicator";
@@ -207,9 +208,21 @@ function handleTreeBuild(
     const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
     const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions, showDepthGuides);
     const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
-    const dndZoneCoordinates = calculateDragAndDropZones(nodeCoordinatesCentered);
+    //
+    let minifiedDndZones: DnDZone[] = [];
+    if (renderStyle === "hierarchy") {
+        //The homepage does not allow adding or moving nodes
+        const dndZones = calculateDragAndDropZones(nodeCoordinatesCentered);
+        minifiedDndZones = minifyDragAndDropZones(dndZones, nodeCoordinatesCentered);
+    }
     //
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
-    return { nodeCoordinatesCentered, centeredCoordinatedWithTreeData, dndZoneCoordinates, coordinatesWithTreeData, canvasDimentions };
+    return {
+        nodeCoordinatesCentered,
+        centeredCoordinatedWithTreeData,
+        dndZoneCoordinates: minifiedDndZones,
+        coordinatesWithTreeData,
+        canvasDimentions,
+    };
 }

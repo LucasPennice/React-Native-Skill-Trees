@@ -1,3 +1,4 @@
+import { returnUpdatedMapArrayValue } from "../../functions/misc";
 import { PlotTreeReingoldTiltfordAlgorithm } from "../../functions/treeToHierarchicalCoordinates";
 import { PlotCircularTree } from "../../functions/treeToRadialCoordinates/general";
 import {
@@ -11,6 +12,8 @@ import {
 } from "../../parameters";
 import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
 import { CanvasDimensions, CoordinatesWithTreeData, DnDZone, NodeCoordinate, ParentId, Skill, Tree } from "../../types";
+
+const brotherDndWidth = DISTANCE_BETWEEN_CHILDREN / 2;
 
 export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): CoordinatesWithTreeData[] {
     if (!currentTree) return [];
@@ -93,8 +96,6 @@ function dndZonesFromNodeCoord(nodeCoord: NodeCoordinate, dndType: DnDZone["type
             ofNode: nodeCoord.id,
         };
 
-    const brotherDndWidth = DISTANCE_BETWEEN_CHILDREN / 2;
-
     if (dndType === "LEFT_BROTHER") {
         return {
             x: nodeCoord.x - brotherDndWidth,
@@ -153,6 +154,168 @@ export function calculateDragAndDropZones(nodeCoordinatesCentered: NodeCoordinat
     }
 
     return result;
+}
+
+export function minifyDragAndDropZones(dndZones: DnDZone[], nodeCoordCentered: NodeCoordinate[]) {
+    let result: DnDZone[] = [];
+
+    let parentIdToChildrenIds = new Map<string, NodeCoordinate[]>();
+
+    //Populates the map from the coordinates
+    for (let i = 0; i !== nodeCoordCentered.length; i++) {
+        const currentNode = nodeCoordCentered[i];
+
+        const parentId = currentNode.parentId === null ? "null" : currentNode.parentId;
+
+        const childrenIds = parentIdToChildrenIds.get(parentId);
+
+        if (childrenIds !== undefined) {
+            let orderedChildrenByAscendingXCoord = [...childrenIds, currentNode].sort((a, b) => a.x - b.x);
+            parentIdToChildrenIds.set(parentId, orderedChildrenByAscendingXCoord);
+        } else {
+            parentIdToChildrenIds.set(parentId, [currentNode]);
+        }
+    }
+
+    let dndZoneBlacklist = new Map<string, DnDZone["type"][]>();
+
+    for (let i = 0; i !== dndZones.length; i++) {
+        const currentZone = dndZones[i];
+
+        const currentNodeBlacklist = dndZoneBlacklist.get(currentZone.ofNode);
+
+        const currentZoneBlacklisted = currentNodeBlacklist && currentNodeBlacklist.includes(currentZone.type);
+
+        if (currentZoneBlacklisted) continue;
+
+        const isRightBrotherDndZone = currentZone.type === "RIGHT_BROTHER";
+        const isParentDndZne = currentZone.type === "PARENT";
+
+        const minifiableZoneType = isRightBrotherDndZone || isParentDndZne;
+
+        if (!minifiableZoneType) {
+            result.push(currentZone);
+            continue;
+        }
+
+        if (isRightBrotherDndZone) {
+            const {
+                result: minifySiblings,
+                rightZoneOfLeftSibling,
+                leftZoneOfRightSibling,
+            } = shoulfMinifySiblings(currentZone, nodeCoordCentered, dndZones);
+
+            if (!minifySiblings) {
+                result.push(currentZone);
+                continue;
+            }
+
+            const leftSiblingBlacklist = dndZoneBlacklist.get(rightZoneOfLeftSibling.ofNode);
+            dndZoneBlacklist.set(rightZoneOfLeftSibling.ofNode, returnUpdatedMapArrayValue<DnDZone["type"]>(leftSiblingBlacklist, "RIGHT_BROTHER"));
+
+            const rightSiblingBlacklist = dndZoneBlacklist.get(leftZoneOfRightSibling!.ofNode);
+            dndZoneBlacklist.set(leftZoneOfRightSibling!.ofNode, returnUpdatedMapArrayValue<DnDZone["type"]>(rightSiblingBlacklist, "LEFT_BROTHER"));
+
+            const minifiedZones: DnDZone = {
+                height: currentZone.height,
+                ofNode: currentZone.ofNode,
+                type: currentZone.type,
+                x: currentZone.x,
+                y: currentZone.y,
+                width: leftZoneOfRightSibling!.x - rightZoneOfLeftSibling.x + brotherDndWidth,
+            };
+
+            result.push(minifiedZones);
+            continue;
+        }
+
+        const {
+            result: minifyChildAndParent,
+            parentZoneOfOnlyChild,
+            onlyChildZoneOfParent,
+        } = shoulfMinifyOnlyChildAndParent(currentZone, nodeCoordCentered, dndZones);
+
+        if (!minifyChildAndParent) {
+            result.push(currentZone);
+            continue;
+        }
+
+        const childNodeId = parentZoneOfOnlyChild.ofNode;
+        const childBlacklist = dndZoneBlacklist.get(childNodeId);
+        dndZoneBlacklist.set(childNodeId, returnUpdatedMapArrayValue<DnDZone["type"]>(childBlacklist, "PARENT"));
+
+        const parentNodeId = onlyChildZoneOfParent!.ofNode;
+        const parentBlacklist = dndZoneBlacklist.get(parentNodeId);
+        dndZoneBlacklist.set(parentNodeId, returnUpdatedMapArrayValue<DnDZone["type"]>(parentBlacklist, "CHILDREN"));
+
+        const minifiedZones: DnDZone = {
+            width: currentZone.width,
+            ofNode: currentZone.ofNode,
+            type: currentZone.type,
+            x: currentZone.x,
+            y: currentZone.y - currentZone.height,
+            height: 2 * currentZone.height,
+        };
+
+        result.push(minifiedZones);
+    }
+
+    return result;
+
+    function shoulfMinifySiblings(rightZoneOfLeftSibling: DnDZone, nodeCoordCentered: NodeCoordinate[], dndZones: DnDZone[]) {
+        // [Left Brother] LEFT SIBLING [Right Brother] -- [Left Brother] Right Sibling [Right Brother]
+
+        const nodeOfLeftSibling = nodeCoordCentered.find((n) => n.id === rightZoneOfLeftSibling.ofNode);
+
+        if (!nodeOfLeftSibling) throw new Error("nodeOfSibling not found at shouldMinifySiblings");
+
+        const parentNodeId = nodeOfLeftSibling.parentId ?? "null";
+
+        const siblings = parentIdToChildrenIds.get(parentNodeId);
+
+        if (!siblings) throw new Error("siblings undefined at shoulfMinifySiblings");
+
+        const leftSiblingIdx = siblings.findIndex((s) => s.id === rightZoneOfLeftSibling.ofNode);
+
+        const isLastSibling = leftSiblingIdx === siblings.length - 1;
+
+        if (isLastSibling) return { result: false, rightZoneOfLeftSibling, leftZoneOfRightSibling: undefined };
+
+        const rightSiblingNode = siblings[leftSiblingIdx + 1];
+        const leftZoneOfRightSibling = dndZones.find((zone) => zone.ofNode === rightSiblingNode.id && zone.type === "LEFT_BROTHER");
+
+        if (!leftZoneOfRightSibling) throw new Error("no leftZoneOfRightSibling found at shouldMinifySiblings");
+
+        return { result: true, rightZoneOfLeftSibling, leftZoneOfRightSibling };
+    }
+    function shoulfMinifyOnlyChildAndParent(parentZoneOfOnlyChild: DnDZone, nodeCoordCentered: NodeCoordinate[], dndZones: DnDZone[]) {
+        // [Parent Zone]
+        // Parent
+        // [Children Zone]
+        // [Parent Zone]
+        // Only Child
+        // [Children Zone]
+
+        const onlyChildNodeId = nodeCoordCentered.find((n) => n.id === parentZoneOfOnlyChild.ofNode);
+
+        if (!onlyChildNodeId) throw new Error("onlyChildNodeId not found at shoulfMinifyOnlyChildAndParent");
+
+        const parentNodeId = onlyChildNodeId.parentId ?? "null";
+
+        const siblings = parentIdToChildrenIds.get(parentNodeId);
+
+        if (!siblings) throw new Error("siblings undefined at shoulfMinifyOnlyChildAndParent");
+
+        const isOnlyChild = siblings.length === 1;
+
+        if (!isOnlyChild) return { result: false, parentZoneOfOnlyChild, onlyChildZoneOfParent: undefined };
+
+        const onlyChildZoneOfParent = dndZones.find((zone) => zone.ofNode === parentNodeId && zone.type === "CHILDREN");
+
+        if (!onlyChildZoneOfParent) throw new Error("no onlyChildZoneOfParent found at shoulfMinifyOnlyChildAndParent");
+
+        return { result: true, parentZoneOfOnlyChild, onlyChildZoneOfParent };
+    }
 }
 
 export function getCanvasDimensions(coordinates: NodeCoordinate[], screenDimentions: ScreenDimentions, showDepthGuides?: boolean): CanvasDimensions {

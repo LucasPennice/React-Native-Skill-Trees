@@ -115,3 +115,9 @@ export function getWheelParams(progressColor: string, backgroundColor: string, s
 
     return result;
 }
+
+export const returnUpdatedMapArrayValue = <T>(mapValue: T[] | undefined, newValue: T) => {
+    if (mapValue) return [...mapValue, newValue];
+
+    return [newValue];
+};
