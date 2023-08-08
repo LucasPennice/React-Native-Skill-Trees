@@ -27,6 +27,7 @@ import NodeMenu from "./nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "./returnNodeMenuFunctions";
 import useDragState from "./useDragState";
 import useCalculateDnDZonesWhenDraggingNode from "./hooks/useCalculateDnDZonesWhenDraggingNode";
+import useLongPressState from "./useLongPressState";
 
 type NavigateFunction =
     | NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>["navigate"]
@@ -84,6 +85,7 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
     const { showCircleGuide } = canvasDisplaySettings;
 
     //Local State
+    const [longPressIndicatorState, longPressIndicatorDispatch] = useLongPressState();
     const [dragState, dispatchDragState, dragValues] = useDragState(tree);
 
     //Derived State
@@ -126,7 +128,12 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
     }, [tree]);
 
     //Hooks
-    const touchHandlerState = { selectedNodeId, nodeCoordinatesCentered, dragAndDropZones: dndZoneCoordinates };
+    const touchHandlerState = {
+        selectedNodeId,
+        nodeCoordinatesCentered,
+        dragAndDropZones: dndZoneCoordinates,
+        longPressIndicatorReducer: [longPressIndicatorState, longPressIndicatorDispatch] as const,
+    };
     const touchHandlerFunctions = {
         onNodeClick: onNodeClickAdapter,
         onDndZoneClick: onDndZoneClickAdapter,

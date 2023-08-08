@@ -7,12 +7,14 @@ import { useAppDispatch } from "../../../redux/reduxHooks";
 import { clearSelectedNode } from "../../../redux/userTreesSlice";
 import { CartesianCoordinate, DnDZone, GestureHandlerState, NodeCoordinate, SelectedNodeId } from "../../../types";
 import { DragStateDispatch, DragValuesAndSetters } from "../useDragState";
+import { LongPressIndicatorDispatch, LongPressIndicatorState } from "../useLongPressState";
 
 type Props = {
     state: {
         nodeCoordinatesCentered: NodeCoordinate[];
         selectedNodeId: SelectedNodeId;
         dragAndDropZones: DnDZone[];
+        longPressIndicatorReducer: readonly [LongPressIndicatorState, LongPressIndicatorDispatch];
     };
     config: {
         showAddNodeDndZones?: boolean;
@@ -44,7 +46,7 @@ export type CanvasTouchHandler = { touchHandler: TouchHandler };
 const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
     const { showAddNodeDndZones, blockLongPress, blockDragAndDrop } = config;
     const { onDndZoneClick, onNodeClick, dispatchDragState, resetDragValues } = functions;
-    const { dragAndDropZones, nodeCoordinatesCentered, selectedNodeId } = state;
+    const { dragAndDropZones, nodeCoordinatesCentered, selectedNodeId, longPressIndicatorReducer } = state;
     //
     const [openMenuOnNode, setOpenMenuOnNode] = useState<NodeCoordinate | undefined>(undefined);
     const [longPressIndicatorPosition, setLongPressIndicatorPosition] = useState<{
@@ -140,7 +142,7 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
             const shouldDragAndDrop = !blockDragAndDrop && longPressingNode && fingerMovedOutsideAllowedZone && correctDuration;
 
             if (shouldDragAndDrop) {
-                dispatchDragState({ type: "UPDATE_IS_OUTSIDE_NODE_MENU_ZONE", payload: {} });
+                // dispatchDragState({ type: "UPDATE_IS_OUTSIDE_NODE_MENU_ZONE", payload: {} });
                 return resetLongPressIndicator();
             }
 
@@ -169,7 +171,7 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
 
     const canvasPressAndLongPress = Gesture.Exclusive(canvasLongPress, canvasTouch);
 
-    return { canvasPressAndLongPress, openMenuOnNode, longPressIndicatorPosition, closeNodeMenu, onScroll };
+    return { canvasPressAndLongPress, openMenuOnNode, longPressIndicatorPosition, closeNodeMenu, onScroll, resetLongPressIndicator };
 };
 
 export default useCanvasPressAndLongPress;

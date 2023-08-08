@@ -1,7 +1,8 @@
 import { useReducer } from "react";
-import { SharedValue, useSharedValue } from "react-native-reanimated";
+import { SharedValue, runOnJS, useAnimatedReaction, useSharedValue } from "react-native-reanimated";
 import { addEveryChildFromTreeToArray, findNodeById } from "../../functions/extractInformationFromTree";
 import { DragState, NodeCoordinate, Skill, Tree } from "../../types";
+import { NODE_MENU_SIZE } from "../../parameters";
 
 const defaultDragState: DragState = { isDragging: false, isOutsideNodeMenuZone: false, nodeId: null, draggingNodeIds: [], subtreeIds: [] };
 
@@ -43,6 +44,23 @@ function useDragState(currentTree: Tree<Skill>) {
 
     const [state, dispatch] = useReducer(dragStateReducer, defaultDragState);
 
+    useAnimatedReaction(
+        () => {
+            return [dragX.value, dragY.value, state.isOutsideNodeMenuZone] as const;
+        },
+        (arr, _) => {
+            const [dragX, dragY, isOutsideNodeMenuZone] = arr;
+
+            if (isOutsideNodeMenuZone) return;
+
+            const dragDistance = parseInt(Math.sqrt(dragX ** 2 + dragY ** 2).toFixed(0));
+
+            if (dragDistance > NODE_MENU_SIZE / 2) runOnJS(dispatch)({ type: "UPDATE_IS_OUTSIDE_NODE_MENU_ZONE", payload: {} });
+            console.log(dragDistance);
+        },
+        [dragX, dragY, state.isOutsideNodeMenuZone]
+    );
+
     function dragStateReducer(state: DragState, action: { type: DragStateReducers; payload: DragStatePayload }): DragState {
         const { payload, type } = action;
         switch (type) {
@@ -65,6 +83,7 @@ function useDragState(currentTree: Tree<Skill>) {
                 if (payload.runOnEndDragging) payload.runOnEndDragging();
                 return defaultDragState;
             case "UPDATE_IS_OUTSIDE_NODE_MENU_ZONE":
+                console.log("AHORA");
                 return { ...state, isOutsideNodeMenuZone: true, draggingNodeIds: state.subtreeIds };
             default:
                 throw new Error("Unknown action at dragStateReducer");
