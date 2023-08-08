@@ -15,7 +15,7 @@ type Props = {
         dragAndDropZones: DnDZone[];
     };
     config: {
-        showDndZones?: boolean;
+        showAddNodeDndZones?: boolean;
         blockLongPress?: boolean;
         blockDragAndDrop?: boolean;
     };
@@ -42,7 +42,7 @@ export const MIN_DURATION_LONG_PRESS_MS = 300;
 export type CanvasTouchHandler = { touchHandler: TouchHandler };
 
 const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
-    const { showDndZones, blockLongPress, blockDragAndDrop } = config;
+    const { showAddNodeDndZones, blockLongPress, blockDragAndDrop } = config;
     const { onDndZoneClick, onNodeClick, dispatchDragState, resetDragValues } = functions;
     const { dragAndDropZones, nodeCoordinatesCentered, selectedNodeId } = state;
     //
@@ -89,7 +89,7 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
         },
         handleOnEnd: (e: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
             const clickedDndZone = dragAndDropZones.find(didTapDndZone(e));
-            if (onDndZoneClick && showDndZones) return onDndZoneClick(clickedDndZone);
+            if (onDndZoneClick && showAddNodeDndZones) return onDndZoneClick(clickedDndZone);
             const clickedNode = nodeCoordinatesCentered.find(didTapCircle(e));
             if (clickedNode === undefined) return dispatch(clearSelectedNode());
             if (selectedNodeId !== clickedNode.id && onNodeClick) return onNodeClick(clickedNode.id);
@@ -116,7 +116,7 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
             if (!clickedNode) return setLongPressIndicatorPosition({ data: undefined, state: "IDLE" });
 
             startDraggingTimeoutID.value = setTimeout(() => {
-                dispatchDragState({ type: "START_DRAGGING", payload: { nodeId: clickedNode.id } });
+                dispatchDragState({ type: "START_DRAGGING", payload: { nodeId: clickedNode.id, treeCoordinates: nodeCoordinatesCentered } });
             }, MIN_DURATION_LONG_PRESS_MS);
 
             return setLongPressIndicatorPosition({ data: clickedNode, state: "PRESSING" });

@@ -108,7 +108,7 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag
                     showIcons: settings.showIcons,
                 };
 
-                const nodeDrag = dragObject.state.nodesToDrag.includes(node.nodeId) ? dragObject.sharedValues : undefined;
+                const nodeDrag = dragObject.state.draggingNodeIds.includes(node.nodeId) ? dragObject.sharedValues : undefined;
 
                 return <Node state={state} key={`${node.nodeId}_node`} nodeData={nodeData} nodeDrag={nodeDrag} />;
             })}

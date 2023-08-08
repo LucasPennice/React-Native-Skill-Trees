@@ -39,25 +39,32 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, settings
 
                 let parentCoord: CartesianCoordinate = { x: parentNode.x, y: parentNode.y };
 
-                const pathColor = parentNode.data.isCompleted ? node.accentColor.color1 : colors.line;
+                const shouldDragPath = dragObject.state.nodeId === node.nodeId ? false : dragObject.state.draggingNodeIds.includes(node.nodeId);
+                const animatePathRetract = dragObject.state.nodeId === node.nodeId;
+                const pathDrag = shouldDragPath ? dragObject.sharedValues : undefined;
 
                 return (
                     <HierarchicalCanvasPath
                         key={`${node.nodeId}_path`}
                         coordinates={{ cx: node.x, cy: node.y, pathInitialPoint: parentCoord }}
                         isRoot={node.isRoot}
-                        pathColor={pathColor}
+                        pathDrag={pathDrag}
+                        animatePathRetract={animatePathRetract}
                     />
                 );
             })}
 
             {showLabel &&
                 nodeCoordinatesCentered.map((node, idx) => {
+                    const draggingNode = dragObject.state.draggingNodeIds.includes(node.nodeId);
+
+                    if (draggingNode) return <Fragment key={idx}></Fragment>;
+
                     return (
                         <Label
                             key={idx}
-                            text={node.nodeId}
-                            // text={node.data.name}
+                            // text={node.nodeId}
+                            text={node.data.name}
                             color={{ rect: node.accentColor.color1, text: labelTextColor }}
                             coord={{ cx: node.x, cy: node.y }}
                         />
@@ -83,7 +90,7 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, settings
 
                 const state = { font, treeCompletedPercentage, selectedNodeId: selectedNode, showIcons };
 
-                const nodeDrag = dragObject.state.nodesToDrag.includes(node.nodeId) ? dragObject.sharedValues : undefined;
+                const nodeDrag = dragObject.state.draggingNodeIds.includes(node.nodeId) ? dragObject.sharedValues : undefined;
 
                 return <Node key={`${node.nodeId}_node`} state={state} nodeData={nodeData} nodeDrag={nodeDrag} />;
             })}

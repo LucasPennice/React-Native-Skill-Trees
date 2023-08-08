@@ -18,7 +18,7 @@ function useHandleMemoizedTreeProps(
         screenDimensions: ScreenDimentions;
         canvasDisplaySettings: CanvasDisplaySettings;
         selectedTree: Tree<Skill> | undefined;
-        showDndZones: boolean | undefined;
+        showAddNodeDndZones: boolean | undefined;
         selectedDndZone: DnDZone | undefined;
         modalState: ModalState;
         selectedNodeMenuMode: "EDITING" | "VIEWING";
@@ -28,7 +28,7 @@ function useHandleMemoizedTreeProps(
     navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>,
     openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void
 ) {
-    const { canvasDisplaySettings, screenDimensions, selectedTree, showDndZones, selectedDndZone, modalState, selectedNodeMenuMode } = state;
+    const { canvasDisplaySettings, screenDimensions, selectedTree, showAddNodeDndZones, selectedDndZone, modalState, selectedNodeMenuMode } = state;
     //
     const dispatch = useAppDispatch();
     const modalRef = useRef<ModalState>(modalState);
@@ -46,11 +46,11 @@ function useHandleMemoizedTreeProps(
             canvasDisplaySettings: hierarchicalTreeSettings,
             isInteractive: true,
             renderStyle: "hierarchy",
-            showDndZones,
+            showAddNodeDndZones,
             blockLongPress: modalState !== "IDLE",
             editTreeFromNodeMenu: true,
         };
-    }, [canvasDisplaySettings, modalState, showDndZones]);
+    }, [canvasDisplaySettings, modalState, showAddNodeDndZones]);
 
     const interactiveTreeState: InteractiveNodeState = useMemo(() => {
         return { screenDimensions, canvasRef, selectedDndZone, selectedNodeId };

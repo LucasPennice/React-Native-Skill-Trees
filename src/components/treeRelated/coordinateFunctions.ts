@@ -284,7 +284,8 @@ export function minifyDragAndDropZones(dndZones: DnDZone[], nodeCoordCentered: N
         const rightSiblingNode = siblings[leftSiblingIdx + 1];
         const leftZoneOfRightSibling = dndZones.find((zone) => zone.ofNode === rightSiblingNode.id && zone.type === "LEFT_BROTHER");
 
-        if (!leftZoneOfRightSibling) throw new Error("no leftZoneOfRightSibling found at shouldMinifySiblings");
+        //This case could be because we are dragging the right sibling node, hence not creating it's dnd zones
+        if (!leftZoneOfRightSibling) return { result: false, rightZoneOfLeftSibling, leftZoneOfRightSibling: undefined };
 
         return { result: true, rightZoneOfLeftSibling, leftZoneOfRightSibling };
     }
@@ -312,7 +313,8 @@ export function minifyDragAndDropZones(dndZones: DnDZone[], nodeCoordCentered: N
 
         const onlyChildZoneOfParent = dndZones.find((zone) => zone.ofNode === parentNodeId && zone.type === "CHILDREN");
 
-        if (!onlyChildZoneOfParent) throw new Error("no onlyChildZoneOfParent found at shoulfMinifyOnlyChildAndParent");
+        //This case could be because we are dragging the parent node, hence not creating it's dnd zones
+        if (!onlyChildZoneOfParent) return { result: false, parentZoneOfOnlyChild, onlyChildZoneOfParent: undefined };
 
         return { result: true, parentZoneOfOnlyChild, onlyChildZoneOfParent };
     }

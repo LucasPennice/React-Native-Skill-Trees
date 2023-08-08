@@ -171,10 +171,17 @@ export enum GestureHandlerState {
     END = 5,
 }
 
-export type DragState = { isDragging: boolean; isOutsideNodeMenuZone: boolean; nodeId: null | string; nodesToDrag: string[] };
+export type DragState = {
+    isDragging: boolean;
+    isOutsideNodeMenuZone: boolean;
+    nodeId: null | string;
+    draggingNodeIds: string[];
+    subtreeIds: string[];
+};
 
 export type DragObject = {
     state: DragState;
+    dndZones: DnDZone[];
     sharedValues: {
         x: SharedValue<number>;
         y: SharedValue<number>;

@@ -49,8 +49,10 @@ function HierarchicalSkillTreeRender({
 }) {
     const { selectedNodeId, selectedDndZone } = state;
     const { dndZoneCoordinates, nodeCoordinates } = treeData;
-    const { isInteractive, showDndZones, canvasDisplaySettings } = config;
+    const { isInteractive, showAddNodeDndZones, canvasDisplaySettings } = config;
     const { showLabel, showIcons } = canvasDisplaySettings;
+
+    const showDragAndDropZones = dragObject.state.isOutsideNodeMenuZone;
 
     return (
         <>
@@ -60,7 +62,8 @@ function HierarchicalSkillTreeRender({
                 settings={{ showIcons, showLabel }}
                 dragObject={dragObject}
             />
-            {isInteractive && showDndZones && <DragAndDropZones data={dndZoneCoordinates} selectedDndZone={selectedDndZone} />}
+            {isInteractive && showAddNodeDndZones && <DragAndDropZones data={dndZoneCoordinates} selectedDndZone={selectedDndZone} />}
+            {isInteractive && showDragAndDropZones && <DragAndDropZones data={dragObject.dndZones} selectedDndZone={undefined} />}
         </>
     );
 }

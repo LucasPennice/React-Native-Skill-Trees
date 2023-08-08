@@ -196,12 +196,13 @@ function ImportTree({
     const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
     const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
-    const dragReducer = useDragState();
+    const dragReducer = useDragState(data);
 
     const { canvasScrollAndZoom, transform } = useHandleCanvasScroll(canvasDimentions, screenDimensions, undefined, undefined, () => {}, dragReducer);
 
     const mockDragObject: DragObject = {
-        state: { isDragging: false, isOutsideNodeMenuZone: false, nodeId: null, nodesToDrag: [] },
+        state: { isDragging: false, isOutsideNodeMenuZone: false, nodeId: null, draggingNodeIds: [], subtreeIds: [] },
+        dndZones: [],
         sharedValues: { x: useSharedValue(0), y: useSharedValue(0) },
     };
 

@@ -1,8 +1,8 @@
 import { Path } from "@shopify/react-native-skia";
-import { useDerivedValue } from "react-native-reanimated";
-import { CIRCLE_SIZE } from "../../../parameters";
+import { useEffect } from "react";
+import { Easing, SharedValue, useAnimatedReaction, useDerivedValue, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
+import { CIRCLE_SIZE, MENU_HIGH_DAMPENING } from "../../../parameters";
 import { CartesianCoordinate } from "../../../types";
-import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
 
 type pathCoordinates = {
     cx: number;
@@ -10,13 +10,68 @@ type pathCoordinates = {
     pathInitialPoint: CartesianCoordinate;
 };
 
-function HierarchicalCanvasPath({ coordinates, pathColor, isRoot }: { coordinates: pathCoordinates; pathColor: string; isRoot?: boolean }) {
+function HierarchicalCanvasPath({
+    coordinates,
+    pathDrag,
+    isRoot,
+    animatePathRetract,
+}: {
+    coordinates: pathCoordinates;
+    isRoot?: boolean;
+    animatePathRetract: boolean;
+    pathDrag:
+        | {
+              x: SharedValue<number>;
+              y: SharedValue<number>;
+          }
+        | undefined;
+}) {
     const { cx, cy, pathInitialPoint } = coordinates;
 
-    const p1x = useAnimateSkiaValue({ initialValue: cx, stateToAnimate: cx });
-    const p1y = useAnimateSkiaValue({ initialValue: cy, stateToAnimate: cy });
-    const p2x = useAnimateSkiaValue({ initialValue: pathInitialPoint.x, stateToAnimate: pathInitialPoint.x });
-    const p2y = useAnimateSkiaValue({ initialValue: pathInitialPoint.y, stateToAnimate: pathInitialPoint.y });
+    const p1x = useSharedValue(cx);
+    const p1y = useSharedValue(cy);
+    const p2x = useSharedValue(pathInitialPoint.x);
+    const p2y = useSharedValue(pathInitialPoint.y);
+
+    const start = useSharedValue(0);
+
+    //ANIMATES PATH RETRACTION FOR THE MAIN NODE THAT IS BEING DRAGGED
+    useEffect(() => {
+        if (animatePathRetract) {
+            start.value = withTiming(1, { duration: 300, easing: Easing.ease });
+            return;
+        }
+
+        start.value = withTiming(0, { duration: 300, easing: Easing.ease });
+    }, [animatePathRetract]);
+
+    useAnimatedReaction(
+        () => {
+            return [pathDrag, coordinates] as const;
+        },
+        (arr, _) => {
+            const [pathDrag, coordinates] = arr;
+            const { cx, cy, pathInitialPoint } = coordinates;
+
+            let updatedP1X = cx;
+            let updatedP1Y = cy;
+            let updatedP2X = pathInitialPoint.x;
+            let updatedP2Y = pathInitialPoint.y;
+
+            if (pathDrag !== undefined) {
+                updatedP1X += pathDrag.x.value;
+                updatedP1Y += pathDrag.y.value;
+                updatedP2X += pathDrag.x.value;
+                updatedP2Y += pathDrag.y.value;
+            }
+
+            p1x.value = withSpring(updatedP1X, MENU_HIGH_DAMPENING);
+            p1y.value = withSpring(updatedP1Y, MENU_HIGH_DAMPENING);
+            p2x.value = withSpring(updatedP2X, MENU_HIGH_DAMPENING);
+            p2y.value = withSpring(updatedP2Y, MENU_HIGH_DAMPENING);
+        },
+        [coordinates, pathDrag]
+    );
 
     const path = useDerivedValue(() => {
         let result = "";
@@ -35,7 +90,7 @@ function HierarchicalCanvasPath({ coordinates, pathColor, isRoot }: { coordinate
     if (isRoot) return <></>;
 
     //eslint-disable-next-line
-    return <Path path={path} color={"#1C1C1D"} style="stroke" strokeWidth={2} />;
+    return <Path path={path} color={"#1C1C1D"} style="stroke" strokeWidth={2} start={start} />;
 }
 
 export default HierarchicalCanvasPath;

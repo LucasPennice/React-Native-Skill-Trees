@@ -1,6 +1,6 @@
 import { SkFont, Skia } from "@shopify/react-native-skia";
-import { useAnimatedReaction, useDerivedValue, useSharedValue } from "react-native-reanimated";
-import { CIRCLE_SIZE } from "../../../parameters";
+import { useAnimatedReaction, useDerivedValue, useSharedValue, withSpring } from "react-native-reanimated";
+import { CIRCLE_SIZE, MENU_HIGH_DAMPENING } from "../../../parameters";
 import { DragObject } from "../../../types";
 
 const NODE_ICON_FONT_SIZE = 17;
@@ -33,8 +33,8 @@ function useHandleNodeAnimatedCoordinates(
                 updatedY += nodeDrag.y.value;
             }
 
-            x.value = updatedX;
-            y.value = updatedY;
+            x.value = withSpring(updatedX, MENU_HIGH_DAMPENING);
+            y.value = withSpring(updatedY, MENU_HIGH_DAMPENING);
         },
         [coordinates, nodeDrag]
     );

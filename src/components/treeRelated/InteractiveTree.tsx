@@ -26,6 +26,7 @@ import useHandleCanvasScrollAndZoom from "./hooks/useHandleCanvasScrollAndZoom";
 import NodeMenu from "./nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "./returnNodeMenuFunctions";
 import useDragState from "./useDragState";
+import useCalculateDnDZonesWhenDraggingNode from "./hooks/useCalculateDnDZonesWhenDraggingNode";
 
 type NavigateFunction =
     | NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>["navigate"]
@@ -34,7 +35,7 @@ type NavigateFunction =
 export type InteractiveTreeConfig = {
     renderStyle: "hierarchy" | "radial";
     canvasDisplaySettings: CanvasDisplaySettings;
-    showDndZones?: boolean;
+    showAddNodeDndZones?: boolean;
     isInteractive: boolean;
     blockLongPress?: boolean;
     blockDragAndDrop?: boolean;
@@ -79,11 +80,11 @@ export type InteractiveTreeProps = {
 function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeId }: InteractiveTreeProps) {
     //Props
     const { screenDimensions, selectedNodeId, canvasRef } = state;
-    const { isInteractive, renderStyle, showDndZones, canvasDisplaySettings, blockLongPress, blockDragAndDrop, editTreeFromNodeMenu } = config;
+    const { isInteractive, renderStyle, showAddNodeDndZones, canvasDisplaySettings, blockLongPress, blockDragAndDrop, editTreeFromNodeMenu } = config;
     const { showCircleGuide } = canvasDisplaySettings;
 
     //Local State
-    const [dragState, dispatchDragState, dragValues] = useDragState();
+    const [dragState, dispatchDragState, dragValues] = useDragState(tree);
 
     //Derived State
     const { centeredCoordinatedWithTreeData, dndZoneCoordinates, nodeCoordinatesCentered, canvasDimentions } = handleTreeBuild(
@@ -93,6 +94,9 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
         showCircleGuide
     );
     const { canvasHeight, canvasWidth } = canvasDimentions;
+
+    const draggingNodeSubtreeIds = config.renderStyle === "radial" ? null : dragState.subtreeIds;
+    const dragDndZones = useCalculateDnDZonesWhenDraggingNode(draggingNodeSubtreeIds, nodeCoordinatesCentered);
 
     const selectedNodeCoordinates = nodeCoordinatesCentered.find((c) => c.id === selectedNodeId);
 
@@ -132,7 +136,7 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
     const { canvasPressAndLongPress, openMenuOnNode, longPressIndicatorPosition, closeNodeMenu, onScroll } = useCanvasPressAndLongPress({
         functions: touchHandlerFunctions,
         state: touchHandlerState,
-        config: { showDndZones, blockLongPress, blockDragAndDrop },
+        config: { showAddNodeDndZones, blockLongPress, blockDragAndDrop },
     });
     //
 
@@ -165,6 +169,7 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
 
     const dragObject: DragObject = {
         state: dragState,
+        dndZones: dragDndZones,
         sharedValues: dragDelta,
     };
 

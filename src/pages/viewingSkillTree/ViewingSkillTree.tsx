@@ -56,7 +56,7 @@ function ViewingSkillTree({ navigation, route }: Props) {
     const [nodeToDelete, setNodeToDelete] = useState<Tree<Skill> | null>(null);
     //Derived State
 
-    const showDndZones = modalState === "PLACING_NEW_NODE";
+    const showAddNodeDndZones = modalState === "PLACING_NEW_NODE";
     const shouldRenderShareButton = isSharingAvailable && selectedTree && modalState === "IDLE";
 
     useEffect(() => {
@@ -76,7 +76,7 @@ function ViewingSkillTree({ navigation, route }: Props) {
     };
 
     const { RenderOnSelectedNodeId, config, interactiveTreeState, tree } = useHandleMemoizedTreeProps(
-        { canvasDisplaySettings, modalState, screenDimensions, selectedDndZone, selectedTree, showDndZones, selectedNodeMenuMode },
+        { canvasDisplaySettings, modalState, screenDimensions, selectedDndZone, selectedTree, showAddNodeDndZones, selectedNodeMenuMode },
         selectedNodeId,
         canvasRef,
         navigation,
