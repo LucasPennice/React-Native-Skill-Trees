@@ -1,6 +1,7 @@
 import { Canvas, SkiaDomView } from "@shopify/react-native-skia";
-import { MutableRefObject, memo } from "react";
+import { MutableRefObject, memo, useState } from "react";
 import { GestureDetector, SimultaneousGesture } from "react-native-gesture-handler";
+import { runOnJS, useAnimatedReaction, useSharedValue } from "react-native-reanimated";
 import RadialSkillTree from "../../pages/homepage/RadialSkillTree";
 import { CoordinatesWithTreeData, DnDZone, DragObject } from "../../types";
 import { InteractiveNodeState, InteractiveTreeConfig, TreeCoordinates } from "./InteractiveTree";
@@ -54,6 +55,42 @@ function HierarchicalSkillTreeRender({
 
     const showDragAndDropZones = dragObject.state.isOutsideNodeMenuZone;
 
+    const [hoveringOverDndZone, setHoveringOverDndZone] = useState<DnDZone | undefined>(undefined);
+    const prevHoveringOverDndZone = useSharedValue<DnDZone | undefined>(undefined);
+
+    const { dndZones, sharedValues: dragValues, state: dragState } = dragObject;
+
+    useAnimatedReaction(
+        () => {
+            return [dragState.node, dragValues, dndZones, prevHoveringOverDndZone] as const;
+        },
+        (arr, _) => {
+            const [draggingNode, dragValues, treeInsertPositions, prevHoveringOverDndZone] = arr;
+
+            const { x: dragX, y: dragY } = dragValues;
+
+            if (draggingNode === null) return;
+
+            const x = draggingNode.x + dragX.value;
+            const y = draggingNode.y + dragY.value;
+            const dragCoord = { x, y };
+
+            const hoveringZone = getHoveringOverDndZone(dragCoord, treeInsertPositions);
+
+            const notUndefined = prevHoveringOverDndZone.value !== undefined && hoveringZone !== undefined;
+
+            const sameNodeId = notUndefined && prevHoveringOverDndZone.value!.ofNode === hoveringZone.ofNode;
+            const sameType = notUndefined && prevHoveringOverDndZone.value!.type === hoveringZone.type;
+
+            if (sameNodeId && sameType) return;
+
+            prevHoveringOverDndZone.value = hoveringZone;
+
+            runOnJS(setHoveringOverDndZone)(hoveringZone);
+        },
+        [dragState.node, dragValues, dndZones, prevHoveringOverDndZone]
+    );
+
     return (
         <>
             <HierarchicalSkillTree
@@ -63,9 +100,26 @@ function HierarchicalSkillTreeRender({
                 dragObject={dragObject}
             />
             {isInteractive && showAddNodeDndZones && <DragAndDropZones data={dndZoneCoordinates} selectedDndZone={selectedDndZone} />}
-            {isInteractive && showDragAndDropZones && <DragAndDropZones data={dragObject.dndZones} selectedDndZone={undefined} />}
+            {isInteractive && showDragAndDropZones && <DragAndDropZones data={dragObject.dndZones} selectedDndZone={hoveringOverDndZone} />}
         </>
     );
+}
+
+function getHoveringOverDndZone(dragCoord: { x: number; y: number }, treeInsertPositions: DnDZone[]) {
+    "worklet";
+    for (let i = 0; i < treeInsertPositions.length; i++) {
+        const position = treeInsertPositions[i];
+
+        const isWithinXBounds = dragCoord.x >= position.x && dragCoord.x <= position.x + position.width;
+
+        if (!isWithinXBounds) continue;
+
+        const isWithinYBounds = dragCoord.y >= position.y && dragCoord.y <= position.y + position.height;
+
+        if (isWithinXBounds && isWithinYBounds) return position;
+    }
+
+    return undefined;
 }
 
 function RadialTreeRendererRender({

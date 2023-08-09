@@ -1,12 +1,10 @@
-import { Group, RoundedRect, Text, useFont } from "@shopify/react-native-skia";
+import { Group, useFont } from "@shopify/react-native-skia";
 import { Fragment, useEffect } from "react";
 import { useSharedValue, withTiming } from "react-native-reanimated";
-import { colors } from "../../../parameters";
 import { DnDZone } from "../../../types";
+import TreeInsertPositions from "./TreeInsertPositions";
 
 function DragAndDropZones({ data, selectedDndZone }: { data: DnDZone[]; selectedDndZone?: DnDZone }) {
-    const selectedZoneId = selectedDndZone ? `${selectedDndZone.ofNode}${selectedDndZone.type}` : "";
-
     const font = useFont(require("../../../../assets/Helvetica.ttf"), 22);
 
     const opacity = useSharedValue(0);
@@ -17,46 +15,27 @@ function DragAndDropZones({ data, selectedDndZone }: { data: DnDZone[]; selected
 
     if (!font) return <></>;
 
+    const selectedDndZoneId = selectedDndZone === undefined ? "undefined" : `${selectedDndZone.ofNode}${selectedDndZone.type}`;
+
     return (
         <Group opacity={opacity}>
-            {data.map((z, idx) => {
+            {data.map((z) => {
                 const dndZoneId = `${z.ofNode}${z.type}`;
 
-                const isSelected = selectedZoneId === dndZoneId;
+                const isSelected = dndZoneId === selectedDndZoneId;
 
-                const text = {
-                    x: z.x + z.width / 2 - 7,
-                    y: z.y + z.height / 2 + 5,
-                };
+                if (isSelected) return <Fragment key={"foo"}></Fragment>;
 
-                return (
-                    <Fragment key={idx}>
-                        <RoundedRect
-                            r={5}
-                            style={"fill"}
-                            strokeWidth={1}
-                            height={z.height}
-                            width={z.width}
-                            x={z.x}
-                            y={z.y}
-                            color={colors.darkGray}
-                            opacity={isSelected ? 0.4 : 0.8}
-                        />
-                        <RoundedRect
-                            r={5}
-                            style={"stroke"}
-                            strokeWidth={1}
-                            height={z.height}
-                            width={z.width}
-                            x={z.x}
-                            y={z.y}
-                            color={colors.line}
-                            opacity={isSelected ? 0.4 : 1}
-                        />
-                        <Text x={text.x} y={text.y} text={"+"} font={font} color={colors.accent} />
-                    </Fragment>
-                );
+                return <TreeInsertPositions font={font} z={z} key={`${z.ofNode}${z.type}`} selectedDndZone={undefined} />;
             })}
+            {selectedDndZone && (
+                <TreeInsertPositions
+                    key={`${selectedDndZone.ofNode}${selectedDndZone.type}`}
+                    font={font}
+                    z={selectedDndZone}
+                    selectedDndZone={selectedDndZone}
+                />
+            )}
         </Group>
     );
 }

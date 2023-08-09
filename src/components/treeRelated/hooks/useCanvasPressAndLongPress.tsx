@@ -74,6 +74,7 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
     const tapGesture = {
         handleOnStart: (e: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
             closeNodeMenu();
+            longPressIndicatorDispatch({ type: "RESET", payload: { node: undefined } });
         },
         handleOnEnd: (e: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
             const clickedDndZone = dragAndDropZones.find(didTapDndZone(e));
@@ -98,6 +99,8 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
 
     const longPressGesture = {
         handleOnStart: (e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>) => {
+            closeNodeMenu();
+
             if (blockLongPress) return;
 
             const clickedNode = nodeCoordinatesCentered.find(didTapCircle(e));
