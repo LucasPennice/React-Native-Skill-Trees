@@ -20,7 +20,7 @@ import {
 } from "../../../components/treeRelated/coordinateFunctions";
 import HierarchicalSkillTree from "../../../components/treeRelated/hierarchical/HierarchicalSkillTree";
 import useHandleCanvasScroll from "../../../components/treeRelated/hooks/useHandleCanvasScrollAndZoom";
-import useDragState from "../../../components/treeRelated/useDragState";
+import useDragState from "../../../components/treeRelated/useDragReducer";
 import { createTree } from "../../../functions/misc";
 import { MENU_HIGH_DAMPENING, centerFlex, colors, nodeGradients } from "../../../parameters";
 import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
@@ -177,91 +177,92 @@ function ImportTree({
     linkState: [string, (v: string) => void];
     closeModal: () => void;
 }) {
-    const { data, isError, isFetching, refetch: fetchTreeFromImportLink } = importTreeQuery;
-    const [treeImportKey, setTreeImportKey] = linkState;
-    const { showLabel, showIcons } = useAppSelector(selectCanvasDisplaySettings);
-    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
-    const { height, width } = screenDimensions;
+    // const { data, isError, isFetching, refetch: fetchTreeFromImportLink } = importTreeQuery;
+    // const [treeImportKey, setTreeImportKey] = linkState;
+    // const { showLabel, showIcons } = useAppSelector(selectCanvasDisplaySettings);
+    // const screenDimensions = useAppSelector(selectSafeScreenDimentions);
+    // const { height, width } = screenDimensions;
 
-    const initialState = !isFetching && data === undefined;
+    // const initialState = !isFetching && data === undefined;
 
-    const handleImportTree = useHandleImportTree(data as Tree<Skill> | undefined, closeModal);
+    // const handleImportTree = useHandleImportTree(data as Tree<Skill> | undefined, closeModal);
 
-    const WIDTH = width - 20;
-    const HEIGHT = height - 200;
+    // const WIDTH = width - 20;
+    // const HEIGHT = height - 200;
 
-    const coordinatesWithTreeData = getNodesCoordinates(data as Tree<Skill>, "hierarchy");
-    const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
-    const canvasDimentions = getCanvasDimensions(nodeCoordinates, { width: WIDTH, height: HEIGHT });
-    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
-    const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
+    // const coordinatesWithTreeData = getNodesCoordinates(data as Tree<Skill>, "hierarchy");
+    // const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
+    // const canvasDimentions = getCanvasDimensions(nodeCoordinates, { width: WIDTH, height: HEIGHT });
+    // const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
+    // const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
-    const dragReducer = useDragState(data);
+    // const dragReducer = useDragState(data);
 
-    const { canvasScrollAndZoom, transform } = useHandleCanvasScroll(canvasDimentions, screenDimensions, undefined, undefined, () => {}, dragReducer);
+    // const { canvasScrollAndZoom, transform } = useHandleCanvasScroll(canvasDimentions, screenDimensions, undefined, undefined, () => {}, dragReducer);
 
-    const mockDragObject: DragObject = {
-        state: { isDragging: false, isOutsideNodeMenuZone: false, nodeId: null, draggingNodeIds: [], subtreeIds: [] },
-        dndZones: [],
-        sharedValues: { x: useSharedValue(0), y: useSharedValue(0) },
-    };
+    // const mockDragObject: DragObject = {
+    //     state: { isDragging: false, isOutsideNodeMenuZone: false, nodeId: null, draggingNodeIds: [], subtreeIds: [] },
+    //     dndZones: [],
+    //     sharedValues: { x: useSharedValue(0), y: useSharedValue(0) },
+    // };
 
-    if (initialState)
-        return (
-            <>
-                {isError === true && (
-                    <AppText fontSize={16} style={{ color: colors.accent }}>
-                        There was an error fetching your tree. Please check if the id is correct and try again
-                    </AppText>
-                )}
-                <AppTextInput placeholder={"Import Link"} textState={[treeImportKey, setTreeImportKey]} containerStyles={{ marginVertical: 20 }} />
-                <Pressable
-                    disabled={treeImportKey.length === 0}
-                    onPress={() => fetchTreeFromImportLink()}
-                    style={[generalStyles.btn, { backgroundColor: "#282A2C", opacity: treeImportKey.length === 0 ? 0.5 : 1 }]}>
-                    <AppText fontSize={16} style={{ color: colors.accent }}>
-                        Search
-                    </AppText>
-                </Pressable>
-            </>
-        );
+    // if (initialState)
+    //     return (
+    //         <>
+    //             {isError === true && (
+    //                 <AppText fontSize={16} style={{ color: colors.accent }}>
+    //                     There was an error fetching your tree. Please check if the id is correct and try again
+    //                 </AppText>
+    //             )}
+    //             <AppTextInput placeholder={"Import Link"} textState={[treeImportKey, setTreeImportKey]} containerStyles={{ marginVertical: 20 }} />
+    //             <Pressable
+    //                 disabled={treeImportKey.length === 0}
+    //                 onPress={() => fetchTreeFromImportLink()}
+    //                 style={[generalStyles.btn, { backgroundColor: "#282A2C", opacity: treeImportKey.length === 0 ? 0.5 : 1 }]}>
+    //                 <AppText fontSize={16} style={{ color: colors.accent }}>
+    //                     Search
+    //                 </AppText>
+    //             </Pressable>
+    //         </>
+    //     );
 
-    if (isFetching)
-        return (
-            <Animated.View entering={FadeInDown} style={[centerFlex, { width: WIDTH, height: HEIGHT }]}>
-                <LoadingIcon />
-            </Animated.View>
-        );
+    // if (isFetching)
+    //     return (
+    //         <Animated.View entering={FadeInDown} style={[centerFlex, { width: WIDTH, height: HEIGHT }]}>
+    //             <LoadingIcon />
+    //         </Animated.View>
+    //     );
 
-    return (
-        <Animated.View entering={FadeInDown} style={[centerFlex, { marginTop: 15, justifyContent: "space-between" }]}>
-            <GestureDetector gesture={canvasScrollAndZoom}>
-                <View style={[{ width: WIDTH, height: HEIGHT, overflow: "hidden", borderRadius: 10, backgroundColor: colors.background }]}>
-                    <Animated.View style={[transform]}>
-                        <Canvas
-                            style={{
-                                width: canvasDimentions.canvasWidth,
-                                height: canvasDimentions.canvasHeight,
-                            }}>
-                            <HierarchicalSkillTree
-                                nodeCoordinatesCentered={centeredCoordinatedWithTreeData}
-                                selectedNode={null}
-                                settings={{ showIcons, showLabel }}
-                                dragObject={mockDragObject}
-                            />
-                        </Canvas>
-                    </Animated.View>
-                </View>
-            </GestureDetector>
-            <View>
-                <Pressable onPress={handleImportTree} style={[generalStyles.btn, { backgroundColor: "#282A2C", marginTop: 15 }]}>
-                    <AppText fontSize={16} style={{ color: colors.accent }}>
-                        Import
-                    </AppText>
-                </Pressable>
-            </View>
-        </Animated.View>
-    );
+    // return (
+    //     <Animated.View entering={FadeInDown} style={[centerFlex, { marginTop: 15, justifyContent: "space-between" }]}>
+    //         <GestureDetector gesture={canvasScrollAndZoom}>
+    //             <View style={[{ width: WIDTH, height: HEIGHT, overflow: "hidden", borderRadius: 10, backgroundColor: colors.background }]}>
+    //                 <Animated.View style={[transform]}>
+    //                     <Canvas
+    //                         style={{
+    //                             width: canvasDimentions.canvasWidth,
+    //                             height: canvasDimentions.canvasHeight,
+    //                         }}>
+    //                         <HierarchicalSkillTree
+    //                             nodeCoordinatesCentered={centeredCoordinatedWithTreeData}
+    //                             selectedNode={null}
+    //                             settings={{ showIcons, showLabel }}
+    //                             dragObject={mockDragObject}
+    //                         />
+    //                     </Canvas>
+    //                 </Animated.View>
+    //             </View>
+    //         </GestureDetector>
+    //         <View>
+    //             <Pressable onPress={handleImportTree} style={[generalStyles.btn, { backgroundColor: "#282A2C", marginTop: 15 }]}>
+    //                 <AppText fontSize={16} style={{ color: colors.accent }}>
+    //                     Import
+    //                 </AppText>
+    //             </Pressable>
+    //         </View>
+    //     </Animated.View>
+    // );
+    return <></>;
 }
 
 export default AddTreeModal;

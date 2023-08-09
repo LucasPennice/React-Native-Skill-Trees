@@ -174,7 +174,7 @@ export enum GestureHandlerState {
 export type DragState = {
     isDragging: boolean;
     isOutsideNodeMenuZone: boolean;
-    nodeId: null | string;
+    node: null | NodeCoordinate;
     draggingNodeIds: string[];
     subtreeIds: string[];
 };

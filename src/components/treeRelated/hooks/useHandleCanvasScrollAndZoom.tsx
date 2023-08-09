@@ -5,7 +5,7 @@ import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../
 import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
 import { CanvasDimensions, DragState, NodeCoordinate } from "../../../types";
 import { getXBounds, getYBounds, useHandleCanvasBounds } from "./useHandleCanvasBounds";
-import { DragStateDispatch, DragValuesAndSetters } from "../useDragState";
+import { DragStateDispatch, DragValuesAndSetters } from "../useDragReducer";
 
 const DEFAULT_SCALE = 1;
 const deaccelerationFactor = 2500;

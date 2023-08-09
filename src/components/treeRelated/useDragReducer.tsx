@@ -3,14 +3,15 @@ import { SharedValue, runOnJS, useAnimatedReaction, useSharedValue } from "react
 import { addEveryChildFromTreeToArray, findNodeById } from "../../functions/extractInformationFromTree";
 import { DragState, NodeCoordinate, Skill, Tree } from "../../types";
 import { NODE_MENU_SIZE } from "../../parameters";
+import { LongPressIndicatorDispatch } from "./useLongPressReducer";
 
-const defaultDragState: DragState = { isDragging: false, isOutsideNodeMenuZone: false, nodeId: null, draggingNodeIds: [], subtreeIds: [] };
+const defaultDragState: DragState = { isDragging: false, isOutsideNodeMenuZone: false, node: null, draggingNodeIds: [], subtreeIds: [] };
 
 export type DragStateReducers = "START_DRAGGING" | "END_DRAGGING" | "UPDATE_IS_OUTSIDE_NODE_MENU_ZONE" | "UPDATE_NODES_TO_DRAG";
 export type DragStatePayload = {
     runOnEndDragging?: () => void;
     treeCoordinates?: NodeCoordinate[];
-    nodeId?: null | string;
+    node?: null | NodeCoordinate;
     draggingNodeIds?: string[];
 };
 
@@ -23,7 +24,7 @@ export type DragValuesAndSetters = {
     resetDragValues: () => void;
 };
 
-function useDragState(currentTree: Tree<Skill>) {
+function useDragReducer(currentTree: Tree<Skill>, longPressIndicatorDispatch: LongPressIndicatorDispatch) {
     const dragX = useSharedValue(0);
     const dragY = useSharedValue(0);
 
@@ -55,8 +56,19 @@ function useDragState(currentTree: Tree<Skill>) {
 
             const dragDistance = parseInt(Math.sqrt(dragX ** 2 + dragY ** 2).toFixed(0));
 
-            if (dragDistance > NODE_MENU_SIZE / 2) runOnJS(dispatch)({ type: "UPDATE_IS_OUTSIDE_NODE_MENU_ZONE", payload: {} });
-            console.log(dragDistance);
+            const isOutsideMenuSize = dragDistance > NODE_MENU_SIZE / 2;
+
+            const allowDragOutsideMenu = currentTree.treeId !== "HomepageTree";
+
+            if (isOutsideMenuSize) {
+                if (allowDragOutsideMenu) {
+                    runOnJS(dispatch)({ type: "UPDATE_IS_OUTSIDE_NODE_MENU_ZONE", payload: {} });
+                } else {
+                    runOnJS(dispatch)({ type: "END_DRAGGING", payload: {} });
+                    runOnJS(longPressIndicatorDispatch)({ type: "RESET", payload: {} });
+                    drag.resetDragValues();
+                }
+            }
         },
         [dragX, dragY, state.isOutsideNodeMenuZone]
     );
@@ -65,25 +77,26 @@ function useDragState(currentTree: Tree<Skill>) {
         const { payload, type } = action;
         switch (type) {
             case "START_DRAGGING":
-                if (!payload.nodeId) throw new Error("undefined nodeId at dragStateReducer");
+                if (!payload.node) throw new Error("undefined node at dragStateReducer");
                 if (!payload.treeCoordinates) throw new Error("undefined treeCoordinates at dragStateReducer");
 
-                let subtreeIds: string[] = [payload.nodeId];
+                let subtreeIds: string[] = [payload.node.id];
 
                 if (currentTree.treeId !== "HomepageTree") {
-                    const node = findNodeById(currentTree, payload.nodeId);
+                    const node = findNodeById(currentTree, payload.node.id);
 
                     if (!node) throw new Error("node not found at dragStateReducer");
 
                     addEveryChildFromTreeToArray(node, subtreeIds);
                 }
 
-                return { ...state, isDragging: true, nodeId: payload.nodeId, draggingNodeIds: [payload.nodeId], subtreeIds };
+                return { ...state, isDragging: true, node: payload.node, draggingNodeIds: [payload.node.id], subtreeIds };
             case "END_DRAGGING":
                 if (payload.runOnEndDragging) payload.runOnEndDragging();
                 return defaultDragState;
             case "UPDATE_IS_OUTSIDE_NODE_MENU_ZONE":
-                console.log("AHORA");
+                longPressIndicatorDispatch({ type: "RESET", payload: {} });
+
                 return { ...state, isOutsideNodeMenuZone: true, draggingNodeIds: state.subtreeIds };
             default:
                 throw new Error("Unknown action at dragStateReducer");
@@ -93,4 +106,4 @@ function useDragState(currentTree: Tree<Skill>) {
     return [state, dispatch, drag] as const;
 }
 
-export default useDragState;
+export default useDragReducer;

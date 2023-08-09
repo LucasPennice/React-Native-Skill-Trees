@@ -8,7 +8,7 @@ export type LongPressIndicatorDispatch = React.Dispatch<{ type: LongPressIndicat
 
 const defaultState: LongPressIndicatorState = { node: undefined, state: "IDLE" };
 
-function useLongPressState() {
+function useLongPressReducer() {
     const [state, dispatch] = useReducer(reducer, defaultState);
 
     function reducer(
@@ -23,7 +23,7 @@ function useLongPressState() {
                 if (!payload.node) throw new Error("node undefined at BEGIN_LONG_PRESS");
                 return { node: payload.node, state: "PRESSING" };
             case "INTERRUPT":
-                return { node: undefined, state: "IDLE" };
+                return { node: payload.node, state: "IDLE" };
 
             default:
                 throw new Error("Unknown action at dragStateReducer");
@@ -33,4 +33,4 @@ function useLongPressState() {
     return [state, dispatch] as const;
 }
 
-export default useLongPressState;
+export default useLongPressReducer;

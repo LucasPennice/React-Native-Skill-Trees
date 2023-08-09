@@ -8,8 +8,6 @@ function useCalculateDnDZonesWhenDraggingNode(subtreeIds: string[] | null, nodeC
     useEffect(() => {
         if (subtreeIds === null) return;
 
-        console.log(subtreeIds);
-
         const dndZones = calculateDragAndDropZones(nodeCoordinatesCentered);
 
         const allowedZones = returnAllowedZones(dndZones, subtreeIds);

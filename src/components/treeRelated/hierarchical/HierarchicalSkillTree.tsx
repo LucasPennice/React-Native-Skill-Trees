@@ -39,8 +39,11 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, settings
 
                 let parentCoord: CartesianCoordinate = { x: parentNode.x, y: parentNode.y };
 
-                const shouldDragPath = dragObject.state.nodeId === node.nodeId ? false : dragObject.state.draggingNodeIds.includes(node.nodeId);
-                const animatePathRetract = dragObject.state.nodeId === node.nodeId;
+                const shouldDragPath =
+                    dragObject.state.node && dragObject.state.node.id === node.nodeId
+                        ? false
+                        : dragObject.state.draggingNodeIds.includes(node.nodeId);
+                const animatePathRetract = dragObject.state.node !== null && dragObject.state.node.id === node.nodeId;
                 const pathDrag = shouldDragPath ? dragObject.sharedValues : undefined;
 
                 return (
