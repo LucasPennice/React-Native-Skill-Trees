@@ -7,12 +7,22 @@ import { getWheelParams } from "../../../functions/misc";
 import { colors } from "../../../parameters";
 import { MIN_DURATION_LONG_PRESS_MS } from "../hooks/useCanvasPressAndLongPress";
 import { LongPressIndicatorState } from "../useLongPressReducer";
+import DraggingInsideMenuZoneIndicator from "./DraggingInsideMenuZoneIndicator";
+import { DragObject } from "../../../types";
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
 const indicatorSize = Platform.OS === "android" ? 143 : 150;
 const progressWheelProps = getWheelParams("#FFFFFF", `#FFFFFF3D`, indicatorSize, 16);
 
-function NodeLongPressIndicator({ longPressIndicatorState, scale }: { longPressIndicatorState: LongPressIndicatorState; scale: number }) {
+function NodeLongPressIndicator({
+    longPressIndicatorState,
+    scale,
+    dragObject,
+}: {
+    longPressIndicatorState: LongPressIndicatorState;
+    scale: number;
+    dragObject: DragObject;
+}) {
     const [lastX, setLastX] = useState(0);
     const [lastY, setLastY] = useState(0);
 
@@ -79,7 +89,8 @@ function NodeLongPressIndicator({ longPressIndicatorState, scale }: { longPressI
             entering={FadeIn}
             style={[containerStyles, { left: position.x, top: position.y, position: "absolute" }, animatedScale]}
             pointerEvents={"none"}>
-            <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
+            <DraggingInsideMenuZoneIndicator drag={{ x: dragObject.sharedValues.x, y: dragObject.sharedValues.y }} />
+            {/* <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
                 <AnimatedCircle
                     cx={progressWheelProps.centerCoordinate}
                     cy={progressWheelProps.centerCoordinate}
@@ -90,7 +101,7 @@ function NodeLongPressIndicator({ longPressIndicatorState, scale }: { longPressI
                     strokeLinecap="round"
                     animatedProps={animatedProps}
                 />
-            </Svg>
+            </Svg> */}
         </Animated.View>
     );
 }

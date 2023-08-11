@@ -188,7 +188,7 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
                         treeData={treeData}
                     />
                     {/* Long press Node related 👇 */}
-                    <NodeLongPressIndicator longPressIndicatorState={longPressIndicatorState} scale={scale} />
+                    <NodeLongPressIndicator longPressIndicatorState={longPressIndicatorState} scale={scale} dragObject={dragObject} />
                     {renderNodeMenu && <NodeMenu functions={nodeMenuFunctions} data={foundNodeOfMenu} scale={scale} closeNodeMenu={closeNodeMenu} />}
                     {/* Long press Node related 👆 */}
                 </Animated.View>
