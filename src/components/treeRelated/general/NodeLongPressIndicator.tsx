@@ -87,7 +87,7 @@ function NodeLongPressIndicator({
     return (
         <Animated.View
             entering={FadeIn}
-            style={[containerStyles, { left: position.x, top: position.y, position: "absolute" }, animatedScale]}
+            style={[containerStyles, { left: position.x - 30, top: position.y - 30, position: "absolute" }, animatedScale]}
             pointerEvents={"none"}>
             <DraggingInsideMenuZoneIndicator drag={{ x: dragObject.sharedValues.x, y: dragObject.sharedValues.y }} />
             {/* <Svg width={progressWheelProps.size} height={progressWheelProps.size}>

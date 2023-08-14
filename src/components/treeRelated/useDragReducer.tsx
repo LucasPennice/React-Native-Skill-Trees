@@ -1,8 +1,8 @@
 import { useReducer } from "react";
-import { SharedValue, runOnJS, useAnimatedReaction, useSharedValue } from "react-native-reanimated";
+import { SharedValue, runOnJS, useAnimatedReaction, useSharedValue, withSpring } from "react-native-reanimated";
 import { addEveryChildFromTreeToArray, findNodeById } from "../../functions/extractInformationFromTree";
 import { DragState, NodeCoordinate, Skill, Tree } from "../../types";
-import { NODE_MENU_SIZE } from "../../parameters";
+import { MENU_HIGH_DAMPENING, NODE_MENU_SIZE } from "../../parameters";
 import { LongPressIndicatorDispatch } from "./useLongPressReducer";
 
 const defaultDragState: DragState = { isDragging: false, isOutsideNodeMenuZone: false, node: null, draggingNodeIds: [], subtreeIds: [] };
@@ -38,8 +38,8 @@ function useDragReducer(currentTree: Tree<Skill>, longPressIndicatorDispatch: Lo
         },
         resetDragValues: () => {
             "worklet";
-            dragX.value = 0;
-            dragY.value = 0;
+            dragX.value = withSpring(0, MENU_HIGH_DAMPENING);
+            dragY.value = withSpring(0, MENU_HIGH_DAMPENING);
         },
     };
 
