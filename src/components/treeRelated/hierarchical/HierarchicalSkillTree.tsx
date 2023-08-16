@@ -61,7 +61,8 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, settings
                     return (
                         <Label
                             key={idx}
-                            text={node.data.name}
+                            text={node.nodeId.slice(0, 6)}
+                            // text={node.data.name}
                             color={{ rect: node.accentColor.color1, text: labelTextColor }}
                             coord={{ cx: node.x, cy: node.y }}
                         />

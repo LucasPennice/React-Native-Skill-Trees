@@ -196,10 +196,11 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
     }
 };
 
-export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, string]) {
+function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, string]) {
     const treesToShift: { byBiggestOverlap: string[]; byHalfOfBiggestOverlap: string[] } = { byBiggestOverlap: [], byHalfOfBiggestOverlap: [] };
 
     const nodesInConflictLCA = findLowestCommonAncestorIdOfNodes(result, ...nodesInConflict);
+
     const LCANode = findNodeById(result, nodesInConflictLCA);
 
     if (!nodesInConflictLCA) throw new Error("getTreesToShift nodesInConflictLCA");
@@ -247,6 +248,9 @@ export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, s
         }
 
         function getAllNodesFromLevel0ToLCALevel() {
+            //Estoy en el mismo cluster en el que esta el lca?
+            //Si estamos en otro cluster, y estamos a la derecha del lca, entonces deberiamos meter a todos los hijos de esto
+
             const result: string[] = [];
 
             ifNodeLevelLowerOrEqualThanLCALevelAppendIt(tree, result);
@@ -254,17 +258,39 @@ export function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, s
             return result;
 
             function ifNodeLevelLowerOrEqualThanLCALevelAppendIt(tree: Tree<Skill>, arr: string[]) {
+                if (!LCANode) throw new Error("LCANode undefined at ifNodeLevelLowerOrEqualThanLCALevelAppendIt");
+
                 //Base Case 👇
-                if (tree.level > LCANode!.level) return undefined;
+                if (tree.level > LCANode.level) return undefined;
 
                 arr.push(tree.nodeId);
 
                 if (!tree.children.length) return undefined;
 
+                let lcaChildIndex: undefined | number = undefined;
+
                 //Recursive Case 👇
                 for (let i = 0; i < tree.children.length; i++) {
                     const child = tree.children[i];
-                    ifNodeLevelLowerOrEqualThanLCALevelAppendIt(child, arr);
+
+                    const isLCA = child.nodeId === LCANode.nodeId;
+
+                    if (isLCA) lcaChildIndex = i;
+
+                    const sameLevelAsLCA = LCANode.level === child.level;
+
+                    const rightOfLCA = lcaChildIndex !== undefined && i > lcaChildIndex;
+
+                    const leftOfLCA = lcaChildIndex === undefined || i < lcaChildIndex;
+
+                    if (sameLevelAsLCA && leftOfLCA) continue;
+
+                    if (sameLevelAsLCA && rightOfLCA) {
+                        arr.push(child.nodeId);
+                        addEveryChildFromTreeToArray(child, arr);
+                    } else {
+                        ifNodeLevelLowerOrEqualThanLCALevelAppendIt(child, arr);
+                    }
                 }
             }
         }

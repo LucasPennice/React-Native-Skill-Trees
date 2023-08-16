@@ -24,8 +24,6 @@ function Homepage(props: Props) {
         navigation.navigate("MyTrees", { openNewTreeModal: true });
     };
 
-    console.log("test");
-
     return (
         <View style={{ position: "relative", flex: 1, overflow: "hidden" }}>
             {userHasAtLestOneTree ? (
