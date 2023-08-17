@@ -22,9 +22,7 @@ export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: 
         unscaledCoordinates = PlotTreeReingoldTiltfordAlgorithm(currentTree);
         scaledCoordinates = scaleCoordinatesAfterReingoldTiltford(unscaledCoordinates);
     } else {
-        console.log("🧠", JSON.stringify(currentTree));
         unscaledCoordinates = PlotCircularTree(currentTree);
-        console.log("💀", JSON.stringify(unscaledCoordinates));
         scaledCoordinates = scaleCoordinatesAfterRadialReingoldTiltford(unscaledCoordinates);
     }
 

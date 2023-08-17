@@ -248,9 +248,6 @@ function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, string])
         }
 
         function getAllNodesFromLevel0ToLCALevel() {
-            //Estoy en el mismo cluster en el que esta el lca?
-            //Si estamos en otro cluster, y estamos a la derecha del lca, entonces deberiamos meter a todos los hijos de esto
-
             const result: string[] = [];
 
             ifNodeLevelLowerOrEqualThanLCALevelAppendIt(tree, result);
@@ -258,7 +255,7 @@ function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, string])
             return result;
 
             function ifNodeLevelLowerOrEqualThanLCALevelAppendIt(tree: Tree<Skill>, arr: string[]) {
-                if (!LCANode) throw new Error("LCANode undefined at ifNodeLevelLowerOrEqualThanLCALevelAppendIt");
+                if (!LCANode) throw new Error("LCANode undefined at hierarchical ifNodeLevelLowerOrEqualThanLCALevelAppendIt");
 
                 //Base Case 👇
                 if (tree.level > LCANode.level) return undefined;

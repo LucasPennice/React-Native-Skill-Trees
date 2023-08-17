@@ -131,6 +131,11 @@ export type PolarOverlapCheck = undefined | { biggestOverlapAngle: number; nodes
 
 export type RadialDistanceTable = { [key: string]: { current: number; original: number } };
 
+export type OuterPolarContour = {
+    levelContours: { [level: number]: PolarContour };
+    maxLevel: number;
+};
+
 export type PolarContourByLevel = {
     contourByLevel: {
         [level: string]: PolarContour[];

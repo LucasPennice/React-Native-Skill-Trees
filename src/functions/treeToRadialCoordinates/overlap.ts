@@ -1,11 +1,11 @@
 import { ALLOWED_NODE_SPACING, UNCENTERED_ROOT_COORDINATES } from "../../parameters";
-import { LevelOverflow, PolarContour, PolarContourByLevel, PolarCoordinate, PolarOverlapCheck, Skill, Tree } from "../../types";
+import { LevelOverflow, OuterPolarContour, PolarContour, PolarCoordinate, PolarOverlapCheck, Skill, Tree } from "../../types";
 import {
     angleFromLeftToRightCounterClockWise,
     arcToAngleRadians,
     cartesianToPositivePolarCoordinates,
     polarToCartesianCoordinates,
-    round3Decimals,
+    round8Decimals,
 } from "../coordinateSystem";
 import {
     extractTreeIds,
@@ -13,7 +13,7 @@ import {
     findNodeById,
     findTreeHeight,
     getRadialTreeContourByLevel,
-    getSubTreesContour,
+    getSubTreesOuterContour,
     returnPathFromRootToNode,
 } from "../extractInformationFromTree";
 
@@ -24,21 +24,24 @@ export function shiftSubTreeToFinalAngle(tree: Tree<Skill>) {
 
     if (!subTrees.length) return tree;
 
-    let result = { ...tree };
+    let result: Tree<Skill> = { ...tree };
 
-    const subTreesContour = getSubTreesContour(tree);
+    const firstSubTree = [tree.children[0]];
+    const firstSubTreeContour = getSubTreesOuterContour(firstSubTree)[0];
 
     //This contour contains the last node positioned at that level for every level drawn
     //so most likely it holds nodes from several trees at the same time
     //it also holds the left nodes but I dont intend on using them
-    let rightContourOfTreeGraph: PolarContourByLevel = updateRightContourOfTreeGraph(undefined, subTreesContour[0]);
+    let rightContourOfTreeGraph: OuterPolarContour = extendContourToSubtree(undefined, firstSubTreeContour);
 
     subTrees.forEach((_, idx) => {
         const isLastSubTree = idx === subTrees.length - 1;
 
         if (!isLastSubTree) {
-            const updatesSubTrees = getSubTreesContour(result);
-            rightContourOfTreeGraph = updateRightContourOfTreeGraph(rightContourOfTreeGraph, updatesSubTrees[idx]);
+            const updatesSubTrees = getSubTreesOuterContour(result.children);
+
+            rightContourOfTreeGraph = extendContourToSubtree(rightContourOfTreeGraph, updatesSubTrees[idx]);
+
             const nextSubTreeContour = updatesSubTrees[idx + 1];
 
             const overlap = checkForOverlapBetweenContours(rightContourOfTreeGraph, nextSubTreeContour);
@@ -56,14 +59,29 @@ export function shiftSubTreeToFinalAngle(tree: Tree<Skill>) {
 
     return result;
 
-    function updateRightContourOfTreeGraph(rightContourOfTreeGraph: PolarContourByLevel | undefined, shiftedSubTreeContour: PolarContourByLevel) {
-        if (rightContourOfTreeGraph === undefined) return shiftedSubTreeContour;
+    function extendContourToSubtree(contour: OuterPolarContour | undefined, subTreeContour: OuterPolarContour) {
+        if (contour === undefined) return subTreeContour;
 
-        const result = { ...rightContourOfTreeGraph };
+        let result: OuterPolarContour = { ...contour };
 
-        shiftedSubTreeContour.treeLevels.forEach((level) => {
-            result.contourByLevel[level] = shiftedSubTreeContour.contourByLevel[level];
-        });
+        for (let level = 1; level < subTreeContour.maxLevel + 1; level++) {
+            const notNodesOnCurrentLevel = result.levelContours[level] === undefined;
+
+            if (notNodesOnCurrentLevel) {
+                result.levelContours[level] = subTreeContour.levelContours[level];
+                continue;
+            }
+
+            const contourLeftNode = result.levelContours[level].leftNode;
+
+            const subTreeLevelContour = subTreeContour.levelContours[level];
+            const levelRightmostNode = subTreeLevelContour.rightNode;
+
+            const updatedLevelContour: PolarContour = { leftNode: contourLeftNode, rightNode: levelRightmostNode };
+
+            result.levelContours[level] = updatedLevelContour;
+        }
+        if (subTreeContour.maxLevel > result.maxLevel) result.maxLevel = subTreeContour.maxLevel;
 
         return result;
     }
@@ -80,45 +98,38 @@ export function shiftSubTreeToFinalAngle(tree: Tree<Skill>) {
         return result;
     }
 
-    function checkForOverlapBetweenContours(
-        currentSubTreeContour: { contourByLevel: { [x: string]: PolarContour[] }; treeLevels: string[] },
-        nextSubTreeContour: { contourByLevel: { [x: string]: PolarContour[] }; treeLevels: string[] }
-    ): PolarOverlapCheck {
+    function checkForOverlapBetweenContours(currentSubTreeContour: OuterPolarContour, nextSubTreeContour: OuterPolarContour): PolarOverlapCheck {
         let result: PolarOverlapCheck = undefined;
 
-        const levelsOfShallowerTree = getLevelsOfShallowerTree();
+        const maxLevel = getLevelsOfShallowerTree();
 
-        levelsOfShallowerTree.forEach((level) => {
-            const currentSubTreeLevelContour = currentSubTreeContour.contourByLevel[level];
-            const currentSubTreeLevelLeftmostNode = currentSubTreeLevelContour[0].leftNode;
-            const currentSubTreeLevelRightmostNode = currentSubTreeLevelContour[currentSubTreeLevelContour.length - 1].rightNode;
+        for (let level = 1; level < maxLevel + 1; level++) {
+            const currentSubTreeLevelContour = currentSubTreeContour.levelContours[level];
             const currentSubTreeLevelOuterContour: PolarContour[] = [
-                { leftNode: currentSubTreeLevelLeftmostNode, rightNode: currentSubTreeLevelRightmostNode },
+                { leftNode: currentSubTreeLevelContour.leftNode, rightNode: currentSubTreeLevelContour.rightNode },
             ];
 
-            const nextSubTreeLevelContour = nextSubTreeContour.contourByLevel[level];
-            const nextSubTreeLevelLeftmostNode = nextSubTreeLevelContour[0].leftNode;
-            const nextSubTreeLevelRightmostNode = nextSubTreeLevelContour[nextSubTreeLevelContour.length - 1].rightNode;
+            const nextSubTreeLevelContour = nextSubTreeContour.levelContours[level];
             const nextSubTreeLevelOuterContour: PolarContour[] = [
-                { leftNode: nextSubTreeLevelLeftmostNode, rightNode: nextSubTreeLevelRightmostNode },
+                { leftNode: nextSubTreeLevelContour.leftNode, rightNode: nextSubTreeLevelContour.rightNode },
             ];
 
             const levelContour = [...currentSubTreeLevelOuterContour, ...nextSubTreeLevelOuterContour];
 
-            const levelBiggestOverlap = getLevelBiggestOverlap(levelContour, parseInt(level));
+            const levelBiggestOverlap = getLevelBiggestOverlap(levelContour, level);
 
             const updateBiggestTreeOverlap =
                 levelBiggestOverlap !== undefined && (result === undefined || levelBiggestOverlap.biggestOverlapAngle >= result.biggestOverlapAngle);
 
             if (updateBiggestTreeOverlap) result = { ...levelBiggestOverlap };
-        });
+        }
 
         return result;
 
         function getLevelsOfShallowerTree() {
-            if (currentSubTreeContour.treeLevels.length < nextSubTreeContour.treeLevels.length) return currentSubTreeContour.treeLevels;
+            if (currentSubTreeContour.maxLevel < nextSubTreeContour.maxLevel) return currentSubTreeContour.maxLevel;
 
-            return nextSubTreeContour.treeLevels;
+            return nextSubTreeContour.maxLevel;
         }
     }
 }
@@ -144,8 +155,7 @@ export function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill>
 
         let limiter = 0;
 
-        // while (overlapWithinTree && limiter < 1) {
-        while (overlapWithinTree && limiter < 1000 * subTrees.length) {
+        while (overlapWithinTree && limiter < 1000) {
             let polarOverlap = checkForOverlap(result);
 
             //Tolerance to avoid loops
@@ -157,8 +167,6 @@ export function fixOverlapWithinSubTreesOfLevel1(tree: Tree<Skill>): Tree<Skill>
                 //We append the rootNode to the subTree so that the path finding functions can work correctly
                 const subTreeWithRootNode = { ...tree, children: [subTree] };
                 const treesToShift = getTreesToShiftForCircularTree(subTreeWithRootNode, polarOverlap.nodesInConflict);
-
-                console.log(treesToShift);
 
                 result = shiftNodesCounterClockWise(result, treesToShift, polarOverlap.biggestOverlapAngle);
             }
@@ -261,7 +269,7 @@ function getLevelBiggestOverlap(levelContour: PolarContour[], originalDistanceTo
     function checkForPoorSpacing(nextContourLeftNode: PolarCoordinate, currentContourRightNode: PolarCoordinate): undefined | number {
         const separationAngle = angleFromLeftToRightCounterClockWise(nextContourLeftNode, currentContourRightNode);
 
-        const roundedSeparationAngle = round3Decimals(separationAngle);
+        const roundedSeparationAngle = round8Decimals(separationAngle);
 
         const minimumSeparationAngle = arcToAngleRadians(ALLOWED_NODE_SPACING, originalDistanceToCenter);
 
@@ -329,17 +337,40 @@ function getTreesToShiftForCircularTree(result: Tree<Skill>, nodesInConflict: [s
             return result;
 
             function ifNodeLevelLowerOrEqualThanLCALevelAppendIt(tree: Tree<Skill>, arr: string[]) {
+                if (!LCANode) throw new Error("LCANode undefined at radial ifNodeLevelLowerOrEqualThanLCALevelAppendIt");
+
                 //Base Case 👇
-                if (tree.level > LCANode!.level) return undefined;
+                if (tree.level > LCANode.level) return undefined;
 
                 arr.push(tree.nodeId);
 
                 if (!tree.children.length) return undefined;
 
+                let lcaChildIndex: undefined | number = undefined;
+
                 //Recursive Case 👇
                 for (let i = 0; i < tree.children.length; i++) {
                     const child = tree.children[i];
-                    ifNodeLevelLowerOrEqualThanLCALevelAppendIt(child, arr);
+
+                    const isLCA = child.nodeId === LCANode.nodeId;
+
+                    if (isLCA) lcaChildIndex = i;
+
+                    const sameLevelAsLCA = LCANode.level === child.level;
+
+                    //In the radial tree the way to calculate leftOfLca and rightOfLCA is different due to how the skia canvas is set
+                    const leftOfLCA = lcaChildIndex !== undefined && i > lcaChildIndex;
+
+                    const rightOfLCA = lcaChildIndex === undefined || i < lcaChildIndex;
+
+                    if (sameLevelAsLCA && leftOfLCA) continue;
+
+                    if (sameLevelAsLCA && rightOfLCA) {
+                        arr.push(child.nodeId);
+                        addEveryChildFromTreeToArray(child, arr);
+                    } else {
+                        ifNodeLevelLowerOrEqualThanLCALevelAppendIt(child, arr);
+                    }
                 }
             }
         }

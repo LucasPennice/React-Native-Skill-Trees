@@ -1,5 +1,5 @@
 import { CoordinatesWithTreeData, LevelOverflow, NodeCategory, Skill, Tree } from "../../types";
-import { round3Decimals } from "../coordinateSystem";
+import { round8Decimals } from "../coordinateSystem";
 
 import { firstIteration } from "./firstInstance";
 import { checkForLevelOverflow } from "./levelOverflow";
@@ -61,8 +61,8 @@ function radialTreeToCoordArray(tree: Tree<Skill>, result: CoordinatesWithTreeDa
         nodeId: tree.nodeId,
         treeId: tree.treeId,
         treeName: tree.treeName,
-        x: round3Decimals(tree.x),
-        y: round3Decimals(tree.y),
+        x: round8Decimals(tree.x),
+        y: round8Decimals(tree.y),
         level: tree.level,
         parentId: tree.parentId,
     });

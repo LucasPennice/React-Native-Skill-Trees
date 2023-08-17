@@ -30,15 +30,15 @@ export function cartesianToPositivePolarCoordinates(point: CartesianCoordinate, 
 }
 
 export function roundPolarCoordinates(pc: PolarCoordinate): PolarCoordinate {
-    const roundedDistance = round3Decimals(pc.distanceToCenter);
+    const roundedDistance = round8Decimals(pc.distanceToCenter);
 
-    const roundedAngle = round3Decimals(pc.angleInRadians);
+    const roundedAngle = round8Decimals(pc.angleInRadians);
 
     return { angleInRadians: roundedAngle, distanceToCenter: roundedDistance };
 }
 
-export function round3Decimals(n: number) {
-    return parseFloat(n.toFixed(3));
+export function round8Decimals(n: number) {
+    return parseFloat(n.toFixed(8));
 }
 
 export function returnSmallestBetweenAngleAndComplement(angle: number) {
@@ -84,7 +84,7 @@ export function angleFromLeftToRightCounterClockWise(left: PolarCoordinate, righ
 
     if (result < 0) result = result + 2 * Math.PI;
 
-    return round3Decimals(result);
+    return round8Decimals(result);
 }
 
 export function movePointParallelToVector(directionVector: CartesianCoordinate, distanceToMove: number, pointToMove: CartesianCoordinate) {

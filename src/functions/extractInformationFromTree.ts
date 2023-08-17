@@ -1,5 +1,5 @@
 import { UNCENTERED_ROOT_COORDINATES } from "../parameters";
-import { CoordinatesWithTreeData, PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
+import { CoordinatesWithTreeData, OuterPolarContour, PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
 import { cartesianToPositivePolarCoordinates } from "./coordinateSystem";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
@@ -203,7 +203,7 @@ export function addEveryChildFromTreeToArray(tree: Tree<Skill>, arrToAdd: string
 export function getRadialTreeContourByLevel(tree: Tree<Skill>) {
     const contourByLevelWithUnorderedContours: { [key: string]: PolarContour[] } = {};
 
-    getUnorderedTreeContourByLevel(tree, contourByLevelWithUnorderedContours);
+    getSubTreeContourByLevel(tree, contourByLevelWithUnorderedContours);
 
     const treeLevels = Object.keys(contourByLevelWithUnorderedContours);
 
@@ -215,8 +215,25 @@ export function getRadialTreeContourByLevel(tree: Tree<Skill>) {
 
     return { contourByLevel, treeLevels };
 
-    function getUnorderedTreeContourByLevel(tree: Tree<Skill>, result: { [key: string]: PolarContour[] }) {
+    function getSubTreeContourByLevel(tree: Tree<Skill>, result: { [key: string]: PolarContour[] }) {
         //Base Case 👇
+        const subTreeRoot = tree.level === 1;
+        const ROOT_LEVEL = 1;
+
+        if (subTreeRoot) {
+            const leftmostNodePolarCoordinates = {
+                ...cartesianToPositivePolarCoordinates({ x: tree.x, y: tree.y }, UNCENTERED_ROOT_COORDINATES),
+                id: tree.nodeId,
+            };
+            const rightmostNodetNodePolarCoordinates = {
+                ...cartesianToPositivePolarCoordinates({ x: tree.x, y: tree.y }, UNCENTERED_ROOT_COORDINATES),
+                id: tree.nodeId,
+            };
+
+            const contourToAppend: PolarContour = { leftNode: leftmostNodePolarCoordinates, rightNode: rightmostNodetNodePolarCoordinates };
+
+            result[ROOT_LEVEL] = [contourToAppend];
+        }
 
         if (!tree.children.length) return;
 
@@ -225,7 +242,7 @@ export function getRadialTreeContourByLevel(tree: Tree<Skill>) {
         const leftmostNode = tree.children[tree.children.length - 1];
         const rightmostNode = tree.children[0];
 
-        const key = `${tree.level + 1}`;
+        const nextLevel = `${tree.level + 1}`;
 
         const leftmostNodePolarCoordinates = {
             ...cartesianToPositivePolarCoordinates({ x: leftmostNode.x, y: leftmostNode.y }, UNCENTERED_ROOT_COORDINATES),
@@ -241,13 +258,13 @@ export function getRadialTreeContourByLevel(tree: Tree<Skill>) {
             rightNode: rightmostNodetNodePolarCoordinates,
         };
 
-        if (result[key]) result[key] = [...result[key], contourToAppend];
-        if (!result[key]) result[key] = [contourToAppend];
+        if (result[nextLevel]) result[nextLevel] = [...result[nextLevel], contourToAppend];
+        if (!result[nextLevel]) result[nextLevel] = [contourToAppend];
 
         for (let i = 0; i < tree.children.length; i++) {
             const element = tree.children[i];
 
-            getUnorderedTreeContourByLevel(element, result);
+            getSubTreeContourByLevel(element, result);
         }
     }
 }
@@ -265,6 +282,43 @@ export function getSubTreesContour(tree: Tree<Skill>) {
     });
 
     return result;
+}
+
+export function getSubTreesOuterContour(subTrees: Tree<Skill>[]) {
+    //I specify outer because we could also calculate the contour of each branch for each level
+    const subTreeContours: PolarContourByLevel[] = [];
+
+    subTrees.forEach((subTree) => {
+        const subTreeContour = getRadialTreeContourByLevel(subTree);
+
+        subTreeContours.push(subTreeContour);
+    });
+
+    const subTreeOuterContours: OuterPolarContour[] = [];
+
+    subTreeContours.forEach((contour) => {
+        const outerContour = returnSubTreeOuterContour(contour);
+
+        subTreeOuterContours.push(outerContour);
+    });
+
+    return subTreeOuterContours;
+
+    function returnSubTreeOuterContour(contour: PolarContourByLevel): OuterPolarContour {
+        const maxLevel = parseInt(contour.treeLevels[contour.treeLevels.length - 1]);
+
+        let result: OuterPolarContour = { levelContours: {}, maxLevel };
+
+        for (let level = 1; level !== maxLevel + 1; level++) {
+            const currentLevelContour = contour.contourByLevel[level];
+            const leftContourNode = currentLevelContour[0].leftNode;
+            const rightContourNode = currentLevelContour[currentLevelContour.length - 1].rightNode;
+
+            result.levelContours[level] = { leftNode: leftContourNode, rightNode: rightContourNode };
+        }
+
+        return result;
+    }
 }
 
 export function countCompletedSkillNodes(rootNode: Tree<Skill>) {
