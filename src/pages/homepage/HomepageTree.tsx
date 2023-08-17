@@ -52,8 +52,6 @@ function HomepageTree({ n: { navigation, route }, state }: Props) {
         };
     }, []);
 
-    console.log(JSON.stringify(userTrees));
-
     return (
         <>
             <InteractiveTree
