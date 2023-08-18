@@ -9,7 +9,7 @@ import { findNodeById } from "../../functions/extractInformationFromTree";
 import { centerFlex } from "../../parameters";
 import { CanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { CoordinatesWithTreeData, DnDZone, SelectedDnDZone, SelectedNodeId, Skill, Tree } from "../../types";
+import { CoordinatesWithTreeData, DnDZone, NodeCoordinate, SelectedDnDZone, SelectedNodeId, Skill, Tree } from "../../types";
 import TreeCanvas from "./TreeCanvas";
 import {
     calculateDragAndDropZones,
@@ -20,7 +20,8 @@ import {
     removeTreeDataFromCoordinate,
 } from "./coordinateFunctions";
 import NodeLongPressIndicator from "./general/NodeLongPressIndicator";
-import useCanvasPressAndLongPress from "./hooks/useCanvasPressAndLongPress";
+import useCanvasLongPress from "./hooks/gestures/useCanvasLongPress";
+import useCanvasTap from "./hooks/gestures/useCanvasTap";
 import useHandleCanvasScrollAndZoom from "./hooks/useHandleCanvasScrollAndZoom";
 import NodeMenu from "./nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "./returnNodeMenuFunctions";
@@ -119,25 +120,48 @@ function InteractiveTree({ tree, config, functions, state, renderOnSelectedNodeI
         //eslint-disable-next-line
     }, [tree]);
 
-    //Hooks
-    const touchHandlerState = { selectedNodeId, nodeCoordinatesCentered, dragAndDropZones: dndZoneCoordinates };
-    const touchHandlerFunctions = { onNodeClick: onNodeClickAdapter, onDndZoneClick: onDndZoneClickAdapter, setDraggingNode };
-    const { canvasPressAndLongPress, openMenuOnNode, longPressIndicatorPosition, closeNodeMenu, onScroll } = useCanvasPressAndLongPress({
-        functions: touchHandlerFunctions,
-        state: touchHandlerState,
-        config: { showDndZones, blockLongPress, blockDragAndDrop },
+    //Gesture Props 👇
+    const nodeMenuState = useState<NodeCoordinate | undefined>(undefined);
+    const [openMenuOnNode, setOpenMenuOnNode] = nodeMenuState;
+    const closeNodeMenu = () => setOpenMenuOnNode(undefined);
+
+    const longPressState = useState<{ data: NodeCoordinate | undefined; state: "INTERRUPTED" | "PRESSING" | "IDLE" }>({
+        data: undefined,
+        state: "IDLE",
     });
-    //
+    const [longPressIndicatorPosition] = longPressState;
+
+    const canvasLongPressProps = {
+        config: { blockDragAndDrop, blockLongPress },
+        nodeCoordinatesCentered,
+        longPressState,
+        nodeMenuState,
+        setDraggingNode,
+    };
+
+    const canvasTapProps = {
+        functions: { runOnTap: closeNodeMenu, onDndZoneClick: onDndZoneClickAdapter, onNodeClick: onNodeClickAdapter },
+        state: { dragAndDropZones: dndZoneCoordinates, nodeCoordinates: nodeCoordinatesCentered, selectedNodeId, showDndZones },
+    };
+
+    //Gesture Props
+
+    const { canvasLongPress, runOnScroll } = useCanvasLongPress(canvasLongPressProps);
+    const canvasTap = useCanvasTap(canvasTapProps);
+
+    const canvasPressAndLongPress = Gesture.Exclusive(canvasLongPress, canvasTap);
 
     const foundNodeOfMenu = openMenuOnNode ? centeredCoordinatedWithTreeData.find((c) => c.nodeId === openMenuOnNode.id) : undefined;
     const foundNodeOfMenuWithoutData = openMenuOnNode ? nodeCoordinatesCentered.find((c) => c.id === openMenuOnNode.id) : undefined;
 
+    //     OK ME FALTA SEPARAR SCROLL Y ZOOM DE LO DEMAS SOLAMENTE
+    // Y DESPUES EMPEZAR A ARMAR LA NUEVA VERSION DE VIEWING SKILL TREE Y HOMEPAGE TREE COMO LO PUSE EN EL IPAD
     const { canvasScrollAndZoom, transform, scale, dragDelta } = useHandleCanvasScrollAndZoom(
         canvasDimentions,
         screenDimensions,
         selectedNodeCoordinates,
         foundNodeOfMenuWithoutData,
-        onScroll,
+        runOnScroll,
         { state: draggingNode, endDragging }
     );
 

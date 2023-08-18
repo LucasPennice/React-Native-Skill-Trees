@@ -159,7 +159,7 @@ function useHandleCanvasScrollAndZoom(
 
     const canvasPan = Gesture.Pan()
         .onStart(() => {
-            if (draggingNode) return (animatePan.value = true);
+            if (draggingNode.state) return (animatePan.value = true);
 
             shouldUpdateStartValue.value = false;
             offsetX.value = start.value.x;
