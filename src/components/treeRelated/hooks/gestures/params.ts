@@ -7,3 +7,7 @@ export const TOUCH_BUFFER = 15;
 export const MAX_TAP_DURATION = 80;
 
 export const MIN_DURATION_LONG_PRESS_MS = 300;
+
+export const DEFAULT_SCALE = 1;
+export const DEACCELERATION_FACTOR = 2500;
+export const ANIMATION_DURATION_AFTER_FAILED_LONG_PRESS_MS = 1000;

@@ -1,4 +1,4 @@
-import { PlotTreeReingoldTiltfordAlgorithm } from "../../functions/treeToHierarchicalCoordinates";
+import { PlotTreeReingoldTiltfordAlgorithm } from "../../functions/treeToHierarchical/general";
 import { PlotCircularTree } from "../../functions/treeToRadialCoordinates/general";
 import {
     BROTHER_DND_ZONE_HEIGHT,

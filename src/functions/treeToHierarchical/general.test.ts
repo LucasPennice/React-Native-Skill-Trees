@@ -1,6 +1,6 @@
 import { expect, test } from "@jest/globals";
-import { Skill, Tree } from "../types";
-import { PlotTreeReingoldTiltfordAlgorithm } from "./treeToHierarchicalCoordinates";
+import { Skill, Tree } from "../../types";
+import { PlotTreeReingoldTiltfordAlgorithm } from "./general";
 
 test("HierarchicalTree - Rairtha 1", () => {
     const treeToTest: Tree<Skill> = {

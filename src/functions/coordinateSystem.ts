@@ -1,4 +1,14 @@
-import { CartesianCoordinate, PolarCoordinate } from "../types";
+import { InteractiveTreeConfig } from "../components/treeRelated/InteractiveTree";
+import {
+    calculateDragAndDropZones,
+    centerNodesInCanvas,
+    getCanvasDimensions,
+    getCoordinatedWithTreeData,
+    getNodesCoordinates,
+    removeTreeDataFromCoordinate,
+} from "../components/treeRelated/coordinateFunctions";
+import { ScreenDimentions } from "../redux/screenDimentionsSlice";
+import { CartesianCoordinate, PolarCoordinate, Skill, Tree } from "../types";
 
 export function arcToAngleRadians(arcLength: number, circleRadius: number) {
     if (circleRadius === 0) return 0;
@@ -107,4 +117,22 @@ export function getConstantsRotated(angleRadians: number, constantsVector: numbe
     const r2 = Math.sin(angleRadians) * constantsVector[0] + Math.cos(angleRadians) * constantsVector[1];
 
     return [r1, r2];
+}
+
+export function handleTreeBuild(
+    tree: Tree<Skill>,
+    screenDimentions: ScreenDimentions,
+    renderStyle: InteractiveTreeConfig["renderStyle"],
+    showDepthGuides?: boolean
+) {
+    const coordinatesWithTreeData = getNodesCoordinates(tree, renderStyle);
+    //
+    const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
+    const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions, showDepthGuides);
+    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
+    const dndZoneCoordinates = calculateDragAndDropZones(nodeCoordinatesCentered);
+    //
+    const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
+
+    return { nodeCoordinatesCentered, centeredCoordinatedWithTreeData, dndZoneCoordinates, coordinatesWithTreeData, canvasDimentions };
 }

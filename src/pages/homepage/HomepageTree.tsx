@@ -2,14 +2,15 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCanvasRef } from "@shopify/react-native-skia";
 import { useEffect, useMemo, useState } from "react";
 import { StackNavigatorParams } from "../../../App";
-import CanvasSettingsModal from "../../components/treeRelated/canvasSettingsModal/CanvasSettingsModal";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeScreenshot";
 import InteractiveTree from "../../components/treeRelated/InteractiveTree";
+import CanvasSettingsModal from "../../components/treeRelated/canvasSettingsModal/CanvasSettingsModal";
+import { buildHomepageTree } from "../../functions/treeToRadialCoordinates/general";
 import { CanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
 import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { Skill, Tree, getDefaultSkillValue } from "../../types";
+import { Skill, Tree } from "../../types";
 import useHandleMemoizedHomeTreeProps from "./useHandleMemoizedHomeTreeProps";
 
 type Props = {
@@ -75,32 +76,3 @@ function HomepageTree({ n: { navigation, route }, state }: Props) {
 }
 
 export default HomepageTree;
-
-function buildHomepageTree(userTrees: Tree<Skill>[], canvasDisplaySettings: CanvasDisplaySettings) {
-    const { homepageTreeColor, homepageTreeName, homepageTreeIcon } = canvasDisplaySettings;
-    const ROOT_ID = "homepageRoot";
-
-    const modifiedUserTrees = userTrees.map((tree) => {
-        return { ...tree, isRoot: false, parentId: ROOT_ID };
-    });
-
-    const isEmoji = homepageTreeIcon !== "";
-    const text = isEmoji ? homepageTreeIcon : homepageTreeName[0];
-
-    const result: Tree<Skill> = {
-        accentColor: homepageTreeColor,
-        nodeId: ROOT_ID,
-        isRoot: true,
-        children: modifiedUserTrees,
-        data: getDefaultSkillValue(homepageTreeName, false, { isEmoji, text }),
-        level: 0,
-        parentId: null,
-        treeId: "HomepageTree",
-        treeName: homepageTreeName,
-        x: 0,
-        y: 0,
-        category: "USER",
-    };
-
-    return result;
-}

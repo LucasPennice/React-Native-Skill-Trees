@@ -1,4 +1,5 @@
-import { CoordinatesWithTreeData, LevelOverflow, NodeCategory, Skill, Tree } from "../../types";
+import { CanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
+import { CoordinatesWithTreeData, LevelOverflow, NodeCategory, Skill, Tree, getDefaultSkillValue } from "../../types";
 import { round8Decimals } from "../coordinateSystem";
 
 import { firstIteration } from "./firstInstance";
@@ -91,6 +92,35 @@ export function invertTree<T extends { children: T[] }>(rootNode: T) {
 
         result.children.push(d);
     }
+
+    return result;
+}
+
+export function buildHomepageTree(userTrees: Tree<Skill>[], canvasDisplaySettings: CanvasDisplaySettings) {
+    const { homepageTreeColor, homepageTreeName, homepageTreeIcon } = canvasDisplaySettings;
+    const ROOT_ID = "homepageRoot";
+
+    const modifiedUserTrees = userTrees.map((tree) => {
+        return { ...tree, isRoot: false, parentId: ROOT_ID };
+    });
+
+    const isEmoji = homepageTreeIcon !== "";
+    const text = isEmoji ? homepageTreeIcon : homepageTreeName[0];
+
+    const result: Tree<Skill> = {
+        accentColor: homepageTreeColor,
+        nodeId: ROOT_ID,
+        isRoot: true,
+        children: modifiedUserTrees,
+        data: getDefaultSkillValue(homepageTreeName, false, { isEmoji, text }),
+        level: 0,
+        parentId: null,
+        treeId: "HomepageTree",
+        treeName: homepageTreeName,
+        x: 0,
+        y: 0,
+        category: "USER",
+    };
 
     return result;
 }
