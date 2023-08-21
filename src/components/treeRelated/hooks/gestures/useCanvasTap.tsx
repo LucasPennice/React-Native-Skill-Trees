@@ -1,7 +1,7 @@
 import { Gesture, GestureStateChangeEvent, TapGestureHandlerEventPayload } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { useAppDispatch } from "../../../../redux/reduxHooks";
-import { clearSelectedNode } from "../../../../redux/userTreesSlice";
+import { clearSelectedNode } from "../../../../redux/slices/userTreesSlice";
 import { DnDZone, NodeCoordinate, SelectedNodeId } from "../../../../types";
 import { didTapCircle } from "./functions";
 import { MAX_TAP_DURATION } from "./params";

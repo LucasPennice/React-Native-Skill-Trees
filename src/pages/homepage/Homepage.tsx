@@ -1,10 +1,10 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { View } from "react-native";
 import { StackNavigatorParams } from "../../../App";
-import { selectCanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
+import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { useAppSelector } from "../../redux/reduxHooks";
-import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { selectUserTrees } from "../../redux/userTreesSlice";
+import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
+import { selectUserTrees } from "../../redux/slices/userTreesSlice";
 import HomepageTree from "./HomepageTree";
 import WelcomeScreen from "./WelcomeScreen";
 

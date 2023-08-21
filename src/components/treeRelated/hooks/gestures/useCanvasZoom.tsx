@@ -1,7 +1,7 @@
 import { Gesture } from "react-native-gesture-handler";
 import { SharedValue, runOnJS, useAnimatedReaction, useSharedValue, withSpring } from "react-native-reanimated";
 import { CanvasDimensions, NodeCoordinate } from "../../../../types";
-import { ScreenDimentions } from "../../../../redux/screenDimentionsSlice";
+import { ScreenDimentions } from "../../../../redux/slices/screenDimentionsSlice";
 import { MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
 import { DEFAULT_SCALE } from "./params";
 import { useEffect, useState } from "react";

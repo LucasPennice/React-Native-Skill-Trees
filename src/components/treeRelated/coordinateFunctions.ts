@@ -9,7 +9,7 @@ import {
     NAV_HEGIHT,
     PARENT_DND_ZONE_DIMENTIONS,
 } from "../../parameters";
-import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { ScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { CanvasDimensions, CoordinatesWithTreeData, DnDZone, NodeCoordinate, ParentId, Skill, Tree } from "../../types";
 
 export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): CoordinatesWithTreeData[] {

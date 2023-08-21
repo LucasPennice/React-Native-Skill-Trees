@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { WHITE_GRADIENT } from "../parameters";
-import { ColorGradient } from "../types";
-import type { RootState } from "./reduxStore";
+import { WHITE_GRADIENT } from "../../parameters";
+import { ColorGradient } from "../../types";
+import type { RootState } from "./../reduxStore";
 
 // Define a type for the slice state
 export type CanvasDisplaySettings = {

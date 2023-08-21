@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "./redux/reduxHooks";
-import { populateUserId, selectUserId } from "./redux/userSlice";
+import { populateUserId, selectUserId } from "./redux/slices/userSlice";
 
 function useHandleUserId() {
     const userId = useAppSelector(selectUserId);

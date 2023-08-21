@@ -1,12 +1,12 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import canvasDisplaySettingsReducer from "./canvasDisplaySettingsSlice";
-import currentTreeReducer from "./userTreesSlice";
-import loginReducer from "./loginSlice";
-import screenDimentionsReducer from "./screenDimentionsSlice";
-import addTreeReducer from "./addTreeModalSlice";
-import treeOptionsReducer from "./editTreeSlice";
-import userReducer from "./userSlice";
-import newNodeReducer from "./newNodeSlice";
+import canvasDisplaySettingsReducer from "./slices/canvasDisplaySettingsSlice";
+import currentTreeReducer from "./slices/userTreesSlice";
+import loginReducer from "./slices/loginSlice";
+import screenDimentionsReducer from "./slices/screenDimentionsSlice";
+import addTreeReducer from "./slices/addTreeModalSlice";
+import treeOptionsReducer from "./slices/editTreeSlice";
+import userReducer from "./slices/userSlice";
+import newNodeReducer from "./slices/newNodeSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
 

@@ -5,7 +5,7 @@ import { StackNavigatorParams } from "../../../App";
 import { InteractiveTreeFunctions } from "../../components/treeRelated/InteractiveTree";
 import { deleteNodeWithNoChildren, updateNodeAndTreeCompletion } from "../../functions/mutateTree";
 import { useAppDispatch } from "../../redux/reduxHooks";
-import { removeUserTree, setSelectedDndZone, setSelectedNode, updateUserTrees } from "../../redux/userTreesSlice";
+import { removeUserTree, setSelectedDndZone, setSelectedNode, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { DnDZone, Skill, Tree } from "../../types";
 import { ModalState } from "./ViewingSkillTree";
 

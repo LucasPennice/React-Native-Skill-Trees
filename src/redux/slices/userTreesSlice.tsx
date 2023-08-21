@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DnDZone, Skill, Tree } from "../types";
-import type { RootState } from "./reduxStore";
+import { DnDZone, Skill, Tree } from "../../types";
+import { RootState } from "../reduxStore";
 
 // Define a type for the slice state
 type UserTreesSlice = {

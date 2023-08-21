@@ -6,10 +6,10 @@ import { InteractiveNodeState, InteractiveTreeConfig } from "../../components/tr
 import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { getMenuEditingFunctions, getMenuNonEditingFunctions } from "../../components/treeRelated/selectedNodeMenu/useGetMenuFunctions";
 import { findNodeById } from "../../functions/extractInformationFromTree";
-import { CanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
+import { CanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { useAppDispatch } from "../../redux/reduxHooks";
-import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { clearSelectedNode as reduxClearSelectedNode, updateUserTrees } from "../../redux/userTreesSlice";
+import { ScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
+import { clearSelectedNode as reduxClearSelectedNode, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { DnDZone, SelectedNodeId, Skill, Tree } from "../../types";
 import { ModalState } from "./ViewingSkillTree";
 

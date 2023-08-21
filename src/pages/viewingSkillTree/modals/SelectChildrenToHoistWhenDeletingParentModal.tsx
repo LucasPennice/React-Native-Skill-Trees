@@ -6,7 +6,7 @@ import { checkIfTreeHasInvalidCompleteDependencies, findParentOfNode } from "../
 import { deleteNodeWithChildren } from "../../../functions/mutateTree";
 import { centerFlex, colors } from "../../../parameters";
 import { useAppDispatch } from "../../../redux/reduxHooks";
-import { clearSelectedNode, updateUserTrees } from "../../../redux/userTreesSlice";
+import { clearSelectedNode, updateUserTrees } from "../../../redux/slices/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 import useCurrentTree from "../../../useCurrentTree";
 

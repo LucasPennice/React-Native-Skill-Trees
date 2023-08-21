@@ -8,10 +8,10 @@ import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRe
 import { getMenuNonEditingFunctions } from "../../components/treeRelated/selectedNodeMenu/useGetMenuFunctions";
 import { findNodeById } from "../../functions/extractInformationFromTree";
 import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
-import { CanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
+import { CanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { useAppDispatch } from "../../redux/reduxHooks";
-import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
-import { removeUserTree, updateUserTrees } from "../../redux/userTreesSlice";
+import { ScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
+import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { DnDZone, SelectedNodeId, Skill, Tree } from "../../types";
 
 function useHandleMemoizedHomeTreeProps(

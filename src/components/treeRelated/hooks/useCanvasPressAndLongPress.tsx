@@ -4,7 +4,7 @@ import { Gesture, GestureStateChangeEvent, LongPressGestureHandlerEventPayload, 
 import { runOnJS } from "react-native-reanimated";
 import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, TOUCH_BUFFER } from "../../../parameters";
 import { useAppDispatch } from "../../../redux/reduxHooks";
-import { clearSelectedNode } from "../../../redux/userTreesSlice";
+import { clearSelectedNode } from "../../../redux/slices/userTreesSlice";
 import { CartesianCoordinate, DnDZone, GestureHandlerState, NodeCoordinate, SelectedNodeId } from "../../../types";
 import { NODE_MENU_SIZE } from "../nodeMenu/NodeMenu";
 

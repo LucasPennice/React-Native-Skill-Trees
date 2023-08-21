@@ -1,6 +1,6 @@
 import { editTreeProperties } from "../../functions/mutateTree";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { selectTreeSlice, updateUserTrees } from "../../redux/userTreesSlice";
+import { selectTreeSlice, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { Skill, Tree } from "../../types";
 
 function useUpdateTreeWithNewSkillDetails(updatedSkill: Skill, nodeToUpdate: Tree<Skill>) {

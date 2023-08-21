@@ -5,9 +5,9 @@ import AppText from "../../components/AppText";
 import NodeView from "../../components/NodeView";
 import { countCompletedSkillNodes, countSkillNodes, treeCompletedSkillPercentage } from "../../functions/extractInformationFromTree";
 import { centerFlex, colors } from "../../parameters";
-import { setTree } from "../../redux/editTreeSlice";
+import { setTree } from "../../redux/slices/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { selectSafeScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { Skill, Tree } from "../../types";
 
 function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tree<Skill>; changeTreeAndNavigateToViewingTree: () => void }) {

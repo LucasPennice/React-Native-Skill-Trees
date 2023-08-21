@@ -1,4 +1,4 @@
-import { CanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
+import { CanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { CoordinatesWithTreeData, LevelOverflow, NodeCategory, Skill, Tree, getDefaultSkillValue } from "../../types";
 import { round8Decimals } from "../coordinateSystem";
 

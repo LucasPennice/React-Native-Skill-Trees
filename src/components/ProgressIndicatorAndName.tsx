@@ -5,7 +5,7 @@ import { Circle, Defs, LinearGradient, Stop, Svg, Circle as SvgCircle } from "re
 import { treeCompletedSkillPercentage } from "../functions/extractInformationFromTree";
 import { centerFlex, colors } from "../parameters";
 import { useAppSelector } from "../redux/reduxHooks";
-import { selectSafeScreenDimentions } from "../redux/screenDimentionsSlice";
+import { selectSafeScreenDimentions } from "../redux/slices/screenDimentionsSlice";
 import { Skill, Tree } from "../types";
 import AppText from "./AppText";
 import { getWheelParams } from "../functions/misc";

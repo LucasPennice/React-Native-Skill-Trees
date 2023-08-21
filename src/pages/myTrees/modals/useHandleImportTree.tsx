@@ -1,6 +1,6 @@
 import { Alert } from "react-native";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { appendToUserTree, selectTreeSlice, updateUserTrees } from "../../../redux/userTreesSlice";
+import { appendToUserTree, selectTreeSlice, updateUserTrees } from "../../../redux/slices/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 
 function useHandleImportTree(treeToImport: Tree<Skill> | undefined, closeModal: () => void) {

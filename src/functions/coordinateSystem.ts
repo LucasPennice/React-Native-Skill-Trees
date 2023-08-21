@@ -7,7 +7,7 @@ import {
     getNodesCoordinates,
     removeTreeDataFromCoordinate,
 } from "../components/treeRelated/coordinateFunctions";
-import { ScreenDimentions } from "../redux/screenDimentionsSlice";
+import { ScreenDimentions } from "../redux/slices/screenDimentionsSlice";
 import { CartesianCoordinate, PolarCoordinate, Skill, Tree } from "../types";
 
 export function arcToAngleRadians(arcLength: number, circleRadius: number) {

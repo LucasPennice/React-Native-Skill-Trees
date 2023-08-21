@@ -7,9 +7,9 @@ import ColorGradientSelector from "../../../components/ColorGradientSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import { mutateEveryTree } from "../../../functions/mutateTree";
 import { WHITE_GRADIENT, colors, nodeGradients } from "../../../parameters";
-import { selectTreeOptions, setTree } from "../../../redux/editTreeSlice";
+import { selectTreeOptions, setTree } from "../../../redux/slices/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { removeUserTree, updateUserTrees } from "../../../redux/userTreesSlice";
+import { removeUserTree, updateUserTrees } from "../../../redux/slices/userTreesSlice";
 import { generalStyles } from "../../../styles";
 import { ColorGradient, Skill, Tree } from "../../../types";
 

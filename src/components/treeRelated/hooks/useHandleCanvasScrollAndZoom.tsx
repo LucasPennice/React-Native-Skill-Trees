@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../parameters";
-import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { ScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
 import { CanvasDimensions, NodeCoordinate } from "../../../types";
 import { getXBounds, getYBounds, useHandleCanvasBounds } from "./useHandleCanvasBounds";
 

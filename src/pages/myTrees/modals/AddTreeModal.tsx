@@ -22,14 +22,14 @@ import HierarchicalSkillTree from "../../../components/treeRelated/hierarchical/
 import useHandleCanvasScroll from "../../../components/treeRelated/hooks/useHandleCanvasScrollAndZoom";
 import { createTree } from "../../../functions/misc";
 import { MENU_HIGH_DAMPENING, centerFlex, colors, nodeGradients } from "../../../parameters";
-import { close, selectAddTree } from "../../../redux/addTreeModalSlice";
-import { selectCanvasDisplaySettings } from "../../../redux/canvasDisplaySettingsSlice";
+import { close, selectAddTree } from "../../../redux/slices/addTreeModalSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { selectSafeScreenDimentions } from "../../../redux/screenDimentionsSlice";
-import { appendToUserTree } from "../../../redux/userTreesSlice";
+import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
 import { generalStyles } from "../../../styles";
 import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "../../../types";
 import useHandleImportTree from "./useHandleImportTree";
+import { selectCanvasDisplaySettings } from "../../../redux/slices/canvasDisplaySettingsSlice";
+import { appendToUserTree } from "../../../redux/slices/userTreesSlice";
 
 function AddTreeModal() {
     const { query } = useRequestProcessor();

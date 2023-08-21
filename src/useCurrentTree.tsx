@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAppSelector } from "./redux/reduxHooks";
-import { selectTreeSlice } from "./redux/userTreesSlice";
+import { selectTreeSlice } from "./redux/slices/userTreesSlice";
 import { Skill, Tree } from "./types";
 
 function useCurrentTree() {

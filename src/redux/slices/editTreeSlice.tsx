@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Skill, Tree } from "../types";
-import type { RootState } from "./reduxStore";
+import { Skill, Tree } from "../../types";
+import { RootState } from "../reduxStore";
 
 type State = {
     tree: undefined | Tree<Skill>;

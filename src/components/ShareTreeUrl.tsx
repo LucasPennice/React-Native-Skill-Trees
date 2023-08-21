@@ -4,7 +4,7 @@ import axiosClient from "../../axiosClient";
 import { useRequestProcessor } from "../../requestProcessor";
 import { centerFlex, colors } from "../parameters";
 import { useAppSelector } from "../redux/reduxHooks";
-import { selectUserId } from "../redux/userSlice";
+import { selectUserId } from "../redux/slices/userSlice";
 import { Skill, Tree } from "../types";
 import AppText from "./AppText";
 import AppTextInput from "./AppTextInput";

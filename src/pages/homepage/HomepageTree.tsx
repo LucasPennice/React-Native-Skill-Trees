@@ -8,8 +8,8 @@ import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeScreensh
 import InteractiveTree from "../../components/treeRelated/InteractiveTree";
 import CanvasSettingsModal from "../../components/treeRelated/canvasSettingsModal/CanvasSettingsModal";
 import { buildHomepageTree } from "../../functions/treeToRadialCoordinates/general";
-import { CanvasDisplaySettings } from "../../redux/canvasDisplaySettingsSlice";
-import { ScreenDimentions } from "../../redux/screenDimentionsSlice";
+import { CanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
+import { ScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { Skill, Tree } from "../../types";
 import useHandleMemoizedHomeTreeProps from "./useHandleMemoizedHomeTreeProps";
 

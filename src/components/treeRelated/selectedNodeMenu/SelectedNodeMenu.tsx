@@ -3,7 +3,7 @@ import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } fr
 import Animated, { Easing, FadeInDown, FadeOutDown, FadeOutUp, Layout } from "react-native-reanimated";
 import { checkIfCompletionIsAllowedForNode, checkIfUncompletionIsAllowedForNode, findNodeById } from "../../../functions/extractInformationFromTree";
 import { CIRCLE_SIZE_SELECTED, NAV_HEGIHT, centerFlex, colors } from "../../../parameters";
-import { ScreenDimentions } from "../../../redux/screenDimentionsSlice";
+import { ScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
 import { generalStyles } from "../../../styles";
 import { Skill, SkillPropertiesEditableOnPopMenu, Tree } from "../../../types";
 import AppText from "../../AppText";

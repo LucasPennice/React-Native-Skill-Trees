@@ -10,7 +10,7 @@ import {
     setShowCircleGuide,
     setShowIcons,
     setShowLabel,
-} from "../../../redux/canvasDisplaySettingsSlice";
+} from "../../../redux/slices/canvasDisplaySettingsSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { ColorGradient } from "../../../types";
 import AppText from "../../AppText";
