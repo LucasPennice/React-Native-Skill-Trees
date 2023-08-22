@@ -233,6 +233,14 @@ function ViewingSkillTree({ navigation, route }: Props) {
         openChildrenHoistSelector
     );
 
+    const takingScreenshotState = [
+        modalState === "TAKING_SCREENSHOT",
+        {
+            openTakingScreenshotModal: () => dispatchModalState("openTakeScreenshotModal"),
+            closeTakingScreenshotModal: () => dispatchModalState("returnToIdle"),
+        },
+    ] as const;
+
     return (
         <View style={{ position: "relative", backgroundColor: colors.background, flex: 1, overflow: "hidden" }}>
             {showTree && (
@@ -250,13 +258,7 @@ function ViewingSkillTree({ navigation, route }: Props) {
                 <ShareTreeScreenshot
                     canvasRef={canvasRef}
                     shouldShare={Boolean(shouldRenderShareButton)}
-                    takingScreenShotState={[
-                        modalState === "TAKING_SCREENSHOT",
-                        (v: boolean) => {
-                            if (v === true) return dispatchModalState("openTakeScreenshotModal");
-                            return dispatchModalState("returnToIdle");
-                        },
-                    ]}
+                    takingScreenshotState={takingScreenshotState}
                     tree={selectedTree}
                 />
             )}

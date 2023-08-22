@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
-import { SharedValue, runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { SharedValue, WithSpringConfig, runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
 import { ScreenDimentions } from "../../../../redux/slices/screenDimentionsSlice";
 import { CanvasDimensions, NodeCoordinate } from "../../../../types";
 import { useHandleCanvasBounds } from "../useHandleCanvasBounds";
 import { ANIMATION_DURATION_AFTER_FAILED_LONG_PRESS_MS, DEACCELERATION_FACTOR, DEFAULT_SCALE } from "./params";
+
+const AFTER_SCROLL_SPING_PARAMS: WithSpringConfig = {
+    mass: 1,
+    damping: 15,
+    stiffness: 100,
+    overshootClamping: true,
+    restDisplacementThreshold: 0.01,
+    restSpeedThreshold: 2,
+};
 
 function useCanvasScroll(
     canvasDimentions: CanvasDimensions,
@@ -114,6 +123,7 @@ function useCanvasScroll(
                 runOnJS(updateAnimatePan)();
             } else {
                 offsetX.value = newXValue;
+                offsetX.value = newXValue;
                 offsetY.value = newYValue;
             }
         })
@@ -151,9 +161,9 @@ function useCanvasScroll(
                         outOfBounds: { x: xAfterSlideOutOfBounds, y: false },
                         bounds: { x: [minXBound.value, maxXBound.value], y: [0, 0] },
                     });
-                    offsetX.value = withSpring(safeXAfterSlide, { velocity: e.velocityX, stiffness: 10, dampingRatio: 1 });
+                    offsetX.value = withSpring(safeXAfterSlide, { velocity: e.velocityX, ...AFTER_SCROLL_SPING_PARAMS });
                 } else {
-                    offsetX.value = withSpring(xCoordAfterFling, { velocity: e.velocityX, stiffness: 10, dampingRatio: 1 });
+                    offsetX.value = withSpring(xCoordAfterFling, { velocity: e.velocityX, ...AFTER_SCROLL_SPING_PARAMS });
                 }
             }
 
@@ -175,9 +185,9 @@ function useCanvasScroll(
                         outOfBounds: { x: false, y: yAfterSlideOutOfBounds },
                         bounds: { x: [0, 0], y: [minYBound.value, maxYBound.value] },
                     });
-                    offsetY.value = withSpring(safeYAfterSlide, { velocity: e.velocityY, stiffness: 10, dampingRatio: 1 });
+                    offsetY.value = withSpring(safeYAfterSlide, { velocity: e.velocityY, ...AFTER_SCROLL_SPING_PARAMS });
                 } else {
-                    offsetY.value = withSpring(yCoordAfterFling, { velocity: e.velocityY, stiffness: 10, dampingRatio: 1 });
+                    offsetY.value = withSpring(yCoordAfterFling, { velocity: e.velocityY, ...AFTER_SCROLL_SPING_PARAMS });
                 }
             }
         });
