@@ -1,10 +1,13 @@
 import { editTreeProperties } from "../../functions/mutateTree";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
+import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { selectTreeSlice, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { Skill, Tree } from "../../types";
 
 function useUpdateTreeWithNewSkillDetails(updatedSkill: Skill, nodeToUpdate: Tree<Skill>) {
     const { userTrees } = useAppSelector(selectTreeSlice);
+    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
+
     const dispatch = useAppDispatch();
 
     const updateSkillDetails = () => {
@@ -18,7 +21,7 @@ function useUpdateTreeWithNewSkillDetails(updatedSkill: Skill, nodeToUpdate: Tre
 
         if (updatedTree === undefined) throw new Error("couldn't update tree useUpdateTreeWithNewSkillDetails");
 
-        dispatch(updateUserTrees(updatedTree));
+        dispatch(updateUserTrees({ updatedTree, screenDimensions }));
     };
 
     return updateSkillDetails;

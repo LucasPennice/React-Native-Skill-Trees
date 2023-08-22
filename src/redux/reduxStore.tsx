@@ -7,6 +7,7 @@ import addTreeReducer from "./slices/addTreeModalSlice";
 import treeOptionsReducer from "./slices/editTreeSlice";
 import userReducer from "./slices/userSlice";
 import newNodeReducer from "./slices/newNodeSlice";
+import treeCoordinatesReducer from "./slices/treesCoordinatesSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
 
@@ -25,6 +26,7 @@ const rootReducer = combineReducers({
     treeOptions: treeOptionsReducer,
     user: userReducer,
     newNodes: newNodeReducer,
+    treeCoordinates: treeCoordinatesReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

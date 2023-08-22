@@ -2,9 +2,11 @@ import { Alert } from "react-native";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { appendToUserTree, selectTreeSlice, updateUserTrees } from "../../../redux/slices/userTreesSlice";
 import { Skill, Tree } from "../../../types";
+import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
 
 function useHandleImportTree(treeToImport: Tree<Skill> | undefined, closeModal: () => void) {
     const { userTrees } = useAppSelector(selectTreeSlice);
+    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     const dispatch = useAppDispatch();
 
     if (treeToImport === undefined)
@@ -16,7 +18,7 @@ function useHandleImportTree(treeToImport: Tree<Skill> | undefined, closeModal: 
     const overwriteTree = userTrees.find((userTree) => userTree.treeId === treeToImport.treeId);
 
     const updateUserTree = () => {
-        dispatch(updateUserTrees(treeToImport));
+        dispatch(updateUserTrees({ updatedTree: treeToImport, screenDimensions }));
         closeModal();
     };
 

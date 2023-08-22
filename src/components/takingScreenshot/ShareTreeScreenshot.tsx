@@ -10,17 +10,17 @@ import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated"
 
 type Props = {
     shouldShare: boolean;
-    takingScreenShotState: [boolean, (v: boolean) => void];
+    takingScreenshotState: readonly [boolean, { readonly openTakingScreenshotModal: () => void; readonly closeTakingScreenshotModal: () => void }];
     tree: Tree<Skill>;
     canvasRef: RefObject<SkiaDomView>;
 };
 
-function ShareTreeScreenshot({ shouldShare, takingScreenShotState, tree, canvasRef }: Props) {
-    const [isTakingScreenshot, setIsTakingScreenshot] = takingScreenShotState;
+function ShareTreeScreenshot({ shouldShare, takingScreenshotState, tree, canvasRef }: Props) {
+    const [takingScreenshot, { openTakingScreenshotModal }] = takingScreenshotState;
     const [permissionResponse, requestPermission] = usePermissions();
 
     const handleScreenshotPermissions = useCallback(() => {
-        if (!isTakingScreenshot) return;
+        if (!takingScreenshot) return;
 
         if (!permissionResponse) {
             requestPermission();
@@ -37,8 +37,8 @@ function ShareTreeScreenshot({ shouldShare, takingScreenShotState, tree, canvasR
     }, [handleScreenshotPermissions]);
 
     const MemoizedModal = useMemo(() => {
-        return <TakingScreenshotLoadingScreenModal canvasRef={canvasRef.current!} takingScreenShotState={takingScreenShotState} tree={tree} />;
-    }, [canvasRef, takingScreenShotState, tree]);
+        return <TakingScreenshotLoadingScreenModal canvasRef={canvasRef.current!} takingScreenshotState={takingScreenshotState} tree={tree} />;
+    }, [canvasRef, takingScreenshotState, tree]);
 
     const opacity = useAnimatedStyle(() => {
         if (!shouldShare) return { opacity: withTiming(0.5, { duration: 150 }) };
@@ -53,7 +53,7 @@ function ShareTreeScreenshot({ shouldShare, takingScreenShotState, tree, canvasR
                     onPress={() => {
                         if (!shouldShare) return;
                         if (!canvasRef.current) return Alert.alert("Please try again");
-                        setIsTakingScreenshot(true);
+                        openTakingScreenshotModal();
                     }}
                     style={[
                         centerFlex,

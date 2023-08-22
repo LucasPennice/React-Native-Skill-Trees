@@ -9,7 +9,7 @@ import useHandleStateIndicatorAnimations from "./useHandleStateIndicatorAnimatio
 
 type Props = {
     functions: {
-        openNewNodeModal: () => void;
+        openNewNodePositionSelector: () => void;
         returnToIdleState: () => void;
     };
     mode: ModalState;
@@ -17,7 +17,7 @@ type Props = {
 };
 
 function AddNodeStateIndicator({ mode, functions }: Props) {
-    const { openNewNodeModal, returnToIdleState } = functions;
+    const { openNewNodePositionSelector, returnToIdleState } = functions;
     //Redux Store
     const { width } = Dimensions.get("screen");
 
@@ -29,7 +29,7 @@ function AddNodeStateIndicator({ mode, functions }: Props) {
         <Animated.View style={[styles, opacity, centerFlex, s.container]}>
             {showAddNode && (
                 <Animated.View style={[centerFlex, { flexDirection: "row", gap: 20 }]} entering={FadeIn.duration(100)}>
-                    <Pressable onPress={openNewNodeModal} style={s.button}>
+                    <Pressable onPress={openNewNodePositionSelector} style={s.button}>
                         <AppText style={{ color: colors.accent }} textProps={{ ellipsizeMode: "clip", numberOfLines: 1 }} fontSize={15}>
                             Add Node
                         </AppText>

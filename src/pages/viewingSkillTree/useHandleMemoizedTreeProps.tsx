@@ -56,10 +56,6 @@ function useHandleMemoizedTreeProps(
         return { screenDimensions, canvasRef, selectedDndZone, selectedNodeId };
     }, [canvasRef, screenDimensions, selectedDndZone, selectedNodeId]);
 
-    const tree: Tree<Skill> | undefined = useMemo(() => {
-        return selectedTree;
-    }, [selectedTree]);
-
     //Interactive Tree Props - SelectedNodeMenu
     const RenderOnSelectedNodeId = useMemo(() => {
         const clearSelectedNode = () => dispatch(reduxClearSelectedNode());
@@ -68,7 +64,7 @@ function useHandleMemoizedTreeProps(
 
         const fn = {
             openChildrenHoistSelector,
-            updateUserTrees: (v: Tree<Skill> | undefined) => dispatch(updateUserTrees(v)),
+            updateUserTrees: (updatedTree: Tree<Skill> | undefined) => dispatch(updateUserTrees({ updatedTree, screenDimensions })),
             clearSelectedNode,
         };
 
@@ -86,7 +82,7 @@ function useHandleMemoizedTreeProps(
         );
     }, [dispatch, navigation, openChildrenHoistSelector, screenDimensions, selectedNode, selectedTree]);
 
-    return { RenderOnSelectedNodeId, tree, interactiveTreeState, config };
+    return { RenderOnSelectedNodeId, interactiveTreeState, config };
 }
 
 export default useHandleMemoizedTreeProps;

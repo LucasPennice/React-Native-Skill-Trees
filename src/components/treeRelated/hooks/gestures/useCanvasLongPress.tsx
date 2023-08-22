@@ -19,26 +19,28 @@ type Props = {
             }>
         >
     ];
-    nodeMenuState: [NodeCoordinate | undefined, React.Dispatch<React.SetStateAction<NodeCoordinate | undefined>>];
+    nodeMenuState: readonly [
+        NodeCoordinate | undefined,
+        { readonly closeNodeMenu: () => void; readonly openMenuOfNode: (clickedNode: NodeCoordinate) => void }
+    ];
     config: {
         blockLongPress?: boolean;
         blockDragAndDrop?: boolean;
     };
-    setDraggingNode: (v: boolean) => void;
+    draggingNodeActions: { readonly endDragging: () => void; readonly startDragging: () => void };
 };
 
-function useCanvasLongPress({ config, nodeCoordinatesCentered, setDraggingNode, longPressState, nodeMenuState }: Props) {
+function useCanvasLongPress({ config, nodeCoordinatesCentered, draggingNodeActions, longPressState, nodeMenuState }: Props) {
     const { blockLongPress, blockDragAndDrop } = config;
 
     const [longPressIndicatorPosition, setLongPressIndicatorPosition] = longPressState;
-    const [openMenuOnNode, setOpenMenuOnNode] = nodeMenuState;
-
-    const closeNodeMenu = () => setOpenMenuOnNode(undefined);
+    const [openMenuOnNode, { closeNodeMenu, openMenuOfNode }] = nodeMenuState;
+    const { endDragging, startDragging } = draggingNodeActions;
 
     const resetLongPressIndicator = () => setLongPressIndicatorPosition({ data: undefined, state: "IDLE" });
 
     function handleSuccessfulLongPress(clickedNode: NodeCoordinate) {
-        setOpenMenuOnNode(clickedNode);
+        openMenuOfNode(clickedNode);
         return resetLongPressIndicator();
     }
 
@@ -64,7 +66,7 @@ function useCanvasLongPress({ config, nodeCoordinatesCentered, setDraggingNode, 
             const clickedNode = nodeCoordinatesCentered.find(didTapCircle(e));
             if (!clickedNode) return setLongPressIndicatorPosition({ data: undefined, state: "IDLE" });
 
-            if (clickedNode !== undefined) setDraggingNode(true);
+            if (clickedNode !== undefined) startDragging();
 
             return setLongPressIndicatorPosition({ data: clickedNode, state: "PRESSING" });
         },
@@ -86,7 +88,7 @@ function useCanvasLongPress({ config, nodeCoordinatesCentered, setDraggingNode, 
 
             if (shouldDragAndDrop) return resetLongPressIndicator();
 
-            setDraggingNode(false);
+            endDragging();
 
             if (!longPressIndicatorPosition.data) return resetLongPressIndicator();
 

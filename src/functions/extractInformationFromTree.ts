@@ -1,4 +1,4 @@
-import { UNCENTERED_ROOT_COORDINATES } from "../parameters";
+import { HOMETREE_ROOT_ID, UNCENTERED_ROOT_COORDINATES } from "../parameters";
 import { CoordinatesWithTreeData, OuterPolarContour, PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
 import { cartesianToPositivePolarCoordinates } from "./coordinateSystem";
 
@@ -35,6 +35,20 @@ export function findNodeById(rootNode: Tree<Skill> | undefined, id: string | nul
 
         if (foundNode !== undefined) result = foundNode;
     }
+
+    return result;
+}
+
+export function findNodeByIdInHomeTree<T extends { nodeId: string; treeId: string }>(homeTree: Tree<Skill>, node: T | null): Tree<Skill> | undefined {
+    if (node === null) return undefined;
+
+    if (node.nodeId === HOMETREE_ROOT_ID) return homeTree;
+
+    const subTreeOfNode = homeTree.children.find((subTree) => subTree.treeId === node.treeId);
+
+    if (!subTreeOfNode) return undefined;
+
+    const result = findNodeById(subTreeOfNode, node.nodeId);
 
     return result;
 }

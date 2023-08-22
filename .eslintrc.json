@@ -1,7 +1,9 @@
 {
+    "plugins": ["use-encapsulation"],
     "extends": "react-app",
     "rules": {
         "react-hooks/exhaustive-deps": "off",
         "react/style-prop-object": "off"
+        // "use-encapsulation/prefer-custom-hooks": ["error", { "allow": ["useContext"] }]
     }
 }

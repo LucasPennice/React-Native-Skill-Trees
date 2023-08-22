@@ -3,16 +3,18 @@ import { SkiaDomView } from "@shopify/react-native-skia";
 import { useCallback, useMemo } from "react";
 import { Alert } from "react-native";
 import { StackNavigatorParams } from "../../../App";
-import { InteractiveNodeState, InteractiveTreeConfig, InteractiveTreeFunctions } from "../../components/treeRelated/InteractiveTree";
+import { InteractiveTreeConfig, InteractiveTreeFunctions } from "../../components/treeRelated/InteractiveTree";
+import { InteractiveNodeState } from "../../components/treeRelated/InteractiveTree2H";
 import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { getMenuNonEditingFunctions } from "../../components/treeRelated/selectedNodeMenu/useGetMenuFunctions";
 import { findNodeById } from "../../functions/extractInformationFromTree";
 import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
+import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { CanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
-import { useAppDispatch } from "../../redux/reduxHooks";
-import { ScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
+import { selectHomeTreeCoordinates } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { DnDZone, SelectedNodeId, Skill, Tree } from "../../types";
+import { ScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 
 function useHandleMemoizedHomeTreeProps(
     state: {
@@ -20,25 +22,31 @@ function useHandleMemoizedHomeTreeProps(
         canvasDisplaySettings: CanvasDisplaySettings;
         userTrees: Tree<Skill>[];
     },
-    selectedNodeState: [SelectedNodeId, (v: SelectedNodeId) => void],
+    selectedNodeIdState: readonly [
+        SelectedNodeId,
+        {
+            readonly clearSelectedNodeId: () => void;
+            readonly updateSelectedNodeId: (id: string) => void;
+        }
+    ],
     canvasRef: React.RefObject<SkiaDomView>,
     homepageTree: Tree<Skill>,
     navigation: NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>,
     openCanvasSettings: () => void
 ) {
+    const homeTreeCoordinate = useAppSelector(selectHomeTreeCoordinates);
+
     const { canvasDisplaySettings, screenDimensions } = state;
-    const [selectedNodeId, setSelectedNodeId] = selectedNodeState;
+    const [selectedNodeId, { clearSelectedNodeId, updateSelectedNodeId }] = selectedNodeIdState;
 
     const dispatch = useAppDispatch();
-
-    const clearSelectedNode = () => setSelectedNodeId(null);
 
     const selectedNode = findNodeById(homepageTree, selectedNodeId);
 
     const onNodeClick = useCallback((node: Tree<Skill>) => {
         const nodeId = node.nodeId;
 
-        setSelectedNodeId(nodeId);
+        updateSelectedNodeId(nodeId);
 
         return;
         //eslint-disable-next-line
@@ -48,9 +56,13 @@ function useHandleMemoizedHomeTreeProps(
     const config: InteractiveTreeConfig = useMemo(() => {
         return { canvasDisplaySettings, isInteractive: true, renderStyle: "radial", editTreeFromNodeMenu: false, blockDragAndDrop: true };
     }, [canvasDisplaySettings]);
+
     const interactiveTreeState: InteractiveNodeState = useMemo(() => {
-        return { screenDimensions, canvasRef, selectedNodeId };
-    }, [screenDimensions, canvasRef, selectedNodeId]);
+        const treeCoordinate = homeTreeCoordinate;
+
+        return { screenDimensions, selectedNodeId, treeCoordinate, canvasRef, selectedDndZone: undefined };
+    }, [screenDimensions, canvasRef, selectedNodeId, homeTreeCoordinate]);
+
     const functions: InteractiveTreeFunctions = useMemo(() => {
         return {
             onNodeClick,
@@ -74,7 +86,7 @@ function useHandleMemoizedHomeTreeProps(
 
                     const updatedTree = updateNodeAndTreeCompletion(treeToUpdate, updatedNode);
 
-                    dispatch(updateUserTrees(updatedTree));
+                    dispatch(updateUserTrees({ updatedTree, screenDimensions }));
                 },
                 openAddSkillModal: (dnDZoneType: DnDZone["type"], node: Tree<Skill>) => {
                     navigation.navigate("ViewingSkillTree", { treeId: node.treeId, addNodeModal: { dnDZoneType, nodeId: node.nodeId } });
@@ -82,11 +94,11 @@ function useHandleMemoizedHomeTreeProps(
                 openCanvasSettingsModal: openCanvasSettings,
             },
         };
-    }, [dispatch, navigation, onNodeClick, openCanvasSettings]);
+    }, [dispatch, navigation, onNodeClick, openCanvasSettings, screenDimensions]);
 
     //Interactive Tree Props - SelectedNodeMenu
     const RenderOnSelectedNodeId = useMemo(() => {
-        const nonEditingMenuFunctions = getMenuNonEditingFunctions(selectedNode, navigation, clearSelectedNode);
+        const nonEditingMenuFunctions = getMenuNonEditingFunctions(selectedNode, navigation, clearSelectedNodeId);
 
         const selectedNodeMenuState: SelectedNodeMenuState = {
             screenDimensions,

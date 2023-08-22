@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DnDZone, Skill, Tree } from "../../types";
 import { RootState } from "../reduxStore";
+import { ScreenDimentions } from "./screenDimentionsSlice";
 
 // Define a type for the slice state
 type UserTreesSlice = {
@@ -35,15 +36,21 @@ export const userTreesSlice = createSlice({
             state.currentTreeId = undefined;
         },
 
-        updateUserTrees: (state, action: PayloadAction<Tree<Skill> | undefined>) => {
+        updateUserTrees: (
+            state,
+            action: PayloadAction<{
+                updatedTree: Tree<Skill> | undefined;
+                screenDimensions: ScreenDimentions;
+            }>
+        ) => {
             //We pass the new value of the mutated tree
             //And then update the value of userTrees with the new state
-            const valueToMutate = action.payload;
+            const { updatedTree } = action.payload;
 
-            if (valueToMutate === undefined) throw new Error("updateUserTrees error tree is undefined");
+            if (updatedTree === undefined) throw new Error("updateUserTrees error tree is undefined");
 
             state.userTrees = state.userTrees.map((tree) => {
-                if (tree.treeId === valueToMutate.treeId) return valueToMutate;
+                if (tree.treeId === updatedTree.treeId) return updatedTree;
 
                 return tree;
             });

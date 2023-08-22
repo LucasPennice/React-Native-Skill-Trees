@@ -16,23 +16,23 @@ type Stage = "TAKING_SCREENSHOT" | "EDITING_LAYOUT";
 
 function TakingScreenshotLoadingScreenModal({
     canvasRef,
-    takingScreenShotState,
+    takingScreenshotState,
     tree,
 }: {
     canvasRef: SkiaDomView;
-    takingScreenShotState: [boolean, (v: boolean) => void];
+    takingScreenshotState: readonly [boolean, { readonly openTakingScreenshotModal: () => void; readonly closeTakingScreenshotModal: () => void }];
     tree: Tree<Skill>;
 }) {
     const { width } = Dimensions.get("screen");
 
-    const [open, setOpen] = takingScreenShotState;
+    const [takingScreenshot, { closeTakingScreenshotModal }] = takingScreenshotState;
 
     const [stage, setStage] = useState<Stage>("TAKING_SCREENSHOT");
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     useEffect(() => {
-        if (open) getScreenShots();
-    }, [open]);
+        if (takingScreenshot) getScreenShots();
+    }, [takingScreenshot]);
 
     useEffect(() => {
         return () => {
@@ -41,16 +41,14 @@ function TakingScreenshotLoadingScreenModal({
         };
     }, []);
 
-    const closeModal = () => setOpen(false);
-
     const BAR_WIDHT = width > 600 ? 550 : width - 50;
 
     const styles = useAnimatedStyle(() => {
-        return { width: withTiming(open ? BAR_WIDHT : 0, { duration: 1000, easing: Easing.bezierFn(0.83, 0, 0.17, 1) }) };
-    }, [open]);
+        return { width: withTiming(takingScreenshot ? BAR_WIDHT : 0, { duration: 1000, easing: Easing.bezierFn(0.83, 0, 0.17, 1) }) };
+    }, [takingScreenshot]);
 
     return (
-        <FlingToDismissModal closeModal={closeModal} open={open}>
+        <FlingToDismissModal closeModal={closeTakingScreenshotModal} open={takingScreenshot}>
             <>
                 {stage === "TAKING_SCREENSHOT" && (
                     <Animated.View style={[centerFlex, { flex: 1, opacity: 1 }]} entering={FadeInDown}>
@@ -64,7 +62,7 @@ function TakingScreenshotLoadingScreenModal({
                 )}
 
                 {stage === "EDITING_LAYOUT" && selectedImage !== null && (
-                    <LayoutSelector selectedImage={selectedImage} tree={tree} cancelSharing={() => setOpen(false)} />
+                    <LayoutSelector selectedImage={selectedImage} tree={tree} cancelSharing={closeTakingScreenshotModal} />
                 )}
             </>
         </FlingToDismissModal>
@@ -88,7 +86,7 @@ function TakingScreenshotLoadingScreenModal({
             );
         } catch (error) {
             Alert.alert("Could not generate image, please try again");
-            setOpen(false);
+            closeTakingScreenshotModal();
         }
     }
 }

@@ -5,10 +5,11 @@ import NodeView from "../../../components/NodeView";
 import { checkIfTreeHasInvalidCompleteDependencies, findParentOfNode } from "../../../functions/extractInformationFromTree";
 import { deleteNodeWithChildren } from "../../../functions/mutateTree";
 import { centerFlex, colors } from "../../../parameters";
-import { useAppDispatch } from "../../../redux/reduxHooks";
+import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { clearSelectedNode, updateUserTrees } from "../../../redux/slices/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 import useCurrentTree from "../../../useCurrentTree";
+import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
 
 type Props = {
     nodeToDelete: Tree<Skill> | null;
@@ -18,6 +19,7 @@ type Props = {
 
 function SelectChildrenToHoistWhenDeletingParentModal({ nodeToDelete, closeModalAndClearState, open }: Props) {
     const currentTree = useCurrentTree();
+    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     const dispatch = useAppDispatch();
 
     if (!nodeToDelete) return <></>;
@@ -25,9 +27,9 @@ function SelectChildrenToHoistWhenDeletingParentModal({ nodeToDelete, closeModal
     const candidatesToHoist = nodeToDelete.children;
 
     const deleteParentAndHoistChildren = (childrenToHoist: Tree<Skill>) => () => {
-        const newTree = deleteNodeWithChildren(currentTree, nodeToDelete, childrenToHoist);
+        const updatedTree = deleteNodeWithChildren(currentTree, nodeToDelete, childrenToHoist);
 
-        dispatch(updateUserTrees(newTree));
+        dispatch(updateUserTrees({ updatedTree, screenDimensions }));
 
         closeModalAndClearState();
 

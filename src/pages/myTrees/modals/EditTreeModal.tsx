@@ -12,10 +12,12 @@ import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { removeUserTree, updateUserTrees } from "../../../redux/slices/userTreesSlice";
 import { generalStyles } from "../../../styles";
 import { ColorGradient, Skill, Tree } from "../../../types";
+import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
 
 function EditTreeModal() {
     //Redux State
     const { tree } = useAppSelector(selectTreeOptions);
+    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     const open = tree !== undefined;
     //Local State
     const [treeName, setTreeName] = useState<string>("");
@@ -68,7 +70,7 @@ function EditTreeModal() {
 
         updatedTree = { ...updatedTree, data: { ...updatedTree.data, icon: { isEmoji: newIsEmoji, text: newIcon } } };
 
-        dispatch(updateUserTrees(updatedTree));
+        dispatch(updateUserTrees({ updatedTree, screenDimensions }));
         closeModal();
 
         function updateTree(tree: Tree<Skill>): Tree<Skill> {

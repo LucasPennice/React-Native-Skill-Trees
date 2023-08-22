@@ -4,15 +4,16 @@ import { Alert } from "react-native";
 import { StackNavigatorParams } from "../../../App";
 import { InteractiveTreeFunctions } from "../../components/treeRelated/InteractiveTree";
 import { deleteNodeWithNoChildren, updateNodeAndTreeCompletion } from "../../functions/mutateTree";
-import { useAppDispatch } from "../../redux/reduxHooks";
+import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { removeUserTree, setSelectedDndZone, setSelectedNode, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { DnDZone, Skill, Tree } from "../../types";
-import { ModalState } from "./ViewingSkillTree";
+import { ModalReducerAction, ModalState } from "./ViewingSkillTree";
+import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 
 function useHandleTreeFunctions(
     state: {
         params: StackNavigatorParams["ViewingSkillTree"];
-        modal: [ModalState, (v: ModalState) => void];
+        modalStateReducer: readonly [ModalState, React.Dispatch<ModalReducerAction>];
     },
     functions: {
         openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void;
@@ -20,9 +21,10 @@ function useHandleTreeFunctions(
     navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>
 ) {
     //State
-    const { modal, params } = state;
-    const [modalState, setModalState] = modal;
+    const { modalStateReducer, params } = state;
+    const [modalState, dispatchModalState] = modalStateReducer;
     //Hooks
+    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     const dispatch = useAppDispatch();
     const modalRef = useRef<ModalState>(modalState);
     //This is a copy of the Dnd zones inside InteractiveTree 👇
@@ -39,14 +41,14 @@ function useHandleTreeFunctions(
             const nodeId = node.nodeId;
 
             dispatch(setSelectedNode({ nodeId, menuMode: "VIEWING" }));
-            setModalState("NODE_SELECTED");
+            dispatchModalState("openSelectedNodeMenu");
         };
 
         const onDndZoneClick = (clickedZone: DnDZone | undefined) => {
             if (modalRef.current !== "PLACING_NEW_NODE") return;
             if (clickedZone === undefined) return;
             dispatch(setSelectedDndZone(clickedZone));
-            setModalState("INPUT_DATA_FOR_NEW_NODE");
+            dispatchModalState("openNewNodeModal");
         };
 
         const nodeMenu: InteractiveTreeFunctions["nodeMenu"] = {
@@ -54,9 +56,9 @@ function useHandleTreeFunctions(
             confirmDeleteNode: (tree: Tree<Skill>, node: Tree<Skill>) => {
                 if (node.children.length !== 0) return functions.openChildrenHoistSelector(node);
 
-                const result = deleteNodeWithNoChildren(tree, node);
+                const updatedTree = deleteNodeWithNoChildren(tree, node);
 
-                dispatch(updateUserTrees(result));
+                dispatch(updateUserTrees({ updatedTree, screenDimensions }));
             },
             selectNode: (nodeId: string, menuMode: "VIEWING" | "EDITING") => dispatch(setSelectedNode({ nodeId, menuMode })),
             confirmDeleteTree: (treeId: string) => {
@@ -82,7 +84,7 @@ function useHandleTreeFunctions(
 
                 const updatedTree = updateNodeAndTreeCompletion(treeToUpdate, updatedNode);
 
-                dispatch(updateUserTrees(updatedTree));
+                dispatch(updateUserTrees({ updatedTree, screenDimensions }));
             },
             openAddSkillModal: (zoneType: "PARENT" | "CHILDREN" | "LEFT_BROTHER" | "RIGHT_BROTHER", node: Tree<Skill>) => {
                 const dndZone = dndZoneCoordinatesCopy.find((zone) => zone.ofNode === node.nodeId && zone.type === zoneType);
@@ -90,7 +92,7 @@ function useHandleTreeFunctions(
                 if (!dndZone) throw new Error("couldn't find dndZone in openAddSkillModal");
 
                 dispatch(setSelectedDndZone(dndZone));
-                setModalState("INPUT_DATA_FOR_NEW_NODE");
+                dispatchModalState("openNewNodeModal");
             },
         };
 
@@ -105,11 +107,11 @@ function useHandleTreeFunctions(
             if (!dndZone) throw new Error("couldn't find dndZone in runOnTreeUpdate");
 
             dispatch(setSelectedDndZone(dndZone));
-            setModalState("INPUT_DATA_FOR_NEW_NODE");
+            dispatchModalState("openNewNodeModal");
         };
 
         return { onNodeClick, onDndZoneClick, nodeMenu, runOnTreeUpdate };
-    }, [dispatch, dndZoneCoordinatesCopy, functions, navigation.navigate, params, setModalState]);
+    }, [dispatch, dndZoneCoordinatesCopy, functions, navigation.navigate, params, screenDimensions, modalStateReducer]);
 
     return result;
 }

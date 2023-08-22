@@ -244,7 +244,7 @@ export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDim
             ...c,
             x: c.x + distanceToCenterRootNode,
             y: c.y + distanceToCenterRootNodeVertically,
-        };
+        } as NodeCoordinate;
     });
 }
 

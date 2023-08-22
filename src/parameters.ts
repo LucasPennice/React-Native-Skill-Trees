@@ -72,3 +72,5 @@ export const ALLOWED_NODE_SPACING = 0.65;
 export const UNCENTERED_ROOT_COORDINATES = { x: 0, y: 0 };
 
 export const EmojiRegex = /\p{Extended_Pictographic}/gu;
+
+export const HOMETREE_ROOT_ID = "homepageRoot";
