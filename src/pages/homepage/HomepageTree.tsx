@@ -20,7 +20,7 @@ import returnNodeMenuFunctions from "../../components/treeRelated/returnNodeMenu
 import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { getMenuNonEditingFunctions } from "../../components/treeRelated/selectedNodeMenu/useGetMenuFunctions";
 import { handleTreeBuild } from "../../functions/coordinateSystem";
-import { findNodeById, findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
+import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
 import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
 import { centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
@@ -28,7 +28,7 @@ import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySet
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { TreeCoordinateData, selectHomeTreeCoordinates } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
-import { CanvasDimensions, DnDZone, NodeCoordinate, Skill, Tree } from "../../types";
+import { CanvasDimensions, CoordinatesWithTreeData, DnDZone, NodeCoordinate, Skill, Tree } from "../../types";
 import RadialSkillTree from "./RadialSkillTree";
 
 type Props = {
@@ -186,16 +186,16 @@ function HomepageTree({ lol }: Props) {
 
     const selectedNodeCoordinates = nodeCoordinatesNoData.find((c) => c.id === selectedNodeId?.nodeId);
 
-    const onNodeClickAdapter = (nodeId: string) => {
+    const onNodeClickAdapter = (coordOfClickedNode: CoordinatesWithTreeData) => {
         if (!treeFunctions || !treeFunctions.onNodeClick) return;
 
         console.log(new Date().getTime());
-        const node = findNodeById(homepageTree, nodeId);
+
+        const node = findNodeByIdInHomeTree(homepageTree, coordOfClickedNode);
 
         if (!node) return;
 
         treeFunctions.onNodeClick(node);
-        console.log(new Date().getTime());
     };
 
     const onDndZoneClickAdapter = (zone?: DnDZone) => {
@@ -231,7 +231,7 @@ function HomepageTree({ lol }: Props) {
         functions: { runOnTap: closeNodeMenu, onDndZoneClick: onDndZoneClickAdapter, onNodeClick: onNodeClickAdapter },
         state: {
             dragAndDropZones: treeState.treeCoordinate.addNodePositions,
-            nodeCoordinates: nodeCoordinatesNoData,
+            nodeCoordinates: treeState.treeCoordinate.nodeCoordinates,
             selectedNodeId: selectedNodeId === null ? selectedNodeId : selectedNodeId.nodeId,
             showDndZones: treeConfig.showDndZones,
         },
@@ -282,26 +282,17 @@ function HomepageTree({ lol }: Props) {
 
     const drag = { ...dragDelta, nodesToDragId: ["bm2W4LgdatpqWFgnmJwBRVY1"] };
     //Interactive Tree Props - SelectedNodeMenu
-    const RenderOnSelectedNodeId = useMemo(() => {
-        const nonEditingMenuFunctions = getMenuNonEditingFunctions(selectedNode, navigation, clearSelectedNodeId);
+    const nonEditingMenuFunctions = getMenuNonEditingFunctions(selectedNode, navigation, clearSelectedNodeId);
 
-        const selectedNodeMenuState: SelectedNodeMenuState = {
-            screenDimensions,
-            selectedNode: selectedNode!,
-            selectedTree: homepageTree,
-            initialMode: "VIEWING",
-        };
-
-        return <SelectedNodeMenu functions={nonEditingMenuFunctions} state={selectedNodeMenuState} />;
-        //eslint-disable-next-line
-    }, [homepageTree, navigation, screenDimensions, selectedNode]);
+    const selectedNodeMenuState: SelectedNodeMenuState = {
+        screenDimensions,
+        selectedNode: selectedNode!,
+        selectedTree: homepageTree,
+        initialMode: "VIEWING",
+    };
 
     // VER CUANTO TARDA EN ACTUALIZARSE EL SELECTED NODE FUERA DE ESTE COMPONENTE VS DENTRO DE ESTE COMPONENTE
     // O SEA VER DONDE ESTA EL BOTTLENECK DESDE QUE YO HAGO CLICK HASTA QUE EL ESTADO EN ESTE COMPONENTE SE ACTUALIZA
-
-    useEffect(() => {
-        console.log(selectedNode);
-    }, [selectedNode]);
 
     return (
         <>
@@ -331,7 +322,7 @@ function HomepageTree({ lol }: Props) {
                 </Animated.View>
             </View>
 
-            {renderSelectedNodeMenu && RenderOnSelectedNodeId}
+            {renderSelectedNodeMenu && <SelectedNodeMenu functions={nonEditingMenuFunctions} state={selectedNodeMenuState} />}
         </>
     );
 }

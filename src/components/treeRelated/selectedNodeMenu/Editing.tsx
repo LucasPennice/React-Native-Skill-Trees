@@ -6,14 +6,22 @@ import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
 import { colors } from "../../../parameters";
 import { generalStyles } from "../../../styles";
-import { SkillPropertiesEditableOnPopMenu } from "../../../types";
+import { SkillIcon, SkillPropertiesEditableOnPopMenu } from "../../../types";
 
 function Editing({
-    newSkillPropsState,
+    skillPropsState,
     handleDeleteSelectedNode,
     checkToggleCompletionPermissions,
 }: {
-    newSkillPropsState: [SkillPropertiesEditableOnPopMenu, React.Dispatch<React.SetStateAction<SkillPropertiesEditableOnPopMenu>>];
+    skillPropsState: readonly [
+        SkillPropertiesEditableOnPopMenu,
+        {
+            readonly setInitialSkillProps: () => void;
+            readonly updateSkillCompletion: (isCompleted: boolean) => void;
+            readonly updateSkillIcon: (icon: SkillIcon) => void;
+            readonly updateSkillName: (name: string) => void;
+        }
+    ];
     handleDeleteSelectedNode: () => void;
     checkToggleCompletionPermissions: {
         checkComplete: () => boolean;
@@ -22,7 +30,7 @@ function Editing({
 }) {
     const { checkComplete, checkUnComplete } = checkToggleCompletionPermissions;
 
-    const [newSkillProps, setNewSkillProps] = newSkillPropsState;
+    const [newSkillProps, { updateSkillCompletion, updateSkillIcon, updateSkillName }] = skillPropsState;
     const [newName, setNewName] = useState(newSkillProps.name);
     const [icon, setIcon] = useState("");
 
@@ -30,32 +38,28 @@ function Editing({
         if (newSkillProps.icon.isEmoji) setIcon(newSkillProps.icon.text);
     }, []);
 
-    const updateSkillName = (newName: string) => {
-        setNewSkillProps((prev: SkillPropertiesEditableOnPopMenu) => {
-            return { ...prev, name: newName };
-        });
-    };
+    const handleUpdateSkillName = (newName: string) => updateSkillName(newName);
 
-    const updateSkillCompletion = (isCompleted: boolean) => () => {
+    const handleUpdateSkillCompletion = (isCompleted: boolean) => () => {
         if (isCompleted && !checkComplete()) return Alert.alert(`Cannot learn ${newName} because the parent skill is not learned`);
         if (!isCompleted && !checkUnComplete()) return Alert.alert(`Cannot unlearn ${newName}, please unlearn it's children skills first`);
 
-        setNewSkillProps((prev: SkillPropertiesEditableOnPopMenu) => {
-            return { ...prev, isCompleted };
-        });
+        updateSkillCompletion(isCompleted);
     };
 
-    const updateSkillIcon = (tentativeIcon: string) => {
-        if (tentativeIcon === "") return setNewSkillProps({ ...newSkillProps, icon: { isEmoji: false, text: newSkillProps.name[0] } });
+    const handleUpdateSkillIcon = (tentativeIcon: string) => {
+        let updatedIcon: SkillIcon = { isEmoji: true, text: tentativeIcon };
 
-        return setNewSkillProps({ ...newSkillProps, icon: { isEmoji: true, text: tentativeIcon } });
+        if (tentativeIcon === "") updatedIcon = { isEmoji: false, text: newSkillProps.name[0] };
+
+        return updateSkillIcon(updatedIcon);
     };
 
     useEffect(() => {
-        updateSkillName(newName);
+        handleUpdateSkillName(newName);
     }, [newName]);
     useEffect(() => {
-        updateSkillIcon(icon);
+        handleUpdateSkillIcon(icon);
     }, [icon]);
 
     return (
@@ -69,8 +73,8 @@ function Editing({
 
             <RadioInput
                 text="Complete"
-                state={[newSkillProps.isCompleted, updateSkillCompletion]}
-                onPress={updateSkillCompletion(!newSkillProps.isCompleted)}
+                state={[newSkillProps.isCompleted, handleUpdateSkillCompletion]}
+                onPress={handleUpdateSkillCompletion(!newSkillProps.isCompleted)}
                 style={{ marginBottom: 0 }}
             />
 

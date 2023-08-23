@@ -1,6 +1,7 @@
+import { useEffect } from "react";
 import { View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import Animated, { SharedValue, runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
 export type Config = {
     directions: ("horizontal" | "vertical")[];
@@ -15,6 +16,7 @@ export type Config = {
     //If we choose circular the horizontal and vertical sizes must be equal
     circular?: boolean;
     runActionOnTouchUp?: boolean;
+    actionZoneTranslateY?: number;
 };
 
 export type Actions = {
@@ -29,11 +31,18 @@ type Props = {
     action?: Actions;
     onHoverActions?: Actions & { clearHover: () => void };
     children: JSX.Element;
+    actionZoneTranslateY?: number;
 };
 
 type ActionType = "verticalUp" | "verticalDown" | "horizontalLeft" | "horizontalRight";
 
-function DirectionMenu({ action, config, children, onHoverActions }: Props) {
+function useKeepYValueInSyncWithTranslateY(y: SharedValue<number>, actionZoneTranslateY: number) {
+    useEffect(() => {
+        y.value = actionZoneTranslateY;
+    }, [actionZoneTranslateY]);
+}
+
+function DirectionMenu({ action, config, children, onHoverActions, actionZoneTranslateY = 0 }: Props) {
     const {
         directions,
         horizontalSize,
@@ -52,7 +61,9 @@ function DirectionMenu({ action, config, children, onHoverActions }: Props) {
     const realHorizontal = horizontalSize * 2;
 
     const x = useSharedValue(0);
-    const y = useSharedValue(0);
+    const y = useSharedValue(actionZoneTranslateY);
+
+    useKeepYValueInSyncWithTranslateY(y, actionZoneTranslateY);
 
     const lastExecutedAction = useSharedValue<ActionType | undefined>(undefined);
     const lastHoveredAction = useSharedValue<ActionType | undefined>(undefined);
@@ -70,7 +81,7 @@ function DirectionMenu({ action, config, children, onHoverActions }: Props) {
                 const distanceFromCenter = Math.sqrt(absX ** 2 + absY ** 2);
                 const friction = distanceFromCenter * (-1 / realHorizontal) + 1;
                 x.value = e.translationX * friction;
-                y.value = e.translationY * friction;
+                y.value = actionZoneTranslateY + e.translationY * friction;
             } else {
                 const horizontalFriction = absX * (-1 / realHorizontal) + 1;
                 const verticalFriction = absY * (-1 / realVertical) + 1;
@@ -80,7 +91,7 @@ function DirectionMenu({ action, config, children, onHoverActions }: Props) {
                 }
 
                 if (directions.includes("vertical") && absY < realVertical / 2) {
-                    y.value = e.translationY * verticalFriction;
+                    y.value = actionZoneTranslateY + e.translationY * verticalFriction;
                 }
             }
 
@@ -213,7 +224,7 @@ function DirectionMenu({ action, config, children, onHoverActions }: Props) {
             }
 
             x.value = withSpring(0, { damping: 26, stiffness: 300, velocity: velocityX });
-            y.value = withSpring(0, { damping: 26, stiffness: 300, velocity: velocityY });
+            y.value = withSpring(actionZoneTranslateY, { damping: 26, stiffness: 300, velocity: velocityY });
             lastExecutedAction.value = undefined;
         })
         .activateAfterLongPress(maxTapDuration)
@@ -246,8 +257,8 @@ function DirectionMenu({ action, config, children, onHoverActions }: Props) {
         });
 
     const translate = useAnimatedStyle(() => {
-        return { transform: [{ translateX: x.value }, { translateY: y.value }] };
-    }, [x, y]);
+        return { transform: [{ translateX: x.value }, { translateY: y.value - 2 * actionZoneTranslateY }] };
+    }, [x, y, actionZoneTranslateY]);
 
     return (
         <GestureDetector gesture={Gesture.Race(drag, tap)}>
@@ -269,11 +280,12 @@ function DirectionMenu({ action, config, children, onHoverActions }: Props) {
                     backgroundColor: showBounds ? "#1982F97D" : undefined,
                     borderRadius: circular ? horizontalSize : 0,
                     width: horizontalSize,
+                    transform: [{ translateY: actionZoneTranslateY }],
                     height: verticalSize,
                     justifyContent: "center",
                     alignItems: "center",
                 }}>
-                <Animated.View style={[translate]}>{children}</Animated.View>
+                <Animated.View style={translate}>{children}</Animated.View>
             </View>
             {/* </View> */}
         </GestureDetector>

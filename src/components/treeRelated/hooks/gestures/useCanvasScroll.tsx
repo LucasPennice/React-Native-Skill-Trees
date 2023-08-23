@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Gesture } from "react-native-gesture-handler";
 import { SharedValue, WithSpringConfig, runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
@@ -15,6 +15,20 @@ const AFTER_SCROLL_SPING_PARAMS: WithSpringConfig = {
     restDisplacementThreshold: 0.01,
     restSpeedThreshold: 2,
 };
+
+function useSyncStateToSharedValue<T>(state: T): SharedValue<T> {
+    const result = useSharedValue<T>(state);
+
+    useAnimatedReaction(
+        () => state,
+        (updatedSharedValue: T) => {
+            result.value = updatedSharedValue;
+        },
+        [state]
+    );
+
+    return result;
+}
 
 function useCanvasScroll(
     canvasDimentions: CanvasDimensions,
@@ -39,9 +53,6 @@ function useCanvasScroll(
     const minScaleY = screenHeightWithNavAccounted / canvasHeight;
     const minScale = minScaleX < minScaleY ? minScaleY : minScaleX;
     const MAX_SCALE = 1.4;
-
-    const selectedNodeMenuOpen = foundNodeCoordinates !== undefined;
-    const animateFromSelectedNodeMenu = useShouldAnimateTransformation(selectedNodeMenuOpen);
 
     const dragX = useSharedValue(0);
     const dragY = useSharedValue(0);
@@ -192,10 +203,12 @@ function useCanvasScroll(
             }
         });
 
+    const selectedNodeMenuOpen = foundNodeCoordinates !== undefined;
+    const animateNodeMenuTransition = useAnimateNodeMenuTransition(selectedNodeMenuOpen);
+
     const scrollStyle = useAnimatedStyle(() => {
         if (foundNodeCoordinates) return transitionToSelectedNodeStyle();
-        if (animateFromSelectedNodeMenu) return transitionFromMenuToNormalScrolling();
-        // if (foundNodeOfMenu) return transitionToNodeOption();
+        if (animateNodeMenuTransition) return transitionFromMenuToNormalScrolling();
 
         //This is the regular scrolling style
         return {
@@ -232,7 +245,7 @@ function useCanvasScroll(
                 ],
             };
         }
-    }, [offsetX, offsetY, scale, foundNodeCoordinates, animateFromSelectedNodeMenu, foundNodeOfMenu]);
+    }, [offsetX, offsetY, scale, foundNodeCoordinates, animateNodeMenuTransition, foundNodeOfMenu]);
 
     const dragDelta = { x: dragX, y: dragY };
 
@@ -241,17 +254,17 @@ function useCanvasScroll(
 
 export default useCanvasScroll;
 
-function useShouldAnimateTransformation(isMenuOpen: boolean) {
-    const [result, setResult] = useState(false);
+function useAnimateNodeMenuTransition(isMenuOpen: boolean): SharedValue<boolean> {
+    const result = useSharedValue<boolean>(false);
 
     useEffect(() => {
-        if (isMenuOpen) setResult(true);
+        if (isMenuOpen) result.value = true;
 
         let timeoutId: undefined | NodeJS.Timeout;
 
         if (!isMenuOpen) {
             timeoutId = setTimeout(() => {
-                setResult(false);
+                result.value = false;
             }, 200);
         }
 

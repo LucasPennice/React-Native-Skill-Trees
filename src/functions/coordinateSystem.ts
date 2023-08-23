@@ -125,7 +125,7 @@ export function handleTreeBuild(
     renderStyle: InteractiveTreeConfig["renderStyle"],
     showDepthGuides?: boolean
 ) {
-    console.log(Math.random(), "buenas");
+    // console.log(Math.random(), "buenas");
     const coordinatesWithTreeData = getNodesCoordinates(tree, renderStyle);
     //
     const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);

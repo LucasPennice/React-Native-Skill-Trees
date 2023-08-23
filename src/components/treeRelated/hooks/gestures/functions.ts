@@ -1,8 +1,9 @@
 import { CIRCLE_SIZE } from "../../../../parameters";
+import { CartesianCoordinate } from "../../../../types";
 import { TOUCH_BUFFER } from "./params";
 
-export function didTapCircle(touchInfo: { x: number; y: number }) {
-    return (circle: { x: number; y: number; id: string }) => {
+export function didTapCircle<T extends CartesianCoordinate>(touchInfo: { x: number; y: number }) {
+    return (circle: T) => {
         const isTouchInsideCircleXRange =
             touchInfo.x >= circle.x - CIRCLE_SIZE / 2 - TOUCH_BUFFER && touchInfo.x <= circle.x + CIRCLE_SIZE / 2 + TOUCH_BUFFER;
 
