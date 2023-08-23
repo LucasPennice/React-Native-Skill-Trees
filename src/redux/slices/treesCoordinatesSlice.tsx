@@ -2,7 +2,7 @@ import { AnyAction, PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { handleTreeBuild } from "../../functions/coordinateSystem";
 import { CanvasDimensions, CoordinatesWithTreeData, DnDZone, Skill, Tree } from "../../types";
 import type { RootState } from "../reduxStore";
-import { updateUserTrees } from "./userTreesSlice";
+import { saveNewTree, removeUserTree, updateUserTreeWithAppendedNode, updateUserTrees } from "./userTreesSlice";
 import { ScreenDimentions } from "./screenDimentionsSlice";
 import { CanvasDisplaySettings } from "./canvasDisplaySettingsSlice";
 import { buildHomepageTree } from "../../functions/treeToRadialCoordinates/general";
@@ -84,12 +84,48 @@ export const treeCoordinatesSlice = createSlice({
 
             state.homeTree = { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: centeredCoordinatedWithTreeData };
         },
-        // clearHomeTreeState: (state) => {
-        //     state.homeTree = DEFAULT_HOME_TREE;
-        // },
+        clearHomeTreeState: (state) => {
+            state.homeTree = DEFAULT_HOME_TREE;
+            state.trees = {};
+        },
     },
     extraReducers: (builder) => {
+        builder.addCase(removeUserTree, (state, action) => {
+            const treeToDeleteId = action.payload;
+
+            removeFromTrees();
+            removeFromHomeTree();
+
+            function removeFromTrees() {
+                const result = { ...state.trees };
+
+                delete result[treeToDeleteId];
+
+                state.trees = result;
+            }
+
+            function removeFromHomeTree() {}
+        });
+        builder.addCase(saveNewTree, (state, action) => {
+            console.log("hola?");
+            const { screenDimensions, newTree } = action.payload;
+
+            const {
+                dndZoneCoordinates,
+                canvasDimentions: canvasDimensions,
+                centeredCoordinatedWithTreeData,
+            } = handleTreeBuild(newTree, screenDimensions, "hierarchy");
+
+            state.trees = {
+                ...state.trees,
+                [newTree.treeId]: { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: centeredCoordinatedWithTreeData },
+            };
+        });
+        builder.addCase(updateUserTreeWithAppendedNode, (state, action) => {
+            console.log("metiste un nodo un arbol");
+        });
         builder.addCase(updateUserTrees, (state, action) => {
+            console.log("actualizaste la informacion un arbol, no la cantidad o posicion de nodos");
             const { screenDimensions, updatedTree } = action.payload;
 
             if (!updatedTree) return;
@@ -118,7 +154,8 @@ export const treeCoordinatesSlice = createSlice({
     },
 });
 
-export const { calculateHierarchicalTreeCoordinatesInitially, calculateHomeTreeCoordinatesInitially } = treeCoordinatesSlice.actions;
+export const { calculateHierarchicalTreeCoordinatesInitially, calculateHomeTreeCoordinatesInitially, clearHomeTreeState } =
+    treeCoordinatesSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectHomeTreeCoordinates = (state: RootState) => state.treeCoordinates.homeTree;

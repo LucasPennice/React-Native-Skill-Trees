@@ -10,6 +10,7 @@ import ShareTreeScreenshot from "../../components/takingScreenshot/ShareTreeScre
 import InteractiveTree2H from "../../components/treeRelated/InteractiveTree2H";
 import CanvasSettingsModal from "../../components/treeRelated/canvasSettingsModal/CanvasSettingsModal";
 import { IsSharingAvailableContext } from "../../context";
+import { handleTreeBuild } from "../../functions/coordinateSystem";
 import { treeCompletedSkillPercentage } from "../../functions/extractInformationFromTree";
 import { insertNodesBasedOnDnDZone } from "../../functions/mutateTree";
 import { colors } from "../../parameters";
@@ -17,7 +18,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { clearSelectedDndZone, selectNewNodes } from "../../redux/slices/newNodeSlice";
 import { ScreenDimentions, selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
-import { calculateHierarchicalTreeCoordinatesInitially, selectTreesCoordinates } from "../../redux/slices/treesCoordinatesSlice";
+import { TreeCoordinateData, calculateHierarchicalTreeCoordinatesInitially } from "../../redux/slices/treesCoordinatesSlice";
 import { changeTree, clearSelectedNode, selectTreeSlice, setSelectedNode, updateUserTreeWithAppendedNode } from "../../redux/slices/userTreesSlice";
 import { DnDZone, SelectedNodeId, Skill, Tree } from "../../types";
 import useCurrentTree from "../../useCurrentTree";
@@ -54,9 +55,17 @@ function useViewingSkillTreeState() {
     const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
-    const treeCoordinates = useAppSelector(selectTreesCoordinates);
+    let treeCoordinate: TreeCoordinateData | undefined = undefined;
 
-    const treeCoordinate = selectedTree === undefined ? undefined : treeCoordinates[selectedTree.treeId];
+    if (selectedTree) {
+        const {
+            dndZoneCoordinates,
+            canvasDimentions: canvasDimensions,
+            centeredCoordinatedWithTreeData,
+        } = handleTreeBuild(selectedTree, screenDimensions, "hierarchy");
+
+        treeCoordinate = { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: centeredCoordinatedWithTreeData };
+    }
 
     return { selectedTree, selectedNodeId, selectedNodeMenuMode, selectedDndZone, canvasDisplaySettings, screenDimensions, treeCoordinate };
 }

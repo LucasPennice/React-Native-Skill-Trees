@@ -1,14 +1,12 @@
 import { useFont } from "@shopify/react-native-skia";
 import { Fragment } from "react";
-import { removeTreeDataFromCoordinate } from "../../components/treeRelated/coordinateFunctions";
+import { SharedValue } from "react-native-reanimated";
 import Node, { CanvasNodeData } from "../../components/treeRelated/general/Node";
 import RadialCanvasPath from "../../components/treeRelated/radial/RadialCanvasPath";
 import RadialLabel from "../../components/treeRelated/radial/RadialLabel";
 import { completedSkillPercentageFromCoords } from "../../functions/extractInformationFromTree";
 import { getLabelTextColor } from "../../functions/misc";
-import { colors } from "../../parameters";
 import { CartesianCoordinate, CoordinatesWithTreeData } from "../../types";
-import { SharedValue } from "react-native-reanimated";
 
 type TreeProps = {
     nodeCoordinatesCentered: CoordinatesWithTreeData[];
@@ -34,7 +32,6 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag
     if (!rootNode) return <></>;
     if (!labelFont || !nodeLetterFont || !emojiFont) return <></>;
 
-    const nodeCoordinates = removeTreeDataFromCoordinate(nodeCoordinatesCentered);
     const rootCoordinates = { x: rootNode!.x, y: rootNode!.y };
     const treeCompletedPercentage = completedSkillPercentageFromCoords(nodeCoordinatesCentered, rootNode.treeId);
 
@@ -47,15 +44,12 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag
 
                 let parentCoord: CartesianCoordinate = { x: parentNode.x, y: parentNode.y };
 
-                const nodeColor = settings.oneColorPerTree ? rootNode!.accentColor : node.accentColor;
-                const pathColor = parentNode.data.isCompleted ? nodeColor.color1 : colors.line;
                 return (
                     <RadialCanvasPath
                         key={`${node.nodeId}_path`}
                         coordinates={{ cx: node.x, cy: node.y, pathInitialPoint: parentCoord }}
                         isRoot={node.isRoot}
-                        pathColor={pathColor}
-                        nodeCoordinatesCentered={nodeCoordinates}
+                        nodeCoordinates={nodeCoordinatesCentered}
                     />
                 );
             })}
@@ -120,5 +114,27 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag
         </>
     );
 }
+
+// function PathList() {
+//     return nodeCoordinatesCentered.map((node, idx) => {
+//         const parentNode = nodeCoordinatesCentered.find((n) => n.nodeId === node.parentId);
+
+//         if (!parentNode) return <Fragment key={idx}></Fragment>;
+
+//         let parentCoord: CartesianCoordinate = { x: parentNode.x, y: parentNode.y };
+
+//         const nodeColor = settings.oneColorPerTree ? rootNode!.accentColor : node.accentColor;
+//         const pathColor = parentNode.data.isCompleted ? nodeColor.color1 : colors.line;
+//         return (
+//             <RadialCanvasPath
+//                 key={`${node.nodeId}_path`}
+//                 coordinates={{ cx: node.x, cy: node.y, pathInitialPoint: parentCoord }}
+//                 isRoot={node.isRoot}
+//                 pathColor={pathColor}
+//                 nodeCoordinatesCentered={nodeCoordinates}
+//             />
+//         );
+//     });
+// }
 
 export default RadialSkillTree;

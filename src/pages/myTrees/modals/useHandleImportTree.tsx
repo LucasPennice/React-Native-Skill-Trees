@@ -1,6 +1,6 @@
 import { Alert } from "react-native";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { appendToUserTree, selectTreeSlice, updateUserTrees } from "../../../redux/slices/userTreesSlice";
+import { saveNewTree, selectTreeSlice, updateUserTrees } from "../../../redux/slices/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
 
@@ -36,7 +36,7 @@ function useHandleImportTree(treeToImport: Tree<Skill> | undefined, closeModal: 
         };
 
     return () => {
-        dispatch(appendToUserTree(treeToImport));
+        dispatch(saveNewTree({ newTree: treeToImport, screenDimensions }));
         closeModal();
     };
 }

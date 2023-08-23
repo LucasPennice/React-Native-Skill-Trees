@@ -28,7 +28,7 @@ function useCanvasZoom(
 
     const savedScale = useSharedValue(DEFAULT_SCALE);
 
-    const [scaleState, setScaleState] = useState(0);
+    const [scaleState, setScaleState] = useState(DEFAULT_SCALE);
 
     useAnimatedReaction(
         () => scale.value,

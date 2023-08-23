@@ -7,25 +7,23 @@ import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName"
 import ShareTreeLayout from "../../components/takingScreenshot/ShareTreeScreenshot";
 import CanvasSettingsModal from "../../components/treeRelated/canvasSettingsModal/CanvasSettingsModal";
 import { buildHomepageTree } from "../../functions/treeToRadialCoordinates/general";
-import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { CanvasDisplaySettings, selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
-import { ScreenDimentions, selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
-import { calculateHomeTreeCoordinatesInitially } from "../../redux/slices/treesCoordinatesSlice";
+import { useAppSelector } from "../../redux/reduxHooks";
+import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
+import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { selectUserTrees } from "../../redux/slices/userTreesSlice";
-import { Skill, Tree } from "../../types";
 import HomepageTree from "./HomepageTree";
 
 type Props = {
     n: NativeStackScreenProps<StackNavigatorParams, "Home">;
 };
 
-function useHandleInitialTreeCoordinates(userTrees: Tree<Skill>[], screenDimensions: ScreenDimentions, canvasDisplaySettings: CanvasDisplaySettings) {
-    const dispatch = useAppDispatch();
+// function useHandleInitialTreeCoordinates(userTrees: Tree<Skill>[], screenDimensions: ScreenDimentions, canvasDisplaySettings: CanvasDisplaySettings) {
+//     const dispatch = useAppDispatch();
 
-    useEffect(() => {
-        dispatch(calculateHomeTreeCoordinatesInitially({ canvasDisplaySettings, screenDimensions, userTrees }));
-    }, []);
-}
+//     useEffect(() => {
+//         dispatch(calculateHomeTreeCoordinatesInitially({ canvasDisplaySettings, screenDimensions, userTrees }));
+//     }, []);
+// }
 
 function useHandleNavigationListener(
     navigation: NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>,
@@ -75,7 +73,7 @@ function useCanvasSettingsState() {
 }
 
 function HomepageContents({ n: { navigation } }: Props) {
-    const { canvasDisplaySettings, screenDimensions, userTrees } = useHomepageContentsState();
+    const { canvasDisplaySettings, userTrees } = useHomepageContentsState();
 
     const takingScreenShotState = useTakingScreenshotState();
     // const [takingScreenshot, { openTakingScreenshotModal, closeTakingScreenshotModal }] = takingScreenShotState;
@@ -86,7 +84,7 @@ function HomepageContents({ n: { navigation } }: Props) {
 
     const homepageTree = useMemo(() => buildHomepageTree(userTrees, canvasDisplaySettings), [canvasDisplaySettings, userTrees]);
 
-    useHandleInitialTreeCoordinates(userTrees, screenDimensions, canvasDisplaySettings);
+    // useHandleInitialTreeCoordinates(userTrees, screenDimensions, canvasDisplaySettings);
 
     useHandleNavigationListener(navigation, clearSelectedNodeId);
 

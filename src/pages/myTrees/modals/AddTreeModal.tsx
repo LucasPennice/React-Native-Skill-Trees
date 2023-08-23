@@ -1,7 +1,7 @@
 import { Canvas } from "@shopify/react-native-skia";
 import { UseQueryResult } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Alert, Dimensions, Pressable, View } from "react-native";
+import { Alert, Pressable, View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import axiosClient from "../../../../axiosClient";
@@ -22,18 +22,19 @@ import HierarchicalSkillTree from "../../../components/treeRelated/hierarchical/
 import useHandleCanvasScroll from "../../../components/treeRelated/hooks/useHandleCanvasScrollAndZoom";
 import { createTree } from "../../../functions/misc";
 import { MENU_HIGH_DAMPENING, centerFlex, colors, nodeGradients } from "../../../parameters";
-import { close, selectAddTree } from "../../../redux/slices/addTreeModalSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
+import { close, selectAddTree } from "../../../redux/slices/addTreeModalSlice";
+import { selectCanvasDisplaySettings } from "../../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
+import { saveNewTree } from "../../../redux/slices/userTreesSlice";
 import { generalStyles } from "../../../styles";
 import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "../../../types";
 import useHandleImportTree from "./useHandleImportTree";
-import { selectCanvasDisplaySettings } from "../../../redux/slices/canvasDisplaySettingsSlice";
-import { appendToUserTree } from "../../../redux/slices/userTreesSlice";
 
 function AddTreeModal() {
     const { query } = useRequestProcessor();
-    const { width } = Dimensions.get("screen");
+    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
+    const { width } = screenDimensions;
     //Local State
     const [treeName, setTreeName] = useState("");
     const [icon, setIcon] = useState<string>("");
@@ -79,7 +80,7 @@ function AddTreeModal() {
             getDefaultSkillValue(treeName, true, { isEmoji, text: iconText })
         );
 
-        dispatch(appendToUserTree(newTree));
+        dispatch(saveNewTree({ newTree, screenDimensions }));
         closeModal();
     };
 

@@ -55,8 +55,16 @@ export const userTreesSlice = createSlice({
                 return tree;
             });
         },
-        appendToUserTree: (state, action: PayloadAction<Tree<Skill>>) => {
-            state.userTrees = [...state.userTrees, action.payload];
+        saveNewTree: (
+            state,
+            action: PayloadAction<{
+                newTree: Tree<Skill>;
+                screenDimensions: ScreenDimentions;
+            }>
+        ) => {
+            const { newTree } = action.payload;
+
+            state.userTrees = [...state.userTrees, newTree];
         },
         removeUserTree: (state, action: PayloadAction<string>) => {
             const treeToDeleteId = action.payload;
@@ -96,7 +104,7 @@ export const {
     changeTree,
     unselectTree,
     updateUserTrees,
-    appendToUserTree,
+    saveNewTree,
     removeUserTree,
     setSelectedNode,
     updateUserTreeWithAppendedNode,
