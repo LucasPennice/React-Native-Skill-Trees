@@ -1,12 +1,12 @@
 import * as Haptics from "expo-haptics";
 import { memo, useEffect, useRef, useState } from "react";
+import { Platform } from "react-native";
 import Animated, { Easing, FadeIn, useAnimatedProps, useAnimatedStyle, withDelay, withSequence, withTiming } from "react-native-reanimated";
 import { Svg, Circle as SvgCircle } from "react-native-svg";
 import { getWheelParams } from "../../../functions/misc";
 import { colors } from "../../../parameters";
-import { NodeCoordinate } from "../../../types";
+import { CoordinatesWithTreeData } from "../../../types";
 import { MIN_DURATION_LONG_PRESS_MS } from "../hooks/useCanvasPressAndLongPress";
-import { Platform } from "react-native";
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
 const indicatorSize = Platform.OS === "android" ? 143 : 150;
@@ -17,7 +17,7 @@ function NodeLongPressIndicator({
     scale,
 }: {
     data: {
-        data: NodeCoordinate | undefined;
+        data: CoordinatesWithTreeData | undefined;
         state: "INTERRUPTED" | "SUCCESS" | "PRESSING" | "IDLE";
     };
     scale: number;

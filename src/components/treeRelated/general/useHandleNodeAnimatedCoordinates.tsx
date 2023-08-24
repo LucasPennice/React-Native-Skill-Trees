@@ -1,30 +1,43 @@
 import { SkFont, Skia } from "@shopify/react-native-skia";
-import { useDerivedValue } from "react-native-reanimated";
-import { CIRCLE_SIZE } from "../../../parameters";
-import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
+import { SharedValue, useDerivedValue, withSpring } from "react-native-reanimated";
+import { CANVAS_SPRING, CIRCLE_SIZE, NODE_ICON_FONT_SIZE } from "../../../parameters";
 
-const NODE_ICON_FONT_SIZE = 17;
+function useSharedValuesFromNodeCoord(coordinates: { cx: number; cy: number }) {
+    const x = useDerivedValue(() => {
+        return withSpring(coordinates.cx, CANVAS_SPRING);
+    });
+    const y = useDerivedValue(() => {
+        return withSpring(coordinates.cy, CANVAS_SPRING);
+    });
 
-function useHandleNodeAnimatedCoordinates(
-    coordinates: { cx: number; cy: number },
-    text: { color: string; letter: string; isEmoji: boolean },
-    font: SkFont
-) {
-    const { cx, cy } = coordinates;
+    return { x, y };
+}
 
-    const textWidth = getTextWidth();
-
-    const x = useAnimateSkiaValue({ initialValue: cx, stateToAnimate: cx });
-    const y = useAnimateSkiaValue({ initialValue: cy, stateToAnimate: cy });
-
-    const textX = useDerivedValue(() => x.value - textWidth / 2, [x, textWidth]);
+function useIconPosition(x: SharedValue<number>, y: SharedValue<number>, textWidth: number) {
+    const textX = useDerivedValue(() => x.value - textWidth / 2);
     const textY = useDerivedValue(() => {
         function getHeightForFont(fontSize: number) {
             return (fontSize * 125.5) / 110;
         }
 
         return y.value + getHeightForFont(NODE_ICON_FONT_SIZE) / 4 + 1;
-    }, [y]);
+    });
+
+    return { textX, textY };
+}
+
+function useHandleNodeAnimatedCoordinates(
+    coordinates: { cx: number; cy: number },
+    text: { color: string; letter: string; isEmoji: boolean },
+    font: SkFont
+) {
+    const textWidth = getTextWidth();
+
+    const { x, y } = useSharedValuesFromNodeCoord(coordinates);
+    // const x = useAnimateSkiaValue({ initialValue: cx, stateToAnimate: cx });
+    // const y = useAnimateSkiaValue({ initialValue: cy, stateToAnimate: cy });
+
+    const { textX, textY } = useIconPosition(x, y, textWidth);
 
     const path = useDerivedValue(() => {
         const strokeWidth = 2;
@@ -36,7 +49,7 @@ function useHandleNodeAnimatedCoordinates(
         p.simplify();
 
         return p;
-    }, [x, y]);
+    });
 
     return { path, textX, textY, x, y };
 

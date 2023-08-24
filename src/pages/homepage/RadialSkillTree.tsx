@@ -1,5 +1,5 @@
-import { useFont } from "@shopify/react-native-skia";
-import { Fragment } from "react";
+import { SkFont } from "@shopify/react-native-skia";
+import { Fragment, memo, useMemo } from "react";
 import { SharedValue } from "react-native-reanimated";
 import Node, { CanvasNodeData } from "../../components/treeRelated/general/Node";
 import RadialCanvasPath from "../../components/treeRelated/radial/RadialCanvasPath";
@@ -21,39 +21,14 @@ type TreeProps = {
         y: SharedValue<number>;
         nodesToDragId: string[];
     };
+    fonts: {
+        labelFont: SkFont;
+        nodeLetterFont: SkFont;
+        emojiFont: SkFont;
+    };
 };
 
-function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag }: TreeProps) {
-    const labelFont = useFont(require("../../../assets/Helvetica.ttf"), 12);
-    const nodeLetterFont = useFont(require("../../../assets/Helvetica.ttf"), 17);
-    const emojiFont = useFont(require("../../../assets/NotoEmoji-Regular.ttf"), 17);
-
-    const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
-    if (!rootNode) return <></>;
-    if (!labelFont || !nodeLetterFont || !emojiFont) return <></>;
-
-    const treeCompletedPercentage = completedSkillPercentageFromCoords(nodeCoordinatesCentered, rootNode.treeId);
-
-    return (
-        <>
-            <PathList nodeCoordinates={nodeCoordinatesCentered} />
-
-            {settings.showLabel && (
-                <LabelList nodeCoordinates={nodeCoordinatesCentered} oneColorPerTree={settings.oneColorPerTree} rootNode={rootNode} />
-            )}
-
-            <NodeList
-                nodeCoordinates={nodeCoordinatesCentered}
-                settings={{ oneColorPerTree: settings.oneColorPerTree, showIcons: settings.showIcons }}
-                selectedNodeId={selectedNode}
-                treeCompletedPercentage={treeCompletedPercentage}
-                rootNode={rootNode}
-            />
-        </>
-    );
-}
-
-function PathList({ nodeCoordinates }: { nodeCoordinates: CoordinatesWithTreeData[] }) {
+const PathList = memo(function PathList({ nodeCoordinates }: { nodeCoordinates: CoordinatesWithTreeData[] }) {
     return nodeCoordinates.map((node, idx) => {
         const parentNode = nodeCoordinates.find((n) => n.nodeId === node.parentId);
 
@@ -70,36 +45,73 @@ function PathList({ nodeCoordinates }: { nodeCoordinates: CoordinatesWithTreeDat
             />
         );
     });
-}
+});
 
-function LabelList({
+const LabelList = memo(function LabelList({
     nodeCoordinates,
     rootNode,
-    oneColorPerTree,
+    font,
 }: {
     nodeCoordinates: CoordinatesWithTreeData[];
     rootNode: CoordinatesWithTreeData;
-    oneColorPerTree: boolean;
+    font: SkFont;
 }) {
     const rootCoordinate = { x: rootNode.x, y: rootNode.y };
 
     return nodeCoordinates.map((node, idx) => {
         if (node.isRoot) return <Fragment key={idx}></Fragment>;
 
-        const rectColor = oneColorPerTree ? rootNode.accentColor : node.accentColor;
-        const labelTextColor = getLabelTextColor(rectColor.color1);
-
         return (
             <RadialLabel
                 key={idx}
+                labelFont={font}
                 text={node.nodeId.slice(0, 5)}
                 // text={node.data.name}
-                color={{ rect: rectColor.color1, text: labelTextColor }}
                 coord={{ x: node.x, y: node.y }}
                 rootCoord={rootCoordinate}
             />
         );
     });
+});
+
+function useGetTreeCompletePercetage(nodeCoordinates: CoordinatesWithTreeData[], rootId?: string) {
+    const result = useMemo(() => {
+        if (rootId === undefined) return 0;
+
+        return completedSkillPercentageFromCoords(nodeCoordinates, rootId);
+    }, [nodeCoordinates, rootId]);
+
+    return result;
+}
+
+function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag, fonts }: TreeProps) {
+    const { emojiFont, labelFont, nodeLetterFont } = fonts;
+
+    const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
+
+    const treeCompletedPercentage = useGetTreeCompletePercetage(nodeCoordinatesCentered, rootNode?.nodeId);
+
+    if (!rootNode) return <></>;
+
+    //Passive effects with everything BUT nodes commented out is 57
+
+    return (
+        <>
+            {/* 24 */}
+            <PathList nodeCoordinates={nodeCoordinatesCentered} />
+
+            {settings.showLabel && <LabelList font={labelFont} nodeCoordinates={nodeCoordinatesCentered} rootNode={rootNode} />}
+
+            <NodeList
+                fonts={{ emojiFont, nodeLetterFont }}
+                nodeCoordinates={nodeCoordinatesCentered}
+                settings={{ oneColorPerTree: settings.oneColorPerTree, showIcons: settings.showIcons }}
+                selectedNodeId={selectedNode}
+                treeCompletedPercentage={treeCompletedPercentage}
+                rootNode={rootNode}
+            />
+        </>
+    );
 }
 
 function NodeList({
@@ -108,21 +120,22 @@ function NodeList({
     rootNode,
     treeCompletedPercentage,
     selectedNodeId,
+    fonts,
 }: {
     nodeCoordinates: CoordinatesWithTreeData[];
     rootNode: CoordinatesWithTreeData;
     settings: { oneColorPerTree: boolean; showIcons: boolean };
     treeCompletedPercentage: number;
     selectedNodeId: SelectedNodeId;
+    fonts: { nodeLetterFont: SkFont; emojiFont: SkFont };
 }) {
-    const nodeLetterFont = useFont(require("../../../assets/Helvetica.ttf"), 17);
-    const emojiFont = useFont(require("../../../assets/NotoEmoji-Regular.ttf"), 17);
+    const { emojiFont, nodeLetterFont } = fonts;
 
     const { oneColorPerTree, showIcons } = settings;
 
-    if (!nodeLetterFont || !emojiFont) return <></>;
-
     return nodeCoordinates.map((node) => {
+        const isSelected = node.nodeId === selectedNodeId;
+
         const accentColor = oneColorPerTree ? rootNode.accentColor : node.accentColor;
         const font = node.data.icon.isEmoji ? emojiFont : nodeLetterFont;
 
@@ -140,7 +153,6 @@ function NodeList({
             treeAccentColor: accentColor,
             text,
             category: node.category,
-            nodeId: node.nodeId,
         };
 
         const currentTreeCompletedPercentage =
@@ -150,9 +162,7 @@ function NodeList({
                 ? 0
                 : completedSkillPercentageFromCoords(nodeCoordinates, node.treeId);
 
-        const state = { font, treeCompletedPercentage: currentTreeCompletedPercentage, selectedNodeId, showIcons: showIcons };
-
-        // const nodeDrag = drag.nodesToDragId.includes(node.nodeId) ? drag : undefined;
+        const state = { font, treeCompletedPercentage: currentTreeCompletedPercentage, isSelected, showIcons: showIcons };
 
         return <Node state={state} key={`${node.nodeId}_node`} nodeData={nodeData} nodeDrag={undefined} />;
     });

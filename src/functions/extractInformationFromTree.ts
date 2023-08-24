@@ -441,3 +441,21 @@ export function checkIfUncompletionIsAllowedForNode(nodeToCheck: Tree<Skill>) {
 
     return true;
 }
+
+export function treeNodeToCoordinate(node: Tree<Skill>): CoordinatesWithTreeData {
+    const result: CoordinatesWithTreeData = {
+        accentColor: node.accentColor,
+        category: node.category,
+        data: node.data,
+        isRoot: node.isRoot,
+        level: node.level,
+        nodeId: node.nodeId,
+        parentId: node.parentId,
+        treeId: node.treeId,
+        treeName: node.treeName,
+        x: node.x,
+        y: node.y,
+    };
+
+    return result;
+}

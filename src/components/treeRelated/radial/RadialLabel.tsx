@@ -1,21 +1,11 @@
-import { Group, Text, useFont } from "@shopify/react-native-skia";
-import { CIRCLE_SIZE } from "../../../parameters";
+import { Group, SkFont, Text } from "@shopify/react-native-skia";
+import { memo } from "react";
+import { CIRCLE_SIZE, RADIAL_LABEL_FONT_SIZE } from "../../../parameters";
 import { CartesianCoordinate } from "../../../types";
 
-function RadialLabel({
-    coord,
-    color,
-    text,
-    rootCoord,
-}: {
-    color: { rect: string; text: string };
-    text: string;
-    coord: CartesianCoordinate;
-    rootCoord: CartesianCoordinate;
-}) {
-    const fontSize = 14;
-    const labelFont = useFont(require("../../../../assets/Helvetica.ttf"), fontSize);
+type Props = { text: string; coord: CartesianCoordinate; rootCoord: CartesianCoordinate; labelFont: SkFont };
 
+function RadialLabel({ coord, text, rootCoord, labelFont }: Props) {
     if (!labelFont) return <></>;
 
     const { x, y } = coord;
@@ -34,7 +24,7 @@ function RadialLabel({
     const horizontalPadding = 10;
     const verticalPadding = 5;
 
-    const textHeight = wordArr.length * fontSize + (wordArr.length - 1) * (distanceBetweenWords - fontSize);
+    const textHeight = wordArr.length * RADIAL_LABEL_FONT_SIZE + (wordArr.length - 1) * (distanceBetweenWords - RADIAL_LABEL_FONT_SIZE);
 
     const rectangleDimentions = calculateRectangleDimentions(wordArr);
 
@@ -46,7 +36,8 @@ function RadialLabel({
         <Group origin={{ x: x, y: y }} transform={[{ rotate: angleInRadians }]}>
             {wordArr.map((word, idx) => {
                 const textX = x + CIRCLE_SIZE + horizontalPadding;
-                const textY = y - fontSize / 4 - verticalPadding - 4 * wordArr.length + 3 * verticalPadding + idx * distanceBetweenWords;
+                const textY =
+                    y - RADIAL_LABEL_FONT_SIZE / 4 - verticalPadding - 4 * wordArr.length + 3 * verticalPadding + idx * distanceBetweenWords;
 
                 const rotatedTextX = textX - rectangleDimentions.width + 2 * horizontalPadding - 2;
                 const rotatedTextY = textY + verticalPadding + 3;
@@ -85,4 +76,14 @@ function RadialLabel({
     }
 }
 
-export default RadialLabel;
+export default memo(RadialLabel, arePropsEqual);
+
+function arePropsEqual(prevProps: Props, nextProps: Props): boolean {
+    if (prevProps.coord.x !== nextProps.coord.x) return false;
+    if (prevProps.coord.y !== nextProps.coord.y) return false;
+    if (prevProps.rootCoord.x !== nextProps.rootCoord.x) return false;
+    if (prevProps.rootCoord.y !== nextProps.rootCoord.y) return false;
+    if (prevProps.text !== nextProps.text) return false;
+
+    return true;
+}

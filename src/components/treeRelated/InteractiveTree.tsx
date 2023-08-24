@@ -43,7 +43,7 @@ export type InteractiveNodeState = {
 };
 
 export type InteractiveTreeFunctions = {
-    onNodeClick?: (node: Tree<Skill>) => void;
+    onNodeClick?: (node: CoordinatesWithTreeData) => void;
     onDndZoneClick?: (zone: DnDZone) => void;
     nodeMenu: {
         navigate: NavigateFunction;

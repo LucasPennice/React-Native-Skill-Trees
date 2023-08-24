@@ -1,9 +1,10 @@
-import { Blur, Group, SkFont, SkiaMutableValue } from "@shopify/react-native-skia";
+import { Blur, Group, SkFont } from "@shopify/react-native-skia";
+import { memo } from "react";
+import { SharedValue } from "react-native-reanimated";
 import { ColorGradient, NodeCategory } from "../../../types";
 import { NodeProps, SkillNode, SkillTreeNode, UserNode } from "./NodeCategories";
 import useHandleGroupTransform from "./useHandleGroupTransform";
 import useHandleNodeAnimatedCoordinates from "./useHandleNodeAnimatedCoordinates";
-import { SharedValue } from "react-native-reanimated";
 
 export type CanvasNodeData = {
     isComplete: boolean;
@@ -11,22 +12,15 @@ export type CanvasNodeData = {
     treeAccentColor: ColorGradient;
     text: { color: string; letter: string; isEmoji: boolean };
     category: NodeCategory;
-    nodeId: string;
 };
 
-function Node({
-    nodeData,
-    circleBlurOnInactive,
-    state,
-    nodeDrag,
-}: {
+type Props = {
     state: {
         font: SkFont;
         treeCompletedPercentage: number;
-        selectedNodeId: string | null;
+        isSelected: boolean;
         showIcons: boolean;
     };
-    circleBlurOnInactive?: SkiaMutableValue<number>;
     nodeData: CanvasNodeData;
     nodeDrag:
         | {
@@ -35,15 +29,17 @@ function Node({
               nodesToDragId: string[];
           }
         | undefined;
-}) {
-    const { category, coord, isComplete, text, treeAccentColor, nodeId } = nodeData;
-    const { font, treeCompletedPercentage, selectedNodeId, showIcons } = state;
+};
+
+function Node({ nodeData, state, nodeDrag }: Props) {
+    const { category, coord, isComplete, text, treeAccentColor } = nodeData;
+    const { font, treeCompletedPercentage, isSelected, showIcons } = state;
 
     const { cx, cy } = coord;
 
     const { path, textX, textY, x, y } = useHandleNodeAnimatedCoordinates(coord, text, font);
 
-    const { groupTransform, blur } = useHandleGroupTransform(selectedNodeId, nodeId, nodeDrag);
+    const { groupTransform, motionBlur } = useHandleGroupTransform(isSelected, nodeDrag);
 
     const nodeIcon = text.isEmoji ? text.letter : text.letter.toUpperCase();
 
@@ -53,7 +49,7 @@ function Node({
     const nodeState: NodeProps = { accentColor: treeAccentColor, animatedCoordinates, font, text: nodeIcon, textCoordinates, showIcons };
 
     return (
-        <Group origin={{ x: cx, y: cy }} transform={groupTransform} opacity={circleBlurOnInactive ?? 1}>
+        <Group origin={{ x: cx, y: cy }} transform={groupTransform}>
             {category === "SKILL" && <SkillNode nodeState={nodeState} isComplete={isComplete} path={path} />}
 
             {category === "SKILL_TREE" && (
@@ -61,10 +57,27 @@ function Node({
             )}
 
             {category === "USER" && <UserNode nodeState={nodeState} textColor={text.color} treeCompletedPercentage={treeCompletedPercentage} />}
-
-            <Blur blur={blur} />
+            <Blur blur={motionBlur} />
         </Group>
     );
 }
 
-export default Node;
+export default memo(Node, arePropsEqual);
+
+function arePropsEqual(prevProps: Props, nextProps: Props): boolean {
+    //We compare the nodeData object
+    if (prevProps.state.isSelected !== nextProps.state.isSelected) return false;
+    if (prevProps.nodeData.coord.cx !== nextProps.nodeData.coord.cx) return false;
+    if (prevProps.nodeData.coord.cy !== nextProps.nodeData.coord.cy) return false;
+    if (prevProps.state.treeCompletedPercentage !== nextProps.state.treeCompletedPercentage) return false;
+    if (prevProps.nodeData.isComplete !== nextProps.nodeData.isComplete) return false;
+    if (prevProps.nodeData.treeAccentColor !== nextProps.nodeData.treeAccentColor) return false;
+    if (prevProps.state.showIcons !== nextProps.state.showIcons) return false;
+    if (JSON.stringify(prevProps.nodeData.text) !== JSON.stringify(nextProps.nodeData.text)) return false;
+    if (prevProps.nodeData.category !== nextProps.nodeData.category) return false;
+
+    //☢️ I'M NOT COMPARING IF THE PREVPROPS FONT IS EQUAL TO THE NEXT PROPS FONT
+    //OR THE DRAG, BECAUSE IT'S NOT IMPLEMENTED YET
+
+    return true;
+}

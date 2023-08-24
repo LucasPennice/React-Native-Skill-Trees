@@ -74,3 +74,7 @@ export const UNCENTERED_ROOT_COORDINATES = { x: 0, y: 0 };
 export const EmojiRegex = /\p{Extended_Pictographic}/gu;
 
 export const HOMETREE_ROOT_ID = "homepageRoot";
+
+export const NODE_ICON_FONT_SIZE = 17;
+
+export const RADIAL_LABEL_FONT_SIZE = 14;

@@ -2,22 +2,21 @@ import { Path, Skia } from "@shopify/react-native-skia";
 import { getConstantsRotated } from "../../../functions/coordinateSystem";
 import { CIRCLE_SIZE } from "../../../parameters";
 import { CartesianCoordinate, CoordinatesWithTreeData } from "../../../types";
+import { memo } from "react";
 
-type pathCoordinates = {
+type PathCoordinates = {
     cx: number;
     cy: number;
     pathInitialPoint: CartesianCoordinate;
 };
 
-function RadialCanvasPath({
-    coordinates,
-    isRoot,
-    nodeCoordinates,
-}: {
-    coordinates: pathCoordinates;
+type Props = {
+    coordinates: PathCoordinates;
     isRoot?: boolean;
     nodeCoordinates: CoordinatesWithTreeData[];
-}) {
+};
+
+function RadialCanvasPath({ coordinates, isRoot, nodeCoordinates }: Props) {
     const { cx, cy, pathInitialPoint } = coordinates;
 
     const p1x = cx;
@@ -155,4 +154,16 @@ function getCurvedPath(rootCoordinates: CoordinatesWithTreeData, parentOfNodeCoo
     }
 }
 
-export default RadialCanvasPath;
+export default memo(RadialCanvasPath, arePropsEqual);
+
+function arePropsEqual(prevProps: Props, nextProps: Props): boolean {
+    if (prevProps.coordinates.cx !== nextProps.coordinates.cx) return false;
+    if (prevProps.coordinates.cy !== nextProps.coordinates.cy) return false;
+    if (prevProps.coordinates.pathInitialPoint.x !== nextProps.coordinates.pathInitialPoint.x) return false;
+    if (prevProps.coordinates.pathInitialPoint.y !== nextProps.coordinates.pathInitialPoint.y) return false;
+
+    if (prevProps.isRoot !== nextProps.isRoot) return false;
+    if (JSON.stringify(prevProps.nodeCoordinates) !== JSON.stringify(nextProps.nodeCoordinates)) return false;
+
+    return true;
+}

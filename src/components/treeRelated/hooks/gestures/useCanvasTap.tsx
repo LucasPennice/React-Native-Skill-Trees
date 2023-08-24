@@ -6,7 +6,7 @@ import { CoordinatesWithTreeData, DnDZone, SelectedNodeId } from "../../../../ty
 import { didTapCircle } from "./functions";
 import { MAX_TAP_DURATION } from "./params";
 
-type Props = {
+export type CanvasTapProps = {
     state: {
         nodeCoordinates: CoordinatesWithTreeData[];
         selectedNodeId: SelectedNodeId;
@@ -20,7 +20,7 @@ type Props = {
     };
 };
 
-function useCanvasTap({ functions, state }: Props) {
+function useCanvasTap({ functions, state }: CanvasTapProps) {
     const { runOnTap, onDndZoneClick, onNodeClick } = functions;
     const { dragAndDropZones, nodeCoordinates, selectedNodeId, showDndZones } = state;
 

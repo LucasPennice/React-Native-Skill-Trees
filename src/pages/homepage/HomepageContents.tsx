@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCanvasRef } from "@shopify/react-native-skia";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { StackNavigatorParams } from "../../../App";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
@@ -12,6 +12,9 @@ import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySet
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { selectUserTrees } from "../../redux/slices/userTreesSlice";
 import HomepageTree from "./HomepageTree";
+import { CoordinatesWithTreeData } from "../../types";
+import { useSharedValue } from "react-native-reanimated";
+import { Button } from "react-native";
 
 type Props = {
     n: NativeStackScreenProps<StackNavigatorParams, "Home">;
@@ -27,12 +30,12 @@ type Props = {
 
 function useHandleNavigationListener(
     navigation: NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>,
-    clearSelectedNodeId: () => void
+    clearSelectedNodeCoord: () => void
 ) {
     useEffect(() => {
-        navigation.addListener("state", (_) => clearSelectedNodeId());
+        navigation.addListener("state", (_) => clearSelectedNodeCoord());
         return () => {
-            navigation.removeListener("state", (_) => clearSelectedNodeId());
+            navigation.removeListener("state", (_) => clearSelectedNodeCoord());
         };
     }, []);
 }
@@ -54,20 +57,30 @@ function useTakingScreenshotState() {
     return [takingScreenshot, { openTakingScreenshotModal, closeTakingScreenshotModal }] as const;
 }
 
-function useSelectedNodeIdState() {
-    const [selectedNodeId, setSelectedNodeId] = useState<{ nodeId: string; treeId: string } | null>(null);
+function useSelectedNodeCoordState() {
+    const [selectedNodeCoord, setSelectedNodeCoord] = useState<CoordinatesWithTreeData | null>(null);
+    const svSelectedNodeCoord = useSharedValue<CoordinatesWithTreeData | null>(null);
 
-    const clearSelectedNodeId = () => setSelectedNodeId(null);
-    const updateSelectedNodeId = (value: { nodeId: string; treeId: string }) => setSelectedNodeId(value);
+    const clearSelectedNodeCoord = () => {
+        svSelectedNodeCoord.value = null;
+        setSelectedNodeCoord(null);
+    };
+    const updateSelectedNodeCoord = (value: CoordinatesWithTreeData) => {
+        svSelectedNodeCoord.value = value;
+        setSelectedNodeCoord(value);
+    };
 
-    return [selectedNodeId, { clearSelectedNodeId, updateSelectedNodeId }] as const;
+    return [
+        { selectedNodeCoord, svSelectedNodeCoord },
+        { clearSelectedNodeCoord, updateSelectedNodeCoord },
+    ] as const;
 }
 
 function useCanvasSettingsState() {
     const [canvasSettings, setCanvasSettings] = useState(false);
 
-    const openCanvasSettingsModal = () => setCanvasSettings(true);
-    const closeCanvasSettingsModal = () => setCanvasSettings(false);
+    const openCanvasSettingsModal = useCallback(() => setCanvasSettings(true), []);
+    const closeCanvasSettingsModal = useCallback(() => setCanvasSettings(false), []);
 
     return [canvasSettings, { openCanvasSettingsModal, closeCanvasSettingsModal }] as const;
 }
@@ -77,8 +90,8 @@ function HomepageContents({ n: { navigation } }: Props) {
 
     const takingScreenShotState = useTakingScreenshotState();
     // const [takingScreenshot, { openTakingScreenshotModal, closeTakingScreenshotModal }] = takingScreenShotState;
-    const selectedNodeIdState = useSelectedNodeIdState();
-    const [selectedNodeId, { clearSelectedNodeId }] = selectedNodeIdState;
+    const selectedNodeCoordState = useSelectedNodeCoordState();
+    const [{ selectedNodeCoord }, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
 
     const [canvasSettings, { openCanvasSettingsModal, closeCanvasSettingsModal }] = useCanvasSettingsState();
 
@@ -947,26 +960,75 @@ function HomepageContents({ n: { navigation } }: Props) {
 
     // useHandleInitialTreeCoordinates(userTrees, screenDimensions, canvasDisplaySettings);
 
-    useHandleNavigationListener(navigation, clearSelectedNodeId);
+    useHandleNavigationListener(navigation, clearSelectedNodeCoord);
 
     const canvasRef = useCanvasRef();
 
-    const lol = {
-        selectedNodeIdState,
-        canvasRef,
-        homepageTree,
-        navigation,
-        openCanvasSettingsModal,
-    };
+    const ctm = useCallback(() => {
+        updateSelectedNodeCoord({
+            accentColor: { color1: "#FF9F23", color2: "#BF5AF2", label: "Orange" },
+            category: "SKILL",
+            data: {
+                icon: { isEmoji: false, text: "" },
+                isCompleted: false,
+                logs: [],
+                milestones: [],
+                motivesToLearn: [],
+                name: "Hehej",
+                usefulResources: [],
+            },
+            isRoot: false,
+            level: 3,
+            nodeId: "h1XB4MHwb6UjRndE4yy5H9Fb",
+            parentId: "UydKvtvXuznmmprn39hDN7Uq",
+            treeId: "XrWEpaPKRS68T09rlekrkwvY",
+            treeName: "Art",
+            x: 0,
+            y: 0,
+        });
+    }, []);
+    // const ctm = useCallback(() => {
+    //     const foo = Math.random();
+
+    //     if (foo < 0.5) return clearSelectedNodeCoord();
+
+    //     updateSelectedNodeCoord({
+    //         accentColor: { color1: "#FF9F23", color2: "#BF5AF2", label: "Orange" },
+    //         category: "SKILL",
+    //         data: {
+    //             icon: { isEmoji: false, text: "" },
+    //             isCompleted: false,
+    //             logs: [],
+    //             milestones: [],
+    //             motivesToLearn: [],
+    //             name: "Hehej",
+    //             usefulResources: [],
+    //         },
+    //         isRoot: false,
+    //         level: 3,
+    //         nodeId: "h1XB4MHwb6UjRndE4yy5H9Fb",
+    //         parentId: "UydKvtvXuznmmprn39hDN7Uq",
+    //         treeId: "XrWEpaPKRS68T09rlekrkwvY",
+    //         treeName: "Art",
+    //         x: 0,
+    //         y: 0,
+    //     });
+    // }, []);
 
     return (
         <>
-            <HomepageTree lol={lol} />
+            <HomepageTree
+                selectedNodeCoordState={selectedNodeCoordState}
+                canvasRef={canvasRef}
+                homepageTree={homepageTree}
+                navigation={navigation}
+                openCanvasSettingsModal={openCanvasSettingsModal}
+            />
             <ProgressIndicatorAndName tree={homepageTree} />
-            <OpenSettingsMenu openModal={openCanvasSettingsModal} show={selectedNodeId === null} />
+            <OpenSettingsMenu openModal={openCanvasSettingsModal} show={selectedNodeCoord === null} />
             <ShareTreeLayout
                 canvasRef={canvasRef}
-                shouldShare={selectedNodeId === null}
+                shouldShare={selectedNodeCoord === null}
                 takingScreenshotState={takingScreenShotState}
                 tree={homepageTree}
             />

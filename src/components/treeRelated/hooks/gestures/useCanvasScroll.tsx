@@ -3,7 +3,7 @@ import { Gesture } from "react-native-gesture-handler";
 import { SharedValue, WithSpringConfig, runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
 import { ScreenDimentions } from "../../../../redux/slices/screenDimentionsSlice";
-import { CanvasDimensions, NodeCoordinate } from "../../../../types";
+import { CanvasDimensions, CartesianCoordinate, CoordinatesWithTreeData } from "../../../../types";
 import { useHandleCanvasBounds } from "../useHandleCanvasBounds";
 import { ANIMATION_DURATION_AFTER_FAILED_LONG_PRESS_MS, DEACCELERATION_FACTOR, DEFAULT_SCALE } from "./params";
 
@@ -23,28 +23,62 @@ function useSyncStateToSharedValue<T>(state: T): SharedValue<T> {
         () => state,
         (updatedSharedValue: T) => {
             result.value = updatedSharedValue;
-        },
-        [state]
+        }
     );
 
     return result;
 }
 
+function useResetValuesOnCanvasDimensionUpdates(resetValues: () => void, canvasDimensions: CanvasDimensions) {
+    useEffect(() => {
+        resetValues();
+    }, [canvasDimensions]);
+}
+
+function useUpdateStartValue(
+    offsetX: SharedValue<number>,
+    offsetY: SharedValue<number>,
+    shouldUpdateStartValue: SharedValue<boolean>,
+    start: SharedValue<CartesianCoordinate>
+) {
+    useAnimatedReaction(
+        () => {
+            return { offsetX: offsetX.value, offsetY: offsetY.value, shouldUpdateStartValue: shouldUpdateStartValue.value };
+        },
+        (args: { offsetX: number; offsetY: number; shouldUpdateStartValue: boolean }) => {
+            if (shouldUpdateStartValue.value !== true) return;
+
+            start.value = { x: args.offsetX, y: args.offsetY };
+        }
+    );
+}
+
 function useCanvasScroll(
     canvasDimentions: CanvasDimensions,
     screenDimensions: ScreenDimentions,
-    foundNodeCoordinates: NodeCoordinate | undefined,
-    foundNodeOfMenu: NodeCoordinate | undefined,
+    foundNodeCoordinates: CoordinatesWithTreeData | undefined,
+    foundNodeOfMenu: CoordinatesWithTreeData | undefined,
     onScroll: () => void,
     draggingNode: { state: boolean; endDragging: () => void },
-    sharedValues: { offsetX: SharedValue<number>; offsetY: SharedValue<number>; scale: SharedValue<number> }
+    sharedValues: {
+        offsetX: SharedValue<number>;
+        offsetY: SharedValue<number>;
+        scale: SharedValue<number>;
+        selectedNode: SharedValue<CoordinatesWithTreeData | null>;
+    }
 ) {
-    const { offsetX, offsetY, scale } = sharedValues;
+    const { offsetX, offsetY, scale, selectedNode } = sharedValues;
+
+    const resetSharedValues = () => {
+        shouldUpdateStartValue.value = true;
+        offsetX.value = 0;
+        offsetY.value = 0;
+    };
 
     const screenHeightWithNavAccounted = screenDimensions.height - NAV_HEGIHT;
     const { canvasHeight, canvasWidth } = canvasDimentions;
 
-    const start = useSharedValue({ x: 0, y: 0 });
+    const start = useSharedValue<CartesianCoordinate>({ x: 0, y: 0 });
     //We don't want to update the start value while panning (normal scrolling, NOT the slide after the scrolling) because the offsetX is calculated
     //based on the start value, if we update it while panning it causes exponential growth in the offset variables
     const shouldUpdateStartValue = useSharedValue(false);
@@ -77,29 +111,9 @@ function useCanvasScroll(
 
     const { maxXBound, minXBound, maxYBound, minYBound } = useHandleCanvasBounds(boundsProps);
 
-    useEffect(() => {
-        shouldUpdateStartValue.value = true;
-        offsetX.value = 0;
-        offsetY.value = 0;
-    }, [canvasDimentions.canvasHeight, canvasDimentions.canvasWidth]);
+    useResetValuesOnCanvasDimensionUpdates(resetSharedValues, canvasDimentions);
 
-    useAnimatedReaction(
-        () => offsetX.value,
-        (offsetX: number) => {
-            if (shouldUpdateStartValue.value !== true) return;
-            start.value = { x: offsetX, y: start.value.y };
-        },
-        [offsetX, shouldUpdateStartValue]
-    );
-
-    useAnimatedReaction(
-        () => offsetY.value,
-        (offsetY: number) => {
-            if (shouldUpdateStartValue.value !== true) return;
-            start.value = { x: start.value.x, y: offsetY };
-        },
-        [offsetY, shouldUpdateStartValue]
-    );
+    useUpdateStartValue(offsetX, offsetY, shouldUpdateStartValue, start);
 
     const canvasPan = Gesture.Pan()
         .onStart(() => {
@@ -208,7 +222,7 @@ function useCanvasScroll(
 
     const scrollStyle = useAnimatedStyle(() => {
         if (foundNodeCoordinates) return transitionToSelectedNodeStyle();
-        if (animateNodeMenuTransition) return transitionFromMenuToNormalScrolling();
+        if (animateNodeMenuTransition.value) return transitionFromMenuToNormalScrolling();
 
         //This is the regular scrolling style
         return {
@@ -245,7 +259,7 @@ function useCanvasScroll(
                 ],
             };
         }
-    }, [offsetX, offsetY, scale, foundNodeCoordinates, animateNodeMenuTransition, foundNodeOfMenu]);
+    });
 
     const dragDelta = { x: dragX, y: dragY };
 

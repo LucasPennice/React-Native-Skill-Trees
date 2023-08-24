@@ -1,19 +1,17 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Canvas, SkiaDomView } from "@shopify/react-native-skia";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
+import { ReactNode, memo, useEffect, useMemo, useState } from "react";
 import { Alert, View } from "react-native";
 import { Gesture, GestureDetector, SimultaneousGesture } from "react-native-gesture-handler";
-import Animated, { useSharedValue } from "react-native-reanimated";
+import Animated, { SharedValue, useSharedValue } from "react-native-reanimated";
 import { StackNavigatorParams } from "../../../App";
 import { InteractiveTreeConfig, InteractiveTreeFunctions } from "../../components/treeRelated/InteractiveTree";
-import { InteractiveNodeState } from "../../components/treeRelated/InteractiveTree2H";
 import RadialTreeLevelCircles from "../../components/treeRelated/RadialTreeLevelCircles";
-import { removeTreeDataFromCoordinate } from "../../components/treeRelated/coordinateFunctions";
 import NodeLongPressIndicator from "../../components/treeRelated/general/NodeLongPressIndicator";
 import { DEFAULT_SCALE } from "../../components/treeRelated/hooks/gestures/params";
 import useCanvasLongPress from "../../components/treeRelated/hooks/gestures/useCanvasLongPress";
 import useCanvasScroll from "../../components/treeRelated/hooks/gestures/useCanvasScroll";
-import useCanvasTap from "../../components/treeRelated/hooks/gestures/useCanvasTap";
+import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks/gestures/useCanvasTap";
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "../../components/treeRelated/returnNodeMenuFunctions";
@@ -22,32 +20,30 @@ import { getMenuNonEditingFunctions } from "../../components/treeRelated/selecte
 import { handleTreeBuild } from "../../functions/coordinateSystem";
 import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
 import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
-import { centerFlex } from "../../parameters";
+import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
-import { TreeCoordinateData, selectHomeTreeCoordinates } from "../../redux/slices/treesCoordinatesSlice";
+import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
-import { CanvasDimensions, CoordinatesWithTreeData, DnDZone, NodeCoordinate, Skill, Tree } from "../../types";
+import { CanvasDimensions, CoordinatesWithTreeData, DnDZone, SelectedNodeId, Skill, Tree } from "../../types";
 import RadialSkillTree from "./RadialSkillTree";
 
 type Props = {
-    lol: {
-        selectedNodeIdState: readonly [
-            {
-                nodeId: string;
-                treeId: string;
-            } | null,
-            {
-                readonly clearSelectedNodeId: () => void;
-                readonly updateSelectedNodeId: (value: { nodeId: string; treeId: string }) => void;
-            }
-        ];
-        canvasRef: React.RefObject<SkiaDomView>;
-        homepageTree: Tree<Skill>;
-        navigation: NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>;
-        openCanvasSettingsModal: () => void;
-    };
+    selectedNodeCoordState: readonly [
+        {
+            readonly selectedNodeCoord: CoordinatesWithTreeData | null;
+            readonly svSelectedNodeCoord: SharedValue<CoordinatesWithTreeData | null>;
+        },
+        {
+            readonly clearSelectedNodeCoord: () => void;
+            readonly updateSelectedNodeCoord: (value: CoordinatesWithTreeData) => void;
+        }
+    ];
+    canvasRef: React.RefObject<SkiaDomView>;
+    homepageTree: Tree<Skill>;
+    navigation: NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>;
+    openCanvasSettingsModal: () => void;
 };
 
 function useHomepageTreeState() {
@@ -57,76 +53,68 @@ function useHomepageTreeState() {
 }
 
 function useCreateTreeFunctions(
-    updateSelectedNodeId: (value: { nodeId: string; treeId: string }) => void,
+    updateSelectedNodeCoord: (value: CoordinatesWithTreeData) => void,
     navigation: NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>,
     openCanvasSettingsModal: () => void
 ) {
     const dispatch = useAppDispatch();
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
-    const result: InteractiveTreeFunctions = useMemo(() => {
-        return {
-            onNodeClick: (node: Tree<Skill>) => {
-                const nodeId = node.nodeId;
-                updateSelectedNodeId({ nodeId, treeId: node.treeId });
-                return;
+    const result: InteractiveTreeFunctions = {
+        onNodeClick: (coordOfClickedNode: CoordinatesWithTreeData) => {
+            updateSelectedNodeCoord(coordOfClickedNode);
+            return;
+        },
+        nodeMenu: {
+            navigate: navigation.navigate,
+            confirmDeleteTree: (treeId: string) => {
+                Alert.alert(
+                    "Delete this tree?",
+                    "",
+                    [
+                        { text: "No", style: "cancel" },
+                        { text: "Yes", onPress: () => dispatch(removeUserTree(treeId)), style: "destructive" },
+                    ],
+                    { cancelable: true }
+                );
             },
-            nodeMenu: {
-                navigate: navigation.navigate,
-                confirmDeleteTree: (treeId: string) => {
-                    Alert.alert(
-                        "Delete this tree?",
-                        "",
-                        [
-                            { text: "No", style: "cancel" },
-                            { text: "Yes", onPress: () => dispatch(removeUserTree(treeId)), style: "destructive" },
-                        ],
-                        { cancelable: true }
-                    );
-                },
-                selectNode: () => {},
-                confirmDeleteNode: () => {},
-                toggleCompletionOfSkill: (treeToUpdate: Tree<Skill>, node: Tree<Skill>) => {
-                    let updatedNode: Tree<Skill> = { ...node, data: { ...node.data, isCompleted: !node.data.isCompleted } };
+            selectNode: () => {},
+            confirmDeleteNode: () => {},
+            toggleCompletionOfSkill: (treeToUpdate: Tree<Skill>, node: Tree<Skill>) => {
+                let updatedNode: Tree<Skill> = { ...node, data: { ...node.data, isCompleted: !node.data.isCompleted } };
 
-                    const updatedTree = updateNodeAndTreeCompletion(treeToUpdate, updatedNode);
+                const updatedTree = updateNodeAndTreeCompletion(treeToUpdate, updatedNode);
 
-                    dispatch(updateUserTrees({ updatedTree, screenDimensions }));
-                },
-                openAddSkillModal: (dnDZoneType: DnDZone["type"], node: Tree<Skill>) => {
-                    navigation.navigate("ViewingSkillTree", { treeId: node.treeId, addNodeModal: { dnDZoneType, nodeId: node.nodeId } });
-                },
-                openCanvasSettingsModal,
+                dispatch(updateUserTrees({ updatedTree, screenDimensions }));
             },
-        };
-    }, [dispatch, navigation, openCanvasSettingsModal, screenDimensions]);
+            openAddSkillModal: (dnDZoneType: DnDZone["type"], node: Tree<Skill>) => {
+                navigation.navigate("ViewingSkillTree", { treeId: node.treeId, addNodeModal: { dnDZoneType, nodeId: node.nodeId } });
+            },
+            openCanvasSettingsModal,
+        },
+    };
 
     return result;
 }
 
-function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: { nodeId: string; treeId: string } | null, homeTree: Tree<Skill>) {
-    const homeTreeCoordinate = useAppSelector(selectHomeTreeCoordinates);
+function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: CoordinatesWithTreeData | null, homeTree: Tree<Skill>) {
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
-    const result: InteractiveNodeState = useMemo(() => {
-        const {
-            dndZoneCoordinates,
-            canvasDimentions: canvasDimensions,
-            centeredCoordinatedWithTreeData,
-        } = handleTreeBuild(homeTree, screenDimensions, "radial");
+    const {
+        dndZoneCoordinates,
+        canvasDimentions: canvasDimensions,
+        centeredCoordinatedWithTreeData,
+    } = useMemo(() => handleTreeBuild(homeTree, screenDimensions, "radial"), [homeTree, screenDimensions]);
 
-        const treeCoordinate: TreeCoordinateData = {
-            canvasDimensions,
-            addNodePositions: dndZoneCoordinates,
-            nodeCoordinates: centeredCoordinatedWithTreeData,
-        };
+    const treeCoordinate: TreeCoordinateData = {
+        canvasDimensions,
+        addNodePositions: dndZoneCoordinates,
+        nodeCoordinates: centeredCoordinatedWithTreeData,
+    };
 
-        const selectedNodeId = selectedNode ? selectedNode.nodeId : null;
+    const selectedNodeId = selectedNode ? selectedNode.nodeId : null;
 
-        return { screenDimensions, selectedNodeId, treeCoordinate, canvasRef, selectedDndZone: undefined };
-    }, [screenDimensions, canvasRef, selectedNode, homeTreeCoordinate]);
-
-    return result;
+    return { screenDimensions, selectedNodeId, treeCoordinate, canvasRef, selectedDndZone: undefined };
 }
 
 function useGetTreeConfig() {
@@ -157,54 +145,44 @@ function useRunOnTreeUpdate(tree: Tree<Skill>, functions: InteractiveTreeFunctio
 }
 
 function useNodeMenuState() {
-    const [openMenuOnNode, setOpenMenuOnNode] = useState<NodeCoordinate | undefined>(undefined);
+    const [openMenuOnNode, setOpenMenuOnNode] = useState<CoordinatesWithTreeData | undefined>(undefined);
 
     const closeNodeMenu = () => setOpenMenuOnNode(undefined);
 
-    const openMenuOfNode = (clickedNode: NodeCoordinate) => setOpenMenuOnNode(clickedNode);
+    const openMenuOfNode = (clickedNode: CoordinatesWithTreeData) => setOpenMenuOnNode(clickedNode);
 
     return [openMenuOnNode, { closeNodeMenu, openMenuOfNode }] as const;
 }
 
-function HomepageTree({ lol }: Props) {
+function useSkiaFonts() {
+    const labelFont = useFont(require("../../../assets/Helvetica.ttf"), 12);
+    const nodeLetterFont = useFont(require("../../../assets/Helvetica.ttf"), NODE_ICON_FONT_SIZE);
+    const emojiFont = useFont(require("../../../assets/NotoEmoji-Regular.ttf"), NODE_ICON_FONT_SIZE);
+
+    if (!labelFont || !nodeLetterFont || !emojiFont) return undefined;
+
+    return { labelFont, nodeLetterFont, emojiFont };
+}
+
+function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsModal, selectedNodeCoordState }: Props) {
     const { screenDimensions } = useHomepageTreeState();
 
-    const { canvasRef, homepageTree, navigation, openCanvasSettingsModal, selectedNodeIdState } = lol;
+    const [{ selectedNodeCoord, svSelectedNodeCoord }, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
 
-    const [selectedNodeId, { clearSelectedNodeId, updateSelectedNodeId }] = selectedNodeIdState;
-
-    const selectedNode = findNodeByIdInHomeTree(homepageTree, selectedNodeId);
+    const selectedNode = findNodeByIdInHomeTree(homepageTree, selectedNodeCoord);
 
     const treeConfig = useGetTreeConfig();
-    const treeState = useGetTreeState(canvasRef, selectedNodeId, homepageTree);
-    const treeFunctions = useCreateTreeFunctions(updateSelectedNodeId, navigation, openCanvasSettingsModal);
+
+    const treeState = useGetTreeState(canvasRef, selectedNodeCoord, homepageTree);
+
+    const treeFunctions = useCreateTreeFunctions(updateSelectedNodeCoord, navigation, openCanvasSettingsModal);
 
     const [draggingNode, draggingNodeActions] = useDraggingNodeState();
     const { endDragging } = draggingNodeActions;
 
-    const nodeCoordinatesNoData = removeTreeDataFromCoordinate(treeState.treeCoordinate.nodeCoordinates);
+    // const nodeCoordinatesNoData = removeTreeDataFromCoordinate(treeState.treeCoordinate.nodeCoordinates);
 
-    const selectedNodeCoordinates = nodeCoordinatesNoData.find((c) => c.id === selectedNodeId?.nodeId);
-
-    const onNodeClickAdapter = (coordOfClickedNode: CoordinatesWithTreeData) => {
-        if (!treeFunctions || !treeFunctions.onNodeClick) return;
-
-        console.log(new Date().getTime());
-
-        const node = findNodeByIdInHomeTree(homepageTree, coordOfClickedNode);
-
-        if (!node) return;
-
-        treeFunctions.onNodeClick(node);
-    };
-
-    const onDndZoneClickAdapter = (zone?: DnDZone) => {
-        if (!treeFunctions || !treeFunctions.onDndZoneClick) return;
-
-        if (!zone) return;
-
-        treeFunctions.onDndZoneClick(zone);
-    };
+    const selectedNodeCoordinates = treeState.treeCoordinate.nodeCoordinates.find((c) => c.nodeId === selectedNodeCoord?.nodeId);
 
     useRunOnTreeUpdate(homepageTree, treeFunctions, treeState.treeCoordinate.addNodePositions);
 
@@ -213,7 +191,7 @@ function HomepageTree({ lol }: Props) {
     const [openMenuOnNode, { closeNodeMenu }] = nodeMenuState;
 
     //eslint-disable-next-line
-    const longPressState = useState<{ data: NodeCoordinate | undefined; state: "INTERRUPTED" | "PRESSING" | "IDLE" }>({
+    const longPressState = useState<{ data: CoordinatesWithTreeData | undefined; state: "INTERRUPTED" | "PRESSING" | "IDLE" }>({
         data: undefined,
         state: "IDLE",
     });
@@ -221,34 +199,40 @@ function HomepageTree({ lol }: Props) {
 
     const canvasLongPressProps = {
         config: { blockDragAndDrop: treeConfig.blockDragAndDrop, blockLongPress: treeConfig.blockLongPress },
-        nodeCoordinatesCentered: nodeCoordinatesNoData,
+        nodeCoordinates: treeState.treeCoordinate.nodeCoordinates,
         longPressState,
         nodeMenuState,
         draggingNodeActions,
     };
 
-    const canvasTapProps = {
-        functions: { runOnTap: closeNodeMenu, onDndZoneClick: onDndZoneClickAdapter, onNodeClick: onNodeClickAdapter },
+    const canvasTapProps: CanvasTapProps = {
+        functions: { runOnTap: closeNodeMenu, onNodeClick: treeFunctions.onNodeClick },
         state: {
             dragAndDropZones: treeState.treeCoordinate.addNodePositions,
             nodeCoordinates: treeState.treeCoordinate.nodeCoordinates,
-            selectedNodeId: selectedNodeId === null ? selectedNodeId : selectedNodeId.nodeId,
+            selectedNodeId: selectedNodeCoord?.nodeId as SelectedNodeId,
             showDndZones: treeConfig.showDndZones,
         },
     };
 
     const { canvasLongPress, runOnScroll } = useCanvasLongPress(canvasLongPressProps);
+
+    //✅👆
+
     const canvasTap = useCanvasTap(canvasTapProps);
 
     const canvasPressAndLongPress = Gesture.Exclusive(canvasLongPress, canvasTap);
 
-    const foundNodeOfMenu = openMenuOnNode ? treeState.treeCoordinate.nodeCoordinates.find((c) => c.nodeId === openMenuOnNode.id) : undefined;
-    const foundNodeOfMenuWithoutData = openMenuOnNode ? nodeCoordinatesNoData.find((c) => c.id === openMenuOnNode.id) : undefined;
+    const foundNodeOfMenu = openMenuOnNode ? treeState.treeCoordinate.nodeCoordinates.find((c) => c.nodeId === openMenuOnNode.nodeId) : undefined;
+    const foundNodeOfMenuWithoutData = openMenuOnNode
+        ? treeState.treeCoordinate.nodeCoordinates.find((c) => c.nodeId === openMenuOnNode.nodeId)
+        : undefined;
 
     const offsetX = useSharedValue(0);
     const offsetY = useSharedValue(0);
     const scale = useSharedValue(DEFAULT_SCALE);
 
+    //🟡👇
     const { canvasPan, dragDelta, scrollStyle } = useCanvasScroll(
         treeState.treeCoordinate.canvasDimensions,
         screenDimensions,
@@ -256,8 +240,9 @@ function HomepageTree({ lol }: Props) {
         foundNodeOfMenuWithoutData,
         runOnScroll,
         { state: draggingNode, endDragging },
-        { offsetX, offsetY, scale }
+        { offsetX, offsetY, scale, selectedNode: svSelectedNodeCoord }
     );
+    //🟡👆
 
     const { canvasZoom, scaleState } = useCanvasZoom(treeState.treeCoordinate.canvasDimensions, screenDimensions, selectedNodeCoordinates, {
         offsetX,
@@ -267,7 +252,7 @@ function HomepageTree({ lol }: Props) {
 
     const canvasScrollAndZoom = Gesture.Simultaneous(canvasPan, canvasZoom);
 
-    const renderSelectedNodeMenu = selectedNodeCoordinates && selectedNodeId && treeConfig.isInteractive;
+    const renderSelectedNodeMenu = selectedNodeCoordinates && selectedNode?.nodeId && treeConfig.isInteractive;
     const renderNodeMenu = foundNodeOfMenu && openMenuOnNode && treeConfig.isInteractive;
 
     const nodeMenuFunctions = returnNodeMenuFunctions(
@@ -282,7 +267,7 @@ function HomepageTree({ lol }: Props) {
 
     const drag = { ...dragDelta, nodesToDragId: ["bm2W4LgdatpqWFgnmJwBRVY1"] };
     //Interactive Tree Props - SelectedNodeMenu
-    const nonEditingMenuFunctions = getMenuNonEditingFunctions(selectedNode, navigation, clearSelectedNodeId);
+    const nonEditingMenuFunctions = getMenuNonEditingFunctions(selectedNode, navigation, clearSelectedNodeCoord);
 
     const selectedNodeMenuState: SelectedNodeMenuState = {
         screenDimensions,
@@ -291,8 +276,7 @@ function HomepageTree({ lol }: Props) {
         initialMode: "VIEWING",
     };
 
-    // VER CUANTO TARDA EN ACTUALIZARSE EL SELECTED NODE FUERA DE ESTE COMPONENTE VS DENTRO DE ESTE COMPONENTE
-    // O SEA VER DONDE ESTA EL BOTTLENECK DESDE QUE YO HAGO CLICK HASTA QUE EL ESTADO EN ESTE COMPONENTE SE ACTUALIZA
+    const fonts = useSkiaFonts();
 
     return (
         <>
@@ -302,16 +286,19 @@ function HomepageTree({ lol }: Props) {
                         {treeConfig.canvasDisplaySettings.showCircleGuide && (
                             <RadialTreeLevelCircles nodeCoordinates={treeState.treeCoordinate.nodeCoordinates} />
                         )}
-                        <RadialSkillTree
-                            nodeCoordinatesCentered={treeState.treeCoordinate.nodeCoordinates}
-                            selectedNode={selectedNodeId?.nodeId ?? null}
-                            settings={{
-                                showLabel: treeConfig.canvasDisplaySettings.showLabel,
-                                oneColorPerTree: treeConfig.canvasDisplaySettings.oneColorPerTree,
-                                showIcons: treeConfig.canvasDisplaySettings.showIcons,
-                            }}
-                            drag={drag}
-                        />
+                        {fonts && (
+                            <RadialSkillTree
+                                nodeCoordinatesCentered={treeState.treeCoordinate.nodeCoordinates}
+                                selectedNode={selectedNode?.nodeId ?? null}
+                                fonts={fonts}
+                                settings={{
+                                    showLabel: treeConfig.canvasDisplaySettings.showLabel,
+                                    oneColorPerTree: treeConfig.canvasDisplaySettings.oneColorPerTree,
+                                    showIcons: treeConfig.canvasDisplaySettings.showIcons,
+                                }}
+                                drag={drag}
+                            />
+                        )}
                     </CanvasView>
                     {/* Long press Node related 👇 */}
                     <NodeLongPressIndicator data={longPressIndicatorPosition} scale={scaleState} />
@@ -348,4 +335,4 @@ function CanvasView({
     );
 }
 
-export default HomepageTree;
+export default memo(HomepageTree);
