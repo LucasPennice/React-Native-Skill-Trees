@@ -1,4 +1,4 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCanvasRef } from "@shopify/react-native-skia";
 import { useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { View } from "react-native";
@@ -10,19 +10,24 @@ import ShareTreeScreenshot from "../../components/takingScreenshot/ShareTreeScre
 import CanvasSettingsModal from "../../components/treeRelated/canvasSettingsModal/CanvasSettingsModal";
 import { IsSharingAvailableContext } from "../../context";
 import { handleTreeBuild } from "../../functions/coordinateSystem";
-import { treeCompletedSkillPercentage } from "../../functions/extractInformationFromTree";
-import { insertNodesBasedOnDnDZone } from "../../functions/mutateTree";
+import { findNodeById, treeCompletedSkillPercentage } from "../../functions/extractInformationFromTree";
+import { deleteNodeWithNoChildren, insertNodesBasedOnDnDZone, updateNodeAndTreeCompletion } from "../../functions/mutateTree";
 import { colors } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
-import { changeTree, updateUserTreeWithAppendedNode } from "../../redux/slices/userTreesSlice";
+import { changeTree, updateUserTreeWithAppendedNode, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { NodeCoordinate, DnDZone, Skill, Tree } from "../../types";
 import useCurrentTree from "../../useCurrentTree";
 import AddNodeStateIndicator from "./AddNodeStateIndicator";
 import IndividualSkillTree from "./IndividualSkillTree";
 import AddNodeModal from "./modals/AddNodeModal";
 import DeleteNodeModal from "./modals/DeleteNodeModal";
+import SelectedNodeMenu, {
+    SelectedNodeMenuFunctions,
+    SelectedNodeMenuMutateFunctions,
+    SelectedNodeMenuState,
+} from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 
 export type ModalState =
     | "TAKING_SCREENSHOT"
@@ -248,6 +253,63 @@ function useSelectedNodeCoordState(dispatchModalState: React.Dispatch<ModalReduc
     return [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] as const;
 }
 
+function useGetSelectedNodeMenuFns(
+    selectedNode: Tree<Skill> | undefined,
+    selectedTree: Tree<Skill>,
+    navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>,
+    openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void,
+    clearSelectedNodeCoord: () => void
+) {
+    const dispatch = useAppDispatch();
+    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
+
+    const closeMenu = clearSelectedNodeCoord;
+
+    const handleDeleteNode = (node: Tree<Skill>) => {
+        if (!selectedTree) throw new Error("No selectedTree at deleteNode");
+        if (!selectedNode) throw new Error("No selected node at deleteNode");
+
+        if (node.children.length !== 0) return openChildrenHoistSelector(node);
+
+        const updatedTree = deleteNodeWithNoChildren(selectedTree, node);
+
+        dispatch(updateUserTrees({ updatedTree, screenDimensions }));
+        clearSelectedNodeCoord();
+    };
+
+    const updateNode = (updatedNode: Tree<Skill>) => {
+        try {
+            if (!selectedNode) throw new Error("No selected node at updateNode");
+
+            const updatedTree = updateNodeAndTreeCompletion(selectedTree, updatedNode);
+
+            dispatch(updateUserTrees({ updatedTree, screenDimensions }));
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const goToSkillPage = () => {
+        if (!selectedNode) throw new Error("No selected node at goToSkillPage");
+        navigation.navigate("SkillPage", selectedNode);
+    };
+    const goToTreePage = () => {
+        if (!selectedNode) throw new Error("No selected node at goToTreePage");
+        navigation.navigate("ViewingSkillTree", { node: selectedNode });
+    };
+    const goToEditTreePage = () => {
+        if (!selectedNode) throw new Error("No selected node at goToTreePage");
+        navigation.navigate("MyTrees", { editingTreeId: selectedNode.treeId });
+    };
+
+    const result: { query: SelectedNodeMenuFunctions; mutate: SelectedNodeMenuMutateFunctions } = {
+        mutate: { handleDeleteNode, updateNode },
+        query: { closeMenu, goToEditTreePage, goToSkillPage, goToTreePage },
+    };
+
+    return result;
+}
+
 function IndividualSkillTreePage({ navigation, route }: Props) {
     //Redux State
     const { selectedTree, treeCoordinate } = useViewingSkillTreeState();
@@ -268,12 +330,13 @@ function IndividualSkillTreePage({ navigation, route }: Props) {
 type IndividualSkillTreeWithSelectedTreeProps = Props & { selectedTree: Tree<Skill>; treeCoordinate: TreeCoordinateData };
 
 function IndividualSkillTreeWithSelectedTree({ navigation, route, selectedTree, treeCoordinate }: IndividualSkillTreeWithSelectedTreeProps) {
+    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     //
     const modalStateReducer = useModalStateReducer();
     const [modalState, dispatchModalState] = modalStateReducer;
     //
     const selectedNodeCoordState = useSelectedNodeCoordState(dispatchModalState);
-    const [_, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
+    const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
     //
     const selectedNewNodePositionState = useSelectedNewNodePositionState();
     const [selectedNewNodePosition, { clearSelectedNewNodePosition, updateSelectedNewNodePosition }] = selectedNewNodePositionState;
@@ -316,6 +379,23 @@ function IndividualSkillTreeWithSelectedTree({ navigation, route, selectedTree, 
         openNewNodeModal: () => dispatchModalState("openNewNodeModal"),
     };
 
+    const selectedNode = findNodeById(selectedTree, selectedNodeCoord?.node?.nodeId ?? null);
+
+    const selectedNodeMenuState: SelectedNodeMenuState = {
+        screenDimensions,
+        selectedNode: selectedNode!,
+        selectedTree,
+        initialMode: selectedNodeCoord?.menuMode ?? "VIEWING",
+    };
+
+    const selectedNodeMenuFunctions = useGetSelectedNodeMenuFns(
+        selectedNode,
+        selectedTree,
+        navigation,
+        openChildrenHoistSelector,
+        clearSelectedNodeCoord
+    );
+
     return (
         <View style={{ position: "relative", backgroundColor: colors.background, flex: 1, overflow: "hidden" }}>
             <IndividualSkillTree
@@ -343,6 +423,15 @@ function IndividualSkillTreeWithSelectedTree({ navigation, route, selectedTree, 
             <OpenSettingsMenu show={modalState === "IDLE"} openModal={() => dispatchModalState("openEditCanvasSettings")} />
 
             <AddNodeStateIndicator mode={modalState} functions={nodeStateIndicatorFunctions} currentTree={selectedTree} />
+
+            {selectedNodeCoord && (
+                <SelectedNodeMenu
+                    functions={selectedNodeMenuFunctions.query}
+                    mutateFunctions={selectedNodeMenuFunctions.mutate}
+                    state={selectedNodeMenuState}
+                    allowEdit
+                />
+            )}
 
             <DeleteNodeModal
                 open={modalState === "CANDIDATES_TO_HOIST"}

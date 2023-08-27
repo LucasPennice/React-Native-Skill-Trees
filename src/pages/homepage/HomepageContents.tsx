@@ -13,6 +13,9 @@ import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsS
 import { selectUserTrees } from "../../redux/slices/userTreesSlice";
 import { NodeCoordinate } from "../../types";
 import HomepageTree from "./HomepageTree";
+import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
+import { selectedNodeMenuQueryFns } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenuFunctions";
+import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
 
 type Props = {
     n: NativeStackScreenProps<StackNavigatorParams, "Home">;
@@ -74,7 +77,7 @@ function useCanvasSettingsState() {
 }
 
 function HomepageContents({ n: { navigation } }: Props) {
-    const { canvasDisplaySettings, userTrees } = useHomepageContentsState();
+    const { canvasDisplaySettings, userTrees, screenDimensions } = useHomepageContentsState();
 
     const takingScreenShotState = useTakingScreenshotState();
     // const [takingScreenshot, { openTakingScreenshotModal, closeTakingScreenshotModal }] = takingScreenShotState;
@@ -90,6 +93,17 @@ function HomepageContents({ n: { navigation } }: Props) {
     useHandleNavigationListener(navigation, clearSelectedNodeCoord);
 
     const canvasRef = useCanvasRef();
+
+    const selectedNode = findNodeByIdInHomeTree(homepageTree, selectedNodeCoord);
+
+    const selectedNodeQueryFns = selectedNodeMenuQueryFns(selectedNode, navigation, clearSelectedNodeCoord);
+
+    const selectedNodeMenuState: SelectedNodeMenuState = {
+        screenDimensions,
+        selectedNode: selectedNode!,
+        selectedTree: homepageTree,
+        initialMode: "VIEWING",
+    };
 
     return (
         <>
@@ -108,6 +122,9 @@ function HomepageContents({ n: { navigation } }: Props) {
                 takingScreenshotState={takingScreenShotState}
                 tree={homepageTree}
             />
+
+            {selectedNodeCoord && <SelectedNodeMenu functions={selectedNodeQueryFns} state={selectedNodeMenuState} />}
+
             <CanvasSettingsModal open={canvasSettings} closeModal={closeCanvasSettingsModal} />
         </>
     );

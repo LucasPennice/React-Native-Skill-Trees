@@ -15,11 +15,6 @@ import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu, { NodeMenuFunctions } from "../../components/treeRelated/nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "../../components/treeRelated/returnNodeMenuFunctions";
-import SelectedNodeMenu, {
-    SelectedNodeMenuFunctions,
-    SelectedNodeMenuMutateFunctions,
-    SelectedNodeMenuState,
-} from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { handleTreeBuild } from "../../functions/coordinateSystem";
 import { findNodeById } from "../../functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, updateNodeAndTreeCompletion } from "../../functions/mutateTree";
@@ -29,7 +24,7 @@ import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySet
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
-import { CanvasDimensions, NodeCoordinate, DnDZone, InteractiveTreeFunctions, Skill, Tree } from "../../types";
+import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeCoordinate, Skill, Tree } from "../../types";
 import { SelectedNewNodePositionState, SelectedNodeCoordState } from "./IndividualSkillTreePage";
 
 type Props = {
@@ -195,63 +190,6 @@ function useSkiaFonts() {
     return { labelFont, nodeLetterFont, emojiFont };
 }
 
-function useGetSelectedNodeMenuFns(
-    selectedNode: Tree<Skill> | undefined,
-    selectedTree: Tree<Skill>,
-    navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>,
-    openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void,
-    clearSelectedNodeCoord: () => void
-) {
-    const dispatch = useAppDispatch();
-    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
-
-    const closeMenu = clearSelectedNodeCoord;
-
-    const handleDeleteNode = (node: Tree<Skill>) => {
-        if (!selectedTree) throw new Error("No selectedTree at deleteNode");
-        if (!selectedNode) throw new Error("No selected node at deleteNode");
-
-        if (node.children.length !== 0) return openChildrenHoistSelector(node);
-
-        const updatedTree = deleteNodeWithNoChildren(selectedTree, node);
-
-        dispatch(updateUserTrees({ updatedTree, screenDimensions }));
-        clearSelectedNodeCoord();
-    };
-
-    const updateNode = (updatedNode: Tree<Skill>) => {
-        try {
-            if (!selectedNode) throw new Error("No selected node at updateNode");
-
-            const updatedTree = updateNodeAndTreeCompletion(selectedTree, updatedNode);
-
-            dispatch(updateUserTrees({ updatedTree, screenDimensions }));
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const goToSkillPage = () => {
-        if (!selectedNode) throw new Error("No selected node at goToSkillPage");
-        navigation.navigate("SkillPage", selectedNode);
-    };
-    const goToTreePage = () => {
-        if (!selectedNode) throw new Error("No selected node at goToTreePage");
-        navigation.navigate("ViewingSkillTree", { node: selectedNode });
-    };
-    const goToEditTreePage = () => {
-        if (!selectedNode) throw new Error("No selected node at goToTreePage");
-        navigation.navigate("MyTrees", { editingTreeId: selectedNode.treeId });
-    };
-
-    const result: { query: SelectedNodeMenuFunctions; mutate: SelectedNodeMenuMutateFunctions } = {
-        mutate: { handleDeleteNode, updateNode },
-        query: { closeMenu, goToEditTreePage, goToSkillPage, goToTreePage },
-    };
-
-    return result;
-}
-
 function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: Props) {
     const { openCanvasSettingsModal, openChildrenHoistSelector, openNewNodeModal } = functions;
     const { screenDimensions, canvasDisplaySettings } = useHomepageTreeState();
@@ -343,7 +281,6 @@ function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: 
 
     const canvasScrollAndZoom = Gesture.Simultaneous(canvasPan, canvasZoom);
 
-    const renderSelectedNodeMenu = selectedNodeCoordinates && selectedNode?.nodeId;
     const renderNodeMenu = foundNodeOfMenu && openMenuOnNode;
 
     const nodeMenuFunctions = useGetNodeMenuFns(foundNodeOfMenu, tree, treeFunctions.nodeMenu);
@@ -353,16 +290,7 @@ function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: 
     const drag = { ...dragDelta, nodesToDragId: ["bm2W4LgdatpqWFgnmJwBRVY1"] };
     //Interactive Tree Props - SelectedNodeMenu
 
-    const selectedNodeMenuState: SelectedNodeMenuState = {
-        screenDimensions,
-        selectedNode: selectedNode!,
-        selectedTree: tree,
-        initialMode: selectedNodeCoord?.menuMode ?? "VIEWING",
-    };
-
     const fonts = useSkiaFonts();
-
-    const selectedNodeMenuFunctions = useGetSelectedNodeMenuFns(selectedNode, tree, navigation, openChildrenHoistSelector, clearSelectedNodeCoord);
 
     return (
         <>
@@ -391,15 +319,6 @@ function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: 
                     {/* Long press Node related 👆 */}
                 </Animated.View>
             </View>
-
-            {renderSelectedNodeMenu && (
-                <SelectedNodeMenu
-                    functions={selectedNodeMenuFunctions.query}
-                    mutateFunctions={selectedNodeMenuFunctions.mutate}
-                    state={selectedNodeMenuState}
-                    allowEdit
-                />
-            )}
         </>
     );
 }

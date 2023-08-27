@@ -14,8 +14,6 @@ import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "../../components/treeRelated/returnNodeMenuFunctions";
-import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
-import { selectedNodeMenuQueryFns } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenuFunctions";
 import { handleTreeBuild } from "../../functions/coordinateSystem";
 import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
 import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
@@ -25,7 +23,7 @@ import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySet
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
-import { CanvasDimensions, NodeCoordinate, DnDZone, InteractiveTreeConfig, InteractiveTreeFunctions, SelectedNodeId, Skill, Tree } from "../../types";
+import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeCoordinate, SelectedNodeId, Skill, Tree } from "../../types";
 import RadialSkillTree from "./RadialSkillTree";
 
 type Props = {
@@ -44,8 +42,9 @@ type Props = {
 
 function useHomepageTreeState() {
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
+    const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
 
-    return { screenDimensions };
+    return { screenDimensions, canvasDisplaySettings };
 }
 
 function useCreateTreeFunctions(
@@ -113,16 +112,6 @@ function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: 
     return { screenDimensions, selectedNodeId, treeCoordinate, canvasRef, selectedDndZone: undefined };
 }
 
-function useGetTreeConfig() {
-    const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
-
-    const result: InteractiveTreeConfig = useMemo(() => {
-        return { canvasDisplaySettings, isInteractive: true, renderStyle: "radial", editTreeFromNodeMenu: false, blockDragAndDrop: true };
-    }, [canvasDisplaySettings]);
-
-    return result;
-}
-
 function useDraggingNodeState() {
     const [draggingNode, setDraggingNode] = useState(false);
     const endDragging = () => setDraggingNode(false);
@@ -161,13 +150,11 @@ function useSkiaFonts() {
 }
 
 function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsModal, selectedNodeCoordState }: Props) {
-    const { screenDimensions } = useHomepageTreeState();
+    const { screenDimensions, canvasDisplaySettings } = useHomepageTreeState();
 
     const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
 
     const selectedNode = findNodeByIdInHomeTree(homepageTree, selectedNodeCoord);
-
-    const treeConfig = useGetTreeConfig();
 
     const treeState = useGetTreeState(canvasRef, selectedNodeCoord, homepageTree);
 
@@ -191,7 +178,7 @@ function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsM
     const [longPressIndicatorPosition] = longPressState;
 
     const canvasLongPressProps = {
-        config: { blockDragAndDrop: treeConfig.blockDragAndDrop, blockLongPress: treeConfig.blockLongPress },
+        config: { blockDragAndDrop: true, blockLongPress: false },
         nodeCoordinates: treeState.treeCoordinate.nodeCoordinates,
         longPressState,
         nodeMenuState,
@@ -204,7 +191,7 @@ function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsM
             dragAndDropZones: treeState.treeCoordinate.addNodePositions,
             nodeCoordinates: treeState.treeCoordinate.nodeCoordinates,
             selectedNodeId: selectedNodeCoord?.nodeId as SelectedNodeId,
-            showDndZones: treeConfig.showDndZones,
+            showNewNodePositions: false,
         },
     };
 
@@ -241,23 +228,14 @@ function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsM
 
     const canvasScrollAndZoom = Gesture.Simultaneous(canvasPan, canvasZoom);
 
-    const renderSelectedNodeMenu = selectedNodeCoordinates && selectedNode?.nodeId && treeConfig.isInteractive;
-    const renderNodeMenu = foundNodeOfMenu && openMenuOnNode && treeConfig.isInteractive;
+    const renderNodeMenu = foundNodeOfMenu && openMenuOnNode;
 
-    const nodeMenuFunctions = returnNodeMenuFunctions(foundNodeOfMenu, homepageTree, treeConfig.editTreeFromNodeMenu, treeFunctions.nodeMenu);
+    const nodeMenuFunctions = returnNodeMenuFunctions(foundNodeOfMenu, homepageTree, false, treeFunctions.nodeMenu);
 
     const canvasGestures = Gesture.Simultaneous(canvasScrollAndZoom, canvasPressAndLongPress);
 
     const drag = { ...dragDelta, nodesToDragId: ["bm2W4LgdatpqWFgnmJwBRVY1"] };
     //Interactive Tree Props - SelectedNodeMenu
-    const selectedNodeQueryFns = selectedNodeMenuQueryFns(selectedNode, navigation, clearSelectedNodeCoord);
-
-    const selectedNodeMenuState: SelectedNodeMenuState = {
-        screenDimensions,
-        selectedNode: selectedNode!,
-        selectedTree: homepageTree,
-        initialMode: "VIEWING",
-    };
 
     const fonts = useSkiaFonts();
 
@@ -266,7 +244,7 @@ function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsM
             <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative" }]}>
                 <Animated.View style={[scrollStyle, { flex: 1 }]}>
                     <CanvasView canvasDimensions={treeState.treeCoordinate.canvasDimensions} canvasGestures={canvasGestures} canvasRef={canvasRef}>
-                        {treeConfig.canvasDisplaySettings.showCircleGuide && (
+                        {canvasDisplaySettings.showCircleGuide && (
                             <RadialTreeLevelCircles nodeCoordinates={treeState.treeCoordinate.nodeCoordinates} />
                         )}
                         {fonts && (
@@ -275,9 +253,9 @@ function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsM
                                 selectedNode={selectedNode?.nodeId ?? null}
                                 fonts={fonts}
                                 settings={{
-                                    showLabel: treeConfig.canvasDisplaySettings.showLabel,
-                                    oneColorPerTree: treeConfig.canvasDisplaySettings.oneColorPerTree,
-                                    showIcons: treeConfig.canvasDisplaySettings.showIcons,
+                                    showLabel: canvasDisplaySettings.showLabel,
+                                    oneColorPerTree: canvasDisplaySettings.oneColorPerTree,
+                                    showIcons: canvasDisplaySettings.showIcons,
                                 }}
                                 drag={drag}
                             />
@@ -291,8 +269,6 @@ function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsM
                     {/* Long press Node related 👆 */}
                 </Animated.View>
             </View>
-
-            {renderSelectedNodeMenu && <SelectedNodeMenu functions={selectedNodeQueryFns} state={selectedNodeMenuState} />}
         </>
     );
 }
