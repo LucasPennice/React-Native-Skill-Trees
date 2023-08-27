@@ -4,7 +4,7 @@ import { useSharedValue, withTiming } from "react-native-reanimated";
 import { colors } from "../../../parameters";
 import { DnDZone } from "../../../types";
 
-function DragAndDropZones({ data, selectedDndZone }: { data: DnDZone[]; selectedDndZone?: DnDZone }) {
+function DragAndDropZones({ data, selectedDndZone }: { data: DnDZone[]; selectedDndZone: DnDZone | null }) {
     const selectedZoneId = selectedDndZone ? `${selectedDndZone.ofNode}${selectedDndZone.type}` : "";
 
     const font = useFont(require("../../../../assets/Helvetica.ttf"), 22);

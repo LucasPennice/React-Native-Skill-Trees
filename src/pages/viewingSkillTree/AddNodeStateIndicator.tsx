@@ -4,7 +4,7 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import AppText from "../../components/AppText";
 import { centerFlex, colors } from "../../parameters";
 import { Skill, Tree } from "../../types";
-import { ModalState } from "./ViewingSkillTree";
+import { ModalState } from "./IndividualSkillTreePage";
 import useHandleStateIndicatorAnimations from "./useHandleStateIndicatorAnimations";
 
 type Props = {

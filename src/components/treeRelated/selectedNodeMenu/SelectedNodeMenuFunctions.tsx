@@ -3,7 +3,7 @@ import { StackNavigatorParams } from "../../../../App";
 import { deleteNodeWithNoChildren, updateNodeAndTreeCompletion } from "../../../functions/mutateTree";
 import { Skill, Tree } from "../../../types";
 
-function getMenuNonEditingFunctions(
+function selectedNodeMenuQueryFns(
     selectedNode: Tree<Skill> | undefined,
     navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree" | "Home", undefined>,
     clearSelectedNode: () => void
@@ -16,7 +16,7 @@ function getMenuNonEditingFunctions(
         },
         goToTreePage: () => {
             if (!selectedNode) throw new Error("No selected node at goToTreePage");
-            navigation.navigate("ViewingSkillTree", { treeId: selectedNode.treeId });
+            navigation.navigate("ViewingSkillTree", { node: selectedNode });
         },
         goToEditTreePage: () => {
             if (!selectedNode) throw new Error("No selected node at goToTreePage");
@@ -25,7 +25,7 @@ function getMenuNonEditingFunctions(
     };
 }
 
-function getMenuEditingFunctions(
+function selectedNodeMenuMutateFns(
     functions: {
         openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void;
         updateUserTrees: (v: Tree<Skill> | undefined) => void;
@@ -62,4 +62,4 @@ function getMenuEditingFunctions(
     };
 }
 
-export { getMenuEditingFunctions, getMenuNonEditingFunctions };
+export { selectedNodeMenuMutateFns, selectedNodeMenuQueryFns };

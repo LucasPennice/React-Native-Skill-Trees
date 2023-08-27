@@ -1,22 +1,8 @@
-import { Group, SkiaMutableValue, Text, useFont } from "@shopify/react-native-skia";
+import { Group, SkFont, Text } from "@shopify/react-native-skia";
 
 const labelMarginTop = 30;
 
-function Label({
-    coord,
-    color,
-    text,
-    pathBlurOnInactive,
-}: {
-    text: string;
-    color: { rect: string; text: string };
-    coord: { cx: number; cy: number };
-    pathBlurOnInactive?: SkiaMutableValue<number>;
-}) {
-    const labelFont = useFont(require("../../../../assets/Helvetica.ttf"), 14);
-
-    if (!labelFont) return <></>;
-
+function HierarchicalLabel({ coord, text, font }: { text: string; coord: { cx: number; cy: number }; font: SkFont }) {
     const { cx, cy } = coord;
 
     const WORD_LENGTH_LIMIT = 13;
@@ -32,17 +18,17 @@ function Label({
     const fontSize = 14;
 
     return (
-        <Group opacity={pathBlurOnInactive}>
+        <Group>
             {wordArr.map((word, idx) => {
-                const wordWidth = labelFont.getTextWidth(word);
+                const wordWidth = font.getTextWidth(word);
 
                 const textX = cx - wordWidth / 2;
                 const textY = cy + fontSize / 2 + idx * distanceBetweenWords + labelMarginTop;
 
-                return <Text key={idx} x={textX} y={textY} text={word} color={"#FFFFFF"} font={labelFont} />;
+                return <Text key={idx} x={textX} y={textY} text={word} color={"#FFFFFF"} font={font} />;
             })}
         </Group>
     );
 }
 
-export default Label;
+export default HierarchicalLabel;

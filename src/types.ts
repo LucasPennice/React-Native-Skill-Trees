@@ -1,4 +1,10 @@
 import { Swipeable } from "react-native-gesture-handler";
+import { CanvasDisplaySettings } from "./redux/slices/canvasDisplaySettingsSlice";
+import { ScreenDimentions } from "./redux/slices/screenDimentionsSlice";
+import { MutableRefObject } from "react";
+import { SkiaDomView } from "@shopify/react-native-skia";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { StackNavigatorParams } from "../App";
 
 export type Milestone = {
     complete: boolean;
@@ -174,3 +180,50 @@ export enum GestureHandlerState {
     ACTIVE = 4,
     END = 5,
 }
+
+export type InteractiveTreeConfig = {
+    renderStyle: "hierarchy" | "radial";
+    canvasDisplaySettings: CanvasDisplaySettings;
+    showDndZones?: boolean;
+    isInteractive: boolean;
+    blockLongPress?: boolean;
+    blockDragAndDrop?: boolean;
+    editTreeFromNodeMenu?: boolean;
+};
+
+export type InteractiveNodeState = {
+    selectedNodeId: SelectedNodeId;
+    selectedDndZone?: SelectedDnDZone;
+    screenDimensions: ScreenDimentions;
+    canvasRef?: MutableRefObject<SkiaDomView | null>;
+};
+
+type NavigateFunction = NativeStackNavigationProp<StackNavigatorParams, keyof StackNavigatorParams, undefined>["navigate"];
+
+export type InteractiveTreeFunctions = {
+    onNodeClick?: (node: CoordinatesWithTreeData) => void;
+    onDndZoneClick?: (zone: DnDZone) => void;
+    nodeMenu: {
+        navigate: NavigateFunction;
+        openCanvasSettingsModal?: () => void;
+        confirmDeleteTree: (treeId: string) => void;
+        confirmDeleteNode: (tree: Tree<Skill>, node: Tree<Skill>) => void;
+        selectNode: <T extends CoordinatesWithTreeData>(node: T, menuMode: "EDITING" | "VIEWING") => void;
+        openAddSkillModal: (zoneType: DnDZone["type"], node: Tree<Skill>) => void;
+        toggleCompletionOfSkill: (tree: Tree<Skill>, node: Tree<Skill>) => void;
+    };
+    runOnTreeUpdate?: (dndZoneCoordinates: DnDZone[]) => void;
+};
+
+export type TreeCoordinates = {
+    nodeCoordinates: CoordinatesWithTreeData[];
+    dndZoneCoordinates: DnDZone[];
+};
+
+export type InteractiveTreeProps = {
+    tree: Tree<Skill>;
+    config: InteractiveTreeConfig;
+    state: InteractiveNodeState;
+    functions?: InteractiveTreeFunctions;
+    renderOnSelectedNodeId?: JSX.Element;
+};

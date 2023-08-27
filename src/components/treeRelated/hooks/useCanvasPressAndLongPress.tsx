@@ -3,8 +3,6 @@ import { useState } from "react";
 import { Gesture, GestureStateChangeEvent, LongPressGestureHandlerEventPayload, TapGestureHandlerEventPayload } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, TOUCH_BUFFER } from "../../../parameters";
-import { useAppDispatch } from "../../../redux/reduxHooks";
-import { clearSelectedNode } from "../../../redux/slices/userTreesSlice";
 import { CartesianCoordinate, DnDZone, GestureHandlerState, NodeCoordinate, SelectedNodeId } from "../../../types";
 import { NODE_MENU_SIZE } from "../nodeMenu/NodeMenu";
 
@@ -23,6 +21,7 @@ type Props = {
         onNodeClick?: (nodeId: string) => void;
         onDndZoneClick?: (clickedZone?: DnDZone) => void;
         setDraggingNode: (v: boolean) => void;
+        clearSelectedNodeCoord: () => void;
     };
 };
 
@@ -51,8 +50,6 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
         state: "INTERRUPTED" | "PRESSING" | "IDLE";
     }>({ data: undefined, state: "IDLE" });
     const closeNodeMenu = () => setOpenMenuOnNode(undefined);
-    //Redux
-    const dispatch = useAppDispatch();
     //
 
     const resetLongPressIndicator = () => setLongPressIndicatorPosition({ data: undefined, state: "IDLE" });
@@ -87,9 +84,9 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
             const clickedDndZone = dragAndDropZones.find(didTapDndZone(e));
             if (onDndZoneClick && showDndZones) return onDndZoneClick(clickedDndZone);
             const clickedNode = nodeCoordinatesCentered.find(didTapCircle(e));
-            if (clickedNode === undefined) return dispatch(clearSelectedNode());
+            if (clickedNode === undefined) return functions.clearSelectedNodeCoord();
             if (selectedNodeId !== clickedNode.id && onNodeClick) return onNodeClick(clickedNode.id);
-            return dispatch(clearSelectedNode());
+            return functions.clearSelectedNodeCoord();
         },
     };
 

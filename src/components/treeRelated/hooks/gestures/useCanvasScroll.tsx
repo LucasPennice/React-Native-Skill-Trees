@@ -64,10 +64,9 @@ function useCanvasScroll(
         offsetX: SharedValue<number>;
         offsetY: SharedValue<number>;
         scale: SharedValue<number>;
-        selectedNode: SharedValue<CoordinatesWithTreeData | null>;
     }
 ) {
-    const { offsetX, offsetY, scale, selectedNode } = sharedValues;
+    const { offsetX, offsetY, scale } = sharedValues;
 
     const resetSharedValues = () => {
         shouldUpdateStartValue.value = true;

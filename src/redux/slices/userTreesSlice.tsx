@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DnDZone, Skill, Tree } from "../../types";
+import { Skill, Tree } from "../../types";
 import { RootState } from "../reduxStore";
 import { ScreenDimentions } from "./screenDimentionsSlice";
 
@@ -7,20 +7,12 @@ import { ScreenDimentions } from "./screenDimentionsSlice";
 type UserTreesSlice = {
     userTrees: Tree<Skill>[];
     currentTreeId: string | undefined;
-    selectedNode: string | null;
-    selectedNodeMenuMode: "EDITING" | "VIEWING";
-    selectedDndZone: DnDZone | undefined;
-    newNode: Tree<Skill> | undefined;
 };
 
 // Define the initial state using that type
 const initialState: UserTreesSlice = {
     userTrees: [],
     currentTreeId: undefined,
-    selectedNode: null,
-    selectedDndZone: undefined,
-    newNode: undefined,
-    selectedNodeMenuMode: "VIEWING",
 };
 
 export type ModifiableNodeProperties = { name?: string; isCompleted?: boolean };
@@ -71,26 +63,8 @@ export const userTreesSlice = createSlice({
 
             state.userTrees = state.userTrees.filter((t) => t.treeId !== treeToDeleteId);
         },
-        setSelectedNode: (state, action: PayloadAction<{ nodeId: string | null; menuMode: "EDITING" | "VIEWING" }>) => {
-            state.selectedNode = action.payload.nodeId;
-            state.selectedNodeMenuMode = action.payload.menuMode;
-        },
-        clearSelectedNode: (state) => {
-            state.selectedNode = null;
-            state.selectedNodeMenuMode = initialState.selectedNodeMenuMode;
-        },
-        setSelectedDndZone: (state, action: PayloadAction<DnDZone | undefined>) => {
-            state.selectedDndZone = action.payload;
-        },
-        clearNewNodeState: (state) => {
-            state.newNode = undefined;
-        },
-        setNewNode: (state, action: PayloadAction<Tree<Skill>>) => {
-            state.newNode = { ...action.payload };
-        },
+
         updateUserTreeWithAppendedNode: (state, action: PayloadAction<Tree<Skill>>) => {
-            state.selectedDndZone = undefined;
-            state.newNode = undefined;
             state.userTrees = state.userTrees.map((tree) => {
                 if (tree.treeId === action.payload.treeId) return action.payload;
 
@@ -100,19 +74,7 @@ export const userTreesSlice = createSlice({
     },
 });
 
-export const {
-    changeTree,
-    unselectTree,
-    updateUserTrees,
-    saveNewTree,
-    removeUserTree,
-    setSelectedNode,
-    updateUserTreeWithAppendedNode,
-    setSelectedDndZone,
-    clearSelectedNode,
-    clearNewNodeState,
-    setNewNode,
-} = userTreesSlice.actions;
+export const { changeTree, unselectTree, updateUserTrees, saveNewTree, removeUserTree, updateUserTreeWithAppendedNode } = userTreesSlice.actions;
 
 export const selectTreeSlice = (state: RootState) => state.currentTree;
 export const selectUserTrees = (state: RootState) => state.currentTree.userTrees;

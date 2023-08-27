@@ -6,10 +6,10 @@ import { checkIfTreeHasInvalidCompleteDependencies, findParentOfNode } from "../
 import { deleteNodeWithChildren } from "../../../functions/mutateTree";
 import { centerFlex, colors } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { clearSelectedNode, updateUserTrees } from "../../../redux/slices/userTreesSlice";
+import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
+import { updateUserTrees } from "../../../redux/slices/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 import useCurrentTree from "../../../useCurrentTree";
-import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
 
 type Props = {
     nodeToDelete: Tree<Skill> | null;
@@ -17,7 +17,7 @@ type Props = {
     open: boolean;
 };
 
-function SelectChildrenToHoistWhenDeletingParentModal({ nodeToDelete, closeModalAndClearState, open }: Props) {
+function DeleteNodeModal({ nodeToDelete, closeModalAndClearState, open }: Props) {
     const currentTree = useCurrentTree();
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     const dispatch = useAppDispatch();
@@ -32,8 +32,6 @@ function SelectChildrenToHoistWhenDeletingParentModal({ nodeToDelete, closeModal
         dispatch(updateUserTrees({ updatedTree, screenDimensions }));
 
         closeModalAndClearState();
-
-        dispatch(clearSelectedNode());
     };
 
     const confirmDeleteNode = (children: Tree<Skill>) => () => {
@@ -100,7 +98,7 @@ const styles = StyleSheet.create({
     },
 });
 
-export default SelectChildrenToHoistWhenDeletingParentModal;
+export default DeleteNodeModal;
 
 function numberOfChildrenString(number: number) {
     if (number === 0) return "No skills stem from this";

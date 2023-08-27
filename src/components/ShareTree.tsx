@@ -13,7 +13,7 @@ import ExportTreeIcon from "./Icons/ExportTreeIcon";
 import LoadingIcon from "./LoadingIcon";
 import { memo } from "react";
 
-function ShareTreeUrl({ tree, show }: { tree: Tree<Skill>; show?: boolean }) {
+function ShareTree({ tree, show }: { tree: Tree<Skill>; show?: boolean }) {
     const { mutate } = useRequestProcessor();
     const { width } = Dimensions.get("screen");
     const userId = useAppSelector(selectUserId);
@@ -95,4 +95,4 @@ function ShareTreeUrl({ tree, show }: { tree: Tree<Skill>; show?: boolean }) {
     );
 }
 
-export default memo(ShareTreeUrl);
+export default memo(ShareTree);

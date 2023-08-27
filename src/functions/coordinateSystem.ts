@@ -1,4 +1,3 @@
-import { InteractiveTreeConfig } from "../components/treeRelated/InteractiveTree";
 import {
     calculateDragAndDropZones,
     centerNodesInCanvas,
@@ -8,7 +7,7 @@ import {
     removeTreeDataFromCoordinate,
 } from "../components/treeRelated/coordinateFunctions";
 import { ScreenDimentions } from "../redux/slices/screenDimentionsSlice";
-import { CartesianCoordinate, PolarCoordinate, Skill, Tree } from "../types";
+import { CartesianCoordinate, InteractiveTreeConfig, PolarCoordinate, Skill, Tree } from "../types";
 
 export function arcToAngleRadians(arcLength: number, circleRadius: number) {
     if (circleRadius === 0) return 0;

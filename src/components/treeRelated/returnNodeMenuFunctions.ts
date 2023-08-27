@@ -1,23 +1,21 @@
 import { Alert } from "react-native";
 import { checkIfCompletionIsAllowedForNode, checkIfUncompletionIsAllowedForNode, findNodeById } from "../../functions/extractInformationFromTree";
-import { CoordinatesWithTreeData, Skill, Tree } from "../../types";
-import { InteractiveTreeFunctions } from "./InteractiveTree";
+import { CoordinatesWithTreeData, InteractiveTreeFunctions, Skill, Tree } from "../../types";
 import { NodeMenuFunctions } from "./nodeMenu/NodeMenu";
 
 function returnNodeMenuFunctions(
-    foundNodeOfMenu: CoordinatesWithTreeData | undefined,
-    centeredCoordinatedWithTreeData: CoordinatesWithTreeData[],
+    node: CoordinatesWithTreeData | undefined,
     tree: Tree<Skill>,
     editTreeFromNodeMenu: boolean | undefined,
     functions?: InteractiveTreeFunctions["nodeMenu"]
 ) {
-    if (!foundNodeOfMenu || !functions) return { idle: {}, selectingPosition: {} };
+    if (!node || !functions) return { idle: {}, selectingPosition: {} };
 
     const { confirmDeleteTree, navigate, openAddSkillModal, openCanvasSettingsModal, toggleCompletionOfSkill } = functions;
 
-    if (foundNodeOfMenu.category === "SKILL") return menuFunctionsForSkillNode();
+    if (node.category === "SKILL") return menuFunctionsForSkillNode();
 
-    if (foundNodeOfMenu.category === "SKILL_TREE") return menuFunctionsForSkillTreeNode();
+    if (node.category === "SKILL_TREE") return menuFunctionsForSkillTreeNode();
 
     //USER NODE CASE 👇
 
@@ -30,26 +28,17 @@ function returnNodeMenuFunctions(
     };
 
     function menuFunctionsForSkillNode() {
-        const parentOfNode = centeredCoordinatedWithTreeData.find((n) => n.nodeId === foundNodeOfMenu!.parentId);
-        const nodeInTree = findNodeById(tree, foundNodeOfMenu!.nodeId);
+        const parentOfNode = findNodeById(tree, node!.parentId);
+        // const parentOfNode = centeredCoordinatedWithTreeData.find((n) => n.nodeId === node!.parentId);
+        const nodeInTree = findNodeById(tree, node!.nodeId);
 
         if (!nodeInTree) throw new Error("Node not in tree in menuFunctionsForSkillNode");
 
         let result: NodeMenuFunctions = { idle: {}, selectingPosition: {} };
 
-        result.idle.verticalUp = () =>
-            functions?.navigate("ViewingSkillTree", {
-                treeId: nodeInTree.treeId,
-                selectedNodeId: nodeInTree.nodeId,
-                selectedNodeMenuMode: "EDITING",
-            });
+        result.idle.verticalUp = () => functions?.navigate("ViewingSkillTree", { node: nodeInTree, selectedNodeMenuMode: "EDITING" });
 
-        result.idle.horizontalLeft = () =>
-            functions?.navigate("ViewingSkillTree", {
-                treeId: nodeInTree.treeId,
-                selectedNodeId: nodeInTree.nodeId,
-                selectedNodeMenuMode: "EDITING",
-            });
+        result.idle.horizontalLeft = () => functions?.navigate("ViewingSkillTree", { node: nodeInTree, selectedNodeMenuMode: "EDITING" });
 
         result.selectingPosition = {
             verticalUp: () => openAddSkillModal("PARENT", nodeInTree),
@@ -58,12 +47,7 @@ function returnNodeMenuFunctions(
             horizontalRight: () => openAddSkillModal("RIGHT_BROTHER", nodeInTree),
         };
 
-        result.idle.verticalDown = () =>
-            functions?.navigate("ViewingSkillTree", {
-                treeId: nodeInTree.treeId,
-                selectedNodeId: nodeInTree.nodeId,
-                selectedNodeMenuMode: "EDITING",
-            });
+        result.idle.verticalDown = () => functions?.navigate("ViewingSkillTree", { node: nodeInTree, selectedNodeMenuMode: "EDITING" });
 
         //👇 Add functions to edit nodes from the node menu
         if (editTreeFromNodeMenu) {
@@ -87,20 +71,20 @@ function returnNodeMenuFunctions(
 
             result.idle.verticalDown = () => functions?.confirmDeleteNode(tree, nodeInTree);
 
-            result.idle.horizontalLeft = () => functions?.selectNode(nodeInTree.nodeId, "EDITING");
+            result.idle.horizontalLeft = () => functions?.selectNode(nodeInTree, "EDITING");
         }
 
         return result;
     }
 
     function menuFunctionsForSkillTreeNode() {
-        const nodeInTree = findNodeById(tree, foundNodeOfMenu!.nodeId);
+        const nodeInTree = findNodeById(tree, node!.nodeId);
         if (!nodeInTree) throw new Error("Node not in tree in menuFunctionsForSkillNode");
 
         return {
             idle: {
-                verticalDown: () => confirmDeleteTree(foundNodeOfMenu!.treeId),
-                horizontalLeft: () => navigate("MyTrees", { editingTreeId: foundNodeOfMenu!.treeId }),
+                verticalDown: () => confirmDeleteTree(node!.treeId),
+                horizontalLeft: () => navigate("MyTrees", { editingTreeId: node!.treeId }),
             },
             selectingPosition: {
                 verticalDown: () => openAddSkillModal("CHILDREN", nodeInTree),

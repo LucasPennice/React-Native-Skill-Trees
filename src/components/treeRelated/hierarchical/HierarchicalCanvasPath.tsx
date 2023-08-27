@@ -1,22 +1,35 @@
 import { Path } from "@shopify/react-native-skia";
-import { useDerivedValue } from "react-native-reanimated";
-import { CIRCLE_SIZE } from "../../../parameters";
+import { useDerivedValue, withSpring } from "react-native-reanimated";
+import { CANVAS_SPRING, CIRCLE_SIZE } from "../../../parameters";
 import { CartesianCoordinate } from "../../../types";
-import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
 
-type pathCoordinates = {
+type PathCoordinates = {
     cx: number;
     cy: number;
     pathInitialPoint: CartesianCoordinate;
 };
 
-function HierarchicalCanvasPath({ coordinates, pathColor, isRoot }: { coordinates: pathCoordinates; pathColor: string; isRoot?: boolean }) {
-    const { cx, cy, pathInitialPoint } = coordinates;
+type Props = { coordinates: PathCoordinates; isRoot?: boolean };
 
-    const p1x = useAnimateSkiaValue({ initialValue: cx, stateToAnimate: cx });
-    const p1y = useAnimateSkiaValue({ initialValue: cy, stateToAnimate: cy });
-    const p2x = useAnimateSkiaValue({ initialValue: pathInitialPoint.x, stateToAnimate: pathInitialPoint.x });
-    const p2y = useAnimateSkiaValue({ initialValue: pathInitialPoint.y, stateToAnimate: pathInitialPoint.y });
+function useSharedValuesFromPoints(coordinates: PathCoordinates) {
+    const p1x = useDerivedValue(() => {
+        return withSpring(coordinates.cx, CANVAS_SPRING);
+    });
+    const p1y = useDerivedValue(() => {
+        return withSpring(coordinates.cy, CANVAS_SPRING);
+    });
+    const p2x = useDerivedValue(() => {
+        return withSpring(coordinates.pathInitialPoint.x, CANVAS_SPRING);
+    });
+    const p2y = useDerivedValue(() => {
+        return withSpring(coordinates.pathInitialPoint.y, CANVAS_SPRING);
+    });
+
+    return { p1x, p1y, p2x, p2y };
+}
+
+function HierarchicalCanvasPath({ coordinates, isRoot }: Props) {
+    const { p1x, p1y, p2x, p2y } = useSharedValuesFromPoints(coordinates);
 
     const path = useDerivedValue(() => {
         let result = "";
@@ -30,7 +43,7 @@ function HierarchicalCanvasPath({ coordinates, pathColor, isRoot }: { coordinate
         } ${p2y.value + CIRCLE_SIZE}`;
 
         return result;
-    }, [p1x, p1y, p2x, p2y]);
+    });
 
     if (isRoot) return <></>;
 

@@ -15,26 +15,24 @@ import { IsSharingAvailableContext } from "./src/context";
 import Homepage from "./src/pages/homepage/Homepage";
 import MyTrees from "./src/pages/myTrees/MyTrees";
 import SkillPage from "./src/pages/skillPage/SkillPage";
-import ViewingSkillTree from "./src/pages/viewingSkillTree/ViewingSkillTree";
+import IndividualSkillTreePage from "./src/pages/viewingSkillTree/IndividualSkillTreePage";
 import { centerFlex, colors } from "./src/parameters";
 import { open } from "./src/redux/slices/addTreeModalSlice";
 import { useAppDispatch } from "./src/redux/reduxHooks";
 import { persistor, store } from "./src/redux/reduxStore";
 import { updateSafeScreenDimentions } from "./src/redux/slices/screenDimentionsSlice";
-import { DnDZone, Skill, Tree } from "./src/types";
+import { CoordinatesWithTreeData, DnDZone, Skill, Tree } from "./src/types";
 import useHandleUserId from "./src/useHandleUserId";
 import useIsSharingAvailable from "./src/useIsSharingAvailable";
+
+interface NodeRouteProp extends CoordinatesWithTreeData {}
 
 export type StackNavigatorParams = {
     Home: undefined;
     ViewingSkillTree?: {
-        treeId: string;
-        selectedNodeId?: string;
+        node: NodeRouteProp;
         selectedNodeMenuMode?: "EDITING" | "VIEWING";
-        addNodeModal?: {
-            nodeId: string;
-            dnDZoneType: DnDZone["type"];
-        };
+        addNewNodePosition?: DnDZone["type"];
     };
     MyTrees: { openNewTreeModal?: boolean; editingTreeId?: string };
     Settings: undefined;
@@ -86,7 +84,7 @@ function AppWithReduxContext() {
     const APP_ROUTES: Routes = [
         { component: Homepage, route: "Home", options: { headerShown: false }, title: "Me" },
         {
-            component: ViewingSkillTree,
+            component: IndividualSkillTreePage,
             route: "ViewingSkillTree",
             options: { headerShown: false },
             title: "Viewing Skill Tree",

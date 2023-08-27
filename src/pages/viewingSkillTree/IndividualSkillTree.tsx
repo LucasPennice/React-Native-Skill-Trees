@@ -1,54 +1,52 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
-import { ReactNode, memo, useEffect, useMemo, useState } from "react";
+import { ReactNode, memo, useMemo, useState } from "react";
 import { Alert, View } from "react-native";
 import { Gesture, GestureDetector, SimultaneousGesture } from "react-native-gesture-handler";
 import Animated, { useSharedValue } from "react-native-reanimated";
 import { StackNavigatorParams } from "../../../App";
-import RadialTreeLevelCircles from "../../components/treeRelated/RadialTreeLevelCircles";
 import NodeLongPressIndicator from "../../components/treeRelated/general/NodeLongPressIndicator";
+import DragAndDropZones from "../../components/treeRelated/hierarchical/DragAndDropZones";
+import HierarchicalSkillTree from "../../components/treeRelated/hierarchical/HierarchicalSkillTree";
 import { DEFAULT_SCALE } from "../../components/treeRelated/hooks/gestures/params";
 import useCanvasLongPress from "../../components/treeRelated/hooks/gestures/useCanvasLongPress";
 import useCanvasScroll from "../../components/treeRelated/hooks/gestures/useCanvasScroll";
 import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks/gestures/useCanvasTap";
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
-import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
+import NodeMenu, { NodeMenuFunctions } from "../../components/treeRelated/nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "../../components/treeRelated/returnNodeMenuFunctions";
-import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
-import { selectedNodeMenuQueryFns } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenuFunctions";
+import SelectedNodeMenu, {
+    SelectedNodeMenuFunctions,
+    SelectedNodeMenuMutateFunctions,
+    SelectedNodeMenuState,
+} from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { handleTreeBuild } from "../../functions/coordinateSystem";
-import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
-import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
+import { findNodeById } from "../../functions/extractInformationFromTree";
+import { deleteNodeWithNoChildren, updateNodeAndTreeCompletion } from "../../functions/mutateTree";
 import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
-import {
-    CanvasDimensions,
-    CoordinatesWithTreeData,
-    DnDZone,
-    InteractiveTreeConfig,
-    InteractiveTreeFunctions,
-    SelectedNodeId,
-    Skill,
-    Tree,
-} from "../../types";
-import RadialSkillTree from "./RadialSkillTree";
+import { CanvasDimensions, CoordinatesWithTreeData, DnDZone, InteractiveTreeConfig, InteractiveTreeFunctions, Skill, Tree } from "../../types";
+import { SelectedNewNodePositionState, SelectedNodeCoordState } from "./IndividualSkillTreePage";
 
 type Props = {
-    selectedNodeCoordState: readonly [
-        CoordinatesWithTreeData | null,
-        {
-            readonly clearSelectedNodeCoord: () => void;
-            readonly updateSelectedNodeCoord: (value: CoordinatesWithTreeData) => void;
-        }
-    ];
+    state: {
+        selectedNewNodePositionState: SelectedNewNodePositionState;
+        selectedNodeCoordState: SelectedNodeCoordState;
+        addNodePositions: DnDZone[];
+        showNewNodePositions: boolean;
+    };
+    functions: {
+        openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void;
+        openCanvasSettingsModal: () => void;
+        openNewNodeModal: () => void;
+    };
     canvasRef: React.RefObject<SkiaDomView>;
-    homepageTree: Tree<Skill>;
-    navigation: NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>;
-    openCanvasSettingsModal: () => void;
+    tree: Tree<Skill>;
+    navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>;
 };
 
 function useHomepageTreeState() {
@@ -58,33 +56,56 @@ function useHomepageTreeState() {
 }
 
 function useCreateTreeFunctions(
-    updateSelectedNodeCoord: (value: CoordinatesWithTreeData) => void,
-    navigation: NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>,
-    openCanvasSettingsModal: () => void
+    navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>,
+    addNodePositions: DnDZone[],
+    functions: {
+        openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void;
+        openCanvasSettingsModal: () => void;
+        openNewNodeModal: () => void;
+        updateSelectedNodeCoord: SelectedNodeCoordState["1"]["updateSelectedNodeCoord"];
+        updateSelectedNewNodePosition: SelectedNewNodePositionState["1"]["updateSelectedNewNodePosition"];
+    }
 ) {
     const dispatch = useAppDispatch();
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
     const result: InteractiveTreeFunctions = {
         onNodeClick: (coordOfClickedNode: CoordinatesWithTreeData) => {
-            updateSelectedNodeCoord(coordOfClickedNode);
+            functions.updateSelectedNodeCoord(coordOfClickedNode, "VIEWING");
             return;
         },
+
         nodeMenu: {
             navigate: navigation.navigate,
+
             confirmDeleteTree: (treeId: string) => {
                 Alert.alert(
                     "Delete this tree?",
                     "",
                     [
                         { text: "No", style: "cancel" },
-                        { text: "Yes", onPress: () => dispatch(removeUserTree(treeId)), style: "destructive" },
+                        {
+                            text: "Yes",
+                            onPress: () => {
+                                navigation.navigate("MyTrees", {});
+                                dispatch(removeUserTree(treeId));
+                            },
+                            style: "destructive",
+                        },
                     ],
                     { cancelable: true }
                 );
             },
-            selectNode: () => {},
-            confirmDeleteNode: () => {},
+            selectNode: functions.updateSelectedNodeCoord,
+
+            confirmDeleteNode: (tree: Tree<Skill>, node: Tree<Skill>) => {
+                if (node.children.length !== 0) return functions.openChildrenHoistSelector(node);
+
+                const updatedTree = deleteNodeWithNoChildren(tree, node);
+
+                dispatch(updateUserTrees({ updatedTree, screenDimensions }));
+            },
+
             toggleCompletionOfSkill: (treeToUpdate: Tree<Skill>, node: Tree<Skill>) => {
                 let updatedNode: Tree<Skill> = { ...node, data: { ...node.data, isCompleted: !node.data.isCompleted } };
 
@@ -92,24 +113,30 @@ function useCreateTreeFunctions(
 
                 dispatch(updateUserTrees({ updatedTree, screenDimensions }));
             },
-            openAddSkillModal: (addNewNodePosition: DnDZone["type"], node: Tree<Skill>) => {
-                navigation.navigate("ViewingSkillTree", { node, addNewNodePosition });
+            openAddSkillModal: (zoneType: DnDZone["type"], node: Tree<Skill>) => {
+                const dndZone = addNodePositions.find((zone) => zone.ofNode === node.nodeId && zone.type === zoneType);
+
+                if (!dndZone) throw new Error("couldn't find dndZone in runOnTreeRender");
+
+                functions.updateSelectedNewNodePosition(dndZone);
+                functions.openNewNodeModal();
             },
-            openCanvasSettingsModal,
+
+            openCanvasSettingsModal: functions.openCanvasSettingsModal,
         },
     };
 
     return result;
 }
 
-function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: CoordinatesWithTreeData | null, homeTree: Tree<Skill>) {
+function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: CoordinatesWithTreeData | null, selectedTree: Tree<Skill>) {
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
     const {
         dndZoneCoordinates,
         canvasDimentions: canvasDimensions,
         centeredCoordinatedWithTreeData,
-    } = useMemo(() => handleTreeBuild(homeTree, screenDimensions, "radial"), [homeTree, screenDimensions]);
+    } = useMemo(() => handleTreeBuild(selectedTree, screenDimensions, "hierarchy"), [selectedTree, screenDimensions]);
 
     const treeCoordinate: TreeCoordinateData = {
         canvasDimensions,
@@ -140,15 +167,6 @@ function useDraggingNodeState() {
     return [draggingNode, { endDragging, startDragging }] as const;
 }
 
-function useRunOnTreeUpdate(tree: Tree<Skill>, functions: InteractiveTreeFunctions | undefined, addNodePositions: DnDZone[]) {
-    useEffect(() => {
-        if (!functions || !functions.runOnTreeUpdate) return;
-
-        functions.runOnTreeUpdate(addNodePositions);
-        //eslint-disable-next-line
-    }, [tree]);
-}
-
 function useNodeMenuState() {
     const [openMenuOnNode, setOpenMenuOnNode] = useState<CoordinatesWithTreeData | undefined>(undefined);
 
@@ -157,6 +175,15 @@ function useNodeMenuState() {
     const openMenuOfNode = (clickedNode: CoordinatesWithTreeData) => setOpenMenuOnNode(clickedNode);
 
     return [openMenuOnNode, { closeNodeMenu, openMenuOfNode }] as const;
+}
+
+function useGetNodeMenuFns(
+    node: CoordinatesWithTreeData | undefined,
+    tree: Tree<Skill>,
+    menuFunctions: InteractiveTreeFunctions["nodeMenu"]
+): NodeMenuFunctions {
+    const editTreeFromNodeMenu = true;
+    return returnNodeMenuFunctions(node, tree, editTreeFromNodeMenu, menuFunctions);
 }
 
 function useSkiaFonts() {
@@ -169,25 +196,89 @@ function useSkiaFonts() {
     return { labelFont, nodeLetterFont, emojiFont };
 }
 
-function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsModal, selectedNodeCoordState }: Props) {
+function useGetSelectedNodeMenuFns(
+    selectedNode: Tree<Skill> | undefined,
+    selectedTree: Tree<Skill>,
+    navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>,
+    openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void,
+    clearSelectedNodeCoord: () => void
+) {
+    const dispatch = useAppDispatch();
+    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
+
+    const closeMenu = clearSelectedNodeCoord;
+
+    const handleDeleteNode = (node: Tree<Skill>) => {
+        if (!selectedTree) throw new Error("No selectedTree at deleteNode");
+        if (!selectedNode) throw new Error("No selected node at deleteNode");
+
+        if (node.children.length !== 0) return openChildrenHoistSelector(node);
+
+        const updatedTree = deleteNodeWithNoChildren(selectedTree, node);
+
+        dispatch(updateUserTrees({ updatedTree, screenDimensions }));
+        clearSelectedNodeCoord();
+    };
+
+    const updateNode = (updatedNode: Tree<Skill>) => {
+        try {
+            if (!selectedNode) throw new Error("No selected node at updateNode");
+
+            const updatedTree = updateNodeAndTreeCompletion(selectedTree, updatedNode);
+
+            dispatch(updateUserTrees({ updatedTree, screenDimensions }));
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const goToSkillPage = () => {
+        if (!selectedNode) throw new Error("No selected node at goToSkillPage");
+        navigation.navigate("SkillPage", selectedNode);
+    };
+    const goToTreePage = () => {
+        if (!selectedNode) throw new Error("No selected node at goToTreePage");
+        navigation.navigate("ViewingSkillTree", { node: selectedNode });
+    };
+    const goToEditTreePage = () => {
+        if (!selectedNode) throw new Error("No selected node at goToTreePage");
+        navigation.navigate("MyTrees", { editingTreeId: selectedNode.treeId });
+    };
+
+    const result: { query: SelectedNodeMenuFunctions; mutate: SelectedNodeMenuMutateFunctions } = {
+        mutate: { handleDeleteNode, updateNode },
+        query: { closeMenu, goToEditTreePage, goToSkillPage, goToTreePage },
+    };
+
+    return result;
+}
+
+function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: Props) {
+    const { openCanvasSettingsModal, openChildrenHoistSelector, openNewNodeModal } = functions;
     const { screenDimensions } = useHomepageTreeState();
 
+    const { selectedNewNodePositionState, selectedNodeCoordState, showNewNodePositions, addNodePositions } = state;
+    const [selectedNewNodePosition, { updateSelectedNewNodePosition }] = selectedNewNodePositionState;
     const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
 
-    const selectedNode = findNodeByIdInHomeTree(homepageTree, selectedNodeCoord);
+    const selectedNode = findNodeById(tree, selectedNodeCoord?.node?.nodeId ?? null);
 
     const treeConfig = useGetTreeConfig();
 
-    const treeState = useGetTreeState(canvasRef, selectedNodeCoord, homepageTree);
+    const treeState = useGetTreeState(canvasRef, selectedNodeCoord?.node ?? null, tree);
 
-    const treeFunctions = useCreateTreeFunctions(updateSelectedNodeCoord, navigation, openCanvasSettingsModal);
+    const treeFunctions = useCreateTreeFunctions(navigation, state.addNodePositions, {
+        openCanvasSettingsModal,
+        openChildrenHoistSelector,
+        openNewNodeModal,
+        updateSelectedNewNodePosition,
+        updateSelectedNodeCoord,
+    });
 
     const [draggingNode, draggingNodeActions] = useDraggingNodeState();
     const { endDragging } = draggingNodeActions;
 
-    const selectedNodeCoordinates = treeState.treeCoordinate.nodeCoordinates.find((c) => c.nodeId === selectedNodeCoord?.nodeId);
-
-    useRunOnTreeUpdate(homepageTree, treeFunctions, treeState.treeCoordinate.addNodePositions);
+    const selectedNodeCoordinates = treeState.treeCoordinate.nodeCoordinates.find((c) => c.nodeId === selectedNodeCoord?.node?.nodeId ?? null);
 
     //Gesture Props 👇
     const nodeMenuState = useNodeMenuState();
@@ -212,7 +303,7 @@ function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsM
         state: {
             dragAndDropZones: treeState.treeCoordinate.addNodePositions,
             nodeCoordinates: treeState.treeCoordinate.nodeCoordinates,
-            selectedNodeId: selectedNodeCoord?.nodeId as SelectedNodeId,
+            selectedNodeId: selectedNodeCoord?.node?.nodeId ?? null,
             showDndZones: treeConfig.showDndZones,
         },
     };
@@ -253,44 +344,42 @@ function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsM
     const renderSelectedNodeMenu = selectedNodeCoordinates && selectedNode?.nodeId && treeConfig.isInteractive;
     const renderNodeMenu = foundNodeOfMenu && openMenuOnNode && treeConfig.isInteractive;
 
-    const nodeMenuFunctions = returnNodeMenuFunctions(foundNodeOfMenu, homepageTree, treeConfig.editTreeFromNodeMenu, treeFunctions.nodeMenu);
+    const nodeMenuFunctions = useGetNodeMenuFns(foundNodeOfMenu, tree, treeFunctions.nodeMenu);
 
     const canvasGestures = Gesture.Simultaneous(canvasScrollAndZoom, canvasPressAndLongPress);
 
     const drag = { ...dragDelta, nodesToDragId: ["bm2W4LgdatpqWFgnmJwBRVY1"] };
     //Interactive Tree Props - SelectedNodeMenu
-    const selectedNodeQueryFns = selectedNodeMenuQueryFns(selectedNode, navigation, clearSelectedNodeCoord);
 
     const selectedNodeMenuState: SelectedNodeMenuState = {
         screenDimensions,
         selectedNode: selectedNode!,
-        selectedTree: homepageTree,
-        initialMode: "VIEWING",
+        selectedTree: tree,
+        initialMode: selectedNodeCoord?.menuMode ?? "VIEWING",
     };
 
     const fonts = useSkiaFonts();
+
+    const selectedNodeMenuFunctions = useGetSelectedNodeMenuFns(selectedNode, tree, navigation, openChildrenHoistSelector, clearSelectedNodeCoord);
 
     return (
         <>
             <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative" }]}>
                 <Animated.View style={[scrollStyle, { flex: 1 }]}>
                     <CanvasView canvasDimensions={treeState.treeCoordinate.canvasDimensions} canvasGestures={canvasGestures} canvasRef={canvasRef}>
-                        {treeConfig.canvasDisplaySettings.showCircleGuide && (
-                            <RadialTreeLevelCircles nodeCoordinates={treeState.treeCoordinate.nodeCoordinates} />
-                        )}
                         {fonts && (
-                            <RadialSkillTree
+                            <HierarchicalSkillTree
                                 nodeCoordinatesCentered={treeState.treeCoordinate.nodeCoordinates}
                                 selectedNode={selectedNode?.nodeId ?? null}
                                 fonts={fonts}
                                 settings={{
                                     showLabel: treeConfig.canvasDisplaySettings.showLabel,
-                                    oneColorPerTree: treeConfig.canvasDisplaySettings.oneColorPerTree,
                                     showIcons: treeConfig.canvasDisplaySettings.showIcons,
                                 }}
                                 drag={drag}
                             />
                         )}
+                        {showNewNodePositions && <DragAndDropZones data={addNodePositions} selectedDndZone={selectedNewNodePosition} />}
                     </CanvasView>
                     {/* Long press Node related 👇 */}
                     <NodeLongPressIndicator data={longPressIndicatorPosition} scale={scaleState} />
@@ -301,7 +390,14 @@ function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsM
                 </Animated.View>
             </View>
 
-            {renderSelectedNodeMenu && <SelectedNodeMenu functions={selectedNodeQueryFns} state={selectedNodeMenuState} />}
+            {renderSelectedNodeMenu && (
+                <SelectedNodeMenu
+                    functions={selectedNodeMenuFunctions.query}
+                    mutateFunctions={selectedNodeMenuFunctions.mutate}
+                    state={selectedNodeMenuState}
+                    allowEdit
+                />
+            )}
         </>
     );
 }
@@ -327,4 +423,4 @@ function CanvasView({
     );
 }
 
-export default memo(HomepageTree);
+export default memo(IndividualSkillTree);
