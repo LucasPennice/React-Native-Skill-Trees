@@ -10,7 +10,7 @@ function NavigationBar({ data: APP_ROUTES }: { data: Routes }) {
     const nav = useNavigation<NativeStackScreenProps<StackNavigatorParams>["navigation"]>();
     const appRoutesForNavBar = APP_ROUTES.filter((route) => route.hideFromNavBar !== true);
 
-    const [routeName, setRouteName] = useState("Home");
+    const [routeName, setRouteName] = useState<keyof StackNavigatorParams>("Home");
 
     nav.addListener("state", (e) => {
         const currentRoute = e.data.state.routes[e.data.state.routes.length - 1].name;

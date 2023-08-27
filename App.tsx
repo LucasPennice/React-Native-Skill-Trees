@@ -4,8 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import * as SplashScreen from "expo-splash-screen";
-import { useCallback } from "react";
-import { Platform, SafeAreaView, StatusBar, TouchableOpacity, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Keyboard, Platform, SafeAreaView, StatusBar, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
@@ -127,6 +127,8 @@ function AppWithReduxContext() {
         }
     }, [fontsLoaded]);
 
+    const isKeyboardOpen = useIsKeyboardOpen();
+
     if (!fontsLoaded) return null;
 
     const Stack = createStackNavigator<StackNavigatorParams>();
@@ -154,7 +156,27 @@ function AppWithReduxContext() {
                     <Stack.Screen key={screen.route} name={screen.route} component={screen.component} options={screen.options} />
                 ))}
             </Stack.Navigator>
-            <NavigationBar data={APP_ROUTES} />
+            {!isKeyboardOpen && <NavigationBar data={APP_ROUTES} />}
         </View>
     );
+}
+
+function useIsKeyboardOpen() {
+    const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+    useEffect(() => {
+        const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
+            setKeyboardOpen(true);
+        });
+        const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+            setKeyboardOpen(false);
+        });
+
+        return () => {
+            showSubscription.remove();
+            hideSubscription.remove();
+        };
+    }, []);
+
+    return keyboardOpen;
 }
