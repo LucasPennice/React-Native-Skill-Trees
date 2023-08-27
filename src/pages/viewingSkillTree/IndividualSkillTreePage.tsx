@@ -87,10 +87,6 @@ function useModalStateReducer() {
 
     const [state, dispatch] = useReducer(reducer, "IDLE");
 
-    useEffect(() => {
-        console.log(state);
-    }, [state]);
-
     return [state, dispatch] as const;
 }
 
@@ -225,10 +221,6 @@ function useSelectedNewNodePositionState() {
 
     const clearSelectedNewNodePosition = () => setNewNodePosition(null);
     const updateSelectedNewNodePosition = (position: DnDZone) => setNewNodePosition(position);
-
-    useEffect(() => {
-        console.log(newNodePosition);
-    }, [newNodePosition]);
 
     return [newNodePosition, { clearSelectedNewNodePosition, updateSelectedNewNodePosition }] as SelectedNewNodePositionState;
 }
