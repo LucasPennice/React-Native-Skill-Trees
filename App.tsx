@@ -21,11 +21,11 @@ import { open } from "./src/redux/slices/addTreeModalSlice";
 import { useAppDispatch } from "./src/redux/reduxHooks";
 import { persistor, store } from "./src/redux/reduxStore";
 import { updateSafeScreenDimentions } from "./src/redux/slices/screenDimentionsSlice";
-import { CoordinatesWithTreeData, DnDZone, Skill, Tree } from "./src/types";
+import { NodeCoordinate, DnDZone, Skill, Tree } from "./src/types";
 import useHandleUserId from "./src/useHandleUserId";
 import useIsSharingAvailable from "./src/useIsSharingAvailable";
 
-interface NodeRouteProp extends CoordinatesWithTreeData {}
+interface NodeRouteProp extends NodeCoordinate {}
 
 export type StackNavigatorParams = {
     Home: undefined;

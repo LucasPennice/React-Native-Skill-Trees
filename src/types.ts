@@ -81,10 +81,7 @@ export type Tree<T> = CartesianCoordinate & {
     category: NodeCategory;
 };
 
-export type CirclePositionInCanvas = CartesianCoordinate & { id: string };
-export type Coordinates = CartesianCoordinate & { id: string; level: number; parentId: ParentId; name: string };
-
-export type CoordinatesWithTreeData = CartesianCoordinate & {
+export type NodeCoordinate = CartesianCoordinate & {
     isRoot: boolean;
     parentId: ParentId;
     treeId: string;
@@ -95,8 +92,6 @@ export type CoordinatesWithTreeData = CartesianCoordinate & {
     data: Skill;
     category: NodeCategory;
 };
-
-export type NodeCoordinate = CartesianCoordinate & { id: string; level: number; parentId: ParentId };
 
 export type ModifiableProperties<T> = {
     [Property in keyof T]: T[Property];
@@ -201,14 +196,14 @@ export type InteractiveNodeState = {
 type NavigateFunction = NativeStackNavigationProp<StackNavigatorParams, keyof StackNavigatorParams, undefined>["navigate"];
 
 export type InteractiveTreeFunctions = {
-    onNodeClick?: (node: CoordinatesWithTreeData) => void;
-    onDndZoneClick?: (zone: DnDZone) => void;
+    onNodeClick?: (node: NodeCoordinate) => void;
+    onDndZoneClick?: (clickedZone?: DnDZone) => void;
     nodeMenu: {
         navigate: NavigateFunction;
         openCanvasSettingsModal?: () => void;
         confirmDeleteTree: (treeId: string) => void;
         confirmDeleteNode: (tree: Tree<Skill>, node: Tree<Skill>) => void;
-        selectNode: <T extends CoordinatesWithTreeData>(node: T, menuMode: "EDITING" | "VIEWING") => void;
+        selectNode: <T extends NodeCoordinate>(node: T, menuMode: "EDITING" | "VIEWING") => void;
         openAddSkillModal: (zoneType: DnDZone["type"], node: Tree<Skill>) => void;
         toggleCompletionOfSkill: (tree: Tree<Skill>, node: Tree<Skill>) => void;
     };
@@ -216,7 +211,7 @@ export type InteractiveTreeFunctions = {
 };
 
 export type TreeCoordinates = {
-    nodeCoordinates: CoordinatesWithTreeData[];
+    nodeCoordinates: NodeCoordinate[];
     dndZoneCoordinates: DnDZone[];
 };
 

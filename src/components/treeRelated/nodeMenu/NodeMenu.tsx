@@ -21,7 +21,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Defs, LinearGradient, Path, Stop, Svg } from "react-native-svg";
 import { CIRCLE_SIZE } from "../../../parameters";
-import { CoordinatesWithTreeData } from "../../../types";
+import { NodeCoordinate } from "../../../types";
 import AppText from "../../AppText";
 import DirectionMenu, { Config } from "../../DirectionMenu";
 import { adjustedScale } from "../general/NodeLongPressIndicator";
@@ -64,7 +64,7 @@ function NodeMenu({
     closeNodeMenu,
     functions,
 }: {
-    data: CoordinatesWithTreeData;
+    data: NodeCoordinate;
     scale: number;
     closeNodeMenu: () => void;
     functions: NodeMenuFunctions;

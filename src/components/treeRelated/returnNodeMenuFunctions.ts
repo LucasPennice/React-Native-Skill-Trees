@@ -1,10 +1,10 @@
 import { Alert } from "react-native";
 import { checkIfCompletionIsAllowedForNode, checkIfUncompletionIsAllowedForNode, findNodeById } from "../../functions/extractInformationFromTree";
-import { CoordinatesWithTreeData, InteractiveTreeFunctions, Skill, Tree } from "../../types";
+import { NodeCoordinate, InteractiveTreeFunctions, Skill, Tree } from "../../types";
 import { NodeMenuFunctions } from "./nodeMenu/NodeMenu";
 
 function returnNodeMenuFunctions(
-    node: CoordinatesWithTreeData | undefined,
+    node: NodeCoordinate | undefined,
     tree: Tree<Skill>,
     editTreeFromNodeMenu: boolean | undefined,
     functions?: InteractiveTreeFunctions["nodeMenu"]

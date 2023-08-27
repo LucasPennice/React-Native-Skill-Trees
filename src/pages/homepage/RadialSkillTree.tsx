@@ -5,10 +5,10 @@ import NodeList from "../../components/treeRelated/general/NodeList";
 import RadialCanvasPath from "../../components/treeRelated/radial/RadialCanvasPath";
 import RadialLabel from "../../components/treeRelated/radial/RadialLabel";
 import { completedSkillPercentageFromCoords } from "../../functions/extractInformationFromTree";
-import { CartesianCoordinate, CoordinatesWithTreeData } from "../../types";
+import { CartesianCoordinate, NodeCoordinate } from "../../types";
 
 type TreeProps = {
-    nodeCoordinatesCentered: CoordinatesWithTreeData[];
+    nodeCoordinatesCentered: NodeCoordinate[];
     selectedNode: string | null;
     settings: {
         showLabel: boolean;
@@ -27,7 +27,7 @@ type TreeProps = {
     };
 };
 
-const PathList = memo(function PathList({ nodeCoordinates }: { nodeCoordinates: CoordinatesWithTreeData[] }) {
+const PathList = memo(function PathList({ nodeCoordinates }: { nodeCoordinates: NodeCoordinate[] }) {
     return nodeCoordinates.map((node, idx) => {
         const parentNode = nodeCoordinates.find((n) => n.nodeId === node.parentId);
 
@@ -51,8 +51,8 @@ const LabelList = memo(function LabelList({
     rootNode,
     font,
 }: {
-    nodeCoordinates: CoordinatesWithTreeData[];
-    rootNode: CoordinatesWithTreeData;
+    nodeCoordinates: NodeCoordinate[];
+    rootNode: NodeCoordinate;
     font: SkFont;
 }) {
     const rootCoordinate = { x: rootNode.x, y: rootNode.y };
@@ -73,7 +73,7 @@ const LabelList = memo(function LabelList({
     });
 });
 
-function useGetTreeCompletePercetage(nodeCoordinates: CoordinatesWithTreeData[], rootId?: string) {
+function useGetTreeCompletePercetage(nodeCoordinates: NodeCoordinate[], rootId?: string) {
     const result = useMemo(() => {
         if (rootId === undefined) return 0;
 

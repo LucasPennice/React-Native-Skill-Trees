@@ -11,7 +11,7 @@ import { useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { selectUserTrees } from "../../redux/slices/userTreesSlice";
-import { CoordinatesWithTreeData } from "../../types";
+import { NodeCoordinate } from "../../types";
 import HomepageTree from "./HomepageTree";
 
 type Props = {
@@ -56,10 +56,10 @@ function useTakingScreenshotState() {
 }
 
 function useSelectedNodeCoordState() {
-    const [selectedNodeCoord, setSelectedNodeCoord] = useState<CoordinatesWithTreeData | null>(null);
+    const [selectedNodeCoord, setSelectedNodeCoord] = useState<NodeCoordinate | null>(null);
 
     const clearSelectedNodeCoord = () => setSelectedNodeCoord(null);
-    const updateSelectedNodeCoord = (value: CoordinatesWithTreeData) => setSelectedNodeCoord(value);
+    const updateSelectedNodeCoord = (value: NodeCoordinate) => setSelectedNodeCoord(value);
 
     return [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] as const;
 }

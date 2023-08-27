@@ -1,27 +1,27 @@
 import { Gesture, GestureStateChangeEvent, LongPressGestureHandlerEventPayload } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
-import { CoordinatesWithTreeData, GestureHandlerState } from "../../../../types";
+import { NodeCoordinate, GestureHandlerState } from "../../../../types";
 import { NODE_MENU_SIZE } from "../../nodeMenu/NodeMenu";
 import { didTapCircle } from "./functions";
 import { MAX_TAP_DURATION, MIN_DURATION_LONG_PRESS_MS } from "./params";
 
 type Props = {
-    nodeCoordinates: CoordinatesWithTreeData[];
+    nodeCoordinates: NodeCoordinate[];
     longPressState: [
         {
-            data: CoordinatesWithTreeData | undefined;
+            data: NodeCoordinate | undefined;
             state: "INTERRUPTED" | "PRESSING" | "IDLE";
         },
         React.Dispatch<
             React.SetStateAction<{
-                data: CoordinatesWithTreeData | undefined;
+                data: NodeCoordinate | undefined;
                 state: "INTERRUPTED" | "PRESSING" | "IDLE";
             }>
         >
     ];
     nodeMenuState: readonly [
-        CoordinatesWithTreeData | undefined,
-        { readonly closeNodeMenu: () => void; readonly openMenuOfNode: (clickedNode: CoordinatesWithTreeData) => void }
+        NodeCoordinate | undefined,
+        { readonly closeNodeMenu: () => void; readonly openMenuOfNode: (clickedNode: NodeCoordinate) => void }
     ];
     config: {
         blockLongPress?: boolean;
@@ -39,7 +39,7 @@ function useCanvasLongPress({ config, nodeCoordinates, draggingNodeActions, long
 
     const resetLongPressIndicator = () => setLongPressIndicatorPosition({ data: undefined, state: "IDLE" });
 
-    function handleSuccessfulLongPress(clickedNode: CoordinatesWithTreeData) {
+    function handleSuccessfulLongPress(clickedNode: NodeCoordinate) {
         openMenuOfNode(clickedNode);
         return resetLongPressIndicator();
     }

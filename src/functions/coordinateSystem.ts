@@ -2,9 +2,7 @@ import {
     calculateDragAndDropZones,
     centerNodesInCanvas,
     getCanvasDimensions,
-    getCoordinatedWithTreeData,
     getNodesCoordinates,
-    removeTreeDataFromCoordinate,
 } from "../components/treeRelated/coordinateFunctions";
 import { ScreenDimentions } from "../redux/slices/screenDimentionsSlice";
 import { CartesianCoordinate, InteractiveTreeConfig, PolarCoordinate, Skill, Tree } from "../types";
@@ -125,13 +123,9 @@ export function handleTreeBuild(
     showDepthGuides?: boolean
 ) {
     const coordinatesWithTreeData = getNodesCoordinates(tree, renderStyle);
-    //
-    const nodeCoordinates = removeTreeDataFromCoordinate(coordinatesWithTreeData);
-    const canvasDimentions = getCanvasDimensions(nodeCoordinates, screenDimentions, showDepthGuides);
-    const nodeCoordinatesCentered = centerNodesInCanvas(nodeCoordinates, canvasDimentions);
+    const canvasDimentions = getCanvasDimensions(coordinatesWithTreeData, screenDimentions, showDepthGuides);
+    const nodeCoordinatesCentered = centerNodesInCanvas(coordinatesWithTreeData, canvasDimentions);
     const dndZoneCoordinates = calculateDragAndDropZones(nodeCoordinatesCentered);
-    //
-    const centeredCoordinatedWithTreeData = getCoordinatedWithTreeData(coordinatesWithTreeData, nodeCoordinatesCentered);
 
-    return { nodeCoordinatesCentered, centeredCoordinatedWithTreeData, dndZoneCoordinates, coordinatesWithTreeData, canvasDimentions };
+    return { nodeCoordinatesCentered, dndZoneCoordinates, canvasDimentions };
 }

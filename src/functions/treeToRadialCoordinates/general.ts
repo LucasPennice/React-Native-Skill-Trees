@@ -1,6 +1,6 @@
 import { HOMETREE_ROOT_ID } from "../../parameters";
 import { CanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
-import { CoordinatesWithTreeData, LevelOverflow, NodeCategory, Skill, Tree, getDefaultSkillValue } from "../../types";
+import { NodeCoordinate, LevelOverflow, NodeCategory, Skill, Tree, getDefaultSkillValue } from "../../types";
 import { round8Decimals } from "../coordinateSystem";
 
 import { firstIteration } from "./firstInstance";
@@ -38,13 +38,13 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
         limiter++;
     } while (levelOverflow && limiter < 1000);
 
-    let treeCoordinates: CoordinatesWithTreeData[] = [];
+    let treeCoordinates: NodeCoordinate[] = [];
     radialTreeToCoordArray(result, treeCoordinates);
 
     return treeCoordinates;
 }
 
-function radialTreeToCoordArray(tree: Tree<Skill>, result: CoordinatesWithTreeData[]) {
+function radialTreeToCoordArray(tree: Tree<Skill>, result: NodeCoordinate[]) {
     // Recursive Case 👇
     if (tree.children.length) {
         for (let i = 0; i < tree.children.length; i++) {

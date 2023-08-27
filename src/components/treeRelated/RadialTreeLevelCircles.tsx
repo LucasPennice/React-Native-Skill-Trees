@@ -1,8 +1,8 @@
 import { Circle, DashPathEffect } from "@shopify/react-native-skia";
-import { CoordinatesWithTreeData } from "../../types";
+import { NodeCoordinate } from "../../types";
 import { cartesianToPositivePolarCoordinates } from "../../functions/coordinateSystem";
 
-function RadialTreeLevelCircles({ nodeCoordinates }: { nodeCoordinates: CoordinatesWithTreeData[] }) {
+function RadialTreeLevelCircles({ nodeCoordinates }: { nodeCoordinates: NodeCoordinate[] }) {
     const rootNode = nodeCoordinates.find((n) => n.level === 0);
 
     if (!rootNode) return <></>;

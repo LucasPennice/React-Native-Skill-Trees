@@ -5,7 +5,7 @@ import Animated, { Easing, FadeIn, useAnimatedProps, useAnimatedStyle, withDelay
 import { Svg, Circle as SvgCircle } from "react-native-svg";
 import { getWheelParams } from "../../../functions/misc";
 import { colors } from "../../../parameters";
-import { CoordinatesWithTreeData } from "../../../types";
+import { NodeCoordinate } from "../../../types";
 import { MIN_DURATION_LONG_PRESS_MS } from "../hooks/useCanvasPressAndLongPress";
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
@@ -17,7 +17,7 @@ function NodeLongPressIndicator({
     scale,
 }: {
     data: {
-        data: CoordinatesWithTreeData | undefined;
+        data: NodeCoordinate | undefined;
         state: "INTERRUPTED" | "SUCCESS" | "PRESSING" | "IDLE";
     };
     scale: number;

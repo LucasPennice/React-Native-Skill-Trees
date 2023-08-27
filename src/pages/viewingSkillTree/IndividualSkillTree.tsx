@@ -29,7 +29,7 @@ import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySet
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
-import { CanvasDimensions, CoordinatesWithTreeData, DnDZone, InteractiveTreeConfig, InteractiveTreeFunctions, Skill, Tree } from "../../types";
+import { CanvasDimensions, NodeCoordinate, DnDZone, InteractiveTreeFunctions, Skill, Tree } from "../../types";
 import { SelectedNewNodePositionState, SelectedNodeCoordState } from "./IndividualSkillTreePage";
 
 type Props = {
@@ -51,8 +51,9 @@ type Props = {
 
 function useHomepageTreeState() {
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
+    const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
 
-    return { screenDimensions };
+    return { screenDimensions, canvasDisplaySettings };
 }
 
 function useCreateTreeFunctions(
@@ -70,11 +71,19 @@ function useCreateTreeFunctions(
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
     const result: InteractiveTreeFunctions = {
-        onNodeClick: (coordOfClickedNode: CoordinatesWithTreeData) => {
+        onNodeClick: (coordOfClickedNode: NodeCoordinate) => {
             functions.updateSelectedNodeCoord(coordOfClickedNode, "VIEWING");
             return;
         },
 
+        onDndZoneClick: (clickedZone?: DnDZone) => {
+            if (clickedZone === undefined) return;
+
+            functions.updateSelectedNewNodePosition(clickedZone);
+            functions.openNewNodeModal();
+
+            return undefined;
+        },
         nodeMenu: {
             navigate: navigation.navigate,
 
@@ -129,34 +138,24 @@ function useCreateTreeFunctions(
     return result;
 }
 
-function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: CoordinatesWithTreeData | null, selectedTree: Tree<Skill>) {
+function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: NodeCoordinate | null, selectedTree: Tree<Skill>) {
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
     const {
         dndZoneCoordinates,
         canvasDimentions: canvasDimensions,
-        centeredCoordinatedWithTreeData,
+        nodeCoordinatesCentered,
     } = useMemo(() => handleTreeBuild(selectedTree, screenDimensions, "hierarchy"), [selectedTree, screenDimensions]);
 
     const treeCoordinate: TreeCoordinateData = {
         canvasDimensions,
         addNodePositions: dndZoneCoordinates,
-        nodeCoordinates: centeredCoordinatedWithTreeData,
+        nodeCoordinates: nodeCoordinatesCentered,
     };
 
     const selectedNodeId = selectedNode ? selectedNode.nodeId : null;
 
     return { screenDimensions, selectedNodeId, treeCoordinate, canvasRef, selectedDndZone: undefined };
-}
-
-function useGetTreeConfig() {
-    const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
-
-    const result: InteractiveTreeConfig = useMemo(() => {
-        return { canvasDisplaySettings, isInteractive: true, renderStyle: "radial", editTreeFromNodeMenu: false, blockDragAndDrop: true };
-    }, [canvasDisplaySettings]);
-
-    return result;
 }
 
 function useDraggingNodeState() {
@@ -168,17 +167,17 @@ function useDraggingNodeState() {
 }
 
 function useNodeMenuState() {
-    const [openMenuOnNode, setOpenMenuOnNode] = useState<CoordinatesWithTreeData | undefined>(undefined);
+    const [openMenuOnNode, setOpenMenuOnNode] = useState<NodeCoordinate | undefined>(undefined);
 
     const closeNodeMenu = () => setOpenMenuOnNode(undefined);
 
-    const openMenuOfNode = (clickedNode: CoordinatesWithTreeData) => setOpenMenuOnNode(clickedNode);
+    const openMenuOfNode = (clickedNode: NodeCoordinate) => setOpenMenuOnNode(clickedNode);
 
     return [openMenuOnNode, { closeNodeMenu, openMenuOfNode }] as const;
 }
 
 function useGetNodeMenuFns(
-    node: CoordinatesWithTreeData | undefined,
+    node: NodeCoordinate | undefined,
     tree: Tree<Skill>,
     menuFunctions: InteractiveTreeFunctions["nodeMenu"]
 ): NodeMenuFunctions {
@@ -255,15 +254,13 @@ function useGetSelectedNodeMenuFns(
 
 function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: Props) {
     const { openCanvasSettingsModal, openChildrenHoistSelector, openNewNodeModal } = functions;
-    const { screenDimensions } = useHomepageTreeState();
+    const { screenDimensions, canvasDisplaySettings } = useHomepageTreeState();
 
     const { selectedNewNodePositionState, selectedNodeCoordState, showNewNodePositions, addNodePositions } = state;
     const [selectedNewNodePosition, { updateSelectedNewNodePosition }] = selectedNewNodePositionState;
     const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
 
     const selectedNode = findNodeById(tree, selectedNodeCoord?.node?.nodeId ?? null);
-
-    const treeConfig = useGetTreeConfig();
 
     const treeState = useGetTreeState(canvasRef, selectedNodeCoord?.node ?? null, tree);
 
@@ -284,14 +281,14 @@ function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: 
     const nodeMenuState = useNodeMenuState();
     const [openMenuOnNode, { closeNodeMenu }] = nodeMenuState;
 
-    const longPressState = useState<{ data: CoordinatesWithTreeData | undefined; state: "INTERRUPTED" | "PRESSING" | "IDLE" }>({
+    const longPressState = useState<{ data: NodeCoordinate | undefined; state: "INTERRUPTED" | "PRESSING" | "IDLE" }>({
         data: undefined,
         state: "IDLE",
     });
     const [longPressIndicatorPosition] = longPressState;
 
     const canvasLongPressProps = {
-        config: { blockDragAndDrop: treeConfig.blockDragAndDrop, blockLongPress: treeConfig.blockLongPress },
+        config: { blockDragAndDrop: false, blockLongPress: false },
         nodeCoordinates: treeState.treeCoordinate.nodeCoordinates,
         longPressState,
         nodeMenuState,
@@ -299,12 +296,17 @@ function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: 
     };
 
     const canvasTapProps: CanvasTapProps = {
-        functions: { runOnTap: closeNodeMenu, onNodeClick: treeFunctions.onNodeClick, clearSelectedNodeCoord },
+        functions: {
+            runOnTap: closeNodeMenu,
+            onNodeClick: treeFunctions.onNodeClick,
+            clearSelectedNodeCoord,
+            onDndZoneClick: treeFunctions.onDndZoneClick,
+        },
         state: {
             dragAndDropZones: treeState.treeCoordinate.addNodePositions,
             nodeCoordinates: treeState.treeCoordinate.nodeCoordinates,
             selectedNodeId: selectedNodeCoord?.node?.nodeId ?? null,
-            showDndZones: treeConfig.showDndZones,
+            showNewNodePositions,
         },
     };
 
@@ -341,8 +343,8 @@ function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: 
 
     const canvasScrollAndZoom = Gesture.Simultaneous(canvasPan, canvasZoom);
 
-    const renderSelectedNodeMenu = selectedNodeCoordinates && selectedNode?.nodeId && treeConfig.isInteractive;
-    const renderNodeMenu = foundNodeOfMenu && openMenuOnNode && treeConfig.isInteractive;
+    const renderSelectedNodeMenu = selectedNodeCoordinates && selectedNode?.nodeId;
+    const renderNodeMenu = foundNodeOfMenu && openMenuOnNode;
 
     const nodeMenuFunctions = useGetNodeMenuFns(foundNodeOfMenu, tree, treeFunctions.nodeMenu);
 
@@ -373,8 +375,8 @@ function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: 
                                 selectedNode={selectedNode?.nodeId ?? null}
                                 fonts={fonts}
                                 settings={{
-                                    showLabel: treeConfig.canvasDisplaySettings.showLabel,
-                                    showIcons: treeConfig.canvasDisplaySettings.showIcons,
+                                    showLabel: canvasDisplaySettings.showLabel,
+                                    showIcons: canvasDisplaySettings.showIcons,
                                 }}
                                 drag={drag}
                             />

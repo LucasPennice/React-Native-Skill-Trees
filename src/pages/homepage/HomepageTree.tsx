@@ -25,24 +25,15 @@ import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySet
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
-import {
-    CanvasDimensions,
-    CoordinatesWithTreeData,
-    DnDZone,
-    InteractiveTreeConfig,
-    InteractiveTreeFunctions,
-    SelectedNodeId,
-    Skill,
-    Tree,
-} from "../../types";
+import { CanvasDimensions, NodeCoordinate, DnDZone, InteractiveTreeConfig, InteractiveTreeFunctions, SelectedNodeId, Skill, Tree } from "../../types";
 import RadialSkillTree from "./RadialSkillTree";
 
 type Props = {
     selectedNodeCoordState: readonly [
-        CoordinatesWithTreeData | null,
+        NodeCoordinate | null,
         {
             readonly clearSelectedNodeCoord: () => void;
-            readonly updateSelectedNodeCoord: (value: CoordinatesWithTreeData) => void;
+            readonly updateSelectedNodeCoord: (value: NodeCoordinate) => void;
         }
     ];
     canvasRef: React.RefObject<SkiaDomView>;
@@ -58,7 +49,7 @@ function useHomepageTreeState() {
 }
 
 function useCreateTreeFunctions(
-    updateSelectedNodeCoord: (value: CoordinatesWithTreeData) => void,
+    updateSelectedNodeCoord: (value: NodeCoordinate) => void,
     navigation: NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>,
     openCanvasSettingsModal: () => void
 ) {
@@ -66,7 +57,7 @@ function useCreateTreeFunctions(
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
     const result: InteractiveTreeFunctions = {
-        onNodeClick: (coordOfClickedNode: CoordinatesWithTreeData) => {
+        onNodeClick: (coordOfClickedNode: NodeCoordinate) => {
             updateSelectedNodeCoord(coordOfClickedNode);
             return;
         },
@@ -102,19 +93,19 @@ function useCreateTreeFunctions(
     return result;
 }
 
-function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: CoordinatesWithTreeData | null, homeTree: Tree<Skill>) {
+function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: NodeCoordinate | null, homeTree: Tree<Skill>) {
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
     const {
         dndZoneCoordinates,
         canvasDimentions: canvasDimensions,
-        centeredCoordinatedWithTreeData,
+        nodeCoordinatesCentered,
     } = useMemo(() => handleTreeBuild(homeTree, screenDimensions, "radial"), [homeTree, screenDimensions]);
 
     const treeCoordinate: TreeCoordinateData = {
         canvasDimensions,
         addNodePositions: dndZoneCoordinates,
-        nodeCoordinates: centeredCoordinatedWithTreeData,
+        nodeCoordinates: nodeCoordinatesCentered,
     };
 
     const selectedNodeId = selectedNode ? selectedNode.nodeId : null;
@@ -150,11 +141,11 @@ function useRunOnTreeUpdate(tree: Tree<Skill>, functions: InteractiveTreeFunctio
 }
 
 function useNodeMenuState() {
-    const [openMenuOnNode, setOpenMenuOnNode] = useState<CoordinatesWithTreeData | undefined>(undefined);
+    const [openMenuOnNode, setOpenMenuOnNode] = useState<NodeCoordinate | undefined>(undefined);
 
     const closeNodeMenu = () => setOpenMenuOnNode(undefined);
 
-    const openMenuOfNode = (clickedNode: CoordinatesWithTreeData) => setOpenMenuOnNode(clickedNode);
+    const openMenuOfNode = (clickedNode: NodeCoordinate) => setOpenMenuOnNode(clickedNode);
 
     return [openMenuOnNode, { closeNodeMenu, openMenuOfNode }] as const;
 }
@@ -193,7 +184,7 @@ function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsM
     const nodeMenuState = useNodeMenuState();
     const [openMenuOnNode, { closeNodeMenu }] = nodeMenuState;
 
-    const longPressState = useState<{ data: CoordinatesWithTreeData | undefined; state: "INTERRUPTED" | "PRESSING" | "IDLE" }>({
+    const longPressState = useState<{ data: NodeCoordinate | undefined; state: "INTERRUPTED" | "PRESSING" | "IDLE" }>({
         data: undefined,
         state: "IDLE",
     });

@@ -2,13 +2,13 @@ import { SkFont } from "@shopify/react-native-skia";
 import { Fragment, memo } from "react";
 import { SharedValue } from "react-native-reanimated";
 import { completedSkillPercentageFromCoords } from "../../../functions/extractInformationFromTree";
-import { CartesianCoordinate, CoordinatesWithTreeData } from "../../../types";
+import { CartesianCoordinate, NodeCoordinate } from "../../../types";
 import NodeList from "../general/NodeList";
 import HierarchicalCanvasPath from "./HierarchicalCanvasPath";
 import HierarchicalLabel from "./HierarchicalLabel";
 
 type TreeProps = {
-    nodeCoordinatesCentered: CoordinatesWithTreeData[];
+    nodeCoordinatesCentered: NodeCoordinate[];
     selectedNode: string | null;
     settings: {
         showLabel: boolean;
@@ -26,7 +26,7 @@ type TreeProps = {
     };
 };
 
-const PathList = memo(function PathList({ nodeCoordinates }: { nodeCoordinates: CoordinatesWithTreeData[] }) {
+const PathList = memo(function PathList({ nodeCoordinates }: { nodeCoordinates: NodeCoordinate[] }) {
     return nodeCoordinates.map((node, idx) => {
         const parentNode = nodeCoordinates.find((n) => n.nodeId === node.parentId);
 
@@ -44,7 +44,7 @@ const PathList = memo(function PathList({ nodeCoordinates }: { nodeCoordinates: 
     });
 });
 
-const LabelList = memo(function LabelList({ nodeCoordinates, font }: { nodeCoordinates: CoordinatesWithTreeData[]; font: SkFont }) {
+const LabelList = memo(function LabelList({ nodeCoordinates, font }: { nodeCoordinates: NodeCoordinate[]; font: SkFont }) {
     return nodeCoordinates.map((node, idx) => {
         if (node.isRoot) return <Fragment key={idx}></Fragment>;
 

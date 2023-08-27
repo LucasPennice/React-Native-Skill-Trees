@@ -3,7 +3,7 @@ import { Gesture } from "react-native-gesture-handler";
 import { SharedValue, WithSpringConfig, runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
 import { ScreenDimentions } from "../../../../redux/slices/screenDimentionsSlice";
-import { CanvasDimensions, CartesianCoordinate, CoordinatesWithTreeData } from "../../../../types";
+import { CanvasDimensions, CartesianCoordinate, NodeCoordinate } from "../../../../types";
 import { useHandleCanvasBounds } from "../useHandleCanvasBounds";
 import { ANIMATION_DURATION_AFTER_FAILED_LONG_PRESS_MS, DEACCELERATION_FACTOR, DEFAULT_SCALE } from "./params";
 
@@ -56,8 +56,8 @@ function useUpdateStartValue(
 function useCanvasScroll(
     canvasDimentions: CanvasDimensions,
     screenDimensions: ScreenDimentions,
-    foundNodeCoordinates: CoordinatesWithTreeData | undefined,
-    foundNodeOfMenu: CoordinatesWithTreeData | undefined,
+    foundNodeCoordinates: NodeCoordinate | undefined,
+    foundNodeOfMenu: NodeCoordinate | undefined,
     onScroll: () => void,
     draggingNode: { state: boolean; endDragging: () => void },
     sharedValues: {

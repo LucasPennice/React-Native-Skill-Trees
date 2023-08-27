@@ -1,6 +1,6 @@
 import { AnyAction, PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { handleTreeBuild } from "../../functions/coordinateSystem";
-import { CanvasDimensions, CoordinatesWithTreeData, DnDZone, Skill, Tree } from "../../types";
+import { CanvasDimensions, NodeCoordinate, DnDZone, Skill, Tree } from "../../types";
 import type { RootState } from "../reduxStore";
 import { saveNewTree, removeUserTree, updateUserTreeWithAppendedNode, updateUserTrees } from "./userTreesSlice";
 import { ScreenDimentions } from "./screenDimentionsSlice";
@@ -20,7 +20,7 @@ const DEFAULT_HOME_TREE: TreeCoordinateData = {
 };
 
 export type TreeCoordinateData = {
-    nodeCoordinates: CoordinatesWithTreeData[];
+    nodeCoordinates: NodeCoordinate[];
     addNodePositions: DnDZone[];
     canvasDimensions: CanvasDimensions;
 };
@@ -56,12 +56,12 @@ export const treeCoordinatesSlice = createSlice({
             const {
                 dndZoneCoordinates,
                 canvasDimentions: canvasDimensions,
-                centeredCoordinatedWithTreeData,
+                nodeCoordinatesCentered,
             } = handleTreeBuild(treeToCheck, screenDimensions, "hierarchy");
 
             state.trees = {
                 ...state.trees,
-                [treeId]: { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: centeredCoordinatedWithTreeData },
+                [treeId]: { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: nodeCoordinatesCentered },
             };
         },
         calculateHomeTreeCoordinatesInitially: (
@@ -79,10 +79,10 @@ export const treeCoordinatesSlice = createSlice({
             const {
                 dndZoneCoordinates,
                 canvasDimentions: canvasDimensions,
-                centeredCoordinatedWithTreeData,
+                nodeCoordinatesCentered,
             } = handleTreeBuild(homeTree, screenDimensions, "radial");
 
-            state.homeTree = { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: centeredCoordinatedWithTreeData };
+            state.homeTree = { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: nodeCoordinatesCentered };
         },
         clearHomeTreeState: (state) => {
             state.homeTree = DEFAULT_HOME_TREE;
@@ -113,12 +113,12 @@ export const treeCoordinatesSlice = createSlice({
             const {
                 dndZoneCoordinates,
                 canvasDimentions: canvasDimensions,
-                centeredCoordinatedWithTreeData,
+                nodeCoordinatesCentered,
             } = handleTreeBuild(newTree, screenDimensions, "hierarchy");
 
             state.trees = {
                 ...state.trees,
-                [newTree.treeId]: { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: centeredCoordinatedWithTreeData },
+                [newTree.treeId]: { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: nodeCoordinatesCentered },
             };
         });
         builder.addCase(updateUserTreeWithAppendedNode, (state, action) => {
@@ -133,12 +133,12 @@ export const treeCoordinatesSlice = createSlice({
             const {
                 dndZoneCoordinates,
                 canvasDimentions: canvasDimensions,
-                centeredCoordinatedWithTreeData,
+                nodeCoordinatesCentered,
             } = handleTreeBuild(updatedTree, screenDimensions, "hierarchy");
 
             state.trees = {
                 ...state.trees,
-                [updatedTree.treeId]: { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: centeredCoordinatedWithTreeData },
+                [updatedTree.treeId]: { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: nodeCoordinatesCentered },
             };
         });
         builder.addMatcher(

@@ -1,7 +1,7 @@
 import { Path, Skia } from "@shopify/react-native-skia";
 import { getConstantsRotated } from "../../../functions/coordinateSystem";
 import { CIRCLE_SIZE } from "../../../parameters";
-import { CartesianCoordinate, CoordinatesWithTreeData } from "../../../types";
+import { CartesianCoordinate, NodeCoordinate } from "../../../types";
 import { memo } from "react";
 
 type PathCoordinates = {
@@ -13,7 +13,7 @@ type PathCoordinates = {
 type Props = {
     coordinates: PathCoordinates;
     isRoot?: boolean;
-    nodeCoordinates: CoordinatesWithTreeData[];
+    nodeCoordinates: NodeCoordinate[];
 };
 
 function RadialCanvasPath({ coordinates, isRoot, nodeCoordinates }: Props) {
@@ -45,7 +45,7 @@ function RadialCanvasPath({ coordinates, isRoot, nodeCoordinates }: Props) {
     return <Path path={res} color={"#1C1C1D"} style="stroke" strokeWidth={2} />;
 }
 
-function getCurvedPath(rootCoordinates: CoordinatesWithTreeData, parentOfNodeCoord: CartesianCoordinate, centerOfNode: CartesianCoordinate) {
+function getCurvedPath(rootCoordinates: NodeCoordinate, parentOfNodeCoord: CartesianCoordinate, centerOfNode: CartesianCoordinate) {
     const finalPoint = getFinalPoint(rootCoordinates, centerOfNode);
     const startingPoint = getStartingPoint(rootCoordinates, parentOfNodeCoord);
 
@@ -82,7 +82,7 @@ function getCurvedPath(rootCoordinates: CoordinatesWithTreeData, parentOfNodeCoo
 
     return { p, c1: { ...translatedAndRotatedCP1 }, c2: { ...translatedAndRotatedCP2 } };
 
-    function getFinalPoint(rootCoordinates: CoordinatesWithTreeData, centerOfNode: CartesianCoordinate) {
+    function getFinalPoint(rootCoordinates: NodeCoordinate, centerOfNode: CartesianCoordinate) {
         const p0 = { ...rootCoordinates };
         const p1 = { ...centerOfNode };
 
@@ -101,7 +101,7 @@ function getCurvedPath(rootCoordinates: CoordinatesWithTreeData, parentOfNodeCoo
         return { x: p0.x + foo * directionVector.x, y: p0.y + foo * directionVector.y };
     }
 
-    function getStartingPoint(rootCoordinates: CoordinatesWithTreeData, parentOfNodeCoord: CartesianCoordinate) {
+    function getStartingPoint(rootCoordinates: NodeCoordinate, parentOfNodeCoord: CartesianCoordinate) {
         const p0 = { ...rootCoordinates };
         const p1 = { ...parentOfNodeCoord };
 

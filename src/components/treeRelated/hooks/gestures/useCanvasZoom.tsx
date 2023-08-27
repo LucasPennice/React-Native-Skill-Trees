@@ -3,14 +3,14 @@ import { Gesture } from "react-native-gesture-handler";
 import { SharedValue, runOnJS, useAnimatedReaction, useSharedValue, withSpring } from "react-native-reanimated";
 import { MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
 import { ScreenDimentions } from "../../../../redux/slices/screenDimentionsSlice";
-import { CanvasDimensions, CoordinatesWithTreeData } from "../../../../types";
+import { CanvasDimensions, NodeCoordinate } from "../../../../types";
 import { getXBounds, getYBounds } from "../useHandleCanvasBounds";
 import { DEFAULT_SCALE } from "./params";
 
 function useCanvasZoom(
     canvasDimentions: CanvasDimensions,
     screenDimensions: ScreenDimentions,
-    foundNodeCoordinates: CoordinatesWithTreeData | undefined,
+    foundNodeCoordinates: NodeCoordinate | undefined,
     sharedValues: { offsetX: SharedValue<number>; offsetY: SharedValue<number>; scale: SharedValue<number> }
 ) {
     const { offsetX, offsetY, scale } = sharedValues;

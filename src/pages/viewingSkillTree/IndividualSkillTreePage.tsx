@@ -17,7 +17,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { changeTree, updateUserTreeWithAppendedNode } from "../../redux/slices/userTreesSlice";
-import { CoordinatesWithTreeData, DnDZone, Skill, Tree } from "../../types";
+import { NodeCoordinate, DnDZone, Skill, Tree } from "../../types";
 import useCurrentTree from "../../useCurrentTree";
 import AddNodeStateIndicator from "./AddNodeStateIndicator";
 import IndividualSkillTree from "./IndividualSkillTree";
@@ -54,10 +54,10 @@ function useViewingSkillTreeState() {
         const {
             dndZoneCoordinates,
             canvasDimentions: canvasDimensions,
-            centeredCoordinatedWithTreeData,
+            nodeCoordinatesCentered,
         } = handleTreeBuild(selectedTree, screenDimensions, "hierarchy");
 
-        treeCoordinate = { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: centeredCoordinatedWithTreeData };
+        treeCoordinate = { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: nodeCoordinatesCentered };
     }
 
     return { selectedTree, treeCoordinate };
@@ -65,7 +65,6 @@ function useViewingSkillTreeState() {
 
 function useModalStateReducer() {
     function reducer(state: ModalState, action: ModalReducerAction) {
-        console.log(action);
         switch (action) {
             case "returnToIdle":
                 return "IDLE";
@@ -119,7 +118,7 @@ function useHandleRouteParams(
     addNewNodePositions: DnDZone[],
     functions: {
         updateSelectedNewNodePosition: (position: DnDZone) => void;
-        updateSelectedNodeCoord: (node: CoordinatesWithTreeData, menuMode: "EDITING" | "VIEWING") => void;
+        updateSelectedNodeCoord: (node: NodeCoordinate, menuMode: "EDITING" | "VIEWING") => void;
     }
 ) {
     useEffect(() => {
@@ -136,14 +135,10 @@ function useHandleRouteParams(
             return dispatchModalState("openNewNodeModal");
         }
 
-        console.log("IUADSNUIASDUINUIAS");
-
         functions.updateSelectedNodeCoord(params.node, "VIEWING");
 
         //eslint-disable-next-line
     }, []);
-
-    useEffect(() => {}, []);
 }
 
 function useNodeToDelete() {
@@ -240,25 +235,23 @@ function useSelectedNewNodePositionState() {
 
 export type SelectedNodeCoordState = readonly [
     {
-        node: CoordinatesWithTreeData | null;
+        node: NodeCoordinate | null;
         menuMode: "EDITING" | "VIEWING";
     } | null,
     {
         readonly clearSelectedNodeCoord: () => void;
-        readonly updateSelectedNodeCoord: (node: CoordinatesWithTreeData, menuMode: "EDITING" | "VIEWING") => void;
+        readonly updateSelectedNodeCoord: (node: NodeCoordinate, menuMode: "EDITING" | "VIEWING") => void;
     }
 ];
 
 function useSelectedNodeCoordState(dispatchModalState: React.Dispatch<ModalReducerAction>) {
-    const [selectedNodeCoord, setSelectedNodeCoord] = useState<{ node: CoordinatesWithTreeData | null; menuMode: "EDITING" | "VIEWING" } | null>(
-        null
-    );
+    const [selectedNodeCoord, setSelectedNodeCoord] = useState<{ node: NodeCoordinate | null; menuMode: "EDITING" | "VIEWING" } | null>(null);
 
     const clearSelectedNodeCoord = () => {
         setSelectedNodeCoord(null);
         dispatchModalState("returnToIdle");
     };
-    const updateSelectedNodeCoord = (node: CoordinatesWithTreeData, menuMode: "EDITING" | "VIEWING") => setSelectedNodeCoord({ node, menuMode });
+    const updateSelectedNodeCoord = (node: NodeCoordinate, menuMode: "EDITING" | "VIEWING") => setSelectedNodeCoord({ node, menuMode });
 
     return [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] as const;
 }

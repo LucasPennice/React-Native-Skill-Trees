@@ -1,19 +1,19 @@
 import { Gesture, GestureStateChangeEvent, TapGestureHandlerEventPayload } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
-import { CoordinatesWithTreeData, DnDZone, SelectedNodeId } from "../../../../types";
+import { NodeCoordinate, DnDZone, SelectedNodeId } from "../../../../types";
 import { didTapCircle } from "./functions";
 import { MAX_TAP_DURATION } from "./params";
 
 export type CanvasTapProps = {
     state: {
-        nodeCoordinates: CoordinatesWithTreeData[];
+        nodeCoordinates: NodeCoordinate[];
         selectedNodeId: SelectedNodeId;
         dragAndDropZones: DnDZone[];
-        showDndZones?: boolean;
+        showNewNodePositions?: boolean;
     };
     functions: {
         runOnTap: () => void;
-        onNodeClick?: (node: CoordinatesWithTreeData) => void;
+        onNodeClick?: (node: NodeCoordinate) => void;
         onDndZoneClick?: (clickedZone?: DnDZone) => void;
         clearSelectedNodeCoord: () => void;
     };
@@ -21,13 +21,14 @@ export type CanvasTapProps = {
 
 function useCanvasTap({ functions, state }: CanvasTapProps) {
     const { runOnTap, onDndZoneClick, onNodeClick } = functions;
-    const { dragAndDropZones, nodeCoordinates, selectedNodeId, showDndZones } = state;
+    const { dragAndDropZones, nodeCoordinates, selectedNodeId, showNewNodePositions } = state;
 
     const tapGesture = {
         handleOnStart: (e: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => runOnTap(),
         handleOnEnd: (e: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
             const clickedDndZone = dragAndDropZones.find(didTapDndZone(e));
-            if (onDndZoneClick && showDndZones) return onDndZoneClick(clickedDndZone);
+
+            if (onDndZoneClick && showNewNodePositions) return onDndZoneClick(clickedDndZone);
 
             const clickedNode = nodeCoordinates.find(didTapCircle(e));
             if (clickedNode === undefined) return functions.clearSelectedNodeCoord();

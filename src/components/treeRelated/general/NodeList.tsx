@@ -1,5 +1,5 @@
 import { SkFont } from "@shopify/react-native-skia";
-import { CoordinatesWithTreeData, SelectedNodeId } from "../../../types";
+import { NodeCoordinate, SelectedNodeId } from "../../../types";
 import { getLabelTextColor } from "../../../functions/misc";
 import Node, { CanvasNodeData } from "./Node";
 import { completedSkillPercentageFromCoords } from "../../../functions/extractInformationFromTree";
@@ -12,8 +12,8 @@ function NodeList({
     selectedNodeId,
     fonts,
 }: {
-    nodeCoordinates: CoordinatesWithTreeData[];
-    rootNode: CoordinatesWithTreeData;
+    nodeCoordinates: NodeCoordinate[];
+    rootNode: NodeCoordinate;
     settings: { oneColorPerTree: boolean; showIcons: boolean };
     treeCompletedPercentage: number;
     selectedNodeId: SelectedNodeId;

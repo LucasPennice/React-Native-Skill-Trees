@@ -1,4 +1,4 @@
-import { CoordinatesWithTreeData, HierarchicalContour, Skill, Tree } from "../../types";
+import { NodeCoordinate, HierarchicalContour, Skill, Tree } from "../../types";
 import {
     addEveryChildFromTreeToArray,
     findDistanceBetweenNodesById,
@@ -14,7 +14,7 @@ export const PlotTreeReingoldTiltfordAlgorithm = (completeTree: Tree<Skill>) => 
 
     result = handleOverlap(result);
 
-    let treeCoordinates: CoordinatesWithTreeData[] = [];
+    let treeCoordinates: NodeCoordinate[] = [];
     hierarchicalTreeToCoordArray(result, treeCoordinates);
 
     return treeCoordinates;
@@ -329,7 +329,7 @@ function getTreesToShift(result: Tree<Skill>, nodesInConflict: [string, string])
     }
 }
 
-export function hierarchicalTreeToCoordArray(tree: Tree<Skill>, result: CoordinatesWithTreeData[]) {
+export function hierarchicalTreeToCoordArray(tree: Tree<Skill>, result: NodeCoordinate[]) {
     // Recursive Case 👇
     if (tree.children.length) {
         for (let i = 0; i < tree.children.length; i++) {

@@ -10,13 +10,13 @@ import {
     PARENT_DND_ZONE_DIMENTIONS,
 } from "../../parameters";
 import { ScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
-import { CanvasDimensions, CoordinatesWithTreeData, DnDZone, NodeCoordinate, ParentId, Skill, Tree } from "../../types";
+import { CanvasDimensions, CartesianCoordinate, NodeCoordinate, DnDZone, Skill, Tree } from "../../types";
 
-export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): CoordinatesWithTreeData[] {
+export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): NodeCoordinate[] {
     if (!currentTree) return [];
 
-    let unscaledCoordinates: CoordinatesWithTreeData[] = [];
-    let scaledCoordinates: CoordinatesWithTreeData[] = [];
+    let unscaledCoordinates: NodeCoordinate[] = [];
+    let scaledCoordinates: NodeCoordinate[] = [];
 
     if (mode === "hierarchy") {
         unscaledCoordinates = PlotTreeReingoldTiltfordAlgorithm(currentTree);
@@ -28,13 +28,13 @@ export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: 
 
     return scaledCoordinates;
 
-    function scaleCoordinatesAfterReingoldTiltford(coordToScale: CoordinatesWithTreeData[]) {
+    function scaleCoordinatesAfterReingoldTiltford(coordToScale: NodeCoordinate[]) {
         return coordToScale.map((f) => {
             return { ...f, x: f.x * DISTANCE_BETWEEN_CHILDREN, y: f.y * DISTANCE_BETWEEN_GENERATIONS };
         });
     }
 
-    function scaleCoordinatesAfterRadialReingoldTiltford(coordToScale: CoordinatesWithTreeData[]) {
+    function scaleCoordinatesAfterRadialReingoldTiltford(coordToScale: NodeCoordinate[]) {
         //We cannot scale by different constants the nodes will not be rendered along the circumferences
 
         const SCALE = DISTANCE_BETWEEN_GENERATIONS;
@@ -44,7 +44,9 @@ export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: 
     }
 }
 
-export function treeWidthFromCoordinates(coordinates: NodeCoordinate[]): { treeWidth: number; minCoordinate: number; maxCoordinate: number } {
+export function treeWidthFromCoordinates<T extends CartesianCoordinate>(
+    coordinates: T[]
+): { treeWidth: number; minCoordinate: number; maxCoordinate: number } {
     let minCoordinate: number | undefined = undefined,
         maxCoordinate: number | undefined = undefined;
 
@@ -63,7 +65,9 @@ export function treeWidthFromCoordinates(coordinates: NodeCoordinate[]): { treeW
     return { treeWidth: result, minCoordinate, maxCoordinate };
 }
 
-export function treeHeightFromCoordinates(coordinates: NodeCoordinate[]): { treeHeight: number; minCoordinate: number; maxCoordinate: number } {
+export function treeHeightFromCoordinates<T extends CartesianCoordinate>(
+    coordinates: T[]
+): { treeHeight: number; minCoordinate: number; maxCoordinate: number } {
     let minCoordinate: number | undefined = undefined,
         maxCoordinate: number | undefined = undefined;
 
@@ -90,7 +94,7 @@ function dndZonesFromNodeCoord(nodeCoord: NodeCoordinate, dndType: DnDZone["type
             height: PARENT_DND_ZONE_DIMENTIONS.height,
             width: PARENT_DND_ZONE_DIMENTIONS.width,
             type: "PARENT",
-            ofNode: nodeCoord.id,
+            ofNode: nodeCoord.nodeId,
         };
 
     const brotherDndWidth = DISTANCE_BETWEEN_CHILDREN / 2;
@@ -102,7 +106,7 @@ function dndZonesFromNodeCoord(nodeCoord: NodeCoordinate, dndType: DnDZone["type
             height: BROTHER_DND_ZONE_HEIGHT,
             width: brotherDndWidth,
             type: "LEFT_BROTHER",
-            ofNode: nodeCoord.id,
+            ofNode: nodeCoord.nodeId,
         };
     }
 
@@ -113,7 +117,7 @@ function dndZonesFromNodeCoord(nodeCoord: NodeCoordinate, dndType: DnDZone["type
             height: BROTHER_DND_ZONE_HEIGHT,
             width: brotherDndWidth,
             type: "RIGHT_BROTHER",
-            ofNode: nodeCoord.id,
+            ofNode: nodeCoord.nodeId,
         };
 
     if (dndType === "CHILDREN")
@@ -123,17 +127,17 @@ function dndZonesFromNodeCoord(nodeCoord: NodeCoordinate, dndType: DnDZone["type
             x: nodeCoord.x - CHILD_DND_ZONE_DIMENTIONS.width / 2,
             y: nodeCoord.y + 1.5 * CIRCLE_SIZE,
             type: "CHILDREN",
-            ofNode: nodeCoord.id,
+            ofNode: nodeCoord.nodeId,
         };
 
     throw new Error("dndType not supported in coordOfDnDZoneBasedOnNodeCoord");
 }
 
-export function calculateDragAndDropZones(nodeCoordinatesCentered: NodeCoordinate[]) {
+export function calculateDragAndDropZones(nodeCoordinates: NodeCoordinate[]) {
     const result: DnDZone[] = [];
 
-    for (let idx = 0; idx < nodeCoordinatesCentered.length; idx++) {
-        const pos = nodeCoordinatesCentered[idx];
+    for (let idx = 0; idx < nodeCoordinates.length; idx++) {
+        const pos = nodeCoordinates[idx];
 
         const isRoot = pos.level === 0;
 
@@ -245,48 +249,5 @@ export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDim
             x: c.x + distanceToCenterRootNode,
             y: c.y + distanceToCenterRootNodeVertically,
         } as NodeCoordinate;
-    });
-}
-
-export function removeTreeDataFromCoordinate(foo: CoordinatesWithTreeData[]): NodeCoordinate[] {
-    return foo.map((bb) => {
-        return {
-            id: bb.nodeId,
-            level: bb.level,
-            parentId: bb.parentId,
-            x: bb.x,
-            y: bb.y,
-        };
-    });
-}
-
-//The animations break for some reason when using CoordinatesWithTreeData
-//It seems to be a bug of reanimated 2
-export function getCoordinatedWithTreeData(
-    coordinatesWithTreeData: CoordinatesWithTreeData[],
-    nodeCoordinatesCentered: {
-        x: number;
-        y: number;
-        id: string;
-        level: number;
-        parentId: ParentId;
-    }[]
-): CoordinatesWithTreeData[] {
-    return nodeCoordinatesCentered.map((centeredCoord, i) => {
-        const coordWithTreeData = coordinatesWithTreeData[i];
-
-        return {
-            accentColor: coordWithTreeData.accentColor,
-            data: coordWithTreeData.data,
-            isRoot: coordWithTreeData.isRoot,
-            level: coordWithTreeData.level,
-            nodeId: coordWithTreeData.nodeId,
-            parentId: coordWithTreeData.parentId,
-            treeId: coordWithTreeData.treeId,
-            category: coordWithTreeData.category,
-            treeName: coordWithTreeData.treeName,
-            x: centeredCoord.x,
-            y: centeredCoord.y,
-        };
     });
 }

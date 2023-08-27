@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Gesture, GestureStateChangeEvent, LongPressGestureHandlerEventPayload, TapGestureHandlerEventPayload } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, TOUCH_BUFFER } from "../../../parameters";
-import { CartesianCoordinate, DnDZone, GestureHandlerState, NodeCoordinate, SelectedNodeId } from "../../../types";
+import { CartesianCoordinate, NodeCoordinate, DnDZone, GestureHandlerState, SelectedNodeId } from "../../../types";
 import { NODE_MENU_SIZE } from "../nodeMenu/NodeMenu";
 
 type Props = {
@@ -85,7 +85,7 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
             if (onDndZoneClick && showDndZones) return onDndZoneClick(clickedDndZone);
             const clickedNode = nodeCoordinatesCentered.find(didTapCircle(e));
             if (clickedNode === undefined) return functions.clearSelectedNodeCoord();
-            if (selectedNodeId !== clickedNode.id && onNodeClick) return onNodeClick(clickedNode.id);
+            if (selectedNodeId !== clickedNode.nodeId && onNodeClick) return onNodeClick(clickedNode.nodeId);
             return functions.clearSelectedNodeCoord();
         },
     };
@@ -160,7 +160,7 @@ const useCanvasPressAndLongPress = ({ config, functions, state }: Props) => {
 export default useCanvasPressAndLongPress;
 
 export function didTapCircle(touchInfo: { x: number; y: number }) {
-    return (circle: { x: number; y: number; id: string }) => {
+    return (circle: { x: number; y: number }) => {
         const isTouchInsideCircleXRange =
             touchInfo.x >= circle.x - CIRCLE_SIZE / 2 - TOUCH_BUFFER && touchInfo.x <= circle.x + CIRCLE_SIZE / 2 + TOUCH_BUFFER;
 
