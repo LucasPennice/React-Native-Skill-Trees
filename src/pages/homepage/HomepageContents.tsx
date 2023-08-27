@@ -88,8 +88,6 @@ function HomepageContents({ n: { navigation } }: Props) {
 
     const homepageTree = useMemo(() => buildHomepageTree(userTrees, canvasDisplaySettings), [canvasDisplaySettings, userTrees]);
 
-    // useHandleInitialTreeCoordinates(userTrees, screenDimensions, canvasDisplaySettings);
-
     useHandleNavigationListener(navigation, clearSelectedNodeCoord);
 
     const canvasRef = useCanvasRef();

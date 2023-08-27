@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
-import { SharedValue, runOnJS, useAnimatedReaction, useSharedValue, withSpring } from "react-native-reanimated";
+import { SharedValue, runOnJS, useSharedValue, withSpring } from "react-native-reanimated";
 import { MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
 import { ScreenDimentions } from "../../../../redux/slices/screenDimentionsSlice";
 import { CanvasDimensions, NodeCoordinate } from "../../../../types";
@@ -29,13 +29,6 @@ function useCanvasZoom(
     const savedScale = useSharedValue(DEFAULT_SCALE);
 
     const [scaleState, setScaleState] = useState(DEFAULT_SCALE);
-
-    useAnimatedReaction(
-        () => scale.value,
-        (scaleValue: number) => {
-            runOnJS(setScaleState)(scaleValue);
-        }
-    );
 
     useEffect(() => {
         const currentCanvasMinScale = screenDimensions.width / canvasWidth;
@@ -70,6 +63,8 @@ function useCanvasZoom(
             } else {
                 savedScale.value = scale.value;
             }
+
+            runOnJS(setScaleState)(savedScale.value);
 
             const xBounds = getXBounds(safeScale, canvasWidth, screenDimensions.width);
             const yBounds = getYBounds(safeScale, canvasHeight, screenHeightWithNavAccounted);

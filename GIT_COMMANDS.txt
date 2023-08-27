@@ -1,0 +1,15 @@
+Delte branch locally
+
+git branch --delete <branch name>
+
+Delete branch remotely 
+
+git push origin --delete <branch name>
+
+Create and go to new branch
+
+git checkout -b <new branch name>
+
+Merge branch into current branch
+
+git merge <branch name>
