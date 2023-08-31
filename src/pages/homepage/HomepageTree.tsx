@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
-import { ReactNode, memo, useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode, memo, useEffect, useMemo, useState } from "react";
 import { Alert, View } from "react-native";
 import { Gesture, GestureDetector, SimultaneousGesture } from "react-native-gesture-handler";
 import Animated, { useSharedValue } from "react-native-reanimated";
@@ -25,7 +25,6 @@ import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeCoordinate, SelectedNodeId, Skill, Tree } from "../../types";
 import RadialSkillTree from "./RadialSkillTree";
-import { makeid } from "../../functions/misc";
 
 type Props = {
     selectedNodeCoordState: readonly [
