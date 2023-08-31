@@ -30,11 +30,12 @@ function useCanvasTap({ functions, state }: CanvasTapProps) {
 
             if (onDndZoneClick && showNewNodePositions) return onDndZoneClick(clickedDndZone);
 
+            if (selectedNodeId) return functions.clearSelectedNodeCoord();
+
             const clickedNode = nodeCoordinates.find(didTapCircle(e));
             if (clickedNode === undefined) return functions.clearSelectedNodeCoord();
 
             if (selectedNodeId !== clickedNode.nodeId && onNodeClick) return onNodeClick(clickedNode);
-            return functions.clearSelectedNodeCoord();
         },
     };
 

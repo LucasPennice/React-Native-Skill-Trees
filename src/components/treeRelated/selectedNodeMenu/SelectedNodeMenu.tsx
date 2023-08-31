@@ -7,7 +7,6 @@ import { ScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
 import { generalStyles } from "../../../styles";
 import { Skill, SkillIcon, SkillPropertiesEditableOnPopMenu, Tree } from "../../../types";
 import AppText from "../../AppText";
-import DirectionMenu, { Config } from "../../DirectionMenu";
 import SliderToggler from "../../SliderToggler";
 import Editing from "./Editing";
 import Viewing from "./Viewing";
@@ -60,20 +59,6 @@ function useCleanup(setInitialMode: () => void) {
     }, []);
 }
 
-function useHandleDirectionMenuTranslationY(verticalSize: number, mode: "EDITING" | "VIEWING") {
-    const [menuHeight, setMenuHeight] = useState(0);
-
-    const updateMenuHeight = (value: number) => {
-        setMenuHeight(value);
-    };
-
-    let translationY = -menuHeight / 2 + verticalSize / 2;
-
-    if (mode === "EDITING") translationY = -menuHeight / 2 + verticalSize;
-
-    return [translationY, { updateMenuHeight }] as const;
-}
-
 function useSkillPropsState(selectedNode: Tree<Skill>) {
     const initialState = { icon: selectedNode.data.icon, isCompleted: selectedNode.data.isCompleted, name: selectedNode.data.name };
 
@@ -115,22 +100,10 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
     const skillPropsState = useSkillPropsState(selectedNode);
     const [newSkillProps, { setInitialSkillProps }] = skillPropsState;
 
-    //Local State
-    const nodeMenuConfig: Config = {
-        horizontalSize: menuWidth,
-        verticalSize: 50,
-        circular: false,
-        directions: ["vertical"],
-        triggerZoneSize: 1,
-        allowFling: true,
-        maxTapDuration: 10,
-    };
-
     const editingEnabled = Boolean(mutateFunctions !== undefined) && Boolean(allowEdit) && selectedNode.category === "SKILL";
 
     useCleanup(setInitialMode);
     useResetSkillPropsToDefaultOnModeUpdate(setInitialSkillProps, mode);
-    const [translationY, { updateMenuHeight }] = useHandleDirectionMenuTranslationY(nodeMenuConfig.verticalSize, mode);
 
     const showSaveChangesBtn = mode === "EDITING" && checkForSave(newSkillProps, selectedNode);
 
@@ -180,52 +153,48 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
                     alignItems: "flex-start",
                 },
             ]}>
-            <DirectionMenu action={{ verticalDown: closeMenu }} config={nodeMenuConfig} actionZoneTranslateY={translationY}>
-                <Animated.View
-                    onStartShouldSetResponder={(event) => true}
-                    onTouchEnd={(e) => e.stopPropagation()}
-                    entering={FadeInDown.easing(Easing.elastic()).duration(300)}
-                    exiting={FadeOutDown.easing(Easing.elastic()).duration(200)}
-                    onLayout={(c) => updateMenuHeight(c.nativeEvent.layout.height)}
-                    style={[
-                        {
-                            zIndex: 2,
-                            width: menuWidth,
-                            minHeight: 100,
-                            display: "flex",
-                            flexDirection: "row",
-                            alignItems: "center",
-                        },
-                    ]}>
-                    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "position"} style={{ flex: 1 }} keyboardVerticalOffset={60}>
-                        <Animated.View style={styles.interactiveContainer} layout={Layout.stiffness(200).damping(26)}>
-                            <View style={styles.dragLine} />
-                            <AppText style={{ color: colors.line, marginBottom: 10 }} fontSize={12}>
-                                Drag me down or click outside to close
-                            </AppText>
+            <Animated.View
+                onStartShouldSetResponder={(event) => true}
+                onTouchEnd={(e) => e.stopPropagation()}
+                entering={FadeInDown.easing(Easing.elastic()).duration(300)}
+                exiting={FadeOutDown.easing(Easing.elastic()).duration(200)}
+                style={[
+                    {
+                        zIndex: 2,
+                        width: menuWidth,
+                        minHeight: 100,
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                    },
+                ]}>
+                <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "position"} style={{ flex: 1 }} keyboardVerticalOffset={60}>
+                    <Animated.View style={[styles.interactiveContainer]} layout={Layout.stiffness(200).damping(26)}>
+                        <AppText style={{ color: colors.line, paddingBottom: 10 }} fontSize={12}>
+                            Click outside this menu to close
+                        </AppText>
 
-                            {editingEnabled && (
-                                <SliderToggler containerWidth={menuWidth / 2 - 10} isLeftSelected={mode === "VIEWING"} toggleMode={toggleMode} />
-                            )}
+                        {editingEnabled && (
+                            <SliderToggler containerWidth={menuWidth / 2 - 10} isLeftSelected={mode === "VIEWING"} toggleMode={toggleMode} />
+                        )}
 
-                            {mode === "EDITING" && editingEnabled && (
-                                <Editing
-                                    skillPropsState={skillPropsState}
-                                    handleDeleteSelectedNode={editingFunctions!.handleDeleteSelectedNode}
-                                    checkToggleCompletionPermissions={checkToggleCompletionPermissions!}
-                                />
-                            )}
-                            {mode === "VIEWING" && (
-                                <Viewing
-                                    selectedNode={selectedNode}
-                                    selectedTree={selectedTree}
-                                    functions={{ goToTreePage, goToSkillPage, goToEditTreePage }}
-                                />
-                            )}
-                        </Animated.View>
-                    </KeyboardAvoidingView>
-                </Animated.View>
-            </DirectionMenu>
+                        {mode === "EDITING" && editingEnabled && (
+                            <Editing
+                                skillPropsState={skillPropsState}
+                                handleDeleteSelectedNode={editingFunctions!.handleDeleteSelectedNode}
+                                checkToggleCompletionPermissions={checkToggleCompletionPermissions!}
+                            />
+                        )}
+                        {mode === "VIEWING" && (
+                            <Viewing
+                                selectedNode={selectedNode}
+                                selectedTree={selectedTree}
+                                functions={{ goToTreePage, goToSkillPage, goToEditTreePage }}
+                            />
+                        )}
+                    </Animated.View>
+                </KeyboardAvoidingView>
+            </Animated.View>
             {showSaveChangesBtn && <SaveChangesButton height={height} saveChanges={saveChanges} />}
         </Pressable>
     );
@@ -267,32 +236,10 @@ function getNodeMenuStyles(screenDimensions: ScreenDimentions) {
     const styles = StyleSheet.create({
         interactiveContainer: {
             backgroundColor: colors.darkGray,
-            borderRadius: 20,
-            paddingHorizontal: 10,
-            paddingTop: 30,
-            paddingBottom: 10,
+            borderRadius: 10,
+            padding: 10,
             width: menuWidth,
             overflow: "hidden",
-        },
-        container: {
-            left: 0,
-            top: 10,
-            zIndex: 2,
-            position: "absolute",
-            height: menuHeight,
-            width,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-        },
-        dragLine: {
-            backgroundColor: `${colors.line}`,
-            width: 150,
-            height: 6,
-            top: 15,
-            left: (menuWidth - 150) / 2,
-            borderRadius: 10,
-            position: "absolute",
         },
     });
 
