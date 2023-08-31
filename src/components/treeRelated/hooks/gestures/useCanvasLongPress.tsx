@@ -37,7 +37,12 @@ function useCanvasLongPress({ config, nodeCoordinates, draggingNodeActions, long
     const [openMenuOnNode, { closeNodeMenu, openMenuOfNode }] = nodeMenuState;
     const { endDragging, startDragging } = draggingNodeActions;
 
-    const resetLongPressIndicator = () => setLongPressIndicatorPosition({ data: undefined, state: "IDLE" });
+    const resetLongPressIndicator = () =>
+        setLongPressIndicatorPosition((prev) => {
+            if (prev.data === undefined && prev.state === "IDLE") return prev;
+
+            return { data: undefined, state: "IDLE" };
+        });
 
     function handleSuccessfulLongPress(clickedNode: NodeCoordinate) {
         openMenuOfNode(clickedNode);
@@ -50,11 +55,8 @@ function useCanvasLongPress({ config, nodeCoordinates, draggingNodeActions, long
 
         function interruptLongPress() {
             return setLongPressIndicatorPosition((p) => {
-                const prevStateEqualToNewState = !p.data && p.state === "INTERRUPTED";
-
-                if (prevStateEqualToNewState) return p;
-
-                return { data: undefined, state: "INTERRUPTED" };
+                if (p.state === "PRESSING") return { data: undefined, state: "INTERRUPTED" };
+                return p;
             });
         }
     };
@@ -64,7 +66,8 @@ function useCanvasLongPress({ config, nodeCoordinates, draggingNodeActions, long
             if (blockLongPress) return;
 
             const clickedNode = nodeCoordinates.find(didTapCircle(e));
-            if (!clickedNode) return setLongPressIndicatorPosition({ data: undefined, state: "IDLE" });
+
+            if (!clickedNode) return resetLongPressIndicator();
 
             if (clickedNode !== undefined) startDragging();
 

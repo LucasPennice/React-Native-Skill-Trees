@@ -57,7 +57,6 @@ function useCanvasScroll(
     canvasDimentions: CanvasDimensions,
     screenDimensions: ScreenDimentions,
     foundNodeCoordinates: NodeCoordinate | undefined,
-    foundNodeOfMenu: NodeCoordinate | undefined,
     onScroll: () => void,
     draggingNode: { state: boolean; endDragging: () => void },
     sharedValues: {

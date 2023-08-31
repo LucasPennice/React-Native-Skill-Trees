@@ -202,9 +202,6 @@ function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsM
     const canvasPressAndLongPress = Gesture.Exclusive(canvasLongPress, canvasTap);
 
     const foundNodeOfMenu = openMenuOnNode ? treeState.treeCoordinate.nodeCoordinates.find((c) => c.nodeId === openMenuOnNode.nodeId) : undefined;
-    const foundNodeOfMenuWithoutData = openMenuOnNode
-        ? treeState.treeCoordinate.nodeCoordinates.find((c) => c.nodeId === openMenuOnNode.nodeId)
-        : undefined;
 
     const offsetX = useSharedValue(0);
     const offsetY = useSharedValue(0);
@@ -214,7 +211,6 @@ function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsM
         treeState.treeCoordinate.canvasDimensions,
         screenDimensions,
         selectedNodeCoordinates,
-        foundNodeOfMenuWithoutData,
         runOnScroll,
         { state: draggingNode, endDragging },
         { offsetX, offsetY, scale }
