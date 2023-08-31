@@ -1,27 +1,19 @@
 import { Gesture, GestureStateChangeEvent, LongPressGestureHandlerEventPayload } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
-import { NodeCoordinate, GestureHandlerState } from "../../../../types";
+import { GestureHandlerState, NodeAction, NodeCoordinate } from "../../../../types";
 import { NODE_MENU_SIZE } from "../../nodeMenu/NodeMenu";
 import { didTapCircle } from "./functions";
 import { MAX_TAP_DURATION, MIN_DURATION_LONG_PRESS_MS } from "./params";
 
 type Props = {
     nodeCoordinates: NodeCoordinate[];
-    longPressState: [
+    nodeActionState: readonly [
+        NodeAction,
         {
-            data: NodeCoordinate | undefined;
-            state: "INTERRUPTED" | "PRESSING" | "IDLE";
-        },
-        React.Dispatch<
-            React.SetStateAction<{
-                data: NodeCoordinate | undefined;
-                state: "INTERRUPTED" | "PRESSING" | "IDLE";
-            }>
-        >
-    ];
-    nodeMenuState: readonly [
-        NodeCoordinate | undefined,
-        { readonly closeNodeMenu: () => void; readonly openMenuOfNode: (clickedNode: NodeCoordinate) => void }
+            readonly resetNodeAction: () => void;
+            readonly beginLongPress: (node: NodeCoordinate) => void;
+            readonly openMenuAfterLongPress: () => void;
+        }
     ];
     config: {
         blockLongPress?: boolean;
@@ -30,36 +22,14 @@ type Props = {
     draggingNodeActions: { readonly endDragging: () => void; readonly startDragging: () => void };
 };
 
-function useCanvasLongPress({ config, nodeCoordinates, draggingNodeActions, longPressState, nodeMenuState }: Props) {
+function useCanvasLongPress({ config, nodeCoordinates, draggingNodeActions, nodeActionState }: Props) {
     const { blockLongPress, blockDragAndDrop } = config;
 
-    const [longPressIndicatorPosition, setLongPressIndicatorPosition] = longPressState;
-    const [openMenuOnNode, { closeNodeMenu, openMenuOfNode }] = nodeMenuState;
+    const [nodeAction, { beginLongPress, openMenuAfterLongPress, resetNodeAction }] = nodeActionState;
+
     const { endDragging, startDragging } = draggingNodeActions;
 
-    const resetLongPressIndicator = () =>
-        setLongPressIndicatorPosition((prev) => {
-            if (prev.data === undefined && prev.state === "IDLE") return prev;
-
-            return { data: undefined, state: "IDLE" };
-        });
-
-    function handleSuccessfulLongPress(clickedNode: NodeCoordinate) {
-        openMenuOfNode(clickedNode);
-        return resetLongPressIndicator();
-    }
-
-    const runOnScroll = () => {
-        closeNodeMenu();
-        interruptLongPress();
-
-        function interruptLongPress() {
-            return setLongPressIndicatorPosition((p) => {
-                if (p.state === "PRESSING") return { data: undefined, state: "INTERRUPTED" };
-                return p;
-            });
-        }
-    };
+    const runOnScroll = resetNodeAction;
 
     const longPressGesture = {
         handleOnStart: (e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>) => {
@@ -67,39 +37,34 @@ function useCanvasLongPress({ config, nodeCoordinates, draggingNodeActions, long
 
             const clickedNode = nodeCoordinates.find(didTapCircle(e));
 
-            if (!clickedNode) return resetLongPressIndicator();
+            if (!clickedNode) return;
 
-            if (clickedNode !== undefined) startDragging();
+            // if (clickedNode !== undefined) startDragging();
 
-            return setLongPressIndicatorPosition({ data: clickedNode, state: "PRESSING" });
+            return beginLongPress(clickedNode);
         },
         handleOnEnd: (e: GestureStateChangeEvent<LongPressGestureHandlerEventPayload>) => {
             if (blockLongPress) return;
 
             const correctDuration = e.duration >= MIN_DURATION_LONG_PRESS_MS;
 
-            if (!correctDuration) return;
+            if (!correctDuration) return resetNodeAction();
             const stateCode = e.state;
 
-            const gestureSuccessful = GestureHandlerState.END === stateCode && correctDuration;
+            const gestureSuccessful = GestureHandlerState.END === stateCode && correctDuration && nodeAction.state === "LongPressing";
 
-            const fingerMovedOutsideAllowedZone = GestureHandlerState.CANCELLED === stateCode;
+            // const fingerMovedOutsideAllowedZone = GestureHandlerState.CANCELLED === stateCode;
 
-            const longPressingNode = longPressIndicatorPosition.data !== undefined;
+            // const shouldDragAndDrop = !blockDragAndDrop && nodeAction.state ==="LongPressing" && fingerMovedOutsideAllowedZone && correctDuration;
 
-            const shouldDragAndDrop = !blockDragAndDrop && longPressingNode && fingerMovedOutsideAllowedZone && correctDuration;
+            // if (shouldDragAndDrop) return resetLongPressIndicator();
 
-            if (shouldDragAndDrop) return resetLongPressIndicator();
+            // endDragging();
 
-            endDragging();
+            // if (!longPressIndicatorPosition.data) return resetLongPressIndicator();
+            if (gestureSuccessful) return openMenuAfterLongPress();
 
-            if (!longPressIndicatorPosition.data) return resetLongPressIndicator();
-
-            if (gestureSuccessful) return handleSuccessfulLongPress(longPressIndicatorPosition.data);
-
-            return setLongPressIndicatorPosition((p) => {
-                return { data: p.data, state: "INTERRUPTED" };
-            });
+            return resetNodeAction();
         },
     };
 
@@ -113,7 +78,7 @@ function useCanvasLongPress({ config, nodeCoordinates, draggingNodeActions, long
         .minDuration(MAX_TAP_DURATION)
         .maxDistance(NODE_MENU_SIZE / 2);
 
-    return { canvasLongPress, runOnScroll, openMenuOnNode, longPressIndicatorPosition, closeNodeMenu };
+    return { canvasLongPress, runOnScroll };
 }
 
 export default useCanvasLongPress;

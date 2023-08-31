@@ -183,7 +183,7 @@ function ArrowDownLeftTopRight({
 }
 
 function InnerCircle({ menuMode }: { menuMode: "NORMAL" | "SELECTING_NODE_POSITION" }) {
-    const scale = useSharedValue(0.1);
+    const scale = useSharedValue(0);
 
     useEffect(() => {
         if (menuMode === "NORMAL") {
@@ -195,10 +195,6 @@ function InnerCircle({ menuMode }: { menuMode: "NORMAL" | "SELECTING_NODE_POSITI
             scale.value = withSpring(0, { overshootClamping: true });
             return;
         }
-
-        return () => {
-            scale.value = 0.1;
-        };
     }, [menuMode]);
 
     const styles = useAnimatedStyle(() => {

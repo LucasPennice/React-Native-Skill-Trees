@@ -222,3 +222,5 @@ export type InteractiveTreeProps = {
     functions?: InteractiveTreeFunctions;
     renderOnSelectedNodeId?: JSX.Element;
 };
+
+export type NodeAction = { state: "Idle" | "LongPressing" | "MenuOpen"; node: NodeCoordinate | undefined };

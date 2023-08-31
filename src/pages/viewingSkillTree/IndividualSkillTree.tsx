@@ -24,7 +24,7 @@ import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySet
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
-import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeCoordinate, Skill, Tree } from "../../types";
+import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeAction, NodeCoordinate, Skill, Tree } from "../../types";
 import { SelectedNewNodePositionState, SelectedNodeCoordState } from "./IndividualSkillTreePage";
 
 type Props = {
@@ -161,16 +161,6 @@ function useDraggingNodeState() {
     return [draggingNode, { endDragging, startDragging }] as const;
 }
 
-function useNodeMenuState() {
-    const [openMenuOnNode, setOpenMenuOnNode] = useState<NodeCoordinate | undefined>(undefined);
-
-    const closeNodeMenu = () => setOpenMenuOnNode(undefined);
-
-    const openMenuOfNode = (clickedNode: NodeCoordinate) => setOpenMenuOnNode(clickedNode);
-
-    return [openMenuOnNode, { closeNodeMenu, openMenuOfNode }] as const;
-}
-
 function useGetNodeMenuFns(
     node: NodeCoordinate | undefined,
     tree: Tree<Skill>,
@@ -178,6 +168,27 @@ function useGetNodeMenuFns(
 ): NodeMenuFunctions {
     const editTreeFromNodeMenu = true;
     return returnNodeMenuFunctions(node, tree, editTreeFromNodeMenu, menuFunctions);
+}
+
+function useNodeActionState() {
+    const defaultNodeAction: NodeAction = { node: undefined, state: "Idle" };
+    const [nodeAction, setNodeAction] = useState<NodeAction>(defaultNodeAction);
+
+    const resetNodeAction = () =>
+        setNodeAction((prev) => {
+            if (prev.state === defaultNodeAction.state && prev.node === defaultNodeAction.node) return prev;
+
+            return defaultNodeAction;
+        });
+    const beginLongPress = (node: NodeCoordinate) => setNodeAction({ node, state: "LongPressing" });
+    const openMenuAfterLongPress = () =>
+        setNodeAction((prev) => {
+            if (prev.node === undefined) return defaultNodeAction;
+
+            return { node: prev.node, state: "MenuOpen" };
+        });
+
+    return [nodeAction, { resetNodeAction, beginLongPress, openMenuAfterLongPress }] as const;
 }
 
 function useSkiaFonts() {
@@ -215,27 +226,19 @@ function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: 
 
     const selectedNodeCoordinates = treeState.treeCoordinate.nodeCoordinates.find((c) => c.nodeId === selectedNodeCoord?.node?.nodeId ?? null);
 
-    //Gesture Props 👇
-    const nodeMenuState = useNodeMenuState();
-    const [openMenuOnNode, { closeNodeMenu }] = nodeMenuState;
-
-    const longPressState = useState<{ data: NodeCoordinate | undefined; state: "INTERRUPTED" | "PRESSING" | "IDLE" }>({
-        data: undefined,
-        state: "IDLE",
-    });
-    const [longPressIndicatorPosition] = longPressState;
+    const nodeActionState = useNodeActionState();
+    const [nodeAction, { resetNodeAction }] = nodeActionState;
 
     const canvasLongPressProps = {
-        config: { blockDragAndDrop: false, blockLongPress: false },
+        config: { blockDragAndDrop: false, blockLongPress: selectedNodeCoord !== null },
         nodeCoordinates: treeState.treeCoordinate.nodeCoordinates,
-        longPressState,
-        nodeMenuState,
+        nodeActionState,
         draggingNodeActions,
     };
 
     const canvasTapProps: CanvasTapProps = {
         functions: {
-            runOnTap: closeNodeMenu,
+            runOnTap: resetNodeAction,
             onNodeClick: treeFunctions.onNodeClick,
             clearSelectedNodeCoord,
             onDndZoneClick: treeFunctions.onDndZoneClick,
@@ -253,8 +256,6 @@ function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: 
     const canvasTap = useCanvasTap(canvasTapProps);
 
     const canvasPressAndLongPress = Gesture.Exclusive(canvasLongPress, canvasTap);
-
-    const foundNodeOfMenu = openMenuOnNode ? treeState.treeCoordinate.nodeCoordinates.find((c) => c.nodeId === openMenuOnNode.nodeId) : undefined;
 
     const offsetX = useSharedValue(0);
     const offsetY = useSharedValue(0);
@@ -277,9 +278,7 @@ function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: 
 
     const canvasScrollAndZoom = Gesture.Simultaneous(canvasPan, canvasZoom);
 
-    const renderNodeMenu = foundNodeOfMenu && openMenuOnNode;
-
-    const nodeMenuFunctions = useGetNodeMenuFns(foundNodeOfMenu, tree, treeFunctions.nodeMenu);
+    const nodeMenuFunctions = useGetNodeMenuFns(nodeActionState[0].node, tree, treeFunctions.nodeMenu);
 
     const canvasGestures = Gesture.Simultaneous(canvasScrollAndZoom, canvasPressAndLongPress);
 
@@ -307,12 +306,12 @@ function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: 
                         )}
                         {showNewNodePositions && <DragAndDropZones data={addNodePositions} selectedDndZone={selectedNewNodePosition} />}
                     </CanvasView>
-                    {/* Long press Node related 👇 */}
-                    <NodeLongPressIndicator data={longPressIndicatorPosition} scale={scaleState} />
-                    {renderNodeMenu && (
-                        <NodeMenu functions={nodeMenuFunctions} data={foundNodeOfMenu} scale={scaleState} closeNodeMenu={closeNodeMenu} />
+                    {/* Node Action Related 👇 */}
+                    {nodeAction.node && nodeAction.state === "LongPressing" && <NodeLongPressIndicator data={nodeAction.node} scale={scaleState} />}
+                    {nodeAction.node && nodeAction.state === "MenuOpen" && (
+                        <NodeMenu functions={nodeMenuFunctions} data={nodeAction.node} scale={scaleState} closeNodeMenu={resetNodeAction} />
                     )}
-                    {/* Long press Node related 👆 */}
+                    {/* Node Action Related 👆 */}
                 </Animated.View>
             </View>
         </>
