@@ -262,19 +262,6 @@ function DirectionMenu({ action, config, children, onHoverActions, actionZoneTra
 
     return (
         <GestureDetector gesture={Gesture.Race(drag, tap)}>
-            {/* <View
-                style={{
-                    backgroundColor: showBounds ? "#50D1587D" : undefined,
-                    borderRadius: circular ? horizontalSize : 0,
-                    width: 2 * horizontalSize,
-                    height: 2 * verticalSize,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    // position: "absolute",
-                    // left: position.x,
-                    // top: position.y,
-                    transform: [{ translateX: -horizontalSize / 2 }, { translateY: -verticalSize / 2 }],
-                }}> */}
             <View
                 style={{
                     backgroundColor: showBounds ? "#1982F97D" : undefined,
@@ -287,7 +274,6 @@ function DirectionMenu({ action, config, children, onHoverActions, actionZoneTra
                 }}>
                 <Animated.View style={translate}>{children}</Animated.View>
             </View>
-            {/* </View> */}
         </GestureDetector>
     );
 }
