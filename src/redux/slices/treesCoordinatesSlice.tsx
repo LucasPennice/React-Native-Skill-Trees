@@ -107,7 +107,7 @@ export const treeCoordinatesSlice = createSlice({
             function removeFromHomeTree() {}
         });
         builder.addCase(saveNewTree, (state, action) => {
-            console.log("hola?");
+            // console.log("hola?");
             const { screenDimensions, newTree } = action.payload;
 
             const {
@@ -122,10 +122,10 @@ export const treeCoordinatesSlice = createSlice({
             };
         });
         builder.addCase(updateUserTreeWithAppendedNode, (state, action) => {
-            console.log("metiste un nodo un arbol");
+            // console.log("metiste un nodo un arbol");
         });
         builder.addCase(updateUserTrees, (state, action) => {
-            console.log("actualizaste la informacion un arbol, no la cantidad o posicion de nodos");
+            // console.log("actualizaste la informacion un arbol, no la cantidad o posicion de nodos");
             const { screenDimensions, updatedTree } = action.payload;
 
             if (!updatedTree) return;
