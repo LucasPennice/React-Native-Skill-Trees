@@ -115,3 +115,10 @@ export function getWheelParams(progressColor: string, backgroundColor: string, s
 
     return result;
 }
+
+export function renderScaleForNodeActionMenu(scale: number) {
+    //Just to make sure I notice an invalid value
+    if (scale === 0) return 5;
+
+    return 1 / scale;
+}

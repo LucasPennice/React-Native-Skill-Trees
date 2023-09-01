@@ -15,7 +15,6 @@ import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu, { NodeMenuFunctions } from "../../components/treeRelated/nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "../../components/treeRelated/returnNodeMenuFunctions";
-import { handleTreeBuild } from "../../functions/coordinateSystem";
 import { findNodeById } from "../../functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, updateNodeAndTreeCompletion } from "../../functions/mutateTree";
 import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
@@ -26,6 +25,7 @@ import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeAction, NodeCoordinate, Skill, Tree } from "../../types";
 import { SelectedNewNodePositionState, SelectedNodeCoordState } from "./IndividualSkillTreePage";
+import { handleTreeBuild } from "../../components/treeRelated/treeCalculateCoordinates";
 
 type Props = {
     state: {

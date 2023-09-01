@@ -2,7 +2,7 @@ import { memo, useEffect } from "react";
 import { Platform } from "react-native";
 import Animated, { ZoomIn, ZoomOut, useAnimatedProps, withSequence, withTiming } from "react-native-reanimated";
 import { Svg, Circle as SvgCircle } from "react-native-svg";
-import { getWheelParams } from "../../../functions/misc";
+import { renderScaleForNodeActionMenu, getWheelParams } from "../../../functions/misc";
 import { colors } from "../../../parameters";
 import { NodeCoordinate } from "../../../types";
 import { MIN_DURATION_LONG_PRESS_MS } from "../hooks/useCanvasPressAndLongPress";
@@ -12,8 +12,8 @@ const indicatorSize = Platform.OS === "android" ? 143 : 150;
 
 function NodeLongPressIndicator({ data, scale }: { data: NodeCoordinate; scale: number }) {
     const animatedProps = useAnimatedProps(() => {
-        const adjustedScale = 1 / scale;
-        const updatedStrokeWidth = 16 * adjustedScale;
+        const renderScaleForNodeActionMenu = 1 / scale;
+        const updatedStrokeWidth = 16 * renderScaleForNodeActionMenu;
 
         return {
             strokeWidth: withSequence(withTiming(0, { duration: 0 }), withTiming(updatedStrokeWidth, { duration: MIN_DURATION_LONG_PRESS_MS })),
@@ -21,10 +21,10 @@ function NodeLongPressIndicator({ data, scale }: { data: NodeCoordinate; scale: 
     });
 
     useEffect(() => {
-        console.log(scale, adjustedScale(scale));
+        console.log(scale, renderScaleForNodeActionMenu(scale));
     }, [scale]);
 
-    const updatedScale = adjustedScale(scale);
+    const updatedScale = renderScaleForNodeActionMenu(scale);
     const updatedSize = indicatorSize * updatedScale;
     const updatedStrokeWidth = 16 * updatedScale;
 
@@ -55,10 +55,3 @@ function NodeLongPressIndicator({ data, scale }: { data: NodeCoordinate; scale: 
 }
 
 export default memo(NodeLongPressIndicator);
-
-export function adjustedScale(scale: number) {
-    //Just to make sure I notice an invalid value
-    if (scale === 0) return 5;
-
-    return 1 / scale;
-}

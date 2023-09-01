@@ -10,7 +10,7 @@ import {
     PARENT_DND_ZONE_DIMENTIONS,
 } from "../../parameters";
 import { ScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
-import { CanvasDimensions, CartesianCoordinate, NodeCoordinate, DnDZone, Skill, Tree } from "../../types";
+import { CanvasDimensions, CartesianCoordinate, NodeCoordinate, DnDZone, Skill, Tree, InteractiveTreeConfig } from "../../types";
 
 export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): NodeCoordinate[] {
     if (!currentTree) return [];
@@ -250,4 +250,18 @@ export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDim
             y: c.y + distanceToCenterRootNodeVertically,
         } as NodeCoordinate;
     });
+}
+
+export function handleTreeBuild(
+    tree: Tree<Skill>,
+    screenDimentions: ScreenDimentions,
+    renderStyle: InteractiveTreeConfig["renderStyle"],
+    showDepthGuides?: boolean
+) {
+    const coordinatesWithTreeData = getNodesCoordinates(tree, renderStyle);
+    const canvasDimentions = getCanvasDimensions(coordinatesWithTreeData, screenDimentions, showDepthGuides);
+    const nodeCoordinatesCentered = centerNodesInCanvas(coordinatesWithTreeData, canvasDimentions);
+    const dndZoneCoordinates = calculateDragAndDropZones(nodeCoordinatesCentered);
+
+    return { nodeCoordinatesCentered, dndZoneCoordinates, canvasDimentions };
 }

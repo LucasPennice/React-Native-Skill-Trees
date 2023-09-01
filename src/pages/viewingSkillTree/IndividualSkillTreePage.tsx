@@ -9,7 +9,6 @@ import ShareTree from "../../components/ShareTree";
 import ShareTreeScreenshot from "../../components/takingScreenshot/ShareTreeScreenshot";
 import CanvasSettingsModal from "../../components/treeRelated/canvasSettingsModal/CanvasSettingsModal";
 import { IsSharingAvailableContext } from "../../context";
-import { handleTreeBuild } from "../../functions/coordinateSystem";
 import { findNodeById, treeCompletedSkillPercentage } from "../../functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, insertNodesBasedOnDnDZone, updateNodeAndTreeCompletion } from "../../functions/mutateTree";
 import { colors } from "../../parameters";
@@ -28,6 +27,7 @@ import SelectedNodeMenu, {
     SelectedNodeMenuMutateFunctions,
     SelectedNodeMenuState,
 } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
+import { handleTreeBuild } from "../../components/treeRelated/treeCalculateCoordinates";
 
 export type ModalState =
     | "TAKING_SCREENSHOT"

@@ -1,11 +1,11 @@
 import { AnyAction, PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { handleTreeBuild } from "../../functions/coordinateSystem";
 import { CanvasDimensions, NodeCoordinate, DnDZone, Skill, Tree } from "../../types";
 import type { RootState } from "../reduxStore";
 import { saveNewTree, removeUserTree, updateUserTreeWithAppendedNode, updateUserTrees } from "./userTreesSlice";
 import { ScreenDimentions } from "./screenDimentionsSlice";
 import { CanvasDisplaySettings } from "./canvasDisplaySettingsSlice";
 import { buildHomepageTree } from "../../functions/treeToRadialCoordinates/general";
+import { handleTreeBuild } from "../../components/treeRelated/treeCalculateCoordinates";
 
 const DEFAULT_HOME_TREE: TreeCoordinateData = {
     addNodePositions: [],

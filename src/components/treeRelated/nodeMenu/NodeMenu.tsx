@@ -21,8 +21,8 @@ import { colors } from "../../../parameters";
 import { NodeCoordinate } from "../../../types";
 import AppText from "../../AppText";
 import DirectionMenu, { Config } from "../../DirectionMenu";
-import { adjustedScale } from "../general/NodeLongPressIndicator";
 import useWrapNodeMenuFunctions from "./useWrapNodeMenuFunctions";
+import { renderScaleForNodeActionMenu } from "../../../functions/misc";
 
 export const NODE_MENU_SIZE = 150;
 
@@ -87,8 +87,8 @@ function NodeMenu({
     return (
         <Animated.View
             entering={FadeIn.duration(250)}
-            exiting={exitOpacityScale(adjustedScale(scale))}
-            style={{ position: "absolute", top: position.y, left: position.x, transform: [{ scale: adjustedScale(scale) }] }}>
+            exiting={exitOpacityScale(renderScaleForNodeActionMenu(scale))}
+            style={{ position: "absolute", top: position.y, left: position.x, transform: [{ scale: renderScaleForNodeActionMenu(scale) }] }}>
             <Animated.View
                 style={[
                     styles,

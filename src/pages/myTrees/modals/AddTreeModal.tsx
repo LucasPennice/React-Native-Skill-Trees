@@ -17,7 +17,7 @@ import {
     getCoordinatedWithTreeData,
     getNodesCoordinates,
     removeTreeDataFromCoordinate,
-} from "../../../components/treeRelated/coordinateFunctions";
+} from "../../../components/treeRelated/treeCalculateCoordinates";
 import HierarchicalSkillTree from "../../../components/treeRelated/hierarchical/HierarchicalSkillTree";
 import useHandleCanvasScroll from "../../../components/treeRelated/hooks/useHandleCanvasScrollAndZoom";
 import { createTree } from "../../../functions/misc";
