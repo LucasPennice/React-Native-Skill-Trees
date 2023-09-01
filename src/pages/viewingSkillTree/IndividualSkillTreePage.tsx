@@ -418,7 +418,7 @@ function IndividualSkillTreeWithSelectedTree({ navigation, route, selectedTree, 
                 takingScreenshotState={takingScreenshotState}
                 tree={selectedTree}
             />
-            <ShareTree tree={selectedTree} show={modalState === "IDLE"} />
+            {/* <ShareTree tree={selectedTree} show={modalState === "IDLE"} /> */}
 
             <OpenSettingsMenu show={modalState === "IDLE"} openModal={() => dispatchModalState("openEditCanvasSettings")} />
 
