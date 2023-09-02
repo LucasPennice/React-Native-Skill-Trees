@@ -3,7 +3,7 @@
         "name": "Skill Trees",
         "slug": "SkillTrees",
         "scheme": "skillTree",
-        "version": "1.0.53",
+        "version": "1.0.54",
         "orientation": "portrait",
         "icon": "./assets/icon.png",
         "userInterfaceStyle": "light",
@@ -32,7 +32,7 @@
                 "android.permission.WRITE_EXTERNAL_STORAGE",
                 "android.permission.ACCESS_MEDIA_LOCATION"
             ],
-            "versionCode": 9,
+            "versionCode": 10,
             "package": "com.lucaspennice.skilltrees"
         },
         "web": {

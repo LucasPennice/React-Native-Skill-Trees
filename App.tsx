@@ -156,7 +156,8 @@ function AppWithReduxContext() {
                     <Stack.Screen key={screen.route} name={screen.route} component={screen.component} options={screen.options} />
                 ))}
             </Stack.Navigator>
-            {!isKeyboardOpen && <NavigationBar data={APP_ROUTES} />}
+            <NavigationBar data={APP_ROUTES} />
+            {/* {!isKeyboardOpen && <NavigationBar data={APP_ROUTES} />} */}
         </View>
     );
 }
