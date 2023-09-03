@@ -1,16 +1,15 @@
-import { useRoute } from "@react-navigation/native";
+import { usePathname } from "expo-router";
 import { Linking, ScrollView, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { RouteName } from "../../../../App";
 import { countCompletedSkillNodes, countSkillNodes, treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
-import { LogCard } from "../../../pages/skillPage/DisplayDetails/Logs";
-import { MotivesToLearnCard } from "../../../pages/skillPage/DisplayDetails/MotivesToLearn";
-import { ResourceCard } from "../../../pages/skillPage/DisplayDetails/SkillResources";
-import { MilestoneCard } from "../../../pages/skillPage/Milestones";
-import { centerFlex, colors } from "../../../parameters";
-import { Skill, Tree } from "../../../types";
-import AppText from "../../AppText";
-import GoToPageButton from "../../GoToPageButton";
+import { LogCard } from "@/pages/skillPage/DisplayDetails/Logs";
+import { MotivesToLearnCard } from "@/pages/skillPage/DisplayDetails/MotivesToLearn";
+import { ResourceCard } from "@/pages/skillPage/DisplayDetails/SkillResources";
+import { MilestoneCard } from "@/pages/skillPage/Milestones";
+import { centerFlex, colors } from "@/parameters";
+import { Skill, Tree } from "@/types";
+import AppText from "@/components/AppText";
+import GoToPageButton from "@/components/GoToPageButton";
 
 function Viewing({
     functions,
@@ -21,11 +20,9 @@ function Viewing({
     selectedNode: Tree<Skill>;
     selectedTree: Tree<Skill>;
 }) {
-    const route = useRoute();
+    const pathname = usePathname();
 
-    const treePageRoute: RouteName = "ViewingSkillTree";
-
-    const isNotOnTreePage = route.name !== treePageRoute;
+    const isNotOnTreePage = !pathname.includes("/myTrees");
 
     const { goToSkillPage, goToTreePage, goToEditTreePage } = functions;
 

@@ -4,8 +4,8 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import AppText from "../../components/AppText";
 import { centerFlex, colors } from "../../parameters";
 import { Skill, Tree } from "../../types";
-import { ModalState } from "./IndividualSkillTreePage";
 import useHandleStateIndicatorAnimations from "./useHandleStateIndicatorAnimations";
+import { ModalState } from "app/(tabs)/myTrees/[treeId]";
 
 type Props = {
     functions: {

@@ -24,7 +24,7 @@ import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsS
 import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeAction, NodeCoordinate, Skill, Tree } from "../../types";
-import { SelectedNewNodePositionState, SelectedNodeCoordState } from "./IndividualSkillTreePage";
+import { SelectedNewNodePositionState, SelectedNodeCoordState } from "app/(tabs)/myTrees/[treeId]";
 
 type Props = {
     state: {
