@@ -71,19 +71,19 @@ function Editing({
                 containerStyles={{ marginBottom: 10 }}
             />
 
-            <RadioInput
-                text="Complete"
-                state={[newSkillProps.isCompleted, handleUpdateSkillCompletion]}
-                onPress={handleUpdateSkillCompletion(!newSkillProps.isCompleted)}
-                style={{ marginBottom: 0 }}
-            />
-
             <AppTextInput
                 placeholder={"🧠"}
                 textStyle={{ fontFamily: "emojisMono", fontSize: 40 }}
                 textState={[icon, setIcon]}
                 pattern={new RegExp(/\p{Extended_Pictographic}/u)}
-                containerStyles={{ width: "100%", marginVertical: 10 }}
+                containerStyles={{ width: "100%", marginBottom: 10 }}
+            />
+
+            <RadioInput
+                text="Complete"
+                state={[newSkillProps.isCompleted, handleUpdateSkillCompletion]}
+                onPress={handleUpdateSkillCompletion(!newSkillProps.isCompleted)}
+                style={{ marginBottom: 10 }}
             />
 
             <TouchableOpacity style={[generalStyles.btn, { backgroundColor: "#282A2C", width: "100%" }]} onPress={handleDeleteSelectedNode}>

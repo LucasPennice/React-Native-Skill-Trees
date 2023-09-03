@@ -1,10 +1,8 @@
+import { SkiaDomView } from "@shopify/react-native-skia";
+import { MutableRefObject } from "react";
 import { Swipeable } from "react-native-gesture-handler";
 import { CanvasDisplaySettings } from "./redux/slices/canvasDisplaySettingsSlice";
 import { ScreenDimentions } from "./redux/slices/screenDimentionsSlice";
-import { MutableRefObject } from "react";
-import { SkiaDomView } from "@shopify/react-native-skia";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { StackNavigatorParams } from "../App";
 
 export type Milestone = {
     complete: boolean;
@@ -193,13 +191,10 @@ export type InteractiveNodeState = {
     canvasRef?: MutableRefObject<SkiaDomView | null>;
 };
 
-type NavigateFunction = NativeStackNavigationProp<StackNavigatorParams, keyof StackNavigatorParams, undefined>["navigate"];
-
 export type InteractiveTreeFunctions = {
     onNodeClick?: (node: NodeCoordinate) => void;
     onDndZoneClick?: (clickedZone?: DnDZone) => void;
     nodeMenu: {
-        navigate: NavigateFunction;
         openCanvasSettingsModal?: () => void;
         confirmDeleteTree: (treeId: string) => void;
         confirmDeleteNode: (tree: Tree<Skill>, node: Tree<Skill>) => void;

@@ -1,10 +1,9 @@
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
+import { router } from "expo-router";
 import { ReactNode, memo, useMemo, useState } from "react";
 import { Alert, View } from "react-native";
 import { Gesture, GestureDetector, SimultaneousGesture } from "react-native-gesture-handler";
 import Animated, { useSharedValue } from "react-native-reanimated";
-import { StackNavigatorParams } from "../../../App";
 import NodeLongPressIndicator from "../../components/treeRelated/general/NodeLongPressIndicator";
 import DragAndDropZones from "../../components/treeRelated/hierarchical/DragAndDropZones";
 import HierarchicalSkillTree from "../../components/treeRelated/hierarchical/HierarchicalSkillTree";
@@ -15,6 +14,7 @@ import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu, { NodeMenuFunctions } from "../../components/treeRelated/nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "../../components/treeRelated/returnNodeMenuFunctions";
+import { handleTreeBuild } from "../../components/treeRelated/treeCalculateCoordinates";
 import { findNodeById } from "../../functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, updateNodeAndTreeCompletion } from "../../functions/mutateTree";
 import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
@@ -25,7 +25,6 @@ import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeAction, NodeCoordinate, Skill, Tree } from "../../types";
 import { SelectedNewNodePositionState, SelectedNodeCoordState } from "./IndividualSkillTreePage";
-import { handleTreeBuild } from "../../components/treeRelated/treeCalculateCoordinates";
 
 type Props = {
     state: {
@@ -41,7 +40,6 @@ type Props = {
     };
     canvasRef: React.RefObject<SkiaDomView>;
     tree: Tree<Skill>;
-    navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>;
 };
 
 function useHomepageTreeState() {
@@ -52,7 +50,6 @@ function useHomepageTreeState() {
 }
 
 function useCreateTreeFunctions(
-    navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree", undefined>,
     addNodePositions: DnDZone[],
     functions: {
         openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void;
@@ -80,8 +77,6 @@ function useCreateTreeFunctions(
             return undefined;
         },
         nodeMenu: {
-            navigate: navigation.navigate,
-
             confirmDeleteTree: (treeId: string) => {
                 Alert.alert(
                     "Delete this tree?",
@@ -91,7 +86,7 @@ function useCreateTreeFunctions(
                         {
                             text: "Yes",
                             onPress: () => {
-                                navigation.navigate("MyTrees", {});
+                                router.push("/myTrees");
                                 dispatch(removeUserTree(treeId));
                             },
                             style: "destructive",
@@ -201,7 +196,7 @@ function useSkiaFonts() {
     return { labelFont, nodeLetterFont, emojiFont };
 }
 
-function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: Props) {
+function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
     const { openCanvasSettingsModal, openChildrenHoistSelector, openNewNodeModal } = functions;
     const { screenDimensions, canvasDisplaySettings } = useHomepageTreeState();
 
@@ -213,7 +208,7 @@ function IndividualSkillTree({ canvasRef, tree, navigation, functions, state }: 
 
     const treeState = useGetTreeState(canvasRef, selectedNodeCoord?.node ?? null, tree);
 
-    const treeFunctions = useCreateTreeFunctions(navigation, state.addNodePositions, {
+    const treeFunctions = useCreateTreeFunctions(state.addNodePositions, {
         openCanvasSettingsModal,
         openChildrenHoistSelector,
         openNewNodeModal,

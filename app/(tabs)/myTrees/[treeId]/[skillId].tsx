@@ -1,30 +1,53 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RoutesParams } from "@/../routes";
+import AppText from "@/components/AppText";
+import { findNodeById } from "@/functions/extractInformationFromTree";
+import { LogCard, LogHeader } from "@/pages/skillPage/DisplayDetails/Logs";
+import { MotivesToLearnCard, MotivesToLearnHeader } from "@/pages/skillPage/DisplayDetails/MotivesToLearn";
+import { ResourceCard, ResourceHeader } from "@/pages/skillPage/DisplayDetails/SkillResources";
+import { MilestoneCard, MilestoneHeader } from "@/pages/skillPage/Milestones";
+import UpdateLogsModal from "@/pages/skillPage/Modals/UpdateLogsModal";
+import UpdateMilestoneModal from "@/pages/skillPage/Modals/UpdateMilestoneModal";
+import UpdateMotivesToLearnModal from "@/pages/skillPage/Modals/UpdateMotivesToLearnModal";
+import UpdateResourcesModal from "@/pages/skillPage/Modals/UpdateResourcesModal";
+import RenderSkillDetails from "@/pages/skillPage/RenderSkillDetails";
+import { getDefaultFns } from "@/pages/skillPage/functions";
+import useSaveUpdatedSkillToAsyncStorage from "@/pages/skillPage/useUpdateTreeWithNewSkillDetails";
+import { colors } from "@/parameters";
+import { useAppSelector } from "@/redux/reduxHooks";
+import { selectUserTrees } from "@/redux/slices/userTreesSlice";
+import { Milestone, MotiveToLearn, ObjectWithId, Skill, SkillDetails, SkillLogs, SkillModal, SkillResource, Tree } from "@/types";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Linking, ScrollView } from "react-native";
-import { Swipeable } from "react-native-gesture-handler";
-import { StackNavigatorParams } from "../../../App";
-import AppText from "../../components/AppText";
-import { colors } from "../../parameters";
-import { Milestone, MotiveToLearn, ObjectWithId, Skill, SkillDetails, SkillLogs, SkillModal, SkillResource } from "../../types";
-import { LogCard, LogHeader } from "./DisplayDetails/Logs";
-import { MotivesToLearnCard, MotivesToLearnHeader } from "./DisplayDetails/MotivesToLearn";
-import { ResourceCard, ResourceHeader } from "./DisplayDetails/SkillResources";
-import { MilestoneCard, MilestoneHeader } from "./Milestones";
-import UpdateLogsModal from "./Modals/UpdateLogsModal";
-import UpdateMilestoneModal from "./Modals/UpdateMilestoneModal";
-import UpdateMotivesToLearnModal from "./Modals/UpdateMotivesToLearnModal";
-import UpdateResourcesModal from "./Modals/UpdateResourcesModal";
-import RenderSkillDetails from "./RenderSkillDetails";
-import { getDefaultFns } from "./functions";
-import useSaveUpdatedSkillToAsyncStorage from "./useUpdateTreeWithNewSkillDetails";
+import { Linking } from "react-native";
+import { ScrollView, Swipeable } from "react-native-gesture-handler";
 
-type Props = NativeStackScreenProps<StackNavigatorParams, "SkillPage">;
+function useGetCurrentSkill(treeId: string, nodeId: string) {
+    const userTrees = useAppSelector(selectUserTrees);
 
-function SkillPage({ route, navigation }: Props) {
-    const treeNode = route.params;
-    const { data: skill } = treeNode;
+    const userTree = userTrees.find((uT) => uT.treeId === treeId);
+
+    if (!userTree) throw new Error("userTree not found at useGetCurrentSkills");
+
+    const userSkill = findNodeById(userTree, nodeId);
+
+    if (!userSkill) throw new Error("userSkill not found at useGetCurrentSkill");
+
+    return userSkill;
+}
+
+function SkillDetailsPage() {
+    const localParams = useLocalSearchParams();
+    //@ts-ignore
+    const { treeId, skillId }: RoutesParams["myTrees_skillId"] = localParams;
+
+    const node = useGetCurrentSkill(treeId, skillId);
+
+    return <Foo node={node} />;
+}
+
+function Foo({ node }: { node: Tree<Skill> }) {
     //Local State
-    const [skillState, setSkillState] = useState<Skill>(skill);
+    const [skillState, setSkillState] = useState<Skill>(node.data);
     //Local State - Modal
     const [editMilestoneModal, setEditMilestoneModal] = useState<SkillModal<Milestone | undefined>>({ open: false, data: undefined, ref: null });
     const [editLogsModal, setEditLogsModal] = useState<SkillModal<SkillLogs | undefined>>({ open: false, data: undefined, ref: null });
@@ -35,7 +58,7 @@ function SkillPage({ route, navigation }: Props) {
     });
     const [editResourcesModal, setEditResourcesModal] = useState<SkillModal<SkillResource | undefined>>({ open: false, data: undefined, ref: null });
     //Hooks
-    const updateSkillDetails = useSaveUpdatedSkillToAsyncStorage(skillState, treeNode);
+    const updateSkillDetails = useSaveUpdatedSkillToAsyncStorage(skillState, node);
 
     const openModal =
         <T,>(setModalState: React.Dispatch<React.SetStateAction<SkillModal<T | undefined>>>, key: keyof SkillDetails) =>
@@ -195,4 +218,4 @@ function SkillPage({ route, navigation }: Props) {
     );
 }
 
-export default SkillPage;
+export default SkillDetailsPage;

@@ -3,6 +3,10 @@
         "name": "Skill Trees",
         "slug": "SkillTrees",
         "scheme": "skillTree",
+        "experiments": {
+            "typedRoutes": true,
+            "tsconfigPaths": true
+        },
         "version": "1.0.54",
         "orientation": "portrait",
         "icon": "./assets/icon.png",
@@ -54,7 +58,8 @@
                         "flipper": true
                     }
                 }
-            ]
+            ],
+            "expo-router"
         ],
         "extra": {
             "eas": {

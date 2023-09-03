@@ -2,6 +2,8 @@ import { Alert } from "react-native";
 import { checkIfCompletionIsAllowedForNode, checkIfUncompletionIsAllowedForNode, findNodeById } from "../../functions/extractInformationFromTree";
 import { NodeCoordinate, InteractiveTreeFunctions, Skill, Tree } from "../../types";
 import { NodeMenuFunctions } from "./nodeMenu/NodeMenu";
+import { router } from "expo-router";
+import { RoutesParams } from "routes";
 
 function returnNodeMenuFunctions(
     node: NodeCoordinate | undefined,
@@ -11,7 +13,7 @@ function returnNodeMenuFunctions(
 ) {
     if (!node || !functions) return { idle: {}, selectingPosition: {} };
 
-    const { confirmDeleteTree, navigate, openAddSkillModal, openCanvasSettingsModal, toggleCompletionOfSkill } = functions;
+    const { confirmDeleteTree, openAddSkillModal, openCanvasSettingsModal, toggleCompletionOfSkill } = functions;
 
     if (node.category === "SKILL") return menuFunctionsForSkillNode();
 
@@ -21,7 +23,7 @@ function returnNodeMenuFunctions(
 
     return {
         idle: {
-            horizontalRight: () => navigate("MyTrees", { openNewTreeModal: true }),
+            horizontalRight: () => router.push({ pathname: "/myTrees", params: { openNewTreeModal: true } }),
             horizontalLeft: openCanvasSettingsModal,
         },
         selectingPosition: {},
@@ -36,9 +38,21 @@ function returnNodeMenuFunctions(
 
         let result: NodeMenuFunctions = { idle: {}, selectingPosition: {} };
 
-        result.idle.verticalUp = () => functions?.navigate("ViewingSkillTree", { node: nodeInTree, selectedNodeMenuMode: "EDITING" });
+        result.idle.verticalUp = () => {
+            const params: RoutesParams["myTrees_treeId"] = { nodeId: nodeInTree.nodeId, treeId: nodeInTree.treeId, selectedNodeMenuMode: "EDITING" };
 
-        result.idle.horizontalLeft = () => functions?.navigate("ViewingSkillTree", { node: nodeInTree, selectedNodeMenuMode: "EDITING" });
+            router.push({ pathname: `/myTrees/${nodeInTree.treeId}`, params });
+        };
+
+        result.idle.horizontalLeft = () => {
+            const params: RoutesParams["myTrees_treeId"] = {
+                nodeId: nodeInTree.nodeId,
+                treeId: nodeInTree.treeId,
+                selectedNodeMenuMode: "EDITING",
+            };
+
+            router.push({ pathname: `/myTrees/${nodeInTree.treeId}`, params });
+        };
 
         result.selectingPosition = {
             verticalUp: () => openAddSkillModal("PARENT", nodeInTree),
@@ -47,7 +61,14 @@ function returnNodeMenuFunctions(
             horizontalRight: () => openAddSkillModal("RIGHT_BROTHER", nodeInTree),
         };
 
-        result.idle.verticalDown = () => functions?.navigate("ViewingSkillTree", { node: nodeInTree, selectedNodeMenuMode: "EDITING" });
+        result.idle.verticalDown = () => {
+            const params: RoutesParams["myTrees_treeId"] = {
+                nodeId: nodeInTree.nodeId,
+                treeId: nodeInTree.treeId,
+                selectedNodeMenuMode: "EDITING",
+            };
+            router.push({ pathname: `/myTrees/${nodeInTree.treeId}`, params });
+        };
 
         //👇 Add functions to edit nodes from the node menu
         if (editTreeFromNodeMenu) {
@@ -84,7 +105,10 @@ function returnNodeMenuFunctions(
         return {
             idle: {
                 verticalDown: () => confirmDeleteTree(node!.treeId),
-                horizontalLeft: () => navigate("MyTrees", { editingTreeId: node!.treeId }),
+                horizontalLeft: () => {
+                    const params: RoutesParams["myTrees"] = { editingTreeId: node!.treeId };
+                    router.push({ pathname: `/myTrees`, params });
+                },
             },
             selectingPosition: {
                 verticalDown: () => openAddSkillModal("CHILDREN", nodeInTree),

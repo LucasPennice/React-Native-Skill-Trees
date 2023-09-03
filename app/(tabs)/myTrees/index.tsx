@@ -1,51 +1,56 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import AppText from "@/components/AppText";
+import TreeCard from "@/pages/myTrees/TreeCard";
+import AddTreeModal from "@/pages/myTrees/modals/AddTreeModal";
+import EditTreeModal from "@/pages/myTrees/modals/EditTreeModal";
+import { colors } from "@/parameters";
+import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
+import { open } from "@/redux/slices/addTreeModalSlice";
+import { setTree } from "@/redux/slices/editTreeSlice";
+import { changeTree, selectUserTrees } from "@/redux/slices/userTreesSlice";
+import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect } from "react";
-import { Alert, ScrollView } from "react-native";
-import { StackNavigatorParams } from "../../../App";
-import AppText from "../../components/AppText";
-import { colors } from "../../parameters";
-import { open } from "../../redux/slices/addTreeModalSlice";
-import { setTree } from "../../redux/slices/editTreeSlice";
-import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { changeTree, selectUserTrees } from "../../redux/slices/userTreesSlice";
-import TreeCard from "./TreeCard";
-import AddTreeModal from "./modals/AddTreeModal";
-import EditTreeModal from "./modals/EditTreeModal";
+import { Alert } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import { RoutesParams } from "routes";
 
-type Props = NativeStackScreenProps<StackNavigatorParams, "MyTrees">;
-
-function MyTrees({ navigation, route }: Props) {
-    const { params } = route;
+function MyTrees() {
+    const localParams = useLocalSearchParams();
+    //@ts-ignore
+    const { openNewTreeModal, editingTreeId }: { openNewTreeModal?: boolean; editingTreeId?: string } = localParams;
     //Redux Related
     const userTrees = useAppSelector(selectUserTrees);
     const dispatch = useAppDispatch();
 
-    const openNewTreeModal = useCallback(() => {
-        if (params && params.openNewTreeModal) dispatch(open());
-        //eslint-disable-next-line
-    }, [params]);
+    const doOpenNewTreeModal = useCallback(() => {
+        if (openNewTreeModal) {
+            dispatch(open());
+            //@ts-ignore
+            router.setParams({ openNewTreeModal: undefined } as RoutesParams["myTrees"]);
+        }
+    }, []);
 
     const openEditModal = useCallback(() => {
-        if (params && params.editingTreeId) {
-            const treeToEdit = userTrees.find((userTree) => userTree.treeId === params.editingTreeId);
+        if (editingTreeId) {
+            const treeToEdit = userTrees.find((userTree) => userTree.treeId === editingTreeId);
 
             if (!treeToEdit) return Alert.alert("Could not find the tree");
 
             dispatch(setTree(treeToEdit));
+            //@ts-ignore
+            router.setParams({ editingTreeId: undefined } as RoutesParams["myTrees"]);
         }
-        //eslint-disable-next-line
-    }, [params]);
+    }, []);
 
     useEffect(() => {
-        openNewTreeModal();
-    }, [openNewTreeModal]);
+        doOpenNewTreeModal();
+    }, [doOpenNewTreeModal]);
     useEffect(() => {
         openEditModal();
     }, [openEditModal]);
 
     const factoryChangeTreeAndNavigateToViewingTree = (treeId: string) => () => {
         dispatch(changeTree(treeId));
-        navigation.navigate("ViewingSkillTree");
+        router.push(`/myTrees/${treeId}`);
     };
 
     return (
@@ -75,4 +80,3 @@ function MyTrees({ navigation, route }: Props) {
 }
 
 export default MyTrees;
-// export default memo(MyTrees);

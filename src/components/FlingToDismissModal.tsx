@@ -1,6 +1,6 @@
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import { createContext, useContext } from "react";
-import { Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, SafeAreaView, StatusBar, View } from "react-native";
+import { Dimensions, Modal, Platform, Pressable, SafeAreaView, StatusBar, View } from "react-native";
 import { Directions, Gesture, GestureDetector, gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { centerFlex, colors } from "../parameters";
@@ -133,9 +133,7 @@ function FlingToDismissModal({
             presentationStyle={Platform.OS === "android" ? "overFullScreen" : "formSheet"}>
             <StatusBar backgroundColor={colors.background} barStyle="light-content" />
             <PropsContext.Provider value={{ closeModal, children, leftHeaderButton }}>
-                <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "padding"} style={{ flex: 1 }}>
-                    <ModalWithGesturesEnabled />
-                </KeyboardAvoidingView>
+                <ModalWithGesturesEnabled />
             </PropsContext.Provider>
         </Modal>
     );

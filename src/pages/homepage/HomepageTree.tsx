@@ -1,10 +1,9 @@
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
+import { router } from "expo-router";
 import { ReactNode, memo, useEffect, useMemo, useState } from "react";
 import { Alert, View } from "react-native";
 import { Gesture, GestureDetector, SimultaneousGesture } from "react-native-gesture-handler";
 import Animated, { useSharedValue } from "react-native-reanimated";
-import { StackNavigatorParams } from "../../../App";
 import RadialTreeLevelCircles from "../../components/treeRelated/RadialTreeLevelCircles";
 import NodeLongPressIndicator from "../../components/treeRelated/general/NodeLongPressIndicator";
 import { DEFAULT_SCALE } from "../../components/treeRelated/hooks/gestures/params";
@@ -14,6 +13,7 @@ import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "../../components/treeRelated/returnNodeMenuFunctions";
+import { handleTreeBuild } from "../../components/treeRelated/treeCalculateCoordinates";
 import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
 import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
 import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
@@ -24,7 +24,7 @@ import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeAction, NodeCoordinate, SelectedNodeId, Skill, Tree } from "../../types";
 import RadialSkillTree from "./RadialSkillTree";
-import { handleTreeBuild } from "../../components/treeRelated/treeCalculateCoordinates";
+import { RoutesParams } from "routes";
 
 type Props = {
     selectedNodeCoordState: readonly [
@@ -36,7 +36,6 @@ type Props = {
     ];
     canvasRef: React.RefObject<SkiaDomView>;
     homepageTree: Tree<Skill>;
-    navigation: NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>;
     openCanvasSettingsModal: () => void;
 };
 
@@ -47,11 +46,7 @@ function useHomepageTreeState() {
     return { screenDimensions, canvasDisplaySettings };
 }
 
-function useCreateTreeFunctions(
-    updateSelectedNodeCoord: (value: NodeCoordinate) => void,
-    navigation: NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>,
-    openCanvasSettingsModal: () => void
-) {
+function useCreateTreeFunctions(updateSelectedNodeCoord: (value: NodeCoordinate) => void, openCanvasSettingsModal: () => void) {
     const dispatch = useAppDispatch();
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
@@ -61,7 +56,6 @@ function useCreateTreeFunctions(
             return;
         },
         nodeMenu: {
-            navigate: navigation.navigate,
             confirmDeleteTree: (treeId: string) => {
                 Alert.alert(
                     "Delete this tree?",
@@ -83,7 +77,8 @@ function useCreateTreeFunctions(
                 dispatch(updateUserTrees({ updatedTree, screenDimensions }));
             },
             openAddSkillModal: (addNewNodePosition: DnDZone["type"], node: Tree<Skill>) => {
-                navigation.navigate("ViewingSkillTree", { node, addNewNodePosition });
+                const params: RoutesParams["myTrees_treeId"] = { nodeId: node.nodeId, treeId: node.treeId, addNewNodePosition };
+                router.push({ pathname: `/myTrees/${node.treeId}`, params });
             },
             openCanvasSettingsModal,
         },
@@ -160,7 +155,7 @@ function useSkiaFonts() {
     return { labelFont, nodeLetterFont, emojiFont };
 }
 
-function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsModal, selectedNodeCoordState }: Props) {
+function HomepageTree({ canvasRef, homepageTree, openCanvasSettingsModal, selectedNodeCoordState }: Props) {
     const { screenDimensions, canvasDisplaySettings } = useHomepageTreeState();
 
     const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
@@ -169,7 +164,7 @@ function HomepageTree({ canvasRef, homepageTree, navigation, openCanvasSettingsM
 
     const treeState = useGetTreeState(canvasRef, selectedNodeCoord, homepageTree);
 
-    const treeFunctions = useCreateTreeFunctions(updateSelectedNodeCoord, navigation, openCanvasSettingsModal);
+    const treeFunctions = useCreateTreeFunctions(updateSelectedNodeCoord, openCanvasSettingsModal);
 
     const [draggingNode, draggingNodeActions] = useDraggingNodeState();
     const { endDragging } = draggingNodeActions;

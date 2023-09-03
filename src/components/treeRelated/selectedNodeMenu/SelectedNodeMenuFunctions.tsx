@@ -1,26 +1,21 @@
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { StackNavigatorParams } from "../../../../App";
+import { router } from "expo-router";
 import { deleteNodeWithNoChildren, updateNodeAndTreeCompletion } from "../../../functions/mutateTree";
 import { Skill, Tree } from "../../../types";
 
-function selectedNodeMenuQueryFns(
-    selectedNode: Tree<Skill> | undefined,
-    navigation: NativeStackNavigationProp<StackNavigatorParams, "ViewingSkillTree" | "Home", undefined>,
-    clearSelectedNode: () => void
-) {
+function selectedNodeMenuQueryFns(selectedNode: Tree<Skill> | undefined, clearSelectedNode: () => void) {
     return {
         closeMenu: clearSelectedNode,
         goToSkillPage: () => {
             if (!selectedNode) throw new Error("No selected node at goToSkillPage");
-            navigation.navigate("SkillPage", selectedNode);
+            router.push(`/myTrees/${selectedNode.treeId}/${selectedNode.nodeId}`);
         },
         goToTreePage: () => {
             if (!selectedNode) throw new Error("No selected node at goToTreePage");
-            navigation.navigate("ViewingSkillTree", { node: selectedNode });
+            router.push(`/myTrees/${selectedNode.treeId}`);
         },
         goToEditTreePage: () => {
             if (!selectedNode) throw new Error("No selected node at goToTreePage");
-            navigation.navigate("MyTrees", { editingTreeId: selectedNode.treeId });
+            router.push({ pathname: `/myTrees`, params: { editingTreeId: selectedNode.treeId } });
         },
     };
 }

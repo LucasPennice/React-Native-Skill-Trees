@@ -1,11 +1,13 @@
-import { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCanvasRef } from "@shopify/react-native-skia";
+import { useNavigation } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { StackNavigatorParams } from "../../../App";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import ShareTreeScreenshot from "../../components/takingScreenshot/ShareTreeScreenshot";
 import CanvasSettingsModal from "../../components/treeRelated/canvasSettingsModal/CanvasSettingsModal";
+import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
+import { selectedNodeMenuQueryFns } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenuFunctions";
+import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
 import { buildHomepageTree } from "../../functions/treeToRadialCoordinates/general";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
@@ -13,26 +15,10 @@ import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsS
 import { selectUserTrees } from "../../redux/slices/userTreesSlice";
 import { NodeCoordinate } from "../../types";
 import HomepageTree from "./HomepageTree";
-import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
-import { selectedNodeMenuQueryFns } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenuFunctions";
-import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
 
-type Props = {
-    n: NativeStackScreenProps<StackNavigatorParams, "Home">;
-};
+function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
+    const navigation = useNavigation();
 
-// function useHandleInitialTreeCoordinates(userTrees: Tree<Skill>[], screenDimensions: ScreenDimentions, canvasDisplaySettings: CanvasDisplaySettings) {
-//     const dispatch = useAppDispatch();
-
-//     useEffect(() => {
-//         dispatch(calculateHomeTreeCoordinatesInitially({ canvasDisplaySettings, screenDimensions, userTrees }));
-//     }, []);
-// }
-
-function useHandleNavigationListener(
-    navigation: NativeStackNavigationProp<StackNavigatorParams, "Home", undefined>,
-    clearSelectedNodeCoord: () => void
-) {
     useEffect(() => {
         navigation.addListener("state", (_) => clearSelectedNodeCoord());
         return () => {
@@ -76,11 +62,10 @@ function useCanvasSettingsState() {
     return [canvasSettings, { openCanvasSettingsModal, closeCanvasSettingsModal }] as const;
 }
 
-function HomepageContents({ n: { navigation } }: Props) {
+function HomepageContents() {
     const { canvasDisplaySettings, userTrees, screenDimensions } = useHomepageContentsState();
 
     const takingScreenShotState = useTakingScreenshotState();
-    // const [takingScreenshot, { openTakingScreenshotModal, closeTakingScreenshotModal }] = takingScreenShotState;
     const selectedNodeCoordState = useSelectedNodeCoordState();
     const [selectedNodeCoord, { clearSelectedNodeCoord }] = selectedNodeCoordState;
 
@@ -88,13 +73,13 @@ function HomepageContents({ n: { navigation } }: Props) {
 
     const homepageTree = useMemo(() => buildHomepageTree(userTrees, canvasDisplaySettings), [canvasDisplaySettings, userTrees]);
 
-    useHandleNavigationListener(navigation, clearSelectedNodeCoord);
+    useHandleNavigationListener(clearSelectedNodeCoord);
 
     const canvasRef = useCanvasRef();
 
     const selectedNode = findNodeByIdInHomeTree(homepageTree, selectedNodeCoord);
 
-    const selectedNodeQueryFns = selectedNodeMenuQueryFns(selectedNode, navigation, clearSelectedNodeCoord);
+    const selectedNodeQueryFns = selectedNodeMenuQueryFns(selectedNode, clearSelectedNodeCoord);
 
     const selectedNodeMenuState: SelectedNodeMenuState = {
         screenDimensions,
@@ -109,7 +94,6 @@ function HomepageContents({ n: { navigation } }: Props) {
                 selectedNodeCoordState={selectedNodeCoordState}
                 canvasRef={canvasRef}
                 homepageTree={homepageTree}
-                navigation={navigation}
                 openCanvasSettingsModal={openCanvasSettingsModal}
             />
             <ProgressIndicatorAndName tree={homepageTree} />
