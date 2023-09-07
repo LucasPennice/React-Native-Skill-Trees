@@ -29,6 +29,7 @@ function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
 
 function useHomepageContentsState() {
     const userTrees = useAppSelector(selectUserTrees);
+
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
 

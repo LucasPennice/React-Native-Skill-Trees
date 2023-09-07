@@ -1,5 +1,11 @@
 BE SURE TO INCREASE THE APP AND ANDROID RELEASE VERSION
 
+TO CREATE AN apk IN ADROID
+eas build --profile preview  --platform android
+
+To create a development build for android phone/emulator
+eas build --profile development --platform android
+
 CREATE A NEW ANDROID BUILD
 
 eas build --platform android

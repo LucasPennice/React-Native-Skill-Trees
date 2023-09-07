@@ -87,6 +87,18 @@ export function angleFromLeftToRightCounterClockWise(left: PolarCoordinate, righ
     return round8Decimals(result);
 }
 
+export function angleFromRightToLeftCounterClockWise(left: PolarCoordinate, right: PolarCoordinate) {
+    const isSameCoordinate = left.angleInRadians === right.angleInRadians && left.distanceToCenter === right.distanceToCenter;
+
+    if (isSameCoordinate) return 0;
+
+    let result = angleFromLeftToRightCounterClockWise(left, right);
+
+    result = 2 * Math.PI - result;
+
+    return result;
+}
+
 export function movePointParallelToVector(directionVector: CartesianCoordinate, distanceToMove: number, pointToMove: CartesianCoordinate) {
     const directionVectorModule = Math.sqrt(Math.pow(directionVector.x, 2) + Math.pow(directionVector.y, 2));
 

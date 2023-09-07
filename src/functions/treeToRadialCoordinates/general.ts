@@ -1,17 +1,12 @@
 import { HOMETREE_ROOT_ID } from "../../parameters";
 import { CanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
-import { NodeCoordinate, LevelOverflow, NodeCategory, Skill, Tree, getDefaultSkillValue } from "../../types";
+import { NodeCategory, NodeCoordinate, Skill, Tree, getDefaultSkillValue } from "../../types";
 import { round8Decimals } from "../coordinateSystem";
+import { mutateEveryTreeNode } from "../mutateTree";
 
 import { firstIteration } from "./firstInstance";
-import { checkForLevelOverflow } from "./levelOverflow";
-import {
-    DistanceToCenterPerLevel,
-    fixOverlapWithinSubTreesOfLevel1,
-    getDistanceToCenterPerLevel,
-    shiftSubTreeToFinalAngle,
-    updateDistanceToCenterPerLevel,
-} from "./overlap";
+import { radiusPerLevelToAvoidLevelOverflow } from "./levelOverflow";
+import { fixOverlapWithinSubTreesOfLevel1, shiftSubTreeToFinalAngle } from "./overlap";
 
 //☢️ The canvas has the positive y axis pointing downwards, this changes how calculations are to be made ☢️
 
@@ -19,24 +14,13 @@ export function PlotCircularTree(completeTree: Tree<Skill>) {
     //We invert the tree because the Skia canvas is mirrored vertically
     let result: Tree<Skill> = invertTree(completeTree);
 
-    let levelOverflow: LevelOverflow = undefined;
+    const distanceToCenterPerLevel = radiusPerLevelToAvoidLevelOverflow(completeTree);
 
-    let limiter = 0;
+    result = firstIteration(result, result, distanceToCenterPerLevel);
 
-    let distanceToCenterPerLevel: DistanceToCenterPerLevel = getDistanceToCenterPerLevel(completeTree);
-    do {
-        result = firstIteration(result, result, distanceToCenterPerLevel);
+    result = fixOverlapWithinSubTreesOfLevel1(result);
 
-        result = fixOverlapWithinSubTreesOfLevel1(result);
-
-        result = shiftSubTreeToFinalAngle(result);
-
-        levelOverflow = checkForLevelOverflow(result);
-
-        if (levelOverflow !== undefined) distanceToCenterPerLevel = updateDistanceToCenterPerLevel(distanceToCenterPerLevel, levelOverflow);
-
-        limiter++;
-    } while (levelOverflow && limiter < 1000);
+    result = shiftSubTreeToFinalAngle(result);
 
     let treeCoordinates: NodeCoordinate[] = [];
     radialTreeToCoordArray(result, treeCoordinates);
@@ -100,8 +84,18 @@ export function invertTree<T extends { children: T[] }>(rootNode: T) {
 export function buildHomepageTree(userTrees: Tree<Skill>[], canvasDisplaySettings: CanvasDisplaySettings) {
     const { homepageTreeColor, homepageTreeName, homepageTreeIcon } = canvasDisplaySettings;
 
-    const modifiedUserTrees = userTrees.map((tree) => {
+    const subTreesWithUpdatedRootAndParentId = userTrees.map((tree) => {
         return { ...tree, isRoot: false, parentId: HOMETREE_ROOT_ID };
+    });
+
+    const subTreesWithUpdatedLevel = subTreesWithUpdatedRootAndParentId.map((uT) => {
+        const result = mutateEveryTreeNode(uT, (node: Tree<Skill>) => {
+            return { ...node, level: node.level + 1 };
+        });
+
+        if (!result) throw new Error("buildHomepageTree undefined tree error");
+
+        return result;
     });
 
     const isEmoji = homepageTreeIcon !== "";
@@ -111,7 +105,7 @@ export function buildHomepageTree(userTrees: Tree<Skill>[], canvasDisplaySetting
         accentColor: homepageTreeColor,
         nodeId: HOMETREE_ROOT_ID,
         isRoot: true,
-        children: modifiedUserTrees,
+        children: subTreesWithUpdatedLevel,
         data: getDefaultSkillValue(homepageTreeName, false, { isEmoji, text }),
         level: 0,
         parentId: null,

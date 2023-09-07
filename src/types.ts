@@ -141,7 +141,6 @@ export type PolarContourByLevel = {
     };
     treeLevels: string[];
 };
-export type LevelOverflow = undefined | { overflow: number; level: number };
 
 export type SkillModal<T> = { open: boolean; data: T; ref: Swipeable | null };
 
