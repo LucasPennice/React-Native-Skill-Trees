@@ -1,109 +1,109 @@
+import { AnglePerLevelTable, OuterPolarContour, Skill, Tree, UpdateRadiusPerLevelTable } from "@/types";
+import { angleFromRightToLeftCounterClockWise, arcToAngleRadians, round8Decimals } from "../coordinateSystem";
+import { getSubTreesOuterContour } from "../extractInformationFromTree";
+import { DistanceToCenterPerLevel } from "./overlap";
 import { ALLOWED_NODE_SPACING } from "../../parameters";
-import { Skill, Tree } from "../../types";
-import { arcToAngleRadians } from "../coordinateSystem";
-import { DistanceToCenterPerLevel, getDistanceToCenterPerLevel } from "./overlap";
 
-//THIS VALUE OF PI SHOULD BE USE TO CHECK FOR OVERFLOW
-export const ROUNDED_2PI = 6.289;
+export function checkForLevelOverflow(treeInFinalPosition: Tree<Skill>, radiusPerLevelTable: DistanceToCenterPerLevel): UpdateRadiusPerLevelTable {
+    const subTrees = treeInFinalPosition.children;
 
-type LevelOverflow = { distanceToDisplace: number; level: number } | undefined;
+    let result: UpdateRadiusPerLevelTable = undefined;
 
-type NodeQtyPerLevel = { [key: number]: number };
+    if (!subTrees.length) return result;
 
-export function radiusPerLevelToAvoidLevelOverflow(treeInFinalPosition: Tree<Skill>) {
-    const nodesPerLevel = countNodesPerLevel(treeInFinalPosition);
-    let distanceToCenterPerLevel = getDistanceToCenterPerLevel(treeInFinalPosition);
+    const subTreesContour = getSubTreesOuterContour(subTrees);
 
-    let levelOverflow: LevelOverflow = undefined;
+    const angleSpanPerLevel = getAngleSpanPerLevel(subTreesContour, radiusPerLevelTable);
 
-    do {
-        levelOverflow = checkForLevelOverflow(nodesPerLevel, distanceToCenterPerLevel);
-        if (levelOverflow) {
-            distanceToCenterPerLevel = updateDistanceToCenterTable(distanceToCenterPerLevel, levelOverflow);
-        }
-    } while (levelOverflow !== undefined);
+    const angleSpans = Object.values(angleSpanPerLevel);
 
-    return distanceToCenterPerLevel;
+    const overflowAngle = angleSpans.find((span) => span > 2 * Math.PI);
 
-    function updateDistanceToCenterTable(distanceToCenterPerLevel: DistanceToCenterPerLevel, levelOverflow: LevelOverflow) {
-        if (!levelOverflow) throw new Error("levelOverflow undefined at updatedDistanceToCenterTable");
+    if (overflowAngle) {
+        const overflowLevel = angleSpans.findIndex((span) => span > 2 * Math.PI) + 1;
 
-        const result: DistanceToCenterPerLevel = { ...distanceToCenterPerLevel };
+        const distanceToDisplace = getDistanceToDisplace(overflowAngle, radiusPerLevelTable[overflowLevel]);
 
-        const levelsString = Object.keys(distanceToCenterPerLevel);
+        return { distanceToDisplace, level: overflowLevel };
+    }
+    return undefined;
 
-        for (const levelString of levelsString) {
-            const level = parseInt(levelString);
+    function getDistanceToDisplace(overflowAngle: number, levelRadius: number) {
+        if (overflowAngle < 2 * Math.PI) throw new Error("overflow angle less than 2pi at getDistanceToDisplace");
 
-            if (level >= levelOverflow.level) {
-                const timesToIncrease = level - levelOverflow.level + 1;
+        const test = overflowAngle + arcToAngleRadians(ALLOWED_NODE_SPACING, levelRadius);
 
-                result[level] = result[level] + levelOverflow.distanceToDisplace * timesToIncrease;
-            }
-        }
+        const excessAngle = test - 2 * Math.PI;
+
+        const percentageToIncrease = excessAngle / (2 * Math.PI);
+
+        const deltaRadius = percentageToIncrease * levelRadius;
+
+        const result = round8Decimals(deltaRadius);
 
         return result;
     }
-
-    function checkForLevelOverflow(nodesPerLevel: NodeQtyPerLevel, distanceToCenterPerLevel: DistanceToCenterPerLevel): LevelOverflow {
-        const levels = Object.keys(nodesPerLevel);
-
-        for (const levelString of levels) {
-            const level = parseInt(levelString);
-
-            const levelPerimeter = Math.PI * 2 * distanceToCenterPerLevel[level];
-
-            const averageArcLengthBetweenNodes = levelPerimeter / nodesPerLevel[level];
-
-            const averageAngleBetweenNodes = arcToAngleRadians(averageArcLengthBetweenNodes, distanceToCenterPerLevel[level]);
-
-            const minimumAngleBetweenNodes = arcToAngleRadians(ALLOWED_NODE_SPACING, distanceToCenterPerLevel[level]);
-
-            const overflowInLevel = averageAngleBetweenNodes < minimumAngleBetweenNodes;
-
-            if (overflowInLevel) {
-                const correctDistance = (ALLOWED_NODE_SPACING * nodesPerLevel[level]) / (2 * Math.PI);
-
-                const distanceToDisplace = correctDistance - distanceToCenterPerLevel[level];
-
-                return { distanceToDisplace, level };
-            }
-        }
-
-        return undefined;
-    }
 }
 
-function countNodesPerLevel(rootNode: Tree<Skill>): NodeQtyPerLevel {
-    let nodesPerLevel: { [key: number]: string[] } = {};
+function getAngleSpanPerLevel(subTreesOuterContours: OuterPolarContour[], radiusPerLevelTable: DistanceToCenterPerLevel) {
+    const result: AnglePerLevelTable = {};
 
-    nodeIdsPerLevel(rootNode, nodesPerLevel);
+    let maxLevel = 0;
 
-    const levels = Object.keys(nodesPerLevel);
+    for (let subTreeIdx = 0; subTreeIdx !== subTreesOuterContours.length; subTreeIdx++) {
+        const subTreeContour = subTreesOuterContours[subTreeIdx];
 
-    const result: NodeQtyPerLevel = {};
+        const subTreeDepth = subTreeContour.maxLevel;
 
-    levels.forEach((levelString) => {
-        const level = parseInt(levelString);
+        if (subTreeDepth > maxLevel) maxLevel = subTreeDepth;
 
-        result[level] = nodesPerLevel[level].length;
-    });
+        for (let level = 1; level !== subTreeDepth + 1; level++) {
+            const levelContour = subTreeContour.levelContours[level];
+
+            const levelAngleSpan = angleFromRightToLeftCounterClockWise(levelContour.leftNode, levelContour.rightNode);
+
+            const distanceToNextSubTreeNodeOfSameLevel = getDistanceToNodeOfSameLevelInNextSubTree(subTreesOuterContours, subTreeIdx, level);
+
+            if (!result[level]) {
+                result[level] = levelAngleSpan + distanceToNextSubTreeNodeOfSameLevel;
+            } else {
+                result[level] += levelAngleSpan + distanceToNextSubTreeNodeOfSameLevel;
+            }
+        }
+    }
+
+    const onlyOneSubTree = subTreesOuterContours.length === 1;
+
+    if (onlyOneSubTree) return result;
+
+    //Adding padding between the last node of the last subTree and the first node of the first subtree
+    //to avoid overlap between them when adjusting the radius per level table
+    for (let level = 1; level !== maxLevel + 1; level++) {
+        result[level] += arcToAngleRadians(ALLOWED_NODE_SPACING, radiusPerLevelTable[level]);
+    }
 
     return result;
 
-    function nodeIdsPerLevel(rootNode: Tree<Skill>, table: { [key: number]: string[] }) {
-        if (table[rootNode.level]) {
-            table[rootNode.level].push(rootNode.nodeId);
-        } else {
-            table[rootNode.level] = [rootNode.nodeId];
-        }
+    function getDistanceToNodeOfSameLevelInNextSubTree(subTreesOuterContours: OuterPolarContour[], currentSubTreeIdx: number, currentLevel: number) {
+        const isLastTree = currentSubTreeIdx === subTreesOuterContours.length - 1;
 
-        if (!rootNode.children.length) return undefined;
+        if (isLastTree) return 0;
 
-        for (let i = 0; i < rootNode.children.length; i++) {
-            nodeIdsPerLevel(rootNode.children[i], table);
-        }
+        const currentSubTreeContour = subTreesOuterContours[currentSubTreeIdx];
+        const currentSubTreeLevelContour = currentSubTreeContour.levelContours[currentLevel];
+        const currentContourLeftNodeOfLevel = currentSubTreeLevelContour.rightNode;
 
-        return undefined;
+        const nextSubTreeContour = subTreesOuterContours[currentSubTreeIdx + 1];
+
+        const nextTreeIsAtLeastCurrentLevelDeep = nextSubTreeContour.maxLevel >= currentLevel;
+
+        if (!nextTreeIsAtLeastCurrentLevelDeep) return 0;
+
+        const nextSubTreeLevelContour = nextSubTreeContour.levelContours[currentLevel];
+        const nextContourLeftNodeOfLevel = nextSubTreeLevelContour.leftNode;
+
+        const result = angleFromRightToLeftCounterClockWise(currentContourLeftNodeOfLevel, nextContourLeftNodeOfLevel);
+
+        return result;
     }
 }

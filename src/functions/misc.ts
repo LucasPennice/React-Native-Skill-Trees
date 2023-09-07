@@ -1,5 +1,6 @@
 import { colors } from "../parameters";
-import { ColorGradient, NodeCategory, Skill, Tree, getDefaultSkillValue } from "../types";
+import { ColorGradient, NodeCategory, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../types";
+import { DistanceToCenterPerLevel } from "./treeToRadialCoordinates/overlap";
 
 export function makeid(length: number) {
     let result = "";
@@ -121,4 +122,24 @@ export function renderScaleForNodeActionMenu(scale: number) {
     if (scale === 0) return 5;
 
     return 1 / scale;
+}
+
+export function updateRadiusPerLevelTable(distanceToCenterPerLevel: DistanceToCenterPerLevel, levelOverflow: UpdateRadiusPerLevelTable) {
+    if (!levelOverflow) throw new Error("levelOverflow undefined at updatedDistanceToCenterTable");
+
+    const result: DistanceToCenterPerLevel = { ...distanceToCenterPerLevel };
+
+    const levelsString = Object.keys(distanceToCenterPerLevel);
+
+    for (const levelString of levelsString) {
+        const level = parseInt(levelString);
+
+        if (level >= levelOverflow.level) {
+            const timesToIncrease = level - levelOverflow.level + 1;
+
+            result[level] = result[level] + levelOverflow.distanceToDisplace * timesToIncrease;
+        }
+    }
+
+    return result;
 }

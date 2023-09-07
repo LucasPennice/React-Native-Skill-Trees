@@ -1,3 +1,4 @@
+import { buildHomepageTree } from "@/functions/treeToRadialCoordinates/general";
 import { useCanvasRef } from "@shopify/react-native-skia";
 import { useNavigation } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -8,7 +9,6 @@ import CanvasSettingsModal from "../../components/treeRelated/canvasSettingsModa
 import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { selectedNodeMenuQueryFns } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenuFunctions";
 import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
-import { buildHomepageTree } from "../../functions/treeToRadialCoordinates/general";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";

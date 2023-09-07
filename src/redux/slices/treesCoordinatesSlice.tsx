@@ -5,7 +5,7 @@ import { saveNewTree, removeUserTree, updateUserTreeWithAppendedNode, updateUser
 import { ScreenDimentions } from "./screenDimentionsSlice";
 import { CanvasDisplaySettings } from "./canvasDisplaySettingsSlice";
 import { buildHomepageTree } from "../../functions/treeToRadialCoordinates/general";
-import { handleTreeBuild } from "../../components/treeRelated/treeCalculateCoordinates";
+import { handleTreeBuild } from "../../functions/treeCalculateCoordinates";
 
 const DEFAULT_HOME_TREE: TreeCoordinateData = {
     addNodePositions: [],

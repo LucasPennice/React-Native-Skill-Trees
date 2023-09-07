@@ -14,7 +14,7 @@ import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu, { NodeMenuFunctions } from "../../components/treeRelated/nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "../../components/treeRelated/returnNodeMenuFunctions";
-import { handleTreeBuild } from "../../components/treeRelated/treeCalculateCoordinates";
+import { handleTreeBuild } from "../../functions/treeCalculateCoordinates";
 import { findNodeById } from "../../functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, updateNodeAndTreeCompletion } from "../../functions/mutateTree";
 import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";

@@ -1,26 +1,45 @@
+import { CanvasDisplaySettings } from "@/redux/slices/canvasDisplaySettingsSlice";
 import { HOMETREE_ROOT_ID } from "../../parameters";
-import { CanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
-import { NodeCategory, NodeCoordinate, Skill, Tree, getDefaultSkillValue } from "../../types";
+import { NodeCategory, NodeCoordinate, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../../types";
 import { round8Decimals } from "../coordinateSystem";
+import { updateRadiusPerLevelTable } from "../misc";
 import { mutateEveryTreeNode } from "../mutateTree";
-
 import { firstIteration } from "./firstInstance";
-import { radiusPerLevelToAvoidLevelOverflow } from "./levelOverflow";
+import { radiusPerLevelToAvoidLevelOvercrowd } from "./levelOvercrowd";
+import { checkForLevelOverflow } from "./levelOverflow";
 import { fixOverlapWithinSubTreesOfLevel1, shiftSubTreeToFinalAngle } from "./overlap";
 
 //☢️ The canvas has the positive y axis pointing downwards, this changes how calculations are to be made ☢️
 
-export function PlotCircularTree(completeTree: Tree<Skill>) {
+//There are 2 cases of level overflow
+// 1 - The nodes are perfectly spaced and when adding a new node the average space is less than the minimum allowed space
+// So, we don't have space between nodes, this is level overcrowd
+// 2 - We do have the necessary space to add the new node, but the sibling subtree is taking that space, if we insert the tree without
+// Increasing the radius we will overlap the nodes, this is level overflow
+
+export function plotCircularTree(completeTree: Tree<Skill>) {
     //We invert the tree because the Skia canvas is mirrored vertically
     let result: Tree<Skill> = invertTree(completeTree);
 
-    const distanceToCenterPerLevel = radiusPerLevelToAvoidLevelOverflow(completeTree);
+    let limiter = 0;
 
-    result = firstIteration(result, result, distanceToCenterPerLevel);
+    let radiusPerLevelTable = radiusPerLevelToAvoidLevelOvercrowd(completeTree);
 
-    result = fixOverlapWithinSubTreesOfLevel1(result);
+    let levelOverflow: UpdateRadiusPerLevelTable = undefined;
 
-    result = shiftSubTreeToFinalAngle(result);
+    do {
+        result = firstIteration(result, result, radiusPerLevelTable);
+
+        result = fixOverlapWithinSubTreesOfLevel1(result);
+
+        result = shiftSubTreeToFinalAngle(result, radiusPerLevelTable);
+
+        levelOverflow = checkForLevelOverflow(result, radiusPerLevelTable);
+
+        if (levelOverflow) radiusPerLevelTable = updateRadiusPerLevelTable(radiusPerLevelTable, levelOverflow);
+
+        limiter++;
+    } while (levelOverflow && limiter !== 100);
 
     let treeCoordinates: NodeCoordinate[] = [];
     radialTreeToCoordArray(result, treeCoordinates);

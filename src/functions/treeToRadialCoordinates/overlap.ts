@@ -19,7 +19,7 @@ import {
 
 export type DistanceToCenterPerLevel = { [level: string]: number };
 
-export function shiftSubTreeToFinalAngle(tree: Tree<Skill>) {
+export function shiftSubTreeToFinalAngle(tree: Tree<Skill>, radiusPerLevelTable: DistanceToCenterPerLevel) {
     const subTrees = tree.children;
 
     if (!subTrees.length) return tree;
@@ -44,7 +44,7 @@ export function shiftSubTreeToFinalAngle(tree: Tree<Skill>) {
 
             const nextSubTreeContour = updatesSubTrees[idx + 1];
 
-            const overlap = checkForOverlapBetweenContours(rightContourOfTreeGraph, nextSubTreeContour);
+            const overlap = checkForOverlapBetweenContours(rightContourOfTreeGraph, nextSubTreeContour, radiusPerLevelTable);
 
             if (overlap) {
                 const treesToShift = getIdsFromNextToLastSubTrees(subTrees, idx + 1);
@@ -99,7 +99,11 @@ export function shiftSubTreeToFinalAngle(tree: Tree<Skill>) {
         return result;
     }
 
-    function checkForOverlapBetweenContours(currentSubTreeContour: OuterPolarContour, nextSubTreeContour: OuterPolarContour): PolarOverlapCheck {
+    function checkForOverlapBetweenContours(
+        currentSubTreeContour: OuterPolarContour,
+        nextSubTreeContour: OuterPolarContour,
+        radiusPerLevelTable: DistanceToCenterPerLevel
+    ): PolarOverlapCheck {
         let result: PolarOverlapCheck = undefined;
 
         const maxLevel = getLevelsOfShallowerTree();
@@ -117,12 +121,10 @@ export function shiftSubTreeToFinalAngle(tree: Tree<Skill>) {
 
             const levelContour = [...currentSubTreeLevelOuterContour, ...nextSubTreeLevelOuterContour];
 
-            const levelBiggestOverlap = getLevelBiggestOverlap(levelContour, level);
+            const levelBiggestOverlap = getLevelBiggestOverlap(levelContour, radiusPerLevelTable[level]);
 
             const updateBiggestTreeOverlap =
                 levelBiggestOverlap !== undefined && (result === undefined || levelBiggestOverlap.biggestOverlapAngle >= result.biggestOverlapAngle);
-
-            // console.log(level, levelBiggestOverlap);
 
             if (updateBiggestTreeOverlap) result = { ...levelBiggestOverlap };
         }
@@ -225,8 +227,6 @@ function checkForOverlap(tree: Tree<Skill>): PolarOverlapCheck {
 function getLevelBiggestOverlap(levelContour: PolarContour[], originalDistanceToCenter: number) {
     let result: PolarOverlapCheck = undefined;
 
-    const mockLevel = originalDistanceToCenter;
-
     for (let idx = 0; idx < levelContour.length; idx++) {
         const isOnLastContour = idx === levelContour.length - 1;
 
@@ -239,16 +239,6 @@ function getLevelBiggestOverlap(levelContour: PolarContour[], originalDistanceTo
         //I define two nodes perfectly overlapping as poor spacing and not overlap
         const overlapBetweenThisAndNextContour = checkForOverlapBetweenNodes(nextContour.leftNode, currentContour.rightNode);
         const poorSpacing = checkForPoorSpacing(nextContour.leftNode, currentContour.rightNode);
-
-        // if (mockLevel === 3) {
-        //     console.log(levelContour);
-        // }
-        // if (nextContour.leftNode.id === "uuCCxAdSWUkCeYggU5zvQWgs" && currentContour.rightNode.id === "08U707WLuhXJN2E4PyKvPOiD") {
-        //     const leftToRightAngle = angleFromLeftToRightCounterClockWise(nextContour.leftNode, currentContour.rightNode);
-        //     const rightToLeftAngle = 2 * Math.PI - leftToRightAngle;
-
-        //     console.log(leftToRightAngle, rightToLeftAngle);
-        // }
 
         if (overlapBetweenThisAndNextContour && (!result || overlapBetweenThisAndNextContour > result.biggestOverlapAngle)) {
             result = {

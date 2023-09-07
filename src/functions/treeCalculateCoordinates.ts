@@ -1,5 +1,5 @@
-import { PlotTreeReingoldTiltfordAlgorithm } from "../../functions/treeToHierarchical/general";
-import { PlotCircularTree } from "../../functions/treeToRadialCoordinates/general";
+import { PlotTreeReingoldTiltfordAlgorithm } from "./treeToHierarchical/general";
+import { plotCircularTree } from "./treeToRadialCoordinates/general";
 import {
     BROTHER_DND_ZONE_HEIGHT,
     CHILD_DND_ZONE_DIMENTIONS,
@@ -8,9 +8,9 @@ import {
     DISTANCE_BETWEEN_GENERATIONS,
     NAV_HEGIHT,
     PARENT_DND_ZONE_DIMENTIONS,
-} from "../../parameters";
-import { ScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
-import { CanvasDimensions, CartesianCoordinate, NodeCoordinate, DnDZone, Skill, Tree, InteractiveTreeConfig } from "../../types";
+} from "../parameters";
+import { ScreenDimentions } from "../redux/slices/screenDimentionsSlice";
+import { CanvasDimensions, CartesianCoordinate, NodeCoordinate, DnDZone, Skill, Tree, InteractiveTreeConfig } from "../types";
 
 export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): NodeCoordinate[] {
     if (!currentTree) return [];
@@ -22,9 +22,7 @@ export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: 
         unscaledCoordinates = PlotTreeReingoldTiltfordAlgorithm(currentTree);
         scaledCoordinates = scaleCoordinatesAfterReingoldTiltford(unscaledCoordinates);
     } else {
-        // console.log("🧠", JSON.stringify(currentTree));
-        unscaledCoordinates = PlotCircularTree(currentTree);
-        // console.log("😈", JSON.stringify(unscaledCoordinates));
+        unscaledCoordinates = plotCircularTree(currentTree);
         scaledCoordinates = scaleCoordinatesAfterRadialReingoldTiltford(unscaledCoordinates);
     }
 

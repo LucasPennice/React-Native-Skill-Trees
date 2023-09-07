@@ -218,3 +218,8 @@ export type InteractiveTreeProps = {
 };
 
 export type NodeAction = { state: "Idle" | "LongPressing" | "MenuOpen"; node: NodeCoordinate | undefined };
+
+export type NodeQtyPerLevel = { [key: number]: number };
+export type AnglePerLevelTable = { [key: number]: number };
+
+export type UpdateRadiusPerLevelTable = { distanceToDisplace: number; level: number } | undefined;

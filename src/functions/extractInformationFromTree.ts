@@ -1,5 +1,5 @@
 import { HOMETREE_ROOT_ID, UNCENTERED_ROOT_COORDINATES } from "../parameters";
-import { NodeCoordinate, OuterPolarContour, PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
+import { NodeCoordinate, NodeQtyPerLevel, OuterPolarContour, PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
 import { cartesianToPositivePolarCoordinates } from "./coordinateSystem";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
@@ -458,4 +458,38 @@ export function treeNodeToCoordinate(node: Tree<Skill>): NodeCoordinate {
     };
 
     return result;
+}
+
+export function countNodesPerLevel(rootNode: Tree<Skill>): NodeQtyPerLevel {
+    let nodesPerLevel: { [key: number]: string[] } = {};
+
+    nodeIdsPerLevel(rootNode, nodesPerLevel);
+
+    const levels = Object.keys(nodesPerLevel);
+
+    const result: NodeQtyPerLevel = {};
+
+    levels.forEach((levelString) => {
+        const level = parseInt(levelString);
+
+        result[level] = nodesPerLevel[level].length;
+    });
+
+    return result;
+
+    function nodeIdsPerLevel(rootNode: Tree<Skill>, table: { [key: number]: string[] }) {
+        if (table[rootNode.level]) {
+            table[rootNode.level].push(rootNode.nodeId);
+        } else {
+            table[rootNode.level] = [rootNode.nodeId];
+        }
+
+        if (!rootNode.children.length) return undefined;
+
+        for (let i = 0; i < rootNode.children.length; i++) {
+            nodeIdsPerLevel(rootNode.children[i], table);
+        }
+
+        return undefined;
+    }
 }

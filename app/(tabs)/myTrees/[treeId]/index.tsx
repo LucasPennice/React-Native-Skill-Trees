@@ -8,7 +8,7 @@ import SelectedNodeMenu, {
     SelectedNodeMenuMutateFunctions,
     SelectedNodeMenuState,
 } from "@/components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
-import { handleTreeBuild } from "@/components/treeRelated/treeCalculateCoordinates";
+import { handleTreeBuild } from "@/functions/treeCalculateCoordinates";
 import { IsSharingAvailableContext } from "@/context";
 import { findNodeById, treeCompletedSkillPercentage } from "@/functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, insertNodesBasedOnDnDZone, updateNodeAndTreeCompletion } from "@/functions/mutateTree";
