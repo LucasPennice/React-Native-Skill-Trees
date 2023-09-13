@@ -257,7 +257,7 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
     const scale = useSharedValue(DEFAULT_SCALE);
 
     const { canvasPan, dragDelta, scrollStyle } = useCanvasScroll(
-        treeState.treeCoordinate.canvasDimensions,
+        treeState.treeCoordinate,
         screenDimensions,
         selectedNodeCoordinates,
         runOnScroll,

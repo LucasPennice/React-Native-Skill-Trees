@@ -1,7 +1,17 @@
+import { TreeCoordinateData } from "@/redux/slices/treesCoordinatesSlice";
 import { useEffect } from "react";
 import { Gesture } from "react-native-gesture-handler";
-import { SharedValue, WithSpringConfig, runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
+import {
+    SharedValue,
+    WithSpringConfig,
+    runOnJS,
+    useAnimatedReaction,
+    useAnimatedStyle,
+    useDerivedValue,
+    useSharedValue,
+    withSpring,
+} from "react-native-reanimated";
+import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
 import { ScreenDimentions } from "../../../../redux/slices/screenDimentionsSlice";
 import { CanvasDimensions, CartesianCoordinate, NodeCoordinate } from "../../../../types";
 import { useHandleCanvasBounds } from "../useHandleCanvasBounds";
@@ -16,23 +26,61 @@ const AFTER_SCROLL_SPING_PARAMS: WithSpringConfig = {
     restSpeedThreshold: 2,
 };
 
-function useSyncStateToSharedValue<T>(state: T): SharedValue<T> {
-    const result = useSharedValue<T>(state);
+function useResetValuesOnCanvasBounds(
+    sharedValues: {
+        canvasBounds: {
+            minXBound: SharedValue<number>;
+            maxXBound: SharedValue<number>;
+            minYBound: SharedValue<number>;
+            maxYBound: SharedValue<number>;
+        };
+        offsetX: SharedValue<number>;
+        offsetY: SharedValue<number>;
+        shouldUpdateStartValue: SharedValue<boolean>;
+    },
+    canvasDimensions: CanvasDimensions,
+    screenDimensions: ScreenDimentions,
+    nodeCoordinates: NodeCoordinate[]
+) {
+    const { canvasBounds, offsetX, offsetY, shouldUpdateStartValue } = sharedValues;
+    const { maxXBound, maxYBound, minXBound, minYBound } = canvasBounds;
 
-    useAnimatedReaction(
-        () => state,
-        (updatedSharedValue: T) => {
-            result.value = updatedSharedValue;
-        }
-    );
+    const { canvasWidth } = canvasDimensions;
 
-    return result;
-}
+    const resetSharedValues = () => {
+        shouldUpdateStartValue.value = true;
 
-function useResetValuesOnCanvasDimensionUpdates(resetValues: () => void, canvasDimensions: CanvasDimensions) {
-    useEffect(() => {
-        resetValues();
-    }, [canvasDimensions]);
+        const rootNode = nodeCoordinates.find((n) => n.isRoot);
+
+        if (!rootNode) throw new Error("root node not found at resetSharedValues");
+
+        const alignCanvasLeftSideWithScreenLeftSide = (canvasWidth - screenDimensions.width) / 2;
+        const foundNodeTranslatedX =
+            alignCanvasLeftSideWithScreenLeftSide - rootNode.x + screenDimensions.width - screenDimensions.width / 2 + CIRCLE_SIZE / 2;
+
+        const deltaY = (screenDimensions.height - NAV_HEGIHT) / 2 - rootNode.y;
+        const foundNodeTranslatedY = deltaY;
+
+        const uninitilizedBounds = minYBound.value === maxYBound.value || minXBound.value === maxXBound.value;
+
+        const outOfBounds = checkIfScrollOutOfBounds({
+            offset: { x: foundNodeTranslatedX, y: offsetY.value },
+            bounds: { x: [minXBound.value, maxXBound.value], y: [minYBound.value, maxYBound.value] },
+        });
+
+        const { x: safeX, y: safeY } = returnSafeOffset({
+            offset: { x: foundNodeTranslatedX, y: offsetY.value },
+            outOfBounds,
+            bounds: { x: [minXBound.value, maxXBound.value], y: [minYBound.value, maxYBound.value] },
+        });
+
+        offsetX.value = uninitilizedBounds ? foundNodeTranslatedX : safeX;
+        offsetY.value = uninitilizedBounds ? foundNodeTranslatedY : safeY;
+    };
+
+    useDerivedValue(() => {
+        runOnJS(resetSharedValues)();
+    }, [minXBound, minYBound]);
 }
 
 function useUpdateStartValue(
@@ -54,7 +102,7 @@ function useUpdateStartValue(
 }
 
 function useCanvasScroll(
-    canvasDimentions: CanvasDimensions,
+    treeCoordinate: TreeCoordinateData,
     screenDimensions: ScreenDimentions,
     foundNodeCoordinates: NodeCoordinate | undefined,
     onScroll: () => void,
@@ -65,18 +113,14 @@ function useCanvasScroll(
         scale: SharedValue<number>;
     }
 ) {
+    const { nodeCoordinates, canvasDimensions } = treeCoordinate;
     const { offsetX, offsetY, scale } = sharedValues;
 
-    const resetSharedValues = () => {
-        shouldUpdateStartValue.value = true;
-        offsetX.value = 0;
-        offsetY.value = 0;
-    };
-
     const screenHeightWithNavAccounted = screenDimensions.height - NAV_HEGIHT;
-    const { canvasHeight, canvasWidth } = canvasDimentions;
+    const { canvasHeight, canvasWidth } = canvasDimensions;
 
     const start = useSharedValue<CartesianCoordinate>({ x: 0, y: 0 });
+
     //We don't want to update the start value while panning (normal scrolling, NOT the slide after the scrolling) because the offsetX is calculated
     //based on the start value, if we update it while panning it causes exponential growth in the offset variables
     const shouldUpdateStartValue = useSharedValue(false);
@@ -107,9 +151,11 @@ function useCanvasScroll(
         maxScale: MAX_SCALE,
     };
 
-    const { maxXBound, minXBound, maxYBound, minYBound } = useHandleCanvasBounds(boundsProps);
+    const canvasBounds = useHandleCanvasBounds(boundsProps);
+    const { maxXBound, minXBound, maxYBound, minYBound } = canvasBounds;
 
-    useResetValuesOnCanvasDimensionUpdates(resetSharedValues, canvasDimentions);
+    const arg = { canvasBounds, offsetX, offsetY, shouldUpdateStartValue };
+    useResetValuesOnCanvasBounds(arg, canvasDimensions, screenDimensions, nodeCoordinates);
 
     useUpdateStartValue(offsetX, offsetY, shouldUpdateStartValue, start);
 

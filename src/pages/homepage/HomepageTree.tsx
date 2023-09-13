@@ -4,6 +4,7 @@ import { ReactNode, memo, useEffect, useMemo, useState } from "react";
 import { Alert, View } from "react-native";
 import { Gesture, GestureDetector, SimultaneousGesture } from "react-native-gesture-handler";
 import Animated, { useSharedValue } from "react-native-reanimated";
+import { RoutesParams } from "routes";
 import RadialTreeLevelCircles from "../../components/treeRelated/RadialTreeLevelCircles";
 import NodeLongPressIndicator from "../../components/treeRelated/general/NodeLongPressIndicator";
 import { DEFAULT_SCALE } from "../../components/treeRelated/hooks/gestures/params";
@@ -13,9 +14,9 @@ import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "../../components/treeRelated/returnNodeMenuFunctions";
-import { handleTreeBuild } from "../../functions/treeCalculateCoordinates";
 import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
 import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
+import { handleTreeBuild } from "../../functions/treeCalculateCoordinates";
 import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
@@ -24,7 +25,6 @@ import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
 import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
 import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeAction, NodeCoordinate, SelectedNodeId, Skill, Tree } from "../../types";
 import RadialSkillTree from "./RadialSkillTree";
-import { RoutesParams } from "routes";
 
 type Props = {
     selectedNodeCoordState: readonly [
@@ -204,7 +204,7 @@ function HomepageTree({ canvasRef, homepageTree, openCanvasSettingsModal, select
     const scale = useSharedValue(DEFAULT_SCALE);
 
     const { canvasPan, dragDelta, scrollStyle } = useCanvasScroll(
-        treeState.treeCoordinate.canvasDimensions,
+        treeState.treeCoordinate,
         screenDimensions,
         selectedNodeCoordinates,
         runOnScroll,
