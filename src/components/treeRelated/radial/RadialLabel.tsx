@@ -2,6 +2,7 @@ import { Group, SkFont, Text } from "@shopify/react-native-skia";
 import { memo } from "react";
 import { CIRCLE_SIZE, RADIAL_LABEL_FONT_SIZE } from "../../../parameters";
 import { CartesianCoordinate } from "../../../types";
+import { getNodeLabelLines } from "../general/functions";
 
 type Props = { text: string; coord: CartesianCoordinate; rootCoord: CartesianCoordinate; labelFont: SkFont };
 
@@ -10,23 +11,15 @@ function RadialLabel({ coord, text, rootCoord, labelFont }: Props) {
 
     const { x, y } = coord;
 
-    const WORD_LENGTH_LIMIT = 7;
-    const WORD_QTY_LIMIT = 3;
-
-    let wordArr = text.split(" ").map((word) => {
-        if (word.length > WORD_LENGTH_LIMIT) return `${word.slice(0, WORD_LENGTH_LIMIT)}...`;
-        return word;
-    });
-
-    wordArr = wordArr.length > WORD_QTY_LIMIT ? [...wordArr.slice(0, WORD_QTY_LIMIT), "..."] : wordArr;
+    const lines = getNodeLabelLines(text.split(" "), labelFont);
 
     const distanceBetweenWords = 14;
     const horizontalPadding = 10;
     const verticalPadding = 5;
 
-    const textHeight = wordArr.length * RADIAL_LABEL_FONT_SIZE + (wordArr.length - 1) * (distanceBetweenWords - RADIAL_LABEL_FONT_SIZE);
+    const textHeight = lines.length * RADIAL_LABEL_FONT_SIZE + (lines.length - 1) * (distanceBetweenWords - RADIAL_LABEL_FONT_SIZE);
 
-    const rectangleDimentions = calculateRectangleDimentions(wordArr);
+    const rectangleDimentions = calculateRectangleDimentions(lines);
 
     const directionVector = { x: coord.x - rootCoord.x, y: coord.y - rootCoord.y };
     const possiblyNegativeAngleInRadians = Math.atan2(directionVector.y, directionVector.x);
@@ -34,10 +27,9 @@ function RadialLabel({ coord, text, rootCoord, labelFont }: Props) {
 
     return (
         <Group origin={{ x: x, y: y }} transform={[{ rotate: angleInRadians }]}>
-            {wordArr.map((word, idx) => {
+            {lines.map((word, idx) => {
                 const textX = x + CIRCLE_SIZE + horizontalPadding;
-                const textY =
-                    y - RADIAL_LABEL_FONT_SIZE / 4 - verticalPadding - 4 * wordArr.length + 3 * verticalPadding + idx * distanceBetweenWords;
+                const textY = y - RADIAL_LABEL_FONT_SIZE / 4 - verticalPadding - 4 * lines.length + 3 * verticalPadding + idx * distanceBetweenWords;
 
                 const rotatedTextX = textX - rectangleDimentions.width + 2 * horizontalPadding - 2;
                 const rotatedTextY = textY + verticalPadding + 3;
