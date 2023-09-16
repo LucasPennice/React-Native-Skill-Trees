@@ -93,17 +93,26 @@ function getAngleSpanPerLevel(subTreesOuterContours: OuterPolarContour[], radius
         const currentSubTreeLevelContour = currentSubTreeContour.levelContours[currentLevel];
         const currentContourLeftNodeOfLevel = currentSubTreeLevelContour.rightNode;
 
-        const nextSubTreeContour = subTreesOuterContours[currentSubTreeIdx + 1];
+        const nextSubTreeLevelContour = getNextPolarContourOfLevel(subTreesOuterContours, currentSubTreeIdx, currentLevel);
 
-        const nextTreeIsAtLeastCurrentLevelDeep = nextSubTreeContour.maxLevel >= currentLevel;
+        if (!nextSubTreeLevelContour) return 0;
 
-        if (!nextTreeIsAtLeastCurrentLevelDeep) return 0;
-
-        const nextSubTreeLevelContour = nextSubTreeContour.levelContours[currentLevel];
         const nextContourLeftNodeOfLevel = nextSubTreeLevelContour.leftNode;
 
         const result = angleFromRightToLeftCounterClockWise(currentContourLeftNodeOfLevel, nextContourLeftNodeOfLevel);
 
         return result;
+
+        function getNextPolarContourOfLevel(subTreesOuterContours: OuterPolarContour[], currentSubTreeIdx: number, currentLevel: number) {
+            const qtyOfSubTrees = subTreesOuterContours.length;
+
+            for (let subTreeIdx = currentSubTreeIdx + 1; subTreeIdx !== qtyOfSubTrees; subTreeIdx++) {
+                const subTreeOuterContour = subTreesOuterContours[subTreeIdx];
+
+                if (subTreeOuterContour.maxLevel < currentLevel) continue;
+
+                return subTreeOuterContour.levelContours[currentLevel];
+            }
+        }
     }
 }

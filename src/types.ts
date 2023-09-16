@@ -79,6 +79,18 @@ export type Tree<T> = CartesianCoordinate & {
     category: NodeCategory;
 };
 
+export type NormalizedNode = CartesianCoordinate & {
+    isRoot: boolean;
+    parentId: ParentId;
+    treeId: string;
+    id: string;
+    accentColor: ColorGradient;
+    level: number;
+    data: Skill;
+    childrenIds: string[];
+    category: NodeCategory;
+};
+
 export type NodeCoordinate = CartesianCoordinate & {
     isRoot: boolean;
     parentId: ParentId;
