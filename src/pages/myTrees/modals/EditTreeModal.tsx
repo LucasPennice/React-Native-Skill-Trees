@@ -6,17 +6,14 @@ import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import ColorGradientSelector from "../../../components/ColorGradientSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
-import { WHITE_GRADIENT, colors, nodeGradients } from "../../../parameters";
+import { colors, nodeGradients } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { selectTreeOptions, setTree } from "../../../redux/slices/editTreeSlice";
 import { generalStyles } from "../../../styles";
 import { ColorGradient } from "../../../types";
 
-function EditTreeModal() {
+function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; closeModal: () => void }) {
     //Redux State
-    const { tree } = useAppSelector(selectTreeOptions);
-    const treeData = useAppSelector(selectTreeById(tree!.treeId));
-    const open = tree !== undefined;
+    const treeData = useAppSelector(selectTreeById(editingTreeId));
     //Local State
     const [treeName, setTreeName] = useState<string>("");
     const [selectedColor, setSelectedColor] = useState<ColorGradient | undefined>(undefined);
@@ -25,22 +22,16 @@ function EditTreeModal() {
     const { width } = Dimensions.get("screen");
 
     useEffect(() => {
-        const defaultTreeName = tree ? tree.treeName : "";
-        setTreeName(defaultTreeName);
-        const defaultAccentColor = tree ? tree.accentColor : WHITE_GRADIENT;
-        setSelectedColor(defaultAccentColor);
+        setTreeName(treeData.treeName);
+        setSelectedColor(treeData.accentColor);
 
-        if (tree && tree.data.icon.isEmoji) setIcon(tree.data.icon.text);
-    }, [open]);
+        if (treeData.icon.isEmoji) setIcon(treeData.icon.text);
+    }, []);
 
     const dispatch = useAppDispatch();
 
-    const closeModal = () => dispatch(setTree(undefined));
-
     const deleteTree = () => {
-        if (!tree) return;
-
-        dispatch(removeUserTree({ treeId: tree.treeId, nodes: treeData.nodes }));
+        dispatch(removeUserTree({ treeId: treeData.treeId, nodes: treeData.nodes }));
         closeModal();
     };
 
@@ -72,7 +63,7 @@ function EditTreeModal() {
     };
 
     return (
-        <FlingToDismissModal closeModal={closeModal} open={open} leftHeaderButton={{ onPress: updateTree(selectedColor, treeName), title: "Save" }}>
+        <FlingToDismissModal closeModal={closeModal} open={true} leftHeaderButton={{ onPress: updateTree(selectedColor, treeName), title: "Save" }}>
             <Animated.View style={{ flex: 1 }} layout={Layout.stiffness(300).damping(26)}>
                 <AppTextInput placeholder={"Tree Name"} textState={[treeName, setTreeName]} containerStyles={{ marginVertical: 20 }} />
                 <View style={{ flexDirection: "row", marginBottom: 15, justifyContent: "space-between", alignItems: "center" }}>

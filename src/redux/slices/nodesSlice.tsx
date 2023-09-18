@@ -14,7 +14,9 @@ export const nodesSlice = createSlice({
     name: "nodesSlice",
     initialState,
     reducers: {
-        updateNode: nodesAdapter.updateOne,
+        updateNode: (state, action: PayloadAction<Update<NormalizedNode>>) => {
+            nodesAdapter.updateOne(state, action.payload);
+        },
         updateNodes: nodesAdapter.updateMany,
         addNodes: (state, action: PayloadAction<{ treeId: string; nodesToAdd: NormalizedNode[] }>) => {
             nodesAdapter.addMany(state, action.payload.nodesToAdd);
@@ -38,7 +40,6 @@ export const nodesSlice = createSlice({
             });
 
             //Remove the nodes to delete
-
             nodesAdapter.removeMany(state, action.payload.nodesToDelete);
         },
     },
@@ -114,8 +115,3 @@ export const selectNodeById = (nodeId: string) => (state: RootState) => {
 
     return node;
 };
-
-// 🚨 MI PROBLEMA AHORA ES QUE NO SE
-//     - SI EL ESTADO SE CARGO BIEN, PARA LO CUAL ESTABA PROBANDO EN HOME LOS SELECTORS
-// - TAMPOCO SE COMO ARMAR LOS SELECTORS
-// - MAS LO QUE TENGO ANOTADO EN EL CUADERNO

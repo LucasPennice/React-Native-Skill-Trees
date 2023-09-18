@@ -6,18 +6,23 @@ import AppText from "../../components/AppText";
 import NodeView from "../../components/NodeView";
 import { countCompleteNodes } from "../../functions/extractInformationFromTree";
 import { centerFlex, colors } from "../../parameters";
-import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
-import { setTree } from "../../redux/slices/editTreeSlice";
+import { useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { Skill, Tree } from "../../types";
 
-function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tree<Skill>; changeTreeAndNavigateToViewingTree: () => void }) {
+function TreeCard({
+    element,
+    changeTreeAndNavigateToViewingTree,
+    openEditTreeModal,
+}: {
+    element: Tree<Skill>;
+    changeTreeAndNavigateToViewingTree: () => void;
+    openEditTreeModal: (treeId: string) => void;
+}) {
     //Redux Related
-    const dispatch = useAppDispatch();
     const nodesOfTree = useAppSelector(selectNodesOfTree(element.treeId));
 
     const { width } = useAppSelector(selectSafeScreenDimentions);
-    const dispatchSetTree = () => dispatch(setTree(element));
     //
 
     const completedSkillsQty = countCompleteNodes(nodesOfTree);
@@ -36,7 +41,7 @@ function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tr
             scale.value = withTiming(1.05, { duration: 1000, easing: Easing.bezier(0.83, 0, 0.17, 1) });
         })
         .onStart(() => {
-            runOnJS(dispatchSetTree)();
+            runOnJS(openEditTreeModal)(element.treeId);
         })
         .onFinalize(() => {
             scale.value = withSpring(1);

@@ -1,5 +1,5 @@
 import { colors } from "../parameters";
-import { ColorGradient, NodeCategory, NormalizedNode, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../types";
+import { ColorGradient, DnDZone, NodeCategory, NormalizedNode, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../types";
 import { DistanceToCenterPerLevel } from "./treeToRadialCoordinates/overlap";
 
 export function makeid(length: number) {
@@ -187,4 +187,140 @@ export function deleteNodeAndHoistChild(nodes: NormalizedNode[], nodeToHoist: No
     });
 
     return { nodeIdToDelete: nodeToDelete.nodeId, updatedNodes: [updatedParentOfNodeToDelete, updatedNodeToHoist, ...updatedChildrenOfNodeToDelete] };
+}
+
+export function insertNodeAsParent(nodesOfTree: NormalizedNode[], nodeToAdd: NormalizedNode, newNodePosition: DnDZone) {
+    //By selected node I mean the node from which you select the position to open the add node modal
+    const selectedNode = nodesOfTree.find((node) => node.nodeId === newNodePosition.ofNode);
+
+    if (!selectedNode) throw new Error("undefined selectedNode at insertNodeAsParent");
+
+    const parentOfSelectedNode = nodesOfTree.find((node) => node.nodeId === selectedNode.parentId);
+
+    if (!parentOfSelectedNode) throw new Error("undefined parentOfSelectedNode at insertNodeAsParent");
+
+    const updatedParentOfSelectedNode: NormalizedNode = {
+        ...parentOfSelectedNode,
+        childrenIds: parentOfSelectedNode.childrenIds.map((childId) => {
+            if (childId === selectedNode.nodeId) return nodeToAdd.nodeId;
+            return childId;
+        }),
+    };
+
+    const selectedNodeTreeWithLevelUpdated = nodesToUpdateFromTreeMutation(nodesOfTree, selectedNode, (v) => {
+        if (v.nodeId === selectedNode.nodeId) return { ...v, level: v.level + 1, parentId: nodeToAdd.nodeId };
+        return { ...v, level: v.level + 1 };
+    });
+
+    const updatedNewNode: NormalizedNode = {
+        ...nodeToAdd,
+        parentId: parentOfSelectedNode.nodeId,
+        childrenIds: [selectedNode.nodeId],
+        level: selectedNode.level,
+    };
+
+    return { nodesToUpdate: [updatedParentOfSelectedNode, ...selectedNodeTreeWithLevelUpdated], nodeToAdd: updatedNewNode };
+}
+
+export function insertNodeAsSibling(nodesOfTree: NormalizedNode[], nodesToAdd: NormalizedNode[], newNodePosition: DnDZone) {
+    const selectedNode = nodesOfTree.find((node) => node.nodeId === newNodePosition.ofNode);
+
+    if (!selectedNode) throw new Error("undefined selectedNode at insertNodeAsLeftSibling");
+
+    const parentOfSelectedNode = nodesOfTree.find((node) => node.nodeId === selectedNode.parentId);
+
+    if (!parentOfSelectedNode) throw new Error("undefined parentOfSelectedNode at insertNodeAsLeftSibling");
+
+    const indexOfSelected = parentOfSelectedNode.childrenIds.findIndex((id) => id === selectedNode.nodeId);
+    const leftSiblingsOfTargetNode = parentOfSelectedNode.childrenIds.slice(0, indexOfSelected);
+    const rightSiblingsOfTargetNode = parentOfSelectedNode.childrenIds.slice(indexOfSelected + 1, parentOfSelectedNode.childrenIds.length);
+
+    const nodesToAddIds = nodesToAdd.map((node) => node.nodeId);
+
+    const updatedNodesToAdd = nodesToAdd.map((node) => {
+        return { ...node, level: selectedNode.level, parentId: selectedNode.parentId, treeId: selectedNode.treeId };
+    });
+
+    if (newNodePosition.type === "LEFT_BROTHER") {
+        const updatedParentOfSelectedNode: NormalizedNode = {
+            ...parentOfSelectedNode,
+            childrenIds: [...leftSiblingsOfTargetNode, ...nodesToAddIds, selectedNode.nodeId, ...rightSiblingsOfTargetNode],
+        };
+
+        return { nodesToUpdate: [updatedParentOfSelectedNode], nodesToAdd: updatedNodesToAdd };
+    }
+
+    const updatedParentOfSelectedNode: NormalizedNode = {
+        ...parentOfSelectedNode,
+        childrenIds: [...leftSiblingsOfTargetNode, selectedNode.nodeId, ...nodesToAddIds, ...rightSiblingsOfTargetNode],
+    };
+
+    return { nodesToUpdate: [updatedParentOfSelectedNode], nodesToAdd: updatedNodesToAdd };
+}
+
+export function insertNodeAsChild(nodesOfTree: NormalizedNode[], nodesToAdd: NormalizedNode[], newNodePosition: DnDZone) {
+    const selectedNode = nodesOfTree.find((node) => node.nodeId === newNodePosition.ofNode);
+
+    if (!selectedNode) throw new Error("undefined selectedNode at insertNodeAsChild");
+
+    const updatedSelectedNode: NormalizedNode = { ...selectedNode, childrenIds: nodesToAdd.map((n) => n.nodeId) };
+
+    const onlyAddingOneNodeCase = nodesToAdd.length === 1;
+
+    if (onlyAddingOneNodeCase) {
+        const selectedNodeTreeWithLevelUpdated = nodesToUpdateFromTreeMutation(nodesOfTree, selectedNode, (v) => {
+            if (v.parentId === selectedNode.nodeId) return { ...v, level: v.level + 1, parentId: nodesToAdd[0].nodeId };
+            return { ...v, level: v.level + 1 };
+        });
+
+        const updatedNodeToAdd: NormalizedNode = {
+            ...nodesToAdd[0],
+            childrenIds: selectedNode.childrenIds,
+            level: selectedNode.level + 1,
+            parentId: selectedNode.nodeId,
+        };
+
+        const foo = selectedNodeTreeWithLevelUpdated.filter((n) => n.nodeId !== selectedNode.nodeId);
+
+        return {
+            nodesToUpdate: [updatedSelectedNode, ...foo],
+            nodesToAdd: [updatedNodeToAdd],
+        };
+    }
+
+    const updatedNodeToAdd: NormalizedNode[] = nodesToAdd.map((node) => {
+        return {
+            ...node,
+            level: selectedNode.level + 1,
+            parentId: selectedNode.nodeId,
+        };
+    });
+
+    return { nodesToUpdate: [], nodesToAdd: updatedNodeToAdd };
+}
+
+export function nodesToUpdateFromTreeMutation(
+    nodes: NormalizedNode[],
+    startingNode: NormalizedNode,
+    mutation: (v: NormalizedNode) => NormalizedNode
+) {
+    let result: NormalizedNode[] = [];
+
+    createTreeFromArray(startingNode.nodeId);
+
+    return result;
+
+    function createTreeFromArray(nodeId: string) {
+        const nodeOfTree = nodes.find((n) => n.nodeId === nodeId);
+
+        if (!nodeOfTree) throw new Error(`nodeOfTree undefined at nodesToUpdateFromTreeMutation id of: ${nodeId}`);
+
+        const updatedNode: NormalizedNode = mutation(nodeOfTree);
+
+        result.push(updatedNode);
+
+        if (!nodeOfTree.childrenIds.length) return;
+
+        for (const childId of nodeOfTree.childrenIds) createTreeFromArray(childId);
+    }
 }

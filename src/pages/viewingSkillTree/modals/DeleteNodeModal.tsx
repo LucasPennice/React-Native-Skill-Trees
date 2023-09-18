@@ -13,7 +13,7 @@ import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { NormalizedNode, Skill, Tree } from "../../../types";
 
 type Props = {
-    nodeToDelete: Tree<Skill> | null;
+    nodeToDelete: Tree<Skill>;
     closeModalAndClearState: () => void;
     open: boolean;
 };
@@ -28,13 +28,11 @@ function useGetSelectedTree(treeId: string) {
 }
 
 function DeleteNodeModal({ nodeToDelete, closeModalAndClearState, open }: Props) {
-    const currentTree = useGetSelectedTree(nodeToDelete!.treeId);
+    const currentTree = useGetSelectedTree(nodeToDelete.treeId);
 
     const nodesOfTree = useAppSelector(selectNodesOfTree(currentTree!.treeId));
 
     const dispatch = useAppDispatch();
-
-    if (!nodeToDelete) return <></>;
 
     const candidatesToHoist = nodeToDelete.children;
 

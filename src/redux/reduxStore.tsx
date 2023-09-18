@@ -3,7 +3,6 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { FLUSH, PAUSE, PERSIST, PURGE, PersistConfig, REGISTER, REHYDRATE, persistReducer, persistStore } from "redux-persist";
 import addTreeReducer from "./slices/addTreeModalSlice";
 import canvasDisplaySettingsReducer from "./slices/canvasDisplaySettingsSlice";
-import treeOptionsReducer from "./slices/editTreeSlice";
 import loginReducer from "./slices/loginSlice";
 import newUserTreesSlice, { UserTreeSlice } from "./slices/newUserTreesSlice";
 import nodesSlice, { NodeSlice } from "./slices/nodesSlice";
@@ -51,7 +50,6 @@ const rootReducer = combineReducers({
     currentTree: toBeDepricatedCurrentTreeReducer,
     screenDimentions: screenDimentionsReducer,
     addTree: addTreeReducer,
-    treeOptions: treeOptionsReducer,
     user: userReducer,
     userTrees: newUserTreesSlice,
     nodes: nodesSlice,

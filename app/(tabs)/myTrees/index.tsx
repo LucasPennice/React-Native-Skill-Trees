@@ -6,17 +6,17 @@ import EditTreeModal from "@/pages/myTrees/modals/EditTreeModal";
 import { colors } from "@/parameters";
 import { useAppDispatch } from "@/redux/reduxHooks";
 import { open } from "@/redux/slices/addTreeModalSlice";
-import { setTree } from "@/redux/slices/editTreeSlice";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect } from "react";
-import { Alert } from "react-native";
+import { useCallback, useEffect, useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import { RoutesParams } from "routes";
 
 function MyTrees() {
     const localParams = useLocalSearchParams();
     //@ts-ignore
-    const { openNewTreeModal, editingTreeId }: { openNewTreeModal?: boolean; editingTreeId?: string } = localParams;
+    const { openNewTreeModal, editingTreeId: paramsEditingTreeId }: { openNewTreeModal?: boolean; editingTreeId?: string } = localParams;
+
+    const [editingTreeId, setEditingTreeId] = useState<string | null>(null);
     //Redux Related
     const userTrees = useGetUserTrees();
 
@@ -31,14 +31,10 @@ function MyTrees() {
     }, []);
 
     const openEditModal = useCallback(() => {
-        if (editingTreeId) {
-            const treeToEdit = userTrees.find((userTree) => userTree.treeId === editingTreeId);
-
-            if (!treeToEdit) return Alert.alert("Could not find the tree");
-
-            dispatch(setTree(treeToEdit));
+        if (paramsEditingTreeId) {
+            setEditingTreeId(paramsEditingTreeId);
             //@ts-ignore
-            router.setParams({ editingTreeId: undefined } as RoutesParams["myTrees"]);
+            router.setParams({ paramsEditingTreeId: undefined } as RoutesParams["myTrees"]);
         }
     }, []);
 
@@ -69,11 +65,18 @@ function MyTrees() {
                 {userTrees.length > 0 &&
                     userTrees.map((element, idx) => {
                         const changeTreeAndNavigateToViewingTree = factoryChangeTreeAndNavigateToViewingTree(element.treeId ?? "");
-                        return <TreeCard element={element} changeTreeAndNavigateToViewingTree={changeTreeAndNavigateToViewingTree} key={idx} />;
+                        return (
+                            <TreeCard
+                                openEditTreeModal={setEditingTreeId}
+                                element={element}
+                                changeTreeAndNavigateToViewingTree={changeTreeAndNavigateToViewingTree}
+                                key={idx}
+                            />
+                        );
                     })}
             </ScrollView>
 
-            <EditTreeModal />
+            {editingTreeId && <EditTreeModal editingTreeId={editingTreeId} closeModal={() => setEditingTreeId(null)} />}
             <AddTreeModal />
         </>
     );

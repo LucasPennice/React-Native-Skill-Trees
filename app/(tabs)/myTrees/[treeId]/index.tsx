@@ -10,8 +10,8 @@ import SelectedNodeMenu, {
     SelectedNodeMenuState,
 } from "@/components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { IsSharingAvailableContext } from "@/context";
-import { findNodeById, treeCompletedSkillPercentage } from "@/functions/extractInformationFromTree";
-import { deleteNodeWithNoChildren, insertNodesBasedOnDnDZone, updateNodeAndTreeCompletion } from "@/functions/mutateTree";
+import { findNodeById } from "@/functions/extractInformationFromTree";
+import { insertNodeAsChild, insertNodeAsParent, insertNodeAsSibling } from "@/functions/misc";
 import { handleTreeBuild } from "@/functions/treeCalculateCoordinates";
 import AddNodeStateIndicator from "@/pages/viewingSkillTree/AddNodeStateIndicator";
 import IndividualSkillTree from "@/pages/viewingSkillTree/IndividualSkillTree";
@@ -20,10 +20,9 @@ import DeleteNodeModal from "@/pages/viewingSkillTree/modals/DeleteNodeModal";
 import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { selectTreeById } from "@/redux/slices/newUserTreesSlice";
-import { selectNodesOfTree } from "@/redux/slices/nodesSlice";
+import { addNodes, removeNodes, selectNodesOfTree, updateNodes, updateNode as updatedNodeFromNodeSlice } from "@/redux/slices/nodesSlice";
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
-import { changeTree, updateUserTreeWithAppendedNode, updateUserTrees } from "@/redux/slices/userTreesSlice";
-import { DnDZone, NodeCoordinate, Skill, Tree, TreeCoordinateData } from "@/types";
+import { DnDZone, NodeCoordinate, NormalizedNode, Skill, Tree, TreeCoordinateData } from "@/types";
 import { useCanvasRef } from "@shopify/react-native-skia";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
@@ -55,17 +54,13 @@ function useViewingSkillTreeState(treeId: string) {
 
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
-    let treeCoordinate: TreeCoordinateData | undefined = undefined;
+    const {
+        dndZoneCoordinates,
+        canvasDimentions: canvasDimensions,
+        nodeCoordinatesCentered,
+    } = handleTreeBuild(selectedTree, screenDimensions, "hierarchy");
 
-    if (selectedTree) {
-        const {
-            dndZoneCoordinates,
-            canvasDimentions: canvasDimensions,
-            nodeCoordinatesCentered,
-        } = handleTreeBuild(selectedTree, screenDimensions, "hierarchy");
-
-        treeCoordinate = { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: nodeCoordinatesCentered };
-    }
+    let treeCoordinate: TreeCoordinateData = { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: nodeCoordinatesCentered };
 
     return { selectedTree, treeCoordinate };
 }
@@ -197,19 +192,82 @@ function useAddNodeModalFunctions(
     selectedTree: Tree<Skill>,
     clearSelectedNewNodePosition: () => void
 ) {
+    const nodesOfTree = useAppSelector(selectNodesOfTree(selectedTree.treeId));
     const dispatch = useAppDispatch();
 
     const result = (newNodes: Tree<Skill>[], dnDZone: DnDZone) => {
-        let result = insertNodesBasedOnDnDZone(dnDZone, selectedTree, newNodes);
+        const normalizedNewNodes: NormalizedNode[] = newNodes.map((node) => {
+            return {
+                category: node.category,
+                data: node.data,
+                isRoot: node.isRoot,
+                level: node.level,
+                nodeId: node.nodeId,
+                parentId: node.parentId,
+                treeId: node.treeId,
+                x: node.x,
+                y: node.y,
+                childrenIds: node.children.map((node) => node.nodeId),
+            };
+        });
 
-        if (result === undefined) throw new Error("result undefined at foo");
+        switch (dnDZone.type) {
+            case "CHILDREN":
+                let childCase = insertNodeAsChild(nodesOfTree, normalizedNewNodes, dnDZone);
+                dispatch(
+                    updateNodes(
+                        childCase.nodesToUpdate.map((node) => {
+                            return { id: node.nodeId, changes: node };
+                        })
+                    )
+                );
+                dispatch(addNodes({ treeId: selectedTree.treeId, nodesToAdd: childCase.nodesToAdd }));
+                break;
+            case "LEFT_BROTHER":
+                const leftCase = insertNodeAsSibling(nodesOfTree, normalizedNewNodes, dnDZone);
+                dispatch(
+                    updateNodes(
+                        leftCase.nodesToUpdate.map((node) => {
+                            return { id: node.nodeId, changes: node };
+                        })
+                    )
+                );
+                dispatch(addNodes({ treeId: selectedTree.treeId, nodesToAdd: leftCase.nodesToAdd }));
+                break;
+            case "RIGHT_BROTHER":
+                const rightCase = insertNodeAsSibling(nodesOfTree, normalizedNewNodes, dnDZone);
+                dispatch(
+                    updateNodes(
+                        rightCase.nodesToUpdate.map((node) => {
+                            return { id: node.nodeId, changes: node };
+                        })
+                    )
+                );
+                dispatch(addNodes({ treeId: selectedTree.treeId, nodesToAdd: rightCase.nodesToAdd }));
+                break;
 
-        const treeSkillCompletion = treeCompletedSkillPercentage(result);
+            default:
+                const parentCase = insertNodeAsParent(nodesOfTree, normalizedNewNodes[0], dnDZone);
+                dispatch(
+                    updateNodes(
+                        parentCase.nodesToUpdate.map((node) => {
+                            return { id: node.nodeId, changes: node };
+                        })
+                    )
+                );
+                dispatch(addNodes({ treeId: selectedTree.treeId, nodesToAdd: [parentCase.nodeToAdd] }));
+                break;
+        }
+        // let result = insertNodesBasedOnDnDZone(dnDZone, selectedTree, newNodes);
 
-        if (treeSkillCompletion === 100) result = { ...result, data: { ...result.data, isCompleted: true } };
-        if (treeSkillCompletion !== 100) result = { ...result, data: { ...result.data, isCompleted: false } };
+        // if (result === undefined) throw new Error("result undefined at foo");
 
-        dispatch(updateUserTreeWithAppendedNode(result));
+        // const treeSkillCompletion = treeCompletedSkillPercentage(result);
+
+        // if (treeSkillCompletion === 100) result = { ...result, data: { ...result.data, isCompleted: true } };
+        // if (treeSkillCompletion !== 100) result = { ...result, data: { ...result.data, isCompleted: false } };
+
+        // dispatch(updateUserTreeWithAppendedNode(result));
         clearSelectedNewNodePosition();
         dispatchModalState("returnToIdle");
     };
@@ -264,19 +322,16 @@ function useGetSelectedNodeMenuFns(
     clearSelectedNodeCoord: () => void
 ) {
     const dispatch = useAppDispatch();
-    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
     const closeMenu = clearSelectedNodeCoord;
 
-    const handleDeleteNode = (node: Tree<Skill>) => {
+    const handleDeleteNode = (nodeToDelete: Tree<Skill>) => {
         if (!selectedTree) throw new Error("No selectedTree at deleteNode");
         if (!selectedNode) throw new Error("No selected node at deleteNode");
 
-        if (node.children.length !== 0) return openChildrenHoistSelector(node);
+        if (nodeToDelete.children.length !== 0) return openChildrenHoistSelector(nodeToDelete);
 
-        const updatedTree = deleteNodeWithNoChildren(selectedTree, node);
-
-        dispatch(updateUserTrees({ updatedTree, screenDimensions }));
+        dispatch(removeNodes({ treeId: nodeToDelete.treeId, nodesToDelete: [nodeToDelete.nodeId] }));
         clearSelectedNodeCoord();
     };
 
@@ -284,9 +339,7 @@ function useGetSelectedNodeMenuFns(
         try {
             if (!selectedNode) throw new Error("No selected node at updateNode");
 
-            const updatedTree = updateNodeAndTreeCompletion(selectedTree, updatedNode);
-
-            dispatch(updateUserTrees({ updatedTree, screenDimensions }));
+            dispatch(updatedNodeFromNodeSlice({ id: updatedNode.nodeId, changes: { data: updatedNode.data } }));
         } catch (error) {
             console.error(error);
         }
@@ -324,20 +377,6 @@ function IndividualSkillTreePage() {
     //Redux State
     const { selectedTree, treeCoordinate } = useViewingSkillTreeState(treeId);
 
-    const dispatch = useAppDispatch();
-
-    useEffect(() => {
-        dispatch(changeTree(treeId));
-    }, []);
-
-    if (!selectedTree || !treeCoordinate) return <></>;
-
-    return <IndividualSkillTreeWithSelectedTree selectedTree={selectedTree} treeCoordinate={treeCoordinate} />;
-}
-
-type IndividualSkillTreeWithSelectedTreeProps = { selectedTree: Tree<Skill>; treeCoordinate: TreeCoordinateData };
-
-function IndividualSkillTreeWithSelectedTree({ selectedTree, treeCoordinate }: IndividualSkillTreeWithSelectedTreeProps) {
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     //
     const modalStateReducer = useModalStateReducer();
@@ -434,11 +473,13 @@ function IndividualSkillTreeWithSelectedTree({ selectedTree, treeCoordinate }: I
                 />
             )}
 
-            <DeleteNodeModal
-                open={modalState === "CANDIDATES_TO_HOIST"}
-                nodeToDelete={nodeToDelete}
-                closeModalAndClearState={closeChildrenHoistModal}
-            />
+            {nodeToDelete && (
+                <DeleteNodeModal
+                    open={modalState === "CANDIDATES_TO_HOIST"}
+                    nodeToDelete={nodeToDelete}
+                    closeModalAndClearState={closeChildrenHoistModal}
+                />
+            )}
             {showAddNodeModal && (
                 <AddNodeModal
                     open={modalState === "INPUT_DATA_FOR_NEW_NODE"}
