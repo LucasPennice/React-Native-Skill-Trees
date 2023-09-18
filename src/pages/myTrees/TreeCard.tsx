@@ -1,25 +1,28 @@
+import { selectNodesOfTree } from "@/redux/slices/nodesSlice";
 import { View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import AppText from "../../components/AppText";
 import NodeView from "../../components/NodeView";
-import { countCompletedSkillNodes, countSkillNodes, treeCompletedSkillPercentage } from "../../functions/extractInformationFromTree";
+import { countCompleteNodes } from "../../functions/extractInformationFromTree";
 import { centerFlex, colors } from "../../parameters";
-import { setTree } from "../../redux/slices/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
+import { setTree } from "../../redux/slices/editTreeSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { Skill, Tree } from "../../types";
 
 function TreeCard({ element, changeTreeAndNavigateToViewingTree }: { element: Tree<Skill>; changeTreeAndNavigateToViewingTree: () => void }) {
     //Redux Related
     const dispatch = useAppDispatch();
+    const nodesOfTree = useAppSelector(selectNodesOfTree(element.treeId));
+
     const { width } = useAppSelector(selectSafeScreenDimentions);
     const dispatchSetTree = () => dispatch(setTree(element));
     //
 
-    const completedSkillsQty = countCompletedSkillNodes(element);
-    const skillsQty = countSkillNodes(element);
-    const completedPercentage = treeCompletedSkillPercentage(element);
+    const completedSkillsQty = countCompleteNodes(nodesOfTree);
+    const skillsQty = nodesOfTree.length - 1;
+    const completedPercentage = (completedSkillsQty / skillsQty) * 100;
 
     const tapGesture = Gesture.Tap().onEnd((e) => {
         runOnJS(changeTreeAndNavigateToViewingTree)();

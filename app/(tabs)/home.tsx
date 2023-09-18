@@ -1,16 +1,12 @@
 import HomepageContents from "@/pages/homepage/HomepageContents";
 import WelcomeScreen from "@/pages/homepage/WelcomeScreen";
 import { useAppSelector } from "@/redux/reduxHooks";
-import { selectUserTrees } from "@/redux/slices/userTreesSlice";
+import { selectTotalTreeQty } from "@/redux/slices/newUserTreesSlice";
 import { router } from "expo-router";
 import { View } from "react-native";
 
 function Home() {
-    const userTrees = useAppSelector(selectUserTrees);
-
-    const userTreesChildrenQty = userTrees.length;
-
-    const userHasAtLestOneTree = userTreesChildrenQty !== 0;
+    const userTreeQty = useAppSelector(selectTotalTreeQty);
 
     const openCreateNewTree = () => {
         router.push({ pathname: "/myTrees", params: { openNewTreeModal: true } });
@@ -18,7 +14,7 @@ function Home() {
 
     return (
         <View style={{ position: "relative", flex: 1, overflow: "hidden" }}>
-            {userHasAtLestOneTree ? <HomepageContents /> : <WelcomeScreen openCreateNewTree={openCreateNewTree} />}
+            {userTreeQty !== 0 ? <HomepageContents /> : <WelcomeScreen openCreateNewTree={openCreateNewTree} />}
         </View>
     );
 }

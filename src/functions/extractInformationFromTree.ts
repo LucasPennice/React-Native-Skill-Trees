@@ -1,5 +1,5 @@
 import { HOMETREE_ROOT_ID, UNCENTERED_ROOT_COORDINATES } from "../parameters";
-import { NodeCoordinate, NodeQtyPerLevel, OuterPolarContour, PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
+import { NodeCoordinate, NodeQtyPerLevel, NormalizedNode, OuterPolarContour, PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
 import { cartesianToPositivePolarCoordinates } from "./coordinateSystem";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
@@ -369,6 +369,18 @@ export function countSkillNodes(rootNode: Tree<Skill>) {
 
     return result;
 }
+
+export const countCompleteNodes = (nodes: NormalizedNode[]) => {
+    let completeNodes = 0;
+
+    for (const node of nodes) {
+        if (node.data.isCompleted && node.category === "SKILL") {
+            completeNodes++;
+        }
+    }
+
+    return completeNodes;
+};
 
 //This function ignores USER and SKILL_TREE nodes when calculating the percentage
 export function treeCompletedSkillPercentage(rootNode: Tree<Skill>) {

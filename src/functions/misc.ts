@@ -1,5 +1,5 @@
 import { colors } from "../parameters";
-import { ColorGradient, NodeCategory, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../types";
+import { ColorGradient, NodeCategory, NormalizedNode, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../types";
 import { DistanceToCenterPerLevel } from "./treeToRadialCoordinates/overlap";
 
 export function makeid(length: number) {
@@ -142,4 +142,49 @@ export function updateRadiusPerLevelTable(distanceToCenterPerLevel: DistanceToCe
     }
 
     return result;
+}
+
+export function deleteNodeAndHoistChild(nodes: NormalizedNode[], nodeToHoist: NormalizedNode) {
+    const nodeToDelete = nodes.find((n) => n.nodeId === nodeToHoist.parentId);
+
+    if (!nodeToDelete) throw new Error("nodeToDelete undefined at deleteNodeAndHoistChildren");
+
+    const parentOfNodeToDelete = nodes.find((n) => n.nodeId === nodeToDelete.parentId);
+
+    if (!parentOfNodeToDelete) throw new Error("nodeToDelete undefined at deleteNodeAndHoistChildren");
+
+    //This array does not include the node to be hoisted
+    const childrenOfNodeToDeleteIds = nodeToDelete.childrenIds.filter((id) => id !== nodeToHoist.nodeId);
+
+    const childrenOfNodeToDelete = childrenOfNodeToDeleteIds.map((childId) => {
+        const child = nodes.find((n) => n.nodeId === childId);
+
+        if (!child) throw new Error("child not found at childrenOfNodeToDelete");
+
+        return child;
+    });
+
+    //Replacing the nodeId of the node to delete for the id of the node to hoist
+    const updatedParentOfNodeToDelete: NormalizedNode = {
+        ...parentOfNodeToDelete,
+        childrenIds: parentOfNodeToDelete.childrenIds.map((childId) => {
+            if (childId === nodeToDelete.nodeId) return nodeToHoist.nodeId;
+            return childId;
+        }),
+    };
+
+    //Updating the parent id value of node to hoist
+    //Adding the nodeToDelete children to nodeToHoist's array of children (Except for itself)
+    const updatedNodeToHoist: NormalizedNode = {
+        ...nodeToHoist,
+        parentId: parentOfNodeToDelete.nodeId,
+        childrenIds: [...nodeToHoist.childrenIds, ...nodeToDelete.childrenIds.filter((childId) => childId !== nodeToHoist.nodeId)],
+    };
+
+    //Updating the parent id value of the children of the node to be deleted
+    const updatedChildrenOfNodeToDelete: NormalizedNode[] = childrenOfNodeToDelete.map((node) => {
+        return { ...node, parentId: nodeToHoist.nodeId };
+    });
+
+    return { nodeIdToDelete: nodeToDelete.nodeId, updatedNodes: [updatedParentOfNodeToDelete, updatedNodeToHoist, ...updatedChildrenOfNodeToDelete] };
 }

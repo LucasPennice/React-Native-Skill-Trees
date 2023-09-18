@@ -1,3 +1,5 @@
+import { removeUserTree } from "@/redux/slices/newUserTreesSlice";
+import { updateNode } from "@/redux/slices/nodesSlice";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
 import { router } from "expo-router";
 import { ReactNode, memo, useEffect, useMemo, useState } from "react";
@@ -15,15 +17,22 @@ import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvas
 import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "../../components/treeRelated/returnNodeMenuFunctions";
 import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
-import { updateNodeAndTreeCompletion } from "../../functions/mutateTree";
 import { handleTreeBuild } from "../../functions/treeCalculateCoordinates";
 import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
-import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
-import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
-import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeAction, NodeCoordinate, SelectedNodeId, Skill, Tree } from "../../types";
+import {
+    CanvasDimensions,
+    DnDZone,
+    InteractiveTreeFunctions,
+    NodeAction,
+    NodeCoordinate,
+    SelectedNodeId,
+    Skill,
+    Tree,
+    TreeCoordinateData,
+} from "../../types";
 import RadialSkillTree from "./RadialSkillTree";
 
 type Props = {
@@ -48,7 +57,6 @@ function useHomepageTreeState() {
 
 function useCreateTreeFunctions(updateSelectedNodeCoord: (value: NodeCoordinate) => void, openCanvasSettingsModal: () => void) {
     const dispatch = useAppDispatch();
-    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
     const result: InteractiveTreeFunctions = {
         onNodeClick: (coordOfClickedNode: NodeCoordinate) => {
@@ -56,25 +64,23 @@ function useCreateTreeFunctions(updateSelectedNodeCoord: (value: NodeCoordinate)
             return;
         },
         nodeMenu: {
-            confirmDeleteTree: (treeId: string) => {
+            confirmDeleteTree: (treeId: string, nodesIdOfTree: string[]) => {
                 Alert.alert(
                     "Delete this tree?",
                     "",
                     [
                         { text: "No", style: "cancel" },
-                        { text: "Yes", onPress: () => dispatch(removeUserTree(treeId)), style: "destructive" },
+                        { text: "Yes", onPress: () => dispatch(removeUserTree({ treeId, nodes: nodesIdOfTree })), style: "destructive" },
                     ],
                     { cancelable: true }
                 );
             },
             selectNode: () => {},
             confirmDeleteNode: () => {},
-            toggleCompletionOfSkill: (treeToUpdate: Tree<Skill>, node: Tree<Skill>) => {
-                let updatedNode: Tree<Skill> = { ...node, data: { ...node.data, isCompleted: !node.data.isCompleted } };
+            toggleCompletionOfSkill: (node: Tree<Skill>) => {
+                const updatedNodeData = { ...node.data, isCompleted: !node.data.isCompleted };
 
-                const updatedTree = updateNodeAndTreeCompletion(treeToUpdate, updatedNode);
-
-                dispatch(updateUserTrees({ updatedTree, screenDimensions }));
+                dispatch(updateNode({ id: node.nodeId, changes: { data: updatedNodeData } }));
             },
             openAddSkillModal: (addNewNodePosition: DnDZone["type"], node: Tree<Skill>) => {
                 const params: RoutesParams["myTrees_treeId"] = { nodeId: node.nodeId, treeId: node.treeId, addNewNodePosition };

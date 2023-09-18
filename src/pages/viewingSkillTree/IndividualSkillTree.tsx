@@ -1,4 +1,7 @@
+import { removeUserTree } from "@/redux/slices/newUserTreesSlice";
+import { removeNodes, updateNode } from "@/redux/slices/nodesSlice";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
+import { SelectedNewNodePositionState, SelectedNodeCoordState } from "app/(tabs)/myTrees/[treeId]";
 import { router } from "expo-router";
 import { ReactNode, memo, useMemo, useState } from "react";
 import { Alert, View } from "react-native";
@@ -14,17 +17,13 @@ import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu, { NodeMenuFunctions } from "../../components/treeRelated/nodeMenu/NodeMenu";
 import returnNodeMenuFunctions from "../../components/treeRelated/returnNodeMenuFunctions";
-import { handleTreeBuild } from "../../functions/treeCalculateCoordinates";
 import { findNodeById } from "../../functions/extractInformationFromTree";
-import { deleteNodeWithNoChildren, updateNodeAndTreeCompletion } from "../../functions/mutateTree";
+import { handleTreeBuild } from "../../functions/treeCalculateCoordinates";
 import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
-import { TreeCoordinateData } from "../../redux/slices/treesCoordinatesSlice";
-import { removeUserTree, updateUserTrees } from "../../redux/slices/userTreesSlice";
-import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeAction, NodeCoordinate, Skill, Tree } from "../../types";
-import { SelectedNewNodePositionState, SelectedNodeCoordState } from "app/(tabs)/myTrees/[treeId]";
+import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeAction, NodeCoordinate, Skill, Tree, TreeCoordinateData } from "../../types";
 
 type Props = {
     state: {
@@ -60,7 +59,6 @@ function useCreateTreeFunctions(
     }
 ) {
     const dispatch = useAppDispatch();
-    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
     const result: InteractiveTreeFunctions = {
         onNodeClick: (coordOfClickedNode: NodeCoordinate) => {
@@ -77,7 +75,7 @@ function useCreateTreeFunctions(
             return undefined;
         },
         nodeMenu: {
-            confirmDeleteTree: (treeId: string) => {
+            confirmDeleteTree: (treeId: string, nodesIdOfTree: string[]) => {
                 Alert.alert(
                     "Delete this tree?",
                     "",
@@ -87,7 +85,7 @@ function useCreateTreeFunctions(
                             text: "Yes",
                             onPress: () => {
                                 router.push("/myTrees");
-                                dispatch(removeUserTree(treeId));
+                                dispatch(removeUserTree({ treeId, nodes: nodesIdOfTree }));
                             },
                             style: "destructive",
                         },
@@ -97,20 +95,16 @@ function useCreateTreeFunctions(
             },
             selectNode: functions.updateSelectedNodeCoord,
 
-            confirmDeleteNode: (tree: Tree<Skill>, node: Tree<Skill>) => {
-                if (node.children.length !== 0) return functions.openChildrenHoistSelector(node);
+            confirmDeleteNode: (nodeToDelete: Tree<Skill>) => {
+                if (nodeToDelete.children.length !== 0) return functions.openChildrenHoistSelector(nodeToDelete);
 
-                const updatedTree = deleteNodeWithNoChildren(tree, node);
-
-                dispatch(updateUserTrees({ updatedTree, screenDimensions }));
+                dispatch(removeNodes({ nodesToDelete: [nodeToDelete.nodeId], treeId: nodeToDelete.treeId }));
             },
 
-            toggleCompletionOfSkill: (treeToUpdate: Tree<Skill>, node: Tree<Skill>) => {
-                let updatedNode: Tree<Skill> = { ...node, data: { ...node.data, isCompleted: !node.data.isCompleted } };
+            toggleCompletionOfSkill: (node: Tree<Skill>) => {
+                const updatedData = { ...node.data, isCompleted: !node.data.isCompleted };
 
-                const updatedTree = updateNodeAndTreeCompletion(treeToUpdate, updatedNode);
-
-                dispatch(updateUserTrees({ updatedTree, screenDimensions }));
+                dispatch(updateNode({ id: node.nodeId, changes: { data: updatedData } }));
             },
             openAddSkillModal: (zoneType: DnDZone["type"], node: Tree<Skill>) => {
                 const dndZone = addNodePositions.find((zone) => zone.ofNode === node.nodeId && zone.type === zoneType);

@@ -83,8 +83,7 @@ export type NormalizedNode = CartesianCoordinate & {
     isRoot: boolean;
     parentId: ParentId;
     treeId: string;
-    id: string;
-    accentColor: ColorGradient;
+    nodeId: string;
     level: number;
     data: Skill;
     childrenIds: string[];
@@ -207,11 +206,11 @@ export type InteractiveTreeFunctions = {
     onDndZoneClick?: (clickedZone?: DnDZone) => void;
     nodeMenu: {
         openCanvasSettingsModal?: () => void;
-        confirmDeleteTree: (treeId: string) => void;
-        confirmDeleteNode: (tree: Tree<Skill>, node: Tree<Skill>) => void;
+        confirmDeleteTree: (treeId: string, nodesIdOfTree: string[]) => void;
+        confirmDeleteNode: (node: Tree<Skill>) => void;
         selectNode: <T extends NodeCoordinate>(node: T, menuMode: "EDITING" | "VIEWING") => void;
         openAddSkillModal: (zoneType: DnDZone["type"], node: Tree<Skill>) => void;
-        toggleCompletionOfSkill: (tree: Tree<Skill>, node: Tree<Skill>) => void;
+        toggleCompletionOfSkill: (node: Tree<Skill>) => void;
     };
     runOnTreeUpdate?: (dndZoneCoordinates: DnDZone[]) => void;
 };
@@ -235,3 +234,9 @@ export type NodeQtyPerLevel = { [key: number]: number };
 export type AnglePerLevelTable = { [key: number]: number };
 
 export type UpdateRadiusPerLevelTable = { distanceToDisplace: number; level: number } | undefined;
+
+export type TreeCoordinateData = {
+    nodeCoordinates: NodeCoordinate[];
+    addNodePositions: DnDZone[];
+    canvasDimensions: CanvasDimensions;
+};

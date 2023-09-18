@@ -3,26 +3,27 @@ import OpenSettingsMenu from "@/components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "@/components/ProgressIndicatorAndName";
 import ShareTreeScreenshot from "@/components/takingScreenshot/ShareTreeScreenshot";
 import CanvasSettingsModal from "@/components/treeRelated/canvasSettingsModal/CanvasSettingsModal";
+import { normalizedNodeToTree } from "@/components/treeRelated/general/functions";
 import SelectedNodeMenu, {
     SelectedNodeMenuFunctions,
     SelectedNodeMenuMutateFunctions,
     SelectedNodeMenuState,
 } from "@/components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
-import { handleTreeBuild } from "@/functions/treeCalculateCoordinates";
 import { IsSharingAvailableContext } from "@/context";
 import { findNodeById, treeCompletedSkillPercentage } from "@/functions/extractInformationFromTree";
 import { deleteNodeWithNoChildren, insertNodesBasedOnDnDZone, updateNodeAndTreeCompletion } from "@/functions/mutateTree";
+import { handleTreeBuild } from "@/functions/treeCalculateCoordinates";
 import AddNodeStateIndicator from "@/pages/viewingSkillTree/AddNodeStateIndicator";
 import IndividualSkillTree from "@/pages/viewingSkillTree/IndividualSkillTree";
 import AddNodeModal from "@/pages/viewingSkillTree/modals/AddNodeModal";
 import DeleteNodeModal from "@/pages/viewingSkillTree/modals/DeleteNodeModal";
 import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
+import { selectTreeById } from "@/redux/slices/newUserTreesSlice";
+import { selectNodesOfTree } from "@/redux/slices/nodesSlice";
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
-import { TreeCoordinateData } from "@/redux/slices/treesCoordinatesSlice";
 import { changeTree, updateUserTreeWithAppendedNode, updateUserTrees } from "@/redux/slices/userTreesSlice";
-import { DnDZone, NodeCoordinate, Skill, Tree } from "@/types";
-import useCurrentTree from "@/useCurrentTree";
+import { DnDZone, NodeCoordinate, Skill, Tree, TreeCoordinateData } from "@/types";
 import { useCanvasRef } from "@shopify/react-native-skia";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
@@ -46,8 +47,12 @@ export type ModalReducerAction =
     | "openSelectedNodeMenu"
     | "openNewNodePositionSelector";
 
-function useViewingSkillTreeState() {
-    const selectedTree = useCurrentTree();
+function useViewingSkillTreeState(treeId: string) {
+    const treeData = useAppSelector(selectTreeById(treeId));
+    const treeNodes = useAppSelector(selectNodesOfTree(treeId));
+
+    const selectedTree = normalizedNodeToTree(treeNodes, treeData);
+
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
     let treeCoordinate: TreeCoordinateData | undefined = undefined;
@@ -317,7 +322,7 @@ function IndividualSkillTreePage() {
     const { treeId }: RoutesParams["myTrees_treeId"] = localParams;
 
     //Redux State
-    const { selectedTree, treeCoordinate } = useViewingSkillTreeState();
+    const { selectedTree, treeCoordinate } = useViewingSkillTreeState(treeId);
 
     const dispatch = useAppDispatch();
 

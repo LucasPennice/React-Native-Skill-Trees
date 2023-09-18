@@ -1,12 +1,12 @@
 import AppText from "@/components/AppText";
+import useGetUserTrees from "@/components/treeRelated/hooks/useGetUserTrees";
 import TreeCard from "@/pages/myTrees/TreeCard";
 import AddTreeModal from "@/pages/myTrees/modals/AddTreeModal";
 import EditTreeModal from "@/pages/myTrees/modals/EditTreeModal";
 import { colors } from "@/parameters";
-import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
+import { useAppDispatch } from "@/redux/reduxHooks";
 import { open } from "@/redux/slices/addTreeModalSlice";
 import { setTree } from "@/redux/slices/editTreeSlice";
-import { changeTree, selectUserTrees } from "@/redux/slices/userTreesSlice";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect } from "react";
 import { Alert } from "react-native";
@@ -18,7 +18,8 @@ function MyTrees() {
     //@ts-ignore
     const { openNewTreeModal, editingTreeId }: { openNewTreeModal?: boolean; editingTreeId?: string } = localParams;
     //Redux Related
-    const userTrees = useAppSelector(selectUserTrees);
+    const userTrees = useGetUserTrees();
+
     const dispatch = useAppDispatch();
 
     const doOpenNewTreeModal = useCallback(() => {
@@ -49,7 +50,6 @@ function MyTrees() {
     }, [openEditModal]);
 
     const factoryChangeTreeAndNavigateToViewingTree = (treeId: string) => () => {
-        dispatch(changeTree(treeId));
         router.push(`/myTrees/${treeId}`);
     };
 

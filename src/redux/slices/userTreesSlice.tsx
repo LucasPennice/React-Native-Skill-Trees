@@ -4,7 +4,7 @@ import { RootState } from "../reduxStore";
 import { ScreenDimentions } from "./screenDimentionsSlice";
 
 // Define a type for the slice state
-type UserTreesSlice = {
+export type UserTreesSlice = {
     userTrees: Tree<Skill>[];
     currentTreeId: string | undefined;
 };

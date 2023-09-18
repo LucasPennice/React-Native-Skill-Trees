@@ -1,6 +1,5 @@
 import { RoutesParams } from "@/../routes";
 import AppText from "@/components/AppText";
-import { findNodeById } from "@/functions/extractInformationFromTree";
 import { LogCard, LogHeader } from "@/pages/skillPage/DisplayDetails/Logs";
 import { MotivesToLearnCard, MotivesToLearnHeader } from "@/pages/skillPage/DisplayDetails/MotivesToLearn";
 import { ResourceCard, ResourceHeader } from "@/pages/skillPage/DisplayDetails/SkillResources";
@@ -11,41 +10,42 @@ import UpdateMotivesToLearnModal from "@/pages/skillPage/Modals/UpdateMotivesToL
 import UpdateResourcesModal from "@/pages/skillPage/Modals/UpdateResourcesModal";
 import RenderSkillDetails from "@/pages/skillPage/RenderSkillDetails";
 import { getDefaultFns } from "@/pages/skillPage/functions";
-import useSaveUpdatedSkillToAsyncStorage from "@/pages/skillPage/useUpdateTreeWithNewSkillDetails";
 import { colors } from "@/parameters";
-import { useAppSelector } from "@/redux/reduxHooks";
-import { selectUserTrees } from "@/redux/slices/userTreesSlice";
-import { Milestone, MotiveToLearn, ObjectWithId, Skill, SkillDetails, SkillLogs, SkillModal, SkillResource, Tree } from "@/types";
+import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
+import { selectNodeById, updateNode } from "@/redux/slices/nodesSlice";
+import { Milestone, MotiveToLearn, NormalizedNode, ObjectWithId, Skill, SkillDetails, SkillLogs, SkillModal, SkillResource } from "@/types";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Linking } from "react-native";
 import { ScrollView, Swipeable } from "react-native-gesture-handler";
 
-function useGetCurrentSkill(treeId: string, nodeId: string) {
-    const userTrees = useAppSelector(selectUserTrees);
-
-    const userTree = userTrees.find((uT) => uT.treeId === treeId);
-
-    if (!userTree) throw new Error("userTree not found at useGetCurrentSkills");
-
-    const userSkill = findNodeById(userTree, nodeId);
+function useGetCurrentSkill(nodeId: string) {
+    const userSkill = useAppSelector(selectNodeById(nodeId));
 
     if (!userSkill) throw new Error("userSkill not found at useGetCurrentSkill");
 
     return userSkill;
 }
 
+function useUpdateTreeWithNewSkillDetails(updatedSkill: Skill, nodeId: string) {
+    const dispatch = useAppDispatch();
+
+    const updateSkillDetails = () => dispatch(updateNode({ changes: { data: updatedSkill }, id: nodeId }));
+
+    return updateSkillDetails;
+}
+
 function SkillDetailsPage() {
     const localParams = useLocalSearchParams();
     //@ts-ignore
-    const { treeId, skillId }: RoutesParams["myTrees_skillId"] = localParams;
+    const { skillId }: RoutesParams["myTrees_skillId"] = localParams;
 
-    const node = useGetCurrentSkill(treeId, skillId);
+    const node = useGetCurrentSkill(skillId);
 
     return <Foo node={node} />;
 }
 
-function Foo({ node }: { node: Tree<Skill> }) {
+function Foo({ node }: { node: NormalizedNode }) {
     //Local State
     const [skillState, setSkillState] = useState<Skill>(node.data);
     //Local State - Modal
@@ -58,7 +58,7 @@ function Foo({ node }: { node: Tree<Skill> }) {
     });
     const [editResourcesModal, setEditResourcesModal] = useState<SkillModal<SkillResource | undefined>>({ open: false, data: undefined, ref: null });
     //Hooks
-    const updateSkillDetails = useSaveUpdatedSkillToAsyncStorage(skillState, node);
+    const updateSkillDetails = useUpdateTreeWithNewSkillDetails(skillState, node.nodeId);
 
     const openModal =
         <T,>(setModalState: React.Dispatch<React.SetStateAction<SkillModal<T | undefined>>>, key: keyof SkillDetails) =>

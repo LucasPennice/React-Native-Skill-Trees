@@ -1,3 +1,4 @@
+import useGetUserTrees from "@/components/treeRelated/hooks/useGetUserTrees";
 import { buildHomepageTree } from "@/functions/treeToRadialCoordinates/general";
 import { useCanvasRef } from "@shopify/react-native-skia";
 import { useNavigation } from "expo-router";
@@ -12,7 +13,6 @@ import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTr
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
-import { selectUserTrees } from "../../redux/slices/userTreesSlice";
 import { NodeCoordinate } from "../../types";
 import HomepageTree from "./HomepageTree";
 
@@ -28,7 +28,7 @@ function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
 }
 
 function useHomepageContentsState() {
-    const userTrees = useAppSelector(selectUserTrees);
+    const userTrees = useGetUserTrees();
 
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);

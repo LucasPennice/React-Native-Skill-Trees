@@ -1,15 +1,16 @@
+import { normalizedNodeToTree } from "@/components/treeRelated/general/functions";
+import { deleteNodeAndHoistChild } from "@/functions/misc";
+import { selectTreeById } from "@/redux/slices/newUserTreesSlice";
+import { removeNodes, selectNodesOfTree, updateNodes } from "@/redux/slices/nodesSlice";
+import { Update } from "@reduxjs/toolkit";
 import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import AppText from "../../../components/AppText";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import NodeView from "../../../components/NodeView";
 import { checkIfTreeHasInvalidCompleteDependencies, findParentOfNode } from "../../../functions/extractInformationFromTree";
-import { deleteNodeWithChildren } from "../../../functions/mutateTree";
 import { centerFlex, colors } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
-import { updateUserTrees } from "../../../redux/slices/userTreesSlice";
-import { Skill, Tree } from "../../../types";
-import useCurrentTree from "../../../useCurrentTree";
+import { NormalizedNode, Skill, Tree } from "../../../types";
 
 type Props = {
     nodeToDelete: Tree<Skill> | null;
@@ -17,9 +18,20 @@ type Props = {
     open: boolean;
 };
 
+function useGetSelectedTree(treeId: string) {
+    const treeData = useAppSelector(selectTreeById(treeId));
+    const treeNodes = useAppSelector(selectNodesOfTree(treeId));
+
+    const selectedTree = normalizedNodeToTree(treeNodes, treeData);
+
+    return selectedTree;
+}
+
 function DeleteNodeModal({ nodeToDelete, closeModalAndClearState, open }: Props) {
-    const currentTree = useCurrentTree();
-    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
+    const currentTree = useGetSelectedTree(nodeToDelete!.treeId);
+
+    const nodesOfTree = useAppSelector(selectNodesOfTree(currentTree!.treeId));
+
     const dispatch = useAppDispatch();
 
     if (!nodeToDelete) return <></>;
@@ -27,9 +39,20 @@ function DeleteNodeModal({ nodeToDelete, closeModalAndClearState, open }: Props)
     const candidatesToHoist = nodeToDelete.children;
 
     const deleteParentAndHoistChildren = (childrenToHoist: Tree<Skill>) => () => {
-        const updatedTree = deleteNodeWithChildren(currentTree, nodeToDelete, childrenToHoist);
+        const nodeToHoist = nodesOfTree.find((node) => node.nodeId === childrenToHoist.nodeId);
 
-        dispatch(updateUserTrees({ updatedTree, screenDimensions }));
+        if (!nodeToHoist) throw new Error("nodeToHoist undefined at deleteParentAndHoistChildren");
+
+        const { nodeIdToDelete, updatedNodes } = deleteNodeAndHoistChild(nodesOfTree, nodeToHoist);
+
+        const updatedNodesReducerFormat: Update<NormalizedNode>[] = updatedNodes.map((updatedNode) => {
+            return {
+                id: updatedNode.nodeId,
+                changes: { childrenIds: updatedNode.childrenIds, parentId: updatedNode.parentId },
+            };
+        });
+        dispatch(updateNodes(updatedNodesReducerFormat));
+        dispatch(removeNodes({ treeId: childrenToHoist.treeId, nodesToDelete: [nodeIdToDelete] }));
 
         closeModalAndClearState();
     };

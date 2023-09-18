@@ -1,3 +1,5 @@
+import { TreeData } from "@/redux/slices/newUserTreesSlice";
+import { NormalizedNode, Skill, Tree } from "@/types";
 import { SkFont } from "@shopify/react-native-skia";
 
 const MAX_LINE_WIDTH_PX = 60;
@@ -62,4 +64,42 @@ function getCutWord(word: string, wordWidth: number) {
     const nLettersToKeep = word.length - nOverflowLetters;
 
     return `${word.slice(0, nLettersToKeep)}_`;
+}
+
+export function normalizedNodeToTree(nodes: NormalizedNode[], treeData: TreeData) {
+    const rootNode = nodes.find((node) => node.nodeId === treeData.rootNodeId);
+
+    if (!rootNode) throw new Error("rootNode undefined at foo");
+
+    return createTreeFromArray(rootNode.nodeId);
+
+    function createTreeFromArray(nodeId: string) {
+        //Base case
+        const nodeOfTree = nodes.find((n) => n.nodeId === nodeId);
+
+        if (!nodeOfTree) throw new Error("nodeOfTree undefined at recursivefoo");
+
+        let fooTree: Tree<Skill> = {
+            accentColor: treeData.accentColor,
+            category: nodeOfTree.category,
+            children: [],
+            data: nodeOfTree.data,
+            isRoot: nodeOfTree.isRoot,
+            level: nodeOfTree.level,
+            nodeId: nodeOfTree.nodeId,
+            parentId: nodeOfTree.parentId,
+            treeId: treeData.treeId,
+            treeName: treeData.treeName,
+            x: nodeOfTree.x,
+            y: nodeOfTree.y,
+        };
+
+        if (!nodeOfTree.childrenIds.length) return fooTree;
+
+        for (const childId of nodeOfTree.childrenIds) {
+            fooTree.children.push(createTreeFromArray(childId));
+        }
+
+        return fooTree;
+    }
 }

@@ -1,3 +1,4 @@
+import { removeUserTree, selectTreeById, updateUserTree } from "@/redux/slices/newUserTreesSlice";
 import { useEffect, useState } from "react";
 import { Alert, Dimensions, TouchableOpacity, View } from "react-native";
 import Animated, { Layout } from "react-native-reanimated";
@@ -5,19 +6,16 @@ import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import ColorGradientSelector from "../../../components/ColorGradientSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
-import { mutateEveryTree } from "../../../functions/mutateTree";
 import { WHITE_GRADIENT, colors, nodeGradients } from "../../../parameters";
-import { selectTreeOptions, setTree } from "../../../redux/slices/editTreeSlice";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { removeUserTree, updateUserTrees } from "../../../redux/slices/userTreesSlice";
+import { selectTreeOptions, setTree } from "../../../redux/slices/editTreeSlice";
 import { generalStyles } from "../../../styles";
-import { ColorGradient, Skill, Tree } from "../../../types";
-import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
+import { ColorGradient } from "../../../types";
 
 function EditTreeModal() {
     //Redux State
     const { tree } = useAppSelector(selectTreeOptions);
-    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
+    const treeData = useAppSelector(selectTreeById(tree!.treeId));
     const open = tree !== undefined;
     //Local State
     const [treeName, setTreeName] = useState<string>("");
@@ -42,7 +40,7 @@ function EditTreeModal() {
     const deleteTree = () => {
         if (!tree) return;
 
-        dispatch(removeUserTree(tree.treeId));
+        dispatch(removeUserTree({ treeId: tree.treeId, nodes: treeData.nodes }));
         closeModal();
     };
 
@@ -61,23 +59,16 @@ function EditTreeModal() {
         if (selectedColor === undefined) return Alert.alert("Please select a color");
         if (treeName === "") return Alert.alert("Please give the tree a name");
 
-        let updatedTree = mutateEveryTree(tree, updateTree);
-
-        if (updatedTree === undefined) return;
-
         const newIsEmoji = icon !== "";
         const newIcon = newIsEmoji ? icon : treeName[0];
 
-        updatedTree = { ...updatedTree, data: { ...updatedTree.data, icon: { isEmoji: newIsEmoji, text: newIcon } } };
-
-        dispatch(updateUserTrees({ updatedTree, screenDimensions }));
+        dispatch(
+            updateUserTree({
+                rootNodeId: treeData.rootNodeId,
+                update: { id: treeData.treeId, changes: { accentColor: selectedColor, icon: { isEmoji: newIsEmoji, text: newIcon }, treeName } },
+            })
+        );
         closeModal();
-
-        function updateTree(tree: Tree<Skill>): Tree<Skill> {
-            if (tree.isRoot) return { ...tree, data: { ...tree.data, name: treeName }, accentColor: selectedColor!, treeName };
-
-            return { ...tree, accentColor: selectedColor!, treeName };
-        }
     };
 
     return (

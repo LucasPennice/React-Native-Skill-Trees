@@ -14,16 +14,16 @@ import LoadingIcon from "../../../components/LoadingIcon";
 
 import HierarchicalSkillTree from "../../../components/treeRelated/hierarchical/HierarchicalSkillTree";
 import useHandleCanvasScroll from "../../../components/treeRelated/hooks/useHandleCanvasScrollAndZoom";
-import { createTree } from "../../../functions/misc";
+import { createTree, makeid } from "../../../functions/misc";
 import { MENU_HIGH_DAMPENING, centerFlex, colors, nodeGradients } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { close, selectAddTree } from "../../../redux/slices/addTreeModalSlice";
 import { selectCanvasDisplaySettings } from "../../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
-import { saveNewTree } from "../../../redux/slices/userTreesSlice";
 import { generalStyles } from "../../../styles";
 import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "../../../types";
 import useHandleImportTree from "./useHandleImportTree";
+import { TreeData, addUserTree } from "@/redux/slices/newUserTreesSlice";
 
 function AddTreeModal() {
     const { query } = useRequestProcessor();
@@ -66,15 +66,18 @@ function AddTreeModal() {
         const isEmoji = icon === "" ? false : true;
         const iconText = isEmoji ? icon : treeName[0];
 
-        const newTree = createTree(
-            treeName,
-            selectedColorGradient,
-            true,
-            "SKILL_TREE",
-            getDefaultSkillValue(treeName, true, { isEmoji, text: iconText })
-        );
+        const rootNodeId = makeid(24);
 
-        dispatch(saveNewTree({ newTree, screenDimensions }));
+        const newUserTree: TreeData = {
+            accentColor: selectedColorGradient,
+            icon: { isEmoji, text: iconText },
+            nodes: [rootNodeId],
+            rootNodeId,
+            treeId: makeid(24),
+            treeName,
+        };
+
+        dispatch(addUserTree(newUserTree));
         closeModal();
     };
 
