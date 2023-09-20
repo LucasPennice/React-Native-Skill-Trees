@@ -296,7 +296,7 @@ export function insertNodeAsChild(nodesOfTree: NormalizedNode[], nodesToAdd: Nor
         };
     });
 
-    return { nodesToUpdate: [], nodesToAdd: updatedNodeToAdd };
+    return { nodesToUpdate: [updatedSelectedNode], nodesToAdd: updatedNodeToAdd };
 }
 
 export function nodesToUpdateFromTreeMutation(

@@ -7,13 +7,13 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import AppText from "../../../components/AppText";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import NodeView from "../../../components/NodeView";
-import { checkIfTreeHasInvalidCompleteDependencies, findParentOfNode } from "../../../functions/extractInformationFromTree";
+import { findParentOfNode } from "../../../functions/extractInformationFromTree";
 import { centerFlex, colors } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { NormalizedNode, Skill, Tree } from "../../../types";
+import { NormalizedNode } from "../../../types";
 
 type Props = {
-    nodeToDelete: Tree<Skill>;
+    nodeToDelete: NormalizedNode;
     closeModalAndClearState: () => void;
     open: boolean;
 };
@@ -30,13 +30,13 @@ function useGetSelectedTree(treeId: string) {
 function DeleteNodeModal({ nodeToDelete, closeModalAndClearState, open }: Props) {
     const currentTree = useGetSelectedTree(nodeToDelete.treeId);
 
-    const nodesOfTree = useAppSelector(selectNodesOfTree(currentTree!.treeId));
+    const nodesOfTree = useAppSelector(selectNodesOfTree(nodeToDelete.treeId));
 
     const dispatch = useAppDispatch();
 
-    const candidatesToHoist = nodeToDelete.children;
+    const candidatesToHoist = nodesOfTree.filter((n) => nodeToDelete.childrenIds.includes(n.nodeId));
 
-    const deleteParentAndHoistChildren = (childrenToHoist: Tree<Skill>) => () => {
+    const deleteParentAndHoistChildren = (childrenToHoist: NormalizedNode) => () => {
         const nodeToHoist = nodesOfTree.find((node) => node.nodeId === childrenToHoist.nodeId);
 
         if (!nodeToHoist) throw new Error("nodeToHoist undefined at deleteParentAndHoistChildren");
@@ -55,7 +55,7 @@ function DeleteNodeModal({ nodeToDelete, closeModalAndClearState, open }: Props)
         closeModalAndClearState();
     };
 
-    const confirmDeleteNode = (children: Tree<Skill>) => () => {
+    const confirmDeleteNode = (children: NormalizedNode) => () => {
         const parent = findParentOfNode(currentTree, children.nodeId);
 
         const parentName = parent ? parent.data.name : "";
@@ -75,8 +75,8 @@ function DeleteNodeModal({ nodeToDelete, closeModalAndClearState, open }: Props)
         <FlingToDismissModal closeModal={closeModalAndClearState} open={open}>
             <View style={[centerFlex, { flex: 1 }]}>
                 <ScrollView style={[{ flex: 1, width: "100%", marginTop: 20 }]}>
-                    {candidatesToHoist.map((children, idx) => {
-                        const blockDelete = checkIfShouldBlockDelete(nodeToDelete, children);
+                    {candidatesToHoist.map((candidate, idx) => {
+                        const blockDelete = checkIfShouldBlockDelete(nodeToDelete, candidate, nodesOfTree);
 
                         const notifyWhyDeleteBlocked = () =>
                             Alert.alert(
@@ -87,16 +87,20 @@ function DeleteNodeModal({ nodeToDelete, closeModalAndClearState, open }: Props)
                             <Pressable
                                 key={idx}
                                 style={[centerFlex, styles.pressable, { opacity: blockDelete ? 0.3 : 1 }]}
-                                onPress={blockDelete ? notifyWhyDeleteBlocked : confirmDeleteNode(children)}>
+                                onPress={blockDelete ? notifyWhyDeleteBlocked : confirmDeleteNode(candidate)}>
                                 <View>
                                     <AppText style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 5 }} fontSize={20}>
-                                        {children.data.name}
+                                        {candidate.data.name}
                                     </AppText>
                                     <AppText style={{ color: "#FFFFFF5D" }} fontSize={18}>
-                                        {numberOfChildrenString(children.children.length)}
+                                        {numberOfChildrenString(candidate.childrenIds.length)}
                                     </AppText>
                                 </View>
-                                <NodeView node={children} size={60} />
+                                <NodeView
+                                    node={{ ...candidate, accentColor: currentTree.accentColor }}
+                                    completePercentage={candidate.data.isCompleted ? 100 : 0}
+                                    size={60}
+                                />
                             </Pressable>
                         );
                     })}
@@ -129,19 +133,19 @@ function numberOfChildrenString(number: number) {
     return `${number} Skills stem from this`;
 }
 
-function checkIfShouldBlockDelete(nodeToDelete: Tree<Skill>, candidate: Tree<Skill>) {
-    const newChildrenArrayWithStaleParentId = [...nodeToDelete.children.filter((c) => c.nodeId !== candidate.nodeId), ...candidate.children];
-    const newChildrenArray = newChildrenArrayWithStaleParentId.map((c) => {
-        return { ...c, parentId: candidate.nodeId };
+function checkIfShouldBlockDelete(nodeToDelete: NormalizedNode, candidate: NormalizedNode, nodesOfTree: NormalizedNode[]) {
+    if (candidate.data.isCompleted) return false;
+
+    //These are the children of the candidate node if it were to be hoisted
+    const possibleChildrenOfCandidate = nodesOfTree.filter((n) => {
+        if (n.nodeId === candidate.nodeId) return false;
+        if (nodeToDelete.childrenIds.includes(n.nodeId)) return true;
+        return false;
     });
 
-    const tentativeNewTree: Tree<Skill> = {
-        ...nodeToDelete,
-        nodeId: candidate.nodeId,
-        data: candidate.data,
-        children: newChildrenArray,
-        parentId: nodeToDelete.parentId,
-    };
+    const anyPossibleChildrenOfCandidateComplete = possibleChildrenOfCandidate.find((n) => n.data.isCompleted);
 
-    return checkIfTreeHasInvalidCompleteDependencies(tentativeNewTree);
+    if (anyPossibleChildrenOfCandidateComplete) return true;
+
+    return false;
 }

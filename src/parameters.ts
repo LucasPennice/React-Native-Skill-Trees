@@ -78,3 +78,5 @@ export const HOMETREE_ROOT_ID = "homepageRoot";
 export const NODE_ICON_FONT_SIZE = 17;
 
 export const RADIAL_LABEL_FONT_SIZE = 14;
+
+export const HOMEPAGE_TREE_ID = "HomepageTree";

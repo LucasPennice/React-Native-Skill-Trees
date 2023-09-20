@@ -11,7 +11,7 @@ function GeneralTreeExample({ showIcons, showLabel }: { showLabel: boolean; show
 
     return (
         <View style={[centerFlex, { gap: 7 }]}>
-            <NodeView node={CanvasSettingsMockNode} size={CanvasSettingsNodeSize} hideIcon={!showIcons} />
+            <NodeView completePercentage={100} node={CanvasSettingsMockNode} size={CanvasSettingsNodeSize} hideIcon={!showIcons} />
             <View style={{ marginBottom: 10, height: 16, width: 60, overflow: "hidden" }}>
                 <Animated.View style={styles}>
                     <AppText style={{ color: "#FFFFFF" }} fontSize={15}>

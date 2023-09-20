@@ -2,14 +2,23 @@ import { memo } from "react";
 import { View } from "react-native";
 import Animated from "react-native-reanimated";
 import { Circle, Defs, LinearGradient, Stop, Svg } from "react-native-svg";
-import { treeCompletedSkillPercentage } from "../functions/extractInformationFromTree";
 import { getWheelParams } from "../functions/misc";
 import { centerFlex, colors } from "../parameters";
-import { Skill, Tree } from "../types";
+import { ColorGradient, NodeCategory, Skill } from "../types";
 import AppText from "./AppText";
 import useShowHideStylesWithoutTransitionView from "./treeRelated/hooks/useShowHideStylesWithoutTransitionView";
 
-function NodeView({ node, size, hideIcon }: { node: Tree<Skill>; size: number; hideIcon?: boolean }) {
+function NodeView<T extends { data: Skill; accentColor: ColorGradient; category: NodeCategory }>({
+    node,
+    size,
+    hideIcon,
+    completePercentage = 100,
+}: {
+    node: T;
+    size: number;
+    hideIcon?: boolean;
+    completePercentage: number;
+}) {
     const gradient = node.accentColor;
     const progressWheelProps = getWheelParams(gradient.color1, `${gradient.color1}3D`, size, (8 * size) / 150);
 
@@ -17,8 +26,7 @@ function NodeView({ node, size, hideIcon }: { node: Tree<Skill>; size: number; h
     const category = node.category;
     const isEmojiIcon = skill.icon.isEmoji;
 
-    const completedPercentage = treeCompletedSkillPercentage(node);
-    const result = progressWheelProps.circumference - (progressWheelProps.circumference * completedPercentage) / 100;
+    const result = progressWheelProps.circumference - (progressWheelProps.circumference * completePercentage) / 100;
 
     const showIcon = useShowHideStylesWithoutTransitionView(!hideIcon);
 

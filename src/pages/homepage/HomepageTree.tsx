@@ -1,5 +1,5 @@
+import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMenuFunctions";
 import { removeUserTree } from "@/redux/slices/newUserTreesSlice";
-import { updateNode } from "@/redux/slices/nodesSlice";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
 import { router } from "expo-router";
 import { ReactNode, memo, useEffect, useMemo, useState } from "react";
@@ -15,10 +15,9 @@ import useCanvasScroll from "../../components/treeRelated/hooks/gestures/useCanv
 import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks/gestures/useCanvasTap";
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
-import returnNodeMenuFunctions from "../../components/treeRelated/returnNodeMenuFunctions";
 import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
 import { handleTreeBuild } from "../../functions/treeCalculateCoordinates";
-import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
+import { HOMEPAGE_TREE_ID, NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
@@ -28,6 +27,7 @@ import {
     InteractiveTreeFunctions,
     NodeAction,
     NodeCoordinate,
+    NormalizedNode,
     SelectedNodeId,
     Skill,
     Tree,
@@ -37,10 +37,10 @@ import RadialSkillTree from "./RadialSkillTree";
 
 type Props = {
     selectedNodeCoordState: readonly [
-        NodeCoordinate | null,
+        NormalizedNode | null,
         {
             readonly clearSelectedNodeCoord: () => void;
-            readonly updateSelectedNodeCoord: (value: NodeCoordinate) => void;
+            readonly updateSelectedNodeCoord: (value: NormalizedNode) => void;
         }
     ];
     canvasRef: React.RefObject<SkiaDomView>;
@@ -55,11 +55,11 @@ function useHomepageTreeState() {
     return { screenDimensions, canvasDisplaySettings };
 }
 
-function useCreateTreeFunctions(updateSelectedNodeCoord: (value: NodeCoordinate) => void, openCanvasSettingsModal: () => void) {
+function useCreateTreeFunctions(updateSelectedNodeCoord: (value: NormalizedNode) => void, openCanvasSettingsModal: () => void) {
     const dispatch = useAppDispatch();
 
     const result: InteractiveTreeFunctions = {
-        onNodeClick: (coordOfClickedNode: NodeCoordinate) => {
+        onNodeClick: (coordOfClickedNode: NormalizedNode) => {
             updateSelectedNodeCoord(coordOfClickedNode);
             return;
         },
@@ -77,12 +77,7 @@ function useCreateTreeFunctions(updateSelectedNodeCoord: (value: NodeCoordinate)
             },
             selectNode: () => {},
             confirmDeleteNode: () => {},
-            toggleCompletionOfSkill: (node: Tree<Skill>) => {
-                const updatedNodeData = { ...node.data, isCompleted: !node.data.isCompleted };
-
-                dispatch(updateNode({ id: node.nodeId, changes: { data: updatedNodeData } }));
-            },
-            openAddSkillModal: (addNewNodePosition: DnDZone["type"], node: Tree<Skill>) => {
+            openAddSkillModal: (addNewNodePosition: DnDZone["type"], node: NormalizedNode) => {
                 const params: RoutesParams["myTrees_treeId"] = { nodeId: node.nodeId, treeId: node.treeId, addNewNodePosition };
                 router.push({ pathname: `/myTrees/${node.treeId}`, params });
             },
@@ -93,7 +88,7 @@ function useCreateTreeFunctions(updateSelectedNodeCoord: (value: NodeCoordinate)
     return result;
 }
 
-function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: NodeCoordinate | null, homeTree: Tree<Skill>) {
+function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: NormalizedNode | null, homeTree: Tree<Skill>) {
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
     const {
@@ -226,7 +221,7 @@ function HomepageTree({ canvasRef, homepageTree, openCanvasSettingsModal, select
 
     const canvasScrollAndZoom = Gesture.Simultaneous(canvasPan, canvasZoom);
 
-    const nodeMenuFunctions = returnNodeMenuFunctions(nodeActionState[0].node, homepageTree, false, treeFunctions.nodeMenu);
+    const nodeMenuFunctions = useReturnNodeMenuFunctions(nodeActionState[0].node, HOMEPAGE_TREE_ID, false, treeFunctions.nodeMenu);
 
     const canvasGestures = Gesture.Simultaneous(canvasScrollAndZoom, canvasPressAndLongPress);
 

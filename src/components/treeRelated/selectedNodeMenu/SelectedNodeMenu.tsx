@@ -1,19 +1,20 @@
+import { useAppSelector } from "@/redux/reduxHooks";
+import { selectNodesOfTree } from "@/redux/slices/nodesSlice";
 import { useEffect, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { Easing, FadeInDown, FadeOutDown, FadeOutUp, Layout } from "react-native-reanimated";
-import { checkIfCompletionIsAllowedForNode, checkIfUncompletionIsAllowedForNode, findNodeById } from "../../../functions/extractInformationFromTree";
+import { checkIfCompletionAllowed, checkIfReverseCompletionAllowed } from "../../../functions/extractInformationFromTree";
 import { CIRCLE_SIZE_SELECTED, NAV_HEGIHT, centerFlex, colors } from "../../../parameters";
 import { ScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
 import { generalStyles } from "../../../styles";
-import { Skill, SkillIcon, SkillPropertiesEditableOnPopMenu, Tree } from "../../../types";
+import { NormalizedNode, Skill, SkillIcon, SkillPropertiesEditableOnPopMenu } from "../../../types";
 import AppText from "../../AppText";
 import SliderToggler from "../../SliderToggler";
 import Editing from "./Editing";
 import Viewing from "./Viewing";
 
 export type SelectedNodeMenuState = {
-    selectedNode: Tree<Skill>;
-    selectedTree: Tree<Skill>;
+    selectedNode: NormalizedNode;
     initialMode: "EDITING" | "VIEWING";
     screenDimensions: ScreenDimentions;
 };
@@ -26,8 +27,8 @@ export type SelectedNodeMenuFunctions = {
 };
 
 export type SelectedNodeMenuMutateFunctions = {
-    updateNode: (updatedNode: Tree<Skill>) => void;
-    handleDeleteNode: (node: Tree<Skill>) => void;
+    updateNode: (updatedNode: NormalizedNode) => void;
+    handleDeleteNode: (node: NormalizedNode) => void;
 };
 
 type Props = {
@@ -59,7 +60,7 @@ function useCleanup(setInitialMode: () => void) {
     }, []);
 }
 
-function useSkillPropsState(selectedNode: Tree<Skill>) {
+function useSkillPropsState(selectedNode: NormalizedNode) {
     const initialState = { icon: selectedNode.data.icon, isCompleted: selectedNode.data.isCompleted, name: selectedNode.data.name };
 
     const [newSkillProps, setNewSkillProps] = useState<SkillPropertiesEditableOnPopMenu>(initialState);
@@ -89,16 +90,16 @@ function useResetSkillPropsToDefaultOnModeUpdate(setInitialSkillProps: () => voi
 }
 
 function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Props) {
-    const { screenDimensions, selectedNode, selectedTree, initialMode } = state;
+    const { screenDimensions, selectedNode, initialMode } = state;
     const { height, width } = screenDimensions;
     const { closeMenu, goToSkillPage, goToTreePage, goToEditTreePage } = functions;
     const { menuWidth, styles } = getNodeMenuStyles(screenDimensions);
 
-    const parentOfSelectedNode = findNodeById(selectedTree, selectedNode.parentId);
-
     const [mode, { toggleMode, setInitialMode }] = useHandleModeState(initialMode);
     const skillPropsState = useSkillPropsState(selectedNode);
     const [newSkillProps, { setInitialSkillProps }] = skillPropsState;
+
+    const nodesOfTree = useAppSelector(selectNodesOfTree(selectedNode.treeId));
 
     const editingEnabled = Boolean(mutateFunctions !== undefined) && Boolean(allowEdit) && selectedNode.category === "SKILL";
 
@@ -113,17 +114,17 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
         const { handleDeleteNode, updateNode } = mutateFunctions;
 
         return {
-            saveUpdates: (selectedNode: Tree<Skill>, newProps: SkillPropertiesEditableOnPopMenu) => () => {
+            saveUpdates: (selectedNode: NormalizedNode, newProps: SkillPropertiesEditableOnPopMenu) => () => {
                 if (newSkillProps.name === "") return Alert.alert("The skill name cannot be empty");
 
                 const updatedData: Skill = { ...selectedNode.data, ...newProps };
-                const result: Tree<Skill> = { ...selectedNode, data: updatedData };
+                const result: NormalizedNode = { ...selectedNode, data: updatedData };
 
                 return updateNode(result);
             },
             handleDeleteSelectedNode: () => handleDeleteNode(selectedNode),
-            checkIfCompleteAllowed: () => checkIfCompletionIsAllowedForNode(parentOfSelectedNode),
-            checkIfUnCompleteAllowed: () => checkIfUncompletionIsAllowedForNode(selectedNode),
+            checkIfCompleteAllowed: () => checkIfCompletionAllowed(selectedNode, nodesOfTree),
+            checkIfUnCompleteAllowed: () => checkIfReverseCompletionAllowed(selectedNode, nodesOfTree),
         };
     };
 
@@ -188,7 +189,7 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
                         {mode === "VIEWING" && (
                             <Viewing
                                 selectedNode={selectedNode}
-                                selectedTree={selectedTree}
+                                selectedTreeId={selectedNode.treeId}
                                 functions={{ goToTreePage, goToSkillPage, goToEditTreePage }}
                             />
                         )}
@@ -219,7 +220,7 @@ function SaveChangesButton({ saveChanges, height }: { saveChanges: () => void; h
     );
 }
 
-function checkForSave(newSkillProps: SkillPropertiesEditableOnPopMenu, selectedNode: Tree<Skill>) {
+function checkForSave(newSkillProps: SkillPropertiesEditableOnPopMenu, selectedNode: NormalizedNode) {
     const { data } = selectedNode;
     if (newSkillProps.icon.text !== data.icon.text) return true;
     if (newSkillProps.icon.isEmoji !== data.icon.isEmoji) return true;

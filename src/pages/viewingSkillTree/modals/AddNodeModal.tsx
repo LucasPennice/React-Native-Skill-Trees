@@ -338,7 +338,7 @@ function SelectableNodeView({
             ]}
             entering={FadeInDown}>
             <Pressable onPress={selectNode} style={[centerFlex, { height: 90, width: 90 }]}>
-                <NodeView node={n} size={65} />
+                <NodeView node={n} size={65} completePercentage={n.data.isCompleted ? 100 : 0} />
 
                 {isSelected && (
                     <Pressable style={{ position: "absolute", top: 5, right: 5, zIndex: 2 }} onPress={deleteNode}>

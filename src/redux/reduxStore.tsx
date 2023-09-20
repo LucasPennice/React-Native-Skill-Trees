@@ -10,6 +10,8 @@ import screenDimentionsReducer from "./slices/screenDimentionsSlice";
 import userReducer from "./slices/userSlice";
 import toBeDepricatedCurrentTreeReducer, { UserTreesSlice } from "./slices/userTreesSlice";
 import { Skill, Tree } from "@/types";
+import homeTreeSlice, { HomeTreeSlice } from "./slices/homeTreeSlice";
+import { WHITE_GRADIENT } from "@/parameters";
 
 const persistConfig: PersistConfig<any> = {
     key: "root",
@@ -23,25 +25,40 @@ const persistConfig: PersistConfig<any> = {
             //@ts-ignore
             const userTreesSliceEmpty = state.userTrees.ids[0] === null;
 
+            //@ts-ignore
+            const migrateToHomeTreeSlice = shouldMigrateToHomeTree(state.homeTree);
+
+            let updatedState = { ...state };
+
             if (nodesSliceEmpty || userTreesSliceEmpty) {
                 //@ts-ignore
-                const migratedState = migrationFunction(state.currentTree.userTrees);
+                const { nodeState, userTrees } = migrationFunction(state.currentTree.userTrees);
 
-                //ESTO deberia migrar al nuevo formato de data normalizado
-                // y despues borrar la data vieja
-                return Promise.resolve({
-                    ...state,
-                    nodes: migratedState.nodeState,
-                    userTrees: migratedState.userTrees,
-                });
+                //@ts-ignore
+                updatedState[nodes] = nodeState;
+                //@ts-ignore
+                updatedState[userTrees] = userTrees;
+                //@ts-ignore
+                updatedState[currentTree] = undefined;
             }
 
-            return Promise.resolve(state);
+            if (migrateToHomeTreeSlice) {
+                //@ts-ignore
+                updatedState[homeTree] = {
+                    //@ts-ignore
+                    accentColor: state.canvasDisplaySettings.homepageTreeColor,
+                    //@ts-ignore
+                    icon: { isEmoji: false, text: state.canvasDisplaySettings.homepageTreeIcon },
+                    //@ts-ignore
+                    treeName: state.canvasDisplaySettings.homepageTreeName,
+                } as HomeTreeSlice;
+            }
+            return Promise.resolve(updatedState);
         } catch (error) {
             return Promise.resolve(state);
         }
     },
-    blacklist: ["addTree", "treeOptions"],
+    blacklist: ["addTree"],
 };
 
 const rootReducer = combineReducers({
@@ -53,6 +70,7 @@ const rootReducer = combineReducers({
     user: userReducer,
     userTrees: newUserTreesSlice,
     nodes: nodesSlice,
+    homeTree: homeTreeSlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -132,4 +150,18 @@ function migrationFunction(userTrees: UserTreesSlice["userTrees"]) {
             treeName: userTree.treeName,
         };
     }
+}
+
+function shouldMigrateToHomeTree(homeTreeState?: HomeTreeSlice) {
+    if (homeTreeState === undefined) return true;
+
+    const doesHomeTreeHasDefaultValues =
+        homeTreeState.accentColor === WHITE_GRADIENT &&
+        homeTreeState.icon.text === "L" &&
+        homeTreeState.icon.isEmoji === false &&
+        homeTreeState.treeName === "Life Skills";
+
+    if (doesHomeTreeHasDefaultValues) return true;
+
+    return false;
 }

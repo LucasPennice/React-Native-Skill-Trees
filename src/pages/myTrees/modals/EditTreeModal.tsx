@@ -31,8 +31,8 @@ function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; c
     const dispatch = useAppDispatch();
 
     const deleteTree = () => {
-        dispatch(removeUserTree({ treeId: treeData.treeId, nodes: treeData.nodes }));
         closeModal();
+        dispatch(removeUserTree({ treeId: treeData.treeId, nodes: treeData.nodes }));
     };
 
     const confirmDeleteTree = () =>

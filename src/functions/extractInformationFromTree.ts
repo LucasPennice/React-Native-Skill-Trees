@@ -454,6 +454,32 @@ export function checkIfUncompletionIsAllowedForNode(nodeToCheck: Tree<Skill>) {
     return true;
 }
 
+export function checkIfCompletionAllowed(node: NormalizedNode, nodesOfTree: NormalizedNode[]) {
+    const nodeDoesNotHaveParent = node.parentId === null;
+
+    if (nodeDoesNotHaveParent) return true;
+
+    const parentNode = nodesOfTree.find((n) => n.nodeId === node.parentId);
+
+    if (!parentNode) throw new Error(`parentNode undefined at checkIfCompletionIsAllowed for ${node.nodeId} - ${node.data.name}`);
+
+    if (parentNode.category !== "SKILL") return true;
+    if (parentNode.data.isCompleted) return true;
+
+    return false;
+}
+
+export function checkIfReverseCompletionAllowed(node: NormalizedNode, nodesOfTree: NormalizedNode[]) {
+    if (node.childrenIds.length === 0) return true;
+
+    const childrenOfNode = nodesOfTree.filter((n) => node.childrenIds.includes(n.nodeId));
+
+    const immediateChildrenComplete = childrenOfNode.find((c) => c.data.isCompleted === true);
+    if (immediateChildrenComplete !== undefined) return false;
+
+    return true;
+}
+
 export function treeNodeToCoordinate(node: Tree<Skill>): NodeCoordinate {
     const result: NodeCoordinate = {
         accentColor: node.accentColor,

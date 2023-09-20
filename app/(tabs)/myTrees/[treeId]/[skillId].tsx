@@ -12,7 +12,7 @@ import RenderSkillDetails from "@/pages/skillPage/RenderSkillDetails";
 import { getDefaultFns } from "@/pages/skillPage/functions";
 import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
-import { selectNodeById, updateNode } from "@/redux/slices/nodesSlice";
+import { selectNodeById, updateNodes } from "@/redux/slices/nodesSlice";
 import { Milestone, MotiveToLearn, NormalizedNode, ObjectWithId, Skill, SkillDetails, SkillLogs, SkillModal, SkillResource } from "@/types";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -30,7 +30,7 @@ function useGetCurrentSkill(nodeId: string) {
 function useUpdateTreeWithNewSkillDetails(updatedSkill: Skill, nodeId: string) {
     const dispatch = useAppDispatch();
 
-    const updateSkillDetails = () => dispatch(updateNode({ changes: { data: updatedSkill }, id: nodeId }));
+    const updateSkillDetails = () => dispatch(updateNodes([{ changes: { data: updatedSkill }, id: nodeId }]));
 
     return updateSkillDetails;
 }

@@ -1,51 +1,56 @@
-import { usePathname } from "expo-router";
-import { Linking, ScrollView, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
-import { countCompletedSkillNodes, countSkillNodes, treeCompletedSkillPercentage } from "../../../functions/extractInformationFromTree";
+import AppText from "@/components/AppText";
+import GoToPageButton from "@/components/GoToPageButton";
 import { LogCard } from "@/pages/skillPage/DisplayDetails/Logs";
 import { MotivesToLearnCard } from "@/pages/skillPage/DisplayDetails/MotivesToLearn";
 import { ResourceCard } from "@/pages/skillPage/DisplayDetails/SkillResources";
 import { MilestoneCard } from "@/pages/skillPage/Milestones";
-import { centerFlex, colors } from "@/parameters";
-import { Skill, Tree } from "@/types";
-import AppText from "@/components/AppText";
-import GoToPageButton from "@/components/GoToPageButton";
+import { HOMEPAGE_TREE_ID, centerFlex, colors } from "@/parameters";
+import { useAppSelector } from "@/redux/reduxHooks";
+import { TreeData, selectAllTrees, selectTreeById } from "@/redux/slices/newUserTreesSlice";
+import { selectAllNodes, selectNodesOfTree } from "@/redux/slices/nodesSlice";
+import { NodeCategory, NormalizedNode } from "@/types";
+import { usePathname } from "expo-router";
+import { Linking, ScrollView, View } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { countCompleteNodes } from "../../../functions/extractInformationFromTree";
 
 function Viewing({
     functions,
     selectedNode,
-    selectedTree,
+    selectedTreeId,
 }: {
     functions: { goToSkillPage: () => void; goToTreePage: () => void; goToEditTreePage: () => void };
-    selectedNode: Tree<Skill>;
-    selectedTree: Tree<Skill>;
+    selectedNode: NormalizedNode;
+    selectedTreeId: string;
 }) {
     const pathname = usePathname();
+
+    const selectedTree = useAppSelector(selectTreeById(selectedTreeId));
+
+    const treeData = useAppSelector(selectTreeById(selectedNode.treeId));
 
     const isNotOnTreePage = !pathname.includes("/myTrees");
 
     const { goToSkillPage, goToTreePage, goToEditTreePage } = functions;
 
-    const { category, treeName } = selectedNode;
-
     return (
         <Animated.View entering={FadeInDown}>
             <AppText style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 10 }} fontSize={24}>
-                {category === "SKILL" ? selectedNode.data.name : treeName}
+                {selectedNode.category === "SKILL" ? selectedNode.data.name : treeData.treeName}
             </AppText>
 
-            {category === "SKILL" && <SkillDetails data={selectedNode} goToSkillPage={goToSkillPage} />}
+            {selectedNode.category === "SKILL" && <SkillDetails data={selectedNode} goToSkillPage={goToSkillPage} />}
 
-            {category !== "SKILL" && <TreeStats category={category} selectedTree={selectedTree} selectedNode={selectedNode} />}
+            {selectedNode.category !== "SKILL" && <TreeStats category={selectedNode.category} selectedTree={selectedTree} />}
 
-            {category === "SKILL_TREE" && <GoToPageButton onPress={goToEditTreePage} title={"Edit tree"} />}
+            {selectedNode.category === "SKILL_TREE" && <GoToPageButton onPress={goToEditTreePage} title={"Edit tree"} />}
 
-            {category !== "USER" && isNotOnTreePage && <GoToPageButton onPress={goToTreePage} title={`Skill Tree`} />}
+            {selectedNode.category !== "USER" && isNotOnTreePage && <GoToPageButton onPress={goToTreePage} title={`Skill Tree`} />}
         </Animated.View>
     );
 }
 
-function SkillDetails({ goToSkillPage, data }: { goToSkillPage: () => void; data: Tree<Skill> }) {
+function SkillDetails({ goToSkillPage, data }: { goToSkillPage: () => void; data: NormalizedNode }) {
     const {
         data: { milestones, logs, motivesToLearn, usefulResources },
     } = data;
@@ -105,18 +110,13 @@ function SkillDetails({ goToSkillPage, data }: { goToSkillPage: () => void; data
     );
 }
 
-function TreeStats({
-    selectedTree,
-    category,
-    selectedNode,
-}: {
-    selectedTree: Tree<Skill>;
-    category: Tree<Skill>["category"];
-    selectedNode: Tree<Skill>;
-}) {
-    const completedPercenage = treeCompletedSkillPercentage(selectedNode);
-    const completedNodes = countCompletedSkillNodes(selectedNode);
-    const nodes = countSkillNodes(selectedNode);
+function TreeStats({ selectedTree, category }: { selectedTree: TreeData; category: NodeCategory }) {
+    //Redux Related
+    const nodesOfTree = useAppSelector(selectedTree.treeId === HOMEPAGE_TREE_ID ? selectAllNodes : selectNodesOfTree(selectedTree.treeId));
+
+    const completedSkillsQty = countCompleteNodes(nodesOfTree);
+    const skillsQty = nodesOfTree.length - 1;
+    const completePercentage = skillsQty === 0 ? 0 : (completedSkillsQty / skillsQty) * 100;
 
     return (
         <View style={{ borderTopColor: colors.line, borderColor: "transparent", borderWidth: 1, paddingTop: 15 }}>
@@ -124,24 +124,24 @@ function TreeStats({
                 <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
                     Completed (%)
                 </AppText>
-                <AppText style={{ color: selectedNode.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
-                    {completedPercenage.toFixed(2)}%
+                <AppText style={{ color: selectedTree.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
+                    {completePercentage.toFixed(2)}%
                 </AppText>
             </View>
             <View style={[centerFlex, { flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }]}>
                 <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
                     Completed Skills
                 </AppText>
-                <AppText style={{ color: selectedNode.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
-                    {completedNodes}
+                <AppText style={{ color: selectedTree.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
+                    {completedSkillsQty}
                 </AppText>
             </View>
             <View style={[centerFlex, { flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }]}>
                 <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
                     Total Skills
                 </AppText>
-                <AppText style={{ color: selectedNode.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
-                    {nodes}
+                <AppText style={{ color: selectedTree.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
+                    {skillsQty}
                 </AppText>
             </View>
 
@@ -176,16 +176,14 @@ function TreeStats({
                 </AppText> */}
         </View>
     );
-    function UserTreeStats() {
-        const subTreeNodeQty = selectedTree.children.map((t) => countSkillNodes(t));
-        const maxNodeQty = Math.max(...subTreeNodeQty);
-        const largestSubTreeIdx = subTreeNodeQty.indexOf(maxNodeQty);
-        const largestSubTree = selectedTree.children[largestSubTreeIdx];
 
-        const subTreeCompletion = selectedTree.children.map((t) => treeCompletedSkillPercentage(t));
-        const maxCompletion = Math.max(...subTreeCompletion);
-        const mostCompleteSubTreeIdx = subTreeCompletion.indexOf(maxCompletion);
-        const mostCompleteSubTree = selectedTree.children[mostCompleteSubTreeIdx];
+    function UserTreeStats() {
+        const allTrees = useAppSelector(selectAllTrees);
+        const allNodes = useAppSelector(selectAllNodes);
+
+        const { largestSubTreeName, quantity: largestSubTreeQuantity } = getLargestSubTree(allTrees);
+
+        const { completePercentage, mostCompleteSubTreeName } = getMostCompleteSubTree(allTrees, allNodes);
 
         return (
             <>
@@ -193,31 +191,31 @@ function TreeStats({
                     <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
                         Largest tree is
                     </AppText>
-                    <AppText style={{ color: selectedNode.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
-                        {largestSubTree.data.name}
+                    <AppText style={{ color: selectedTree.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
+                        {largestSubTreeName}
                     </AppText>
                     <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
                         with
                     </AppText>
-                    <AppText style={{ color: selectedNode.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
-                        {maxNodeQty}
+                    <AppText style={{ color: selectedTree.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
+                        {largestSubTreeQuantity}
                     </AppText>
                     <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
-                        {maxNodeQty === 1 ? "node" : "nodes"}
+                        {largestSubTreeQuantity === 1 ? "node" : "nodes"}
                     </AppText>
                 </View>
                 <View style={[centerFlex, { flexDirection: "row", justifyContent: "flex-start", marginBottom: 20, gap: 4, flexWrap: "wrap" }]}>
                     <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
                         Most complete tree is
                     </AppText>
-                    <AppText style={{ color: selectedNode.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
-                        {mostCompleteSubTree.data.name}
+                    <AppText style={{ color: selectedTree.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
+                        {mostCompleteSubTreeName}
                     </AppText>
                     <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
                         with
                     </AppText>
-                    <AppText style={{ color: selectedNode.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
-                        {maxCompletion.toFixed(2)}%
+                    <AppText style={{ color: selectedTree.accentColor.color1, fontFamily: "helveticaBold" }} fontSize={16}>
+                        {completePercentage.toFixed(2)}%
                     </AppText>
                     <AppText style={{ color: colors.unmarkedText }} fontSize={16}>
                         completion
@@ -226,6 +224,45 @@ function TreeStats({
             </>
         );
     }
+}
+
+function getLargestSubTree(allTrees: TreeData[]) {
+    let largestSubTreeName = "";
+    let quantity = 0;
+
+    for (const tree of allTrees) {
+        if (tree.nodes.length > quantity) {
+            largestSubTreeName = tree.treeName;
+            quantity = tree.nodes.length;
+        }
+    }
+
+    return { largestSubTreeName, quantity };
+}
+
+function getMostCompleteSubTree(allTrees: TreeData[], allNodes: NormalizedNode[]) {
+    let mostCompleteSubTreeName = "";
+    let completeQuantity = 0;
+    let quantity = 0;
+    let completePercentage = 0;
+
+    for (const tree of allTrees) {
+        const treeCompleteSkillQty = allNodes.reduce((acc, node) => {
+            if (node.treeId === tree.treeId && node.data.isCompleted) return acc + 1;
+            return acc;
+        }, 0);
+
+        const treeCompletePercentage = (treeCompleteSkillQty / tree.nodes.length) * 100;
+
+        if (treeCompletePercentage > completePercentage) {
+            mostCompleteSubTreeName = tree.treeName;
+            completeQuantity = treeCompleteSkillQty;
+            quantity = tree.nodes.length;
+            completePercentage = treeCompletePercentage;
+        }
+    }
+
+    return { mostCompleteSubTreeName, completeQuantity, quantity, completePercentage };
 }
 
 export default Viewing;

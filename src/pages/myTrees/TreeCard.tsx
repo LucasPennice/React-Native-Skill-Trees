@@ -19,15 +19,12 @@ function TreeCard({
     changeTreeAndNavigateToViewingTree: () => void;
     openEditTreeModal: (treeId: string) => void;
 }) {
-    //Redux Related
-    const nodesOfTree = useAppSelector(selectNodesOfTree(element.treeId));
-
     const { width } = useAppSelector(selectSafeScreenDimentions);
     //
-
+    const nodesOfTree = useAppSelector(selectNodesOfTree(element.treeId));
     const completedSkillsQty = countCompleteNodes(nodesOfTree);
     const skillsQty = nodesOfTree.length - 1;
-    const completedPercentage = (completedSkillsQty / skillsQty) * 100;
+    const completePercentage = skillsQty === 0 ? 0 : (completedSkillsQty / skillsQty) * 100;
 
     const tapGesture = Gesture.Tap().onEnd((e) => {
         runOnJS(changeTreeAndNavigateToViewingTree)();
@@ -79,13 +76,13 @@ function TreeCard({
                         {element.treeName ?? "tree"}
                     </AppText>
                     <AppText fontSize={20} style={{ color: "#FFFFFF5D" }}>
-                        {completedPercentage.toFixed(0)}% Complete
+                        {completePercentage.toFixed(0)}% Complete
                     </AppText>
                     <AppText fontSize={20} style={{ color: "#FFFFFF5D" }}>
                         {completedSkillsQty} skills of {skillsQty}
                     </AppText>
                 </View>
-                <NodeView node={element} size={60} />
+                <NodeView node={element} size={60} completePercentage={completePercentage} />
             </Animated.View>
         </GestureDetector>
     );

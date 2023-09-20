@@ -1,8 +1,8 @@
 import { router } from "expo-router";
 import { deleteNodeWithNoChildren, updateNodeAndTreeCompletion } from "../../../functions/mutateTree";
-import { Skill, Tree } from "../../../types";
+import { NormalizedNode, Skill, Tree } from "../../../types";
 
-function selectedNodeMenuQueryFns(selectedNode: Tree<Skill> | undefined, clearSelectedNode: () => void) {
+function selectedNodeMenuQueryFns(selectedNode: NormalizedNode | undefined, clearSelectedNode: () => void) {
     return {
         closeMenu: clearSelectedNode,
         goToSkillPage: () => {

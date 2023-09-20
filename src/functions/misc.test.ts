@@ -1260,7 +1260,28 @@ test("insertNodeAsChild - At leaf position", () => {
     ];
 
     const output = {
-        nodesToUpdate: [],
+        nodesToUpdate: [
+            {
+                category: "SKILL",
+                childrenIds: ["newNode", "newNode2"],
+                data: {
+                    usefulResources: [],
+                    icon: { isEmoji: false, text: "text" },
+                    isCompleted: false,
+                    logs: [],
+                    milestones: [],
+                    motivesToLearn: [],
+                    name: "skillName",
+                },
+                isRoot: false,
+                level: 1,
+                nodeId: "1-1",
+                parentId: "rootId",
+                treeId: "mockTreeId",
+                x: 0,
+                y: 0,
+            },
+        ],
         nodesToAdd: [
             {
                 category: "SKILL",

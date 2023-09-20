@@ -1,5 +1,5 @@
 import { CanvasDisplaySettings } from "@/redux/slices/canvasDisplaySettingsSlice";
-import { HOMETREE_ROOT_ID } from "../../parameters";
+import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID } from "../../parameters";
 import { NodeCategory, NodeCoordinate, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../../types";
 import { round8Decimals } from "../coordinateSystem";
 import { updateRadiusPerLevelTable } from "../misc";
@@ -128,7 +128,7 @@ export function buildHomepageTree(userTrees: Tree<Skill>[], canvasDisplaySetting
         data: getDefaultSkillValue(homepageTreeName, false, { isEmoji, text }),
         level: 0,
         parentId: null,
-        treeId: "HomepageTree",
+        treeId: HOMEPAGE_TREE_ID,
         treeName: homepageTreeName,
         x: 0,
         y: 0,

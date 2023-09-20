@@ -10,7 +10,6 @@ import SelectedNodeMenu, {
     SelectedNodeMenuState,
 } from "@/components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { IsSharingAvailableContext } from "@/context";
-import { findNodeById } from "@/functions/extractInformationFromTree";
 import { insertNodeAsChild, insertNodeAsParent, insertNodeAsSibling } from "@/functions/misc";
 import { handleTreeBuild } from "@/functions/treeCalculateCoordinates";
 import AddNodeStateIndicator from "@/pages/viewingSkillTree/AddNodeStateIndicator";
@@ -20,9 +19,9 @@ import DeleteNodeModal from "@/pages/viewingSkillTree/modals/DeleteNodeModal";
 import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { selectTreeById } from "@/redux/slices/newUserTreesSlice";
-import { addNodes, removeNodes, selectNodesOfTree, updateNodes, updateNode as updatedNodeFromNodeSlice } from "@/redux/slices/nodesSlice";
+import { addNodes, removeNodes, selectNodeById, selectNodesOfTree, updateNodes } from "@/redux/slices/nodesSlice";
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
-import { DnDZone, NodeCoordinate, NormalizedNode, Skill, Tree, TreeCoordinateData } from "@/types";
+import { DnDZone, NormalizedNode, Skill, Tree, TreeCoordinateData } from "@/types";
 import { useCanvasRef } from "@shopify/react-native-skia";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
@@ -62,7 +61,7 @@ function useViewingSkillTreeState(treeId: string) {
 
     let treeCoordinate: TreeCoordinateData = { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: nodeCoordinatesCentered };
 
-    return { selectedTree, treeCoordinate };
+    return { selectedTree, treeCoordinate, treeNodes, treeData };
 }
 
 function useModalStateReducer() {
@@ -115,11 +114,13 @@ function useHandleRouteParams(
     treeCoordinate: TreeCoordinateData,
     functions: {
         updateSelectedNewNodePosition: (position: DnDZone) => void;
-        updateSelectedNodeCoord: (node: NodeCoordinate, menuMode: "EDITING" | "VIEWING") => void;
+        updateSelectedNodeCoord: (node: NormalizedNode, menuMode: "EDITING" | "VIEWING") => void;
     }
 ) {
     //@ts-ignore
     const { nodeId, addNewNodePosition, selectedNodeMenuMode }: RoutesParams["myTrees_treeId"] = useLocalSearchParams();
+
+    const selectedNode = useAppSelector(selectNodeById(nodeId))!;
 
     useEffect(() => {
         if (addNewNodePosition) {
@@ -135,30 +136,30 @@ function useHandleRouteParams(
 
         const updatedSelectedNodeCoord = treeCoordinate.nodeCoordinates.find((n) => n.nodeId === nodeId);
 
-        if (updatedSelectedNodeCoord) functions.updateSelectedNodeCoord(updatedSelectedNodeCoord, selectedNodeMenuMode ?? "VIEWING");
+        if (updatedSelectedNodeCoord) functions.updateSelectedNodeCoord(selectedNode, selectedNodeMenuMode ?? "VIEWING");
 
         //eslint-disable-next-line
     }, []);
 }
 
 function useNodeToDelete() {
-    const [nodeToDelete, setNodeToDelete] = useState<Tree<Skill> | null>(null);
+    const [nodeToDelete, setNodeToDelete] = useState<NormalizedNode | null>(null);
 
     const resetNodeToDelete = () => setNodeToDelete(null);
 
-    const updateNodeToDelete = (node: Tree<Skill>) => setNodeToDelete(node);
+    const updateNodeToDelete = (node: NormalizedNode) => setNodeToDelete(node);
 
     return [nodeToDelete, { updateNodeToDelete, resetNodeToDelete }] as const;
 }
 
 function useChildrenHoistSelectorProps(
-    mutateNodeToDelete: { updateNodeToDelete: (node: Tree<Skill>) => void; resetNodeToDelete: () => void },
+    mutateNodeToDelete: { updateNodeToDelete: (node: NormalizedNode) => void; resetNodeToDelete: () => void },
     dispatchModalState: React.Dispatch<ModalReducerAction>,
     clearSelectedNodeCoord: () => void
 ) {
     const { resetNodeToDelete, updateNodeToDelete } = mutateNodeToDelete;
 
-    const openChildrenHoistSelector = useCallback((nodeToDelete: Tree<Skill>) => {
+    const openChildrenHoistSelector = useCallback((nodeToDelete: NormalizedNode) => {
         updateNodeToDelete(nodeToDelete);
         dispatchModalState("openCandidatesToHoistModal");
     }, []);
@@ -214,6 +215,7 @@ function useAddNodeModalFunctions(
         switch (dnDZone.type) {
             case "CHILDREN":
                 let childCase = insertNodeAsChild(nodesOfTree, normalizedNewNodes, dnDZone);
+
                 dispatch(
                     updateNodes(
                         childCase.nodesToUpdate.map((node) => {
@@ -294,52 +296,51 @@ function useSelectedNewNodePositionState() {
 
 export type SelectedNodeCoordState = readonly [
     {
-        node: NodeCoordinate | null;
+        node: NormalizedNode | null;
         menuMode: "EDITING" | "VIEWING";
     } | null,
     {
         readonly clearSelectedNodeCoord: () => void;
-        readonly updateSelectedNodeCoord: (node: NodeCoordinate, menuMode: "EDITING" | "VIEWING") => void;
+        readonly updateSelectedNodeCoord: (node: NormalizedNode, menuMode: "EDITING" | "VIEWING") => void;
     }
 ];
 
 function useSelectedNodeCoordState(dispatchModalState: React.Dispatch<ModalReducerAction>) {
-    const [selectedNodeCoord, setSelectedNodeCoord] = useState<{ node: NodeCoordinate | null; menuMode: "EDITING" | "VIEWING" } | null>(null);
+    const [selectedNodeCoord, setSelectedNodeCoord] = useState<{ node: NormalizedNode | null; menuMode: "EDITING" | "VIEWING" } | null>(null);
 
     const clearSelectedNodeCoord = () => {
+        // console.log("RUN");
         setSelectedNodeCoord(null);
+        // console.log("RUN2");
         dispatchModalState("returnToIdle");
+        // console.log("RUN3");
     };
-    const updateSelectedNodeCoord = (node: NodeCoordinate, menuMode: "EDITING" | "VIEWING") => setSelectedNodeCoord({ node, menuMode });
+    const updateSelectedNodeCoord = (node: NormalizedNode, menuMode: "EDITING" | "VIEWING") => setSelectedNodeCoord({ node, menuMode });
 
     return [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] as const;
 }
 
 function useGetSelectedNodeMenuFns(
-    selectedNode: Tree<Skill> | undefined,
-    selectedTree: Tree<Skill>,
-    openChildrenHoistSelector: (nodeToDelete: Tree<Skill>) => void,
+    selectedNode: NormalizedNode | undefined,
+    openChildrenHoistSelector: (nodeToDelete: NormalizedNode) => void,
     clearSelectedNodeCoord: () => void
 ) {
     const dispatch = useAppDispatch();
 
     const closeMenu = clearSelectedNodeCoord;
 
-    const handleDeleteNode = (nodeToDelete: Tree<Skill>) => {
-        if (!selectedTree) throw new Error("No selectedTree at deleteNode");
-        if (!selectedNode) throw new Error("No selected node at deleteNode");
-
-        if (nodeToDelete.children.length !== 0) return openChildrenHoistSelector(nodeToDelete);
+    const handleDeleteNode = (nodeToDelete: NormalizedNode) => {
+        if (nodeToDelete.childrenIds.length !== 0) return openChildrenHoistSelector(nodeToDelete);
 
         dispatch(removeNodes({ treeId: nodeToDelete.treeId, nodesToDelete: [nodeToDelete.nodeId] }));
         clearSelectedNodeCoord();
     };
 
-    const updateNode = (updatedNode: Tree<Skill>) => {
+    const updateNode = (updatedNode: NormalizedNode) => {
         try {
             if (!selectedNode) throw new Error("No selected node at updateNode");
 
-            dispatch(updatedNodeFromNodeSlice({ id: updatedNode.nodeId, changes: { data: updatedNode.data } }));
+            dispatch(updateNodes([{ id: updatedNode.nodeId, changes: { data: updatedNode.data } }]));
         } catch (error) {
             console.error(error);
         }
@@ -375,7 +376,7 @@ function IndividualSkillTreePage() {
     const { treeId }: RoutesParams["myTrees_treeId"] = localParams;
 
     //Redux State
-    const { selectedTree, treeCoordinate } = useViewingSkillTreeState(treeId);
+    const { selectedTree, treeCoordinate, treeNodes, treeData } = useViewingSkillTreeState(treeId);
 
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     //
@@ -426,16 +427,15 @@ function IndividualSkillTreePage() {
         openNewNodeModal: () => dispatchModalState("openNewNodeModal"),
     };
 
-    const selectedNode = findNodeById(selectedTree, selectedNodeCoord?.node?.nodeId ?? null);
+    const selectedNode = treeNodes.find((n) => n.nodeId === selectedNodeCoord?.node?.nodeId ?? null);
 
     const selectedNodeMenuState: SelectedNodeMenuState = {
         screenDimensions,
         selectedNode: selectedNode!,
-        selectedTree,
         initialMode: selectedNodeCoord?.menuMode ?? "VIEWING",
     };
 
-    const selectedNodeMenuFunctions = useGetSelectedNodeMenuFns(selectedNode, selectedTree, openChildrenHoistSelector, clearSelectedNodeCoord);
+    const selectedNodeMenuFunctions = useGetSelectedNodeMenuFns(selectedNode, openChildrenHoistSelector, clearSelectedNodeCoord);
 
     return (
         <View style={{ position: "relative", backgroundColor: colors.background, flex: 1, overflow: "hidden" }}>

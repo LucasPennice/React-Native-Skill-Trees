@@ -29,7 +29,7 @@ function MockUserNode({
             },
         };
 
-        return <NodeView node={node} size={CanvasSettingsNodeSize} hideIcon={!showIcons} />;
+        return <NodeView completePercentage={100} node={node} size={CanvasSettingsNodeSize} hideIcon={!showIcons} />;
     }, [homepageTreeIcon, homepageTreeColor, homepageTreeName[0], showIcons]);
     return (
         <View style={{ gap: 7 }}>
@@ -56,6 +56,7 @@ function MockSkillTreeNode({
     const Node = useMemo(() => {
         return (
             <NodeView
+                completePercentage={100}
                 node={{ ...CanvasSettingsMockNode, accentColor: oneColorPerTree ? homepageTreeColor : nodeGradients[3] }}
                 size={CanvasSettingsNodeSize}
                 hideIcon={!showIcons}

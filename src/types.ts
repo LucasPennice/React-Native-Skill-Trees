@@ -202,15 +202,14 @@ export type InteractiveNodeState = {
 };
 
 export type InteractiveTreeFunctions = {
-    onNodeClick?: (node: NodeCoordinate) => void;
+    onNodeClick?: (node: NormalizedNode) => void;
     onDndZoneClick?: (clickedZone?: DnDZone) => void;
     nodeMenu: {
         openCanvasSettingsModal?: () => void;
         confirmDeleteTree: (treeId: string, nodesIdOfTree: string[]) => void;
-        confirmDeleteNode: (node: Tree<Skill>) => void;
-        selectNode: <T extends NodeCoordinate>(node: T, menuMode: "EDITING" | "VIEWING") => void;
-        openAddSkillModal: (zoneType: DnDZone["type"], node: Tree<Skill>) => void;
-        toggleCompletionOfSkill: (node: Tree<Skill>) => void;
+        confirmDeleteNode: (node: NormalizedNode) => void;
+        selectNode: <T extends NormalizedNode>(node: T, menuMode: "EDITING" | "VIEWING") => void;
+        openAddSkillModal: <T extends NormalizedNode>(zoneType: DnDZone["type"], node: T) => void;
     };
     runOnTreeUpdate?: (dndZoneCoordinates: DnDZone[]) => void;
 };

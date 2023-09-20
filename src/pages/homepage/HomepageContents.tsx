@@ -1,5 +1,6 @@
 import useGetUserTrees from "@/components/treeRelated/hooks/useGetUserTrees";
 import { buildHomepageTree } from "@/functions/treeToRadialCoordinates/general";
+import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { useCanvasRef } from "@shopify/react-native-skia";
 import { useNavigation } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -9,11 +10,10 @@ import ShareTreeScreenshot from "../../components/takingScreenshot/ShareTreeScre
 import CanvasSettingsModal from "../../components/treeRelated/canvasSettingsModal/CanvasSettingsModal";
 import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { selectedNodeMenuQueryFns } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenuFunctions";
-import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
-import { NodeCoordinate } from "../../types";
+import { NormalizedNode } from "../../types";
 import HomepageTree from "./HomepageTree";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
@@ -28,12 +28,13 @@ function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
 }
 
 function useHomepageContentsState() {
-    const userTrees = useGetUserTrees();
+    const { userTrees, allNodes } = useGetUserTrees();
+    const homePageTreeData = useAppSelector(selectHomeTree);
 
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
 
-    return { canvasDisplaySettings, screenDimensions, userTrees };
+    return { canvasDisplaySettings, screenDimensions, userTrees, allNodes, homePageTreeData };
 }
 
 function useTakingScreenshotState() {
@@ -46,10 +47,10 @@ function useTakingScreenshotState() {
 }
 
 function useSelectedNodeCoordState() {
-    const [selectedNodeCoord, setSelectedNodeCoord] = useState<NodeCoordinate | null>(null);
+    const [selectedNodeCoord, setSelectedNodeCoord] = useState<NormalizedNode | null>(null);
 
     const clearSelectedNodeCoord = () => setSelectedNodeCoord(null);
-    const updateSelectedNodeCoord = (value: NodeCoordinate) => setSelectedNodeCoord(value);
+    const updateSelectedNodeCoord = (value: NormalizedNode) => setSelectedNodeCoord(value);
 
     return [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] as const;
 }
@@ -64,7 +65,7 @@ function useCanvasSettingsState() {
 }
 
 function HomepageContents() {
-    const { canvasDisplaySettings, userTrees, screenDimensions } = useHomepageContentsState();
+    const { canvasDisplaySettings, userTrees, screenDimensions, allNodes } = useHomepageContentsState();
 
     const takingScreenShotState = useTakingScreenshotState();
     const selectedNodeCoordState = useSelectedNodeCoordState();
@@ -78,14 +79,13 @@ function HomepageContents() {
 
     const canvasRef = useCanvasRef();
 
-    const selectedNode = findNodeByIdInHomeTree(homepageTree, selectedNodeCoord);
+    const selectedNode = allNodes.find((n) => n.nodeId === selectedNodeCoord?.nodeId);
 
     const selectedNodeQueryFns = selectedNodeMenuQueryFns(selectedNode, clearSelectedNodeCoord);
 
     const selectedNodeMenuState: SelectedNodeMenuState = {
         screenDimensions,
         selectedNode: selectedNode!,
-        selectedTree: homepageTree,
         initialMode: "VIEWING",
     };
 

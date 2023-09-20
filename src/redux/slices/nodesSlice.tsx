@@ -4,7 +4,11 @@ import { RootState } from "../reduxStore";
 import { addUserTree, removeUserTree, updateUserTree } from "./newUserTreesSlice";
 
 const nodesAdapter = createEntityAdapter<NormalizedNode>({ selectId: (node) => node.nodeId });
-export const { selectAll: selectAllNodes, selectTotal: selectTotalNodeNumber } = nodesAdapter.getSelectors<RootState>((state) => state.nodes);
+export const {
+    selectAll: selectAllNodes,
+    selectTotal: selectTotalNodeNumber,
+    selectIds: selectAllNodeIds,
+} = nodesAdapter.getSelectors<RootState>((state) => state.nodes);
 
 const initialState = nodesAdapter.getInitialState();
 
@@ -14,9 +18,6 @@ export const nodesSlice = createSlice({
     name: "nodesSlice",
     initialState,
     reducers: {
-        updateNode: (state, action: PayloadAction<Update<NormalizedNode>>) => {
-            nodesAdapter.updateOne(state, action.payload);
-        },
         updateNodes: nodesAdapter.updateMany,
         addNodes: (state, action: PayloadAction<{ treeId: string; nodesToAdd: NormalizedNode[] }>) => {
             nodesAdapter.addMany(state, action.payload.nodesToAdd);
@@ -38,7 +39,6 @@ export const nodesSlice = createSlice({
                     nodesAdapter.updateOne(state, { id: parentNode.nodeId, changes: { childrenIds: childrenWithoutNodeToDelete } });
                 }
             });
-
             //Remove the nodes to delete
             nodesAdapter.removeMany(state, action.payload.nodesToDelete);
         },
@@ -88,7 +88,7 @@ export const nodesSlice = createSlice({
     },
 });
 
-export const { addNodes, removeNodes, updateNode, updateNodes } = nodesSlice.actions;
+export const { addNodes, removeNodes, updateNodes } = nodesSlice.actions;
 
 export default nodesSlice.reducer;
 
@@ -108,7 +108,9 @@ export const selectNodesOfTree = (treeId: string) => (state: RootState) => {
     return result;
 };
 
-export const selectNodeById = (nodeId: string) => (state: RootState) => {
+export const selectNodeById = (nodeId?: string) => (state: RootState) => {
+    if (!nodeId) return undefined;
+
     const node = state.nodes.entities[nodeId];
 
     if (!node) throw new Error("node undefined at selectNodeById");

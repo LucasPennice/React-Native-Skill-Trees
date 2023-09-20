@@ -18,7 +18,7 @@ function MyTrees() {
 
     const [editingTreeId, setEditingTreeId] = useState<string | null>(null);
     //Redux Related
-    const userTrees = useGetUserTrees();
+    const { userTrees } = useGetUserTrees();
 
     const dispatch = useAppDispatch();
 
