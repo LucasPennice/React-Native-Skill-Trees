@@ -1,4 +1,4 @@
-import { CanvasDisplaySettings } from "@/redux/slices/canvasDisplaySettingsSlice";
+import { HomeTreeSlice } from "@/redux/slices/homeTreeSlice";
 import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID } from "../../parameters";
 import { NodeCategory, NodeCoordinate, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../../types";
 import { round8Decimals } from "../coordinateSystem";
@@ -100,8 +100,8 @@ export function invertTree<T extends { children: T[] }>(rootNode: T) {
     return result;
 }
 
-export function buildHomepageTree(userTrees: Tree<Skill>[], canvasDisplaySettings: CanvasDisplaySettings) {
-    const { homepageTreeColor, homepageTreeName, homepageTreeIcon } = canvasDisplaySettings;
+export function buildHomepageTree(userTrees: Tree<Skill>[], homeTreeData: HomeTreeSlice) {
+    const { accentColor, treeName, icon } = homeTreeData;
 
     const subTreesWithUpdatedRootAndParentId = userTrees.map((tree) => {
         return { ...tree, isRoot: false, parentId: HOMETREE_ROOT_ID };
@@ -117,19 +117,16 @@ export function buildHomepageTree(userTrees: Tree<Skill>[], canvasDisplaySetting
         return result;
     });
 
-    const isEmoji = homepageTreeIcon !== "";
-    const text = isEmoji ? homepageTreeIcon : homepageTreeName[0];
-
     const result: Tree<Skill> = {
-        accentColor: homepageTreeColor,
+        accentColor,
         nodeId: HOMETREE_ROOT_ID,
         isRoot: true,
         children: subTreesWithUpdatedLevel,
-        data: getDefaultSkillValue(homepageTreeName, false, { isEmoji, text }),
+        data: getDefaultSkillValue(treeName, false, icon),
         level: 0,
         parentId: null,
         treeId: HOMEPAGE_TREE_ID,
-        treeName: homepageTreeName,
+        treeName,
         x: 0,
         y: 0,
         category: "USER",

@@ -11,7 +11,6 @@ import CanvasSettingsModal from "../../components/treeRelated/canvasSettingsModa
 import SelectedNodeMenu, { SelectedNodeMenuState } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { selectedNodeMenuQueryFns } from "../../components/treeRelated/selectedNodeMenu/SelectedNodeMenuFunctions";
 import { useAppSelector } from "../../redux/reduxHooks";
-import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { NormalizedNode } from "../../types";
 import HomepageTree from "./HomepageTree";
@@ -32,9 +31,8 @@ function useHomepageContentsState() {
     const homePageTreeData = useAppSelector(selectHomeTree);
 
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
-    const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
 
-    return { canvasDisplaySettings, screenDimensions, userTrees, allNodes, homePageTreeData };
+    return { screenDimensions, userTrees, allNodes, homePageTreeData };
 }
 
 function useTakingScreenshotState() {
@@ -65,7 +63,7 @@ function useCanvasSettingsState() {
 }
 
 function HomepageContents() {
-    const { canvasDisplaySettings, userTrees, screenDimensions, allNodes } = useHomepageContentsState();
+    const { userTrees, screenDimensions, allNodes, homePageTreeData } = useHomepageContentsState();
 
     const takingScreenShotState = useTakingScreenshotState();
     const selectedNodeCoordState = useSelectedNodeCoordState();
@@ -73,7 +71,7 @@ function HomepageContents() {
 
     const [canvasSettings, { openCanvasSettingsModal, closeCanvasSettingsModal }] = useCanvasSettingsState();
 
-    const homepageTree = useMemo(() => buildHomepageTree(userTrees, canvasDisplaySettings), [canvasDisplaySettings, userTrees]);
+    const homepageTree = useMemo(() => buildHomepageTree(userTrees, homePageTreeData), [homePageTreeData, userTrees]);
 
     useHandleNavigationListener(clearSelectedNodeCoord);
 
@@ -97,7 +95,7 @@ function HomepageContents() {
                 homepageTree={homepageTree}
                 openCanvasSettingsModal={openCanvasSettingsModal}
             />
-            <ProgressIndicatorAndName tree={homepageTree} />
+            <ProgressIndicatorAndName treeData={homePageTreeData} nodesOfTree={allNodes} />
             <OpenSettingsMenu openModal={openCanvasSettingsModal} show={selectedNodeCoord === null} />
             <ShareTreeScreenshot
                 canvasRef={canvasRef}

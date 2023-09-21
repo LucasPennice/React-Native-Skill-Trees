@@ -451,7 +451,7 @@ function IndividualSkillTreePage() {
                 tree={selectedTree}
                 functions={treeFunctions}
             />
-            <ProgressIndicatorAndName tree={selectedTree} />
+            <ProgressIndicatorAndName nodesOfTree={treeNodes} treeData={treeData} />
 
             <ShareTreeScreenshot
                 canvasRef={canvasRef}

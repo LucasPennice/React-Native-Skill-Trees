@@ -1,18 +1,16 @@
+import { selectHomeTree, updateHomeAccentColor, updateHomeIcon, updateHomeName } from "@/redux/slices/homeTreeSlice";
 import { memo, useEffect, useState } from "react";
-import { Dimensions, ScrollView, View } from "react-native";
+import { Alert, Dimensions, ScrollView, View } from "react-native";
 import { colors, nodeGradients } from "../../../parameters";
+import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import {
     selectCanvasDisplaySettings,
-    setHomepageTreeColor,
-    setHomepageTreeIcon,
-    setHomepageTreeName,
     setOneColorPerTree,
     setShowCircleGuide,
     setShowIcons,
     setShowLabel,
 } from "../../../redux/slices/canvasDisplaySettingsSlice";
-import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
-import { ColorGradient } from "../../../types";
+import { ColorGradient, SkillIcon } from "../../../types";
 import AppText from "../../AppText";
 import AppTextInput from "../../AppTextInput";
 import ColorGradientSelector from "../../ColorGradientSelector";
@@ -26,14 +24,21 @@ type Props = {
     open: boolean;
 };
 
+function useSetInitialIconValue(treeDataIcon: SkillIcon, updateIconState: (v: string) => void) {
+    useEffect(() => {
+        if (treeDataIcon.isEmoji) updateIconState(treeDataIcon.text);
+    }, []);
+}
+
 function CanvasSettingsModal({ closeModal, open }: Props) {
-    const { oneColorPerTree, showCircleGuide, showLabel, homepageTreeColor, showIcons, homepageTreeName } =
-        useAppSelector(selectCanvasDisplaySettings);
+    const { oneColorPerTree, showCircleGuide, showLabel, showIcons } = useAppSelector(selectCanvasDisplaySettings);
+    const { accentColor, icon, treeName } = useAppSelector(selectHomeTree);
+
     const { width } = Dimensions.get("screen");
     const dispatch = useAppDispatch();
 
-    const [homeTreeName, setHomeTreeName] = useState(homepageTreeName);
-    const [icon, setIcon] = useState("");
+    const [newHomeTreeName, setNewHomeTreeName] = useState(treeName);
+    const [newIcon, setIcon] = useState<string>("");
 
     const updateOneColorPerTree = (v: boolean) => {
         dispatch(setOneColorPerTree(v));
@@ -45,29 +50,38 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
         dispatch(setShowLabel(v));
     };
     const updateHomepageTreeColor = (v: ColorGradient) => {
-        dispatch(setHomepageTreeColor(v));
+        dispatch(updateHomeAccentColor(v));
     };
     const updateShowIcons = (v: boolean) => {
         dispatch(setShowIcons(v));
     };
 
-    useEffect(() => {
-        if (homeTreeName === "") return;
-        dispatch(setHomepageTreeName(homeTreeName));
-    }, [homeTreeName]);
+    useSetInitialIconValue(icon, (v: string) => setIcon(v));
 
     useEffect(() => {
-        dispatch(setHomepageTreeIcon(icon));
-    }, [icon]);
+        if (newHomeTreeName === "") return;
+        dispatch(updateHomeName(newHomeTreeName));
+
+        if (newIcon === "") dispatch(updateHomeIcon({ isEmoji: false, text: newHomeTreeName[0] }));
+    }, [newHomeTreeName]);
+
+    useEffect(() => {
+        if (newIcon !== "") {
+            dispatch(updateHomeIcon({ isEmoji: true, text: newIcon }));
+            return;
+        }
+
+        dispatch(updateHomeIcon({ isEmoji: false, text: newHomeTreeName[0] }));
+    }, [newIcon]);
 
     const state = {
         showCircleGuide,
         showLabel,
-        homepageTreeIcon: icon,
-        homepageTreeColor,
+        homepageTreeIcon: newIcon,
+        homepageTreeColor: accentColor,
         oneColorPerTree,
         showIcons,
-        homepageTreeName: homeTreeName,
+        homepageTreeName: newHomeTreeName,
     };
 
     return (
@@ -98,9 +112,15 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
 
                     <AppTextInput
                         placeholder="Home Tree Name"
-                        textState={[homeTreeName, setHomeTreeName]}
+                        textState={[newHomeTreeName, setNewHomeTreeName]}
                         pattern={new RegExp(/^[^ ]/)}
                         containerStyles={{ marginBottom: 15 }}
+                        onBlur={() => {
+                            if (newHomeTreeName === "") {
+                                Alert.alert("Tree name cannot be empty");
+                                setNewHomeTreeName(treeName);
+                            }
+                        }}
                     />
 
                     <View style={{ flexDirection: "row", marginBottom: 15, justifyContent: "space-between", alignItems: "center" }}>
@@ -121,7 +141,7 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
                         <AppTextInput
                             placeholder={"🧠"}
                             textStyle={{ fontFamily: "emojisMono", fontSize: 40 }}
-                            textState={[icon, setIcon]}
+                            textState={[newIcon, setIcon]}
                             pattern={new RegExp(/\p{Extended_Pictographic}/u)}
                             containerStyles={{ width: 130 }}
                         />
@@ -143,7 +163,7 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
                     <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
                         Scroll to see more colors
                     </AppText>
-                    <ColorGradientSelector colorsArray={nodeGradients} state={[homepageTreeColor, updateHomepageTreeColor]} />
+                    <ColorGradientSelector colorsArray={nodeGradients} state={[accentColor, updateHomepageTreeColor]} />
                 </ScrollView>
             </View>
         </FlingToDismissModal>
