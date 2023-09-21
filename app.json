@@ -2,7 +2,7 @@
     "expo": {
         "name": "Skill Trees",
         "slug": "SkillTrees",
-        "scheme": "skillTree",
+        "scheme": ["skill-tree"],
         "experiments": {
             "typedRoutes": true,
             "tsconfigPaths": true
