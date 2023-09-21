@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from "react";
-import { StyleSheet, View, ViewStyle } from "react-native";
+import { Platform, StyleSheet, View, ViewStyle } from "react-native";
 import Animated, {
     FadeIn,
     FadeInDown,
@@ -17,12 +17,12 @@ import Animated, {
     withTiming,
 } from "react-native-reanimated";
 import { exitOpacityScale } from "../../../constants/reanimatedAnimations";
+import { renderScaleForNodeActionMenu } from "../../../functions/misc";
 import { colors } from "../../../parameters";
 import { NodeCoordinate } from "../../../types";
 import AppText from "../../AppText";
 import DirectionMenu, { Config } from "../../DirectionMenu";
 import useWrapNodeMenuFunctions from "./useWrapNodeMenuFunctions";
-import { renderScaleForNodeActionMenu } from "../../../functions/misc";
 
 export const NODE_MENU_SIZE = 150;
 
@@ -52,6 +52,8 @@ export type NodeMenuFunctions = {
         verticalDown?: () => void;
     };
 };
+
+const OS_CompatibleBorderStyle: ViewStyle["borderStyle"] = Platform.OS === "ios" ? "solid" : "dashed";
 
 function NodeMenu({
     data,
@@ -117,7 +119,7 @@ function NodeMenu({
 }
 
 function OuterArrows({ menuMode }: { menuMode: "NORMAL" | "SELECTING_NODE_POSITION" }) {
-    const borderStyle: ViewStyle["borderStyle"] = menuMode === "NORMAL" ? undefined : "dashed";
+    const borderStyle: ViewStyle["borderStyle"] = menuMode === "NORMAL" ? undefined : OS_CompatibleBorderStyle;
 
     return (
         <>
@@ -130,8 +132,8 @@ function OuterArrows({ menuMode }: { menuMode: "NORMAL" | "SELECTING_NODE_POSITI
 function InnerArrows() {
     return (
         <>
-            <ArrowTopLeftDownRight borderStyle={"dashed"} />
-            <ArrowDownLeftTopRight borderStyle={"dashed"} />
+            <ArrowTopLeftDownRight borderStyle={OS_CompatibleBorderStyle} />
+            <ArrowDownLeftTopRight borderStyle={OS_CompatibleBorderStyle} />
         </>
     );
 }
