@@ -25,9 +25,7 @@ function Viewing({
 }) {
     const pathname = usePathname();
 
-    console.log(selectedTreeId);
     const selectedTree = useAppSelector(selectTreeById(selectedTreeId));
-    console.log(selectedTree);
 
     const treeData = useAppSelector(selectTreeById(selectedNode.treeId));
 

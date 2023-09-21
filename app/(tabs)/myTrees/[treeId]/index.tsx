@@ -310,11 +310,8 @@ function useSelectedNodeCoordState(dispatchModalState: React.Dispatch<ModalReduc
     const [selectedNodeCoord, setSelectedNodeCoord] = useState<{ node: NormalizedNode | null; menuMode: "EDITING" | "VIEWING" } | null>(null);
 
     const clearSelectedNodeCoord = () => {
-        // console.log("RUN");
         setSelectedNodeCoord(null);
-        // console.log("RUN2");
         dispatchModalState("returnToIdle");
-        // console.log("RUN3");
     };
     const updateSelectedNodeCoord = (node: NormalizedNode, menuMode: "EDITING" | "VIEWING") => setSelectedNodeCoord({ node, menuMode });
 
