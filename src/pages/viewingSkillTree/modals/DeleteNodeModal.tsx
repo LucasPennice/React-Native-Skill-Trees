@@ -1,6 +1,6 @@
 import { normalizedNodeToTree } from "@/components/treeRelated/general/functions";
 import { deleteNodeAndHoistChild } from "@/functions/misc";
-import { selectTreeById } from "@/redux/slices/newUserTreesSlice";
+import { TreeData, selectTreeById } from "@/redux/slices/newUserTreesSlice";
 import { removeNodes, selectNodesOfTree, updateNodes } from "@/redux/slices/nodesSlice";
 import { Update } from "@reduxjs/toolkit";
 import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
@@ -19,7 +19,8 @@ type Props = {
 };
 
 function useGetSelectedTree(treeId: string) {
-    const treeData = useAppSelector(selectTreeById(treeId));
+    //We can guarantee here that the type is TreeData because we will never pass the home tree id to the selector
+    const treeData = useAppSelector(selectTreeById(treeId)) as TreeData;
     const treeNodes = useAppSelector(selectNodesOfTree(treeId));
 
     const selectedTree = normalizedNodeToTree(treeNodes, treeData);

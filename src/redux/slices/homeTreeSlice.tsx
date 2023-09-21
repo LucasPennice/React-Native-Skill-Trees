@@ -4,7 +4,7 @@ import { RootState } from "../reduxStore";
 import { TreeData } from "./newUserTreesSlice";
 import { ColorGradient } from "@/types";
 
-const initialState: Omit<TreeData, "nodes"> = {
+export const homeTreeSliceInitialState: Omit<TreeData, "nodes"> = {
     accentColor: WHITE_GRADIENT,
     icon: { text: "L", isEmoji: false },
     rootNodeId: HOMETREE_ROOT_ID,
@@ -12,11 +12,11 @@ const initialState: Omit<TreeData, "nodes"> = {
     treeName: "Life Skills",
 };
 
-export type HomeTreeSlice = typeof initialState;
+export type HomeTreeSlice = typeof homeTreeSliceInitialState;
 
 export const homeTreeSlice = createSlice({
     name: "homeTreeSlice",
-    initialState,
+    initialState: homeTreeSliceInitialState,
     reducers: {
         updateHomeAccentColor: (state, action: PayloadAction<ColorGradient>) => {
             state.accentColor = action.payload;

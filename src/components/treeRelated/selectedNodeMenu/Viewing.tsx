@@ -110,7 +110,7 @@ function SkillDetails({ goToSkillPage, data }: { goToSkillPage: () => void; data
     );
 }
 
-function TreeStats({ selectedTree, category }: { selectedTree: TreeData; category: NodeCategory }) {
+function TreeStats<T extends Omit<TreeData, "nodes">>({ selectedTree, category }: { selectedTree: T; category: NodeCategory }) {
     //Redux Related
     const nodesOfTree = useAppSelector(selectedTree.treeId === HOMEPAGE_TREE_ID ? selectAllNodes : selectNodesOfTree(selectedTree.treeId));
 

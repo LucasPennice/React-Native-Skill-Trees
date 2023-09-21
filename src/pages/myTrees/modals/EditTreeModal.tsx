@@ -1,4 +1,4 @@
-import { removeUserTree, selectTreeById, updateUserTree } from "@/redux/slices/newUserTreesSlice";
+import { TreeData, removeUserTree, selectTreeById, updateUserTree } from "@/redux/slices/newUserTreesSlice";
 import { useEffect, useState } from "react";
 import { Alert, Dimensions, TouchableOpacity, View } from "react-native";
 import Animated, { Layout } from "react-native-reanimated";
@@ -13,7 +13,8 @@ import { ColorGradient } from "../../../types";
 
 function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; closeModal: () => void }) {
     //Redux State
-    const treeData = useAppSelector(selectTreeById(editingTreeId));
+    //We can guarantee here that the type is TreeData because we will never pass the home tree id to the selector
+    const treeData = useAppSelector(selectTreeById(editingTreeId)) as TreeData;
     //Local State
     const [treeName, setTreeName] = useState<string>("");
     const [selectedColor, setSelectedColor] = useState<ColorGradient | undefined>(undefined);

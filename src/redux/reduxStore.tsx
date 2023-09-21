@@ -2,16 +2,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { FLUSH, PAUSE, PERSIST, PURGE, PersistConfig, REGISTER, REHYDRATE, persistReducer, persistStore } from "redux-persist";
 import addTreeReducer from "./slices/addTreeModalSlice";
-import canvasDisplaySettingsReducer from "./slices/canvasDisplaySettingsSlice";
+import canvasDisplaySettingsReducer, { CanvasDisplaySettings } from "./slices/canvasDisplaySettingsSlice";
 import loginReducer from "./slices/loginSlice";
 import newUserTreesSlice, { UserTreeSlice } from "./slices/newUserTreesSlice";
 import nodesSlice, { NodeSlice } from "./slices/nodesSlice";
 import screenDimentionsReducer from "./slices/screenDimentionsSlice";
 import userReducer from "./slices/userSlice";
 import toBeDepricatedCurrentTreeReducer, { UserTreesSlice } from "./slices/userTreesSlice";
-import { Skill, Tree } from "@/types";
+import { NormalizedNode, Skill, Tree, getDefaultSkillValue } from "@/types";
 import homeTreeSlice, { HomeTreeSlice } from "./slices/homeTreeSlice";
-import { WHITE_GRADIENT } from "@/parameters";
+import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, WHITE_GRADIENT } from "@/parameters";
 
 const persistConfig: PersistConfig<any> = {
     key: "root",
@@ -31,8 +31,12 @@ const persistConfig: PersistConfig<any> = {
             let updatedState = { ...state };
 
             if (nodesSliceEmpty || userTreesSliceEmpty) {
-                //@ts-ignore
-                const { nodeState, userTrees } = migrationFunction(state.currentTree.userTrees);
+                const { nodeState, userTrees } = migrateFromCurrentTreeToNormalizedSlice(
+                    //@ts-ignore
+                    state.currentTree.userTrees,
+                    //@ts-ignore
+                    state.canvasDisplaySettings
+                );
 
                 //@ts-ignore
                 updatedState[nodes] = nodeState;
@@ -91,8 +95,10 @@ export type RootState = ReturnType<typeof rootReducer>;
 
 export type AppDispatch = typeof store.dispatch;
 
-function migrationFunction(userTrees: UserTreesSlice["userTrees"]) {
+function migrateFromCurrentTreeToNormalizedSlice(userTrees: UserTreesSlice["userTrees"], canvasDisplaySettings: CanvasDisplaySettings) {
     let result: { nodeState: NodeSlice; userTrees: UserTreeSlice } = { nodeState: { entities: {}, ids: [] }, userTrees: { entities: {}, ids: [] } };
+
+    addRootNodeEntity();
 
     for (const userTree of userTrees) {
         createTreeDataEntity(userTree);
@@ -109,6 +115,28 @@ function migrationFunction(userTrees: UserTreesSlice["userTrees"]) {
     }
 
     return result;
+
+    function addRootNodeEntity() {
+        const homepageRootNode: NormalizedNode = {
+            nodeId: HOMETREE_ROOT_ID,
+            isRoot: true,
+            childrenIds: userTrees.map((uT) => uT.nodeId),
+            data: getDefaultSkillValue(canvasDisplaySettings.homepageTreeName, false, {
+                isEmoji: false,
+                text: canvasDisplaySettings.homepageTreeName,
+            }),
+            level: 0,
+            parentId: null,
+            treeId: HOMEPAGE_TREE_ID,
+            x: 0,
+            y: 0,
+            category: "USER",
+        };
+
+        result.nodeState.ids.push(HOMETREE_ROOT_ID);
+
+        result.nodeState.entities[HOMETREE_ROOT_ID] = homepageRootNode;
+    }
 
     function createNodeEntity(node: Tree<Skill>) {
         result.nodeState.entities[node.nodeId] = {

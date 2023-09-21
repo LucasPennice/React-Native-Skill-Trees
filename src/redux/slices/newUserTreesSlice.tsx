@@ -1,3 +1,4 @@
+import { HOMEPAGE_TREE_ID } from "@/parameters";
 import { ColorGradient, SkillIcon } from "@/types";
 import { EntityState, PayloadAction, Update, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../reduxStore";
@@ -58,13 +59,17 @@ export const { addUserTree, removeUserTree, updateUserTree } = userTreesSlice.ac
 
 export default userTreesSlice.reducer;
 
-export const selectTreeById = (treeId: string) => (state: RootState) => {
-    const userTree = state.userTrees.entities[treeId];
+export const selectTreeById =
+    (treeId: string) =>
+    (state: RootState): TreeData | Omit<TreeData, "nodes"> => {
+        if (treeId === HOMEPAGE_TREE_ID) return state.homeTree;
 
-    if (!userTree) throw new Error("userTree undefined at selectTreeById");
+        const userTree = state.userTrees.entities[treeId];
 
-    return userTree;
-};
+        if (!userTree) throw new Error("userTree undefined at selectTreeById");
+
+        return userTree;
+    };
 
 export const {
     selectAll: selectAllTrees,

@@ -2,6 +2,8 @@ import { NormalizedNode, getDefaultSkillValue } from "@/types";
 import { PayloadAction, Update, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../reduxStore";
 import { addUserTree, removeUserTree, updateUserTree } from "./newUserTreesSlice";
+import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID } from "@/parameters";
+import { homeTreeSliceInitialState } from "./homeTreeSlice";
 
 const nodesAdapter = createEntityAdapter<NormalizedNode>({ selectId: (node) => node.nodeId });
 export const {
@@ -45,7 +47,7 @@ export const nodesSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder.addCase(addUserTree, (state, action) => {
-            const rootNode: NormalizedNode = {
+            const newTreeRootNode: NormalizedNode = {
                 category: "SKILL_TREE",
                 childrenIds: [],
                 data: getDefaultSkillValue(action.payload.treeName, false, action.payload.icon),
@@ -58,7 +60,33 @@ export const nodesSlice = createSlice({
                 y: 0,
             };
 
-            nodesAdapter.addOne(state, rootNode);
+            nodesAdapter.addOne(state, newTreeRootNode);
+
+            const homeRootNode = state.entities[HOMETREE_ROOT_ID];
+
+            if (homeRootNode) {
+                nodesAdapter.updateOne(state, {
+                    id: HOMETREE_ROOT_ID,
+                    changes: { childrenIds: [...homeRootNode.childrenIds, newTreeRootNode.nodeId] },
+                });
+            } else {
+                const { icon } = homeTreeSliceInitialState;
+
+                const homeRootNode: NormalizedNode = {
+                    nodeId: HOMETREE_ROOT_ID,
+                    isRoot: true,
+                    childrenIds: [newTreeRootNode.nodeId],
+                    data: getDefaultSkillValue("Life Skills", false, icon),
+                    level: 0,
+                    parentId: null,
+                    treeId: HOMEPAGE_TREE_ID,
+                    x: 0,
+                    y: 0,
+                    category: "USER",
+                };
+
+                nodesAdapter.addOne(state, homeRootNode);
+            }
         });
         builder.addCase(updateUserTree, (state, action) => {
             const rootNodeId = action.payload.rootNodeId;
@@ -83,7 +111,21 @@ export const nodesSlice = createSlice({
             nodesAdapter.updateOne(state, updates);
         });
         builder.addCase(removeUserTree, (state, action) => {
+            const nodeIds = Object.keys(state.entities);
+            const rootNodeIdOfTreeToDelete = nodeIds.find((id) => state.entities[id]!.isRoot && state.entities[id]?.treeId === action.payload.treeId);
+
+            if (!rootNodeIdOfTreeToDelete) throw new Error(`rootNodeIdOfTreeToDelete undefined at extraReducer for removeUserTree`);
+
             nodesAdapter.removeMany(state, action.payload.nodes);
+
+            const homeRootNode = state.entities[HOMETREE_ROOT_ID];
+
+            if (!homeRootNode) throw new Error("homeRootNode is undefined at extraReducer for removeUserTree");
+
+            nodesAdapter.updateOne(state, {
+                id: HOMETREE_ROOT_ID,
+                changes: { childrenIds: homeRootNode.childrenIds.filter((cId) => cId !== rootNodeIdOfTreeToDelete) },
+            });
         });
     },
 });

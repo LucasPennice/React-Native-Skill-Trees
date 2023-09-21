@@ -18,7 +18,7 @@ import AddNodeModal from "@/pages/viewingSkillTree/modals/AddNodeModal";
 import DeleteNodeModal from "@/pages/viewingSkillTree/modals/DeleteNodeModal";
 import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
-import { selectTreeById } from "@/redux/slices/newUserTreesSlice";
+import { TreeData, selectTreeById } from "@/redux/slices/newUserTreesSlice";
 import { addNodes, removeNodes, selectNodeById, selectNodesOfTree, updateNodes } from "@/redux/slices/nodesSlice";
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
 import { DnDZone, NormalizedNode, Skill, Tree, TreeCoordinateData } from "@/types";
@@ -46,7 +46,8 @@ export type ModalReducerAction =
     | "openNewNodePositionSelector";
 
 function useViewingSkillTreeState(treeId: string) {
-    const treeData = useAppSelector(selectTreeById(treeId));
+    //We can guarantee here that the type is TreeData because we will never pass the home tree id to the selector
+    const treeData = useAppSelector(selectTreeById(treeId)) as TreeData;
     const treeNodes = useAppSelector(selectNodesOfTree(treeId));
 
     const selectedTree = normalizedNodeToTree(treeNodes, treeData);

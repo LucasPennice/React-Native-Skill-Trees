@@ -1,10 +1,10 @@
 import { useAppSelector } from "@/redux/reduxHooks";
-import { selectNodesOfTree } from "@/redux/slices/nodesSlice";
+import { selectAllNodes, selectNodesOfTree } from "@/redux/slices/nodesSlice";
 import { useEffect, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { Easing, FadeInDown, FadeOutDown, FadeOutUp, Layout } from "react-native-reanimated";
 import { checkIfCompletionAllowed, checkIfReverseCompletionAllowed } from "../../../functions/extractInformationFromTree";
-import { CIRCLE_SIZE_SELECTED, NAV_HEGIHT, centerFlex, colors } from "../../../parameters";
+import { CIRCLE_SIZE_SELECTED, HOMEPAGE_TREE_ID, NAV_HEGIHT, centerFlex, colors } from "../../../parameters";
 import { ScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
 import { generalStyles } from "../../../styles";
 import { NormalizedNode, Skill, SkillIcon, SkillPropertiesEditableOnPopMenu } from "../../../types";
@@ -99,7 +99,7 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
     const skillPropsState = useSkillPropsState(selectedNode);
     const [newSkillProps, { setInitialSkillProps }] = skillPropsState;
 
-    const nodesOfTree = useAppSelector(selectNodesOfTree(selectedNode.treeId));
+    const nodesOfTree = useAppSelector(selectedNode.treeId === HOMEPAGE_TREE_ID ? selectAllNodes : selectNodesOfTree(selectedNode.treeId));
 
     const editingEnabled = Boolean(mutateFunctions !== undefined) && Boolean(allowEdit) && selectedNode.category === "SKILL";
 
