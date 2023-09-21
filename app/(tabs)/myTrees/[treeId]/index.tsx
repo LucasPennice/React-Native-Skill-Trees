@@ -18,7 +18,7 @@ import AddNodeModal from "@/pages/viewingSkillTree/modals/AddNodeModal";
 import DeleteNodeModal from "@/pages/viewingSkillTree/modals/DeleteNodeModal";
 import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
-import { TreeData, selectTreeById } from "@/redux/slices/newUserTreesSlice";
+import { TreeData, selectTreeById } from "@/redux/slices/userTreesSlice";
 import { addNodes, removeNodes, selectNodeById, selectNodesOfTree, updateNodes } from "@/redux/slices/nodesSlice";
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
 import { DnDZone, NormalizedNode, Skill, Tree, TreeCoordinateData } from "@/types";

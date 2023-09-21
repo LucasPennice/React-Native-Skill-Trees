@@ -1,4 +1,4 @@
-import { TreeData } from "@/redux/slices/newUserTreesSlice";
+import { TreeData } from "@/redux/slices/userTreesSlice";
 import { memo, useEffect } from "react";
 import { View } from "react-native";
 import Animated, { useAnimatedProps, useSharedValue, withSpring } from "react-native-reanimated";

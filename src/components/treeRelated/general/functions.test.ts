@@ -1,7 +1,7 @@
 import { expect, test } from "@jest/globals";
 import { normalizedNodeToTree } from "./functions";
 import { NormalizedNode, Skill, Tree } from "@/types";
-import { TreeData } from "@/redux/slices/newUserTreesSlice";
+import { TreeData } from "@/redux/slices/userTreesSlice";
 
 test("Normalizing Tree with 1 node", () => {
     const nodes: NormalizedNode[] = [

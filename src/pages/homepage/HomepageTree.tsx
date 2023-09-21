@@ -1,5 +1,5 @@
 import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMenuFunctions";
-import { removeUserTree } from "@/redux/slices/newUserTreesSlice";
+import { removeUserTree } from "@/redux/slices/userTreesSlice";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
 import { router } from "expo-router";
 import { ReactNode, memo, useEffect, useMemo, useState } from "react";

@@ -1,5 +1,5 @@
 import { useAppSelector } from "@/redux/reduxHooks";
-import { TreeData, selectAllTrees } from "@/redux/slices/newUserTreesSlice";
+import { TreeData, selectAllTrees } from "@/redux/slices/userTreesSlice";
 import { selectAllNodes } from "@/redux/slices/nodesSlice";
 import { NormalizedNode } from "@/types";
 import { normalizedNodeToTree } from "../general/functions";

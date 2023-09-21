@@ -1,7 +1,7 @@
 import { NormalizedNode, getDefaultSkillValue } from "@/types";
 import { PayloadAction, Update, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../reduxStore";
-import { addUserTree, removeUserTree, updateUserTree } from "./newUserTreesSlice";
+import { addUserTree, removeUserTree, updateUserTree } from "./userTreesSlice";
 import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID } from "@/parameters";
 import { homeTreeSliceInitialState } from "./homeTreeSlice";
 
@@ -135,6 +135,15 @@ export const { addNodes, removeNodes, updateNodes } = nodesSlice.actions;
 export default nodesSlice.reducer;
 
 export const selectNodesOfTree = (treeId: string) => (state: RootState) => {
+    if (treeId === HOMEPAGE_TREE_ID) {
+        const allNodesIds = state.nodes.ids;
+        return allNodesIds.map((nodeId) => {
+            const node = state.nodes.entities[nodeId];
+            if (!node) throw new Error(`node of id ${nodeId} not found at selectedNodesOfTree for home tree`);
+            return node;
+        });
+    }
+
     const userTree = state.userTrees.entities[treeId];
 
     if (!userTree) throw new Error("userTree undefined at selectNodesOfTree");

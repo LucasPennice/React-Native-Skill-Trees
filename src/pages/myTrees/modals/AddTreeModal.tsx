@@ -23,7 +23,7 @@ import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentio
 import { generalStyles } from "../../../styles";
 import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "../../../types";
 import useHandleImportTree from "./useHandleImportTree";
-import { TreeData, addUserTree } from "@/redux/slices/newUserTreesSlice";
+import { TreeData, addUserTree } from "@/redux/slices/userTreesSlice";
 
 function AddTreeModal() {
     const { query } = useRequestProcessor();

@@ -1,82 +1,78 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Skill, Tree } from "../../types";
+import { HOMEPAGE_TREE_ID } from "@/parameters";
+import { ColorGradient, SkillIcon } from "@/types";
+import { EntityState, PayloadAction, Update, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../reduxStore";
-import { ScreenDimentions } from "./screenDimentionsSlice";
+import { addNodes, removeNodes } from "./nodesSlice";
 
-// Define a type for the slice state
-export type UserTreesSlice = {
-    userTrees: Tree<Skill>[];
-    currentTreeId: string | undefined;
+export type TreeData = {
+    treeId: string;
+    treeName: string;
+    accentColor: ColorGradient;
+    nodes: string[];
+    rootNodeId: string;
+    icon: SkillIcon;
 };
 
-// Define the initial state using that type
-const initialState: UserTreesSlice = {
-    userTrees: [],
-    currentTreeId: undefined,
-};
+const userTreesAdapter = createEntityAdapter<TreeData>({ selectId: (tree) => tree.treeId });
 
-export type ModifiableNodeProperties = { name?: string; isCompleted?: boolean };
+const initialState: EntityState<TreeData> = userTreesAdapter.getInitialState({ selectedTree: null });
+
+export type UserTreeSlice = typeof initialState;
 
 export const userTreesSlice = createSlice({
-    name: "currentTree",
+    name: "userTreesSlice",
     initialState,
     reducers: {
-        changeTree: (state, action: PayloadAction<string>) => {
-            state.currentTreeId = action.payload;
+        updateUserTree: (state, action: PayloadAction<{ update: Update<TreeData>; rootNodeId: string }>) => {
+            userTreesAdapter.updateOne(state, action.payload.update);
         },
-        unselectTree: (state) => {
-            state.currentTreeId = undefined;
+        addUserTree: userTreesAdapter.addOne,
+        removeUserTree: (state, action: PayloadAction<{ treeId: string; nodes: string[] }>) => {
+            userTreesAdapter.removeOne(state, action.payload.treeId);
         },
+    },
+    extraReducers: (builder) => {
+        builder.addCase(removeNodes, (state, action) => {
+            const treeWhereNodesRemoved = state.entities[action.payload.treeId];
 
-        updateUserTrees: (
-            state,
-            action: PayloadAction<{
-                updatedTree: Tree<Skill> | undefined;
-                screenDimensions: ScreenDimentions;
-            }>
-        ) => {
-            //We pass the new value of the mutated tree
-            //And then update the value of userTrees with the new state
-            const { updatedTree } = action.payload;
+            if (!treeWhereNodesRemoved) throw new Error("treeWhereNodesRemoved undefined removeNodes at builder.add");
 
-            if (updatedTree === undefined) throw new Error("updateUserTrees error tree is undefined");
-
-            state.userTrees = state.userTrees.map((tree) => {
-                if (tree.treeId === updatedTree.treeId) return updatedTree;
-
-                return tree;
+            const nodesNotRemoved: string[] = treeWhereNodesRemoved.nodes.filter((nodeId) => {
+                return !action.payload.nodesToDelete.includes(nodeId);
             });
-        },
-        saveNewTree: (
-            state,
-            action: PayloadAction<{
-                newTree: Tree<Skill>;
-                screenDimensions: ScreenDimentions;
-            }>
-        ) => {
-            const { newTree } = action.payload;
 
-            state.userTrees = [...state.userTrees, newTree];
-        },
-        removeUserTree: (state, action: PayloadAction<string>) => {
-            const treeToDeleteId = action.payload;
+            userTreesAdapter.updateOne(state, { id: action.payload.treeId, changes: { nodes: nodesNotRemoved } });
+        });
+        builder.addCase(addNodes, (state, action) => {
+            const treeOfNewNodes = state.entities[action.payload.treeId];
 
-            state.userTrees = state.userTrees.filter((t) => t.treeId !== treeToDeleteId);
-        },
+            if (!treeOfNewNodes) throw new Error("treeOfNewNodes undefined addNodes at builder.add");
 
-        updateUserTreeWithAppendedNode: (state, action: PayloadAction<Tree<Skill>>) => {
-            state.userTrees = state.userTrees.map((tree) => {
-                if (tree.treeId === action.payload.treeId) return action.payload;
+            const newNodeIds = action.payload.nodesToAdd.map((n) => n.nodeId);
 
-                return tree;
-            });
-        },
+            userTreesAdapter.updateOne(state, { id: action.payload.treeId, changes: { nodes: [...treeOfNewNodes.nodes, ...newNodeIds] } });
+        });
     },
 });
 
-export const { changeTree, unselectTree, updateUserTrees, saveNewTree, removeUserTree, updateUserTreeWithAppendedNode } = userTreesSlice.actions;
-
-export const selectTreeSlice = (state: RootState) => state.currentTree;
-export const selectUserTrees = (state: RootState) => state.currentTree.userTrees;
+export const { addUserTree, removeUserTree, updateUserTree } = userTreesSlice.actions;
 
 export default userTreesSlice.reducer;
+
+export const selectTreeById =
+    (treeId: string) =>
+    (state: RootState): TreeData | Omit<TreeData, "nodes"> => {
+        if (treeId === HOMEPAGE_TREE_ID) return state.homeTree;
+
+        const userTree = state.userTrees.entities[treeId];
+
+        if (!userTree) throw new Error("userTree undefined at selectTreeById");
+
+        return userTree;
+    };
+
+export const {
+    selectAll: selectAllTrees,
+    selectTotal: selectTotalTreeQty,
+    selectIds: selectTreeIds,
+} = userTreesAdapter.getSelectors<RootState>((state) => state.userTrees);

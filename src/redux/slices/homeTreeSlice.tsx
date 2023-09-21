@@ -1,7 +1,7 @@
 import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, WHITE_GRADIENT } from "@/parameters";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../reduxStore";
-import { TreeData } from "./newUserTreesSlice";
+import { TreeData } from "./userTreesSlice";
 import { ColorGradient } from "@/types";
 
 export const homeTreeSliceInitialState: Omit<TreeData, "nodes"> = {

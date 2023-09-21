@@ -1,32 +1,29 @@
+import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, WHITE_GRADIENT } from "@/parameters";
+import { NormalizedNode, Skill, Tree, getDefaultSkillValue } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import { FLUSH, PAUSE, PERSIST, PURGE, PersistConfig, REGISTER, REHYDRATE, persistReducer, persistStore } from "redux-persist";
+import { FLUSH, PAUSE, PERSIST, PURGE, PersistConfig, PersistedState, REGISTER, REHYDRATE, persistReducer, persistStore } from "redux-persist";
 import addTreeReducer from "./slices/addTreeModalSlice";
 import canvasDisplaySettingsReducer, { CanvasDisplaySettings } from "./slices/canvasDisplaySettingsSlice";
+import homeTreeSlice, { HomeTreeSlice } from "./slices/homeTreeSlice";
 import loginReducer from "./slices/loginSlice";
-import newUserTreesSlice, { UserTreeSlice } from "./slices/newUserTreesSlice";
+import newUserTreesSlice, { UserTreeSlice } from "./slices/userTreesSlice";
 import nodesSlice, { NodeSlice } from "./slices/nodesSlice";
 import screenDimentionsReducer from "./slices/screenDimentionsSlice";
 import userReducer from "./slices/userSlice";
-import toBeDepricatedCurrentTreeReducer, { UserTreesSlice } from "./slices/userTreesSlice";
-import { NormalizedNode, Skill, Tree, getDefaultSkillValue } from "@/types";
-import homeTreeSlice, { HomeTreeSlice } from "./slices/homeTreeSlice";
-import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, WHITE_GRADIENT } from "@/parameters";
 
 const persistConfig: PersistConfig<any> = {
     key: "root",
     version: 1,
     storage: AsyncStorage,
     //@ts-ignore
-    migrate: (state) => {
+    migrate: (state: PersistedState & RootState) => {
         try {
-            //@ts-ignore
-            const nodesSliceEmpty = state.nodes.ids[0] === null;
-            //@ts-ignore
-            const userTreesSliceEmpty = state.userTrees.ids[0] === null;
+            const nodesSliceEmpty = state.nodes.ids[0] === null || state.nodes.ids.length === 0;
 
-            //@ts-ignore
-            const migrateToHomeTreeSlice = shouldMigrateToHomeTree(state.homeTree);
+            const userTreesSliceEmpty = state.userTrees.ids[0] === null || state.userTrees.ids.length === 0;
+
+            const migrateToHomeTreeSlice = shouldMigrateToHomeTree(state.canvasDisplaySettings, state.homeTree);
 
             let updatedState = { ...state };
 
@@ -34,27 +31,24 @@ const persistConfig: PersistConfig<any> = {
                 const { nodeState, userTrees } = migrateFromCurrentTreeToNormalizedSlice(
                     //@ts-ignore
                     state.currentTree.userTrees,
-                    //@ts-ignore
                     state.canvasDisplaySettings
                 );
-
+                updatedState["nodes"] = nodeState;
+                updatedState["userTrees"] = userTrees;
                 //@ts-ignore
-                updatedState[nodes] = nodeState;
-                //@ts-ignore
-                updatedState[userTrees] = userTrees;
-                //@ts-ignore
-                updatedState[currentTree] = undefined;
+                delete updatedState["currentTree"];
             }
 
             if (migrateToHomeTreeSlice) {
-                //@ts-ignore
-                updatedState[homeTree] = {
+                updatedState["homeTree"] = {
                     //@ts-ignore
                     accentColor: state.canvasDisplaySettings.homepageTreeColor,
                     //@ts-ignore
                     icon: { isEmoji: false, text: state.canvasDisplaySettings.homepageTreeIcon },
                     //@ts-ignore
                     treeName: state.canvasDisplaySettings.homepageTreeName,
+                    rootNodeId: HOMETREE_ROOT_ID,
+                    treeId: HOMEPAGE_TREE_ID,
                 } as HomeTreeSlice;
             }
             return Promise.resolve(updatedState);
@@ -68,7 +62,7 @@ const persistConfig: PersistConfig<any> = {
 const rootReducer = combineReducers({
     login: loginReducer,
     canvasDisplaySettings: canvasDisplaySettingsReducer,
-    currentTree: toBeDepricatedCurrentTreeReducer,
+    // currentTree: toBeDepricatedCurrentTreeReducer,
     screenDimentions: screenDimentionsReducer,
     addTree: addTreeReducer,
     user: userReducer,
@@ -95,17 +89,19 @@ export type RootState = ReturnType<typeof rootReducer>;
 
 export type AppDispatch = typeof store.dispatch;
 
-function migrateFromCurrentTreeToNormalizedSlice(userTrees: UserTreesSlice["userTrees"], canvasDisplaySettings: CanvasDisplaySettings) {
+function migrateFromCurrentTreeToNormalizedSlice(userTrees: Tree<Skill>[], canvasDisplaySettings: CanvasDisplaySettings) {
     let result: { nodeState: NodeSlice; userTrees: UserTreeSlice } = { nodeState: { entities: {}, ids: [] }, userTrees: { entities: {}, ids: [] } };
 
     addRootNodeEntity();
 
     for (const userTree of userTrees) {
-        createTreeDataEntity(userTree);
+        let userTreeWithRootTrue: Tree<Skill> = { ...userTree, isRoot: true };
 
-        result.userTrees.ids.push(userTree.treeId);
+        createTreeDataEntity(userTreeWithRootTrue);
 
-        runFnOnEveryNode(userTree, (node: Tree<Skill>) => {
+        result.userTrees.ids.push(userTreeWithRootTrue.treeId);
+
+        runFnOnEveryNode(userTreeWithRootTrue, (node: Tree<Skill>) => {
             createNodeEntity(node);
 
             result.nodeState.ids.push(node.nodeId);
@@ -121,8 +117,10 @@ function migrateFromCurrentTreeToNormalizedSlice(userTrees: UserTreesSlice["user
             nodeId: HOMETREE_ROOT_ID,
             isRoot: true,
             childrenIds: userTrees.map((uT) => uT.nodeId),
+            //@ts-ignore
             data: getDefaultSkillValue(canvasDisplaySettings.homepageTreeName, false, {
                 isEmoji: false,
+                //@ts-ignore
                 text: canvasDisplaySettings.homepageTreeName,
             }),
             level: 0,
@@ -180,11 +178,21 @@ function migrateFromCurrentTreeToNormalizedSlice(userTrees: UserTreesSlice["user
     }
 }
 
-function shouldMigrateToHomeTree(homeTreeState?: HomeTreeSlice) {
+function shouldMigrateToHomeTree(canvasDisplaySettings: CanvasDisplaySettings, homeTreeState?: HomeTreeSlice) {
+    if (
+        //@ts-ignore
+        canvasDisplaySettings["homepageTreeIcon"] === undefined ||
+        //@ts-ignore
+        canvasDisplaySettings["homepageTreeName"] === undefined ||
+        //@ts-ignore
+        canvasDisplaySettings["homepageTreeColor"] === undefined
+    )
+        return false;
+
     if (homeTreeState === undefined) return true;
 
     const doesHomeTreeHasDefaultValues =
-        homeTreeState.accentColor === WHITE_GRADIENT &&
+        JSON.stringify(homeTreeState.accentColor) === JSON.stringify(WHITE_GRADIENT) &&
         homeTreeState.icon.text === "L" &&
         homeTreeState.icon.isEmoji === false &&
         homeTreeState.treeName === "Life Skills";

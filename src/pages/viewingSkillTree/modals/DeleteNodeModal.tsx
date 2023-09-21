@@ -1,6 +1,6 @@
 import { normalizedNodeToTree } from "@/components/treeRelated/general/functions";
 import { deleteNodeAndHoistChild } from "@/functions/misc";
-import { TreeData, selectTreeById } from "@/redux/slices/newUserTreesSlice";
+import { TreeData, selectTreeById } from "@/redux/slices/userTreesSlice";
 import { removeNodes, selectNodesOfTree, updateNodes } from "@/redux/slices/nodesSlice";
 import { Update } from "@reduxjs/toolkit";
 import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";

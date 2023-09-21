@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { saveNewTree, selectTreeSlice, updateUserTrees } from "../../../redux/slices/userTreesSlice";
 import { Skill, Tree } from "../../../types";
 import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
-import { addUserTree } from "@/redux/slices/newUserTreesSlice";
+import { addUserTree } from "@/redux/slices/userTreesSlice";
 
 function useHandleImportTree(treeToImport: Tree<Skill> | undefined, closeModal: () => void) {
     const { userTrees } = useAppSelector(selectTreeSlice);

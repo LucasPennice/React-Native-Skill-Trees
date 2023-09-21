@@ -1,4 +1,4 @@
-import { TreeData, removeUserTree, selectTreeById, updateUserTree } from "@/redux/slices/newUserTreesSlice";
+import { TreeData, removeUserTree, selectTreeById, updateUserTree } from "@/redux/slices/userTreesSlice";
 import { useEffect, useState } from "react";
 import { Alert, Dimensions, TouchableOpacity, View } from "react-native";
 import Animated, { Layout } from "react-native-reanimated";

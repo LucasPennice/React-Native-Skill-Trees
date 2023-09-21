@@ -4,10 +4,10 @@ import { LogCard } from "@/pages/skillPage/DisplayDetails/Logs";
 import { MotivesToLearnCard } from "@/pages/skillPage/DisplayDetails/MotivesToLearn";
 import { ResourceCard } from "@/pages/skillPage/DisplayDetails/SkillResources";
 import { MilestoneCard } from "@/pages/skillPage/Milestones";
-import { HOMEPAGE_TREE_ID, centerFlex, colors } from "@/parameters";
+import { centerFlex, colors } from "@/parameters";
 import { useAppSelector } from "@/redux/reduxHooks";
-import { TreeData, selectAllTrees, selectTreeById } from "@/redux/slices/newUserTreesSlice";
 import { selectAllNodes, selectNodesOfTree } from "@/redux/slices/nodesSlice";
+import { TreeData, selectAllTrees, selectTreeById } from "@/redux/slices/userTreesSlice";
 import { NodeCategory, NormalizedNode } from "@/types";
 import { usePathname } from "expo-router";
 import { Linking, ScrollView, View } from "react-native";
@@ -25,7 +25,9 @@ function Viewing({
 }) {
     const pathname = usePathname();
 
+    console.log(selectedTreeId);
     const selectedTree = useAppSelector(selectTreeById(selectedTreeId));
+    console.log(selectedTree);
 
     const treeData = useAppSelector(selectTreeById(selectedNode.treeId));
 
@@ -112,7 +114,7 @@ function SkillDetails({ goToSkillPage, data }: { goToSkillPage: () => void; data
 
 function TreeStats<T extends Omit<TreeData, "nodes">>({ selectedTree, category }: { selectedTree: T; category: NodeCategory }) {
     //Redux Related
-    const nodesOfTree = useAppSelector(selectedTree.treeId === HOMEPAGE_TREE_ID ? selectAllNodes : selectNodesOfTree(selectedTree.treeId));
+    const nodesOfTree = useAppSelector(selectNodesOfTree(selectedTree.treeId));
 
     const completedSkillsQty = countCompleteNodes(nodesOfTree);
     const skillsQty = nodesOfTree.length - 1;

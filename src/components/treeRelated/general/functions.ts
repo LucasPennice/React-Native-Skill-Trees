@@ -1,4 +1,4 @@
-import { TreeData } from "@/redux/slices/newUserTreesSlice";
+import { TreeData } from "@/redux/slices/userTreesSlice";
 import { NormalizedNode, Skill, Tree } from "@/types";
 import { SkFont } from "@shopify/react-native-skia";
 
