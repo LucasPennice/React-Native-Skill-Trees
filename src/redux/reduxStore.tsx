@@ -1,6 +1,18 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import { FLUSH, PAUSE, PERSIST, PURGE, PersistConfig, PersistedState, REGISTER, REHYDRATE, persistReducer, persistStore } from "redux-persist";
+import {
+    FLUSH,
+    MigrationManifest,
+    PAUSE,
+    PERSIST,
+    PURGE,
+    PersistConfig,
+    REGISTER,
+    REHYDRATE,
+    createMigrate,
+    persistReducer,
+    persistStore,
+} from "redux-persist";
 import { migrationFunction } from "./migration";
 import addTreeReducer from "./slices/addTreeModalSlice";
 import canvasDisplaySettingsReducer from "./slices/canvasDisplaySettingsSlice";
@@ -11,25 +23,25 @@ import screenDimentionsReducer from "./slices/screenDimentionsSlice";
 import userReducer from "./slices/userSlice";
 import newUserTreesSlice from "./slices/userTreesSlice";
 
+const migration: MigrationManifest = {
+    //@ts-ignore
+    2: (state) => {
+        //@ts-ignore
+        return migrationFunction(state);
+    },
+};
+
 const persistConfig: PersistConfig<any> = {
     key: "root",
-    version: 1,
+    version: 2,
     storage: AsyncStorage,
-    //@ts-ignore
-    migrate: (state: PersistedState & RootState) => {
-        try {
-            return migrationFunction(state);
-        } catch (error) {
-            return Promise.resolve(state);
-        }
-    },
+    migrate: createMigrate(migration, { debug: __DEV__ }),
     blacklist: ["addTree"],
 };
 
 const rootReducer = combineReducers({
     login: loginReducer,
     canvasDisplaySettings: canvasDisplaySettingsReducer,
-    // currentTree: toBeDepricatedCurrentTreeReducer,
     screenDimentions: screenDimentionsReducer,
     addTree: addTreeReducer,
     user: userReducer,
