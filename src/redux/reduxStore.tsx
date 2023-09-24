@@ -25,6 +25,10 @@ import newUserTreesSlice from "./slices/userTreesSlice";
 
 const migration: MigrationManifest = {
     //@ts-ignore
+    1: (state) => {
+        return state;
+    },
+    //@ts-ignore
     2: (state) => {
         //@ts-ignore
         return migrationFunction(state);
