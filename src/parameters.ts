@@ -65,6 +65,8 @@ export const nodeGradients: ColorGradient[] = [
     { label: "Magenta", color1: "#FC385F", color2: "#BF5AF2" },
     { label: "White", color1: "#FFFFFF", color2: "#CAEFD7" },
 ];
+
+export const PURPLE_GRADIENT = { label: "Purple", color1: "#BF5AF2", color2: "#5A7BF2" };
 export const WHITE_GRADIENT = { label: "White", color1: "#FFFFFF", color2: "#CAEFD7" };
 
 export const ALLOWED_NODE_SPACING = 0.65;

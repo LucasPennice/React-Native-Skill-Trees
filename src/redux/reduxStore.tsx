@@ -22,16 +22,14 @@ import nodesSlice from "./slices/nodesSlice";
 import screenDimentionsReducer from "./slices/screenDimentionsSlice";
 import userReducer from "./slices/userSlice";
 import newUserTreesSlice from "./slices/userTreesSlice";
+import { MigrationConfig } from "redux-persist/es/createMigrate";
 
 const migration: MigrationManifest = {
     //@ts-ignore
-    1: (state) => {
-        return state;
-    },
-    //@ts-ignore
     2: (state) => {
         //@ts-ignore
-        return migrationFunction(state);
+        const result = migrationFunction(state);
+        return result;
     },
 };
 
@@ -39,7 +37,7 @@ const persistConfig: PersistConfig<any> = {
     key: "root",
     version: 2,
     storage: AsyncStorage,
-    migrate: createMigrate(migration, { debug: __DEV__ }),
+    migrate: createMigrate(migration, { debug: __DEV__ } as MigrationConfig),
     blacklist: ["addTree"],
 };
 

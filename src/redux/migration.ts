@@ -25,30 +25,30 @@ export type MigrationState = PersistedState &
     };
 
 export const migrationFunction = (state: MigrationState) => {
-    const migrateToHomeTreeSlice = shouldMigrateToHomeTree(state.canvasDisplaySettings, state.homeTree);
+    // const migrateToHomeTreeSlice = shouldMigrateToHomeTree(state.canvasDisplaySettings, state.homeTree);
 
-    const migrateUserTreesSlice = shouldMigrateNodesAndTrees(state.nodes, state.userTrees, state.currentTree);
+    // const migrateUserTreesSlice = shouldMigrateNodesAndTrees(state.nodes, state.userTrees, state.currentTree);
 
     let updatedState = { ...state };
 
-    if (migrateUserTreesSlice) {
-        const { nodeState, userTrees } = migrateFromCurrentTreeToNormalizedSlice(state.currentTree!.userTrees, state.canvasDisplaySettings);
-        updatedState["nodes"] = nodeState;
-        updatedState["userTrees"] = userTrees;
-        delete updatedState["currentTree"];
-    }
+    // if (migrateUserTreesSlice) {
+    const { nodeState, userTrees } = migrateFromCurrentTreeToNormalizedSlice(state.currentTree!.userTrees, state.canvasDisplaySettings);
+    updatedState["nodes"] = nodeState;
+    updatedState["userTrees"] = userTrees;
+    delete updatedState["currentTree"];
+    // }
 
-    if (migrateToHomeTreeSlice) {
-        updatedState["homeTree"] = {
-            accentColor: state.canvasDisplaySettings.homepageTreeColor,
-            icon: { isEmoji: false, text: state.canvasDisplaySettings.homepageTreeIcon },
-            treeName: state.canvasDisplaySettings.homepageTreeName,
-            rootNodeId: HOMETREE_ROOT_ID,
-            treeId: HOMEPAGE_TREE_ID,
-        } as HomeTreeSlice;
-    }
+    // if (migrateToHomeTreeSlice) {
+    updatedState["homeTree"] = {
+        accentColor: state.canvasDisplaySettings.homepageTreeColor,
+        icon: { isEmoji: false, text: state.canvasDisplaySettings.homepageTreeIcon },
+        treeName: state.canvasDisplaySettings.homepageTreeName,
+        rootNodeId: HOMETREE_ROOT_ID,
+        treeId: HOMEPAGE_TREE_ID,
+    } as HomeTreeSlice;
+    // }
 
-    return Promise.resolve(updatedState);
+    return updatedState;
 };
 
 export function shouldMigrateNodesAndTrees(

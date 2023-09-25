@@ -1,11 +1,11 @@
-import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, WHITE_GRADIENT } from "../../parameters";
+import { ColorGradient } from "@/types";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, PURPLE_GRADIENT } from "../../parameters";
 import { RootState } from "../reduxStore";
 import { TreeData } from "./userTreesSlice";
-import { ColorGradient } from "@/types";
 
 export const homeTreeSliceInitialState: Omit<TreeData, "nodes"> = {
-    accentColor: WHITE_GRADIENT,
+    accentColor: PURPLE_GRADIENT,
     icon: { text: "L", isEmoji: false },
     rootNodeId: HOMETREE_ROOT_ID,
     treeId: HOMEPAGE_TREE_ID,
