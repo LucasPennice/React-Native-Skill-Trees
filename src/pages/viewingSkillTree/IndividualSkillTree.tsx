@@ -1,10 +1,10 @@
 import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMenuFunctions";
-import { removeUserTree } from "@/redux/slices/userTreesSlice";
 import { removeNodes } from "@/redux/slices/nodesSlice";
+import { removeUserTree } from "@/redux/slices/userTreesSlice";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
 import { SelectedNewNodePositionState, SelectedNodeCoordState } from "app/(tabs)/myTrees/[treeId]";
 import { router } from "expo-router";
-import { ReactNode, memo, useMemo, useState } from "react";
+import { ReactNode, memo, useState } from "react";
 import { Alert, View } from "react-native";
 import { Gesture, GestureDetector, SimultaneousGesture } from "react-native-gesture-handler";
 import Animated, { useSharedValue } from "react-native-reanimated";
@@ -17,8 +17,6 @@ import useCanvasScroll from "../../components/treeRelated/hooks/gestures/useCanv
 import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks/gestures/useCanvasTap";
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
-import { findNodeById } from "../../functions/extractInformationFromTree";
-import { handleTreeBuild } from "../../functions/treeCalculateCoordinates";
 import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
@@ -39,7 +37,7 @@ type Props = {
     state: {
         selectedNewNodePositionState: SelectedNewNodePositionState;
         selectedNodeCoordState: SelectedNodeCoordState;
-        addNodePositions: DnDZone[];
+        treeCoordinate: TreeCoordinateData;
         showNewNodePositions: boolean;
     };
     functions: {
@@ -127,26 +125,6 @@ function useCreateTreeFunctions(
     return result;
 }
 
-function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: NormalizedNode | null, selectedTree: Tree<Skill>) {
-    const screenDimensions = useAppSelector(selectSafeScreenDimentions);
-
-    const {
-        dndZoneCoordinates,
-        canvasDimentions: canvasDimensions,
-        nodeCoordinatesCentered,
-    } = useMemo(() => handleTreeBuild(selectedTree, screenDimensions, "hierarchy"), [selectedTree, screenDimensions]);
-
-    const treeCoordinate: TreeCoordinateData = {
-        canvasDimensions,
-        addNodePositions: dndZoneCoordinates,
-        nodeCoordinates: nodeCoordinatesCentered,
-    };
-
-    const selectedNodeId = selectedNode ? selectedNode.nodeId : null;
-
-    return { screenDimensions, selectedNodeId, treeCoordinate, canvasRef, selectedDndZone: undefined };
-}
-
 function useDraggingNodeState() {
     const [draggingNode, setDraggingNode] = useState(false);
     const endDragging = () => setDraggingNode(false);
@@ -190,15 +168,13 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
     const { openCanvasSettingsModal, openChildrenHoistSelector, openNewNodeModal } = functions;
     const { screenDimensions, canvasDisplaySettings } = useHomepageTreeState();
 
-    const { selectedNewNodePositionState, selectedNodeCoordState, showNewNodePositions, addNodePositions } = state;
+    const { selectedNewNodePositionState, selectedNodeCoordState, showNewNodePositions, treeCoordinate } = state;
+    const { addNodePositions, nodeCoordinates, canvasDimensions } = treeCoordinate;
+
     const [selectedNewNodePosition, { updateSelectedNewNodePosition }] = selectedNewNodePositionState;
     const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
 
-    const selectedNode = findNodeById(tree, selectedNodeCoord?.node?.nodeId ?? null);
-
-    const treeState = useGetTreeState(canvasRef, selectedNodeCoord?.node ?? null, tree);
-
-    const treeFunctions = useCreateTreeFunctions(state.addNodePositions, {
+    const treeFunctions = useCreateTreeFunctions(addNodePositions, {
         openCanvasSettingsModal,
         openChildrenHoistSelector,
         openNewNodeModal,
@@ -209,14 +185,14 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
     const [draggingNode, draggingNodeActions] = useDraggingNodeState();
     const { endDragging } = draggingNodeActions;
 
-    const selectedNodeCoordinates = treeState.treeCoordinate.nodeCoordinates.find((c) => c.nodeId === selectedNodeCoord?.node?.nodeId ?? null);
+    const selectedNodeCoordinates = nodeCoordinates.find((c) => c.nodeId === selectedNodeCoord?.node?.nodeId ?? null);
 
     const nodeActionState = useNodeActionState();
     const [nodeAction, { resetNodeAction }] = nodeActionState;
 
     const canvasLongPressProps = {
         config: { blockDragAndDrop: false, blockLongPress: selectedNodeCoord !== null },
-        nodeCoordinates: treeState.treeCoordinate.nodeCoordinates,
+        nodeCoordinates: nodeCoordinates,
         nodeActionState,
         draggingNodeActions,
     };
@@ -229,8 +205,8 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
             onDndZoneClick: treeFunctions.onDndZoneClick,
         },
         state: {
-            dragAndDropZones: treeState.treeCoordinate.addNodePositions,
-            nodeCoordinates: treeState.treeCoordinate.nodeCoordinates,
+            dragAndDropZones: addNodePositions,
+            nodeCoordinates: nodeCoordinates,
             selectedNodeId: selectedNodeCoord?.node?.nodeId ?? null,
             showNewNodePositions,
         },
@@ -247,7 +223,7 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
     const scale = useSharedValue(DEFAULT_SCALE);
 
     const { canvasPan, dragDelta, scrollStyle } = useCanvasScroll(
-        treeState.treeCoordinate,
+        treeCoordinate,
         screenDimensions,
         selectedNodeCoordinates,
         runOnScroll,
@@ -255,7 +231,7 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
         { offsetX, offsetY, scale }
     );
 
-    const { canvasZoom, scaleState } = useCanvasZoom(treeState.treeCoordinate.canvasDimensions, screenDimensions, selectedNodeCoordinates, {
+    const { canvasZoom, scaleState } = useCanvasZoom(canvasDimensions, screenDimensions, selectedNodeCoordinates, {
         offsetX,
         offsetY,
         scale,
@@ -277,11 +253,11 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
         <>
             <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative" }]}>
                 <Animated.View style={[scrollStyle, { flex: 1 }]}>
-                    <CanvasView canvasDimensions={treeState.treeCoordinate.canvasDimensions} canvasGestures={canvasGestures} canvasRef={canvasRef}>
+                    <CanvasView canvasDimensions={canvasDimensions} canvasGestures={canvasGestures} canvasRef={canvasRef}>
                         {fonts && (
                             <HierarchicalSkillTree
-                                nodeCoordinatesCentered={treeState.treeCoordinate.nodeCoordinates}
-                                selectedNode={selectedNode?.nodeId ?? null}
+                                nodeCoordinatesCentered={nodeCoordinates}
+                                selectedNode={selectedNodeCoord?.node?.nodeId ?? null}
                                 fonts={fonts}
                                 settings={{
                                     showLabel: canvasDisplaySettings.showLabel,

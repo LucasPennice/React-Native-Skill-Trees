@@ -26,6 +26,7 @@ import { useCanvasRef } from "@shopify/react-native-skia";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { View } from "react-native";
+import { Dictionary } from "@reduxjs/toolkit";
 
 export type ModalState =
     | "TAKING_SCREENSHOT"
@@ -58,7 +59,17 @@ function useViewingSkillTreeState(treeId: string) {
         dndZoneCoordinates,
         canvasDimentions: canvasDimensions,
         nodeCoordinatesCentered,
-    } = handleTreeBuild(selectedTree, screenDimensions, "hierarchy");
+    } = useMemo(() => {
+        const treeNodesDictionary: Dictionary<NormalizedNode> = {};
+
+        for (let i = 0; i < treeNodes.length; i++) {
+            const node = treeNodes[i];
+
+            treeNodesDictionary[node.nodeId] = node;
+        }
+
+        return handleTreeBuild(treeNodesDictionary, treeData, screenDimensions, "hierarchy");
+    }, [treeNodes, treeData, screenDimensions]);
 
     let treeCoordinate: TreeCoordinateData = { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: nodeCoordinatesCentered };
 
@@ -261,16 +272,7 @@ function useAddNodeModalFunctions(
                 dispatch(addNodes({ treeId: selectedTree.treeId, nodesToAdd: [parentCase.nodeToAdd] }));
                 break;
         }
-        // let result = insertNodesBasedOnDnDZone(dnDZone, selectedTree, newNodes);
 
-        // if (result === undefined) throw new Error("result undefined at foo");
-
-        // const treeSkillCompletion = treeCompletedSkillPercentage(result);
-
-        // if (treeSkillCompletion === 100) result = { ...result, data: { ...result.data, isCompleted: true } };
-        // if (treeSkillCompletion !== 100) result = { ...result, data: { ...result.data, isCompleted: false } };
-
-        // dispatch(updateUserTreeWithAppendedNode(result));
         clearSelectedNewNodePosition();
         dispatchModalState("returnToIdle");
     };
@@ -441,7 +443,7 @@ function IndividualSkillTreePage() {
                 state={{
                     selectedNodeCoordState,
                     selectedNewNodePositionState,
-                    addNodePositions: treeCoordinate.addNodePositions,
+                    treeCoordinate: treeCoordinate,
                     showNewNodePositions,
                 }}
                 canvasRef={canvasRef}

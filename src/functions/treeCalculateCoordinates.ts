@@ -1,5 +1,5 @@
-import { PlotTreeReingoldTiltfordAlgorithm } from "./treeToHierarchical/general";
-import { plotCircularTree } from "./treeToRadialCoordinates/general";
+import { TreeData } from "@/redux/slices/userTreesSlice";
+import { Dictionary } from "@reduxjs/toolkit";
 import {
     BROTHER_DND_ZONE_HEIGHT,
     CHILD_DND_ZONE_DIMENTIONS,
@@ -10,20 +10,23 @@ import {
     PARENT_DND_ZONE_DIMENTIONS,
 } from "../parameters";
 import { ScreenDimentions } from "../redux/slices/screenDimentionsSlice";
-import { CanvasDimensions, CartesianCoordinate, NodeCoordinate, DnDZone, Skill, Tree, InteractiveTreeConfig } from "../types";
+import { CanvasDimensions, CartesianCoordinate, DnDZone, InteractiveTreeConfig, NodeCoordinate, NormalizedNode } from "../types";
+import { plotTreeReingoldTiltfordAlgorithm } from "./treeToHierarchical/general";
 
-export function getNodesCoordinates(currentTree: Tree<Skill> | undefined, mode: "hierarchy" | "radial"): NodeCoordinate[] {
-    if (!currentTree) return [];
-
-    let unscaledCoordinates: NodeCoordinate[] = [];
+export function getNodesCoordinates(
+    nodes: Dictionary<NormalizedNode>,
+    mode: "hierarchy" | "radial",
+    treeData: Omit<TreeData, "nodes">
+): NodeCoordinate[] {
     let scaledCoordinates: NodeCoordinate[] = [];
 
     if (mode === "hierarchy") {
-        unscaledCoordinates = PlotTreeReingoldTiltfordAlgorithm(currentTree);
+        const unscaledCoordinates = plotTreeReingoldTiltfordAlgorithm(nodes, treeData);
         scaledCoordinates = scaleCoordinatesAfterReingoldTiltford(unscaledCoordinates);
     } else {
-        unscaledCoordinates = plotCircularTree(currentTree);
-        scaledCoordinates = scaleCoordinatesAfterRadialReingoldTiltford(unscaledCoordinates);
+        // const unscaledCoordinates = plotCircularTree(nodes);
+        scaledCoordinates = scaleCoordinatesAfterRadialReingoldTiltford([]);
+        // scaledCoordinates = scaleCoordinatesAfterRadialReingoldTiltford(unscaledCoordinates);
     }
 
     return scaledCoordinates;
@@ -253,14 +256,15 @@ export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDim
 }
 
 export function handleTreeBuild(
-    tree: Tree<Skill>,
+    nodes: Dictionary<NormalizedNode>,
+    treeData: Omit<TreeData, "nodes">,
     screenDimentions: ScreenDimentions,
     renderStyle: InteractiveTreeConfig["renderStyle"],
     showDepthGuides?: boolean
 ) {
-    const coordinatesWithTreeData = getNodesCoordinates(tree, renderStyle);
-    const canvasDimentions = getCanvasDimensions(coordinatesWithTreeData, screenDimentions, showDepthGuides);
-    const nodeCoordinatesCentered = centerNodesInCanvas(coordinatesWithTreeData, canvasDimentions);
+    const coordinates = getNodesCoordinates(nodes, renderStyle, treeData);
+    const canvasDimentions = getCanvasDimensions(coordinates, screenDimentions, showDepthGuides);
+    const nodeCoordinatesCentered = centerNodesInCanvas(coordinates, canvasDimentions);
     const dndZoneCoordinates = calculateDragAndDropZones(nodeCoordinatesCentered);
 
     return { nodeCoordinatesCentered, dndZoneCoordinates, canvasDimentions };

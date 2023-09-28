@@ -1,3 +1,4 @@
+import { Dictionary } from "@reduxjs/toolkit";
 import { HOMETREE_ROOT_ID, UNCENTERED_ROOT_COORDINATES } from "../parameters";
 import { NodeCoordinate, NodeQtyPerLevel, NormalizedNode, OuterPolarContour, PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
 import { cartesianToPositivePolarCoordinates } from "./coordinateSystem";
@@ -90,9 +91,9 @@ export function findParentOfNode(rootNode: Tree<Skill> | undefined, id: string):
     return parentNode;
 }
 
-export function findLowestCommonAncestorIdOfNodes(tree: Tree<Skill>, nodeId1: string, nodeId2: string) {
-    const path1 = returnPathFromRootToNode(tree, nodeId1);
-    const path2 = returnPathFromRootToNode(tree, nodeId2);
+export function findLowestCommonAncestorIdOfNodes(nodes: Dictionary<NormalizedNode>, rootId: string, nodeId1: string, nodeId2: string) {
+    const path1 = returnPathFromRootToNode(nodes, rootId, nodeId1);
+    const path2 = returnPathFromRootToNode(nodes, rootId, nodeId2);
 
     return findLCABetweenToPaths(path1, path2);
 
@@ -115,30 +116,37 @@ export function findLowestCommonAncestorIdOfNodes(tree: Tree<Skill>, nodeId1: st
     }
 }
 
-export function returnPathFromRootToNode(tree: Tree<Skill>, nodeId: string) {
+export function returnPathFromRootToNode(nodes: Dictionary<NormalizedNode>, rootId: string, targetNodeId: string) {
     const result: string[] = [];
 
-    getPathFromRootToNode(tree, nodeId, result);
+    getPathFromRootToNode(rootId, result);
 
     return result;
 
-    function getPathFromRootToNode(tree: Tree<Skill>, nodeId: string, arr: string[]) {
-        arr.push(tree.nodeId);
+    //VER SI PUEDO SACAR ARR DE PARAMETRO
+
+    function getPathFromRootToNode(currentNodeId: string, arr: string[]) {
+        //Note: currentNodeId will be root id when we first call the function
+        const currentNode = nodes[currentNodeId];
+
+        if (!currentNode) throw new Error("currentNode undefined at getPathFromRootToNode");
+
+        arr.push(currentNode.nodeId);
 
         //Base Case 👇
-        if (tree.nodeId === nodeId) return true;
+        if (currentNode.nodeId === targetNodeId) return true;
 
-        if (!tree.children.length) {
+        if (!currentNode.childrenIds.length) {
             arr.pop();
             return false;
         }
 
         //Recursive Case 👇
 
-        for (let i = 0; i < tree.children.length; i++) {
-            const element = tree.children[i];
+        for (let i = 0; i < currentNode.childrenIds.length; i++) {
+            const childId = currentNode.childrenIds[i];
 
-            const childHasPath = getPathFromRootToNode(element, nodeId, arr);
+            const childHasPath = getPathFromRootToNode(childId, arr);
 
             if (childHasPath) return true;
         }
@@ -202,15 +210,28 @@ export function extractTreeIds(rootNode: Tree<Skill>, idArr: string[]) {
     return idArr.push(rootNode.nodeId);
 }
 
-export function addEveryChildFromTreeToArray(tree: Tree<Skill>, arrToAdd: string[]) {
-    if (!tree.children.length) return;
+export function getDescendantsId(nodes: Dictionary<NormalizedNode>, startingNodeId: string) {
+    const result: string[] = [];
 
-    for (let i = 0; i < tree.children.length; i++) {
-        const element = tree.children[i];
+    recursive(startingNodeId);
 
-        arrToAdd.push(element.nodeId);
+    return result;
 
-        addEveryChildFromTreeToArray(element, arrToAdd);
+    function recursive(currentNodeId: string) {
+        //Note: currentNodeId will be the initial node, that node will not be added in this function. Only their children (and theirs, and so on)
+        const currentNode = nodes[currentNodeId];
+
+        if (!currentNode) throw new Error("currentNode undefined at addEveryChildFromTreeToArray");
+
+        if (!currentNode.childrenIds.length) return;
+
+        for (let i = 0; i < currentNode.childrenIds.length; i++) {
+            const childId = currentNode.childrenIds[i];
+
+            result.push(childId);
+
+            recursive(childId);
+        }
     }
 }
 

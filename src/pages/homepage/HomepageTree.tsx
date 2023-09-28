@@ -1,5 +1,6 @@
 import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMenuFunctions";
-import { selectNodeById } from "@/redux/slices/nodesSlice";
+import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
+import { selectNodeById, selectNodesTable } from "@/redux/slices/nodesSlice";
 import { removeUserTree } from "@/redux/slices/userTreesSlice";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
 import { router } from "expo-router";
@@ -89,14 +90,17 @@ function useCreateTreeFunctions(updateSelectedNodeCoord: (value: NormalizedNode)
     return result;
 }
 
-function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: NormalizedNode | null, homeTree: Tree<Skill>) {
+function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: NormalizedNode | null) {
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
+
+    const allNodes = useAppSelector(selectNodesTable);
+    const homeTreeData = useAppSelector(selectHomeTree);
 
     const {
         dndZoneCoordinates,
         canvasDimentions: canvasDimensions,
         nodeCoordinatesCentered,
-    } = useMemo(() => handleTreeBuild(homeTree, screenDimensions, "radial"), [homeTree, screenDimensions]);
+    } = useMemo(() => handleTreeBuild(allNodes, homeTreeData, screenDimensions, "radial"), [allNodes, homeTreeData, screenDimensions]);
 
     const treeCoordinate: TreeCoordinateData = {
         canvasDimensions,
@@ -161,7 +165,7 @@ function HomepageTree({ canvasRef, homepageTree, openCanvasSettingsModal, select
     const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
     const { screenDimensions, canvasDisplaySettings, selectedNode } = useHomepageTreeState(selectedNodeCoord?.nodeId ?? undefined);
 
-    const treeState = useGetTreeState(canvasRef, selectedNodeCoord, homepageTree);
+    const treeState = useGetTreeState(canvasRef, selectedNodeCoord);
 
     const treeFunctions = useCreateTreeFunctions(updateSelectedNodeCoord, openCanvasSettingsModal);
 

@@ -71,37 +71,37 @@ function HomepageContents() {
     //🧠 .4ms
     const { userTrees, screenDimensions, allNodes, homePageTreeData } = useHomepageContentsState();
 
-    return (
-        <View style={{ backgroundColor: "green", flex: 1, justifyContent: "center" }}>
-            <Button
-                title={"toggleSelect"}
-                onPress={() => {
-                    console.log("cajeta");
-                    if (selectedNodeCoordState[0]) return selectedNodeCoordState[1].clearSelectedNodeCoord();
-                    selectedNodeCoordState[1].updateSelectedNodeCoord({
-                        category: "SKILL",
-                        data: {
-                            name: "b",
-                            isCompleted: false,
-                            icon: { isEmoji: false, text: "" },
-                            logs: [],
-                            milestones: [],
-                            motivesToLearn: [],
-                            usefulResources: [],
-                        },
-                        isRoot: false,
-                        level: 1,
-                        nodeId: "lGbDlPoI87rvxVBThUE38orH",
-                        parentId: "ngevJAb90cbcAf9uUnW5IZYe",
-                        treeId: "cDZz7HWQ38QWsWyjPOe9enM1",
-                        x: 0,
-                        y: 0,
-                        childrenIds: [],
-                    });
-                }}
-            />
-        </View>
-    );
+    // return (
+    //     <View style={{ backgroundColor: "green", flex: 1, justifyContent: "center" }}>
+    //         <Button
+    //             title={"toggleSelect"}
+    //             onPress={() => {
+    //                 console.log("cajeta");
+    //                 if (selectedNodeCoordState[0]) return selectedNodeCoordState[1].clearSelectedNodeCoord();
+    //                 selectedNodeCoordState[1].updateSelectedNodeCoord({
+    //                     category: "SKILL",
+    //                     data: {
+    //                         name: "b",
+    //                         isCompleted: false,
+    //                         icon: { isEmoji: false, text: "" },
+    //                         logs: [],
+    //                         milestones: [],
+    //                         motivesToLearn: [],
+    //                         usefulResources: [],
+    //                     },
+    //                     isRoot: false,
+    //                     level: 1,
+    //                     nodeId: "lGbDlPoI87rvxVBThUE38orH",
+    //                     parentId: "ngevJAb90cbcAf9uUnW5IZYe",
+    //                     treeId: "cDZz7HWQ38QWsWyjPOe9enM1",
+    //                     x: 0,
+    //                     y: 0,
+    //                     childrenIds: [],
+    //                 });
+    //             }}
+    //         />
+    //     </View>
+    // );
 
     const takingScreenShotState = useTakingScreenshotState();
     const [selectedNodeCoord, { clearSelectedNodeCoord }] = selectedNodeCoordState;
@@ -126,12 +126,12 @@ function HomepageContents() {
 
     return (
         <>
-            <HomepageTree
+            {/* <HomepageTree
                 selectedNodeCoordState={selectedNodeCoordState}
                 canvasRef={canvasRef}
                 homepageTree={homepageTree}
                 openCanvasSettingsModal={openCanvasSettingsModal}
-            />
+            /> */}
             <ProgressIndicatorAndName treeData={homePageTreeData} nodesOfTree={allNodes} />
             <OpenSettingsMenu openModal={openCanvasSettingsModal} show={selectedNodeCoord === null} />
             <ShareTreeScreenshot

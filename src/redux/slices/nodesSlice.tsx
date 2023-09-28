@@ -8,6 +8,7 @@ import { homeTreeSliceInitialState } from "./homeTreeSlice";
 const nodesAdapter = createEntityAdapter<NormalizedNode>({ selectId: (node) => node.nodeId });
 export const {
     selectAll: selectAllNodes,
+    selectEntities: selectNodesTable,
     selectTotal: selectTotalNodeNumber,
     selectIds: selectAllNodeIds,
 } = nodesAdapter.getSelectors<RootState>((state) => state.nodes);
