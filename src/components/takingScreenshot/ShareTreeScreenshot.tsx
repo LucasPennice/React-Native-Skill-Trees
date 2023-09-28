@@ -1,21 +1,21 @@
+import { TreeData } from "@/redux/slices/userTreesSlice";
 import { SkiaDomView } from "@shopify/react-native-skia";
 import { usePermissions } from "expo-media-library";
 import { RefObject, useCallback, useEffect, useMemo } from "react";
 import { Alert, Pressable } from "react-native";
-import { centerFlex, colors } from "../../parameters";
-import { Skill, Tree } from "../../types";
-import TakingScreenshotLoadingScreenModal from "./TakingScreenshotLoadingScreenModal";
-import ShareScreenshotIcon from "../Icons/ShareScreenshotIcon";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
+import { centerFlex, colors } from "../../parameters";
+import ShareScreenshotIcon from "../Icons/ShareScreenshotIcon";
+import TakingScreenshotLoadingScreenModal from "./TakingScreenshotLoadingScreenModal";
 
 type Props = {
     shouldShare: boolean;
     takingScreenshotState: readonly [boolean, { readonly openTakingScreenshotModal: () => void; readonly closeTakingScreenshotModal: () => void }];
-    tree: Tree<Skill>;
+    treeData: Omit<TreeData, "nodes">;
     canvasRef: RefObject<SkiaDomView>;
 };
 
-function ShareTreeScreenshot({ shouldShare, takingScreenshotState, tree, canvasRef }: Props) {
+function ShareTreeScreenshot({ shouldShare, takingScreenshotState, treeData, canvasRef }: Props) {
     const [takingScreenshot, { openTakingScreenshotModal }] = takingScreenshotState;
     const [permissionResponse, requestPermission] = usePermissions();
 
@@ -37,8 +37,10 @@ function ShareTreeScreenshot({ shouldShare, takingScreenshotState, tree, canvasR
     }, [handleScreenshotPermissions]);
 
     const MemoizedModal = useMemo(() => {
-        return <TakingScreenshotLoadingScreenModal canvasRef={canvasRef.current!} takingScreenshotState={takingScreenshotState} tree={tree} />;
-    }, [canvasRef, takingScreenshotState, tree]);
+        return (
+            <TakingScreenshotLoadingScreenModal canvasRef={canvasRef.current!} takingScreenshotState={takingScreenshotState} treeData={treeData} />
+        );
+    }, [canvasRef, takingScreenshotState, treeData]);
 
     const opacity = useAnimatedStyle(() => {
         if (!shouldShare) return { opacity: withTiming(0.5, { duration: 150 }) };

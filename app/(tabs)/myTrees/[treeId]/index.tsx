@@ -454,7 +454,7 @@ function IndividualSkillTreePage() {
                 canvasRef={canvasRef}
                 shouldShare={Boolean(shouldRenderShareButton)}
                 takingScreenshotState={takingScreenshotState}
-                tree={selectedTree}
+                treeData={treeData}
             />
             {/* <ShareTree tree={selectedTree} show={modalState === "IDLE"} /> */}
 

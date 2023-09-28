@@ -1,3 +1,6 @@
+import { useAppSelector } from "@/redux/reduxHooks";
+import { selectNodesOfTree } from "@/redux/slices/nodesSlice";
+import { TreeData } from "@/redux/slices/userTreesSlice";
 import { ImageFormat, SkiaDomView } from "@shopify/react-native-skia";
 import { shareAsync } from "expo-sharing";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -7,24 +10,20 @@ import Animated, { Easing, FadeInDown, useAnimatedStyle, useSharedValue, withTim
 import ViewShot from "react-native-view-shot";
 import { centerFlex, colors } from "../../parameters";
 import { generalStyles } from "../../styles";
-import { Skill, Tree } from "../../types";
 import AppText from "../AppText";
 import FlingToDismissModal from "../FlingToDismissModal";
 import ProgressIndicatorAndName from "../ProgressIndicatorAndName";
-import { useAppSelector } from "@/redux/reduxHooks";
-import { selectNodesOfTree } from "@/redux/slices/nodesSlice";
-import { selectTreeById } from "@/redux/slices/userTreesSlice";
 
 type Stage = "TAKING_SCREENSHOT" | "EDITING_LAYOUT";
 
 function TakingScreenshotLoadingScreenModal({
     canvasRef,
     takingScreenshotState,
-    tree,
+    treeData,
 }: {
     canvasRef: SkiaDomView;
     takingScreenshotState: readonly [boolean, { readonly openTakingScreenshotModal: () => void; readonly closeTakingScreenshotModal: () => void }];
-    tree: Tree<Skill>;
+    treeData: Omit<TreeData, "nodes">;
 }) {
     const { width } = Dimensions.get("screen");
 
@@ -65,7 +64,7 @@ function TakingScreenshotLoadingScreenModal({
                 )}
 
                 {stage === "EDITING_LAYOUT" && selectedImage !== null && (
-                    <LayoutSelector selectedImage={selectedImage} tree={tree} cancelSharing={closeTakingScreenshotModal} />
+                    <LayoutSelector selectedImage={selectedImage} treeData={treeData} cancelSharing={closeTakingScreenshotModal} />
                 )}
             </>
         </FlingToDismissModal>
@@ -94,12 +93,19 @@ function TakingScreenshotLoadingScreenModal({
     }
 }
 
-function LayoutSelector({ selectedImage, tree, cancelSharing }: { selectedImage: string; tree: Tree<Skill>; cancelSharing: () => void }) {
+function LayoutSelector({
+    selectedImage,
+    treeData,
+    cancelSharing,
+}: {
+    selectedImage: string;
+    treeData: Omit<TreeData, "nodes">;
+    cancelSharing: () => void;
+}) {
     const { width: screenWidth } = Dimensions.get("window");
     const width = screenWidth > 600 ? 600 : screenWidth;
 
-    const nodesOfTree = useAppSelector(selectNodesOfTree(tree.treeId));
-    const treeData = useAppSelector(selectTreeById(tree.treeId));
+    const nodesOfTree = useAppSelector(selectNodesOfTree(treeData.treeId));
 
     //The only purpouse of this piece of state is to trigger a reset function inside MovableCanvasImage with a useEffect
     const [foo, setFoo] = useState(false);
@@ -236,7 +242,7 @@ function LayoutSelector({ selectedImage, tree, cancelSharing }: { selectedImage:
                     backgroundColor: colors.background,
                 }}
                 onCapture={onCapture}
-                options={{ fileName: tree.treeName, result: "tmpfile", format: "png", quality: 1 }}>
+                options={{ fileName: treeData.treeName, result: "tmpfile", format: "png", quality: 1 }}>
                 <MovableCanvasImage />
                 <ProgressIndicatorAndName nodesOfTree={nodesOfTree} treeData={treeData} />
             </ViewShot>

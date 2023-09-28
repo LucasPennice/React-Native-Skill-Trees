@@ -1,4 +1,5 @@
 import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMenuFunctions";
+import { selectNodeById } from "@/redux/slices/nodesSlice";
 import { removeUserTree } from "@/redux/slices/userTreesSlice";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
 import { router } from "expo-router";
@@ -15,7 +16,6 @@ import useCanvasScroll from "../../components/treeRelated/hooks/gestures/useCanv
 import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks/gestures/useCanvasTap";
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
-import { findNodeByIdInHomeTree } from "../../functions/extractInformationFromTree";
 import { handleTreeBuild } from "../../functions/treeCalculateCoordinates";
 import { HOMEPAGE_TREE_ID, NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
@@ -48,11 +48,12 @@ type Props = {
     openCanvasSettingsModal: () => void;
 };
 
-function useHomepageTreeState() {
+function useHomepageTreeState(selectedNodeId?: string) {
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
+    const selectedNode = useAppSelector(selectNodeById(selectedNodeId));
 
-    return { screenDimensions, canvasDisplaySettings };
+    return { screenDimensions, canvasDisplaySettings, selectedNode };
 }
 
 function useCreateTreeFunctions(updateSelectedNodeCoord: (value: NormalizedNode) => void, openCanvasSettingsModal: () => void) {
@@ -157,11 +158,8 @@ function useSkiaFonts() {
 }
 
 function HomepageTree({ canvasRef, homepageTree, openCanvasSettingsModal, selectedNodeCoordState }: Props) {
-    const { screenDimensions, canvasDisplaySettings } = useHomepageTreeState();
-
     const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
-
-    const selectedNode = findNodeByIdInHomeTree(homepageTree, selectedNodeCoord);
+    const { screenDimensions, canvasDisplaySettings, selectedNode } = useHomepageTreeState(selectedNodeCoord?.nodeId ?? undefined);
 
     const treeState = useGetTreeState(canvasRef, selectedNodeCoord, homepageTree);
 

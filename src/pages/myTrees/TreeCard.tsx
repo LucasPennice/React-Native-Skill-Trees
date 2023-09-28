@@ -1,4 +1,5 @@
-import { selectNodesOfTree } from "@/redux/slices/nodesSlice";
+import { selectNodeById, selectNodesOfTree } from "@/redux/slices/nodesSlice";
+import { TreeData } from "@/redux/slices/userTreesSlice";
 import { View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
@@ -8,20 +9,20 @@ import { countCompleteNodes } from "../../functions/extractInformationFromTree";
 import { centerFlex, colors } from "../../parameters";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
-import { Skill, Tree } from "../../types";
 
 function TreeCard({
     element,
     changeTreeAndNavigateToViewingTree,
     openEditTreeModal,
 }: {
-    element: Tree<Skill>;
+    element: TreeData;
     changeTreeAndNavigateToViewingTree: () => void;
     openEditTreeModal: (treeId: string) => void;
 }) {
     const { width } = useAppSelector(selectSafeScreenDimentions);
     //
     const nodesOfTree = useAppSelector(selectNodesOfTree(element.treeId));
+    const rootNodeOfTree = useAppSelector(selectNodeById(element.rootNodeId))!;
     const completedSkillsQty = countCompleteNodes(nodesOfTree);
     const skillsQty = nodesOfTree.length - 1;
     const completePercentage = skillsQty === 0 ? 0 : (completedSkillsQty / skillsQty) * 100;
@@ -82,7 +83,11 @@ function TreeCard({
                         {completedSkillsQty} skills of {skillsQty}
                     </AppText>
                 </View>
-                <NodeView node={element} size={60} completePercentage={completePercentage} />
+                <NodeView
+                    node={{ accentColor: element.accentColor, category: "SKILL_TREE", data: rootNodeOfTree.data }}
+                    size={60}
+                    completePercentage={completePercentage}
+                />
             </Animated.View>
         </GestureDetector>
     );

@@ -4,6 +4,7 @@ import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { useCanvasRef } from "@shopify/react-native-skia";
 import { useNavigation } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Button, View } from "react-native";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import ShareTreeScreenshot from "../../components/takingScreenshot/ShareTreeScreenshot";
@@ -27,6 +28,8 @@ function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
 }
 
 function useHomepageContentsState() {
+    // ESTE HOOK TRAE MUCHOS PROBLEMAS
+    // PODRIAMOS QUE NO SE USE MAS
     const { userTrees, allNodes } = useGetUserTrees();
     const homePageTreeData = useAppSelector(selectHomeTree);
 
@@ -63,10 +66,44 @@ function useCanvasSettingsState() {
 }
 
 function HomepageContents() {
+    const selectedNodeCoordState = useSelectedNodeCoordState();
+
+    //🧠 .4ms
     const { userTrees, screenDimensions, allNodes, homePageTreeData } = useHomepageContentsState();
 
+    return (
+        <View style={{ backgroundColor: "green", flex: 1, justifyContent: "center" }}>
+            <Button
+                title={"toggleSelect"}
+                onPress={() => {
+                    console.log("cajeta");
+                    if (selectedNodeCoordState[0]) return selectedNodeCoordState[1].clearSelectedNodeCoord();
+                    selectedNodeCoordState[1].updateSelectedNodeCoord({
+                        category: "SKILL",
+                        data: {
+                            name: "b",
+                            isCompleted: false,
+                            icon: { isEmoji: false, text: "" },
+                            logs: [],
+                            milestones: [],
+                            motivesToLearn: [],
+                            usefulResources: [],
+                        },
+                        isRoot: false,
+                        level: 1,
+                        nodeId: "lGbDlPoI87rvxVBThUE38orH",
+                        parentId: "ngevJAb90cbcAf9uUnW5IZYe",
+                        treeId: "cDZz7HWQ38QWsWyjPOe9enM1",
+                        x: 0,
+                        y: 0,
+                        childrenIds: [],
+                    });
+                }}
+            />
+        </View>
+    );
+
     const takingScreenShotState = useTakingScreenshotState();
-    const selectedNodeCoordState = useSelectedNodeCoordState();
     const [selectedNodeCoord, { clearSelectedNodeCoord }] = selectedNodeCoordState;
 
     const [canvasSettings, { openCanvasSettingsModal, closeCanvasSettingsModal }] = useCanvasSettingsState();
@@ -101,7 +138,7 @@ function HomepageContents() {
                 canvasRef={canvasRef}
                 shouldShare={selectedNodeCoord === null}
                 takingScreenshotState={takingScreenShotState}
-                tree={homepageTree}
+                treeData={homePageTreeData}
             />
 
             {selectedNodeCoord && <SelectedNodeMenu functions={selectedNodeQueryFns} state={selectedNodeMenuState} />}

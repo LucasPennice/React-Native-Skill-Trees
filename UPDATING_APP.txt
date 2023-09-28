@@ -1,3 +1,7 @@
+THE APP NAME SEEMS TO BE @lucaspennice/SkillTrees
+
+Command to profile in hermes: npx react-native profile-hermes .
+
 BE SURE TO INCREASE THE APP AND ANDROID RELEASE VERSION
 
 TO CREATE AN apk IN ADROID

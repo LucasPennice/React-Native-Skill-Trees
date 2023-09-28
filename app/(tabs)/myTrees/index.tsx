@@ -1,11 +1,11 @@
 import AppText from "@/components/AppText";
-import useGetUserTrees from "@/components/treeRelated/hooks/useGetUserTrees";
 import TreeCard from "@/pages/myTrees/TreeCard";
 import AddTreeModal from "@/pages/myTrees/modals/AddTreeModal";
 import EditTreeModal from "@/pages/myTrees/modals/EditTreeModal";
 import { colors } from "@/parameters";
-import { useAppDispatch } from "@/redux/reduxHooks";
+import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { open } from "@/redux/slices/addTreeModalSlice";
+import { selectAllTrees } from "@/redux/slices/userTreesSlice";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
@@ -18,7 +18,7 @@ function MyTrees() {
 
     const [editingTreeId, setEditingTreeId] = useState<string | null>(null);
     //Redux Related
-    const { userTrees } = useGetUserTrees();
+    const userTrees = useAppSelector(selectAllTrees);
 
     const dispatch = useAppDispatch();
 
