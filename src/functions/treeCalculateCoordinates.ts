@@ -12,6 +12,7 @@ import {
 import { ScreenDimentions } from "../redux/slices/screenDimentionsSlice";
 import { CanvasDimensions, CartesianCoordinate, DnDZone, InteractiveTreeConfig, NodeCoordinate, NormalizedNode } from "../types";
 import { plotTreeReingoldTiltfordAlgorithm } from "./treeToHierarchical/general";
+import { plotCircularTree } from "./treeToRadialCoordinates/general";
 
 export function getNodesCoordinates(
     nodes: Dictionary<NormalizedNode>,
@@ -24,7 +25,7 @@ export function getNodesCoordinates(
         const unscaledCoordinates = plotTreeReingoldTiltfordAlgorithm(nodes, treeData);
         scaledCoordinates = scaleCoordinatesAfterReingoldTiltford(unscaledCoordinates);
     } else {
-        // const unscaledCoordinates = plotCircularTree(nodes);
+        const unscaledCoordinates = plotCircularTree(nodes);
         scaledCoordinates = scaleCoordinatesAfterRadialReingoldTiltford([]);
         // scaledCoordinates = scaleCoordinatesAfterRadialReingoldTiltford(unscaledCoordinates);
     }

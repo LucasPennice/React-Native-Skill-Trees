@@ -1,5 +1,6 @@
+import { Dictionary } from "@reduxjs/toolkit";
 import { ALLOWED_NODE_SPACING } from "../../parameters";
-import { PolarCoordinate, Skill, Tree } from "../../types";
+import { NormalizedNode, PolarCoordinate } from "../../types";
 import { arcToAngleRadians, polarToCartesianCoordinates } from "../coordinateSystem";
 import { DistanceToCenterPerLevel } from "./overlap";
 
@@ -7,66 +8,53 @@ type RadialTreeMod = PolarCoordinate & { level: number };
 
 const DEFAULT_CURRENT_TREE_MOD: RadialTreeMod = { angleInRadians: 0, distanceToCenter: 0, level: 0 };
 
-export function firstIteration(
-    tree: Tree<Skill>,
-    completeTree: Tree<Skill>,
-    distanceToCenterPerLevel: DistanceToCenterPerLevel,
-    currentTreeMod?: RadialTreeMod,
-    childrenIdx?: number
-) {
-    const currentMod: RadialTreeMod = currentTreeMod !== undefined ? currentTreeMod : DEFAULT_CURRENT_TREE_MOD;
+export function firstIteration(nodes: Dictionary<NormalizedNode>, rootNodeId: string, distanceToCenterPerLevel: DistanceToCenterPerLevel) {
+    const result: Dictionary<NormalizedNode> = {};
 
-    //Base Case 👇
-    const treeCoord = polarToCartesianCoordinates(currentMod);
+    recursive(rootNodeId);
 
-    let result: Tree<Skill> = { ...tree, x: treeCoord.x, y: treeCoord.y, level: currentMod.level, children: [] };
+    return result;
 
-    if (!tree.children.length) return result;
+    function recursive(currentNodeId: string, currentTreeMod?: RadialTreeMod, childrenIdx?: number) {
+        //Note: currentNodeId will be the root node id for the first call
 
-    result.children = [];
+        const currentMod: RadialTreeMod = currentTreeMod !== undefined ? currentTreeMod : DEFAULT_CURRENT_TREE_MOD;
 
-    //Recursive Case 👇
+        //Base Case 👇
+        const treeCoord = polarToCartesianCoordinates(currentMod);
 
-    if (tree.isRoot) pushLevel1SubTrees();
+        const currentNode = nodes[currentNodeId];
 
-    if (!tree.isRoot) {
+        if (!currentNode) throw new Error("currentNode undefined at firstIteration");
+
+        const currentNodeWithCoordinates = { ...currentNode, x: treeCoord.x, y: treeCoord.y, level: currentMod.level };
+
+        result[currentNodeId] = currentNodeWithCoordinates;
+
+        if (!currentNodeWithCoordinates.childrenIds.length) return;
+
+        //Recursive Case 👇
+
         const isFirstNode = childrenIdx === 0;
         const childrenDistanceToCenter = distanceToCenterPerLevel[currentMod.level + 1];
 
         const angleBetweenChildren = arcToAngleRadians(ALLOWED_NODE_SPACING, childrenDistanceToCenter);
-        const childrenAngleSpan = (tree.children.length - 1) * angleBetweenChildren;
+        const childrenAngleSpan = (currentNode.childrenIds.length - 1) * angleBetweenChildren;
 
         let desiredAngleToCenterChildren = childrenAngleSpan / 2;
 
-        if (isFirstNode === true) result.x = polarToCartesianCoordinates(currentMod).x;
+        if (isFirstNode === true) currentNodeWithCoordinates.x = polarToCartesianCoordinates(currentMod).x;
 
-        for (let idx = 0; idx < tree.children.length; idx++) {
+        for (let idx = 0; idx < currentNode.childrenIds.length; idx++) {
             const childrenMod: RadialTreeMod = {
                 angleInRadians: currentMod.angleInRadians + idx * angleBetweenChildren - desiredAngleToCenterChildren,
                 distanceToCenter: childrenDistanceToCenter,
                 level: currentMod.level + 1,
             };
 
-            const element = tree.children[idx];
+            const childId = currentNode.childrenIds[idx];
 
-            const d = firstIteration(element, completeTree, distanceToCenterPerLevel, childrenMod, idx);
-
-            if (d) result.children.push(d);
-        }
-    }
-
-    return result;
-
-    function pushLevel1SubTrees() {
-        if (!tree.children.length) throw new Error("pushLevel1SubTrees");
-
-        for (let idx = 0; idx < tree.children.length; idx++) {
-            const firstLevelChildrenMod: RadialTreeMod = { angleInRadians: 0, distanceToCenter: distanceToCenterPerLevel[1], level: 1 };
-            const element = tree.children[idx];
-
-            const d = firstIteration(element, completeTree, distanceToCenterPerLevel, firstLevelChildrenMod, idx);
-
-            if (d) result.children!.push(d);
+            recursive(childId, childrenMod, idx);
         }
     }
 }

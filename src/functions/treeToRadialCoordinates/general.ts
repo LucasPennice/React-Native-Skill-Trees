@@ -1,6 +1,6 @@
 import { HomeTreeSlice } from "@/redux/slices/homeTreeSlice";
 import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID } from "../../parameters";
-import { NodeCategory, NodeCoordinate, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../../types";
+import { NodeCategory, NodeCoordinate, NormalizedNode, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../../types";
 import { round8Decimals } from "../coordinateSystem";
 import { updateRadiusPerLevelTable } from "../misc";
 import { mutateEveryTreeNode } from "../mutateTree";
@@ -8,6 +8,8 @@ import { firstIteration } from "./firstInstance";
 import { radiusPerLevelToAvoidLevelOvercrowd } from "./levelOvercrowd";
 import { checkForLevelOverflow } from "./levelOverflow";
 import { fixOverlapWithinSubTreesOfLevel1, shiftSubTreeToFinalAngle } from "./overlap";
+import { Dictionary } from "@reduxjs/toolkit";
+import { TreeData } from "@/redux/slices/userTreesSlice";
 
 //☢️ The canvas has the positive y axis pointing downwards, this changes how calculations are to be made ☢️
 
@@ -17,18 +19,27 @@ import { fixOverlapWithinSubTreesOfLevel1, shiftSubTreeToFinalAngle } from "./ov
 // 2 - We do have the necessary space to add the new node, but the sibling subtree is taking that space, if we insert the tree without
 // Increasing the radius we will overlap the nodes, this is level overflow
 
-export function plotCircularTree(completeTree: Tree<Skill>) {
+export function plotCircularTree(nodes: Dictionary<NormalizedNode>, treeData: Omit<TreeData, "nodes">) {
+    const rootNode = nodes[treeData.rootNodeId];
+    if (!rootNode) throw new Error("rootNode undefined at plotCircularTree");
+
     //We invert the tree because the Skia canvas is mirrored vertically
-    let result: Tree<Skill> = invertTree(completeTree);
+    const reversedChildrenIds = rootNode.childrenIds.map((_, idx) => {
+        const inversedIdx = rootNode.childrenIds.length - 1 - idx;
+
+        return rootNode.childrenIds[inversedIdx];
+    });
+
+    let result: Dictionary<NormalizedNode> = { ...nodes, [treeData.rootNodeId]: { ...rootNode, childrenIds: reversedChildrenIds } };
 
     let limiter = 0;
 
-    let radiusPerLevelTable = radiusPerLevelToAvoidLevelOvercrowd(completeTree);
+    let radiusPerLevelTable = radiusPerLevelToAvoidLevelOvercrowd(nodes);
 
     let levelOverflow: UpdateRadiusPerLevelTable = undefined;
 
     do {
-        result = firstIteration(result, result, radiusPerLevelTable);
+        result = firstIteration(nodes, treeData.rootNodeId, radiusPerLevelTable);
 
         result = fixOverlapWithinSubTreesOfLevel1(result);
 

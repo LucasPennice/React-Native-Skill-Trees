@@ -14,7 +14,7 @@ import {
 } from "./general";
 import { TreeData } from "@/redux/slices/userTreesSlice";
 
-const adapter = (tree: Tree<Skill>) => {
+export const treeToNormalizedNodeAndTreeDataAdapter = (tree: Tree<Skill>) => {
     const treeData: TreeData = {
         icon: tree.data.icon,
         accentColor: tree.accentColor,
@@ -2461,7 +2461,7 @@ test("HierarchicalTree - Rairtha 1", () => {
         },
     ];
 
-    const { nodes, treeData } = adapter(treeToTest);
+    const { nodes, treeData } = treeToNormalizedNodeAndTreeDataAdapter(treeToTest);
 
     expect(plotTreeReingoldTiltfordAlgorithm(nodes, treeData)).toStrictEqual(result);
 });
@@ -3121,7 +3121,7 @@ test("HierarchicalTree - Rairtha 2", () => {
         },
     ];
 
-    const { nodes, treeData } = adapter(treeToTest);
+    const { nodes, treeData } = treeToNormalizedNodeAndTreeDataAdapter(treeToTest);
 
     expect(plotTreeReingoldTiltfordAlgorithm(nodes, treeData)).toStrictEqual(result);
 });
@@ -3697,7 +3697,7 @@ test("HierarchicalTree - Rairtha 3", () => {
         },
     ];
 
-    const { nodes, treeData } = adapter(treeToTest);
+    const { nodes, treeData } = treeToNormalizedNodeAndTreeDataAdapter(treeToTest);
 
     expect(plotTreeReingoldTiltfordAlgorithm(nodes, treeData)).toStrictEqual(result);
 });
@@ -4316,7 +4316,7 @@ test("HierarchicalTree - Rairtha 4", () => {
         },
     ];
 
-    const { nodes, treeData } = adapter(treeToTest);
+    const { nodes, treeData } = treeToNormalizedNodeAndTreeDataAdapter(treeToTest);
 
     expect(plotTreeReingoldTiltfordAlgorithm(nodes, treeData)).toStrictEqual(result);
 });

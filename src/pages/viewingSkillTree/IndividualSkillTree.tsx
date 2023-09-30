@@ -4,7 +4,7 @@ import { removeUserTree } from "@/redux/slices/userTreesSlice";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
 import { SelectedNewNodePositionState, SelectedNodeCoordState } from "app/(tabs)/myTrees/[treeId]";
 import { router } from "expo-router";
-import { ReactNode, memo, useState } from "react";
+import { ReactNode, memo, useEffect, useState } from "react";
 import { Alert, View } from "react-native";
 import { Gesture, GestureDetector, SimultaneousGesture } from "react-native-gesture-handler";
 import Animated, { useSharedValue } from "react-native-reanimated";
@@ -165,14 +165,19 @@ function useSkiaFonts() {
 }
 
 function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
+    const { selectedNewNodePositionState, selectedNodeCoordState, showNewNodePositions, treeCoordinate } = state;
+    const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
+
+    //0ms
+
     const { openCanvasSettingsModal, openChildrenHoistSelector, openNewNodeModal } = functions;
     const { screenDimensions, canvasDisplaySettings } = useHomepageTreeState();
 
-    const { selectedNewNodePositionState, selectedNodeCoordState, showNewNodePositions, treeCoordinate } = state;
+    //0ms
+
     const { addNodePositions, nodeCoordinates, canvasDimensions } = treeCoordinate;
 
     const [selectedNewNodePosition, { updateSelectedNewNodePosition }] = selectedNewNodePositionState;
-    const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
 
     const treeFunctions = useCreateTreeFunctions(addNodePositions, {
         openCanvasSettingsModal,
@@ -181,6 +186,8 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
         updateSelectedNewNodePosition,
         updateSelectedNodeCoord,
     });
+
+    //0ms
 
     const [draggingNode, draggingNodeActions] = useDraggingNodeState();
     const { endDragging } = draggingNodeActions;
@@ -212,6 +219,8 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
         },
     };
 
+    //0ms
+
     const { canvasLongPress, runOnScroll } = useCanvasLongPress(canvasLongPressProps);
 
     const canvasTap = useCanvasTap(canvasTapProps);
@@ -222,6 +231,7 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
     const offsetY = useSharedValue(0);
     const scale = useSharedValue(DEFAULT_SCALE);
 
+    //0ms
     const { canvasPan, dragDelta, scrollStyle } = useCanvasScroll(
         treeCoordinate,
         screenDimensions,
@@ -231,13 +241,19 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
         { offsetX, offsetY, scale }
     );
 
+    //6.4
+
     const { canvasZoom, scaleState } = useCanvasZoom(canvasDimensions, screenDimensions, selectedNodeCoordinates, {
         offsetX,
         offsetY,
         scale,
     });
 
+    //6.9
+
     const canvasScrollAndZoom = Gesture.Simultaneous(canvasPan, canvasZoom);
+
+    //11.6 👆 El problema esta arriba de esto
 
     const editTreeFromNodeMenu = true;
     const nodeMenuFunctions = useReturnNodeMenuFunctions(nodeActionState[0].node, tree.treeId, editTreeFromNodeMenu, treeFunctions.nodeMenu);
@@ -248,6 +264,12 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
     //Interactive Tree Props - SelectedNodeMenu
 
     const fonts = useSkiaFonts();
+
+    useEffect(() => {
+        console.log(JSON.stringify(selectedNodeCoord));
+    }, [selectedNodeCoord]);
+
+    //11.6 ms
 
     return (
         <>

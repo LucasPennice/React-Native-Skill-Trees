@@ -1,6 +1,7 @@
 import { expect, test } from "@jest/globals";
 import { plotCircularTree } from "./general";
 import { Skill, Tree } from "../../types";
+import { treeToNormalizedNodeAndTreeDataAdapter } from "../treeToHierarchical/general.test";
 
 test("Overcrowd - One tree at level 1", () => {
     const treeToTest: Tree<Skill> = {
@@ -998,5 +999,7 @@ test("Overcrowd - One tree at level 1", () => {
     ];
     expect(true);
 
-    expect(plotCircularTree(treeToTest)).toStrictEqual(result);
+    const { nodes, treeData } = treeToNormalizedNodeAndTreeDataAdapter(treeToTest);
+
+    expect(plotCircularTree(nodes, treeData)).toStrictEqual(result);
 });

@@ -1,13 +1,15 @@
+import { Dictionary } from "@reduxjs/toolkit";
 import { ALLOWED_NODE_SPACING } from "../../parameters";
-import { NodeQtyPerLevel, Skill, Tree, UpdateRadiusPerLevelTable } from "../../types";
+import { NodeQtyPerLevel, NormalizedNode, UpdateRadiusPerLevelTable } from "../../types";
 import { arcToAngleRadians } from "../coordinateSystem";
 import { countNodesPerLevel } from "../extractInformationFromTree";
 import { updateRadiusPerLevelTable } from "../misc";
 import { DistanceToCenterPerLevel, getDistanceToCenterPerLevel } from "./overlap";
 
-export function radiusPerLevelToAvoidLevelOvercrowd(treeInFinalPosition: Tree<Skill>) {
-    const nodesPerLevel = countNodesPerLevel(treeInFinalPosition);
-    let distanceToCenterPerLevel = getDistanceToCenterPerLevel(treeInFinalPosition);
+export function radiusPerLevelToAvoidLevelOvercrowd(nodes: Dictionary<NormalizedNode>) {
+    const nodesPerLevel = countNodesPerLevel(nodes);
+
+    let distanceToCenterPerLevel = getDistanceToCenterPerLevel(nodes);
 
     let levelOverflow: UpdateRadiusPerLevelTable = undefined;
 

@@ -41,6 +41,10 @@ export function round8Decimals(n: number) {
     return parseFloat(n.toFixed(8));
 }
 
+export function roundNDecimals(toRound: number, n: number) {
+    return parseFloat(toRound.toFixed(n));
+}
+
 export function returnSmallestBetweenAngleAndComplement(angle: number) {
     const complement = angle - 2 * Math.PI;
 

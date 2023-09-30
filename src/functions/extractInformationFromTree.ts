@@ -519,36 +519,23 @@ export function treeNodeToCoordinate(node: Tree<Skill>): NodeCoordinate {
     return result;
 }
 
-export function countNodesPerLevel(rootNode: Tree<Skill>): NodeQtyPerLevel {
-    let nodesPerLevel: { [key: number]: string[] } = {};
+export function countNodesPerLevel(nodes: Dictionary<NormalizedNode>): NodeQtyPerLevel {
+    let result: NodeQtyPerLevel = {};
 
-    nodeIdsPerLevel(rootNode, nodesPerLevel);
+    const nodeIds = Object.keys(nodes);
 
-    const levels = Object.keys(nodesPerLevel);
+    for (let i = 0; i < nodeIds.length; i++) {
+        const nodeId = nodeIds[i];
+        const node = nodes[nodeId];
 
-    const result: NodeQtyPerLevel = {};
+        if (!node) throw new Error("node undefined at countNodesPerLevel");
 
-    levels.forEach((levelString) => {
-        const level = parseInt(levelString);
-
-        result[level] = nodesPerLevel[level].length;
-    });
+        if (result[node.level] === undefined) {
+            result[node.level] = 1;
+        } else {
+            result[node.level] += 1;
+        }
+    }
 
     return result;
-
-    function nodeIdsPerLevel(rootNode: Tree<Skill>, table: { [key: number]: string[] }) {
-        if (table[rootNode.level]) {
-            table[rootNode.level].push(rootNode.nodeId);
-        } else {
-            table[rootNode.level] = [rootNode.nodeId];
-        }
-
-        if (!rootNode.children.length) return undefined;
-
-        for (let i = 0; i < rootNode.children.length; i++) {
-            nodeIdsPerLevel(rootNode.children[i], table);
-        }
-
-        return undefined;
-    }
 }
