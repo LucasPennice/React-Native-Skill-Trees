@@ -30,11 +30,10 @@ import {
     NodeCoordinate,
     NormalizedNode,
     SelectedNodeId,
-    Skill,
-    Tree,
     TreeCoordinateData,
 } from "../../types";
 import RadialSkillTree from "./RadialSkillTree";
+import { Dictionary } from "@reduxjs/toolkit";
 
 type Props = {
     selectedNodeCoordState: readonly [
@@ -45,7 +44,6 @@ type Props = {
         }
     ];
     canvasRef: React.RefObject<SkiaDomView>;
-    homepageTree: Tree<Skill>;
     openCanvasSettingsModal: () => void;
 };
 
@@ -100,7 +98,11 @@ function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: 
         dndZoneCoordinates,
         canvasDimentions: canvasDimensions,
         nodeCoordinatesCentered,
-    } = useMemo(() => handleTreeBuild(allNodes, homeTreeData, screenDimensions, "radial"), [allNodes, homeTreeData, screenDimensions]);
+    } = useMemo(() => {
+        const homeTreeNodes = prepareNodesForHomeTreeBuild(allNodes, homeTreeData.rootNodeId);
+
+        return handleTreeBuild(homeTreeNodes, homeTreeData, screenDimensions, "radial");
+    }, [allNodes, homeTreeData, screenDimensions]);
 
     const treeCoordinate: TreeCoordinateData = {
         canvasDimensions,
@@ -111,6 +113,62 @@ function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: 
     const selectedNodeId = selectedNode ? selectedNode.nodeId : null;
 
     return { screenDimensions, selectedNodeId, treeCoordinate, canvasRef, selectedDndZone: undefined };
+}
+
+export function prepareNodesForHomeTreeBuild(nodes: Dictionary<NormalizedNode>, rootId: string) {
+    let result = getNodesWithUpdatedLevel(nodes);
+
+    updateSubTreeRoot(result);
+
+    return result;
+
+    function updateSubTreeRoot(result: Dictionary<NormalizedNode>) {
+        const rootNode = nodes[rootId];
+        if (!rootNode) throw new Error("rootNode undefined at updateSubTreeRoot");
+
+        for (const subTreeId of rootNode.childrenIds) {
+            const subTreeRoot = result[subTreeId];
+
+            if (!subTreeRoot) throw new Error("subTreeRoot undefined at updateSubTreeRoot");
+
+            const updatedSubTreeRoot: NormalizedNode = { ...subTreeRoot, isRoot: false, parentId: rootId };
+
+            result[subTreeId] = updatedSubTreeRoot;
+        }
+    }
+    function getNodesWithUpdatedLevel(nodes: Dictionary<NormalizedNode>) {
+        const result: Dictionary<NormalizedNode> = {};
+
+        const nodeIds = Object.keys(nodes);
+
+        for (const nodeId of nodeIds) {
+            const node = nodes[nodeId];
+
+            if (!node) throw new Error("node undefined at getNodesWithUpdatedLevel");
+
+            if (node.nodeId === rootId) {
+                result[rootId] = { ...node };
+                continue;
+            }
+
+            const nodeWithUpdatedLevel = {
+                level: node.level + 1,
+                category: node.category,
+                childrenIds: node.childrenIds,
+                data: node.data,
+                isRoot: node.isRoot,
+                nodeId: node.nodeId,
+                parentId: node.parentId,
+                treeId: node.treeId,
+                x: node.x,
+                y: node.y,
+            };
+
+            result[nodeId] = nodeWithUpdatedLevel;
+        }
+
+        return result;
+    }
 }
 
 function useDraggingNodeState() {
@@ -142,13 +200,13 @@ function useNodeActionState() {
     return [nodeAction, { resetNodeAction, beginLongPress, openMenuAfterLongPress }] as const;
 }
 
-function useRunOnTreeUpdate(tree: Tree<Skill>, functions: InteractiveTreeFunctions | undefined, addNodePositions: DnDZone[]) {
+function useRunOnTreeUpdate(treeCoordinate: TreeCoordinateData, functions: InteractiveTreeFunctions | undefined, addNodePositions: DnDZone[]) {
     useEffect(() => {
         if (!functions || !functions.runOnTreeUpdate) return;
 
         functions.runOnTreeUpdate(addNodePositions);
         //eslint-disable-next-line
-    }, [tree]);
+    }, [treeCoordinate]);
 }
 
 function useSkiaFonts() {
@@ -161,7 +219,7 @@ function useSkiaFonts() {
     return { labelFont, nodeLetterFont, emojiFont };
 }
 
-function HomepageTree({ canvasRef, homepageTree, openCanvasSettingsModal, selectedNodeCoordState }: Props) {
+function HomepageTree({ canvasRef, openCanvasSettingsModal, selectedNodeCoordState }: Props) {
     const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
     const { screenDimensions, canvasDisplaySettings, selectedNode } = useHomepageTreeState(selectedNodeCoord?.nodeId ?? undefined);
 
@@ -174,7 +232,7 @@ function HomepageTree({ canvasRef, homepageTree, openCanvasSettingsModal, select
 
     const selectedNodeCoordinates = treeState.treeCoordinate.nodeCoordinates.find((c) => c.nodeId === selectedNodeCoord?.nodeId);
 
-    useRunOnTreeUpdate(homepageTree, treeFunctions, treeState.treeCoordinate.addNodePositions);
+    useRunOnTreeUpdate(treeState.treeCoordinate, treeFunctions, treeState.treeCoordinate.addNodePositions);
 
     const nodeActionState = useNodeActionState();
     const [nodeAction, { resetNodeAction }] = nodeActionState;

@@ -64,8 +64,8 @@ const LabelList = memo(function LabelList({
             <RadialLabel
                 key={idx}
                 labelFont={font}
-                //text={node.nodeId.slice(0, 5)}
-                text={node.data.name}
+                text={node.nodeId.slice(0, 5)}
+                // text={node.data.name}
                 coord={{ x: node.x, y: node.y }}
                 rootCoord={rootCoordinate}
             />

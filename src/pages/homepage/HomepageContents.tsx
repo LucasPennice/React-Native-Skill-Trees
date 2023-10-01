@@ -1,10 +1,8 @@
-import useGetUserTrees from "@/components/treeRelated/hooks/useGetUserTrees";
-import { buildHomepageTree } from "@/functions/treeToRadialCoordinates/general";
 import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
+import { selectAllNodes } from "@/redux/slices/nodesSlice";
 import { useCanvasRef } from "@shopify/react-native-skia";
 import { useNavigation } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
 import OpenSettingsMenu from "../../components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "../../components/ProgressIndicatorAndName";
 import ShareTreeScreenshot from "../../components/takingScreenshot/ShareTreeScreenshot";
@@ -28,14 +26,13 @@ function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
 }
 
 function useHomepageContentsState() {
-    // ESTE HOOK TRAE MUCHOS PROBLEMAS
-    // PODRIAMOS QUE NO SE USE MAS
-    const { userTrees, allNodes } = useGetUserTrees();
+    const allNodes = useAppSelector(selectAllNodes);
+
     const homePageTreeData = useAppSelector(selectHomeTree);
 
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
-    return { screenDimensions, userTrees, allNodes, homePageTreeData };
+    return { screenDimensions, allNodes, homePageTreeData };
 }
 
 function useTakingScreenshotState() {
@@ -69,7 +66,7 @@ function HomepageContents() {
     const selectedNodeCoordState = useSelectedNodeCoordState();
 
     //🧠 .4ms
-    const { userTrees, screenDimensions, allNodes, homePageTreeData } = useHomepageContentsState();
+    const { screenDimensions, allNodes, homePageTreeData } = useHomepageContentsState();
 
     // return (
     //     <View style={{ backgroundColor: "green", flex: 1, justifyContent: "center" }}>
@@ -108,8 +105,6 @@ function HomepageContents() {
 
     const [canvasSettings, { openCanvasSettingsModal, closeCanvasSettingsModal }] = useCanvasSettingsState();
 
-    const homepageTree = useMemo(() => buildHomepageTree(userTrees, homePageTreeData), [homePageTreeData, userTrees]);
-
     useHandleNavigationListener(clearSelectedNodeCoord);
 
     const canvasRef = useCanvasRef();
@@ -126,12 +121,7 @@ function HomepageContents() {
 
     return (
         <>
-            {/* <HomepageTree
-                selectedNodeCoordState={selectedNodeCoordState}
-                canvasRef={canvasRef}
-                homepageTree={homepageTree}
-                openCanvasSettingsModal={openCanvasSettingsModal}
-            /> */}
+            <HomepageTree selectedNodeCoordState={selectedNodeCoordState} canvasRef={canvasRef} openCanvasSettingsModal={openCanvasSettingsModal} />
             <ProgressIndicatorAndName treeData={homePageTreeData} nodesOfTree={allNodes} />
             <OpenSettingsMenu openModal={openCanvasSettingsModal} show={selectedNodeCoord === null} />
             <ShareTreeScreenshot

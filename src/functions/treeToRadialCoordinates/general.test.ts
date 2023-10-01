@@ -1,33 +1,182 @@
+import { NormalizedNode, getDefaultSkillValue } from "../../types";
 import { expect, test } from "@jest/globals";
-import { invertTree } from "./general";
+import { Dictionary } from "@reduxjs/toolkit";
+import { reverseNodeChildrenArray } from "./general";
 
-const toInvert = {
-    data: "tree",
-    children: [
-        {
-            data: "a",
-            children: [
-                { data: "1", children: [] },
-                { data: "2", children: [] },
-                { data: "3", children: [] },
-            ],
-        },
-    ],
-};
-const expectedInverted = {
-    data: "tree",
-    children: [
-        {
-            data: "a",
-            children: [
-                { data: "3", children: [] },
-                { data: "2", children: [] },
-                { data: "1", children: [] },
-            ],
-        },
-    ],
-};
+const MOCK_SKILL_VALUE = getDefaultSkillValue("foo", false, { isEmoji: false, text: "foo" });
 
-test("invertTree", () => {
-    expect(invertTree<typeof toInvert>(toInvert)).toStrictEqual(expectedInverted);
+test("reverseNodeChildrenArray", () => {
+    const nodes: Dictionary<NormalizedNode> = {
+        "21a": {
+            category: "SKILL",
+            childrenIds: [],
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "21a",
+            parentId: "1-1",
+            treeId: "firstTree",
+            x: -1,
+            y: 2,
+        },
+        "21b": {
+            category: "SKILL",
+            childrenIds: [],
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "21b",
+            parentId: "1-1",
+            treeId: "firstTree",
+            x: 0,
+            y: 2,
+        },
+        "1-1": {
+            category: "SKILL",
+            childrenIds: ["21a", "21b"],
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 1,
+            nodeId: "1-1",
+            parentId: "rootId",
+            treeId: "firstTree",
+            x: -0.5,
+            y: 1,
+        },
+        "22a": {
+            category: "SKILL",
+            childrenIds: [],
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "22a",
+            parentId: "1-2",
+            treeId: "secondTree",
+            x: 0,
+            y: 2,
+        },
+        "22b": {
+            category: "SKILL",
+            childrenIds: [],
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "22b",
+            parentId: "1-2",
+            treeId: "secondTree",
+            x: 1,
+            y: 2,
+        },
+        "1-2": {
+            category: "SKILL",
+            childrenIds: ["22a", "22b"],
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 1,
+            nodeId: "1-2",
+            parentId: "rootId",
+            treeId: "secondTree",
+            x: 0.5,
+            y: 1,
+        },
+        rootId: {
+            category: "SKILL_TREE",
+            childrenIds: ["1-1", "1-2"],
+            data: MOCK_SKILL_VALUE,
+            isRoot: true,
+            level: 0,
+            nodeId: "rootId",
+            parentId: null,
+            treeId: "rootTree",
+            x: 0,
+            y: 0,
+        },
+    };
+
+    expect(reverseNodeChildrenArray(nodes)).toStrictEqual({
+        "21a": {
+            category: "SKILL",
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "21a",
+            parentId: "1-1",
+            treeId: "firstTree",
+            x: -1,
+            y: 2,
+            childrenIds: [],
+        },
+        "21b": {
+            category: "SKILL",
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "21b",
+            parentId: "1-1",
+            treeId: "firstTree",
+            x: 0,
+            y: 2,
+            childrenIds: [],
+        },
+        "1-1": {
+            category: "SKILL",
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 1,
+            nodeId: "1-1",
+            parentId: "rootId",
+            treeId: "firstTree",
+            x: -0.5,
+            y: 1,
+            childrenIds: ["21b", "21a"],
+        },
+        "22a": {
+            category: "SKILL",
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "22a",
+            parentId: "1-2",
+            treeId: "secondTree",
+            x: 0,
+            y: 2,
+            childrenIds: [],
+        },
+        "22b": {
+            category: "SKILL",
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "22b",
+            parentId: "1-2",
+            treeId: "secondTree",
+            x: 1,
+            y: 2,
+            childrenIds: [],
+        },
+        "1-2": {
+            category: "SKILL",
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 1,
+            nodeId: "1-2",
+            parentId: "rootId",
+            treeId: "secondTree",
+            x: 0.5,
+            y: 1,
+            childrenIds: ["22b", "22a"],
+        },
+        rootId: {
+            category: "SKILL_TREE",
+            data: MOCK_SKILL_VALUE,
+            isRoot: true,
+            level: 0,
+            nodeId: "rootId",
+            parentId: null,
+            treeId: "rootTree",
+            x: 0,
+            y: 0,
+            childrenIds: ["1-2", "1-1"],
+        },
+    });
 });

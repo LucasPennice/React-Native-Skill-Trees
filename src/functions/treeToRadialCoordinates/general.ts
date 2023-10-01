@@ -7,9 +7,10 @@ import { mutateEveryTreeNode } from "../mutateTree";
 import { firstIteration } from "./firstInstance";
 import { radiusPerLevelToAvoidLevelOvercrowd } from "./levelOvercrowd";
 import { checkForLevelOverflow } from "./levelOverflow";
-import { fixOverlapWithinSubTreesOfLevel1, shiftSubTreeToFinalAngle } from "./overlap";
+import { fixOverlapWithinSubTreesOfLevel1 } from "./overlap";
 import { Dictionary } from "@reduxjs/toolkit";
 import { TreeData } from "@/redux/slices/userTreesSlice";
+import { normalizedNodeDictionaryToNodeCoordArray } from "../extractInformationFromTree";
 
 //☢️ The canvas has the positive y axis pointing downwards, this changes how calculations are to be made ☢️
 
@@ -24,13 +25,9 @@ export function plotCircularTree(nodes: Dictionary<NormalizedNode>, treeData: Om
     if (!rootNode) throw new Error("rootNode undefined at plotCircularTree");
 
     //We invert the tree because the Skia canvas is mirrored vertically
-    const reversedChildrenIds = rootNode.childrenIds.map((_, idx) => {
-        const inversedIdx = rootNode.childrenIds.length - 1 - idx;
+    const invertedNodes = reverseNodeChildrenArray(nodes);
 
-        return rootNode.childrenIds[inversedIdx];
-    });
-
-    let result: Dictionary<NormalizedNode> = { ...nodes, [treeData.rootNodeId]: { ...rootNode, childrenIds: reversedChildrenIds } };
+    let result: Dictionary<NormalizedNode> = { ...invertedNodes };
 
     let limiter = 0;
 
@@ -39,73 +36,51 @@ export function plotCircularTree(nodes: Dictionary<NormalizedNode>, treeData: Om
     let levelOverflow: UpdateRadiusPerLevelTable = undefined;
 
     do {
-        result = firstIteration(nodes, treeData.rootNodeId, radiusPerLevelTable);
+        result = firstIteration(result, treeData.rootNodeId, radiusPerLevelTable);
 
-        result = fixOverlapWithinSubTreesOfLevel1(result);
+        result = fixOverlapWithinSubTreesOfLevel1(result, treeData.rootNodeId);
 
-        result = shiftSubTreeToFinalAngle(result, radiusPerLevelTable);
+        // result = shiftSubTreeToFinalAngle(result, radiusPerLevelTable);
 
-        levelOverflow = checkForLevelOverflow(result, radiusPerLevelTable);
+        // levelOverflow = checkForLevelOverflow(result, radiusPerLevelTable);
 
-        if (levelOverflow) radiusPerLevelTable = updateRadiusPerLevelTable(radiusPerLevelTable, levelOverflow);
+        // if (levelOverflow) radiusPerLevelTable = updateRadiusPerLevelTable(radiusPerLevelTable, levelOverflow);
 
         limiter++;
     } while (levelOverflow && limiter !== 100);
 
-    let treeCoordinates: NodeCoordinate[] = [];
-    radialTreeToCoordArray(result, treeCoordinates);
+    const treeCoordinates = normalizedNodeDictionaryToNodeCoordArray(result, treeData);
 
     return treeCoordinates;
 }
 
-function radialTreeToCoordArray(tree: Tree<Skill>, result: NodeCoordinate[]) {
-    // Recursive Case 👇
-    if (tree.children.length) {
-        for (let i = 0; i < tree.children.length; i++) {
-            const element = tree.children[i];
-            radialTreeToCoordArray(element, result);
-        }
-    }
+export function reverseNodeChildrenArray(nodes: Dictionary<NormalizedNode>) {
+    const result: Dictionary<NormalizedNode> = {};
 
-    // Non Recursive Case 👇
+    const nodeIds = Object.keys(nodes);
 
-    result.push({
-        accentColor: tree.accentColor,
-        data: tree.data,
-        isRoot: tree.isRoot,
-        category: getCategory(),
-        nodeId: tree.nodeId,
-        treeId: tree.treeId,
-        treeName: tree.treeName,
-        x: round8Decimals(tree.x),
-        y: round8Decimals(tree.y),
-        level: tree.level,
-        parentId: tree.parentId,
-    });
+    for (const nodeId of nodeIds) {
+        const node = nodes[nodeId];
+        if (!node) throw new Error("node undefined at reverseNodeChildrenArray");
 
-    function getCategory(): NodeCategory {
-        if (tree.isRoot) return "USER";
+        const nodeWithReversedChildren: NormalizedNode = {
+            category: node.category,
+            data: node.data,
+            isRoot: node.isRoot,
+            level: node.level,
+            nodeId: node.nodeId,
+            parentId: node.parentId,
+            treeId: node.treeId,
+            x: node.x,
+            y: node.y,
+            childrenIds: node.childrenIds.map((_, idx) => {
+                const inversedIdx = node.childrenIds.length - 1 - idx;
 
-        if (tree.level === 1) return "SKILL_TREE";
+                return node.childrenIds[inversedIdx];
+            }),
+        };
 
-        return "SKILL";
-    }
-}
-
-export function invertTree<T extends { children: T[] }>(rootNode: T) {
-    //Base Case 👇
-    if (!rootNode.children.length) return rootNode;
-
-    //Recursive Case 👇
-
-    let result: T = { ...rootNode, children: [] };
-
-    for (let idx = rootNode.children.length - 1; idx !== -1; idx--) {
-        const element = rootNode.children[idx];
-
-        const d = invertTree(element);
-
-        result.children.push(d);
+        result[nodeId] = nodeWithReversedChildren;
     }
 
     return result;

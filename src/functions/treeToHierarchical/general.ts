@@ -1,7 +1,12 @@
-import { Dictionary } from "@reduxjs/toolkit";
-import { HierarchicalContour, NodeCoordinate, NormalizedNode } from "../../types";
-import { findLowestCommonAncestorIdOfNodes, getDescendantsId, returnPathFromRootToNode } from "../extractInformationFromTree";
 import { TreeData } from "@/redux/slices/userTreesSlice";
+import { Dictionary } from "@reduxjs/toolkit";
+import { HierarchicalContour, NormalizedNode } from "../../types";
+import {
+    findLowestCommonAncestorIdOfNodes,
+    getDescendantsId,
+    normalizedNodeDictionaryToNodeCoordArray,
+    returnPathFromRootToNode,
+} from "../extractInformationFromTree";
 
 type OverlapCheck = undefined | { biggestOverlap: number; nodesInConflict: [string, string] };
 type TreesToShift = { [key: string]: "overlap" | "halfOverlap" };
@@ -211,27 +216,7 @@ export const plotTreeReingoldTiltfordAlgorithm = (nodes: Dictionary<NormalizedNo
 
     const nodesWithoutOverlap = handleOverlap(nodesWithPossibleOverlap, rootId);
 
-    const nodeIds = Object.keys(nodesWithoutOverlap);
-
-    const result: NodeCoordinate[] = nodeIds.map((nodeId) => {
-        const node = nodesWithoutOverlap[nodeId];
-
-        if (!node) throw new Error("node undefined at plotTreeReingoldTiltfordAlgorithm");
-
-        return {
-            accentColor: treeData.accentColor,
-            category: node.category,
-            data: node.data,
-            isRoot: node.isRoot,
-            level: node.level,
-            nodeId: node.nodeId,
-            parentId: node.parentId,
-            treeId: treeData.treeId,
-            treeName: treeData.treeName,
-            x: node.x,
-            y: node.y,
-        };
-    });
+    const result = normalizedNodeDictionaryToNodeCoordArray(nodesWithoutOverlap, treeData);
 
     return result;
 };

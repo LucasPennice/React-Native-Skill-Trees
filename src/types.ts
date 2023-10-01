@@ -137,7 +137,9 @@ export type PolarCoordinate = { angleInRadians: number; distanceToCenter: number
 
 export type PolarContour = { leftNode: PolarCoordinate & { id: string }; rightNode: PolarCoordinate & { id: string } };
 
-export type PolarOverlapCheck = undefined | { biggestOverlapAngle: number; nodesInConflict: [string, string] };
+export type NodesInConflict = { lastChildIdOfTree: string; firstChildIdOfNextTree: string };
+
+export type PolarOverlapCheck = undefined | { biggestOverlapAngle: number; nodesInConflict: NodesInConflict };
 
 export type RadialDistanceTable = { [key: string]: { current: number; original: number } };
 

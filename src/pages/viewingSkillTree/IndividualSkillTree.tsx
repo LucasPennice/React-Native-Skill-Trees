@@ -265,9 +265,9 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
 
     const fonts = useSkiaFonts();
 
-    useEffect(() => {
-        console.log(JSON.stringify(selectedNodeCoord));
-    }, [selectedNodeCoord]);
+    // useEffect(() => {
+    //     console.log(JSON.stringify(selectedNodeCoord));
+    // }, [selectedNodeCoord]);
 
     //11.6 ms
 

@@ -1,22 +1,22 @@
-import { NormalizedNode } from "@/types";
+import { NormalizedNode, getDefaultSkillValue } from "../types";
 import { test, expect } from "@jest/globals";
 import { Dictionary } from "@reduxjs/toolkit";
-import { countNodesPerLevel, findLowestCommonAncestorIdOfNodes, getDescendantsId, returnPathFromRootToNode } from "./extractInformationFromTree";
+import {
+    countNodesPerLevel,
+    findLowestCommonAncestorIdOfNodes,
+    getDescendantsId,
+    getRadialTreeContourByLevel,
+    returnPathFromRootToNode,
+} from "./extractInformationFromTree";
+
+const MOCK_SKILL_VALUE = getDefaultSkillValue("foo", false, { isEmoji: false, text: "foo" });
 
 test("returnPathFromRootToNode - Smallest overlap case", () => {
     const nodes: Dictionary<NormalizedNode> = {
         "21a": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "21a",
@@ -28,15 +28,7 @@ test("returnPathFromRootToNode - Smallest overlap case", () => {
         "21b": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "21b",
@@ -48,15 +40,7 @@ test("returnPathFromRootToNode - Smallest overlap case", () => {
         "1-1": {
             category: "SKILL",
             childrenIds: ["21a", "21b"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
             nodeId: "1-1",
@@ -68,15 +52,7 @@ test("returnPathFromRootToNode - Smallest overlap case", () => {
         "22a": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "22a",
@@ -88,15 +64,7 @@ test("returnPathFromRootToNode - Smallest overlap case", () => {
         "22b": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "22b",
@@ -108,15 +76,7 @@ test("returnPathFromRootToNode - Smallest overlap case", () => {
         "1-2": {
             category: "SKILL",
             childrenIds: ["22a", "22b"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
             nodeId: "1-2",
@@ -128,15 +88,7 @@ test("returnPathFromRootToNode - Smallest overlap case", () => {
         rootId: {
             category: "SKILL_TREE",
             childrenIds: ["1-1", "1-2"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: true,
             level: 0,
             nodeId: "rootId",
@@ -155,15 +107,7 @@ test("findLowestCommonAncestorIdOfNodes - Smallest overlap case", () => {
         "21a": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "21a",
@@ -175,15 +119,7 @@ test("findLowestCommonAncestorIdOfNodes - Smallest overlap case", () => {
         "21b": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "21b",
@@ -195,15 +131,7 @@ test("findLowestCommonAncestorIdOfNodes - Smallest overlap case", () => {
         "1-1": {
             category: "SKILL",
             childrenIds: ["21a", "21b"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
             nodeId: "1-1",
@@ -215,15 +143,7 @@ test("findLowestCommonAncestorIdOfNodes - Smallest overlap case", () => {
         "22a": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "22a",
@@ -235,15 +155,7 @@ test("findLowestCommonAncestorIdOfNodes - Smallest overlap case", () => {
         "22b": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "22b",
@@ -255,15 +167,7 @@ test("findLowestCommonAncestorIdOfNodes - Smallest overlap case", () => {
         "1-2": {
             category: "SKILL",
             childrenIds: ["22a", "22b"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
             nodeId: "1-2",
@@ -275,15 +179,7 @@ test("findLowestCommonAncestorIdOfNodes - Smallest overlap case", () => {
         rootId: {
             category: "SKILL_TREE",
             childrenIds: ["1-1", "1-2"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: true,
             level: 0,
             nodeId: "rootId",
@@ -302,15 +198,7 @@ test("getDescendantsId - Smallest overlap case", () => {
         "21a": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "21a",
@@ -322,15 +210,7 @@ test("getDescendantsId - Smallest overlap case", () => {
         "21b": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "21b",
@@ -342,15 +222,7 @@ test("getDescendantsId - Smallest overlap case", () => {
         "1-1": {
             category: "SKILL",
             childrenIds: ["21a", "21b"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
             nodeId: "1-1",
@@ -362,15 +234,7 @@ test("getDescendantsId - Smallest overlap case", () => {
         "22a": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "22a",
@@ -382,15 +246,7 @@ test("getDescendantsId - Smallest overlap case", () => {
         "22b": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "22b",
@@ -402,15 +258,7 @@ test("getDescendantsId - Smallest overlap case", () => {
         "1-2": {
             category: "SKILL",
             childrenIds: ["22a", "22b"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
             nodeId: "1-2",
@@ -422,15 +270,7 @@ test("getDescendantsId - Smallest overlap case", () => {
         rootId: {
             category: "SKILL_TREE",
             childrenIds: ["1-1", "1-2"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: true,
             level: 0,
             nodeId: "rootId",
@@ -449,15 +289,7 @@ test("countNodesPerLevel", () => {
         "21a": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "21a",
@@ -469,15 +301,7 @@ test("countNodesPerLevel", () => {
         "21b": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "21b",
@@ -489,15 +313,7 @@ test("countNodesPerLevel", () => {
         "1-1": {
             category: "SKILL",
             childrenIds: ["21a", "21b"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
             nodeId: "1-1",
@@ -509,15 +325,7 @@ test("countNodesPerLevel", () => {
         "22a": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "22a",
@@ -529,15 +337,7 @@ test("countNodesPerLevel", () => {
         "22b": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "22b",
@@ -549,15 +349,7 @@ test("countNodesPerLevel", () => {
         "1-2": {
             category: "SKILL",
             childrenIds: ["22a", "22b"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
             nodeId: "1-2",
@@ -569,15 +361,7 @@ test("countNodesPerLevel", () => {
         rootId: {
             category: "SKILL_TREE",
             childrenIds: ["1-1", "1-2"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: true,
             level: 0,
             nodeId: "rootId",
@@ -589,4 +373,121 @@ test("countNodesPerLevel", () => {
     };
 
     expect(countNodesPerLevel(nodes)).toStrictEqual({ "0": 1, "1": 2, "2": 4 });
+});
+
+test("getRadialTreeContourByLevel - Smallest overlap case", () => {
+    const nodes: Dictionary<NormalizedNode> = {
+        "21a": {
+            category: "SKILL",
+            childrenIds: [],
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "21a",
+            parentId: "1-1",
+            treeId: "treeId",
+            x: -1,
+            y: 2,
+        },
+        "21b": {
+            category: "SKILL",
+            childrenIds: [],
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "21b",
+            parentId: "1-1",
+            treeId: "treeId",
+            x: 0,
+            y: 2,
+        },
+        "1-1": {
+            category: "SKILL",
+            childrenIds: ["21a", "21b"],
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 1,
+            nodeId: "1-1",
+            parentId: "rootId",
+            treeId: "treeId",
+            x: -0.5,
+            y: 1,
+        },
+        "22a": {
+            category: "SKILL",
+            childrenIds: [],
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "22a",
+            parentId: "1-2",
+            treeId: "treeId",
+            x: 0,
+            y: 2,
+        },
+        "22b": {
+            category: "SKILL",
+            childrenIds: [],
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "22b",
+            parentId: "1-2",
+            treeId: "treeId",
+            x: 1,
+            y: 2,
+        },
+        "1-2": {
+            category: "SKILL",
+            childrenIds: ["22a", "22b"],
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 1,
+            nodeId: "1-2",
+            parentId: "rootId",
+            treeId: "treeId",
+            x: 0.5,
+            y: 1,
+        },
+        rootId: {
+            category: "SKILL_TREE",
+            childrenIds: ["1-1", "1-2"],
+            data: MOCK_SKILL_VALUE,
+            isRoot: true,
+            level: 0,
+            nodeId: "rootId",
+            parentId: null,
+            treeId: "treeId",
+            x: 0,
+            y: 0,
+        },
+    };
+
+    expect(getRadialTreeContourByLevel(nodes, "rootId")).toStrictEqual({
+        contourByLevel: {
+            "0": [
+                {
+                    leftNode: { angleInRadians: 0, distanceToCenter: 0, id: "rootId" },
+                    rightNode: { angleInRadians: 0, distanceToCenter: 0, id: "rootId" },
+                },
+            ],
+            "1": [
+                {
+                    leftNode: { angleInRadians: 1.10714872, distanceToCenter: 1.11803399, id: "1-2" },
+                    rightNode: { angleInRadians: 2.03444394, distanceToCenter: 1.11803399, id: "1-1" },
+                },
+            ],
+            "2": [
+                {
+                    leftNode: { angleInRadians: 1.10714872, distanceToCenter: 2.23606798, id: "22b" },
+                    rightNode: { angleInRadians: 1.57079633, distanceToCenter: 2, id: "22a" },
+                },
+                {
+                    leftNode: { angleInRadians: 1.57079633, distanceToCenter: 2, id: "21b" },
+                    rightNode: { angleInRadians: 2.03444394, distanceToCenter: 2.23606798, id: "21a" },
+                },
+            ],
+        },
+        treeLevels: ["0", "1", "2"],
+    });
 });
