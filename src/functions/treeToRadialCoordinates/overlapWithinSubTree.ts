@@ -1,6 +1,6 @@
 import { Dictionary } from "@reduxjs/toolkit";
 import { ALLOWED_NODE_SPACING, UNCENTERED_ROOT_COORDINATES } from "../../parameters";
-import { NodesInConflict, NormalizedNode, PolarContour, PolarCoordinate, PolarOverlapCheck } from "../../types";
+import { DistanceToCenterPerLevel, NodesInConflict, NormalizedNode, PolarContour, PolarCoordinate, PolarOverlapCheck } from "../../types";
 import {
     angleFromLeftToRightCounterClockWise,
     arcToAngleRadians,
@@ -15,128 +15,7 @@ import {
     returnPathFromRootToNode,
 } from "../extractInformationFromTree";
 
-export type DistanceToCenterPerLevel = { [level: string]: number };
 type TreesToShift = { [key: string]: "overlap" | "halfOverlap" };
-
-// export function shiftSubTreeToFinalAngle(tree: Tree<Skill>, radiusPerLevelTable: DistanceToCenterPerLevel) {
-//     const subTrees = tree.children;
-
-//     if (!subTrees.length) return tree;
-
-//     let result: Tree<Skill> = { ...tree };
-
-//     const firstSubTree = [tree.children[0]];
-//     const firstSubTreeContour = getSubTreesOuterContour(firstSubTree)[0];
-
-//     //This contour contains the last node positioned at that level for every level drawn
-//     //so most likely it holds nodes from several trees at the same time
-//     //it also holds the left nodes but I dont intend on using them
-//     let rightContourOfTreeGraph: OuterPolarContour = extendContourToSubtree(undefined, firstSubTreeContour);
-
-//     subTrees.forEach((_, idx) => {
-//         const isLastSubTree = idx === subTrees.length - 1;
-
-//         if (!isLastSubTree) {
-//             const updatesSubTrees = getSubTreesOuterContour(result.children);
-
-//             rightContourOfTreeGraph = extendContourToSubtree(rightContourOfTreeGraph, updatesSubTrees[idx]);
-
-//             const nextSubTreeContour = updatesSubTrees[idx + 1];
-
-//             const overlap = checkForOverlapBetweenContours(rightContourOfTreeGraph, nextSubTreeContour, radiusPerLevelTable);
-
-//             if (overlap) {
-//                 const treesToShift = getIdsFromNextToLastSubTrees(subTrees, idx + 1);
-
-//                 result = shiftNodesCounterClockWise(
-//                     result,
-//                     { byBiggestOverlap: treesToShift, byHalfOfBiggestOverlap: [] },
-//                     overlap.biggestOverlapAngle
-//                 );
-//             }
-//         }
-//     });
-
-//     return result;
-
-//     function extendContourToSubtree(contour: OuterPolarContour | undefined, subTreeContour: OuterPolarContour) {
-//         if (contour === undefined) return subTreeContour;
-
-//         let result: OuterPolarContour = { ...contour };
-
-//         for (let level = 1; level < subTreeContour.maxLevel + 1; level++) {
-//             const notNodesOnCurrentLevel = result.levelContours[level] === undefined;
-
-//             if (notNodesOnCurrentLevel) {
-//                 result.levelContours[level] = subTreeContour.levelContours[level];
-//                 continue;
-//             }
-
-//             const contourLeftNode = result.levelContours[level].leftNode;
-
-//             const subTreeLevelContour = subTreeContour.levelContours[level];
-//             const levelRightmostNode = subTreeLevelContour.rightNode;
-
-//             const updatedLevelContour: PolarContour = { leftNode: contourLeftNode, rightNode: levelRightmostNode };
-
-//             result.levelContours[level] = updatedLevelContour;
-//         }
-//         if (subTreeContour.maxLevel > result.maxLevel) result.maxLevel = subTreeContour.maxLevel;
-
-//         return result;
-//     }
-
-//     function getIdsFromNextToLastSubTrees(subTrees: Tree<Skill>[], nextSubTreeIdx: number) {
-//         const result: string[] = [];
-
-//         const subTreesToExtactIds = subTrees.slice(nextSubTreeIdx);
-
-//         subTreesToExtactIds.forEach((subTree) => {
-//             extractTreeIds(subTree, result);
-//         });
-
-//         return result;
-//     }
-
-//     function checkForOverlapBetweenContours(
-//         currentSubTreeContour: OuterPolarContour,
-//         nextSubTreeContour: OuterPolarContour,
-//         radiusPerLevelTable: DistanceToCenterPerLevel
-//     ): PolarOverlapCheck {
-//         let result: PolarOverlapCheck = undefined;
-
-//         const maxLevel = getLevelsOfShallowerTree();
-
-//         for (let level = 1; level < maxLevel + 1; level++) {
-//             const currentSubTreeLevelContour = currentSubTreeContour.levelContours[level];
-//             const currentSubTreeLevelOuterContour: PolarContour[] = [
-//                 { leftNode: currentSubTreeLevelContour.leftNode, rightNode: currentSubTreeLevelContour.rightNode },
-//             ];
-
-//             const nextSubTreeLevelContour = nextSubTreeContour.levelContours[level];
-//             const nextSubTreeLevelOuterContour: PolarContour[] = [
-//                 { leftNode: nextSubTreeLevelContour.leftNode, rightNode: nextSubTreeLevelContour.rightNode },
-//             ];
-
-//             const levelContour = [...currentSubTreeLevelOuterContour, ...nextSubTreeLevelOuterContour];
-
-//             const levelBiggestOverlap = getLevelBiggestOverlap(levelContour, radiusPerLevelTable[level]);
-
-//             const updateBiggestTreeOverlap =
-//                 levelBiggestOverlap !== undefined && (result === undefined || levelBiggestOverlap.biggestOverlapAngle >= result.biggestOverlapAngle);
-
-//             if (updateBiggestTreeOverlap) result = { ...levelBiggestOverlap };
-//         }
-
-//         return result;
-
-//         function getLevelsOfShallowerTree() {
-//             if (currentSubTreeContour.maxLevel < nextSubTreeContour.maxLevel) return currentSubTreeContour.maxLevel;
-
-//             return nextSubTreeContour.maxLevel;
-//         }
-//     }
-// }
 
 type SubTreeIdAndSubTreeRootId = { subTreeId: string; subTreeRootId: string };
 
@@ -145,7 +24,7 @@ export function fixOverlapWithinSubTreesOfLevel1(firstIterationNodes: Dictionary
     if (!rootNode) throw new Error("rootNode undefined at fixOverlapWithinSubTreesOfLevel1");
 
     const subTreeRootIds = rootNode.childrenIds;
-    const subTreeIdsAndSubTreeRootIds = getSubTreeIdsAndSubTreeRootIds(subTreeRootIds);
+    const subTreeIdsAndSubTreeRootIds = getSubTreeIdsAndSubTreeRootIds(firstIterationNodes, subTreeRootIds);
 
     if (!subTreeRootIds.length) return firstIterationNodes;
 
@@ -153,12 +32,12 @@ export function fixOverlapWithinSubTreesOfLevel1(firstIterationNodes: Dictionary
 
     const subTreesDictionary = getSubTreesDictionary(firstIterationNodes, subTreeIdsAndSubTreeRootIds, rootId);
 
-    subTreeIdsAndSubTreeRootIds.forEach(({ subTreeId, subTreeRootId }) => {
+    subTreeIdsAndSubTreeRootIds.forEach(({ subTreeId }) => {
         const subTreeNodes = subTreesDictionary[subTreeId];
 
         if (!subTreeNodes) throw new Error("subTreeNodes undefined at fixOverlapWithinSubTreesOfLevel1");
 
-        const subTreeNodesWithoutOverlap = fixSubTreeOverlapRadial(subTreeNodes, subTreeRootId, rootId);
+        const subTreeNodesWithoutOverlap = fixSubTreeOverlapRadial(subTreeNodes, rootId);
 
         const nodeIds = Object.keys(subTreeNodesWithoutOverlap);
 
@@ -170,20 +49,20 @@ export function fixOverlapWithinSubTreesOfLevel1(firstIterationNodes: Dictionary
     });
 
     return result;
+}
 
-    function getSubTreeIdsAndSubTreeRootIds(subTreeRootIds: string[]): SubTreeIdAndSubTreeRootId[] {
-        const result: SubTreeIdAndSubTreeRootId[] = [];
+export function getSubTreeIdsAndSubTreeRootIds(nodes: Dictionary<NormalizedNode>, subTreeRootIds: string[]): SubTreeIdAndSubTreeRootId[] {
+    const result: SubTreeIdAndSubTreeRootId[] = [];
 
-        for (const subTreeRootId of subTreeRootIds) {
-            const subTreeRoot = firstIterationNodes[subTreeRootId];
+    for (const subTreeRootId of subTreeRootIds) {
+        const subTreeRoot = nodes[subTreeRootId];
 
-            if (!subTreeRoot) throw new Error("subTreeRoot undefined at getSubTreeIds");
+        if (!subTreeRoot) throw new Error("subTreeRoot undefined at getSubTreeIds");
 
-            result.push({ subTreeId: subTreeRoot.treeId, subTreeRootId: subTreeRootId });
-        }
-
-        return result;
+        result.push({ subTreeId: subTreeRoot.treeId, subTreeRootId: subTreeRootId });
     }
+
+    return result;
 }
 
 export function getSubTreesDictionary(nodes: Dictionary<NormalizedNode>, subTreeIdsAndSubTreeRootIds: SubTreeIdAndSubTreeRootId[], rootId: string) {
@@ -217,42 +96,27 @@ export function getSubTreesDictionary(nodes: Dictionary<NormalizedNode>, subTree
     return result;
 }
 
-function fixSubTreeOverlapRadial(firstIterationNodesOfSubTree: Dictionary<NormalizedNode>, subTreeRootId: string, rootId: string) {
+export function fixSubTreeOverlapRadial(firstIterationNodesOfSubTree: Dictionary<NormalizedNode>, rootId: string) {
     let modifiedNodesOfSubTree: Dictionary<NormalizedNode> = { ...firstIterationNodesOfSubTree };
     let overlapWithinTree = true;
 
     let limiter = 0;
 
-    //🚨 TEMPORARY
-    let polarOverlap = checkForRadialOverlap(firstIterationNodesOfSubTree, rootId);
+    while (overlapWithinTree && limiter < 100) {
+        let polarOverlap = checkForRadialOverlap(modifiedNodesOfSubTree, rootId);
 
-    if (polarOverlap !== undefined) {
-        const treesToShift = getNodesToShiftForInternalOverlapRadial(modifiedNodesOfSubTree, rootId, polarOverlap.nodesInConflict);
-        console.log("treesToShift", treesToShift);
+        //Tolerance to avoid loops
+        if (acceptableToleranceInPoorSpacingOverlap(modifiedNodesOfSubTree, polarOverlap)) polarOverlap = undefined;
 
-        // modifiedNodesOfSubTree = shiftNodesCounterClockWise(modifiedNodesOfSubTree, subTreeRootId, treesToShift, polarOverlap.biggestOverlapAngle);
+        if (polarOverlap === undefined) overlapWithinTree = false;
+
+        if (polarOverlap !== undefined) {
+            const treesToShift = getNodesToShiftForInternalOverlapRadial(modifiedNodesOfSubTree, rootId, polarOverlap.nodesInConflict);
+
+            modifiedNodesOfSubTree = shiftNodesCounterClockWise(modifiedNodesOfSubTree, rootId, treesToShift, polarOverlap.biggestOverlapAngle);
+        }
+        limiter++;
     }
-
-    // while (overlapWithinTree && limiter < 1000) {
-    //     let polarOverlap = checkForRadialOverlap(firstIterationNodesOfSubTree, subTreeRootId);
-
-    //     //Tolerance to avoid loops
-    //     if (acceptableToleranceInPoorSpacingOverlap(modifiedNodesOfSubTree, polarOverlap)) polarOverlap = undefined;
-
-    //     if (polarOverlap === undefined) overlapWithinTree = false;
-
-    //     if (polarOverlap !== undefined) {
-    //         const treesToShift = getNodesToShiftForInternalOverlapRadial(modifiedNodesOfSubTree, subTreeRootId, polarOverlap.nodesInConflict);
-
-    //         modifiedNodesOfSubTree = shiftNodesCounterClockWise(
-    //             modifiedNodesOfSubTree,
-    //             subTreeRootId,
-    //             treesToShift,
-    //             polarOverlap.biggestOverlapAngle
-    //         );
-    //     }
-    //     limiter++;
-    // }
 
     return modifiedNodesOfSubTree;
 
@@ -299,7 +163,7 @@ export function checkForRadialOverlap(nodes: Dictionary<NormalizedNode>, rootId:
     return result as PolarOverlapCheck;
 }
 
-function getLevelBiggestOverlap(levelContour: PolarContour[], originalDistanceToCenter: number) {
+export function getLevelBiggestOverlap(levelContour: PolarContour[], originalDistanceToCenter: number) {
     let result: PolarOverlapCheck = undefined;
 
     for (let idx = 0; idx < levelContour.length; idx++) {
@@ -387,7 +251,7 @@ export function getNodesToShiftForInternalOverlapRadial(nodes: Dictionary<Normal
         treesToShift[nodeId] = "overlap";
     }
 
-    const shiftByHalfOverlap = treesToCenterAfterShift(
+    const shiftByHalfOverlap = getNodesToShiftByHalfOverlapRadial(
         nodes,
         rootId,
         lcaNode,
@@ -395,8 +259,6 @@ export function getNodesToShiftForInternalOverlapRadial(nodes: Dictionary<Normal
         pathToFirstChildIdOfNextTreeInConflict,
         pathToLastChildIdOfTreeInConflict
     );
-
-    console.log("treesToCenterAfterShift", treesToCenterAfterShift);
 
     for (let i = 0; i < shiftByHalfOverlap.length; i++) {
         const nodeId = shiftByHalfOverlap[i];
@@ -406,7 +268,7 @@ export function getNodesToShiftForInternalOverlapRadial(nodes: Dictionary<Normal
     return treesToShift;
 }
 
-export function treesToCenterAfterShift(
+export function getNodesToShiftByHalfOverlapRadial(
     nodes: Dictionary<NormalizedNode>,
     rootId: string,
     lcaNode: NormalizedNode,
@@ -414,14 +276,15 @@ export function treesToCenterAfterShift(
     pathToFirstChildIdOfNextTreeInConflict: string[],
     pathToLastChildIdOfTreeInConflict: string[]
 ) {
-    const nodesFromLevel1ToLCALevel = getNodesConnectingRootAndLCAAndTheirRightSiblingsAndChildren();
-    console.log("nodesFromLevel1ToLCALevel", nodesFromLevel1ToLCALevel);
+    //Conflict line: the path connecting the root node (not included) with the Lca
 
-   
+    const nodesFromConflictLineAndRightSubTrees = getNodesFromConflictLineAndRightSubTrees();
 
     const nodesInBetweenConflictingTrees = getNodesInBetweenConflictingTrees();
 
-    return [...nodesFromLevel1ToLCALevel, ...nodesInBetweenConflictingTrees, ...lcaNode.nodeId];
+    const result = [...nodesFromConflictLineAndRightSubTrees, ...nodesInBetweenConflictingTrees];
+
+    return result;
 
     function getNodesInBetweenConflictingTrees() {
         const result = new Set<string>();
@@ -448,7 +311,7 @@ export function treesToCenterAfterShift(
         return Array.from(result);
     }
 
-    function getNodesConnectingRootAndLCAAndTheirRightSiblingsAndChildren() {
+    function getNodesFromConflictLineAndRightSubTrees() {
         const result = new Set<string>();
 
         recursive(rootId);
@@ -458,21 +321,46 @@ export function treesToCenterAfterShift(
         function recursive(currentNodeId: string) {
             const currentNode = nodes[currentNodeId];
 
-            VER NOTAS IPAD
+            const isNodeInConflictPath = pathToFirstChildIdOfNextTreeInConflict.find((nodeIdInPath) => nodeIdInPath === currentNodeId);
 
-            if (!currentNode) throw new Error("currentNode undefined at getNodesConnectingRootAndLCAAndTheirRightSiblingsAndChildren");
+            if (!currentNode) throw new Error("currentNode undefined at getNodesFromConflictLineAndRightSubTrees");
 
+            if (!isNodeInConflictPath) return undefined;
             if (currentNode.level > lcaNode.level) return undefined;
 
             if (currentNode.level !== 0) result.add(currentNode.nodeId);
 
+            if (currentNode.level === lcaNode.level) return undefined;
             if (!currentNode.childrenIds.length) return undefined;
+
+            const childIdInPath = pathToFirstChildIdOfNextTreeInConflict.filter((nodeIdInPath) => currentNode.childrenIds.includes(nodeIdInPath));
+
+            if (childIdInPath.length === 0 || childIdInPath.length > 1)
+                throw new Error("childIdInPath has more than one element in getNodesFromConflictLineAndRightSubTrees");
+
+            const childInPathIndex = currentNode.childrenIds.findIndex((childId) => childId === childIdInPath[0]);
+
+            if (childInPathIndex === -1) throw new Error("childInPathIndex not found in getNodesFromConflictLineAndRightSubTrees");
 
             //Recursive Case 👇
             for (let i = 0; i < currentNode.childrenIds.length; i++) {
                 const childId = currentNode.childrenIds[i];
 
-                recursive(childId);
+                const isChildRightFromConflictLine = i < childInPathIndex;
+
+                const isNodeInConflictPath = pathToFirstChildIdOfNextTreeInConflict.find((nodeInPathId) => nodeInPathId === childId);
+
+                if (isNodeInConflictPath) {
+                    recursive(childId);
+                    continue;
+                }
+
+                if (isChildRightFromConflictLine) {
+                    result.add(childId);
+                    const descendantsId = getDescendantsId(nodes, childId);
+
+                    for (const descendantId of descendantsId) result.add(descendantId);
+                }
             }
         }
     }

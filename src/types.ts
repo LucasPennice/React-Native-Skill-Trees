@@ -241,3 +241,5 @@ export type TreeCoordinateData = {
     addNodePositions: DnDZone[];
     canvasDimensions: CanvasDimensions;
 };
+
+export type DistanceToCenterPerLevel = { [level: string]: number };

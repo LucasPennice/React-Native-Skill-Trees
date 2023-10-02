@@ -4,7 +4,7 @@ import { NodeQtyPerLevel, NormalizedNode, UpdateRadiusPerLevelTable } from "../.
 import { arcToAngleRadians } from "../coordinateSystem";
 import { countNodesPerLevel } from "../extractInformationFromTree";
 import { updateRadiusPerLevelTable } from "../misc";
-import { DistanceToCenterPerLevel, getDistanceToCenterPerLevel } from "./overlap";
+import { DistanceToCenterPerLevel, getDistanceToCenterPerLevel } from "./overlapWithinSubTree";
 
 export function radiusPerLevelToAvoidLevelOvercrowd(nodes: Dictionary<NormalizedNode>) {
     const nodesPerLevel = countNodesPerLevel(nodes);

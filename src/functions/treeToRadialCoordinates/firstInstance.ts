@@ -2,7 +2,7 @@ import { Dictionary } from "@reduxjs/toolkit";
 import { ALLOWED_NODE_SPACING } from "../../parameters";
 import { NormalizedNode, PolarCoordinate } from "../../types";
 import { arcToAngleRadians, polarToCartesianCoordinates } from "../coordinateSystem";
-import { DistanceToCenterPerLevel } from "./overlap";
+import { DistanceToCenterPerLevel } from "./overlapWithinSubTree";
 
 type RadialTreeMod = PolarCoordinate & { level: number };
 

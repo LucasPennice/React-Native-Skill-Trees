@@ -1,6 +1,6 @@
 import { colors } from "../parameters";
 import { ColorGradient, DnDZone, NodeCategory, NormalizedNode, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../types";
-import { DistanceToCenterPerLevel } from "./treeToRadialCoordinates/overlap";
+import { DistanceToCenterPerLevel } from "./treeToRadialCoordinates/overlapWithinSubTree";
 
 export function makeid(length: number) {
     let result = "";

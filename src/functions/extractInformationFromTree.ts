@@ -3,6 +3,7 @@ import { HOMETREE_ROOT_ID, UNCENTERED_ROOT_COORDINATES } from "../parameters";
 import { NodeCoordinate, NodeQtyPerLevel, NormalizedNode, OuterPolarContour, PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
 import { cartesianToPositivePolarCoordinates } from "./coordinateSystem";
 import { TreeData } from "@/redux/slices/userTreesSlice";
+import { getSubTreeIdsAndSubTreeRootIds, getSubTreesDictionary } from "./treeToRadialCoordinates/overlapWithinSubTree";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
     if (!rootNode) return 0;
@@ -313,57 +314,60 @@ export function getRadialTreeContourByLevel(nodes: Dictionary<NormalizedNode>, r
     }
 }
 
-// export function getSubTreesContour(tree: Tree<Skill>) {
-//     const subTrees = tree.children;
-//     const result: PolarContourByLevel[] = [];
+export function getSubTreesContour(nodes: Dictionary<NormalizedNode>, rootId: string) {
+    const rootNode = nodes[rootId];
+    if (!rootNode) throw new Error("rootNode undefined at getSubTreesContour");
 
-//     subTrees.forEach((subTree) => {
-//         const subTreeWithRootNode = { ...tree, children: [subTree] };
+    const subTreeRootIds = rootNode.childrenIds;
+    const subTreeIdsAndSubTreeRootIds = getSubTreeIdsAndSubTreeRootIds(nodes, subTreeRootIds);
 
-//         const contourByLevel = getRadialTreeContourByLevel(subTreeWithRootNode);
+    const subTreesDictionary = getSubTreesDictionary(nodes, subTreeIdsAndSubTreeRootIds, rootId);
 
-//         result.push(contourByLevel);
-//     });
+    const result: PolarContourByLevel[] = [];
 
-//     return result;
-// }
+    subTreeIdsAndSubTreeRootIds.forEach(({ subTreeId }) => {
+        const subTreeNodes = subTreesDictionary[subTreeId];
 
-// export function getSubTreesOuterContour(subTrees: Tree<Skill>[]) {
-//     //I specify outer because we could also calculate the contour of each branch for each level
-//     const subTreeContours: PolarContourByLevel[] = [];
+        if (!subTreeNodes) throw new Error("subTreeNodes undefined at getSubTreesContour");
 
-//     subTrees.forEach((subTree) => {
-//         const subTreeContour = getRadialTreeContourByLevel(subTree);
+        const contourByLevel = getRadialTreeContourByLevel(subTreeNodes, rootId);
 
-//         subTreeContours.push(subTreeContour);
-//     });
+        result.push(contourByLevel);
+    });
 
-//     const subTreeOuterContours: OuterPolarContour[] = [];
+    return result;
+}
 
-//     subTreeContours.forEach((contour) => {
-//         const outerContour = returnSubTreeOuterContour(contour);
+export function getSubTreesOuterContour(nodes: Dictionary<NormalizedNode>, rootId: string) {
+    //I specify outer because we could also calculate the contour of each branch for each level
+    const result: OuterPolarContour[] = [];
 
-//         subTreeOuterContours.push(outerContour);
-//     });
+    const subTreeContours = getSubTreesContour(nodes, rootId);
 
-//     return subTreeOuterContours;
+    subTreeContours.forEach((contour) => {
+        const outerContour = returnSubTreeOuterContour(contour);
 
-//     function returnSubTreeOuterContour(contour: PolarContourByLevel): OuterPolarContour {
-//         const maxLevel = parseInt(contour.treeLevels[contour.treeLevels.length - 1]);
+        result.push(outerContour);
+    });
 
-//         let result: OuterPolarContour = { levelContours: {}, maxLevel };
+    return result;
 
-//         for (let level = 1; level !== maxLevel + 1; level++) {
-//             const currentLevelContour = contour.contourByLevel[level];
-//             const leftContourNode = currentLevelContour[0].leftNode;
-//             const rightContourNode = currentLevelContour[currentLevelContour.length - 1].rightNode;
+    function returnSubTreeOuterContour(contour: PolarContourByLevel): OuterPolarContour {
+        const maxLevel = parseInt(contour.treeLevels[contour.treeLevels.length - 1]);
 
-//             result.levelContours[level] = { leftNode: leftContourNode, rightNode: rightContourNode };
-//         }
+        let result: OuterPolarContour = { levelContours: {}, maxLevel };
 
-//         return result;
-//     }
-// }
+        for (let level = 1; level !== maxLevel + 1; level++) {
+            const currentLevelContour = contour.contourByLevel[level];
+            const leftContourNode = currentLevelContour[0].leftNode;
+            const rightContourNode = currentLevelContour[currentLevelContour.length - 1].rightNode;
+
+            result.levelContours[level] = { leftNode: leftContourNode, rightNode: rightContourNode };
+        }
+
+        return result;
+    }
+}
 
 export function countCompletedSkillNodes(rootNode: Tree<Skill>) {
     const shouldCountNode = rootNode.data.isCompleted && rootNode.category === "SKILL";

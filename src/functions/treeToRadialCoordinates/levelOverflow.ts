@@ -1,7 +1,7 @@
 import { AnglePerLevelTable, OuterPolarContour, Skill, Tree, UpdateRadiusPerLevelTable } from "@/types";
 import { angleFromRightToLeftCounterClockWise, arcToAngleRadians, round8Decimals } from "../coordinateSystem";
 import { getSubTreesOuterContour } from "../extractInformationFromTree";
-import { DistanceToCenterPerLevel } from "./overlap";
+import { DistanceToCenterPerLevel } from "./overlapWithinSubTree";
 import { ALLOWED_NODE_SPACING } from "../../parameters";
 
 export function checkForLevelOverflow(treeInFinalPosition: Tree<Skill>, radiusPerLevelTable: DistanceToCenterPerLevel): UpdateRadiusPerLevelTable {

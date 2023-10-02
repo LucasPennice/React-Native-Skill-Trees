@@ -13,7 +13,7 @@ import {
     getNodesToShiftByOverlapRadial,
     getNodesToShiftForInternalOverlapRadial,
     getSubTreesDictionary,
-} from "../treeToRadialCoordinates/overlap";
+} from "../treeToRadialCoordinates/overlapWithinSubTree";
 import { firstIteration } from "../treeToRadialCoordinates/firstInstance";
 import { radiusPerLevelToAvoidLevelOvercrowd } from "../treeToRadialCoordinates/levelOvercrowd";
 import { reverseNodeChildrenArray } from "../treeToRadialCoordinates/general";

@@ -7,10 +7,11 @@ import { mutateEveryTreeNode } from "../mutateTree";
 import { firstIteration } from "./firstInstance";
 import { radiusPerLevelToAvoidLevelOvercrowd } from "./levelOvercrowd";
 import { checkForLevelOverflow } from "./levelOverflow";
-import { fixOverlapWithinSubTreesOfLevel1 } from "./overlap";
+import { fixOverlapWithinSubTreesOfLevel1 } from "./overlapWithinSubTree";
 import { Dictionary } from "@reduxjs/toolkit";
 import { TreeData } from "@/redux/slices/userTreesSlice";
 import { normalizedNodeDictionaryToNodeCoordArray } from "../extractInformationFromTree";
+import { shiftSubTreeToFinalAngle } from "./shiftSubTree";
 
 //☢️ The canvas has the positive y axis pointing downwards, this changes how calculations are to be made ☢️
 
@@ -40,7 +41,7 @@ export function plotCircularTree(nodes: Dictionary<NormalizedNode>, treeData: Om
 
         result = fixOverlapWithinSubTreesOfLevel1(result, treeData.rootNodeId);
 
-        // result = shiftSubTreeToFinalAngle(result, radiusPerLevelTable);
+        result = shiftSubTreeToFinalAngle(result, treeData.rootNodeId, radiusPerLevelTable);
 
         // levelOverflow = checkForLevelOverflow(result, radiusPerLevelTable);
 
