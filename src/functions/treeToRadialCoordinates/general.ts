@@ -86,14 +86,6 @@ export function reverseNodeChildrenArray(nodes: Dictionary<NormalizedNode>) {
     return result;
 }
 
-export function reverseArray<T>(arr: T[]) {
-    return arr.map((_, idx) => {
-        const inversedIdx = arr.length - 1 - idx;
-
-        return arr[inversedIdx];
-    });
-}
-
 export function buildHomepageTree(userTrees: Tree<Skill>[], homeTreeData: HomeTreeSlice) {
     const { accentColor, treeName, icon } = homeTreeData;
 

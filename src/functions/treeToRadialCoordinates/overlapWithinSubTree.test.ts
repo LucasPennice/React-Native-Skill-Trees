@@ -10,9 +10,9 @@ import {
     getNodesToShiftByHalfOverlapRadial,
     getNodesToShiftByOverlapRadial,
     getNodesToShiftForInternalOverlapRadial,
-    getSubTreesDictionary,
     shiftNodesCounterClockWise,
 } from "./overlapWithinSubTree";
+import { getSubTreesDictionary } from "../extractInformationFromTree";
 
 const MOCK_SKILL_VALUE = getDefaultSkillValue("foo", false, { isEmoji: false, text: "foo" });
 

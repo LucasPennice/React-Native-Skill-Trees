@@ -5,6 +5,7 @@
     "scripts": {
         "start": "expo start --dev-client",
         "android": "expo run:android",
+        "phone": "expo start --localhost --android",
         "ios": "expo run:ios",
         "test": "jest",
         "coverage": "jest --coverage",

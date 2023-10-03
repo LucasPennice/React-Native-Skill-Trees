@@ -394,3 +394,11 @@ export function getNodeDistanceToPoint<T extends CartesianCoordinate>(node: T, c
 
     return result;
 }
+
+export function reverseArray<T>(arr: T[]) {
+    return arr.map((_, idx) => {
+        const inversedIdx = arr.length - 1 - idx;
+
+        return arr[inversedIdx];
+    });
+}

@@ -1,9 +1,18 @@
+import { TreeData } from "@/redux/slices/userTreesSlice";
 import { Dictionary } from "@reduxjs/toolkit";
 import { HOMETREE_ROOT_ID, UNCENTERED_ROOT_COORDINATES } from "../parameters";
-import { NodeCoordinate, NodeQtyPerLevel, NormalizedNode, OuterPolarContour, PolarContour, PolarContourByLevel, Skill, Tree } from "../types";
+import {
+    NodeCoordinate,
+    NodeQtyPerLevel,
+    NormalizedNode,
+    OuterPolarContour,
+    PolarContour,
+    PolarContourByLevel,
+    Skill,
+    SubTreeIdAndSubTreeRootId,
+    Tree,
+} from "../types";
 import { cartesianToPositivePolarCoordinates } from "./coordinateSystem";
-import { TreeData } from "@/redux/slices/userTreesSlice";
-import { getSubTreeIdsAndSubTreeRootIds, getSubTreesDictionary } from "./treeToRadialCoordinates/overlapWithinSubTree";
 
 export function findTreeHeight(rootNode?: Tree<Skill>) {
     if (!rootNode) return 0;
@@ -575,6 +584,50 @@ export function normalizedNodeDictionaryToNodeCoordArray(nodes: Dictionary<Norma
             y: node.y,
         };
     });
+
+    return result;
+}
+
+export function getSubTreesDictionary(nodes: Dictionary<NormalizedNode>, subTreeIdsAndSubTreeRootIds: SubTreeIdAndSubTreeRootId[], rootId: string) {
+    //I consider a sub tree containing the root node of the tree, BUT that root should only contain one child
+    //The root node of the subTree
+    const result: Dictionary<Dictionary<NormalizedNode>> = {};
+
+    const rootNode = nodes[rootId];
+
+    if (!rootNode) throw new Error("rootNode undefined at getSubTreesDictionary");
+
+    //Initialize result and append modified root node
+    for (const subTreeIdAndSubTreeRootId of subTreeIdsAndSubTreeRootIds) {
+        const { subTreeId, subTreeRootId } = subTreeIdAndSubTreeRootId;
+
+        const rootNodeWithOnlySubTreeRootAsChild: NormalizedNode = { ...rootNode, childrenIds: [subTreeRootId] };
+        result[subTreeId] = { [rootId]: rootNodeWithOnlySubTreeRootAsChild };
+    }
+
+    const nodeIds = Object.keys(nodes);
+
+    for (const nodeId of nodeIds) {
+        if (nodeId === rootId) continue;
+
+        const node = nodes[nodeId];
+        if (!node) throw new Error("node undefined at getSubTreesDictionary");
+
+        result[node.treeId]![nodeId] = node;
+    }
+
+    return result;
+}
+export function getSubTreeIdsAndSubTreeRootIds(nodes: Dictionary<NormalizedNode>, subTreeRootIds: string[]): SubTreeIdAndSubTreeRootId[] {
+    const result: SubTreeIdAndSubTreeRootId[] = [];
+
+    for (const subTreeRootId of subTreeRootIds) {
+        const subTreeRoot = nodes[subTreeRootId];
+
+        if (!subTreeRoot) throw new Error("subTreeRoot undefined at getSubTreeIds");
+
+        result.push({ subTreeId: subTreeRoot.treeId, subTreeRootId: subTreeRootId });
+    }
 
     return result;
 }

@@ -7,7 +7,6 @@ import {
     PolarContour,
     PolarCoordinate,
     PolarOverlapCheck,
-    SubTreeIdAndSubTreeRootId,
     TreesToShift,
 } from "../../types";
 import {
@@ -21,6 +20,8 @@ import {
     findLowestCommonAncestorIdOfNodes,
     getDescendantsId,
     getRadialTreeContourByLevel,
+    getSubTreeIdsAndSubTreeRootIds,
+    getSubTreesDictionary,
     returnPathFromRootToNode,
 } from "../extractInformationFromTree";
 import { getNodeDistanceToPoint } from "../misc";
@@ -53,51 +54,6 @@ export function fixOverlapWithinSubTreesOfLevel1(firstIterationNodes: Dictionary
             result[nodeId] = subTreeNodesWithoutOverlap[nodeId];
         }
     });
-
-    return result;
-}
-
-export function getSubTreeIdsAndSubTreeRootIds(nodes: Dictionary<NormalizedNode>, subTreeRootIds: string[]): SubTreeIdAndSubTreeRootId[] {
-    const result: SubTreeIdAndSubTreeRootId[] = [];
-
-    for (const subTreeRootId of subTreeRootIds) {
-        const subTreeRoot = nodes[subTreeRootId];
-
-        if (!subTreeRoot) throw new Error("subTreeRoot undefined at getSubTreeIds");
-
-        result.push({ subTreeId: subTreeRoot.treeId, subTreeRootId: subTreeRootId });
-    }
-
-    return result;
-}
-
-export function getSubTreesDictionary(nodes: Dictionary<NormalizedNode>, subTreeIdsAndSubTreeRootIds: SubTreeIdAndSubTreeRootId[], rootId: string) {
-    //I consider a sub tree containing the root node of the tree, BUT that root should only contain one child
-    //The root node of the subTree
-    const result: Dictionary<Dictionary<NormalizedNode>> = {};
-
-    const rootNode = nodes[rootId];
-
-    if (!rootNode) throw new Error("rootNode undefined at getSubTreesDictionary");
-
-    //Initialize result and append modified root node
-    for (const subTreeIdAndSubTreeRootId of subTreeIdsAndSubTreeRootIds) {
-        const { subTreeId, subTreeRootId } = subTreeIdAndSubTreeRootId;
-
-        const rootNodeWithOnlySubTreeRootAsChild: NormalizedNode = { ...rootNode, childrenIds: [subTreeRootId] };
-        result[subTreeId] = { [rootId]: rootNodeWithOnlySubTreeRootAsChild };
-    }
-
-    const nodeIds = Object.keys(nodes);
-
-    for (const nodeId of nodeIds) {
-        if (nodeId === rootId) continue;
-
-        const node = nodes[nodeId];
-        if (!node) throw new Error("node undefined at getSubTreesDictionary");
-
-        result[node.treeId]![nodeId] = node;
-    }
 
     return result;
 }

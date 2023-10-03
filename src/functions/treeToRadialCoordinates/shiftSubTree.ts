@@ -1,8 +1,8 @@
 import { Dictionary } from "@reduxjs/toolkit";
 import { NormalizedNode, OuterPolarContour, PolarContour, PolarOverlapCheck, SubTreeIdAndSubTreeRootId, TreesToShift } from "../../types";
-import { getDescendantsId, getSubTreesOuterContour } from "../extractInformationFromTree";
-import { reverseArray } from "./general";
-import { getLevelBiggestOverlap, getSubTreeIdsAndSubTreeRootIds, getSubTreesDictionary, shiftNodesCounterClockWise } from "./overlapWithinSubTree";
+import { getDescendantsId, getSubTreesOuterContour, getSubTreeIdsAndSubTreeRootIds, getSubTreesDictionary } from "../extractInformationFromTree";
+import { getLevelBiggestOverlap, shiftNodesCounterClockWise } from "./overlapWithinSubTree";
+import { reverseArray } from "../misc";
 
 export function shiftSubTreeToFinalAngle(nodes: Dictionary<NormalizedNode>, rootId: string) {
     const rootNode = nodes[rootId];
