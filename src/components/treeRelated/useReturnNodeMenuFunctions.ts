@@ -31,6 +31,7 @@ function useReturnNodeMenuFunctions(
 
     return {
         idle: {
+            //@ts-ignore
             horizontalRight: () => router.push({ pathname: "/myTrees", params: { openNewTreeModal: true } }),
             horizontalLeft: openCanvasSettingsModal,
         },
@@ -49,6 +50,7 @@ function useReturnNodeMenuFunctions(
                 selectedNodeMenuMode: "EDITING",
             };
 
+            //@ts-ignore
             router.push({ pathname: `/myTrees/${normalizedNode.treeId}`, params });
         };
 
@@ -59,6 +61,7 @@ function useReturnNodeMenuFunctions(
                 selectedNodeMenuMode: "EDITING",
             };
 
+            //@ts-ignore
             router.push({ pathname: `/myTrees/${normalizedNode.treeId}`, params });
         };
 
@@ -75,6 +78,7 @@ function useReturnNodeMenuFunctions(
                 treeId: normalizedNode.treeId,
                 selectedNodeMenuMode: "EDITING",
             };
+            //@ts-ignore
             router.push({ pathname: `/myTrees/${normalizedNode.treeId}`, params });
         };
 
@@ -122,6 +126,7 @@ function useReturnNodeMenuFunctions(
                     ),
                 horizontalLeft: () => {
                     const params: RoutesParams["myTrees"] = { editingTreeId: actionNode!.treeId };
+                    //@ts-ignore
                     router.push({ pathname: `/myTrees`, params });
                 },
             },

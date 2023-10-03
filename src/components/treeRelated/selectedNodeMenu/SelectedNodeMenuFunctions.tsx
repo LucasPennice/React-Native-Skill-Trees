@@ -11,10 +11,12 @@ function selectedNodeMenuQueryFns(selectedNode: NormalizedNode | undefined, clea
         },
         goToTreePage: () => {
             if (!selectedNode) throw new Error("No selected node at goToTreePage");
+            //@ts-ignore
             router.push(`/myTrees/${selectedNode.treeId}`);
         },
         goToEditTreePage: () => {
             if (!selectedNode) throw new Error("No selected node at goToTreePage");
+            //@ts-ignore
             router.push({ pathname: `/myTrees`, params: { editingTreeId: selectedNode.treeId } });
         },
     };

@@ -46,6 +46,7 @@ function MyTrees() {
     }, [openEditModal]);
 
     const factoryChangeTreeAndNavigateToViewingTree = (treeId: string) => () => {
+        //@ts-ignore
         router.push(`/myTrees/${treeId}`);
     };
 

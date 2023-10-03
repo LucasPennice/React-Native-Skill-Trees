@@ -3,6 +3,7 @@ import { routes } from "../../routes";
 //🚨 IGNORE THIS PAGE 🚨
 
 function Index() {
+    //@ts-ignore
     return <Redirect href={routes.home.route} />;
 }
 

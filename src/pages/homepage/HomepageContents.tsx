@@ -13,7 +13,6 @@ import { useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { NormalizedNode } from "../../types";
 import HomepageTree from "./HomepageTree";
-import { Button, View } from "react-native";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();
@@ -87,38 +86,6 @@ function HomepageContents() {
         selectedNode: selectedNode!,
         initialMode: "VIEWING",
     };
-
-    // return (
-    //     <View style={{ backgroundColor: "green", flex: 1, justifyContent: "center" }}>
-    //         <Button
-    //             title={"toggleSelect"}
-    //             onPress={() => {
-    //                 console.log("cajeta");
-    //                 if (selectedNodeCoordState[0]) return selectedNodeCoordState[1].clearSelectedNodeCoord();
-    //                 selectedNodeCoordState[1].updateSelectedNodeCoord({
-    //                     category: "SKILL",
-    //                     data: {
-    //                         name: "b",
-    //                         isCompleted: false,
-    //                         icon: { isEmoji: false, text: "" },
-    //                         logs: [],
-    //                         milestones: [],
-    //                         motivesToLearn: [],
-    //                         usefulResources: [],
-    //                     },
-    //                     isRoot: false,
-    //                     level: 1,
-    //                     nodeId: "lGbDlPoI87rvxVBThUE38orH",
-    //                     parentId: "ngevJAb90cbcAf9uUnW5IZYe",
-    //                     treeId: "cDZz7HWQ38QWsWyjPOe9enM1",
-    //                     x: 0,
-    //                     y: 0,
-    //                     childrenIds: [],
-    //                 });
-    //             }}
-    //         />
-    //     </View>
-    // );
 
     return (
         <>

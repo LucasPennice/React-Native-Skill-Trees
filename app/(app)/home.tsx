@@ -9,6 +9,7 @@ function Home() {
     const userTreeQty = useAppSelector(selectTotalTreeQty);
 
     const openCreateNewTree = () => {
+        //@ts-ignore
         router.push({ pathname: "/myTrees", params: { openNewTreeModal: true } });
     };
 

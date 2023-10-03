@@ -82,6 +82,7 @@ function useCreateTreeFunctions(
                         {
                             text: "Yes",
                             onPress: () => {
+                                //@ts-ignore
                                 router.push("/myTrees");
                                 dispatch(removeUserTree({ treeId, nodes: nodesIdOfTree }));
                             },
@@ -255,40 +256,34 @@ function IndividualSkillTree({ canvasRef, treeData, functions, state }: Props) {
 
     const fonts = useSkiaFonts();
 
-    // useEffect(() => {
-    //     console.log(JSON.stringify(selectedNodeCoord));
-    // }, [selectedNodeCoord]);
-
     //11.6 ms
 
     return (
-        <>
-            <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative" }]}>
-                <Animated.View style={[scrollStyle, { flex: 1 }]}>
-                    <CanvasView canvasDimensions={canvasDimensions} canvasGestures={canvasGestures} canvasRef={canvasRef}>
-                        {fonts && (
-                            <HierarchicalSkillTree
-                                nodeCoordinatesCentered={nodeCoordinates}
-                                selectedNode={selectedNodeCoord?.node?.nodeId ?? null}
-                                fonts={fonts}
-                                settings={{
-                                    showLabel: canvasDisplaySettings.showLabel,
-                                    showIcons: canvasDisplaySettings.showIcons,
-                                }}
-                                drag={drag}
-                            />
-                        )}
-                        {showNewNodePositions && <DragAndDropZones data={addNodePositions} selectedDndZone={selectedNewNodePosition} />}
-                    </CanvasView>
-                    {/* Node Action Related 👇 */}
-                    {nodeAction.node && nodeAction.state === "LongPressing" && <NodeLongPressIndicator data={nodeAction.node} scale={scaleState} />}
-                    {nodeAction.node && nodeAction.state === "MenuOpen" && (
-                        <NodeMenu functions={nodeMenuFunctions} data={nodeAction.node} scale={scaleState} closeNodeMenu={resetNodeAction} />
+        <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative" }]}>
+            <Animated.View style={[scrollStyle, { flex: 1 }]}>
+                <CanvasView canvasDimensions={canvasDimensions} canvasGestures={canvasGestures} canvasRef={canvasRef}>
+                    {fonts && (
+                        <HierarchicalSkillTree
+                            nodeCoordinatesCentered={nodeCoordinates}
+                            selectedNode={selectedNodeCoord?.node?.nodeId ?? null}
+                            fonts={fonts}
+                            settings={{
+                                showLabel: canvasDisplaySettings.showLabel,
+                                showIcons: canvasDisplaySettings.showIcons,
+                            }}
+                            drag={drag}
+                        />
                     )}
-                    {/* Node Action Related 👆 */}
-                </Animated.View>
-            </View>
-        </>
+                    {showNewNodePositions && <DragAndDropZones data={addNodePositions} selectedDndZone={selectedNewNodePosition} />}
+                </CanvasView>
+                {/* Node Action Related 👇 */}
+                {nodeAction.node && nodeAction.state === "LongPressing" && <NodeLongPressIndicator data={nodeAction.node} scale={scaleState} />}
+                {nodeAction.node && nodeAction.state === "MenuOpen" && (
+                    <NodeMenu functions={nodeMenuFunctions} data={nodeAction.node} scale={scaleState} closeNodeMenu={resetNodeAction} />
+                )}
+                {/* Node Action Related 👆 */}
+            </Animated.View>
+        </View>
     );
 }
 

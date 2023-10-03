@@ -2,6 +2,7 @@ import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMe
 import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { selectNodeById, selectNodesTable } from "@/redux/slices/nodesSlice";
 import { removeUserTree } from "@/redux/slices/userTreesSlice";
+import { Dictionary } from "@reduxjs/toolkit";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
 import { router } from "expo-router";
 import { ReactNode, memo, useEffect, useMemo, useState } from "react";
@@ -33,7 +34,6 @@ import {
     TreeCoordinateData,
 } from "../../types";
 import RadialSkillTree from "./RadialSkillTree";
-import { Dictionary } from "@reduxjs/toolkit";
 
 type Props = {
     selectedNodeCoordState: readonly [
@@ -79,6 +79,7 @@ function useCreateTreeFunctions(updateSelectedNodeCoord: (value: NormalizedNode)
             confirmDeleteNode: () => {},
             openAddSkillModal: (addNewNodePosition: DnDZone["type"], node: NormalizedNode) => {
                 const params: RoutesParams["myTrees_treeId"] = { nodeId: node.nodeId, treeId: node.treeId, addNewNodePosition };
+                //@ts-ignore
                 router.push({ pathname: `/myTrees/${node.treeId}`, params });
             },
             openCanvasSettingsModal,
@@ -292,36 +293,32 @@ function HomepageTree({ canvasRef, openCanvasSettingsModal, selectedNodeCoordSta
     const fonts = useSkiaFonts();
 
     return (
-        <>
-            <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative" }]}>
-                <Animated.View style={[scrollStyle, { flex: 1 }]}>
-                    <CanvasView canvasDimensions={treeState.treeCoordinate.canvasDimensions} canvasGestures={canvasGestures} canvasRef={canvasRef}>
-                        {canvasDisplaySettings.showCircleGuide && (
-                            <RadialTreeLevelCircles nodeCoordinates={treeState.treeCoordinate.nodeCoordinates} />
-                        )}
-                        {fonts && (
-                            <RadialSkillTree
-                                nodeCoordinatesCentered={treeState.treeCoordinate.nodeCoordinates}
-                                selectedNode={selectedNode?.nodeId ?? null}
-                                fonts={fonts}
-                                settings={{
-                                    showLabel: canvasDisplaySettings.showLabel,
-                                    oneColorPerTree: canvasDisplaySettings.oneColorPerTree,
-                                    showIcons: canvasDisplaySettings.showIcons,
-                                }}
-                                drag={drag}
-                            />
-                        )}
-                    </CanvasView>
-                    {/* Node Action Related 👇 */}
-                    {nodeAction.node && nodeAction.state === "LongPressing" && <NodeLongPressIndicator data={nodeAction.node} scale={scaleState} />}
-                    {nodeAction.node && nodeAction.state === "MenuOpen" && (
-                        <NodeMenu functions={nodeMenuFunctions} data={nodeAction.node} scale={scaleState} closeNodeMenu={resetNodeAction} />
+        <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative" }]}>
+            <Animated.View style={[scrollStyle, { flex: 1 }]}>
+                <CanvasView canvasDimensions={treeState.treeCoordinate.canvasDimensions} canvasGestures={canvasGestures} canvasRef={canvasRef}>
+                    {canvasDisplaySettings.showCircleGuide && <RadialTreeLevelCircles nodeCoordinates={treeState.treeCoordinate.nodeCoordinates} />}
+                    {fonts && (
+                        <RadialSkillTree
+                            nodeCoordinatesCentered={treeState.treeCoordinate.nodeCoordinates}
+                            selectedNode={selectedNode?.nodeId ?? null}
+                            fonts={fonts}
+                            settings={{
+                                showLabel: canvasDisplaySettings.showLabel,
+                                oneColorPerTree: canvasDisplaySettings.oneColorPerTree,
+                                showIcons: canvasDisplaySettings.showIcons,
+                            }}
+                            drag={drag}
+                        />
                     )}
-                    {/* Node Action Related 👆 */}
-                </Animated.View>
-            </View>
-        </>
+                </CanvasView>
+                {/* Node Action Related 👇 */}
+                {nodeAction.node && nodeAction.state === "LongPressing" && <NodeLongPressIndicator data={nodeAction.node} scale={scaleState} />}
+                {nodeAction.node && nodeAction.state === "MenuOpen" && (
+                    <NodeMenu functions={nodeMenuFunctions} data={nodeAction.node} scale={scaleState} closeNodeMenu={resetNodeAction} />
+                )}
+                {/* Node Action Related 👆 */}
+            </Animated.View>
+        </View>
     );
 }
 
@@ -337,6 +334,7 @@ function CanvasView({
     canvasRef: React.RefObject<SkiaDomView>;
 }) {
     const { canvasHeight, canvasWidth } = canvasDimensions;
+
     return (
         <GestureDetector gesture={canvasGestures}>
             <Canvas style={{ width: canvasWidth, height: canvasHeight }} ref={canvasRef}>

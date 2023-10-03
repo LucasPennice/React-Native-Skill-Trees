@@ -354,11 +354,13 @@ function useGetSelectedNodeMenuFns(
     const goToTreePage = () => {
         if (!selectedNode) throw new Error("No selected node at goToTreePage");
         const params: RoutesParams["myTrees_treeId"] = { nodeId: selectedNode.nodeId, treeId: selectedNode.treeId };
+        //@ts-ignore
         router.push({ pathname: `/myTrees/${selectedNode.treeId}`, params });
     };
     const goToEditTreePage = () => {
         if (!selectedNode) throw new Error("No selected node at goToTreePage");
         const params: RoutesParams["myTrees"] = { editingTreeId: selectedNode.treeId };
+        //@ts-ignore
         router.push({ pathname: `/myTrees`, params });
     };
 
