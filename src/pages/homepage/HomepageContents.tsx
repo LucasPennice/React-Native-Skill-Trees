@@ -13,6 +13,7 @@ import { useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { NormalizedNode } from "../../types";
 import HomepageTree from "./HomepageTree";
+import { Button, View } from "react-native";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();
@@ -68,6 +69,25 @@ function HomepageContents() {
     //🧠 .4ms
     const { screenDimensions, allNodes, homePageTreeData } = useHomepageContentsState();
 
+    const takingScreenShotState = useTakingScreenshotState();
+    const [selectedNodeCoord, { clearSelectedNodeCoord }] = selectedNodeCoordState;
+
+    const [canvasSettings, { openCanvasSettingsModal, closeCanvasSettingsModal }] = useCanvasSettingsState();
+
+    useHandleNavigationListener(clearSelectedNodeCoord);
+
+    const canvasRef = useCanvasRef();
+
+    const selectedNode = allNodes.find((n) => n.nodeId === selectedNodeCoord?.nodeId);
+
+    const selectedNodeQueryFns = selectedNodeMenuQueryFns(selectedNode, clearSelectedNodeCoord);
+
+    const selectedNodeMenuState: SelectedNodeMenuState = {
+        screenDimensions,
+        selectedNode: selectedNode!,
+        initialMode: "VIEWING",
+    };
+
     // return (
     //     <View style={{ backgroundColor: "green", flex: 1, justifyContent: "center" }}>
     //         <Button
@@ -99,25 +119,6 @@ function HomepageContents() {
     //         />
     //     </View>
     // );
-
-    const takingScreenShotState = useTakingScreenshotState();
-    const [selectedNodeCoord, { clearSelectedNodeCoord }] = selectedNodeCoordState;
-
-    const [canvasSettings, { openCanvasSettingsModal, closeCanvasSettingsModal }] = useCanvasSettingsState();
-
-    useHandleNavigationListener(clearSelectedNodeCoord);
-
-    const canvasRef = useCanvasRef();
-
-    const selectedNode = allNodes.find((n) => n.nodeId === selectedNodeCoord?.nodeId);
-
-    const selectedNodeQueryFns = selectedNodeMenuQueryFns(selectedNode, clearSelectedNodeCoord);
-
-    const selectedNodeMenuState: SelectedNodeMenuState = {
-        screenDimensions,
-        selectedNode: selectedNode!,
-        initialMode: "VIEWING",
-    };
 
     return (
         <>

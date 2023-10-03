@@ -5,7 +5,7 @@ import AppText from "../../components/AppText";
 import { centerFlex, colors } from "../../parameters";
 import { Skill, Tree } from "../../types";
 import useHandleStateIndicatorAnimations from "./useHandleStateIndicatorAnimations";
-import { ModalState } from "app/(app)/(tabs)/myTrees/[treeId]";
+import { ModalState } from "app/(app)/myTrees/[treeId]";
 
 type Props = {
     functions: {
