@@ -1,6 +1,18 @@
+import { Dictionary } from "@reduxjs/toolkit";
 import { colors } from "../parameters";
-import { ColorGradient, DnDZone, NodeCategory, NormalizedNode, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../types";
-import { DistanceToCenterPerLevel } from "./treeToRadialCoordinates/overlapWithinSubTree";
+import {
+    CartesianCoordinate,
+    ColorGradient,
+    DistanceToCenterPerLevel,
+    DnDZone,
+    NodeCategory,
+    NormalizedNode,
+    Skill,
+    Tree,
+    UpdateRadiusPerLevelTable,
+    getDefaultSkillValue,
+} from "../types";
+import { TreeData } from "@/redux/slices/userTreesSlice";
 
 export function makeid(length: number) {
     let result = "";
@@ -323,4 +335,62 @@ export function nodesToUpdateFromTreeMutation(
 
         for (const childId of nodeOfTree.childrenIds) createTreeFromArray(childId);
     }
+}
+
+export const treeToNormalizedNodeAndTreeDataAdapter = (tree: Tree<Skill>) => {
+    const treeData: TreeData = {
+        icon: tree.data.icon,
+        accentColor: tree.accentColor,
+        nodes: [],
+        rootNodeId: tree.nodeId,
+        treeId: tree.treeId,
+        treeName: tree.treeName,
+    };
+
+    const nodes: Dictionary<NormalizedNode> = {};
+
+    runFnOnEveryNode(tree, (node: Tree<Skill>) => createNodeEntity(node));
+
+    return { treeData, nodes };
+
+    function createNodeEntity(node: Tree<Skill>) {
+        nodes[node.nodeId] = {
+            category: node.category,
+            data: node.data,
+            isRoot: node.isRoot,
+            level: node.level,
+            nodeId: node.nodeId,
+            parentId: node.parentId,
+            treeId: node.treeId,
+            x: node.x,
+            y: node.y,
+            childrenIds: node.children.map((node) => node.nodeId),
+        };
+    }
+
+    function runFnOnEveryNode(rootNode: Tree<Skill>, fn: (value: Tree<Skill>) => void) {
+        //Base case 👇
+
+        if (!rootNode.children.length) return fn(rootNode);
+
+        //Recursive case 👇
+
+        for (let i = 0; i < rootNode.children.length; i++) {
+            runFnOnEveryNode(rootNode.children[i], fn);
+        }
+
+        return fn(rootNode);
+    }
+};
+
+export function getNodeDistanceToPoint<T extends CartesianCoordinate>(node: T, center: CartesianCoordinate) {
+    const deltaX = node.x - center.x;
+    const deltaY = node.y - center.y;
+
+    const squareX = deltaX ** 2;
+    const squareY = deltaY ** 2;
+
+    const result = Math.sqrt(squareX + squareY);
+
+    return result;
 }

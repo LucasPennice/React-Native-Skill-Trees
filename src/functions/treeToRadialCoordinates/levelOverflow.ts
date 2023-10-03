@@ -1,19 +1,24 @@
-import { AnglePerLevelTable, OuterPolarContour, Skill, Tree, UpdateRadiusPerLevelTable } from "@/types";
+import { AnglePerLevelTable, DistanceToCenterPerLevel, NormalizedNode, OuterPolarContour, UpdateRadiusPerLevelTable } from "@/types";
+import { Dictionary } from "@reduxjs/toolkit";
+import { ALLOWED_NODE_SPACING } from "../../parameters";
 import { angleFromRightToLeftCounterClockWise, arcToAngleRadians, round8Decimals } from "../coordinateSystem";
 import { getSubTreesOuterContour } from "../extractInformationFromTree";
-import { DistanceToCenterPerLevel } from "./overlapWithinSubTree";
-import { ALLOWED_NODE_SPACING } from "../../parameters";
 
-export function checkForLevelOverflow(treeInFinalPosition: Tree<Skill>, radiusPerLevelTable: DistanceToCenterPerLevel): UpdateRadiusPerLevelTable {
-    const subTrees = treeInFinalPosition.children;
+export function checkForLevelOverflow(
+    nodes: Dictionary<NormalizedNode>,
+    rootId: string,
+    radiusPerLevelTable: DistanceToCenterPerLevel
+): UpdateRadiusPerLevelTable {
+    const rootNode = nodes[rootId];
+    if (!rootNode) throw new Error("undefined rootNode at checkForLevelOverflow");
 
     let result: UpdateRadiusPerLevelTable = undefined;
 
-    if (!subTrees.length) return result;
+    if (!rootNode.childrenIds.length) return result;
 
-    const subTreesContour = getSubTreesOuterContour(subTrees);
+    const subTreesContour = getSubTreesOuterContour(nodes, rootId);
 
-    const angleSpanPerLevel = getAngleSpanPerLevel(subTreesContour, radiusPerLevelTable);
+    const angleSpanPerLevel = getAngleSpanPerLevelIncludingPadding(subTreesContour, radiusPerLevelTable);
 
     const angleSpans = Object.values(angleSpanPerLevel);
 
@@ -45,7 +50,7 @@ export function checkForLevelOverflow(treeInFinalPosition: Tree<Skill>, radiusPe
     }
 }
 
-function getAngleSpanPerLevel(subTreesOuterContours: OuterPolarContour[], radiusPerLevelTable: DistanceToCenterPerLevel) {
+export function getAngleSpanPerLevelIncludingPadding(subTreesOuterContours: OuterPolarContour[], radiusPerLevelTable: DistanceToCenterPerLevel) {
     const result: AnglePerLevelTable = {};
 
     let maxLevel = 0;
@@ -83,36 +88,36 @@ function getAngleSpanPerLevel(subTreesOuterContours: OuterPolarContour[], radius
     }
 
     return result;
+}
 
-    function getDistanceToNodeOfSameLevelInNextSubTree(subTreesOuterContours: OuterPolarContour[], currentSubTreeIdx: number, currentLevel: number) {
-        const isLastTree = currentSubTreeIdx === subTreesOuterContours.length - 1;
+function getDistanceToNodeOfSameLevelInNextSubTree(subTreesOuterContours: OuterPolarContour[], currentSubTreeIdx: number, currentLevel: number) {
+    const isLastTree = currentSubTreeIdx === subTreesOuterContours.length - 1;
 
-        if (isLastTree) return 0;
+    if (isLastTree) return 0;
 
-        const currentSubTreeContour = subTreesOuterContours[currentSubTreeIdx];
-        const currentSubTreeLevelContour = currentSubTreeContour.levelContours[currentLevel];
-        const currentContourLeftNodeOfLevel = currentSubTreeLevelContour.rightNode;
+    const currentSubTreeContour = subTreesOuterContours[currentSubTreeIdx];
+    const currentSubTreeLevelContour = currentSubTreeContour.levelContours[currentLevel];
+    const currentContourLeftNodeOfLevel = currentSubTreeLevelContour.leftNode;
 
-        const nextSubTreeLevelContour = getNextPolarContourOfLevel(subTreesOuterContours, currentSubTreeIdx, currentLevel);
+    const nextSubTreeLevelContour = getNextPolarContourOfLevel(subTreesOuterContours, currentSubTreeIdx, currentLevel);
 
-        if (!nextSubTreeLevelContour) return 0;
+    if (!nextSubTreeLevelContour) return 0;
 
-        const nextContourLeftNodeOfLevel = nextSubTreeLevelContour.leftNode;
+    const nextContourRightNodeOfLevel = nextSubTreeLevelContour.rightNode;
 
-        const result = angleFromRightToLeftCounterClockWise(currentContourLeftNodeOfLevel, nextContourLeftNodeOfLevel);
+    const result = angleFromRightToLeftCounterClockWise(nextContourRightNodeOfLevel, currentContourLeftNodeOfLevel);
 
-        return result;
+    return result;
 
-        function getNextPolarContourOfLevel(subTreesOuterContours: OuterPolarContour[], currentSubTreeIdx: number, currentLevel: number) {
-            const qtyOfSubTrees = subTreesOuterContours.length;
+    function getNextPolarContourOfLevel(subTreesOuterContours: OuterPolarContour[], currentSubTreeIdx: number, currentLevel: number) {
+        const qtyOfSubTrees = subTreesOuterContours.length;
 
-            for (let subTreeIdx = currentSubTreeIdx + 1; subTreeIdx !== qtyOfSubTrees; subTreeIdx++) {
-                const subTreeOuterContour = subTreesOuterContours[subTreeIdx];
+        for (let subTreeIdx = currentSubTreeIdx + 1; subTreeIdx !== qtyOfSubTrees; subTreeIdx++) {
+            const subTreeOuterContour = subTreesOuterContours[subTreeIdx];
 
-                if (subTreeOuterContour.maxLevel < currentLevel) continue;
+            if (subTreeOuterContour.maxLevel < currentLevel) continue;
 
-                return subTreeOuterContour.levelContours[currentLevel];
-            }
+            return subTreeOuterContour.levelContours[currentLevel];
         }
     }
 }

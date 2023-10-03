@@ -243,3 +243,7 @@ export type TreeCoordinateData = {
 };
 
 export type DistanceToCenterPerLevel = { [level: string]: number };
+
+export type TreesToShift = { [key: string]: "overlap" | "halfOverlap" };
+
+export type SubTreeIdAndSubTreeRootId = { subTreeId: string; subTreeRootId: string };

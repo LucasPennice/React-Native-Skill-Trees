@@ -1,5 +1,12 @@
 import { expect, test } from "@jest/globals";
-import { deleteNodeAndHoistChild, insertNodeAsChild, insertNodeAsParent, insertNodeAsSibling, nodesToUpdateFromTreeMutation } from "./misc";
+import {
+    deleteNodeAndHoistChild,
+    getNodeDistanceToPoint,
+    insertNodeAsChild,
+    insertNodeAsParent,
+    insertNodeAsSibling,
+    nodesToUpdateFromTreeMutation,
+} from "./misc";
 import { NormalizedNode } from "@/types";
 
 test("Delete and hoist", () => {
@@ -1374,4 +1381,8 @@ test("insertNodeAsChild - At leaf position", () => {
             { height: 0, ofNode: "1-1", type: "CHILDREN", width: 0, x: 0, y: 0 }
         )
     ).toStrictEqual(output);
+});
+
+test("getNodeDistanceToPoint", () => {
+    expect(getNodeDistanceToPoint({ x: 100, y: 0 }, { x: 0, y: 0 })).toBe(100);
 });

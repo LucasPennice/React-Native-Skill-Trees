@@ -92,6 +92,7 @@ function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: 
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
 
     const allNodes = useAppSelector(selectNodesTable);
+
     const homeTreeData = useAppSelector(selectHomeTree);
 
     const {

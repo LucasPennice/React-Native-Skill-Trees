@@ -1,6 +1,15 @@
 import { Dictionary } from "@reduxjs/toolkit";
 import { ALLOWED_NODE_SPACING, UNCENTERED_ROOT_COORDINATES } from "../../parameters";
-import { DistanceToCenterPerLevel, NodesInConflict, NormalizedNode, PolarContour, PolarCoordinate, PolarOverlapCheck } from "../../types";
+import {
+    DistanceToCenterPerLevel,
+    NodesInConflict,
+    NormalizedNode,
+    PolarContour,
+    PolarCoordinate,
+    PolarOverlapCheck,
+    SubTreeIdAndSubTreeRootId,
+    TreesToShift,
+} from "../../types";
 import {
     angleFromLeftToRightCounterClockWise,
     arcToAngleRadians,
@@ -14,10 +23,7 @@ import {
     getRadialTreeContourByLevel,
     returnPathFromRootToNode,
 } from "../extractInformationFromTree";
-
-type TreesToShift = { [key: string]: "overlap" | "halfOverlap" };
-
-type SubTreeIdAndSubTreeRootId = { subTreeId: string; subTreeRootId: string };
+import { getNodeDistanceToPoint } from "../misc";
 
 export function fixOverlapWithinSubTreesOfLevel1(firstIterationNodes: Dictionary<NormalizedNode>, rootId: string): Dictionary<NormalizedNode> {
     const rootNode = firstIterationNodes[rootId];
@@ -28,7 +34,7 @@ export function fixOverlapWithinSubTreesOfLevel1(firstIterationNodes: Dictionary
 
     if (!subTreeRootIds.length) return firstIterationNodes;
 
-    let result: Dictionary<NormalizedNode> = { rootId: rootNode };
+    let result: Dictionary<NormalizedNode> = { [rootId]: rootNode };
 
     const subTreesDictionary = getSubTreesDictionary(firstIterationNodes, subTreeIdsAndSubTreeRootIds, rootId);
 
@@ -152,7 +158,15 @@ export function checkForRadialOverlap(nodes: Dictionary<NormalizedNode>, rootId:
     treeLevels.forEach((level) => {
         const levelContour = contourByLevel[level];
 
-        const levelBiggestOverlap = getLevelBiggestOverlap(levelContour, parseInt(level));
+        const nodeId = levelContour[0].leftNode.id;
+
+        const node = nodes[nodeId];
+
+        if (!node) throw new Error("node undefined at checkForRadialOverlap");
+
+        const distanceToCenter = getNodeDistanceToPoint(node, UNCENTERED_ROOT_COORDINATES);
+
+        const levelBiggestOverlap = getLevelBiggestOverlap(levelContour, distanceToCenter);
 
         const updateBiggestTreeOverlap =
             levelBiggestOverlap !== undefined && (result === undefined || levelBiggestOverlap.biggestOverlapAngle >= result.biggestOverlapAngle);
@@ -206,7 +220,6 @@ export function getLevelBiggestOverlap(levelContour: PolarContour[], originalDis
         const overlap = rightToLeftAngle < leftToRightAngle;
 
         if (!overlap) return undefined;
-
         return rightToLeftAngle + arcToAngleRadians(ALLOWED_NODE_SPACING, originalDistanceToCenter);
     }
 

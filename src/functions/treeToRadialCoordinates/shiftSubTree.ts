@@ -1,58 +1,62 @@
 import { Dictionary } from "@reduxjs/toolkit";
-import { DistanceToCenterPerLevel, NormalizedNode, OuterPolarContour, PolarContour, PolarOverlapCheck, Skill, Tree } from "../../types";
-import { extractTreeIds, getSubTreesOuterContour } from "../extractInformationFromTree";
+import { NormalizedNode, OuterPolarContour, PolarContour, PolarOverlapCheck, SubTreeIdAndSubTreeRootId, TreesToShift } from "../../types";
+import { getDescendantsId, getSubTreesOuterContour } from "../extractInformationFromTree";
+import { reverseArray } from "./general";
 import { getLevelBiggestOverlap, getSubTreeIdsAndSubTreeRootIds, getSubTreesDictionary, shiftNodesCounterClockWise } from "./overlapWithinSubTree";
 
-export function shiftSubTreeToFinalAngle(nodes: Dictionary<NormalizedNode>, rootId: string, radiusPerLevelTable: DistanceToCenterPerLevel) {
+export function shiftSubTreeToFinalAngle(nodes: Dictionary<NormalizedNode>, rootId: string) {
     const rootNode = nodes[rootId];
+
     if (!rootNode) throw new Error("rootNode undefined at shiftSubTreeToFinalAngle");
 
-    const subTreeRootIds = rootNode.childrenIds;
-    const subTreeIdsAndSubTreeRootIds = getSubTreeIdsAndSubTreeRootIds(nodes, subTreeRootIds);
+    let result: Dictionary<NormalizedNode> = { ...nodes, [rootId]: { ...rootNode, childrenIds: reverseArray(rootNode.childrenIds) } };
+
+    const subTreeRootIds = result[rootId]!.childrenIds;
+    let subTreeIdsAndSubTreeRootIds = getSubTreeIdsAndSubTreeRootIds(result, subTreeRootIds);
 
     if (!subTreeRootIds.length) return nodes;
 
-    let result: Dictionary<NormalizedNode> = { rootId: rootNode };
+    const subTreesDictionary = getSubTreesDictionary(result, subTreeIdsAndSubTreeRootIds, rootId);
 
-    const subTreesDictionary = getSubTreesDictionary(nodes, subTreeIdsAndSubTreeRootIds, rootId);
-
-    // const subTrees = tree.children;
-
-    // if (!subTrees.length) return tree;
-
-    // let result: Tree<Skill> = { ...tree };
-
-    const firstSubTree = subTreesDictionary[subTreeIdsAndSubTreeRootIds[0].subTreeId]!;
-    const firstSubTreeContour = getSubTreesOuterContour(firstSubTree, rootId)[0];
+    const leftmostSubTree = subTreesDictionary[subTreeIdsAndSubTreeRootIds[0].subTreeId]!;
+    const firstSubTreeContour = getSubTreesOuterContour(leftmostSubTree, rootId)[0];
 
     //This contour contains the last node positioned at that level for every level drawn
     //so most likely it holds nodes from several trees at the same time
     //it also holds the left nodes but I dont intend on using them
     let rightContourOfTreeGraph: OuterPolarContour = extendContourToSubtree(undefined, firstSubTreeContour);
 
-    subTrees.forEach((_, idx) => {
-        const isLastSubTree = idx === subTrees.length - 1;
+    // console.log("🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠🧠");
+
+    // console.log(JSON.stringify(rightContourOfTreeGraph));
+
+    for (let idx = 0; idx < subTreeIdsAndSubTreeRootIds.length; idx++) {
+        // const _ = subTreeIdsAndSubTreeRootIds[idx];
+
+        const isLastSubTree = idx === subTreeIdsAndSubTreeRootIds.length - 1;
 
         if (!isLastSubTree) {
-            const updatesSubTrees = getSubTreesOuterContour(result.children);
+            const updatedSubTreesOuterContour = getSubTreesOuterContour(result, rootId);
 
-            rightContourOfTreeGraph = extendContourToSubtree(rightContourOfTreeGraph, updatesSubTrees[idx]);
+            rightContourOfTreeGraph = extendContourToSubtree(rightContourOfTreeGraph, updatedSubTreesOuterContour[idx]);
 
-            const nextSubTreeContour = updatesSubTrees[idx + 1];
+            const nextSubTreeContour = updatedSubTreesOuterContour[idx + 1];
 
-            const overlap = checkForOverlapBetweenContours(rightContourOfTreeGraph, nextSubTreeContour, radiusPerLevelTable);
+            const overlap = checkForOverlapBetweenContours(rightContourOfTreeGraph, nextSubTreeContour);
 
             if (overlap) {
-                const treesToShift = getIdsFromNextToLastSubTrees(subTrees, idx + 1);
+                const treesToShift = getIdsFromNextToLastSubTrees(result, subTreeIdsAndSubTreeRootIds.slice(idx + 1));
+                // console.log(overlap);
+                // console.log(treesToShift);
 
-                result = shiftNodesCounterClockWise(
-                    result,
-                    { byBiggestOverlap: treesToShift, byHalfOfBiggestOverlap: [] },
-                    overlap.biggestOverlapAngle
-                );
+                result = shiftNodesCounterClockWise(result, rootId, treesToShift, overlap.biggestOverlapAngle);
             }
         }
-    });
+
+        // if (idx === 0) return result;
+    }
+
+    result[rootId] = rootNode;
 
     return result;
 
@@ -83,23 +87,21 @@ export function shiftSubTreeToFinalAngle(nodes: Dictionary<NormalizedNode>, root
         return result;
     }
 
-    function getIdsFromNextToLastSubTrees(subTrees: Tree<Skill>[], nextSubTreeIdx: number) {
-        const result: string[] = [];
+    function getIdsFromNextToLastSubTrees(nodes: Dictionary<NormalizedNode>, subTreeIdsAndSubTreesRootId: SubTreeIdAndSubTreeRootId[]) {
+        const result: TreesToShift = {};
 
-        const subTreesToExtactIds = subTrees.slice(nextSubTreeIdx);
+        for (const subTreeIdAndSubTreeRootId of subTreeIdsAndSubTreesRootId) {
+            result[subTreeIdAndSubTreeRootId.subTreeRootId] = "overlap";
+            const descendantsId = getDescendantsId(nodes, subTreeIdAndSubTreeRootId.subTreeRootId);
 
-        subTreesToExtactIds.forEach((subTree) => {
-            extractTreeIds(subTree, result);
-        });
-
+            for (const descendantId of descendantsId) {
+                result[descendantId] = "overlap";
+            }
+        }
         return result;
     }
 
-    function checkForOverlapBetweenContours(
-        currentSubTreeContour: OuterPolarContour,
-        nextSubTreeContour: OuterPolarContour,
-        radiusPerLevelTable: DistanceToCenterPerLevel
-    ): PolarOverlapCheck {
+    function checkForOverlapBetweenContours(currentSubTreeContour: OuterPolarContour, nextSubTreeContour: OuterPolarContour): PolarOverlapCheck {
         let result: PolarOverlapCheck = undefined;
 
         const maxLevel = getLevelsOfShallowerTree();
@@ -117,7 +119,7 @@ export function shiftSubTreeToFinalAngle(nodes: Dictionary<NormalizedNode>, root
 
             const levelContour = [...currentSubTreeLevelOuterContour, ...nextSubTreeLevelOuterContour];
 
-            const levelBiggestOverlap = getLevelBiggestOverlap(levelContour, radiusPerLevelTable[level]);
+            const levelBiggestOverlap = getLevelBiggestOverlap(levelContour, level);
 
             const updateBiggestTreeOverlap =
                 levelBiggestOverlap !== undefined && (result === undefined || levelBiggestOverlap.biggestOverlapAngle >= result.biggestOverlapAngle);

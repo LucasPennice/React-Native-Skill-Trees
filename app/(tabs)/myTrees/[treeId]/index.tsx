@@ -447,7 +447,7 @@ function IndividualSkillTreePage() {
                     showNewNodePositions,
                 }}
                 canvasRef={canvasRef}
-                tree={selectedTree}
+                treeData={treeData}
                 functions={treeFunctions}
             />
             <ProgressIndicatorAndName nodesOfTree={treeNodes} treeData={treeData} />

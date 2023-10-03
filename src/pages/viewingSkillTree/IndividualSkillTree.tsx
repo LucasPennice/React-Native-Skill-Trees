@@ -1,10 +1,10 @@
 import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMenuFunctions";
 import { removeNodes } from "@/redux/slices/nodesSlice";
-import { removeUserTree } from "@/redux/slices/userTreesSlice";
+import { TreeData, removeUserTree } from "@/redux/slices/userTreesSlice";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
 import { SelectedNewNodePositionState, SelectedNodeCoordState } from "app/(tabs)/myTrees/[treeId]";
 import { router } from "expo-router";
-import { ReactNode, memo, useEffect, useState } from "react";
+import { ReactNode, memo, useState } from "react";
 import { Alert, View } from "react-native";
 import { Gesture, GestureDetector, SimultaneousGesture } from "react-native-gesture-handler";
 import Animated, { useSharedValue } from "react-native-reanimated";
@@ -21,17 +21,7 @@ import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
-import {
-    CanvasDimensions,
-    DnDZone,
-    InteractiveTreeFunctions,
-    NodeAction,
-    NodeCoordinate,
-    NormalizedNode,
-    Skill,
-    Tree,
-    TreeCoordinateData,
-} from "../../types";
+import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeAction, NodeCoordinate, NormalizedNode, TreeCoordinateData } from "../../types";
 
 type Props = {
     state: {
@@ -46,7 +36,7 @@ type Props = {
         openNewNodeModal: () => void;
     };
     canvasRef: React.RefObject<SkiaDomView>;
-    tree: Tree<Skill>;
+    treeData: TreeData;
 };
 
 function useHomepageTreeState() {
@@ -164,7 +154,7 @@ function useSkiaFonts() {
     return { labelFont, nodeLetterFont, emojiFont };
 }
 
-function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
+function IndividualSkillTree({ canvasRef, treeData, functions, state }: Props) {
     const { selectedNewNodePositionState, selectedNodeCoordState, showNewNodePositions, treeCoordinate } = state;
     const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
 
@@ -256,7 +246,7 @@ function IndividualSkillTree({ canvasRef, tree, functions, state }: Props) {
     //11.6 👆 El problema esta arriba de esto
 
     const editTreeFromNodeMenu = true;
-    const nodeMenuFunctions = useReturnNodeMenuFunctions(nodeActionState[0].node, tree.treeId, editTreeFromNodeMenu, treeFunctions.nodeMenu);
+    const nodeMenuFunctions = useReturnNodeMenuFunctions(nodeActionState[0].node, treeData.treeId, editTreeFromNodeMenu, treeFunctions.nodeMenu);
 
     const canvasGestures = Gesture.Simultaneous(canvasScrollAndZoom, canvasPressAndLongPress);
 

@@ -1,16 +1,15 @@
 import { HomeTreeSlice } from "@/redux/slices/homeTreeSlice";
+import { TreeData } from "@/redux/slices/userTreesSlice";
+import { Dictionary } from "@reduxjs/toolkit";
 import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID } from "../../parameters";
-import { NodeCategory, NodeCoordinate, NormalizedNode, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../../types";
-import { round8Decimals } from "../coordinateSystem";
+import { NormalizedNode, Skill, Tree, UpdateRadiusPerLevelTable, getDefaultSkillValue } from "../../types";
+import { normalizedNodeDictionaryToNodeCoordArray } from "../extractInformationFromTree";
 import { updateRadiusPerLevelTable } from "../misc";
 import { mutateEveryTreeNode } from "../mutateTree";
 import { firstIteration } from "./firstInstance";
 import { radiusPerLevelToAvoidLevelOvercrowd } from "./levelOvercrowd";
 import { checkForLevelOverflow } from "./levelOverflow";
 import { fixOverlapWithinSubTreesOfLevel1 } from "./overlapWithinSubTree";
-import { Dictionary } from "@reduxjs/toolkit";
-import { TreeData } from "@/redux/slices/userTreesSlice";
-import { normalizedNodeDictionaryToNodeCoordArray } from "../extractInformationFromTree";
 import { shiftSubTreeToFinalAngle } from "./shiftSubTree";
 
 //☢️ The canvas has the positive y axis pointing downwards, this changes how calculations are to be made ☢️
@@ -41,11 +40,11 @@ export function plotCircularTree(nodes: Dictionary<NormalizedNode>, treeData: Om
 
         result = fixOverlapWithinSubTreesOfLevel1(result, treeData.rootNodeId);
 
-        result = shiftSubTreeToFinalAngle(result, treeData.rootNodeId, radiusPerLevelTable);
+        result = shiftSubTreeToFinalAngle(result, treeData.rootNodeId);
 
-        // levelOverflow = checkForLevelOverflow(result, radiusPerLevelTable);
+        levelOverflow = checkForLevelOverflow(result, treeData.rootNodeId, radiusPerLevelTable);
 
-        // if (levelOverflow) radiusPerLevelTable = updateRadiusPerLevelTable(radiusPerLevelTable, levelOverflow);
+        if (levelOverflow) radiusPerLevelTable = updateRadiusPerLevelTable(radiusPerLevelTable, levelOverflow);
 
         limiter++;
     } while (levelOverflow && limiter !== 100);
@@ -85,6 +84,14 @@ export function reverseNodeChildrenArray(nodes: Dictionary<NormalizedNode>) {
     }
 
     return result;
+}
+
+export function reverseArray<T>(arr: T[]) {
+    return arr.map((_, idx) => {
+        const inversedIdx = arr.length - 1 - idx;
+
+        return arr[inversedIdx];
+    });
 }
 
 export function buildHomepageTree(userTrees: Tree<Skill>[], homeTreeData: HomeTreeSlice) {

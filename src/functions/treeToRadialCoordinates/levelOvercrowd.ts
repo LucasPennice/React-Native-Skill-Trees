@@ -1,10 +1,10 @@
 import { Dictionary } from "@reduxjs/toolkit";
 import { ALLOWED_NODE_SPACING } from "../../parameters";
-import { NodeQtyPerLevel, NormalizedNode, UpdateRadiusPerLevelTable } from "../../types";
+import { DistanceToCenterPerLevel, NodeQtyPerLevel, NormalizedNode, UpdateRadiusPerLevelTable } from "../../types";
 import { arcToAngleRadians } from "../coordinateSystem";
 import { countNodesPerLevel } from "../extractInformationFromTree";
 import { updateRadiusPerLevelTable } from "../misc";
-import { DistanceToCenterPerLevel, getDistanceToCenterPerLevel } from "./overlapWithinSubTree";
+import { getDistanceToCenterPerLevel } from "./overlapWithinSubTree";
 
 export function radiusPerLevelToAvoidLevelOvercrowd(nodes: Dictionary<NormalizedNode>) {
     const nodesPerLevel = countNodesPerLevel(nodes);

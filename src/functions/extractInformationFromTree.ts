@@ -357,7 +357,7 @@ export function getSubTreesOuterContour(nodes: Dictionary<NormalizedNode>, rootI
 
         let result: OuterPolarContour = { levelContours: {}, maxLevel };
 
-        for (let level = 1; level !== maxLevel + 1; level++) {
+        for (let level = 0; level !== maxLevel + 1; level++) {
             const currentLevelContour = contour.contourByLevel[level];
             const leftContourNode = currentLevelContour[0].leftNode;
             const rightContourNode = currentLevelContour[currentLevelContour.length - 1].rightNode;

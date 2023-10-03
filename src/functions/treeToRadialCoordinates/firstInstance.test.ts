@@ -1,23 +1,17 @@
-import { NormalizedNode } from "@/types";
+import { NormalizedNode, getDefaultSkillValue } from "../../types";
 import { expect, test } from "@jest/globals";
 import { Dictionary } from "@reduxjs/toolkit";
 import { firstIteration } from "./firstInstance";
 import { radiusPerLevelToAvoidLevelOvercrowd } from "./levelOvercrowd";
+
+const MOCK_SKILL_VALUE = getDefaultSkillValue("foo", false, { isEmoji: false, text: "foo" });
 
 test("firstInstance - Smallest Overlap Case", () => {
     const nodes: Dictionary<NormalizedNode> = {
         "21a": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "21a",
@@ -29,15 +23,7 @@ test("firstInstance - Smallest Overlap Case", () => {
         "21b": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "21b",
@@ -49,15 +35,7 @@ test("firstInstance - Smallest Overlap Case", () => {
         "1-1": {
             category: "SKILL",
             childrenIds: ["21a", "21b"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
             nodeId: "1-1",
@@ -69,15 +47,7 @@ test("firstInstance - Smallest Overlap Case", () => {
         "22a": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "22a",
@@ -89,15 +59,7 @@ test("firstInstance - Smallest Overlap Case", () => {
         "22b": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "22b",
@@ -109,15 +71,7 @@ test("firstInstance - Smallest Overlap Case", () => {
         "1-2": {
             category: "SKILL",
             childrenIds: ["22a", "22b"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
             nodeId: "1-2",
@@ -129,15 +83,7 @@ test("firstInstance - Smallest Overlap Case", () => {
         rootId: {
             category: "SKILL_TREE",
             childrenIds: ["1-1", "1-2"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: true,
             level: 0,
             nodeId: "rootId",
@@ -154,15 +100,7 @@ test("firstInstance - Smallest Overlap Case", () => {
         rootId: {
             category: "SKILL_TREE",
             childrenIds: ["1-1", "1-2"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: true,
             level: 0,
             nodeId: "rootId",
@@ -174,15 +112,7 @@ test("firstInstance - Smallest Overlap Case", () => {
         "1-1": {
             category: "SKILL",
             childrenIds: ["21a", "21b"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
             nodeId: "1-1",
@@ -194,15 +124,7 @@ test("firstInstance - Smallest Overlap Case", () => {
         "21a": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "21a",
@@ -214,15 +136,7 @@ test("firstInstance - Smallest Overlap Case", () => {
         "21b": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "21b",
@@ -234,15 +148,7 @@ test("firstInstance - Smallest Overlap Case", () => {
         "1-2": {
             category: "SKILL",
             childrenIds: ["22a", "22b"],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
             nodeId: "1-2",
@@ -254,15 +160,7 @@ test("firstInstance - Smallest Overlap Case", () => {
         "22a": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "22a",
@@ -274,15 +172,7 @@ test("firstInstance - Smallest Overlap Case", () => {
         "22b": {
             category: "SKILL",
             childrenIds: [],
-            data: {
-                name: "foo",
-                isCompleted: false,
-                icon: { isEmoji: false, text: "foo" },
-                logs: [],
-                milestones: [],
-                motivesToLearn: [],
-                usefulResources: [],
-            },
+            data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
             nodeId: "22b",
