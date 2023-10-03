@@ -37,7 +37,7 @@ const persistConfig: PersistConfig<any> = {
     key: "root",
     version: 2,
     storage: AsyncStorage,
-    migrate: createMigrate(migration, { debug: __DEV__ } as MigrationConfig),
+    migrate: createMigrate(migration, { debug: false } as MigrationConfig),
     blacklist: ["addTree"],
 };
 

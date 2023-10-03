@@ -6,7 +6,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs, router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { routes } from "../../routes";
+import { routes } from "../../../routes";
 import ChevronLeft from "@/components/Icons/ChevronLeft";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {

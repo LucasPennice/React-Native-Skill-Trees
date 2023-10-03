@@ -1,5 +1,5 @@
 import { Redirect } from "expo-router";
-import { routes } from "../routes";
+import { routes } from "../../routes";
 //🚨 IGNORE THIS PAGE 🚨
 
 function Index() {

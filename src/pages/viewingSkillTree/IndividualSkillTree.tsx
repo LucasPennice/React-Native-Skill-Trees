@@ -2,7 +2,7 @@ import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMe
 import { removeNodes } from "@/redux/slices/nodesSlice";
 import { TreeData, removeUserTree } from "@/redux/slices/userTreesSlice";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
-import { SelectedNewNodePositionState, SelectedNodeCoordState } from "app/(tabs)/myTrees/[treeId]";
+import { SelectedNewNodePositionState, SelectedNodeCoordState } from "app/(app)/(tabs)/myTrees/[treeId]";
 import { router } from "expo-router";
 import { ReactNode, memo, useState } from "react";
 import { Alert, View } from "react-native";

@@ -1,7 +1,7 @@
 import { useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import { MENU_HIGH_DAMPENING } from "../../parameters";
 import { Dimensions } from "react-native";
-import { ModalState } from "app/(tabs)/myTrees/[treeId]";
+import { ModalState } from "app/(app)/(tabs)/myTrees/[treeId]";
 
 function useHandleStateIndicatorAnimations(mode: ModalState) {
     const { width } = Dimensions.get("screen");

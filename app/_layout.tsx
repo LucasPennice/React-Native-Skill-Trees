@@ -5,13 +5,10 @@ import { persistor, store } from "@/redux/reduxStore";
 import { updateSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
 import useHandleUserId from "@/useHandleUserId";
 import useIsSharingAvailable from "@/useIsSharingAvailable";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useFonts } from "expo-font";
 import * as ExpoNavigationBar from "expo-navigation-bar";
-import { SplashScreen, Stack, Tabs } from "expo-router";
-import { useEffect } from "react";
+import { SplashScreen, Stack } from "expo-router";
 import { Platform, SafeAreaView, StatusBar, StyleSheet, View } from "react-native";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
@@ -70,28 +67,6 @@ function AppWithReduxContext() {
     const dispatch = useAppDispatch();
     useHandleUserId();
 
-    const [loaded, error] = useFonts({
-        helvetica: require("../assets/Helvetica.ttf"),
-        helveticaBold: require("../assets/Helvetica-Bold.ttf"),
-        emojisMono: require("../assets/NotoEmoji-Regular.ttf"),
-        ...FontAwesome.font,
-    });
-
-    // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-    useEffect(() => {
-        if (error) throw error;
-    }, [error]);
-
-    useEffect(() => {
-        if (loaded) {
-            SplashScreen.hideAsync();
-        }
-    }, [loaded]);
-
-    if (!loaded) {
-        return <Tabs />;
-    }
-
     return (
         <View
             style={{ flex: 1 }}
@@ -99,12 +74,7 @@ function AppWithReduxContext() {
                 var { width, height } = event.nativeEvent.layout;
                 dispatch(updateSafeScreenDimentions({ width, height }));
             }}>
-            <Stack
-                screenOptions={{
-                    headerShown: false,
-                }}>
-                <Stack.Screen name="(tabs)" />
-            </Stack>
+            <Stack screenOptions={{ headerShown: false }} />
         </View>
     );
 }
