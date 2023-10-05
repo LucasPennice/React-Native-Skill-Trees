@@ -1,6 +1,7 @@
 import { SkFont, Skia } from "@shopify/react-native-skia";
 import { SharedValue, useDerivedValue, withSpring } from "react-native-reanimated";
 import { CANVAS_SPRING, CIRCLE_SIZE, NODE_ICON_FONT_SIZE } from "../../../parameters";
+import { CartesianCoordinate } from "@/types";
 
 function useSharedValuesFromNodeCoord(coordinates: { cx: number; cy: number }) {
     const x = useDerivedValue(() => {
@@ -12,6 +13,17 @@ function useSharedValuesFromNodeCoord(coordinates: { cx: number; cy: number }) {
 
     return { x, y };
 }
+
+export const getTextCoordinates = (coord: CartesianCoordinate, textWidth: number) => {
+    const x = coord.x - textWidth / 2;
+    const y = coord.y + getHeightForFont(NODE_ICON_FONT_SIZE) / 4 + 1;
+
+    function getHeightForFont(fontSize: number) {
+        return (fontSize * 125.5) / 110;
+    }
+
+    return { x, y };
+};
 
 function useIconPosition(x: SharedValue<number>, y: SharedValue<number>, textWidth: number) {
     const textX = useDerivedValue(() => x.value - textWidth / 2);

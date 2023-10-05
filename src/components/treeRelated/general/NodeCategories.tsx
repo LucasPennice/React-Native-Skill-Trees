@@ -1,10 +1,10 @@
-import { Circle, DiffRect, LinearGradient, Path, SkFont, SkPath, Text, vec } from "@shopify/react-native-skia";
-import Animated, { SharedValue } from "react-native-reanimated";
-import { interpolateColors } from "../../../functions/misc";
+import { Circle, DiffRect, LinearGradient, Path, SharedValueType, SkFont, SkPath, Text, Transforms2d, vec } from "@shopify/react-native-skia";
+import Animated, { SharedValue, useDerivedValue, withDelay, withTiming } from "react-native-reanimated";
 import { CIRCLE_SIZE, colors } from "../../../parameters";
 import { ColorGradient } from "../../../types";
 import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
 import useHandleNodeCompleteAnimation, { ANIMATION_CONSTANTS_ON_COMPLETE } from "./useHandleNodeCompleteAnimation";
+import { interpolateColors } from "@/functions/misc";
 
 type NodeProps = {
     animatedCoordinates: { x: SharedValue<number>; y: SharedValue<number> };
@@ -79,19 +79,20 @@ type SkillTreeNodeProps = {
     path: SkPath;
     isComplete: boolean;
     treeCompletedPercentage: number;
+    transform: SharedValueType<Transforms2d | undefined>;
+    blur: SharedValue<number>;
 };
 
-function SkillTreeNode({ isComplete, nodeState, path, treeCompletedPercentage }: SkillTreeNodeProps) {
+function SkillTreeNode({ isComplete, nodeState, path, treeCompletedPercentage, blur, transform }: SkillTreeNodeProps) {
     const { accentColor, animatedCoordinates, font, text, textCoordinates, showIcons } = nodeState;
     const { x, y } = animatedCoordinates;
 
     const { textX, textY } = textCoordinates;
 
-    const end = useAnimateSkiaValue({
-        initialValue: treeCompletedPercentage / 100,
-        stateToAnimate: treeCompletedPercentage / 100,
-        delay: isComplete ? ANIMATION_CONSTANTS_ON_COMPLETE.delayAfterOvershoot : 0,
-        duration: isComplete ? ANIMATION_CONSTANTS_ON_COMPLETE.remainingAnimationDuration : 0,
+    const end = useDerivedValue(() => {
+        const delay = isComplete ? ANIMATION_CONSTANTS_ON_COMPLETE.delayAfterOvershoot : 0;
+        const duration = isComplete ? ANIMATION_CONSTANTS_ON_COMPLETE.remainingAnimationDuration : 0;
+        return withDelay(delay, withTiming(treeCompletedPercentage / 100, { duration }));
     });
 
     return (

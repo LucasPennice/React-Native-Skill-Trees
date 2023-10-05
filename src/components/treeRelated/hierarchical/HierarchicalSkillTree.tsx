@@ -2,7 +2,7 @@ import { SkFont } from "@shopify/react-native-skia";
 import { Fragment, memo } from "react";
 import { SharedValue } from "react-native-reanimated";
 import { completedSkillPercentageFromCoords } from "../../../functions/extractInformationFromTree";
-import { CartesianCoordinate, NodeCoordinate } from "../../../types";
+import { CanvasDimensions, CartesianCoordinate, NodeCoordinate } from "../../../types";
 import NodeList from "../general/NodeList";
 import HierarchicalCanvasPath from "./HierarchicalCanvasPath";
 import HierarchicalLabel from "./HierarchicalLabel";
@@ -10,6 +10,7 @@ import HierarchicalLabel from "./HierarchicalLabel";
 type TreeProps = {
     nodeCoordinatesCentered: NodeCoordinate[];
     selectedNode: string | null;
+    canvasDimensions: CanvasDimensions;
     settings: {
         showLabel: boolean;
         showIcons: boolean;
@@ -52,7 +53,7 @@ const LabelList = memo(function LabelList({ nodeCoordinates, font }: { nodeCoord
     });
 });
 
-function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag, fonts }: TreeProps) {
+function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag, fonts, canvasDimensions }: TreeProps) {
     const { emojiFont, labelFont, nodeLetterFont } = fonts;
 
     const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
@@ -74,6 +75,7 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, settings
                 selectedNodeId={selectedNode}
                 treeCompletedPercentage={treeCompletedPercentage}
                 rootNode={rootNode}
+                canvasDimensions={canvasDimensions}
             />
         </>
     );

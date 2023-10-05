@@ -1,11 +1,11 @@
-import { Blur, Circle, Group, SkFont } from "@shopify/react-native-skia";
-import { memo } from "react";
+import { Blur, Circle, Group, Picture, SkFont, Skia, createPicture } from "@shopify/react-native-skia";
+import { memo, useEffect, useMemo } from "react";
 import { SharedValue } from "react-native-reanimated";
 import { ColorGradient, NodeCategory } from "../../../types";
 import { NodeProps, SkillNode, SkillTreeNode, UserNode } from "./NodeCategories";
 import useHandleGroupTransform from "./useHandleGroupTransform";
 import useHandleNodeAnimatedCoordinates from "./useHandleNodeAnimatedCoordinates";
-import { colors } from "@/parameters";
+import { CIRCLE_SIZE, colors } from "@/parameters";
 
 export type CanvasNodeData = {
     isComplete: boolean;
@@ -36,8 +36,6 @@ function Node({ nodeData, state, nodeDrag }: Props) {
     const { category, coord, isComplete, text, treeAccentColor } = nodeData;
     const { font, treeCompletedPercentage, isSelected, showIcons } = state;
 
-    const { cx, cy } = coord;
-
     const { path, textX, textY, x, y } = useHandleNodeAnimatedCoordinates(coord, text, font);
 
     const { groupTransform, motionBlur } = useHandleGroupTransform(isSelected, nodeDrag);
@@ -49,21 +47,19 @@ function Node({ nodeData, state, nodeDrag }: Props) {
     const animatedCoordinates = { x, y };
     const nodeState: NodeProps = { accentColor: treeAccentColor, animatedCoordinates, font, text: nodeIcon, textCoordinates, showIcons };
 
-    // return <Circle cx={nodeData.coord.cx} cy={nodeData.coord.cy} r={25} color={colors.blue} transform={groupTransform} origin={{ x: cx, y: cy }}/>;
-    // return <Circle cx={nodeData.coord.cx} cy={nodeData.coord.cy} r={25} color={colors.blue} />;
-
-    return (
-        <Group origin={{ x: cx, y: cy }} transform={groupTransform}>
-            {category === "SKILL" && <SkillNode nodeState={nodeState} isComplete={isComplete} path={path} />}
-
-            {category === "SKILL_TREE" && (
-                <SkillTreeNode nodeState={nodeState} isComplete={isComplete} path={path} treeCompletedPercentage={treeCompletedPercentage} />
-            )}
-
-            {category === "USER" && <UserNode nodeState={nodeState} textColor={text.color} treeCompletedPercentage={treeCompletedPercentage} />}
-            <Blur blur={motionBlur} />
-        </Group>
-    );
+    if (category === "SKILL") return <SkillNode nodeState={nodeState} isComplete={isComplete} path={path} />;
+    if (category === "SKILL_TREE")
+        return (
+            <SkillTreeNode
+                nodeState={nodeState}
+                isComplete={isComplete}
+                path={path}
+                treeCompletedPercentage={treeCompletedPercentage}
+                blur={motionBlur}
+                transform={groupTransform}
+            />
+        );
+    return <UserNode nodeState={nodeState} textColor={text.color} treeCompletedPercentage={treeCompletedPercentage} />;
 }
 
 export default memo(Node, arePropsEqual);

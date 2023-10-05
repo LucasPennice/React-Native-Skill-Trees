@@ -33,19 +33,19 @@ function RadialCanvasPath({ coordinates, isRoot, nodeCoordinates }: Props) {
     if (res.toSVGString().includes("nan")) {
     }
 
-    const cp1 = Skia.Path.Make();
-    cp1.moveTo(c1.x, c1.y);
-    cp1.addCircle(c1.x, c1.y, 2);
+    // const cp1 = Skia.Path.Make();
+    // cp1.moveTo(c1.x, c1.y);
+    // cp1.addCircle(c1.x, c1.y, 2);
 
-    const cp2 = Skia.Path.Make();
-    cp2.moveTo(c2.x, c2.y);
-    cp2.addCircle(c2.x, c2.y, 2);
+    // const cp2 = Skia.Path.Make();
+    // cp2.moveTo(c2.x, c2.y);
+    // cp2.addCircle(c2.x, c2.y, 2);
 
     //eslint-disable-next-line
     return <Path path={res} color={"#1C1C1D"} style="stroke" strokeWidth={2} />;
 }
 
-function getCurvedPath(rootCoordinates: NodeCoordinate, parentOfNodeCoord: CartesianCoordinate, centerOfNode: CartesianCoordinate) {
+export function getCurvedPath(rootCoordinates: NodeCoordinate, parentOfNodeCoord: CartesianCoordinate, centerOfNode: CartesianCoordinate) {
     const finalPoint = getFinalPoint(rootCoordinates, centerOfNode);
     const startingPoint = getStartingPoint(rootCoordinates, parentOfNodeCoord);
 

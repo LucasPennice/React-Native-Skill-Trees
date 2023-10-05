@@ -1,15 +1,16 @@
-import { SkFont } from "@shopify/react-native-skia";
+import { Picture, SkFont, Skia, createPicture } from "@shopify/react-native-skia";
 import { Fragment, memo, useMemo } from "react";
 import { SharedValue } from "react-native-reanimated";
 import NodeList from "../../components/treeRelated/general/NodeList";
-import RadialCanvasPath from "../../components/treeRelated/radial/RadialCanvasPath";
-import RadialLabel from "../../components/treeRelated/radial/RadialLabel";
+import RadialCanvasPath, { getCurvedPath } from "../../components/treeRelated/radial/RadialCanvasPath";
+import RadialLabel, { getTextRotationAngle } from "../../components/treeRelated/radial/RadialLabel";
 import { completedSkillPercentageFromCoords } from "../../functions/extractInformationFromTree";
-import { CartesianCoordinate, NodeCoordinate } from "../../types";
+import { CanvasDimensions, CartesianCoordinate, NodeCoordinate } from "../../types";
 
 type TreeProps = {
     nodeCoordinatesCentered: NodeCoordinate[];
     selectedNode: string | null;
+    canvasDimensions: CanvasDimensions;
     settings: {
         showLabel: boolean;
         oneColorPerTree: boolean;
@@ -27,23 +28,45 @@ type TreeProps = {
     };
 };
 
-const PathList = memo(function PathList({ nodeCoordinates }: { nodeCoordinates: NodeCoordinate[] }) {
-    return nodeCoordinates.map((node, idx) => {
-        const parentNode = nodeCoordinates.find((n) => n.nodeId === node.parentId);
+const PathList = memo(function PathList({
+    nodeCoordinates,
+    canvasDimensions,
+}: {
+    nodeCoordinates: NodeCoordinate[];
+    canvasDimensions: CanvasDimensions;
+}) {
+    // Create picture
+    const picture = useMemo(
+        () =>
+            createPicture({ x: 0, y: 0, width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }, (canvas) => {
+                const rootNodeCoordinates = nodeCoordinates.find((c) => c.level === 0);
+                if (!rootNodeCoordinates) throw new Error("rootNodeCoordinates not found at PathList createPicture");
 
-        if (!parentNode) return <Fragment key={idx}></Fragment>;
+                const paint = Skia.Paint();
+                paint.setColor(Skia.Color("#1C1C1D"));
 
-        let parentCoord: CartesianCoordinate = { x: parentNode.x, y: parentNode.y };
+                for (const nodeCoordinate of nodeCoordinates) {
+                    if (nodeCoordinate.isRoot) continue;
+                    const parentNode = nodeCoordinates.find((n) => n.nodeId === nodeCoordinate.parentId);
 
-        return (
-            <RadialCanvasPath
-                key={`${node.nodeId}_path`}
-                coordinates={{ cx: node.x, cy: node.y, pathInitialPoint: parentCoord }}
-                isRoot={node.isRoot}
-                nodeCoordinates={nodeCoordinates}
-            />
-        );
-    });
+                    if (!parentNode) throw new Error("parentNode not found at PathList createPicture");
+
+                    const p1x = nodeCoordinate.x;
+                    const p1y = nodeCoordinate.y;
+
+                    const centerOfNode = { x: p1x, y: p1y };
+
+                    if (!rootNodeCoordinates) return <></>;
+                    const { p: path } = getCurvedPath(rootNodeCoordinates, parentNode, centerOfNode);
+                    path.stroke({ width: 2 });
+
+                    canvas.drawPath(path, paint);
+                }
+            }),
+        [nodeCoordinates, canvasDimensions]
+    );
+
+    return <Picture picture={picture} />;
 });
 
 const LabelList = memo(function LabelList({
@@ -83,7 +106,7 @@ function useGetTreeCompletePercetage(nodeCoordinates: NodeCoordinate[], rootId?:
     return result;
 }
 
-function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag, fonts }: TreeProps) {
+function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag, fonts, canvasDimensions }: TreeProps) {
     const { emojiFont, labelFont, nodeLetterFont } = fonts;
 
     const rootNode = nodeCoordinatesCentered.find((n) => n.level === 0);
@@ -94,7 +117,7 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag
 
     return (
         <>
-            <PathList nodeCoordinates={nodeCoordinatesCentered} />
+            <PathList nodeCoordinates={nodeCoordinatesCentered} canvasDimensions={canvasDimensions} />
 
             {settings.showLabel && <LabelList font={labelFont} nodeCoordinates={nodeCoordinatesCentered} rootNode={rootNode} />}
 
@@ -103,6 +126,7 @@ function RadialSkillTree({ nodeCoordinatesCentered, selectedNode, settings, drag
                 nodeCoordinates={nodeCoordinatesCentered}
                 settings={{ oneColorPerTree: settings.oneColorPerTree, showIcons: settings.showIcons }}
                 selectedNodeId={selectedNode}
+                canvasDimensions={canvasDimensions}
                 treeCompletedPercentage={treeCompletedPercentage}
                 rootNode={rootNode}
             />

@@ -6,6 +6,14 @@ import { getNodeLabelLines } from "../general/functions";
 
 type Props = { text: string; coord: CartesianCoordinate; rootCoord: CartesianCoordinate; labelFont: SkFont };
 
+export const getTextRotationAngle = (rootCoord: CartesianCoordinate, nodeCoord: CartesianCoordinate) => {
+    const directionVector = { x: nodeCoord.x - rootCoord.x, y: nodeCoord.y - rootCoord.y };
+    const possiblyNegativeAngleInRadians = Math.atan2(directionVector.y, directionVector.x);
+    const angleInRadians = possiblyNegativeAngleInRadians < 0 ? possiblyNegativeAngleInRadians + 2 * Math.PI : possiblyNegativeAngleInRadians;
+
+    return angleInRadians;
+};
+
 function RadialLabel({ coord, text, rootCoord, labelFont }: Props) {
     if (!labelFont) return <></>;
 
@@ -21,9 +29,7 @@ function RadialLabel({ coord, text, rootCoord, labelFont }: Props) {
 
     const rectangleDimentions = calculateRectangleDimentions(lines);
 
-    const directionVector = { x: coord.x - rootCoord.x, y: coord.y - rootCoord.y };
-    const possiblyNegativeAngleInRadians = Math.atan2(directionVector.y, directionVector.x);
-    const angleInRadians = possiblyNegativeAngleInRadians < 0 ? possiblyNegativeAngleInRadians + 2 * Math.PI : possiblyNegativeAngleInRadians;
+    const angleInRadians = getTextRotationAngle(rootCoord, coord);
 
     return (
         <Group origin={{ x: x, y: y }} transform={[{ rotate: angleInRadians }]}>

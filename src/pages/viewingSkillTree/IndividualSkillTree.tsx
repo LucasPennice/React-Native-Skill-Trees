@@ -264,6 +264,7 @@ function IndividualSkillTree({ canvasRef, treeData, functions, state }: Props) {
                 <CanvasView canvasDimensions={canvasDimensions} canvasGestures={canvasGestures} canvasRef={canvasRef}>
                     {fonts && (
                         <HierarchicalSkillTree
+                            canvasDimensions={state.treeCoordinate.canvasDimensions}
                             nodeCoordinatesCentered={nodeCoordinates}
                             selectedNode={selectedNodeCoord?.node?.nodeId ?? null}
                             fonts={fonts}
