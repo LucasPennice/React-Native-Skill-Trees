@@ -46,6 +46,7 @@ export default function RootLayout() {
         <Tabs
             screenOptions={{
                 headerShown: false,
+                lazy: true,
                 unmountOnBlur: true,
                 tabBarHideOnKeyboard: true,
                 tabBarStyle: { height: NAV_HEGIHT, backgroundColor: colors.darkGray },

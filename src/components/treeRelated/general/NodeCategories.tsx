@@ -17,7 +17,7 @@ type NodeProps = {
 
 type SkillNodeProps = {
     nodeState: NodeProps;
-    path: Readonly<Animated.SharedValue<SkPath>>;
+    path: SkPath;
     isComplete: boolean;
 };
 
@@ -76,7 +76,7 @@ function SkillNode({ path, isComplete, nodeState }: SkillNodeProps) {
 
 type SkillTreeNodeProps = {
     nodeState: NodeProps;
-    path: Readonly<Animated.SharedValue<SkPath>>;
+    path: SkPath;
     isComplete: boolean;
     treeCompletedPercentage: number;
 };

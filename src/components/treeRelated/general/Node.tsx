@@ -1,10 +1,11 @@
-import { Blur, Group, SkFont } from "@shopify/react-native-skia";
+import { Blur, Circle, Group, SkFont } from "@shopify/react-native-skia";
 import { memo } from "react";
 import { SharedValue } from "react-native-reanimated";
 import { ColorGradient, NodeCategory } from "../../../types";
 import { NodeProps, SkillNode, SkillTreeNode, UserNode } from "./NodeCategories";
 import useHandleGroupTransform from "./useHandleGroupTransform";
 import useHandleNodeAnimatedCoordinates from "./useHandleNodeAnimatedCoordinates";
+import { colors } from "@/parameters";
 
 export type CanvasNodeData = {
     isComplete: boolean;
@@ -47,6 +48,9 @@ function Node({ nodeData, state, nodeDrag }: Props) {
     const textCoordinates = { textX, textY };
     const animatedCoordinates = { x, y };
     const nodeState: NodeProps = { accentColor: treeAccentColor, animatedCoordinates, font, text: nodeIcon, textCoordinates, showIcons };
+
+    // return <Circle cx={nodeData.coord.cx} cy={nodeData.coord.cy} r={25} color={colors.blue} transform={groupTransform} origin={{ x: cx, y: cy }}/>;
+    // return <Circle cx={nodeData.coord.cx} cy={nodeData.coord.cy} r={25} color={colors.blue} />;
 
     return (
         <Group origin={{ x: cx, y: cy }} transform={groupTransform}>

@@ -34,22 +34,17 @@ function useHandleNodeAnimatedCoordinates(
     const textWidth = getTextWidth();
 
     const { x, y } = useSharedValuesFromNodeCoord(coordinates);
-    // const x = useAnimateSkiaValue({ initialValue: cx, stateToAnimate: cx });
-    // const y = useAnimateSkiaValue({ initialValue: cy, stateToAnimate: cy });
 
     const { textX, textY } = useIconPosition(x, y, textWidth);
 
-    const path = useDerivedValue(() => {
-        const strokeWidth = 2;
-        const radius = CIRCLE_SIZE + strokeWidth / 2;
-        const p = Skia.Path.Make();
+    const path = Skia.Path.Make();
 
-        p.moveTo(x.value, y.value);
-        p.addCircle(x.value, y.value, radius);
-        p.simplify();
+    const strokeWidth = 2;
+    const radius = CIRCLE_SIZE + strokeWidth / 2;
 
-        return p;
-    });
+    path.moveTo(x.value, y.value);
+    path.addCircle(x.value, y.value, radius);
+    path.simplify();
 
     return { path, textX, textY, x, y };
 

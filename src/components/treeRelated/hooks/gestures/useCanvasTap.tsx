@@ -33,15 +33,19 @@ function useCanvasTap({ functions, state }: CanvasTapProps) {
     const nodesOfTree = useAppSelector(rootNode.treeId === HOMEPAGE_TREE_ID ? selectAllNodes : selectNodesOfTree(rootNode.treeId));
 
     const tapGesture = {
-        handleOnStart: (e: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => runOnTap(),
-        handleOnEnd: (e: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
-            const clickedDndZone = dragAndDropZones.find(didTapDndZone(e));
+        handleOnStart: (e: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
+            runOnTap();
 
-            if (onDndZoneClick && showNewNodePositions) return onDndZoneClick(clickedDndZone);
+            if (onDndZoneClick && showNewNodePositions) {
+                const clickedDndZone = dragAndDropZones.find(didTapDndZone(e));
+
+                return onDndZoneClick(clickedDndZone);
+            }
 
             if (selectedNodeId) return functions.clearSelectedNodeCoord();
 
             const clickedNode = nodeCoordinates.find(didTapCircle(e));
+
             if (clickedNode === undefined) return functions.clearSelectedNodeCoord();
 
             const clickedNormalizedNode = nodesOfTree.find((n) => n.nodeId === clickedNode.nodeId);
@@ -56,9 +60,6 @@ function useCanvasTap({ functions, state }: CanvasTapProps) {
         .onStart((touchEvent) => {
             runOnJS(tapGesture.handleOnStart)(touchEvent);
         })
-        .onEnd((touchEvent) => {
-            runOnJS(tapGesture.handleOnEnd)(touchEvent);
-        })
         .maxDuration(MAX_TAP_DURATION);
 
     return canvasTap;
@@ -70,11 +71,11 @@ function didTapDndZone(touchInfo: GestureStateChangeEvent<TapGestureHandlerEvent
     return (zone: DnDZone) => {
         const isTouchInsideCircleXRange = touchInfo.x >= zone.x && touchInfo.x <= zone.x + zone.width;
 
+        if (!isTouchInsideCircleXRange) return false;
+
         const isTouchInsideCircleYRange = touchInfo.y >= zone.y && touchInfo.y <= zone.y + zone.height;
 
-        const isTouchingCircle = isTouchInsideCircleXRange && isTouchInsideCircleYRange;
-
-        if (!isTouchingCircle) return false;
+        if (!isTouchInsideCircleYRange) return false;
 
         return true;
     };
