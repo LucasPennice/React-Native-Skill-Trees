@@ -3,7 +3,7 @@ import { Fragment, memo } from "react";
 import { SharedValue } from "react-native-reanimated";
 import { completedSkillPercentageFromCoords } from "../../../functions/extractInformationFromTree";
 import { CanvasDimensions, CartesianCoordinate, NodeCoordinate } from "../../../types";
-import NodeList from "../general/NodeList";
+import ReactiveNodeList from "../general/ReactiveNodeList";
 import HierarchicalCanvasPath from "./HierarchicalCanvasPath";
 import HierarchicalLabel from "./HierarchicalLabel";
 
@@ -68,14 +68,13 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, settings
 
             {showLabel && <LabelList font={labelFont} nodeCoordinates={nodeCoordinatesCentered} />}
 
-            <NodeList
+            <ReactiveNodeList
                 fonts={{ emojiFont, nodeLetterFont }}
                 nodeCoordinates={nodeCoordinatesCentered}
                 settings={{ oneColorPerTree: true, showIcons }}
                 selectedNodeId={selectedNode}
                 treeCompletedPercentage={treeCompletedPercentage}
                 rootNode={rootNode}
-                canvasDimensions={canvasDimensions}
             />
         </>
     );

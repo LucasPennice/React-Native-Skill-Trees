@@ -1,7 +1,7 @@
 import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMenuFunctions";
 import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { selectNodeById, selectNodesTable } from "@/redux/slices/nodesSlice";
-import { removeUserTree } from "@/redux/slices/userTreesSlice";
+import { removeUserTree, selectAllTreesEntities } from "@/redux/slices/userTreesSlice";
 import { Dictionary } from "@reduxjs/toolkit";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
 import { router } from "expo-router";
@@ -33,7 +33,7 @@ import {
     SelectedNodeId,
     TreeCoordinateData,
 } from "../../types";
-import RadialSkillTree from "./RadialSkillTree";
+import RadialStaticSkillTree from "./HomepageSkillTree";
 
 type Props = {
     selectedNodeCoordState: readonly [
@@ -95,6 +95,7 @@ function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: 
     const allNodes = useAppSelector(selectNodesTable);
 
     const homeTreeData = useAppSelector(selectHomeTree);
+    const subTreesData = useAppSelector(selectAllTreesEntities);
 
     const {
         dndZoneCoordinates,
@@ -103,7 +104,7 @@ function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: 
     } = useMemo(() => {
         const homeTreeNodes = prepareNodesForHomeTreeBuild(allNodes, homeTreeData.rootNodeId);
 
-        return handleTreeBuild(homeTreeNodes, homeTreeData, screenDimensions, "radial");
+        return handleTreeBuild({ nodes: homeTreeNodes, treeData: homeTreeData, screenDimensions, renderStyle: "radial", subTreesData });
     }, [allNodes, homeTreeData, screenDimensions]);
 
     const treeCoordinate: TreeCoordinateData = {
@@ -138,6 +139,7 @@ export function prepareNodesForHomeTreeBuild(nodes: Dictionary<NormalizedNode>, 
             result[subTreeId] = updatedSubTreeRoot;
         }
     }
+
     function getNodesWithUpdatedLevel(nodes: Dictionary<NormalizedNode>) {
         const result: Dictionary<NormalizedNode> = {};
 
@@ -298,7 +300,7 @@ function HomepageTree({ canvasRef, openCanvasSettingsModal, selectedNodeCoordSta
                 <CanvasView canvasDimensions={treeState.treeCoordinate.canvasDimensions} canvasGestures={canvasGestures} canvasRef={canvasRef}>
                     {canvasDisplaySettings.showCircleGuide && <RadialTreeLevelCircles nodeCoordinates={treeState.treeCoordinate.nodeCoordinates} />}
                     {fonts && (
-                        <RadialSkillTree
+                        <RadialStaticSkillTree
                             canvasDimensions={treeState.treeCoordinate.canvasDimensions}
                             nodeCoordinatesCentered={treeState.treeCoordinate.nodeCoordinates}
                             selectedNode={selectedNode?.nodeId ?? null}

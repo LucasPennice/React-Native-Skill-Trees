@@ -17,7 +17,8 @@ import { plotCircularTree } from "./treeToRadialCoordinates/general";
 export function getNodesCoordinates(
     nodes: Dictionary<NormalizedNode>,
     mode: "hierarchy" | "radial",
-    treeData: Omit<TreeData, "nodes">
+    treeData: Omit<TreeData, "nodes">,
+    subTreesData?: Dictionary<TreeData>
 ): NodeCoordinate[] {
     let scaledCoordinates: NodeCoordinate[] = [];
 
@@ -25,7 +26,7 @@ export function getNodesCoordinates(
         const unscaledCoordinates = plotTreeReingoldTiltfordAlgorithm(nodes, treeData);
         scaledCoordinates = scaleCoordinatesAfterReingoldTiltford(unscaledCoordinates);
     } else {
-        const unscaledCoordinates = plotCircularTree(nodes, treeData);
+        const unscaledCoordinates = plotCircularTree(nodes, treeData, subTreesData);
         scaledCoordinates = scaleCoordinatesAfterRadialReingoldTiltford(unscaledCoordinates);
     }
 
@@ -255,15 +256,18 @@ export function centerNodesInCanvas(nodeCoordinates: NodeCoordinate[], canvasDim
     });
 }
 
-export function handleTreeBuild(
-    nodes: Dictionary<NormalizedNode>,
-    treeData: Omit<TreeData, "nodes">,
-    screenDimentions: ScreenDimentions,
-    renderStyle: InteractiveTreeConfig["renderStyle"],
-    showDepthGuides?: boolean
-) {
-    const coordinates = getNodesCoordinates(nodes, renderStyle, treeData);
-    const canvasDimentions = getCanvasDimensions(coordinates, screenDimentions, showDepthGuides);
+export function handleTreeBuild(props: {
+    nodes: Dictionary<NormalizedNode>;
+    treeData: Omit<TreeData, "nodes">;
+    screenDimensions: ScreenDimentions;
+    renderStyle: InteractiveTreeConfig["renderStyle"];
+    subTreesData?: Dictionary<TreeData> | undefined;
+    showDepthGuides?: boolean;
+}) {
+    const { nodes, renderStyle, screenDimensions, treeData, showDepthGuides, subTreesData } = props;
+
+    const coordinates = getNodesCoordinates(nodes, renderStyle, treeData, subTreesData);
+    const canvasDimentions = getCanvasDimensions(coordinates, screenDimensions, showDepthGuides);
     const nodeCoordinatesCentered = centerNodesInCanvas(coordinates, canvasDimentions);
     const dndZoneCoordinates = calculateDragAndDropZones(nodeCoordinatesCentered);
 

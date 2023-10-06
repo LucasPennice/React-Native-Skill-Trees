@@ -462,6 +462,26 @@ export function completedSkillPercentageFromCoords(coord: NodeCoordinate[], tree
     return result;
 }
 
+export function completedSkillTreeTable(coord: NodeCoordinate[]) {
+    let result: Dictionary<{ qty: number; completedQty: number; percentage: number }> = {};
+
+    for (const node of coord) {
+        if (!result[node.treeId]) result[node.treeId] = { completedQty: 0, percentage: 0, qty: 0 };
+
+        const shouldCount = node.category === "SKILL";
+
+        if (!shouldCount) continue;
+
+        const newCompletedQty = node.data.isCompleted ? result[node.treeId]!.completedQty + 1 : result[node.treeId]!.completedQty;
+        const newQty = result[node.treeId]!.qty + 1;
+        const newPercentage = (newCompletedQty / newQty) * 100;
+
+        result[node.treeId] = { completedQty: newCompletedQty, qty: newQty, percentage: newPercentage };
+    }
+
+    return result;
+}
+
 export function checkIfTreeHasInvalidCompleteDependencies(tree: Tree<Skill>) {
     //Base case 👇
 
@@ -562,7 +582,11 @@ export function countNodesPerLevel(nodes: Dictionary<NormalizedNode>): NodeQtyPe
     return result;
 }
 
-export function normalizedNodeDictionaryToNodeCoordArray(nodes: Dictionary<NormalizedNode>, treeData: Omit<TreeData, "nodes">) {
+export function normalizedNodeDictionaryToNodeCoordArray(
+    nodes: Dictionary<NormalizedNode>,
+    treeData: Omit<TreeData, "nodes">,
+    subTreesData?: Dictionary<TreeData>
+) {
     const nodeIds = Object.keys(nodes);
 
     const result: NodeCoordinate[] = nodeIds.map((nodeId) => {
@@ -570,16 +594,18 @@ export function normalizedNodeDictionaryToNodeCoordArray(nodes: Dictionary<Norma
 
         if (!node) throw new Error("node undefined at plotTreeReingoldTiltfordAlgorithm");
 
+        const nodeTreeData = (subTreesData && subTreesData[node.treeId]) ?? treeData;
+
         return {
-            accentColor: treeData.accentColor,
+            accentColor: nodeTreeData.accentColor,
             category: node.category,
             data: node.data,
             isRoot: node.isRoot,
             level: node.level,
             nodeId: node.nodeId,
             parentId: node.parentId,
-            treeId: treeData.treeId,
-            treeName: treeData.treeName,
+            treeId: node.treeId,
+            treeName: nodeTreeData.treeName,
             x: node.x,
             y: node.y,
         };

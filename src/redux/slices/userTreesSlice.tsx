@@ -73,6 +73,7 @@ export const selectTreeById =
 
 export const {
     selectAll: selectAllTrees,
+    selectEntities: selectAllTreesEntities,
     selectTotal: selectTotalTreeQty,
     selectIds: selectTreeIds,
 } = userTreesAdapter.getSelectors<RootState>((state) => state.userTrees);

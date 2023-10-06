@@ -158,7 +158,7 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
                 onStartShouldSetResponder={(event) => true}
                 onTouchEnd={(e) => e.stopPropagation()}
                 entering={FadeInDown.easing(Easing.elastic()).duration(300)}
-                exiting={FadeOutDown.easing(Easing.elastic()).duration(200)}
+                exiting={FadeOutDown.easing(Easing.elastic()).duration(300)}
                 style={[
                     {
                         zIndex: 2,

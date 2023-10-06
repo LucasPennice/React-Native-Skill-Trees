@@ -283,12 +283,12 @@ function useCanvasScroll(
             return {
                 transform: [
                     {
-                        translateX: withSpring(foundNodeTranslatedX, { damping: 32, stiffness: 350 }),
+                        translateX: withSpring(foundNodeTranslatedX, { damping: 32, stiffness: 300, overshootClamping: true }),
                     },
                     {
-                        translateY: withSpring(foundNodeTranslatedY, { damping: 32, stiffness: 350 }),
+                        translateY: withSpring(foundNodeTranslatedY, { damping: 32, stiffness: 300, overshootClamping: true }),
                     },
-                    { scale: withSpring(DEFAULT_SCALE, { damping: 32, stiffness: 350 }) },
+                    { scale: withSpring(DEFAULT_SCALE, { damping: 32, stiffness: 300, overshootClamping: true }) },
                 ],
             };
         }
@@ -296,9 +296,9 @@ function useCanvasScroll(
         function transitionFromMenuToNormalScrolling() {
             return {
                 transform: [
-                    { translateX: withSpring(offsetX.value, { damping: 32, stiffness: 350 }) },
-                    { translateY: withSpring(offsetY.value, { damping: 32, stiffness: 350 }) },
-                    { scale: withSpring(scale.value, { damping: 32, stiffness: 350 }) },
+                    { translateX: withSpring(offsetX.value, { damping: 32, stiffness: 300, overshootClamping: true }) },
+                    { translateY: withSpring(offsetY.value, { damping: 32, stiffness: 300, overshootClamping: true }) },
+                    { scale: withSpring(scale.value, { damping: 32, stiffness: 300, overshootClamping: true }) },
                 ],
             };
         }
@@ -322,7 +322,7 @@ function useAnimateNodeMenuTransition(isMenuOpen: boolean): SharedValue<boolean>
         if (!isMenuOpen) {
             timeoutId = setTimeout(() => {
                 result.value = false;
-            }, 200);
+            }, 300);
         }
 
         return () => {

@@ -20,7 +20,7 @@ import { shiftSubTreeToFinalAngle } from "./shiftSubTree";
 // 2 - We do have the necessary space to add the new node, but the sibling subtree is taking that space, if we insert the tree without
 // Increasing the radius we will overlap the nodes, this is level overflow
 
-export function plotCircularTree(nodes: Dictionary<NormalizedNode>, treeData: Omit<TreeData, "nodes">) {
+export function plotCircularTree(nodes: Dictionary<NormalizedNode>, treeData: Omit<TreeData, "nodes">, subTreesData?: Dictionary<TreeData>) {
     const rootNode = nodes[treeData.rootNodeId];
     if (!rootNode) throw new Error("rootNode undefined at plotCircularTree");
 
@@ -49,7 +49,7 @@ export function plotCircularTree(nodes: Dictionary<NormalizedNode>, treeData: Om
         limiter++;
     } while (levelOverflow && limiter !== 100);
 
-    const treeCoordinates = normalizedNodeDictionaryToNodeCoordArray(result, treeData);
+    const treeCoordinates = normalizedNodeDictionaryToNodeCoordArray(result, treeData, subTreesData);
 
     return treeCoordinates;
 }
