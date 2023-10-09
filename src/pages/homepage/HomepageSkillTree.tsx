@@ -5,6 +5,7 @@ import { SharedValue } from "react-native-reanimated";
 import StaticNodeList from "../../components/treeRelated/general/StaticNodeList";
 import RadialLabel from "../../components/treeRelated/radial/RadialLabel";
 import { CanvasDimensions, NodeCoordinate } from "../../types";
+import ReactiveNodeList from "@/components/treeRelated/general/ReactiveNodeList";
 
 type TreeProps = {
     reactiveNodes: NodeCoordinate[];
@@ -29,15 +30,10 @@ type TreeProps = {
     };
 };
 
-const LabelList = memo(function LabelList({
-    nodeCoordinates,
-    rootNode,
-    font,
-}: {
-    nodeCoordinates: NodeCoordinate[];
-    rootNode: NodeCoordinate;
-    font: SkFont;
-}) {
+const LabelList = memo(function LabelList({ nodeCoordinates, font }: { nodeCoordinates: NodeCoordinate[]; font: SkFont }) {
+    const rootNode = nodeCoordinates.find((n) => n.level === 0);
+    if (!rootNode) throw new Error("undefined rootNode at ReactiveNodeList");
+
     const rootCoordinate = { x: rootNode.x, y: rootNode.y };
 
     return nodeCoordinates.map((node, idx) => {
@@ -67,7 +63,7 @@ function HomepageSkillTree({ allNodes, reactiveNodes, staticNodes, selectedNode,
         <>
             <StaticRadialPathList allNodes={allNodes} staticNodes={allNodes} canvasDimensions={canvasDimensions} />
 
-            {settings.showLabel && <LabelList font={labelFont} nodeCoordinates={allNodes} rootNode={rootNode} />}
+            {settings.showLabel && <LabelList font={labelFont} nodeCoordinates={allNodes} />}
 
             <StaticNodeList
                 fonts={{ emojiFont, nodeLetterFont }}
@@ -75,6 +71,13 @@ function HomepageSkillTree({ allNodes, reactiveNodes, staticNodes, selectedNode,
                 staticNodes={staticNodes}
                 settings={{ oneColorPerTree: settings.oneColorPerTree, showIcons: settings.showIcons }}
                 canvasDimensions={canvasDimensions}
+            />
+
+            <ReactiveNodeList
+                fonts={{ emojiFont, nodeLetterFont }}
+                allNodes={allNodes}
+                settings={{ oneColorPerTree: settings.oneColorPerTree, showIcons: settings.showIcons }}
+                reactiveNodes={[]}
             />
         </>
     );

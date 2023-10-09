@@ -614,6 +614,18 @@ export function normalizedNodeDictionaryToNodeCoordArray(
     return result;
 }
 
+export function arrayToDictionary<T extends { nodeId: string }>(arr: T[]) {
+    const result: Dictionary<T> = {};
+
+    for (let i = 0; i < arr.length; i++) {
+        const element = arr[i];
+
+        result[element.nodeId] = element;
+    }
+
+    return result;
+}
+
 export function getSubTreesDictionary(nodes: Dictionary<NormalizedNode>, subTreeIdsAndSubTreeRootIds: SubTreeIdAndSubTreeRootId[], rootId: string) {
     //I consider a sub tree containing the root node of the tree, BUT that root should only contain one child
     //The root node of the subTree

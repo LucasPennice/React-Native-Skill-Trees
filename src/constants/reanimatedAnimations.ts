@@ -1,4 +1,4 @@
-import { DESELECT_NODE_ANIMATION_DURATION } from "@/components/treeRelated/general/useHandleGroupTransform";
+import { DESELECT_NODE_ANIMATION_DURATION } from "@/parameters";
 import { Keyframe, withDelay, withSpring } from "react-native-reanimated";
 
 const FINAL_SCALE = 1 / 3;

@@ -1,18 +1,8 @@
-import { SkFont, Skia } from "@shopify/react-native-skia";
-import { SharedValue, useDerivedValue, withSpring } from "react-native-reanimated";
-import { CANVAS_SPRING, CIRCLE_SIZE, NODE_ICON_FONT_SIZE } from "../../../parameters";
 import { CartesianCoordinate } from "@/types";
-
-function useSharedValuesFromNodeCoord(coordinates: { cx: number; cy: number }) {
-    const x = useDerivedValue(() => {
-        return withSpring(coordinates.cx, CANVAS_SPRING);
-    });
-    const y = useDerivedValue(() => {
-        return withSpring(coordinates.cy, CANVAS_SPRING);
-    });
-
-    return { x, y };
-}
+import { SkFont, Skia } from "@shopify/react-native-skia";
+import { useEffect } from "react";
+import { SharedValue, useDerivedValue, useSharedValue, withSpring } from "react-native-reanimated";
+import { CIRCLE_SIZE, NODE_ICON_FONT_SIZE, TIME_TO_REORDER_TREE } from "../../../parameters";
 
 export const getTextCoordinates = (coord: CartesianCoordinate, textWidth: number) => {
     const x = coord.x - textWidth / 2;
@@ -39,24 +29,33 @@ function useIconPosition(x: SharedValue<number>, y: SharedValue<number>, textWid
 }
 
 function useHandleNodeAnimatedCoordinates(
-    coordinates: { cx: number; cy: number },
+    initialCoordinates: CartesianCoordinate,
+    finalCoordinates: CartesianCoordinate,
     text: { color: string; letter: string; isEmoji: boolean },
     font: SkFont
 ) {
     const textWidth = getTextWidth();
 
-    const { x, y } = useSharedValuesFromNodeCoord(coordinates);
+    const x = useSharedValue(initialCoordinates.x);
+    const y = useSharedValue(initialCoordinates.y);
+
+    useEffect(() => {
+        x.value = withSpring(finalCoordinates.x, { duration: TIME_TO_REORDER_TREE, dampingRatio: 0.7 });
+        y.value = withSpring(finalCoordinates.y, { duration: TIME_TO_REORDER_TREE, dampingRatio: 0.7 });
+    }, []);
 
     const { textX, textY } = useIconPosition(x, y, textWidth);
-
-    const path = Skia.Path.Make();
 
     const strokeWidth = 2;
     const radius = CIRCLE_SIZE + strokeWidth / 2;
 
-    path.moveTo(x.value, y.value);
-    path.addCircle(x.value, y.value, radius);
-    path.simplify();
+    const path = useDerivedValue(() => {
+        const path = Skia.Path.Make();
+        path.moveTo(x.value, y.value);
+        path.addCircle(x.value, y.value, radius);
+        path.simplify();
+        return path;
+    });
 
     return { path, textX, textY, x, y };
 

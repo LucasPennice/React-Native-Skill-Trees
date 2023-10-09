@@ -102,6 +102,8 @@ export type NodeCoordinate = CartesianCoordinate & {
     category: NodeCategory;
 };
 
+export type ReactiveNodeCoordinate = NodeCoordinate & { initialCoordinates: CartesianCoordinate };
+
 export type ModifiableProperties<T> = {
     [Property in keyof T]: T[Property];
 };

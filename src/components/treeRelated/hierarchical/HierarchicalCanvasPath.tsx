@@ -28,7 +28,7 @@ function useSharedValuesFromPoints(coordinates: PathCoordinates) {
     return { p1x, p1y, p2x, p2y };
 }
 
-function HierarchicalCanvasPath({ coordinates, isRoot }: Props) {
+function HierarchicalReactiveCanvasPath({ coordinates, isRoot }: Props) {
     const { p1x, p1y, p2x, p2y } = useSharedValuesFromPoints(coordinates);
 
     const path = Skia.Path.Make();
@@ -49,4 +49,4 @@ function HierarchicalCanvasPath({ coordinates, isRoot }: Props) {
     return <Path path={path} color={"#1C1C1D"} style="stroke" strokeWidth={2} />;
 }
 
-export default HierarchicalCanvasPath;
+export default HierarchicalReactiveCanvasPath;

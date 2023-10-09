@@ -99,3 +99,7 @@ export const CANVAS_SETTINGS_MOCK_NODE: Tree<Skill> = {
 };
 
 export const CANVAS_SETTINGS_EXAMPLE_NODE_SIZE = 57;
+
+export const DESELECT_NODE_ANIMATION_DURATION = 400;
+
+export const TIME_TO_REORDER_TREE = 1000;

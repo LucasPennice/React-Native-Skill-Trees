@@ -1,5 +1,4 @@
 import SelectedNodeView from "@/components/treeRelated/general/SelectedNodeView";
-import useHandleReactiveAndStaticNodeList from "@/components/treeRelated/hooks/useHandleReactiveAndStaticNodeList";
 import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMenuFunctions";
 import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { selectNodeById, selectNodesTable } from "@/redux/slices/nodesSlice";
@@ -232,10 +231,6 @@ function HomepageTree({ canvasRef, openCanvasSettingsModal, selectedNodeCoordSta
 
     const treeState = useGetTreeState(canvasRef, selectedNodeCoord);
 
-    //🚨
-    const { reactiveNodes, staticNodes } = useHandleReactiveAndStaticNodeList(treeState.treeCoordinate.nodeCoordinates, selectedNodeCoord, undefined);
-    //🚨
-
     const treeFunctions = useCreateTreeFunctions(updateSelectedNodeCoord, openCanvasSettingsModal);
 
     const [draggingNode, draggingNodeActions] = useDraggingNodeState();
@@ -308,8 +303,8 @@ function HomepageTree({ canvasRef, openCanvasSettingsModal, selectedNodeCoordSta
                     {canvasDisplaySettings.showCircleGuide && <RadialTreeLevelCircles nodeCoordinates={treeState.treeCoordinate.nodeCoordinates} />}
                     {fonts && (
                         <RadialStaticSkillTree
-                            reactiveNodes={reactiveNodes}
-                            staticNodes={staticNodes}
+                            reactiveNodes={[]}
+                            staticNodes={treeState.treeCoordinate.nodeCoordinates}
                             canvasDimensions={treeState.treeCoordinate.canvasDimensions}
                             allNodes={treeState.treeCoordinate.nodeCoordinates}
                             selectedNode={selectedNode?.nodeId ?? null}

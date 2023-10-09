@@ -12,12 +12,11 @@ import {
     withSpring,
     withTiming,
 } from "react-native-reanimated";
-import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
+import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, DESELECT_NODE_ANIMATION_DURATION, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
 import { ScreenDimentions } from "../../../../redux/slices/screenDimentionsSlice";
 import { CanvasDimensions, CartesianCoordinate, NodeCoordinate, TreeCoordinateData } from "../../../../types";
 import { useHandleCanvasBounds } from "../useHandleCanvasBounds";
 import { ANIMATION_DURATION_AFTER_FAILED_LONG_PRESS_MS, DEACCELERATION_FACTOR, DEFAULT_SCALE } from "./params";
-import { DESELECT_NODE_ANIMATION_DURATION } from "../../general/useHandleGroupTransform";
 
 const AFTER_SCROLL_SPING_PARAMS: WithSpringConfig = {
     mass: 1,

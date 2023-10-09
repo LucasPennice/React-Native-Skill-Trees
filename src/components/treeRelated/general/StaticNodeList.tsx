@@ -81,7 +81,7 @@ function paintSkillNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProp
         const textColor = Skia.Paint();
         textColor.setColor(Skia.Color("#515053"));
 
-        const text = node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0];
+        const text = node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0].toUpperCase();
 
         const font = node.data.icon.isEmoji ? fonts.emojiFont : fonts.nodeLetterFont;
 
@@ -146,7 +146,7 @@ function paintSkillTreeNode(
 
     if (settings.showIcons) {
         const textColor = Skia.Paint();
-        textColor.setColor(Skia.Color(node.accentColor.color1));
+        textColor.setColor(Skia.Color(accentColor.color1));
 
         const text = (node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0]).toUpperCase();
 
@@ -190,7 +190,7 @@ function paintUserNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProps
         const textColor = Skia.Paint();
         textColor.setColor(Skia.Color(highContrastTextColor));
 
-        const text = node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0];
+        const text = node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0].toUpperCase();
 
         const font = node.data.icon.isEmoji ? fonts.emojiFont : fonts.nodeLetterFont;
 

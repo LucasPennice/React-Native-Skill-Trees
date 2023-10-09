@@ -17,11 +17,12 @@ import useCanvasScroll from "../../components/treeRelated/hooks/gestures/useCanv
 import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks/gestures/useCanvasTap";
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
-import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
+import { NODE_ICON_FONT_SIZE, PURPLE_GRADIENT, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeAction, NodeCoordinate, NormalizedNode, TreeCoordinateData } from "../../types";
+import SelectedNodeView from "@/components/treeRelated/general/SelectedNodeView";
 
 type Props = {
     state: {
@@ -266,7 +267,6 @@ function IndividualSkillTree({ canvasRef, treeData, functions, state }: Props) {
                         <HierarchicalSkillTree
                             canvasDimensions={state.treeCoordinate.canvasDimensions}
                             nodeCoordinatesCentered={nodeCoordinates}
-                            selectedNode={selectedNodeCoord?.node?.nodeId ?? null}
                             fonts={fonts}
                             settings={{
                                 showLabel: canvasDisplaySettings.showLabel,
@@ -281,6 +281,16 @@ function IndividualSkillTree({ canvasRef, treeData, functions, state }: Props) {
                 {nodeAction.node && nodeAction.state === "LongPressing" && <NodeLongPressIndicator data={nodeAction.node} scale={scaleState} />}
                 {nodeAction.node && nodeAction.state === "MenuOpen" && (
                     <NodeMenu functions={nodeMenuFunctions} data={nodeAction.node} scale={scaleState} closeNodeMenu={resetNodeAction} />
+                )}
+
+                {selectedNodeCoordinates && (
+                    <SelectedNodeView
+                        allNodes={state.treeCoordinate.nodeCoordinates}
+                        settings={{ oneColorPerTree: false, showIcons: canvasDisplaySettings.showIcons }}
+                        rootColor={PURPLE_GRADIENT}
+                        scale={scaleState}
+                        selectedNodeCoordinates={selectedNodeCoordinates}
+                    />
                 )}
                 {/* Node Action Related 👆 */}
             </Animated.View>

@@ -1,14 +1,14 @@
 import { SkFont } from "@shopify/react-native-skia";
 import { memo } from "react";
 import { SharedValue } from "react-native-reanimated";
-import { ColorGradient, NodeCategory } from "../../../types";
+import { CartesianCoordinate, ColorGradient, NodeCategory } from "../../../types";
 import { NodeProps, SkillNode, SkillTreeNode, UserNode } from "./NodeCategories";
-import useHandleGroupTransform from "./useHandleGroupTransform";
 import useHandleNodeAnimatedCoordinates from "./useHandleNodeAnimatedCoordinates";
 
 export type CanvasNodeData = {
     isComplete: boolean;
-    coord: { cx: number; cy: number };
+    finalCoordinates: CartesianCoordinate;
+    initialCoordinates: CartesianCoordinate;
     treeAccentColor: ColorGradient;
     text: { color: string; letter: string; isEmoji: boolean };
     category: NodeCategory;
@@ -18,7 +18,6 @@ type Props = {
     state: {
         font: SkFont;
         treeCompletedPercentage: number;
-        isSelected: boolean;
         showIcons: boolean;
     };
     nodeData: CanvasNodeData;
@@ -32,12 +31,10 @@ type Props = {
 };
 
 function ReactiveNode({ nodeData, state, nodeDrag }: Props) {
-    const { category, coord, isComplete, text, treeAccentColor } = nodeData;
-    const { font, treeCompletedPercentage, isSelected, showIcons } = state;
+    const { category, finalCoordinates, initialCoordinates, isComplete, text, treeAccentColor } = nodeData;
+    const { font, treeCompletedPercentage, showIcons } = state;
 
-    const { path, textX, textY, x, y } = useHandleNodeAnimatedCoordinates(coord, text, font);
-
-    const { groupTransform, motionBlur } = useHandleGroupTransform(isSelected, nodeDrag);
+    const { path, textX, textY, x, y } = useHandleNodeAnimatedCoordinates(initialCoordinates, finalCoordinates, text, font);
 
     const nodeIcon = text.isEmoji ? text.letter : text.letter.toUpperCase();
 
@@ -56,9 +53,8 @@ export default memo(ReactiveNode, arePropsEqual);
 
 function arePropsEqual(prevProps: Props, nextProps: Props): boolean {
     //We compare the nodeData object
-    if (prevProps.state.isSelected !== nextProps.state.isSelected) return false;
-    if (prevProps.nodeData.coord.cx !== nextProps.nodeData.coord.cx) return false;
-    if (prevProps.nodeData.coord.cy !== nextProps.nodeData.coord.cy) return false;
+    if (prevProps.nodeData.finalCoordinates.x !== nextProps.nodeData.finalCoordinates.x) return false;
+    if (prevProps.nodeData.finalCoordinates.y !== nextProps.nodeData.finalCoordinates.y) return false;
     if (prevProps.state.treeCompletedPercentage !== nextProps.state.treeCompletedPercentage) return false;
     if (prevProps.nodeData.isComplete !== nextProps.nodeData.isComplete) return false;
     if (prevProps.nodeData.treeAccentColor !== nextProps.nodeData.treeAccentColor) return false;
