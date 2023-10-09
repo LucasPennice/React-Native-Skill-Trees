@@ -1,11 +1,10 @@
-import { Blur, Circle, Group, Picture, SkFont, Skia, createPicture } from "@shopify/react-native-skia";
-import { memo, useEffect, useMemo } from "react";
+import { SkFont } from "@shopify/react-native-skia";
+import { memo } from "react";
 import { SharedValue } from "react-native-reanimated";
 import { ColorGradient, NodeCategory } from "../../../types";
 import { NodeProps, SkillNode, SkillTreeNode, UserNode } from "./NodeCategories";
 import useHandleGroupTransform from "./useHandleGroupTransform";
 import useHandleNodeAnimatedCoordinates from "./useHandleNodeAnimatedCoordinates";
-import { CIRCLE_SIZE, colors } from "@/parameters";
 
 export type CanvasNodeData = {
     isComplete: boolean;
@@ -32,7 +31,7 @@ type Props = {
         | undefined;
 };
 
-function Node({ nodeData, state, nodeDrag }: Props) {
+function ReactiveNode({ nodeData, state, nodeDrag }: Props) {
     const { category, coord, isComplete, text, treeAccentColor } = nodeData;
     const { font, treeCompletedPercentage, isSelected, showIcons } = state;
 
@@ -42,27 +41,18 @@ function Node({ nodeData, state, nodeDrag }: Props) {
 
     const nodeIcon = text.isEmoji ? text.letter : text.letter.toUpperCase();
 
-    //Node Props
+    //ReactiveNode Props
     const textCoordinates = { textX, textY };
     const animatedCoordinates = { x, y };
     const nodeState: NodeProps = { accentColor: treeAccentColor, animatedCoordinates, font, text: nodeIcon, textCoordinates, showIcons };
 
     if (category === "SKILL") return <SkillNode nodeState={nodeState} isComplete={isComplete} path={path} />;
     if (category === "SKILL_TREE")
-        return (
-            <SkillTreeNode
-                nodeState={nodeState}
-                isComplete={isComplete}
-                path={path}
-                treeCompletedPercentage={treeCompletedPercentage}
-                blur={motionBlur}
-                transform={groupTransform}
-            />
-        );
+        return <SkillTreeNode nodeState={nodeState} isComplete={isComplete} path={path} treeCompletedPercentage={treeCompletedPercentage} />;
     return <UserNode nodeState={nodeState} textColor={text.color} treeCompletedPercentage={treeCompletedPercentage} />;
 }
 
-export default memo(Node, arePropsEqual);
+export default memo(ReactiveNode, arePropsEqual);
 
 function arePropsEqual(prevProps: Props, nextProps: Props): boolean {
     //We compare the nodeData object

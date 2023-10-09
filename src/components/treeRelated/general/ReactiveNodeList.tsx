@@ -1,18 +1,20 @@
 import { SkFont } from "@shopify/react-native-skia";
 import { NodeCoordinate, SelectedNodeId } from "../../../types";
 import { getLabelTextColor } from "../../../functions/misc";
-import Node, { CanvasNodeData } from "./Node";
+import ReactiveNode, { CanvasNodeData } from "./ReactiveNode";
 import { completedSkillPercentageFromCoords } from "../../../functions/extractInformationFromTree";
 
 function ReactiveNodeList({
-    nodeCoordinates,
+    allNodes,
     settings,
+    reactiveNodes,
     rootNode,
     treeCompletedPercentage,
     selectedNodeId,
     fonts,
 }: {
-    nodeCoordinates: NodeCoordinate[];
+    allNodes: NodeCoordinate[];
+    reactiveNodes: NodeCoordinate[];
     rootNode: NodeCoordinate;
     settings: { oneColorPerTree: boolean; showIcons: boolean };
     treeCompletedPercentage: number;
@@ -23,7 +25,7 @@ function ReactiveNodeList({
 
     const { oneColorPerTree, showIcons } = settings;
 
-    return nodeCoordinates.map((node) => {
+    return reactiveNodes.map((node) => {
         const isSelected = node.nodeId === selectedNodeId;
 
         const accentColor = oneColorPerTree ? rootNode.accentColor : node.accentColor;
@@ -50,11 +52,11 @@ function ReactiveNodeList({
                 ? treeCompletedPercentage
                 : node.category === "SKILL"
                 ? 0
-                : completedSkillPercentageFromCoords(nodeCoordinates, node.treeId);
+                : completedSkillPercentageFromCoords(allNodes, node.treeId);
 
         const state = { font, treeCompletedPercentage: currentTreeCompletedPercentage, isSelected, showIcons: showIcons };
 
-        return <Node state={state} key={`${node.nodeId}_node`} nodeData={nodeData} nodeDrag={undefined} />;
+        return <ReactiveNode state={state} key={`${node.nodeId}_node`} nodeData={nodeData} nodeDrag={undefined} />;
     });
 }
 

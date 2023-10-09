@@ -10,8 +10,8 @@ import { getTextCoordinates } from "./useHandleNodeAnimatedCoordinates";
 const strokeWidth = 2;
 
 type Props = {
-    nodeCoordinates: NodeCoordinate[];
-    staticNodeIds?: string[];
+    allNodes: NodeCoordinate[];
+    staticNodes: NodeCoordinate[];
     settings: { oneColorPerTree: boolean; showIcons: boolean };
     canvasDimensions: CanvasDimensions;
     fonts: { nodeLetterFont: SkFont; emojiFont: SkFont };
@@ -24,30 +24,28 @@ type PaintProps = {
     rootColor: ColorGradient;
 };
 
-function StaticNodeList({ nodeCoordinates, staticNodeIds, settings, fonts, canvasDimensions }: Props) {
-    const nodesToPaint = staticNodeIds ? nodeCoordinates.filter((node) => staticNodeIds.includes(node.nodeId)) : nodeCoordinates;
-
+function StaticNodeList({ allNodes, staticNodes, settings, fonts, canvasDimensions }: Props) {
     const { oneColorPerTree, showIcons } = settings;
 
-    const rootNode = nodeCoordinates.find((node) => node.isRoot);
+    const rootNode = allNodes.find((node) => node.isRoot);
 
     if (!rootNode) throw new Error("rootNode undefined at StaticNodeList");
 
     const rootColor = rootNode.accentColor;
 
     const picture = useMemo(() => {
-        const treeCompletionTable = completedSkillTreeTable(nodeCoordinates);
+        const treeCompletionTable = completedSkillTreeTable(allNodes);
 
         const paintProps: PaintProps = { canvasDimensions, fonts, rootColor, settings };
 
         return createPicture({ x: 0, y: 0, width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }, (canvas) => {
-            for (const nodeCoordinate of nodesToPaint) {
+            for (const nodeCoordinate of staticNodes) {
                 if (nodeCoordinate.category === "SKILL") paintSkillNode(canvas, nodeCoordinate, paintProps);
                 if (nodeCoordinate.category === "SKILL_TREE") paintSkillTreeNode(canvas, nodeCoordinate, paintProps, treeCompletionTable);
                 if (nodeCoordinate.category === "USER") paintUserNode(canvas, nodeCoordinate, paintProps);
             }
         });
-    }, [nodesToPaint, canvasDimensions, oneColorPerTree, showIcons]);
+    }, [staticNodes, allNodes, canvasDimensions, oneColorPerTree, showIcons]);
 
     return <Picture picture={picture} />;
 }
@@ -108,22 +106,25 @@ function paintSkillTreeNode(
     const backgroundPaint = Skia.Paint();
     backgroundPaint.setColor(Skia.Color(colors.background));
 
+    canvas.drawCircle(node.x, node.y, CIRCLE_SIZE, backgroundPaint);
+
     const completionPercentage = treeCompletionTable[node.treeId]!.percentage;
 
     const grayColor = Skia.Paint();
     grayColor.setColor(Skia.Color(colors.line));
 
-    const svg = getCircularPathSvgWithGradient(
+    const outerEdge = getCircularPathSvgWithGradient(
         {
             center: { x: node.x, y: node.y },
             gradient: { color1: "#515053", color2: "#2C2C2D", label: "" },
             radius: CIRCLE_SIZE,
-            strokeWidth: strokeWidth,
+            strokeWidth: 2,
+            pathString: `fill-opacity='0'`,
         },
         canvasDimensions
     );
 
-    canvas.drawSvg(svg);
+    canvas.drawSvg(outerEdge);
 
     const accentColor = settings.oneColorPerTree ? rootColor : node.accentColor;
 
@@ -145,9 +146,9 @@ function paintSkillTreeNode(
 
     if (settings.showIcons) {
         const textColor = Skia.Paint();
-        textColor.setColor(Skia.Color(node.data.isCompleted ? node.accentColor.color1 : "#515053"));
+        textColor.setColor(Skia.Color(node.accentColor.color1));
 
-        const text = node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0];
+        const text = (node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0]).toUpperCase();
 
         const font = node.data.icon.isEmoji ? fonts.emojiFont : fonts.nodeLetterFont;
 

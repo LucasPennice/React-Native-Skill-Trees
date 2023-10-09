@@ -1,10 +1,10 @@
-import { Circle, DiffRect, LinearGradient, Path, SharedValueType, SkFont, SkPath, Text, Transforms2d, vec } from "@shopify/react-native-skia";
+import { interpolateColors } from "@/functions/misc";
+import { Circle, DiffRect, Group, LinearGradient, Path, SkFont, SkPath, Text, vec } from "@shopify/react-native-skia";
 import Animated, { SharedValue, useDerivedValue, withDelay, withTiming } from "react-native-reanimated";
 import { CIRCLE_SIZE, colors } from "../../../parameters";
 import { ColorGradient } from "../../../types";
 import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
 import useHandleNodeCompleteAnimation, { ANIMATION_CONSTANTS_ON_COMPLETE } from "./useHandleNodeCompleteAnimation";
-import { interpolateColors } from "@/functions/misc";
 
 type NodeProps = {
     animatedCoordinates: { x: SharedValue<number>; y: SharedValue<number> };
@@ -40,7 +40,7 @@ function SkillNode({ path, isComplete, nodeState }: SkillNodeProps) {
     });
 
     return (
-        <>
+        <Group>
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
             {/* eslint-disable-next-line */}
             <Path path={path} style="stroke" strokeWidth={2}>
@@ -70,7 +70,7 @@ function SkillNode({ path, isComplete, nodeState }: SkillNodeProps) {
                     )}
                 </Text>
             )}
-        </>
+        </Group>
     );
 }
 
@@ -79,24 +79,22 @@ type SkillTreeNodeProps = {
     path: SkPath;
     isComplete: boolean;
     treeCompletedPercentage: number;
-    transform: SharedValueType<Transforms2d | undefined>;
-    blur: SharedValue<number>;
 };
 
-function SkillTreeNode({ isComplete, nodeState, path, treeCompletedPercentage, blur, transform }: SkillTreeNodeProps) {
+function SkillTreeNode({ isComplete, nodeState, path, treeCompletedPercentage }: SkillTreeNodeProps) {
     const { accentColor, animatedCoordinates, font, text, textCoordinates, showIcons } = nodeState;
     const { x, y } = animatedCoordinates;
 
     const { textX, textY } = textCoordinates;
 
-    const end = useDerivedValue(() => {
+    const start = useDerivedValue(() => {
         const delay = isComplete ? ANIMATION_CONSTANTS_ON_COMPLETE.delayAfterOvershoot : 0;
         const duration = isComplete ? ANIMATION_CONSTANTS_ON_COMPLETE.remainingAnimationDuration : 0;
-        return withDelay(delay, withTiming(treeCompletedPercentage / 100, { duration }));
+        return withDelay(delay, withTiming(1 - treeCompletedPercentage / 100, { duration }));
     });
 
     return (
-        <>
+        <Group>
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
             {/* eslint-disable-next-line */}
             <Path path={path} style="stroke" strokeWidth={2}>
@@ -107,7 +105,7 @@ function SkillTreeNode({ isComplete, nodeState, path, treeCompletedPercentage, b
                 />
             </Path>
             {/* eslint-disable-next-line */}
-            <Path path={path} end={end} style={"stroke"} strokeCap={"round"} strokeWidth={2}>
+            <Path path={path} start={start} style={"stroke"} strokeCap={"round"} strokeWidth={2}>
                 <LinearGradient
                     start={vec(x.value - CIRCLE_SIZE, y.value)}
                     end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
@@ -123,7 +121,7 @@ function SkillTreeNode({ isComplete, nodeState, path, treeCompletedPercentage, b
                     />
                 </Text>
             )}
-        </>
+        </Group>
     );
 }
 
@@ -139,7 +137,7 @@ function UserNode({ nodeState, textColor }: UserNodeProps) {
 
     const { textX, textY } = textCoordinates;
     return (
-        <>
+        <Group>
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
             {/* eslint-disable-next-line */}
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={accentColor.color1} style={"fill"} strokeWidth={2}>
@@ -150,7 +148,7 @@ function UserNode({ nodeState, textColor }: UserNodeProps) {
                 />
             </Circle>
             {showIcons && <Text x={textX} y={textY} text={text} font={font} color={textColor} />}
-        </>
+        </Group>
     );
 }
 

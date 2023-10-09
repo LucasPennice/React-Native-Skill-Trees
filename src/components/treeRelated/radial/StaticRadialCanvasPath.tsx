@@ -4,25 +4,27 @@ import { memo, useMemo } from "react";
 import { getCurvedPath } from "./RadialCanvasPath";
 
 export const StaticRadialPathList = memo(function StaticRadialPathList({
-    nodeCoordinates,
+    staticNodes,
+    allNodes,
     canvasDimensions,
 }: {
-    nodeCoordinates: NodeCoordinate[];
+    staticNodes: NodeCoordinate[];
+    allNodes: NodeCoordinate[];
     canvasDimensions: CanvasDimensions;
 }) {
     // Create picture
     const picture = useMemo(
         () =>
             createPicture({ x: 0, y: 0, width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }, (canvas) => {
-                const rootNodeCoordinates = nodeCoordinates.find((c) => c.level === 0);
+                const rootNodeCoordinates = allNodes.find((c) => c.level === 0);
                 if (!rootNodeCoordinates) throw new Error("rootNodeCoordinates not found at StaticRadialPathList createPicture");
 
                 const paint = Skia.Paint();
                 paint.setColor(Skia.Color("#1C1C1D"));
 
-                for (const nodeCoordinate of nodeCoordinates) {
+                for (const nodeCoordinate of staticNodes) {
                     if (nodeCoordinate.isRoot) continue;
-                    const parentNode = nodeCoordinates.find((n) => n.nodeId === nodeCoordinate.parentId);
+                    const parentNode = allNodes.find((n) => n.nodeId === nodeCoordinate.parentId);
 
                     if (!parentNode) throw new Error("parentNode not found at StaticRadialPathList createPicture");
 
@@ -38,7 +40,7 @@ export const StaticRadialPathList = memo(function StaticRadialPathList({
                     canvas.drawPath(path, paint);
                 }
             }),
-        [nodeCoordinates, canvasDimensions]
+        [allNodes, staticNodes, canvasDimensions]
     );
 
     return <Picture picture={picture} />;

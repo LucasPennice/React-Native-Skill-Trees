@@ -34,6 +34,7 @@ import {
     TreeCoordinateData,
 } from "../../types";
 import RadialStaticSkillTree from "./HomepageSkillTree";
+import useHandleReactiveAndStaticNodeList from "@/components/treeRelated/hooks/useHandleReactiveAndStaticNodeList";
 
 type Props = {
     selectedNodeCoordState: readonly [
@@ -229,6 +230,10 @@ function HomepageTree({ canvasRef, openCanvasSettingsModal, selectedNodeCoordSta
 
     const treeState = useGetTreeState(canvasRef, selectedNodeCoord);
 
+    //🚨
+    const { reactiveNodes, staticNodes } = useHandleReactiveAndStaticNodeList(treeState.treeCoordinate.nodeCoordinates, selectedNodeCoord, undefined);
+    //🚨
+
     const treeFunctions = useCreateTreeFunctions(updateSelectedNodeCoord, openCanvasSettingsModal);
 
     const [draggingNode, draggingNodeActions] = useDraggingNodeState();
@@ -301,8 +306,10 @@ function HomepageTree({ canvasRef, openCanvasSettingsModal, selectedNodeCoordSta
                     {canvasDisplaySettings.showCircleGuide && <RadialTreeLevelCircles nodeCoordinates={treeState.treeCoordinate.nodeCoordinates} />}
                     {fonts && (
                         <RadialStaticSkillTree
+                            reactiveNodes={reactiveNodes}
+                            staticNodes={staticNodes}
                             canvasDimensions={treeState.treeCoordinate.canvasDimensions}
-                            nodeCoordinatesCentered={treeState.treeCoordinate.nodeCoordinates}
+                            allNodes={treeState.treeCoordinate.nodeCoordinates}
                             selectedNode={selectedNode?.nodeId ?? null}
                             fonts={fonts}
                             settings={{
