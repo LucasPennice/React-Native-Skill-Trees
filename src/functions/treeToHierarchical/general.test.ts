@@ -4,24 +4,17 @@ import { NormalizedNode, Skill, Tree, getDefaultSkillValue } from "../../types";
 import { treeToNormalizedNodeAndTreeDataAdapter } from "../misc";
 import {
     checkHierarchicalTreeOverlap,
-    getAllNodesFromLevel0ToLCALevelIncluded,
     getHierarchicalTreeContourByLevel,
+    getNodesFromConflictLineAndRightSubTrees,
     getNodesInBetweenConflictingTrees,
+    getNodesToShiftByHalfOverlapHierarchical,
+    getNodesToShiftByOverlapHierarchical,
     getTreeNodesWithPossibleOverlap,
     hierarchicalShiftNodes,
     plotTreeReingoldTiltfordAlgorithm,
-    treesToCenterAfterShift,
-    treesToShiftByBiggestOverlap,
 } from "./general";
 
 const MOCK_SKILL_VALUE = getDefaultSkillValue("foo", false, { isEmoji: false, text: "foo" });
-// const WHITE_HOME_TREE = {
-//     accentColor: { label: "White", color1: "#FFFFFF", color2: "#CAEFD7" },
-//     icon: { isEmoji: false, text: "L" },
-//     rootNodeId: "homepageRoot",
-//     treeId: "HomepageTree",
-//     treeName: "Life Skills",
-// };
 
 test("getTreeNodesWithPossibleOverlap - Root with 2 children", () => {
     const nodes: Dictionary<NormalizedNode> = {
@@ -559,98 +552,200 @@ test("treesToShiftByBiggestOverlap - Smallest overlap case", () => {
         },
     };
 
-    expect(treesToShiftByBiggestOverlap(nodes, "rootId", 0, ["rootId", "1-2", "22a"])).toStrictEqual(["1-2", "22a", "22b"]);
+    expect(getNodesToShiftByOverlapHierarchical(nodes, "rootId", 0, ["rootId", "1-2", "22a"])).toStrictEqual(["1-2", "22a", "22b"]);
 });
 
-test("getAllNodesFromLevel0ToLCALevel - Smallest overlap case", () => {
+test("getNodesFromConflictLineAndRightSubTrees", () => {
     const nodes: Dictionary<NormalizedNode> = {
-        "21a": {
+        STxqHtFLs7w1QefNS82vX6sX: {
             category: "SKILL",
-            childrenIds: [],
             data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
-            nodeId: "21a",
-            parentId: "1-1",
-            treeId: "treeId",
+            nodeId: "STxqHtFLs7w1QefNS82vX6sX",
+            parentId: "OY1qS5ttdNaYqG8M9iCYqdnS",
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
+            x: -2,
+            y: 2,
+            childrenIds: [],
+        },
+        "1pbheeWpLfOlwmGVuOYdAXHQ": {
+            category: "SKILL",
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "1pbheeWpLfOlwmGVuOYdAXHQ",
+            parentId: "OY1qS5ttdNaYqG8M9iCYqdnS",
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
             x: -1,
             y: 2,
-        },
-        "21b": {
-            category: "SKILL",
             childrenIds: [],
+        },
+        a3auhQBO9ws4pbpt0UAveQ2p: {
+            category: "SKILL",
             data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
-            nodeId: "21b",
-            parentId: "1-1",
-            treeId: "treeId",
+            nodeId: "a3auhQBO9ws4pbpt0UAveQ2p",
+            parentId: "OY1qS5ttdNaYqG8M9iCYqdnS",
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
             x: 0,
             y: 2,
+            childrenIds: [],
         },
-        "1-1": {
+        OY1qS5ttdNaYqG8M9iCYqdnS: {
             category: "SKILL",
-            childrenIds: ["21a", "21b"],
             data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
-            nodeId: "1-1",
-            parentId: "rootId",
-            treeId: "treeId",
+            nodeId: "OY1qS5ttdNaYqG8M9iCYqdnS",
+            parentId: "YLLipml9C0hcggz4nWx6p2aH",
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
+            x: -1,
+            y: 1,
+            childrenIds: ["STxqHtFLs7w1QefNS82vX6sX", "1pbheeWpLfOlwmGVuOYdAXHQ", "a3auhQBO9ws4pbpt0UAveQ2p"],
+        },
+        uL0H2WyAsb9fVl9AncrMgzFE: {
+            category: "SKILL",
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 3,
+            nodeId: "uL0H2WyAsb9fVl9AncrMgzFE",
+            parentId: "L9uw2JHj5cQggru1TCMU24P7",
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
             x: -0.5,
-            y: 1,
-        },
-        "22a": {
-            category: "SKILL",
+            y: 3,
             childrenIds: [],
+        },
+        BK0yiYwF6uxznFBKcpS4qoul: {
+            category: "SKILL",
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 3,
+            nodeId: "BK0yiYwF6uxznFBKcpS4qoul",
+            parentId: "L9uw2JHj5cQggru1TCMU24P7",
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
+            x: 0.5,
+            y: 3,
+            childrenIds: [],
+        },
+        L9uw2JHj5cQggru1TCMU24P7: {
+            category: "SKILL",
             data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
-            nodeId: "22a",
-            parentId: "1-2",
-            treeId: "treeId",
+            nodeId: "L9uw2JHj5cQggru1TCMU24P7",
+            parentId: "wBgjsNHppbI4boOTijmfzbVC",
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
             x: 0,
             y: 2,
+            childrenIds: ["uL0H2WyAsb9fVl9AncrMgzFE", "BK0yiYwF6uxznFBKcpS4qoul"],
         },
-        "22b": {
+        "8ZIkDlHekfG4a3RNkhBFuU4u": {
             category: "SKILL",
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 3,
+            nodeId: "8ZIkDlHekfG4a3RNkhBFuU4u",
+            parentId: "Db1l30fYl3Sj8ZqZ2LOGHjQ1",
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
+            x: 1.5,
+            y: 3,
             childrenIds: [],
+        },
+        Db1l30fYl3Sj8ZqZ2LOGHjQ1: {
+            category: "SKILL",
             data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 2,
-            nodeId: "22b",
-            parentId: "1-2",
-            treeId: "treeId",
-            x: 1,
+            nodeId: "Db1l30fYl3Sj8ZqZ2LOGHjQ1",
+            parentId: "wBgjsNHppbI4boOTijmfzbVC",
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
+            x: 1.5,
             y: 2,
+            childrenIds: ["8ZIkDlHekfG4a3RNkhBFuU4u"],
         },
-        "1-2": {
+        wBgjsNHppbI4boOTijmfzbVC: {
             category: "SKILL",
-            childrenIds: ["22a", "22b"],
             data: MOCK_SKILL_VALUE,
             isRoot: false,
             level: 1,
-            nodeId: "1-2",
-            parentId: "rootId",
-            treeId: "treeId",
-            x: 0.5,
+            nodeId: "wBgjsNHppbI4boOTijmfzbVC",
+            parentId: "YLLipml9C0hcggz4nWx6p2aH",
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
+            x: 0.75,
             y: 1,
+            childrenIds: ["L9uw2JHj5cQggru1TCMU24P7", "Db1l30fYl3Sj8ZqZ2LOGHjQ1"],
         },
-        rootId: {
+        mwiLOKwE1vt17q9wPBQWczqs: {
+            category: "SKILL",
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 3,
+            nodeId: "mwiLOKwE1vt17q9wPBQWczqs",
+            parentId: "Co6uxGxjE9pe98hYeXePaZs2",
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
+            x: 2.5,
+            y: 3,
+            childrenIds: [],
+        },
+        Co6uxGxjE9pe98hYeXePaZs2: {
+            category: "SKILL",
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 2,
+            nodeId: "Co6uxGxjE9pe98hYeXePaZs2",
+            parentId: "GE6MTLClIBBAx6kIZFjLAR6o",
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
+            x: 2.5,
+            y: 2,
+            childrenIds: ["mwiLOKwE1vt17q9wPBQWczqs"],
+        },
+        GE6MTLClIBBAx6kIZFjLAR6o: {
+            category: "SKILL",
+            data: MOCK_SKILL_VALUE,
+            isRoot: false,
+            level: 1,
+            nodeId: "GE6MTLClIBBAx6kIZFjLAR6o",
+            parentId: "YLLipml9C0hcggz4nWx6p2aH",
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
+            x: 2.5,
+            y: 1,
+            childrenIds: ["Co6uxGxjE9pe98hYeXePaZs2"],
+        },
+        YLLipml9C0hcggz4nWx6p2aH: {
             category: "SKILL_TREE",
-            childrenIds: ["1-1", "1-2"],
+            childrenIds: ["OY1qS5ttdNaYqG8M9iCYqdnS", "wBgjsNHppbI4boOTijmfzbVC", "GE6MTLClIBBAx6kIZFjLAR6o"],
             data: MOCK_SKILL_VALUE,
             isRoot: true,
             level: 0,
-            nodeId: "rootId",
+            nodeId: "YLLipml9C0hcggz4nWx6p2aH",
             parentId: null,
-            treeId: "treeId",
-            x: 0,
+            treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
+            x: 0.875,
             y: 0,
         },
     };
 
-    expect(getAllNodesFromLevel0ToLCALevelIncluded(nodes, 1)).toStrictEqual(["1-1", "1-2", "rootId"]);
+    expect(
+        getNodesFromConflictLineAndRightSubTrees(
+            nodes,
+            "YLLipml9C0hcggz4nWx6p2aH",
+            ["YLLipml9C0hcggz4nWx6p2aH", "wBgjsNHppbI4boOTijmfzbVC", "L9uw2JHj5cQggru1TCMU24P7"],
+            {
+                category: "SKILL_TREE",
+                childrenIds: ["OY1qS5ttdNaYqG8M9iCYqdnS", "wBgjsNHppbI4boOTijmfzbVC", "GE6MTLClIBBAx6kIZFjLAR6o"],
+                data: MOCK_SKILL_VALUE,
+                isRoot: true,
+                level: 0,
+                nodeId: "YLLipml9C0hcggz4nWx6p2aH",
+                parentId: null,
+                treeId: "wlkvlhenEtHBXWGpI6RJiVnv",
+                x: 0.875,
+                y: 0,
+            }
+        )
+    ).toStrictEqual(["YLLipml9C0hcggz4nWx6p2aH"]);
 });
 
 test("getNodesInBetweenConflictingTrees - Smallest overlap case", () => {
@@ -1087,7 +1182,7 @@ test("treesToCenterAfterShift - Smallest overlap case with nodes in between", ()
         },
     };
     expect(
-        treesToCenterAfterShift(
+        getNodesToShiftByHalfOverlapHierarchical(
             nodes,
             0,
             {
@@ -1103,7 +1198,8 @@ test("treesToCenterAfterShift - Smallest overlap case with nodes in between", ()
                 y: 0,
             },
             ["rootId", "1-1", "21c"],
-            ["rootId", "1-3", "23a"]
+            ["rootId", "1-3", "23a"],
+            "rootId"
         )
     ).toStrictEqual(["rootId", "1-2"]);
 });
@@ -2371,15 +2467,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //     const nodes: Dictionary<NormalizedNode> = {
 //         "5q0IMY79rAneVeAHSwRgm8AM": {
 //             category: "SKILL",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: false,
 //             level: 2,
 //             nodeId: "5q0IMY79rAneVeAHSwRgm8AM",
@@ -2391,15 +2479,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //         },
 //         NRfw8131hOoU3VPgCoQJSBai: {
 //             category: "SKILL",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: false,
 //             level: 2,
 //             nodeId: "NRfw8131hOoU3VPgCoQJSBai",
@@ -2411,15 +2491,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //         },
 //         qsVTkuD9OZ9I5Xl7j3Oib1Ox: {
 //             category: "SKILL",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: false,
 //             level: 2,
 //             nodeId: "qsVTkuD9OZ9I5Xl7j3Oib1Ox",
@@ -2431,15 +2503,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //         },
 //         EaTStq4s6zIxltcjd0MTaLKS: {
 //             category: "SKILL",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: false,
 //             level: 1,
 //             nodeId: "EaTStq4s6zIxltcjd0MTaLKS",
@@ -2451,15 +2515,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //         },
 //         eUVW3NvIA3K2JT4cS8Vt4idV: {
 //             category: "SKILL",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: false,
 //             level: 3,
 //             nodeId: "eUVW3NvIA3K2JT4cS8Vt4idV",
@@ -2471,15 +2527,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //         },
 //         tleqTACAMzNV5IWS6PuhKAQa: {
 //             category: "SKILL",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: false,
 //             level: 3,
 //             nodeId: "tleqTACAMzNV5IWS6PuhKAQa",
@@ -2491,15 +2539,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //         },
 //         R2uls2cGeedOezadmH92BHu8: {
 //             category: "SKILL",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: false,
 //             level: 2,
 //             nodeId: "R2uls2cGeedOezadmH92BHu8",
@@ -2511,15 +2551,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //         },
 //         bz8QsifzNWuC68BcjQ9KSrq6: {
 //             category: "SKILL",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: false,
 //             level: 3,
 //             nodeId: "bz8QsifzNWuC68BcjQ9KSrq6",
@@ -2531,15 +2563,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //         },
 //         aIEQEcZwCzYjLK2hHkvso7vB: {
 //             category: "SKILL",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: false,
 //             level: 2,
 //             nodeId: "aIEQEcZwCzYjLK2hHkvso7vB",
@@ -2551,15 +2575,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //         },
 //         oE5PvpfzuzLjD2o2VZ4OJEUN: {
 //             category: "SKILL",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: false,
 //             level: 1,
 //             nodeId: "oE5PvpfzuzLjD2o2VZ4OJEUN",
@@ -2571,15 +2587,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //         },
 //         qiDTAMbKL2LqI7oPTlDISWUd: {
 //             category: "SKILL",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: false,
 //             level: 3,
 //             nodeId: "qiDTAMbKL2LqI7oPTlDISWUd",
@@ -2591,15 +2599,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //         },
 //         "8Gp9OHcp6orUxdHjSfpaVUAH": {
 //             category: "SKILL",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: false,
 //             level: 2,
 //             nodeId: "8Gp9OHcp6orUxdHjSfpaVUAH",
@@ -2611,15 +2611,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //         },
 //         nFC97sH2HjHgdirs9DcHO4wb: {
 //             category: "SKILL",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: false,
 //             level: 1,
 //             nodeId: "nFC97sH2HjHgdirs9DcHO4wb",
@@ -2631,15 +2623,7 @@ test("HierarchicalTree - Rairtha 3", () => {
 //         },
 //         ZaP524wLoByB2YUJZha99ELz: {
 //             category: "SKILL_TREE",
-//             data: {
-//                 name: "foo",
-//                 isCompleted: false,
-//                 icon: { isEmoji: false, text: "foo" },
-//                 logs: [],
-//                 milestones: [],
-//                 motivesToLearn: [],
-//                 usefulResources: [],
-//             },
+//             data:MOCK_SKILL_VALUE,
 //             isRoot: true,
 //             level: 0,
 //             nodeId: "ZaP524wLoByB2YUJZha99ELz",

@@ -209,11 +209,17 @@ export function getNodesToShiftForInternalOverlapRadial(nodes: Dictionary<Normal
 
     const pathToFirstChildIdOfNextTreeInConflict = returnPathFromRootToNode(nodes, rootId, nodesInConflict.firstChildIdOfNextTree);
     const pathToLastChildIdOfTreeInConflict = returnPathFromRootToNode(nodes, rootId, nodesInConflict.lastChildIdOfTree);
-    const lcaIndexInPathToRightNode = pathToFirstChildIdOfNextTreeInConflict.findIndex((id) => id === lowestCommonAncestorId);
+    const lcaIndexInFirstChildIdOfNextTreeInConflict = pathToFirstChildIdOfNextTreeInConflict.findIndex((id) => id === lowestCommonAncestorId);
 
-    if (lcaIndexInPathToRightNode === -1) throw new Error("getNodesToShiftForInternalOverlapRadial lcaIndexInPathToRightNode error");
+    if (lcaIndexInFirstChildIdOfNextTreeInConflict === -1)
+        throw new Error("getNodesToShiftForInternalOverlapRadial lcaIndexInFirstChildIdOfNextTreeInConflict error");
 
-    const shiftByOverlap = getNodesToShiftByOverlapRadial(nodes, rootId, lcaIndexInPathToRightNode, pathToFirstChildIdOfNextTreeInConflict);
+    const shiftByOverlap = getNodesToShiftByOverlapRadial(
+        nodes,
+        rootId,
+        lcaIndexInFirstChildIdOfNextTreeInConflict,
+        pathToFirstChildIdOfNextTreeInConflict
+    );
 
     for (let i = 0; i < shiftByOverlap.length; i++) {
         const nodeId = shiftByOverlap[i];
@@ -224,7 +230,7 @@ export function getNodesToShiftForInternalOverlapRadial(nodes: Dictionary<Normal
         nodes,
         rootId,
         lcaNode,
-        lcaIndexInPathToRightNode,
+        lcaIndexInFirstChildIdOfNextTreeInConflict,
         pathToFirstChildIdOfNextTreeInConflict,
         pathToLastChildIdOfTreeInConflict
     );
@@ -241,7 +247,7 @@ export function getNodesToShiftByHalfOverlapRadial(
     nodes: Dictionary<NormalizedNode>,
     rootId: string,
     lcaNode: NormalizedNode,
-    lcaIndexInPathToRightNode: number,
+    lcaIndexInPathToFirstChildIdOfNextTreeInConflict: number,
     pathToFirstChildIdOfNextTreeInConflict: string[],
     pathToLastChildIdOfTreeInConflict: string[]
 ) {
@@ -258,8 +264,8 @@ export function getNodesToShiftByHalfOverlapRadial(
     function getNodesInBetweenConflictingTrees() {
         const result = new Set<string>();
 
-        const leftConflictingChildId = pathToLastChildIdOfTreeInConflict[lcaIndexInPathToRightNode + 1];
-        const rightConflictingChildId = pathToFirstChildIdOfNextTreeInConflict[lcaIndexInPathToRightNode + 1];
+        const leftConflictingChildId = pathToLastChildIdOfTreeInConflict[lcaIndexInPathToFirstChildIdOfNextTreeInConflict + 1];
+        const rightConflictingChildId = pathToFirstChildIdOfNextTreeInConflict[lcaIndexInPathToFirstChildIdOfNextTreeInConflict + 1];
 
         const leftConflictingChildIdx = lcaNode.childrenIds.findIndex((childId) => childId === leftConflictingChildId);
         const rightConflictingChildIdx = lcaNode.childrenIds.findIndex((childId) => childId === rightConflictingChildId);

@@ -230,15 +230,29 @@ export function getTreesToShift(nodes: Dictionary<NormalizedNode>, rootId: strin
 
     if (!LCANode) throw new Error("LCANode undefined at getTreesToShift");
 
-    const pathToRightNode = returnPathFromRootToNode(nodes, rootId, nodesInConflict[1]);
-    const pathToLeftNode = returnPathFromRootToNode(nodes, rootId, nodesInConflict[0]);
-    const lcaIndex: number = pathToRightNode.findIndex((id) => id === lowestCommonAncestorId);
+    const pathToFirstChildIdOfNextTreeInConflict = returnPathFromRootToNode(nodes, rootId, nodesInConflict[1]);
+    const pathToLastChildIdOfTreeInConflict = returnPathFromRootToNode(nodes, rootId, nodesInConflict[0]);
+    const lcaIndexInFirstChildIdOfNextTreeInConflict: number = pathToFirstChildIdOfNextTreeInConflict.findIndex(
+        (id) => id === lowestCommonAncestorId
+    );
 
-    if (lcaIndex === -1) throw new Error("getTreesToShift lcaIndex error");
+    if (lcaIndexInFirstChildIdOfNextTreeInConflict === -1) throw new Error("getTreesToShift lcaIndexInFirstChildIdOfNextTreeInConflict error");
 
-    const nodeIdsToShiftByOverlap = treesToShiftByBiggestOverlap(nodes, rootId, lcaIndex, pathToRightNode);
+    const nodeIdsToShiftByOverlap = getNodesToShiftByOverlapHierarchical(
+        nodes,
+        rootId,
+        lcaIndexInFirstChildIdOfNextTreeInConflict,
+        pathToFirstChildIdOfNextTreeInConflict
+    );
 
-    const nodeIdsToShiftByHalfOverlap = treesToCenterAfterShift(nodes, lcaIndex, LCANode, pathToLeftNode, pathToRightNode);
+    const nodeIdsToShiftByHalfOverlap = getNodesToShiftByHalfOverlapHierarchical(
+        nodes,
+        lcaIndexInFirstChildIdOfNextTreeInConflict,
+        LCANode,
+        pathToLastChildIdOfTreeInConflict,
+        pathToFirstChildIdOfNextTreeInConflict,
+        rootId
+    );
 
     let result: TreesToShift = {};
 
@@ -256,31 +270,43 @@ export function getTreesToShift(nodes: Dictionary<NormalizedNode>, rootId: strin
     return result;
 }
 
-export function treesToCenterAfterShift(
+export function getNodesToShiftByHalfOverlapHierarchical(
     nodes: Dictionary<NormalizedNode>,
-    lcaIndex: number,
+    lcaIndexInFirstChildIdOfNextTreeInConflict: number,
     LCANode: NormalizedNode,
-    pathToLeftNode: string[],
-    pathToRightNode: string[]
+    pathToLastChildIdOfTreeInConflict: string[],
+    pathToFirstChildIdOfNextTreeInConflict: string[],
+    rootId: string
 ) {
-    const result1 = getAllNodesFromLevel0ToLCALevelIncluded(nodes, LCANode.level);
+    const nodesFromConflictLineAndRightSubTrees = getNodesFromConflictLineAndRightSubTrees(
+        nodes,
+        rootId,
+        pathToFirstChildIdOfNextTreeInConflict,
+        LCANode
+    );
 
-    const result2 = getNodesInBetweenConflictingTrees(nodes, lcaIndex, LCANode.childrenIds, pathToLeftNode, pathToRightNode);
+    const nodesInBetweenConflictingTrees = getNodesInBetweenConflictingTrees(
+        nodes,
+        lcaIndexInFirstChildIdOfNextTreeInConflict,
+        LCANode.childrenIds,
+        pathToLastChildIdOfTreeInConflict,
+        pathToFirstChildIdOfNextTreeInConflict
+    );
 
-    return [...result1, ...result2];
+    return [...nodesFromConflictLineAndRightSubTrees, ...nodesInBetweenConflictingTrees];
 }
 
 export function getNodesInBetweenConflictingTrees(
     nodes: Dictionary<NormalizedNode>,
-    lcaIndex: number,
+    lcaIndexInFirstChildIdOfNextTreeInConflict: number,
     lcaChildrenIds: string[],
-    pathToLeftNode: string[],
-    pathToRightNode: string[]
+    pathToLastChildIdOfTreeInConflict: string[],
+    pathToFirstChildIdOfNextTreeInConflict: string[]
 ) {
     const result: string[] = [];
 
-    const leftConflictingChildId = pathToLeftNode[lcaIndex + 1];
-    const rightConflictingChildId = pathToRightNode[lcaIndex + 1];
+    const leftConflictingChildId = pathToLastChildIdOfTreeInConflict[lcaIndexInFirstChildIdOfNextTreeInConflict + 1];
+    const rightConflictingChildId = pathToFirstChildIdOfNextTreeInConflict[lcaIndexInFirstChildIdOfNextTreeInConflict + 1];
 
     const leftConflictingChildIdx = lcaChildrenIds.findIndex((childId) => childId === leftConflictingChildId);
     const rightConflictingChildIdx = lcaChildrenIds.findIndex((childId) => childId === rightConflictingChildId);
@@ -301,23 +327,71 @@ export function getNodesInBetweenConflictingTrees(
     return result;
 }
 
-export function getAllNodesFromLevel0ToLCALevelIncluded(nodes: Dictionary<NormalizedNode>, lcaLevel: number) {
-    const ids = Object.keys(nodes);
+export function getNodesFromConflictLineAndRightSubTrees(
+    nodes: Dictionary<NormalizedNode>,
+    rootId: string,
+    pathToFirstChildIdOfNextTreeInConflict: string[],
+    lcaNode: NormalizedNode
+) {
+    const result = new Set<string>();
 
-    const result = ids.filter((id) => {
-        const node = nodes[id];
+    recursive(rootId);
 
-        if (!node) throw new Error("node undefined at getAllNodesFromLevel0ToLCALevelIncluded");
+    return Array.from(result);
 
-        if (node.level <= lcaLevel) return true;
+    function recursive(currentNodeId: string) {
+        const currentNode = nodes[currentNodeId];
 
-        return false;
-    });
+        const isNodeInConflictPath = pathToFirstChildIdOfNextTreeInConflict.find((nodeIdInPath) => nodeIdInPath === currentNodeId);
 
-    return result;
+        if (!currentNode) throw new Error("currentNode undefined at getNodesFromConflictLineAndRightSubTrees");
+
+        if (!isNodeInConflictPath) return undefined;
+        if (currentNode.level > lcaNode.level) return undefined;
+
+        result.add(currentNode.nodeId);
+
+        if (currentNode.level === lcaNode.level) return undefined;
+        if (!currentNode.childrenIds.length) return undefined;
+
+        const childIdInPath = pathToFirstChildIdOfNextTreeInConflict.filter((nodeIdInPath) => currentNode.childrenIds.includes(nodeIdInPath));
+
+        if (childIdInPath.length === 0 || childIdInPath.length > 1)
+            throw new Error("childIdInPath has more than one element in getNodesFromConflictLineAndRightSubTrees");
+
+        const childInPathIndex = currentNode.childrenIds.findIndex((childId) => childId === childIdInPath[0]);
+
+        if (childInPathIndex === -1) throw new Error("childInPathIndex not found in getNodesFromConflictLineAndRightSubTrees");
+
+        //Recursive Case 👇
+        for (let i = 0; i < currentNode.childrenIds.length; i++) {
+            const childId = currentNode.childrenIds[i];
+
+            const isChildRightFromConflictLine = i >= childInPathIndex;
+
+            const isNodeInConflictPath = pathToFirstChildIdOfNextTreeInConflict.find((nodeInPathId) => nodeInPathId === childId);
+
+            if (isNodeInConflictPath) {
+                recursive(childId);
+                continue;
+            }
+
+            if (isChildRightFromConflictLine) {
+                result.add(childId);
+                const descendantsId = getDescendantsId(nodes, childId);
+
+                for (const descendantId of descendantsId) result.add(descendantId);
+            }
+        }
+    }
 }
 
-export function treesToShiftByBiggestOverlap(nodes: Dictionary<NormalizedNode>, rootId: string, lcaIndex: number, pathToRightNode: string[]) {
+export function getNodesToShiftByOverlapHierarchical(
+    nodes: Dictionary<NormalizedNode>,
+    rootId: string,
+    lcaIndexInFirstChildIdOfNextTreeInConflict: number,
+    pathToFirstChildIdOfNextTreeInConflict: string[]
+) {
     //I use a set to avoid duplicated values
     //There are duplicated values because there is a bug in appedTreeIn...
 
@@ -337,8 +411,10 @@ export function treesToShiftByBiggestOverlap(nodes: Dictionary<NormalizedNode>, 
 
         //Recursive Case 👇
         const currentLevel = currentNode.level;
-        const lcaLevel = lcaIndex;
-        const nodeInPathIndexForChildren = currentNode.childrenIds.findIndex((childId) => childId === pathToRightNode[currentLevel + 1]);
+        const lcaLevel = lcaIndexInFirstChildIdOfNextTreeInConflict;
+        const nodeInPathIndexForChildren = currentNode.childrenIds.findIndex(
+            (childId) => childId === pathToFirstChildIdOfNextTreeInConflict[currentLevel + 1]
+        );
         const areAnyOfChildrenInPath = nodeInPathIndexForChildren === -1 ? false : true;
 
         if (!areAnyOfChildrenInPath) return undefined;
@@ -356,7 +432,7 @@ export function treesToShiftByBiggestOverlap(nodes: Dictionary<NormalizedNode>, 
                 for (const descendantId of descendantsId) result.add(descendantId);
             }
 
-            if (childId === pathToRightNode[pathToRightNode.length - 1]) {
+            if (childId === pathToFirstChildIdOfNextTreeInConflict[pathToFirstChildIdOfNextTreeInConflict.length - 1]) {
                 const descendantsId = getDescendantsId(nodes, childId);
                 for (const descendantId of descendantsId) result.add(descendantId);
             }
