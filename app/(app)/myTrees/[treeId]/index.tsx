@@ -68,7 +68,7 @@ function useViewingSkillTreeState(treeId: string) {
             treeNodesDictionary[node.nodeId] = node;
         }
 
-        return handleTreeBuild(treeNodesDictionary, treeData, screenDimensions, "hierarchy");
+        return handleTreeBuild({ nodes: treeNodesDictionary, treeData, screenDimensions, renderStyle: "hierarchy" });
     }, [treeNodes, treeData, screenDimensions]);
 
     let treeCoordinate: TreeCoordinateData = { addNodePositions: dndZoneCoordinates, canvasDimensions, nodeCoordinates: nodeCoordinatesCentered };

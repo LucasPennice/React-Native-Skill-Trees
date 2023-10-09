@@ -1,12 +1,11 @@
 import { useMemo } from "react";
 import { Dimensions, View } from "react-native";
 import Animated from "react-native-reanimated";
-import { centerFlex, colors, nodeGradients } from "../../../parameters";
+import { CANVAS_SETTINGS_EXAMPLE_NODE_SIZE, CANVAS_SETTINGS_MOCK_NODE, centerFlex, colors, nodeGradients } from "../../../parameters";
 import { ColorGradient, Skill, Tree } from "../../../types";
 import AppText from "../../AppText";
 import NodeView from "../../NodeView";
 import useShowHideStylesWithoutTransitionView from "../hooks/useShowHideStylesWithoutTransitionView";
-import { CanvasSettingsMockNode, CanvasSettingsNodeSize } from "./params";
 
 function MockUserNode({
     state,
@@ -19,17 +18,19 @@ function MockUserNode({
         const isEmoji = homepageTreeIcon !== "";
 
         const node: Tree<Skill> = {
-            ...CanvasSettingsMockNode,
+            ...CANVAS_SETTINGS_MOCK_NODE,
             accentColor: homepageTreeColor,
             category: "USER",
             data: {
-                ...CanvasSettingsMockNode.data,
+                ...CANVAS_SETTINGS_MOCK_NODE.data,
                 icon: { isEmoji, text: isEmoji ? homepageTreeIcon : homepageTreeName[0] },
                 name: homepageTreeName,
             },
         };
 
-        return <NodeView completePercentage={100} node={node} size={CanvasSettingsNodeSize} hideIcon={!showIcons} />;
+        return (
+            <NodeView params={{ completePercentage: 100, size: CANVAS_SETTINGS_EXAMPLE_NODE_SIZE, showIcons, oneColorPerTree: false }} node={node} />
+        );
     }, [homepageTreeIcon, homepageTreeColor, homepageTreeName[0], showIcons]);
     return (
         <View style={{ gap: 7 }}>
@@ -56,10 +57,8 @@ function MockSkillTreeNode({
     const Node = useMemo(() => {
         return (
             <NodeView
-                completePercentage={100}
-                node={{ ...CanvasSettingsMockNode, accentColor: oneColorPerTree ? homepageTreeColor : nodeGradients[3] }}
-                size={CanvasSettingsNodeSize}
-                hideIcon={!showIcons}
+                params={{ completePercentage: 100, size: CANVAS_SETTINGS_EXAMPLE_NODE_SIZE, showIcons, oneColorPerTree: false }}
+                node={{ ...CANVAS_SETTINGS_MOCK_NODE, accentColor: oneColorPerTree ? homepageTreeColor : nodeGradients[3] }}
             />
         );
     }, [homepageTreeColor, oneColorPerTree, showIcons]);
@@ -109,7 +108,7 @@ function HomePageTreeExample({
                         borderWidth: 1,
                         borderColor: "gray",
                         borderStyle: "dashed",
-                        left: -CanvasSettingsNodeSize / 2,
+                        left: -CANVAS_SETTINGS_EXAMPLE_NODE_SIZE / 2,
                     }}
                 />
             )}

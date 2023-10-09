@@ -1,5 +1,5 @@
 import { StyleProp, ViewStyle } from "react-native";
-import { ColorGradient } from "./types";
+import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "./types";
 
 export const CIRCLE_SIZE = 15;
 export const CIRCLE_SIZE_SELECTED = CIRCLE_SIZE * 3;
@@ -82,3 +82,20 @@ export const NODE_ICON_FONT_SIZE = 17;
 export const RADIAL_LABEL_FONT_SIZE = 14;
 
 export const HOMEPAGE_TREE_ID = "HomepageTree";
+
+export const CANVAS_SETTINGS_MOCK_NODE: Tree<Skill> = {
+    accentColor: nodeGradients[5],
+    category: "SKILL",
+    children: [],
+    data: getDefaultSkillValue("Example", true, { isEmoji: true, text: "🗿" }),
+    isRoot: true,
+    level: 0,
+    nodeId: "exampleNodeId",
+    parentId: null,
+    treeId: "exampleTreeId",
+    treeName: "exampleTreeName",
+    x: 0,
+    y: 0,
+};
+
+export const CANVAS_SETTINGS_EXAMPLE_NODE_SIZE = 57;

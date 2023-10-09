@@ -70,7 +70,8 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, selectedNode, settings
 
             <ReactiveNodeList
                 fonts={{ emojiFont, nodeLetterFont }}
-                nodeCoordinates={nodeCoordinatesCentered}
+                allNodes={nodeCoordinatesCentered}
+                reactiveNodes={nodeCoordinatesCentered}
                 settings={{ oneColorPerTree: true, showIcons }}
                 selectedNodeId={selectedNode}
                 treeCompletedPercentage={treeCompletedPercentage}

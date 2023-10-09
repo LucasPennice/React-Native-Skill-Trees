@@ -1,7 +1,6 @@
 import { StaticRadialPathList } from "@/components/treeRelated/radial/StaticRadialCanvasPath";
-import { completedSkillPercentageFromCoords } from "@/functions/extractInformationFromTree";
 import { SkFont } from "@shopify/react-native-skia";
-import { Fragment, memo, useMemo } from "react";
+import { Fragment, memo } from "react";
 import { SharedValue } from "react-native-reanimated";
 import StaticNodeList from "../../components/treeRelated/general/StaticNodeList";
 import RadialLabel from "../../components/treeRelated/radial/RadialLabel";
@@ -57,30 +56,12 @@ const LabelList = memo(function LabelList({
     });
 });
 
-function useGetTreeCompletePercetage(nodeCoordinates: NodeCoordinate[], rootId?: string) {
-    const result = useMemo(() => {
-        if (rootId === undefined) return 0;
-
-        return completedSkillPercentageFromCoords(nodeCoordinates, rootId);
-    }, [nodeCoordinates, rootId]);
-
-    return result;
-}
-
 function HomepageSkillTree({ allNodes, reactiveNodes, staticNodes, selectedNode, settings, drag, fonts, canvasDimensions }: TreeProps) {
     const { emojiFont, labelFont, nodeLetterFont } = fonts;
 
     const rootNode = allNodes.find((n) => n.level === 0);
 
-    const treeCompletedPercentage = useGetTreeCompletePercetage(allNodes, rootNode?.nodeId);
-
     if (!rootNode) return <></>;
-
-    // PARECE HABER UNA PERDIDA DE PERFORMANCE DEMASIADO HEAVY EN ANDROID CUANDO HACEMOS
-    // TRANSFORMACIONES DE ESCALA, ENTONCES LA ALTERNATIVA ES RENDERIZAR UN NODO
-    // DE LA MISMA MANERA QUE EL NODE MENU(O SEA QUE SE RENDERICE NO EN EL CANVAS SINO COMO UN NODEVIEW)
-    // SE PUEDE HACER LA MISMA TRANSICION QUE LA QUE ESTA PASANDO AHORA EN EL CANVAS PERO CONSUMIENDO
-    // MENOS RECURSOS. Y EL HOOK DE REACTIVE NODES QUEDA PARA MUTACIONES Y DRAGS
 
     return (
         <>
@@ -95,15 +76,6 @@ function HomepageSkillTree({ allNodes, reactiveNodes, staticNodes, selectedNode,
                 settings={{ oneColorPerTree: settings.oneColorPerTree, showIcons: settings.showIcons }}
                 canvasDimensions={canvasDimensions}
             />
-            {/* <ReactiveNodeList
-                fonts={{ emojiFont, nodeLetterFont }}
-                allNodes={allNodes}
-                reactiveNodes={reactiveNodes}
-                rootNode={rootNode}
-                selectedNodeId={selectedNode}
-                treeCompletedPercentage={treeCompletedPercentage}
-                settings={{ oneColorPerTree: settings.oneColorPerTree, showIcons: settings.showIcons }}
-            /> */}
         </>
     );
 }
