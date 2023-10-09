@@ -1,12 +1,11 @@
 import { StaticRadialPathList } from "@/components/treeRelated/radial/StaticRadialCanvasPath";
+import { completedSkillPercentageFromCoords } from "@/functions/extractInformationFromTree";
 import { SkFont } from "@shopify/react-native-skia";
 import { Fragment, memo, useMemo } from "react";
 import { SharedValue } from "react-native-reanimated";
 import StaticNodeList from "../../components/treeRelated/general/StaticNodeList";
 import RadialLabel from "../../components/treeRelated/radial/RadialLabel";
 import { CanvasDimensions, NodeCoordinate } from "../../types";
-import ReactiveNodeList from "@/components/treeRelated/general/ReactiveNodeList";
-import { completedSkillPercentageFromCoords } from "@/functions/extractInformationFromTree";
 
 type TreeProps = {
     reactiveNodes: NodeCoordinate[];
@@ -96,7 +95,7 @@ function HomepageSkillTree({ allNodes, reactiveNodes, staticNodes, selectedNode,
                 settings={{ oneColorPerTree: settings.oneColorPerTree, showIcons: settings.showIcons }}
                 canvasDimensions={canvasDimensions}
             />
-            <ReactiveNodeList
+            {/* <ReactiveNodeList
                 fonts={{ emojiFont, nodeLetterFont }}
                 allNodes={allNodes}
                 reactiveNodes={reactiveNodes}
@@ -104,7 +103,7 @@ function HomepageSkillTree({ allNodes, reactiveNodes, staticNodes, selectedNode,
                 selectedNodeId={selectedNode}
                 treeCompletedPercentage={treeCompletedPercentage}
                 settings={{ oneColorPerTree: settings.oneColorPerTree, showIcons: settings.showIcons }}
-            />
+            /> */}
         </>
     );
 }

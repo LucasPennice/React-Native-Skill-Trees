@@ -1,3 +1,5 @@
+import SelectedNodeView from "@/components/treeRelated/general/SelectedNodeView";
+import useHandleReactiveAndStaticNodeList from "@/components/treeRelated/hooks/useHandleReactiveAndStaticNodeList";
 import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMenuFunctions";
 import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { selectNodeById, selectNodesTable } from "@/redux/slices/nodesSlice";
@@ -34,7 +36,6 @@ import {
     TreeCoordinateData,
 } from "../../types";
 import RadialStaticSkillTree from "./HomepageSkillTree";
-import useHandleReactiveAndStaticNodeList from "@/components/treeRelated/hooks/useHandleReactiveAndStaticNodeList";
 
 type Props = {
     selectedNodeCoordState: readonly [
@@ -52,8 +53,9 @@ function useHomepageTreeState(selectedNodeId?: string) {
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     const canvasDisplaySettings = useAppSelector(selectCanvasDisplaySettings);
     const selectedNode = useAppSelector(selectNodeById(selectedNodeId));
+    const homeTreeData = useAppSelector(selectHomeTree);
 
-    return { screenDimensions, canvasDisplaySettings, selectedNode };
+    return { screenDimensions, canvasDisplaySettings, selectedNode, homeTreeData };
 }
 
 function useCreateTreeFunctions(updateSelectedNodeCoord: (value: NormalizedNode) => void, openCanvasSettingsModal: () => void) {
@@ -226,7 +228,7 @@ function useSkiaFonts() {
 
 function HomepageTree({ canvasRef, openCanvasSettingsModal, selectedNodeCoordState }: Props) {
     const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
-    const { screenDimensions, canvasDisplaySettings, selectedNode } = useHomepageTreeState(selectedNodeCoord?.nodeId ?? undefined);
+    const { screenDimensions, canvasDisplaySettings, selectedNode, homeTreeData } = useHomepageTreeState(selectedNodeCoord?.nodeId ?? undefined);
 
     const treeState = useGetTreeState(canvasRef, selectedNodeCoord);
 
@@ -325,6 +327,16 @@ function HomepageTree({ canvasRef, openCanvasSettingsModal, selectedNodeCoordSta
                 {nodeAction.node && nodeAction.state === "LongPressing" && <NodeLongPressIndicator data={nodeAction.node} scale={scaleState} />}
                 {nodeAction.node && nodeAction.state === "MenuOpen" && (
                     <NodeMenu functions={nodeMenuFunctions} data={nodeAction.node} scale={scaleState} closeNodeMenu={resetNodeAction} />
+                )}
+
+                {selectedNodeCoordinates && (
+                    <SelectedNodeView
+                        rootColor={homeTreeData.accentColor}
+                        settings={{ showIcons: canvasDisplaySettings.showIcons, oneColorPerTree: canvasDisplaySettings.oneColorPerTree }}
+                        selectedNodeCoordinates={selectedNodeCoordinates}
+                        scale={scaleState}
+                        allNodes={treeState.treeCoordinate.nodeCoordinates}
+                    />
                 )}
                 {/* Node Action Related 👆 */}
             </Animated.View>

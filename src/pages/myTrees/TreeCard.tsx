@@ -85,8 +85,12 @@ function TreeCard({
                 </View>
                 <NodeView
                     node={{ accentColor: element.accentColor, category: "SKILL_TREE", data: rootNodeOfTree.data }}
-                    size={60}
-                    completePercentage={completePercentage}
+                    params={{
+                        completePercentage,
+                        size: 60,
+                        oneColorPerTree: false,
+                        showIcons: true,
+                    }}
                 />
             </Animated.View>
         </GestureDetector>

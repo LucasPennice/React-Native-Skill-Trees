@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Gesture } from "react-native-gesture-handler";
 import {
+    Easing,
     SharedValue,
     WithSpringConfig,
     runOnJS,
@@ -9,12 +10,14 @@ import {
     useDerivedValue,
     useSharedValue,
     withSpring,
+    withTiming,
 } from "react-native-reanimated";
 import { CIRCLE_SIZE, CIRCLE_SIZE_SELECTED, MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
 import { ScreenDimentions } from "../../../../redux/slices/screenDimentionsSlice";
 import { CanvasDimensions, CartesianCoordinate, NodeCoordinate, TreeCoordinateData } from "../../../../types";
 import { useHandleCanvasBounds } from "../useHandleCanvasBounds";
 import { ANIMATION_DURATION_AFTER_FAILED_LONG_PRESS_MS, DEACCELERATION_FACTOR, DEFAULT_SCALE } from "./params";
+import { DESELECT_NODE_ANIMATION_DURATION } from "../../general/useHandleGroupTransform";
 
 const AFTER_SCROLL_SPING_PARAMS: WithSpringConfig = {
     mass: 1,
@@ -283,12 +286,12 @@ function useCanvasScroll(
             return {
                 transform: [
                     {
-                        translateX: withSpring(foundNodeTranslatedX, { damping: 32, stiffness: 300, overshootClamping: true }),
+                        translateX: withTiming(foundNodeTranslatedX, { duration: 500, easing: Easing.inOut(Easing.cubic) }),
                     },
                     {
-                        translateY: withSpring(foundNodeTranslatedY, { damping: 32, stiffness: 300, overshootClamping: true }),
+                        translateY: withTiming(foundNodeTranslatedY, { duration: 500, easing: Easing.inOut(Easing.cubic) }),
                     },
-                    { scale: withSpring(DEFAULT_SCALE, { damping: 32, stiffness: 300, overshootClamping: true }) },
+                    { scale: withTiming(DEFAULT_SCALE, { duration: 500, easing: Easing.inOut(Easing.cubic) }) },
                 ],
             };
         }
@@ -296,9 +299,13 @@ function useCanvasScroll(
         function transitionFromMenuToNormalScrolling() {
             return {
                 transform: [
-                    { translateX: withSpring(offsetX.value, { damping: 32, stiffness: 300, overshootClamping: true }) },
-                    { translateY: withSpring(offsetY.value, { damping: 32, stiffness: 300, overshootClamping: true }) },
-                    { scale: withSpring(scale.value, { damping: 32, stiffness: 300, overshootClamping: true }) },
+                    {
+                        translateX: withTiming(offsetX.value, { duration: DESELECT_NODE_ANIMATION_DURATION, easing: Easing.inOut(Easing.cubic) }),
+                    },
+                    {
+                        translateY: withTiming(offsetY.value, { duration: DESELECT_NODE_ANIMATION_DURATION, easing: Easing.inOut(Easing.cubic) }),
+                    },
+                    { scale: withTiming(scale.value, { duration: DESELECT_NODE_ANIMATION_DURATION, easing: Easing.inOut(Easing.cubic) }) },
                 ],
             };
         }
@@ -322,7 +329,7 @@ function useAnimateNodeMenuTransition(isMenuOpen: boolean): SharedValue<boolean>
         if (!isMenuOpen) {
             timeoutId = setTimeout(() => {
                 result.value = false;
-            }, 300);
+            }, DESELECT_NODE_ANIMATION_DURATION);
         }
 
         return () => {

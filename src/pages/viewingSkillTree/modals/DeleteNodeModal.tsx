@@ -1,7 +1,7 @@
 import { normalizedNodeToTree } from "@/components/treeRelated/general/functions";
 import { deleteNodeAndHoistChild } from "@/functions/misc";
-import { TreeData, selectTreeById } from "@/redux/slices/userTreesSlice";
 import { removeNodes, selectNodesOfTree, updateNodes } from "@/redux/slices/nodesSlice";
+import { TreeData, selectTreeById } from "@/redux/slices/userTreesSlice";
 import { Update } from "@reduxjs/toolkit";
 import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import AppText from "../../../components/AppText";
@@ -99,8 +99,12 @@ function DeleteNodeModal({ nodeToDelete, closeModalAndClearState, open }: Props)
                                 </View>
                                 <NodeView
                                     node={{ ...candidate, accentColor: currentTree.accentColor }}
-                                    completePercentage={candidate.data.isCompleted ? 100 : 0}
-                                    size={60}
+                                    params={{
+                                        completePercentage: candidate.data.isCompleted ? 100 : 0,
+                                        size: 60,
+                                        oneColorPerTree: false,
+                                        showIcons: true,
+                                    }}
                                 />
                             </Pressable>
                         );

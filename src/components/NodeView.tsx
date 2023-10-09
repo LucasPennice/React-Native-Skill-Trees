@@ -3,23 +3,21 @@ import { View } from "react-native";
 import Animated from "react-native-reanimated";
 import { Circle, Defs, LinearGradient, Stop, Svg } from "react-native-svg";
 import { getWheelParams } from "../functions/misc";
-import { centerFlex, colors } from "../parameters";
+import { PURPLE_GRADIENT, centerFlex, colors } from "../parameters";
 import { ColorGradient, NodeCategory, Skill } from "../types";
 import AppText from "./AppText";
 import useShowHideStylesWithoutTransitionView from "./treeRelated/hooks/useShowHideStylesWithoutTransitionView";
 
 function NodeView<T extends { data: Skill; accentColor: ColorGradient; category: NodeCategory }>({
     node,
-    size,
-    hideIcon,
-    completePercentage = 100,
+    params,
 }: {
     node: T;
-    size: number;
-    hideIcon?: boolean;
-    completePercentage: number;
+    params: { oneColorPerTree: boolean; showIcons: boolean; size: number; fontSize?: number; completePercentage: number; rootColor?: ColorGradient };
 }) {
-    const gradient = node.accentColor;
+    const { completePercentage = 100, oneColorPerTree, showIcons, size, fontSize = 25, rootColor = PURPLE_GRADIENT } = params;
+
+    const gradient = oneColorPerTree ? rootColor : node.accentColor;
     const progressWheelProps = getWheelParams(gradient.color1, `${gradient.color1}3D`, size, (8 * size) / 150);
 
     const skill = node.data;
@@ -28,7 +26,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
 
     const result = progressWheelProps.circumference - (progressWheelProps.circumference * completePercentage) / 100;
 
-    const showIcon = useShowHideStylesWithoutTransitionView(!hideIcon);
+    const showIcon = useShowHideStylesWithoutTransitionView(showIcons);
 
     if (category === "SKILL") return <Skill />;
 
@@ -41,18 +39,10 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
             <View>
                 <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
                     <Defs>
-                        {skill.isCompleted && (
-                            <LinearGradient id="progressColor" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <Stop offset="0%" stopColor={gradient.color1} stopOpacity="1" />
-                                <Stop offset="100%" stopColor={gradient.color2} stopOpacity="1" />
-                            </LinearGradient>
-                        )}
-                        {!skill.isCompleted && (
-                            <LinearGradient id="progressColor" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <Stop offset="0%" stopColor={"#515053"} stopOpacity="1" />
-                                <Stop offset="100%" stopColor={"#2C2C2D"} stopOpacity="1" />
-                            </LinearGradient>
-                        )}
+                        <LinearGradient id="progressColor" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <Stop offset="0%" stopColor={gradient.color1} stopOpacity="1" />
+                            <Stop offset="100%" stopColor={gradient.color2} stopOpacity="1" />
+                        </LinearGradient>
                     </Defs>
                     <Circle
                         strokeWidth={progressWheelProps.strokeWidth}
@@ -61,31 +51,24 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                         r={progressWheelProps.radius}
                         fill={"url(#progressColor)"}
                     />
-                    <Circle
-                        strokeWidth={progressWheelProps.strokeWidth}
-                        cx={progressWheelProps.centerCoordinate}
-                        cy={progressWheelProps.centerCoordinate}
-                        r={progressWheelProps.radius}
-                        stroke={"url(#progressColor)"}
-                        fillOpacity={0}
-                        strokeDasharray={progressWheelProps.circumference}
-                        strokeLinecap="round"
-                    />
                 </Svg>
-                <Animated.View style={[centerFlex, showIcon, { width: size, height: size, position: "absolute", right: 0, overflow: "hidden" }]}>
-                    <AppText
-                        fontSize={25}
-                        style={{
-                            position: "absolute",
-                            color: "#000000",
-                            width: size,
-                            textAlign: "center",
-                            lineHeight: isEmojiIcon ? 28 : undefined,
-                            fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
-                        }}>
-                        {isEmojiIcon ? skill.icon.text : skill.name[0]}
-                    </AppText>
-                </Animated.View>
+                {showIcons && (
+                    <Animated.View
+                        style={[centerFlex, showIcon, { width: size - 1, height: size + 1, position: "absolute", right: 0, overflow: "hidden" }]}>
+                        <AppText
+                            fontSize={fontSize}
+                            style={{
+                                position: "absolute",
+                                color: "#000000",
+                                width: size,
+                                textAlign: "center",
+                                lineHeight: isEmojiIcon ? 28 : undefined,
+                                fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
+                            }}>
+                            {isEmojiIcon ? skill.icon.text : skill.name[0].toUpperCase()}
+                        </AppText>
+                    </Animated.View>
+                )}
             </View>
         );
     }
@@ -99,40 +82,56 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                             <Stop offset="100%" stopColor={gradient.color2} stopOpacity="1" />
                         </LinearGradient>
                     </Defs>
-                    {category !== "SKILL" && (
-                        <Circle
-                            strokeWidth={progressWheelProps.strokeWidth}
-                            cx={progressWheelProps.centerCoordinate}
-                            cy={progressWheelProps.centerCoordinate}
-                            fillOpacity={0}
-                            r={progressWheelProps.radius}
-                            stroke={progressWheelProps.backgroundStroke}
-                        />
-                    )}
+                    <Defs>
+                        <LinearGradient id="outerEdge" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <Stop offset="0%" stopColor={"#515053"} stopOpacity="1" />
+                            <Stop offset="100%" stopColor={"#2C2C2D"} stopOpacity="1" />
+                        </LinearGradient>
+                    </Defs>
+                    {/* Background circle */}
+                    <Circle
+                        cx={progressWheelProps.centerCoordinate}
+                        cy={progressWheelProps.centerCoordinate}
+                        r={progressWheelProps.radius}
+                        fillOpacity={1}
+                    />
+                    {/* Outer edge */}
                     <Circle
                         strokeWidth={progressWheelProps.strokeWidth}
                         cx={progressWheelProps.centerCoordinate}
                         cy={progressWheelProps.centerCoordinate}
-                        r={progressWheelProps.radius}
                         fillOpacity={0}
-                        stroke={"url(#progressColor)"}
-                        strokeDasharray={progressWheelProps.circumference}
-                        strokeLinecap="round"
-                        strokeDashoffset={result}
+                        r={progressWheelProps.radius}
+                        stroke={"url(#outerEdge)"}
                     />
+                    {completePercentage !== 0 && (
+                        <Circle
+                            strokeWidth={progressWheelProps.strokeWidth}
+                            cx={progressWheelProps.centerCoordinate}
+                            cy={progressWheelProps.centerCoordinate}
+                            r={progressWheelProps.radius}
+                            fillOpacity={0}
+                            stroke={"url(#progressColor)"}
+                            strokeDasharray={progressWheelProps.circumference}
+                            strokeLinecap="round"
+                            strokeDashoffset={1 - result}
+                        />
+                    )}
                 </Svg>
-                <View style={[centerFlex, { width: size, height: size, position: "absolute", right: 0, overflow: "hidden" }]}>
-                    <AppText
-                        fontSize={25}
-                        style={{
-                            position: "absolute",
-                            color: category === "SKILL" ? colors.unmarkedText : gradient.color1,
-                            lineHeight: isEmojiIcon ? 28 : undefined,
-                            fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
-                        }}>
-                        {isEmojiIcon ? skill.icon.text : skill.icon.text[0]}
-                    </AppText>
-                </View>
+                {showIcons && (
+                    <View style={[centerFlex, { width: size - 1, height: size + 1, position: "absolute", right: 0, overflow: "hidden" }]}>
+                        <AppText
+                            fontSize={fontSize}
+                            style={{
+                                position: "absolute",
+                                color: category === "SKILL" ? colors.unmarkedText : gradient.color1,
+                                lineHeight: isEmojiIcon ? 28 : undefined,
+                                fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
+                            }}>
+                            {isEmojiIcon ? skill.icon.text : skill.icon.text[0].toUpperCase()}
+                        </AppText>
+                    </View>
+                )}
             </View>
         );
     }
@@ -172,20 +171,23 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                         strokeLinecap="round"
                     />
                 </Svg>
-                <Animated.View style={[centerFlex, showIcon, { width: size, height: size, position: "absolute", right: 0, overflow: "hidden" }]}>
-                    <AppText
-                        fontSize={25}
-                        style={{
-                            position: "absolute",
-                            color: category === "SKILL" ? colors.unmarkedText : gradient.color1,
-                            width: size,
-                            textAlign: "center",
-                            lineHeight: isEmojiIcon ? 28 : undefined,
-                            fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
-                        }}>
-                        {isEmojiIcon ? skill.icon.text : skill.name[0]}
-                    </AppText>
-                </Animated.View>
+                {showIcons && (
+                    <Animated.View
+                        style={[centerFlex, showIcon, { width: size - 1, height: size + 1, position: "absolute", right: 0, overflow: "hidden" }]}>
+                        <AppText
+                            fontSize={fontSize}
+                            style={{
+                                position: "absolute",
+                                color: category === "SKILL" ? "#515053" : gradient.color1,
+                                width: size,
+                                textAlign: "center",
+                                lineHeight: isEmojiIcon ? 28 : undefined,
+                                fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
+                            }}>
+                            {isEmojiIcon ? skill.icon.text : skill.name[0].toUpperCase()}
+                        </AppText>
+                    </Animated.View>
+                )}
             </View>
         );
     }
