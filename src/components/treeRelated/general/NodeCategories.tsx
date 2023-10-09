@@ -6,6 +6,16 @@ import { ColorGradient } from "../../../types";
 import useAnimateSkiaValue from "../hooks/useAnimateSkiaValue";
 import useHandleNodeCompleteAnimation, { ANIMATION_CONSTANTS_ON_COMPLETE } from "./useHandleNodeCompleteAnimation";
 
+function useGetLinearVectors(x: SharedValue<number>, y: SharedValue<number>) {
+    const linearGradientStart = useDerivedValue(() => {
+        return vec(x.value - CIRCLE_SIZE, y.value);
+    });
+    const linearGradientEnd = useDerivedValue(() => {
+        return vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE);
+    });
+    return { linearGradientStart, linearGradientEnd };
+}
+
 type NodeProps = {
     animatedCoordinates: { x: SharedValue<number>; y: SharedValue<number> };
     font: SkFont;
@@ -39,37 +49,21 @@ function SkillNode({ path, isComplete, nodeState }: SkillNodeProps) {
         duration: isComplete ? ANIMATION_CONSTANTS_ON_COMPLETE.remainingAnimationDuration : 0,
     });
 
+    const { linearGradientEnd, linearGradientStart } = useGetLinearVectors(x, y);
+
     return (
         <Group>
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
             {/* eslint-disable-next-line */}
             <Path path={path} style="stroke" strokeWidth={2}>
-                <LinearGradient
-                    start={vec(x.value - CIRCLE_SIZE, y.value)}
-                    end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
-                    colors={["#515053", "#2C2C2D"]}
-                />
+                <LinearGradient start={linearGradientStart} end={linearGradientEnd} colors={["#515053", "#2C2C2D"]} />
             </Path>
             <DiffRect inner={inner} outer={outer} color={`${interpolateColors(accentColor.color1, colors.background, 0.49)}`} />
             {/* eslint-disable-next-line */}
             <Path path={path} style="stroke" start={start} strokeCap={"round"} strokeWidth={2}>
-                <LinearGradient
-                    start={vec(x.value - CIRCLE_SIZE, y.value)}
-                    end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
-                    colors={[accentColor.color1, accentColor.color2]}
-                />
+                <LinearGradient start={linearGradientStart} end={linearGradientEnd} colors={[accentColor.color1, accentColor.color2]} />
             </Path>
-            {showIcons && (
-                <Text x={textX} y={textY} text={text} font={font} color={colors.unmarkedText}>
-                    {!isComplete && (
-                        <LinearGradient
-                            start={vec(x.value - CIRCLE_SIZE, y.value)}
-                            end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
-                            colors={["#515053", "#2C2C2D"]}
-                        />
-                    )}
-                </Text>
-            )}
+            {showIcons && <Text x={textX} y={textY} text={text} font={font} color={"#515053"} />}
         </Group>
     );
 }
@@ -93,32 +87,22 @@ function SkillTreeNode({ isComplete, nodeState, path, treeCompletedPercentage }:
         return withDelay(delay, withTiming(1 - treeCompletedPercentage / 100, { duration }));
     });
 
+    const { linearGradientEnd, linearGradientStart } = useGetLinearVectors(x, y);
+
     return (
         <Group>
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
             {/* eslint-disable-next-line */}
             <Path path={path} style="stroke" strokeWidth={2}>
-                <LinearGradient
-                    start={vec(x.value - CIRCLE_SIZE, y.value)}
-                    end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
-                    colors={["#515053", "#2C2C2D"]}
-                />
+                <LinearGradient start={linearGradientStart} end={linearGradientEnd} colors={["#515053", "#2C2C2D"]} />
             </Path>
             {/* eslint-disable-next-line */}
             <Path path={path} start={start} style={"stroke"} strokeCap={"round"} strokeWidth={2}>
-                <LinearGradient
-                    start={vec(x.value - CIRCLE_SIZE, y.value)}
-                    end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
-                    colors={[accentColor.color1, accentColor.color2]}
-                />
+                <LinearGradient start={linearGradientStart} end={linearGradientEnd} colors={[accentColor.color1, accentColor.color2]} />
             </Path>
             {showIcons && (
                 <Text x={textX} y={textY} text={text} font={font}>
-                    <LinearGradient
-                        start={vec(x.value - CIRCLE_SIZE, y.value)}
-                        end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
-                        colors={[accentColor.color1, accentColor.color2]}
-                    />
+                    <LinearGradient start={linearGradientStart} end={linearGradientEnd} colors={[accentColor.color1, accentColor.color2]} />
                 </Text>
             )}
         </Group>
@@ -135,17 +119,15 @@ function UserNode({ nodeState, textColor }: UserNodeProps) {
     const { accentColor, animatedCoordinates, font, text, textCoordinates, showIcons } = nodeState;
     const { x, y } = animatedCoordinates;
 
+    const { linearGradientEnd, linearGradientStart } = useGetLinearVectors(x, y);
+
     const { textX, textY } = textCoordinates;
     return (
         <Group>
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={colors.background} />
             {/* eslint-disable-next-line */}
             <Circle cx={x} cy={y} r={CIRCLE_SIZE} color={accentColor.color1} style={"fill"} strokeWidth={2}>
-                <LinearGradient
-                    start={vec(x.value - CIRCLE_SIZE, y.value)}
-                    end={vec(x.value + CIRCLE_SIZE, y.value + CIRCLE_SIZE)}
-                    colors={[accentColor.color1, accentColor.color2]}
-                />
+                <LinearGradient start={linearGradientStart} end={linearGradientEnd} colors={[accentColor.color1, accentColor.color2]} />
             </Circle>
             {showIcons && <Text x={textX} y={textY} text={text} font={font} color={textColor} />}
         </Group>

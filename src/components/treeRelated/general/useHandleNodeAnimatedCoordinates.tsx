@@ -46,13 +46,10 @@ function useHandleNodeAnimatedCoordinates(
 
     const { textX, textY } = useIconPosition(x, y, textWidth);
 
-    const strokeWidth = 2;
-    const radius = CIRCLE_SIZE + strokeWidth / 2;
-
     const path = useDerivedValue(() => {
         const path = Skia.Path.Make();
         path.moveTo(x.value, y.value);
-        path.addCircle(x.value, y.value, radius);
+        path.addCircle(x.value, y.value, CIRCLE_SIZE);
         path.simplify();
         return path;
     });
