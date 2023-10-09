@@ -10,14 +10,14 @@ import { NodeMenuFunctions } from "./nodeMenu/NodeMenu";
 
 function useReturnNodeMenuFunctions(
     actionNode: NodeCoordinate | undefined,
-    treeId: string,
+    treeId: string | undefined,
     editTreeFromNodeMenu: boolean | undefined,
     functions?: InteractiveTreeFunctions["nodeMenu"]
 ) {
     const dispatch = useAppDispatch();
     const normalizedNode = useAppSelector(selectNodeById(actionNode?.nodeId));
 
-    const nodesOfTree = useAppSelector(treeId === HOMEPAGE_TREE_ID ? selectAllNodes : selectNodesOfTree(treeId));
+    const nodesOfTree = useAppSelector(treeId === HOMEPAGE_TREE_ID || treeId === undefined ? selectAllNodes : selectNodesOfTree(treeId));
 
     if (!normalizedNode || !functions) return { idle: {}, selectingPosition: {} };
 

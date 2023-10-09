@@ -20,7 +20,7 @@ import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
 import { handleTreeBuild } from "../../functions/treeCalculateCoordinates";
-import { HOMEPAGE_TREE_ID, NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
+import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
@@ -287,7 +287,7 @@ function HomepageTree({ canvasRef, openCanvasSettingsModal, selectedNodeCoordSta
 
     const canvasScrollAndZoom = Gesture.Simultaneous(canvasPan, canvasZoom);
 
-    const nodeMenuFunctions = useReturnNodeMenuFunctions(nodeActionState[0].node, HOMEPAGE_TREE_ID, false, treeFunctions.nodeMenu);
+    const nodeMenuFunctions = useReturnNodeMenuFunctions(nodeActionState[0].node, nodeActionState[0].node?.treeId, false, treeFunctions.nodeMenu);
 
     const canvasGestures = Gesture.Simultaneous(canvasScrollAndZoom, canvasPressAndLongPress);
 
