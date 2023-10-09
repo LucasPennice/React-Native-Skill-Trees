@@ -32,7 +32,10 @@ function SelectedNodeView({
 
     return (
         <Animated.View
-            entering={ZoomIn.duration(350).springify().overshootClamping(1)}
+            entering={ZoomIn.duration(350)
+                .springify()
+                .overshootClamping(1)
+                .withInitialValues({ transform: [{ scale: 1 / 3 }] })}
             exiting={exitSelectedNode}
             style={{
                 position: "absolute",
