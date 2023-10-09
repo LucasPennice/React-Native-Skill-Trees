@@ -1,7 +1,8 @@
-import { SkFont } from "@shopify/react-native-skia";
-import { Fragment, memo } from "react";
+import { CIRCLE_SIZE } from "@/parameters";
+import { Picture, SkFont, Skia, createPicture } from "@shopify/react-native-skia";
+import { Fragment, memo, useMemo } from "react";
 import { SharedValue } from "react-native-reanimated";
-import { CanvasDimensions, CartesianCoordinate, NodeCoordinate } from "../../../types";
+import { CanvasDimensions, InitialAndFinalCoord, NodeCoordinate, ReactiveNodeCoordinate } from "../../../types";
 import ReactiveNodeList from "../general/ReactiveNodeList";
 import StaticNodeList from "../general/StaticNodeList";
 import useHandleReactiveAndStaticNodeList from "../hooks/useHandleReactiveAndStaticNodeList";
@@ -27,22 +28,88 @@ type TreeProps = {
     };
 };
 
-const PathList = memo(function PathList({ nodeCoordinates }: { nodeCoordinates: NodeCoordinate[] }) {
-    return nodeCoordinates.map((node, idx) => {
-        const parentNode = nodeCoordinates.find((n) => n.nodeId === node.parentId);
+const ReactiveHierarchicalPathList = memo(function ReactiveHierarchicalPathList({
+    nodeCoordinates,
+    reactiveNodes,
+}: {
+    nodeCoordinates: NodeCoordinate[];
+    reactiveNodes: ReactiveNodeCoordinate[];
+}) {
+    return reactiveNodes.map((node, idx) => {
+        let parentNode: ReactiveNodeCoordinate | NodeCoordinate | undefined = undefined;
+
+        parentNode = reactiveNodes.find((n) => n.nodeId === node.parentId);
+
+        if (!parentNode) parentNode = nodeCoordinates.find((n) => n.nodeId === node.parentId);
 
         if (!parentNode) return <Fragment key={idx}></Fragment>;
 
-        let parentCoord: CartesianCoordinate = { x: parentNode.x, y: parentNode.y };
+        let pathInitialPoint: InitialAndFinalCoord = {
+            finalCoordinates: { x: parentNode.x, y: parentNode.y },
+            //@ts-ignore
+            initialCoordinates: { x: parentNode.initialCoordinates?.x ?? parentNode.x, y: parentNode.initialCoordinates?.y ?? parentNode.y },
+        };
+
+        let pathFinalPoint: InitialAndFinalCoord = {
+            finalCoordinates: { x: node.x, y: node.y },
+            //@ts-ignore
+            initialCoordinates: { x: node.initialCoordinates?.x ?? node.x, y: node.initialCoordinates?.y ?? node.y },
+        };
 
         return (
             <HierarchicalCanvasPath
                 key={`${node.nodeId}_path`}
-                coordinates={{ cx: node.x, cy: node.y, pathInitialPoint: parentCoord }}
+                pathFinalPoint={pathFinalPoint}
+                pathInitialPoint={pathInitialPoint}
                 isRoot={node.isRoot}
             />
         );
     });
+});
+
+const StaticHierarchicalPathList = memo(function StaticHierarchicalPathList({
+    nodeCoordinates,
+    staticNodes,
+    canvasDimensions,
+}: {
+    nodeCoordinates: NodeCoordinate[];
+    staticNodes: NodeCoordinate[];
+    canvasDimensions: CanvasDimensions;
+}) {
+    const picture = useMemo(
+        () =>
+            createPicture({ x: 0, y: 0, width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }, (canvas) => {
+                const paint = Skia.Paint();
+                paint.setColor(Skia.Color("#1C1C1D"));
+
+                for (const nodeCoordinate of staticNodes) {
+                    if (nodeCoordinate.isRoot) continue;
+
+                    const parentOfNode = nodeCoordinates.find((node) => node.nodeId === nodeCoordinate.parentId);
+                    if (!parentOfNode) throw new Error("parentOfNode undefined at StaticHierarchicalCanvasPath");
+
+                    const path = Skia.Path.Make();
+
+                    path.moveTo(nodeCoordinate.x, nodeCoordinate.y - CIRCLE_SIZE);
+
+                    path.cubicTo(
+                        nodeCoordinate.x,
+                        nodeCoordinate.y - 0.87 * (nodeCoordinate.y - parentOfNode.y),
+                        parentOfNode.x,
+                        parentOfNode.y - 0.43 * (parentOfNode.y - nodeCoordinate.y),
+                        parentOfNode.x,
+                        parentOfNode.y + CIRCLE_SIZE
+                    );
+
+                    path.stroke({ width: 2 });
+
+                    canvas.drawPath(path, paint);
+                }
+            }),
+        [nodeCoordinates, staticNodes, canvasDimensions]
+    );
+
+    return <Picture picture={picture} />;
 });
 
 const LabelList = memo(function LabelList({ nodeCoordinates, font }: { nodeCoordinates: NodeCoordinate[]; font: SkFont }) {
@@ -65,7 +132,9 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, settings, drag, fonts,
 
     return (
         <>
-            <PathList nodeCoordinates={nodeCoordinatesCentered} />
+            <ReactiveHierarchicalPathList nodeCoordinates={nodeCoordinatesCentered} reactiveNodes={reactiveNodes} />
+
+            <StaticHierarchicalPathList nodeCoordinates={nodeCoordinatesCentered} staticNodes={staticNodes} canvasDimensions={canvasDimensions} />
 
             {showLabel && <LabelList font={labelFont} nodeCoordinates={nodeCoordinatesCentered} />}
 

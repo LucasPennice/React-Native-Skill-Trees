@@ -104,6 +104,11 @@ export type NodeCoordinate = CartesianCoordinate & {
 
 export type ReactiveNodeCoordinate = NodeCoordinate & { initialCoordinates: CartesianCoordinate };
 
+export type InitialAndFinalCoord = {
+    initialCoordinates: CartesianCoordinate;
+    finalCoordinates: CartesianCoordinate;
+};
+
 export type ModifiableProperties<T> = {
     [Property in keyof T]: T[Property];
 };

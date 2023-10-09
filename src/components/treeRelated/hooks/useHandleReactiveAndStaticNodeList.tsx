@@ -42,7 +42,11 @@ function checkIfTreeCoordinatesChanged(newState: NodeCoordinate[], oldState?: No
         //Added a node case
         if (nodeInNewState && !nodeInOldState) {
             behavior = "Entering";
-            reactiveNodes.push({ ...nodeInNewState, initialCoordinates: { x: 0, y: 0 } });
+            const parentOfNode = oldStateDictionary[nodeInNewState.parentId!]!;
+
+            if (!parentOfNode) throw new Error("parentOfNode undefined at useHandleReactiveAndStaticNodeList");
+
+            reactiveNodes.push({ ...nodeInNewState, initialCoordinates: { x: parentOfNode.x, y: parentOfNode.y } });
             continue;
         }
 
