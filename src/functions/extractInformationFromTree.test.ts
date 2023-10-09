@@ -2078,7 +2078,7 @@ test("completedSkillTreeTable", () => {
         {
             accentColor: { label: "Orange", color1: "#FF9F23", color2: "#BF5AF2" },
             category: "SKILL",
-            data: MOCK_SKILL_VALUE,
+            data: { ...MOCK_SKILL_VALUE, isCompleted: true },
             isRoot: false,
             level: 5,
             nodeId: "4fIm7RGnEjGCisFpEpOy0mae",
@@ -2093,10 +2093,10 @@ test("completedSkillTreeTable", () => {
     const output = {
         CaUf2JKOuTWj0SDktGn91Vii: { completedQty: 0, percentage: 0, qty: 0 },
         HomepageTree: { completedQty: 0, percentage: 0, qty: 0 },
-        TLIq7eKs24qBnUiSQ9KsBi6r: { completedQty: 1, percentage: 100, qty: 1 },
+        TLIq7eKs24qBnUiSQ9KsBi6r: { completedQty: 0, percentage: 0, qty: 1 },
         hgXfsFIBbDXjOMoT8Fs4qqJg: { completedQty: 0, percentage: 0, qty: 13 },
-        jzX4cM1gvWUfzdTVg7UACfLN: { completedQty: 2, percentage: 8.333333333333332, qty: 24 },
-        qFRwpHaQ3QHaxKSNsw4Yd8ER: { completedQty: 0, percentage: 0, qty: 30 },
+        jzX4cM1gvWUfzdTVg7UACfLN: { completedQty: 0, percentage: 0, qty: 24 },
+        qFRwpHaQ3QHaxKSNsw4Yd8ER: { completedQty: 1, percentage: 3.3333333333333335, qty: 30 },
     };
 
     expect(completedSkillTreeTable(input)).toStrictEqual(output);
