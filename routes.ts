@@ -15,6 +15,10 @@ export const routes = {
         name: "myTrees/[treeId]/[skillId]",
         route: "/myTrees/[treeId]/[skillId]",
     },
+    feedback: {
+        name: "feedback",
+        route: "/feedback",
+    },
 };
 
 export type RoutesParams = {

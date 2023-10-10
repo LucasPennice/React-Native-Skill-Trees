@@ -65,6 +65,13 @@ export default function RootLayout() {
                     tabBarIcon: ({ color }) => <TabBarIcon name="tree" color={color} />,
                 }}
             />
+            <Tabs.Screen
+                name={routes.feedback.name}
+                options={{
+                    title: "Feedback (NEW)",
+                    tabBarIcon: ({ color }) => <TabBarIcon name="thumbs-up" color={color} />,
+                }}
+            />
             <Tabs.Screen name={routes.myTrees_treeId.name} options={{ href: null }} />
             <Tabs.Screen name={routes.myTrees_skillId.name} options={{ href: null }} />
             <Tabs.Screen name={"index"} options={{ href: null }} />
