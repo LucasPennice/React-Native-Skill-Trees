@@ -124,9 +124,7 @@ function useHandleReactiveAndStaticNodeList(treeNodes: NodeCoordinate[], dragAnd
     // const dragAndDropTrack = useTrackDragState(dragAndDrop);
     const treeNodesTrack = useTrackTreeNodesState(treeNodes);
 
-    if (treeNodesTrack.behavior === "Entering") return { reactiveNodes: treeNodesTrack.reactiveNodes, staticNodes: treeNodesTrack.staticNodes };
-
-    return { reactiveNodes: [], staticNodes: treeNodes };
+    return { reactiveNodes: treeNodesTrack.reactiveNodes, staticNodes: treeNodesTrack.staticNodes };
 }
 
 export default useHandleReactiveAndStaticNodeList;
