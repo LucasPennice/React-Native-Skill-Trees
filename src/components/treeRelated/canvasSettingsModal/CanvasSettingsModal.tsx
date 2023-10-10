@@ -37,6 +37,11 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
     const { width } = Dimensions.get("screen");
     const dispatch = useAppDispatch();
 
+    const closeModalOrWarning = () => {
+        if (newHomeTreeName === "") return Alert.alert("Home tree name cannot be empty");
+        return closeModal();
+    };
+
     const [newHomeTreeName, setNewHomeTreeName] = useState(treeName);
     const [newIcon, setIcon] = useState<string>("");
 
@@ -85,7 +90,7 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
     };
 
     return (
-        <FlingToDismissModal closeModal={closeModal} open={open}>
+        <FlingToDismissModal closeModal={closeModalOrWarning} open={open}>
             <View style={{ flex: 1 }}>
                 <ScrollView showsVerticalScrollIndicator={false}>
                     <AppText style={{ color: "#FFFFFF", marginBottom: 10, fontFamily: "helveticaBold" }} fontSize={24}>

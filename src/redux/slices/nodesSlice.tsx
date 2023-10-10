@@ -3,7 +3,7 @@ import { PayloadAction, Update, createEntityAdapter, createSlice } from "@reduxj
 import { RootState } from "../reduxStore";
 import { addUserTree, removeUserTree, updateUserTree } from "./userTreesSlice";
 import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID } from "@/parameters";
-import { homeTreeSliceInitialState, updateHomeIcon } from "./homeTreeSlice";
+import { homeTreeSliceInitialState, updateHomeIcon, updateHomeName } from "./homeTreeSlice";
 
 const nodesAdapter = createEntityAdapter<NormalizedNode>({ selectId: (node) => node.nodeId });
 export const {
@@ -136,6 +136,16 @@ export const nodesSlice = createSlice({
             nodesAdapter.updateOne(state, {
                 id: HOMETREE_ROOT_ID,
                 changes: { data: { ...homeRootNode.data, icon: action.payload } },
+            });
+        });
+        builder.addCase(updateHomeName, (state, action) => {
+            const homeRootNode = state.entities[HOMETREE_ROOT_ID];
+
+            if (!homeRootNode) throw new Error("homeRootNode is undefined at extraReducer for updateHomeIcon");
+
+            nodesAdapter.updateOne(state, {
+                id: HOMETREE_ROOT_ID,
+                changes: { data: { ...homeRootNode.data, name: action.payload } },
             });
         });
     },
