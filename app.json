@@ -7,7 +7,7 @@
             "typedRoutes": true,
             "tsconfigPaths": true
         },
-        "version": "1.0.17",
+        "version": "1.0.18",
         "orientation": "portrait",
         "icon": "./assets/icon.png",
         "userInterfaceStyle": "light",
@@ -36,7 +36,7 @@
                 "android.permission.WRITE_EXTERNAL_STORAGE",
                 "android.permission.ACCESS_MEDIA_LOCATION"
             ],
-            "versionCode": 22,
+            "versionCode": 23,
             "package": "com.lucaspennice.skilltrees"
         },
         "web": {
