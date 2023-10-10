@@ -44,14 +44,10 @@ function DeleteNodeModal({ nodeToDelete, closeModalAndClearState, open }: Props)
 
         const { nodeIdToDelete, updatedNodes } = deleteNodeAndHoistChild(nodesOfTree, nodeToHoist);
 
-        console.log("..........");
-        console.log(JSON.stringify(nodesOfTree));
-        console.log(nodeIdToDelete, JSON.stringify(updatedNodes));
-
         const updatedNodesReducerFormat: Update<NormalizedNode>[] = updatedNodes.map((updatedNode) => {
             return {
                 id: updatedNode.nodeId,
-                changes: { childrenIds: updatedNode.childrenIds, parentId: updatedNode.parentId },
+                changes: { childrenIds: updatedNode.childrenIds, parentId: updatedNode.parentId, level: updatedNode.level },
             };
         });
         dispatch(updateNodes(updatedNodesReducerFormat));

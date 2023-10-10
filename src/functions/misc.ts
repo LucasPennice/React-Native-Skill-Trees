@@ -189,6 +189,7 @@ export function deleteNodeAndHoistChild(nodes: NormalizedNode[], nodeToHoist: No
     //Adding the nodeToDelete children to nodeToHoist's array of children (Except for itself)
     const updatedNodeToHoist: NormalizedNode = {
         ...nodeToHoist,
+        level: nodeToHoist.level - 1,
         parentId: parentOfNodeToDelete.nodeId,
         childrenIds: [...nodeToHoist.childrenIds, ...nodeToDelete.childrenIds.filter((childId) => childId !== nodeToHoist.nodeId)],
     };
