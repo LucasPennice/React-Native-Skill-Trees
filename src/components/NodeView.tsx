@@ -62,7 +62,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                                 color: "#000000",
                                 width: size,
                                 textAlign: "center",
-                                lineHeight: isEmojiIcon ? 28 : undefined,
+                                lineHeight: isEmojiIcon ? size : undefined,
                                 fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
                             }}>
                             {isEmojiIcon ? skill.icon.text : skill.name[0].toUpperCase()}
@@ -125,7 +125,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                             style={{
                                 position: "absolute",
                                 color: category === "SKILL" ? colors.unmarkedText : gradient.color1,
-                                lineHeight: isEmojiIcon ? 28 : undefined,
+                                lineHeight: isEmojiIcon ? size : undefined,
                                 fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
                             }}>
                             {isEmojiIcon ? skill.icon.text : skill.icon.text[0].toUpperCase()}
@@ -181,7 +181,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                                 color: category === "SKILL" ? "#515053" : gradient.color1,
                                 width: size,
                                 textAlign: "center",
-                                lineHeight: isEmojiIcon ? 28 : undefined,
+                                lineHeight: isEmojiIcon ? size : undefined,
                                 fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
                             }}>
                             {isEmojiIcon ? skill.icon.text : skill.name[0].toUpperCase()}
