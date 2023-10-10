@@ -5,7 +5,6 @@ import { SharedValue } from "react-native-reanimated";
 import StaticNodeList from "../../components/treeRelated/general/StaticNodeList";
 import RadialLabel from "../../components/treeRelated/radial/RadialLabel";
 import { CanvasDimensions, NodeCoordinate } from "../../types";
-import ReactiveNodeList from "@/components/treeRelated/general/ReactiveNodeList";
 
 type TreeProps = {
     reactiveNodes: NodeCoordinate[];
@@ -71,13 +70,6 @@ function HomepageSkillTree({ allNodes, reactiveNodes, staticNodes, selectedNode,
                 staticNodes={staticNodes}
                 settings={{ oneColorPerTree: settings.oneColorPerTree, showIcons: settings.showIcons }}
                 canvasDimensions={canvasDimensions}
-            />
-
-            <ReactiveNodeList
-                fonts={{ emojiFont, nodeLetterFont }}
-                allNodes={allNodes}
-                settings={{ oneColorPerTree: settings.oneColorPerTree, showIcons: settings.showIcons }}
-                reactiveNodes={[]}
             />
         </>
     );
