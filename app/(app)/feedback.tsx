@@ -10,12 +10,12 @@ function Feedback() {
     const { width } = Dimensions.get("screen");
     return (
         <LinearGradient colors={["#BF5AF2", "#5A7BF2"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0.2 }} style={{ flex: 1 }}>
-            <View style={{ width, height: 170, justifyContent: "center", alignItems: "center", gap: 20 }}>
+            <View style={{ width, height: 130, justifyContent: "center", alignItems: "center", gap: 20 }}>
                 <AppText fontSize={36} style={{ color: "#FFFFFF", fontFamily: "helveticaBold" }}>
                     Hello!
                 </AppText>
                 <AppText fontSize={20} style={{ color: "#FFFFFF", fontFamily: "helveticaBold" }}>
-                    I hope you are enjoying SkillTrees
+                    I hope you are enjoying Skill Trees
                 </AppText>
             </View>
 
@@ -26,14 +26,14 @@ function Feedback() {
                     end={{ x: 0.5, y: 1 }}
                     style={{ flex: 1, borderTopLeftRadius: 25, borderTopRightRadius: 25 }}>
                     <View style={{ flex: 1, padding: 25, justifyContent: "space-between", alignItems: "center" }}>
-                        <Animated.View style={{ gap: 5 }} entering={FadeInDown.duration(300).delay(650).easing(Easing.inOut(Easing.cubic))}>
-                            <AppText fontSize={16} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", textAlign: "center", lineHeight: 25 }}>
+                        <Animated.View style={{ gap: 0 }} entering={FadeInDown.duration(300).delay(650).easing(Easing.inOut(Easing.cubic))}>
+                            <AppText fontSize={16} style={{ color: "#FFFFFF", fontFamily: "helvetica", textAlign: "center", lineHeight: 23 }}>
                                 If you'd like to help shape the future of Skill Trees by giving feedback
                             </AppText>
-                            <AppText fontSize={16} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", textAlign: "center", lineHeight: 25 }}>
+                            <AppText fontSize={16} style={{ color: "#FFFFFF", fontFamily: "helvetica", textAlign: "center", lineHeight: 23 }}>
                                 Consider following me or reaching out
                             </AppText>
-                            <AppText fontSize={16} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", textAlign: "center", lineHeight: 25 }}>
+                            <AppText fontSize={16} style={{ color: "#FFFFFF", fontFamily: "helvetica", textAlign: "center", lineHeight: 23 }}>
                                 I'll run polls to figure out the best way to help you reach your life's goals
                             </AppText>
                         </Animated.View>
