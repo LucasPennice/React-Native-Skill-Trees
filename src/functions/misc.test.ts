@@ -212,7 +212,7 @@ test("Delete and hoist", () => {
                     name: "skillName",
                 },
                 isRoot: false,
-                level: 2,
+                level: 1,
                 nodeId: "2-2",
                 parentId: "rootId",
                 treeId: "mockTreeId",
