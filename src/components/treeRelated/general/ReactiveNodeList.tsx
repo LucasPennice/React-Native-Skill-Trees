@@ -33,7 +33,7 @@ function ReactiveNodeList({
         const text = {
             color: textColor,
             isEmoji: node.data.icon.isEmoji,
-            letter: node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0].toUpperCase(),
+            letter: node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0],
         };
 
         const nodeData: CanvasNodeData = {

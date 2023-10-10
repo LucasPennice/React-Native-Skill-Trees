@@ -36,7 +36,7 @@ function ReactiveNode({ nodeData, state, nodeDrag }: Props) {
 
     const { path, textX, textY, x, y } = useHandleNodeAnimatedCoordinates(initialCoordinates, finalCoordinates, text, font);
 
-    const nodeIcon = text.isEmoji ? text.letter : text.letter.toUpperCase();
+    const nodeIcon = text.isEmoji ? text.letter : text.letter;
 
     //ReactiveNode Props
     const textCoordinates = { textX, textY };

@@ -81,7 +81,7 @@ function paintSkillNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProp
         const textColor = Skia.Paint();
         textColor.setColor(Skia.Color("#515053"));
 
-        const text = node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0].toUpperCase();
+        const text = node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0];
 
         const font = node.data.icon.isEmoji ? fonts.emojiFont : fonts.nodeLetterFont;
 
@@ -148,7 +148,7 @@ function paintSkillTreeNode(
         const textColor = Skia.Paint();
         textColor.setColor(Skia.Color(accentColor.color1));
 
-        const text = (node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0]).toUpperCase();
+        const text = node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0];
 
         const font = node.data.icon.isEmoji ? fonts.emojiFont : fonts.nodeLetterFont;
 
@@ -190,7 +190,7 @@ function paintUserNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProps
         const textColor = Skia.Paint();
         textColor.setColor(Skia.Color(highContrastTextColor));
 
-        const text = node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0].toUpperCase();
+        const text = node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0];
 
         const font = node.data.icon.isEmoji ? fonts.emojiFont : fonts.nodeLetterFont;
 
@@ -227,7 +227,7 @@ function getCircularPathSvgWithGradient(
 
 function getTextWidth(text: string, isEmoji: boolean, font: SkFont) {
     if (isEmoji) return font.getTextWidth(text);
-    if (!isEmoji) return font.getTextWidth(text.toUpperCase());
+    if (!isEmoji) return font.getTextWidth(text);
 
     return 0;
 }

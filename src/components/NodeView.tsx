@@ -65,7 +65,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                                 lineHeight: isEmojiIcon ? size : undefined,
                                 fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
                             }}>
-                            {isEmojiIcon ? skill.icon.text : skill.name[0].toUpperCase()}
+                            {isEmojiIcon ? skill.icon.text : skill.name[0]}
                         </AppText>
                     </Animated.View>
                 )}
@@ -128,7 +128,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                                 lineHeight: isEmojiIcon ? size : undefined,
                                 fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
                             }}>
-                            {isEmojiIcon ? skill.icon.text : skill.icon.text[0].toUpperCase()}
+                            {isEmojiIcon ? skill.icon.text : skill.icon.text[0]}
                         </AppText>
                     </View>
                 )}
@@ -184,7 +184,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                                 lineHeight: isEmojiIcon ? size : undefined,
                                 fontFamily: isEmojiIcon ? "emojisMono" : "helvetica",
                             }}>
-                            {isEmojiIcon ? skill.icon.text : skill.name[0].toUpperCase()}
+                            {isEmojiIcon ? skill.icon.text : skill.name[0]}
                         </AppText>
                     </Animated.View>
                 )}

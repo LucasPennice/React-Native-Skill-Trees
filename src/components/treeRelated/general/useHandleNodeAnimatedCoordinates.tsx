@@ -58,7 +58,7 @@ function useHandleNodeAnimatedCoordinates(
 
     function getTextWidth() {
         if (text.isEmoji) return font.getTextWidth(text.letter);
-        if (!text.isEmoji) return font.getTextWidth(text.letter.toUpperCase());
+        if (!text.isEmoji) return font.getTextWidth(text.letter);
 
         return 0;
     }
