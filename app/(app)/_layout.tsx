@@ -6,10 +6,11 @@ import { open } from "@/redux/slices/addTreeModalSlice";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { routes } from "routes";
+import analytics from "@react-native-firebase/analytics";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
     return <FontAwesome size={props.size ?? 28} style={{ marginBottom: -3 }} {...props} />;
@@ -42,11 +43,31 @@ export default function RootLayout() {
         }
     }, [loaded]);
 
+    const prevRouteName = useRef<string | null>(null);
+
     if (!loaded) return <Text>Loading...</Text>;
 
     return (
         <View style={{ flex: 1, minHeight: Platform.OS === "android" ? height - NAV_HEGIHT : "auto" }}>
-            <Stack screenOptions={{ headerShown: false }}>
+            <Stack
+                screenOptions={{ headerShown: false }}
+                screenListeners={{
+                    state: async (e) => {
+                        //@ts-ignore
+                        const currentRouteName = e.data.state.routes[e.data.state.routes.length - 1].name as string;
+
+                        console.log(prevRouteName.current, currentRouteName);
+
+                        if (prevRouteName.current !== currentRouteName) {
+                            await analytics().logScreenView({
+                                screen_name: currentRouteName,
+                                screen_class: currentRouteName,
+                            });
+                        }
+
+                        prevRouteName.current = currentRouteName;
+                    },
+                }}>
                 <Stack.Screen
                     name={routes.home.name}
                     options={{
