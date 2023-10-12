@@ -60,8 +60,7 @@
                 "expo-build-properties",
                 {
                     "ios": {
-                        "useFrameworks": "static",
-                        "flipper": true
+                        "useFrameworks": "static"
                     }
                 }
             ],
