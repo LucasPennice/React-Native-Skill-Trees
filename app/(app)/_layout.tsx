@@ -5,9 +5,9 @@ import { useAppDispatch } from "@/redux/reduxHooks";
 import { open } from "@/redux/slices/addTreeModalSlice";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
-import { SplashScreen, Tabs, router } from "expo-router";
+import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
 import { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { routes } from "routes";
 
@@ -16,6 +16,11 @@ function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["nam
 }
 
 export default function RootLayout() {
+    const { width, height } = Dimensions.get("window");
+
+    const pathname = usePathname();
+    const router = useRouter();
+
     const [loaded, error] = useFonts({
         helvetica: require("../../assets/Helvetica.ttf"),
         helveticaBold: require("../../assets/Helvetica-Bold.ttf"),
@@ -38,44 +43,64 @@ export default function RootLayout() {
     }, [loaded]);
 
     if (!loaded) return <Text>Loading...</Text>;
-    // ME PARECE QUE EL PROBLEMA ESTA EN TENER UN TABS ADENTRO DE UN STACK ?
-    //     O AL MENOS AL PROGRAMA NO LE FUSTA TENER UN STACK ADENTRO DE UN STACK ADENTRO DE UM<TABS>
-    //     HABRIA QUE IR PROBANDO QUE ES
 
     return (
-        <Tabs
-            screenOptions={{
-                headerShown: false,
-                lazy: true,
-                unmountOnBlur: true,
-                tabBarHideOnKeyboard: true,
-                tabBarStyle: { height: NAV_HEGIHT, backgroundColor: colors.darkGray },
-                tabBarActiveTintColor: colors.accent,
-            }}>
-            <Tabs.Screen
-                name={routes.home.name}
-                options={{ unmountOnBlur: false, title: "Home", tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} /> }}
-            />
-            <Tabs.Screen
-                name={routes.myTrees.name}
-                options={{
-                    headerShown: true,
-                    header: MyTreesHeader(openAddTreeModal),
-                    title: "My Trees",
-                    tabBarIcon: ({ color }) => <TabBarIcon name="tree" color={color} />,
-                }}
-            />
-            <Tabs.Screen
-                name={routes.feedback.name}
-                options={{
-                    title: "Feedback (NEW)",
-                    tabBarIcon: ({ color }) => <TabBarIcon name="thumbs-up" color={color} />,
-                }}
-            />
-            <Tabs.Screen name={routes.myTrees_treeId.name} options={{ href: null }} />
-            <Tabs.Screen name={routes.myTrees_skillId.name} options={{ href: null }} />
-            <Tabs.Screen name={"index"} options={{ href: null }} />
-        </Tabs>
+        <View style={{ flex: 1, minHeight: Platform.OS === "android" ? height - NAV_HEGIHT : "auto" }}>
+            <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen
+                    name={routes.home.name}
+                    options={{
+                        title: "Home",
+                    }}
+                />
+                <Stack.Screen
+                    name={routes.myTrees.name}
+                    options={{
+                        headerShown: true,
+                        header: MyTreesHeader(openAddTreeModal),
+                        title: "My Trees",
+                    }}
+                />
+                <Stack.Screen
+                    name={routes.feedback.name}
+                    options={{
+                        title: "Feedback (NEW)",
+                    }}
+                />
+                <Stack.Screen name={routes.myTrees_treeId.name} />
+                <Stack.Screen name={routes.myTrees_skillId.name} />
+                <Stack.Screen name={"index"} />
+            </Stack>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "padding"}
+                enabled={false}
+                style={{ backgroundColor: colors.darkGray, height: NAV_HEGIHT, width, flexDirection: "row" }}>
+                <Pressable
+                    style={{ width: width / 3, flex: 1, justifyContent: "center", alignItems: "center", gap: 6 }}
+                    onPress={() => router.replace("/home")}>
+                    <TabBarIcon name="home" color={pathname.includes("home") ? colors.accent : colors.unmarkedText} />
+                    <AppText style={{ color: pathname.includes("home") ? colors.accent : colors.unmarkedText }} fontSize={12}>
+                        Home
+                    </AppText>
+                </Pressable>
+                <Pressable
+                    style={{ width: width / 3, flex: 1, justifyContent: "center", alignItems: "center", gap: 6 }}
+                    onPress={() => router.replace("/(app)/myTrees")}>
+                    <TabBarIcon name="tree" color={pathname.includes("myTrees") ? colors.accent : colors.unmarkedText} />
+                    <AppText style={{ color: pathname.includes("myTrees") ? colors.accent : colors.unmarkedText }} fontSize={12}>
+                        My Trees
+                    </AppText>
+                </Pressable>
+                <Pressable
+                    style={{ width: width / 3, flex: 1, justifyContent: "center", alignItems: "center", gap: 6 }}
+                    onPress={() => router.replace("/(app)/feedback")}>
+                    <TabBarIcon name="thumbs-up" color={pathname.includes("feedback") ? colors.accent : colors.unmarkedText} />
+                    <AppText style={{ color: pathname.includes("feedback") ? colors.accent : colors.unmarkedText }} fontSize={10}>
+                        Feedback (NEW)
+                    </AppText>
+                </Pressable>
+            </KeyboardAvoidingView>
+        </View>
     );
 }
 

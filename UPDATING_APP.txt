@@ -2,6 +2,7 @@
 Si no llega a andar algo:
 El loco del tutorial que segui (https://www.youtube.com/watch?v=mZlKwRV4MC8&ab_channel=Dan%27sReactNativeLab) recomienda en 7:16 instalar expo-modules-autolinking, porque sino
 No le deja correr npx expo prebuild --clean , cosa que tal vez sea necesaria si estoy tratando de hacer que una build local ande
+A mi me corre el comando pero si la build local o por EAS llega a fallar en un futuro puede ser una posible solcion
 🚨
 
 THE APP NAME SEEMS TO BE @lucaspennice/SkillTrees
