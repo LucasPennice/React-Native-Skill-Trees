@@ -56,8 +56,6 @@ export default function RootLayout() {
                         //@ts-ignore
                         const currentRouteName = e.data.state.routes[e.data.state.routes.length - 1].name as string;
 
-                        console.log(prevRouteName.current, currentRouteName);
-
                         if (prevRouteName.current !== currentRouteName) {
                             await analytics().logScreenView({
                                 screen_name: currentRouteName,

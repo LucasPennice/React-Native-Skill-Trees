@@ -11,7 +11,7 @@ import AppTextInput from "../../../components/AppTextInput";
 import ColorGradientSelector from "../../../components/ColorGradientSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import LoadingIcon from "../../../components/LoadingIcon";
-
+import analytics from "@react-native-firebase/analytics";
 import HierarchicalSkillTree from "../../../components/treeRelated/hierarchical/HierarchicalSkillTree";
 import useHandleCanvasScroll from "../../../components/treeRelated/hooks/useHandleCanvasScrollAndZoom";
 import { createTree, makeid } from "../../../functions/misc";
@@ -59,7 +59,7 @@ function AddTreeModal() {
 
     const closeModal = () => dispatch(close());
 
-    const createNewTree = () => {
+    const createNewTree = async () => {
         if (treeName === "") return Alert.alert("Please give the tree a name");
         if (!selectedColorGradient) return Alert.alert("Please select a color");
 
@@ -78,6 +78,9 @@ function AddTreeModal() {
         };
 
         dispatch(addUserTree(newUserTree));
+
+        await analytics().logEvent("createTree", { treeName, isEmoji });
+
         closeModal();
     };
 

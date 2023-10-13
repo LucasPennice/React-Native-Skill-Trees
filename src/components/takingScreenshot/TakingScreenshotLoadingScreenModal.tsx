@@ -13,6 +13,7 @@ import { generalStyles } from "../../styles";
 import AppText from "../AppText";
 import FlingToDismissModal from "../FlingToDismissModal";
 import ProgressIndicatorAndName from "../ProgressIndicatorAndName";
+import analytics from "@react-native-firebase/analytics";
 
 type Stage = "TAKING_SCREENSHOT" | "EDITING_LAYOUT";
 
@@ -33,7 +34,13 @@ function TakingScreenshotLoadingScreenModal({
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     useEffect(() => {
-        if (takingScreenshot) getScreenShots();
+        (async () => {
+            if (takingScreenshot) {
+                await analytics().logEvent("takingScreenshot");
+
+                getScreenShots();
+            }
+        })();
     }, [takingScreenshot]);
 
     useEffect(() => {

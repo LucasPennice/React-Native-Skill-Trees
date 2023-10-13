@@ -5,6 +5,14 @@ No le deja correr npx expo prebuild --clean , cosa que tal vez sea necesaria si 
 A mi me corre el comando pero si la build local o por EAS llega a fallar en un futuro puede ser una posible solcion
 🚨
 
+Correr en telefono conectado
+
+npm run phone
+
+INSTALL LOCAL BUILD TO DEVICE
+
+adb install path/to/the/file.apk
+
 THE APP NAME SEEMS TO BE @lucaspennice/SkillTrees
 
 Command to profile in hermes: npx react-native profile-hermes .

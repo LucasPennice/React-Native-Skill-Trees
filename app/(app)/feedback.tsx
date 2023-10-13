@@ -4,6 +4,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Dimensions, Pressable, View } from "react-native";
 import Animated, { Easing, FadeInDown, SlideInDown } from "react-native-reanimated";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import analytics from "@react-native-firebase/analytics";
+
 import * as Linking from "expo-linking";
 
 function Feedback() {
@@ -39,7 +41,10 @@ function Feedback() {
                         </Animated.View>
                         <Animated.View entering={FadeInDown.duration(300).delay(700).easing(Easing.inOut(Easing.cubic))} style={{ gap: 30 }}>
                             <Pressable
-                                onPress={() => Linking.openURL("https://instagram.com/lucas_pennice?igshid=NGVhN2U2NjQ0Yg%3D%3D&utm_source=qr")}>
+                                onPress={async () => {
+                                    await analytics().logEvent("ClickInstagramLink");
+                                    Linking.openURL("https://instagram.com/lucas_pennice?igshid=NGVhN2U2NjQ0Yg%3D%3D&utm_source=qr");
+                                }}>
                                 <LinearGradient
                                     colors={["#BF5AF2", "#5A7BF2"]}
                                     start={{ x: 0, y: 0 }}
@@ -67,7 +72,11 @@ function Feedback() {
                                 </LinearGradient>
                             </Pressable>
 
-                            <Pressable onPress={() => Linking.openURL("https://twitter.com/LucasPennice")}>
+                            <Pressable
+                                onPress={async () => {
+                                    await analytics().logEvent("ClickTwitterLink");
+                                    Linking.openURL("https://twitter.com/LucasPennice");
+                                }}>
                                 <LinearGradient
                                     colors={["#5A7BF2", "#40C8E0"]}
                                     start={{ x: 0, y: 0 }}
