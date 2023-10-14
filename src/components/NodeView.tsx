@@ -59,7 +59,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                             fontSize={fontSize}
                             style={{
                                 position: "absolute",
-                                color: "#000000",
+                                color: colors.background,
                                 width: size,
                                 textAlign: "center",
                                 lineHeight: isEmojiIcon ? size : undefined,
@@ -158,7 +158,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                         cx={progressWheelProps.centerCoordinate}
                         cy={progressWheelProps.centerCoordinate}
                         r={progressWheelProps.radius}
-                        fill={"#000000"}
+                        fill={colors.background}
                     />
                     <Circle
                         strokeWidth={progressWheelProps.strokeWidth}

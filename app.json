@@ -36,7 +36,8 @@
             "permissions": [
                 "android.permission.READ_EXTERNAL_STORAGE",
                 "android.permission.WRITE_EXTERNAL_STORAGE",
-                "android.permission.ACCESS_MEDIA_LOCATION"
+                "android.permission.ACCESS_MEDIA_LOCATION",
+                "com.google.android.gms.permission.AD_ID"
             ],
             "versionCode": 24,
             "package": "com.lucaspennice.skilltrees"
