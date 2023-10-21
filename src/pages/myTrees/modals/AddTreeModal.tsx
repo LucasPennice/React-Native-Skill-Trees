@@ -24,6 +24,7 @@ import { generalStyles } from "../../../styles";
 import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "../../../types";
 import useHandleImportTree from "./useHandleImportTree";
 import { TreeData, addUserTree } from "@/redux/slices/userTreesSlice";
+import { mixpanel } from "app/(app)/_layout";
 
 function AddTreeModal() {
     const { query } = useRequestProcessor();
@@ -80,6 +81,7 @@ function AddTreeModal() {
         dispatch(addUserTree(newUserTree));
 
         await analytics().logEvent("createTree", { treeName, isEmoji });
+        mixpanel.track("userCreatedTree");
 
         closeModal();
     };

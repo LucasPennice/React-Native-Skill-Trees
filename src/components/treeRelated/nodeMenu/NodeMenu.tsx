@@ -23,6 +23,7 @@ import { NodeCoordinate } from "../../../types";
 import AppText from "../../AppText";
 import DirectionMenu, { Config } from "../../DirectionMenu";
 import useWrapNodeMenuFunctions from "./useWrapNodeMenuFunctions";
+import { mixpanel } from "app/(app)/_layout";
 
 export const NODE_MENU_SIZE = 150;
 
@@ -55,6 +56,12 @@ export type NodeMenuFunctions = {
 
 const OS_CompatibleBorderStyle: ViewStyle["borderStyle"] = Platform.OS === "ios" ? "solid" : "dashed";
 
+function useTrackOpenNodeMenu() {
+    useEffect(() => {
+        mixpanel.track("openNodeMenu");
+    }, []);
+}
+
 function NodeMenu({
     data,
     scale,
@@ -75,6 +82,8 @@ function NodeMenu({
     const { idleActions, selectNodePositionAction } = useWrapNodeMenuFunctions(functions, closeNodeMenu, setMenuMode);
 
     const progress = useSharedValue(0);
+
+    useTrackOpenNodeMenu();
 
     useEffect(() => {
         if (menuMode === "SELECTING_NODE_POSITION") progress.value = withTiming(1, { duration: 500 });

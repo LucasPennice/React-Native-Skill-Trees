@@ -1,7 +1,9 @@
 import { useAppSelector } from "@/redux/reduxHooks";
 import { selectNodesOfTree } from "@/redux/slices/nodesSlice";
 import { TreeData } from "@/redux/slices/userTreesSlice";
+import analytics from "@react-native-firebase/analytics";
 import { ImageFormat, SkiaDomView } from "@shopify/react-native-skia";
+import { mixpanel } from "app/(app)/_layout";
 import { shareAsync } from "expo-sharing";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, Dimensions, Pressable, View } from "react-native";
@@ -13,7 +15,6 @@ import { generalStyles } from "../../styles";
 import AppText from "../AppText";
 import FlingToDismissModal from "../FlingToDismissModal";
 import ProgressIndicatorAndName from "../ProgressIndicatorAndName";
-import analytics from "@react-native-firebase/analytics";
 
 type Stage = "TAKING_SCREENSHOT" | "EDITING_LAYOUT";
 
@@ -36,6 +37,8 @@ function TakingScreenshotLoadingScreenModal({
     useEffect(() => {
         (async () => {
             if (takingScreenshot) {
+                mixpanel.track(`takingScreenshot`);
+
                 await analytics().logEvent("takingScreenshot");
 
                 getScreenShots();

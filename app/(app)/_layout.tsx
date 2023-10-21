@@ -18,22 +18,22 @@ function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["nam
     return <FontAwesome size={props.size ?? 28} style={{ marginBottom: -3 }} {...props} />;
 }
 
-// function usePassMixPanelUserId() {
-//     const userId = useAppSelector(selectUserId);
+function usePassMixPanelUserId() {
+    const userId = useAppSelector(selectUserId);
 
-//     useEffect(() => {
-//         if (userId !== "") mixpanel.identify(userId);
+    useEffect(() => {
+        if (userId !== "") mixpanel.identify(userId);
 
-//         //WHEN A USER LOGS OUT I'M SUPPOUSED TO CALL mixpanel.reset()
-//     }, [userId]);
-// }
+        //WHEN A USER LOGS OUT I'M SUPPOUSED TO CALL mixpanel.reset()
+    }, [userId]);
+}
 
-// const trackAutomaticEvents = true;
-// const mixpanel = new Mixpanel("5a141ce3c43980d8fab68b96e1256525", trackAutomaticEvents);
-// mixpanel.init();
+const trackAutomaticEvents = true;
+export const mixpanel = new Mixpanel("5a141ce3c43980d8fab68b96e1256525", trackAutomaticEvents);
+mixpanel.init();
 
 export default function RootLayout() {
-    // usePassMixPanelUserId();
+    usePassMixPanelUserId();
 
     const { width, height } = Dimensions.get("window");
 
@@ -80,7 +80,7 @@ export default function RootLayout() {
                                 screen_class: currentRouteName,
                             });
 
-                            // mixpanel.track(`Navigate to ${currentRouteName}`);
+                            mixpanel.track(`Navigate to ${currentRouteName}`);
                         }
 
                         prevRouteName.current = currentRouteName;
