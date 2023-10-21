@@ -1,7 +1,7 @@
 import AppText from "@/components/AppText";
 import ChevronLeft from "@/components/Icons/ChevronLeft";
 import { NAV_HEGIHT, colors } from "@/parameters";
-import { useAppDispatch } from "@/redux/reduxHooks";
+import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { open } from "@/redux/slices/addTreeModalSlice";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
@@ -11,12 +11,30 @@ import { Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { routes } from "routes";
 import analytics from "@react-native-firebase/analytics";
+import { Mixpanel } from "mixpanel-react-native";
+import { selectUserId } from "@/redux/slices/userSlice";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
     return <FontAwesome size={props.size ?? 28} style={{ marginBottom: -3 }} {...props} />;
 }
 
+// function usePassMixPanelUserId() {
+//     const userId = useAppSelector(selectUserId);
+
+//     useEffect(() => {
+//         if (userId !== "") mixpanel.identify(userId);
+
+//         //WHEN A USER LOGS OUT I'M SUPPOUSED TO CALL mixpanel.reset()
+//     }, [userId]);
+// }
+
+// const trackAutomaticEvents = true;
+// const mixpanel = new Mixpanel("5a141ce3c43980d8fab68b96e1256525", trackAutomaticEvents);
+// mixpanel.init();
+
 export default function RootLayout() {
+    // usePassMixPanelUserId();
+
     const { width, height } = Dimensions.get("window");
 
     const pathname = usePathname();
@@ -61,6 +79,8 @@ export default function RootLayout() {
                                 screen_name: currentRouteName,
                                 screen_class: currentRouteName,
                             });
+
+                            // mixpanel.track(`Navigate to ${currentRouteName}`);
                         }
 
                         prevRouteName.current = currentRouteName;
