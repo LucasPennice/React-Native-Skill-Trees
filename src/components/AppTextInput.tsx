@@ -41,9 +41,9 @@ function AppTextInput({
                 //@ts-ignore
                 enterKeyHint="done"
                 multiline
-                onChangeText={updateText}
+                onChangeText={disable ? undefined : updateText}
                 placeholder={placeholder}
-                onBlur={onBlur}
+                onBlur={disable ? undefined : onBlur}
                 value={text}
                 allowFontScaling={false}
                 placeholderTextColor={colors.line}

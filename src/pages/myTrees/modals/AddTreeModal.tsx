@@ -1,30 +1,21 @@
-import { Canvas } from "@shopify/react-native-skia";
-import { UseQueryResult } from "@tanstack/react-query";
+import { TreeData, addUserTree } from "@/redux/slices/userTreesSlice";
+import analytics from "@react-native-firebase/analytics";
+import { mixpanel } from "app/(app)/_layout";
 import { useEffect, useState } from "react";
-import { Alert, Pressable, View } from "react-native";
-import { GestureDetector } from "react-native-gesture-handler";
-import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { Alert, View } from "react-native";
+import Animated, { FadeInDown, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import axiosClient from "../../../../axiosClient";
 import { useRequestProcessor } from "../../../../requestProcessor";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import ColorGradientSelector from "../../../components/ColorGradientSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
-import LoadingIcon from "../../../components/LoadingIcon";
-import analytics from "@react-native-firebase/analytics";
-import HierarchicalSkillTree from "../../../components/treeRelated/hierarchical/HierarchicalSkillTree";
-import useHandleCanvasScroll from "../../../components/treeRelated/hooks/useHandleCanvasScrollAndZoom";
-import { createTree, makeid } from "../../../functions/misc";
-import { MENU_HIGH_DAMPENING, centerFlex, colors, nodeGradients } from "../../../parameters";
+import { MENU_HIGH_DAMPENING, colors, nodeGradients } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { close, selectAddTree } from "../../../redux/slices/addTreeModalSlice";
-import { selectCanvasDisplaySettings } from "../../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
-import { generalStyles } from "../../../styles";
-import { ColorGradient, Skill, Tree, getDefaultSkillValue } from "../../../types";
-import useHandleImportTree from "./useHandleImportTree";
-import { TreeData, addUserTree } from "@/redux/slices/userTreesSlice";
-import { mixpanel } from "app/(app)/_layout";
+import { ColorGradient } from "../../../types";
+import { generate24CharHexId } from "@/functions/misc";
 
 function AddTreeModal() {
     const { query } = useRequestProcessor();
@@ -67,14 +58,14 @@ function AddTreeModal() {
         const isEmoji = icon === "" ? false : true;
         const iconText = isEmoji ? icon : treeName[0];
 
-        const rootNodeId = makeid(24);
+        const rootNodeId = generate24CharHexId();
 
         const newUserTree: TreeData = {
             accentColor: selectedColorGradient,
             icon: { isEmoji, text: iconText },
             nodes: [rootNodeId],
             rootNodeId,
-            treeId: makeid(24),
+            treeId: generate24CharHexId(),
             treeName,
         };
 

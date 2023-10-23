@@ -23,6 +23,7 @@ import screenDimentionsReducer from "./slices/screenDimentionsSlice";
 import userReducer from "./slices/userSlice";
 import newUserTreesSlice from "./slices/userTreesSlice";
 import { MigrationConfig } from "redux-persist/es/createMigrate";
+import { generate24CharHexId } from "@/functions/misc";
 
 const migration: MigrationManifest = {
     //@ts-ignore
@@ -31,11 +32,20 @@ const migration: MigrationManifest = {
         const result = migrationFunction(state);
         return result;
     },
+    //@ts-ignore
+    3: (state) => {
+        let updatedState = { ...state };
+        //@ts-ignore
+        const newID = generate24CharHexId();
+        //@ts-ignore
+        updatedState["user"] = { userId: newID };
+        return updatedState;
+    },
 };
 
 const persistConfig: PersistConfig<any> = {
     key: "root",
-    version: 2,
+    version: 3,
     storage: AsyncStorage,
     migrate: createMigrate(migration, { debug: false } as MigrationConfig),
     blacklist: ["addTree"],

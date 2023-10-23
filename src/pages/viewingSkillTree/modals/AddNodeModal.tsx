@@ -9,9 +9,9 @@ import FlingToDismissModal from "../../../components/FlingToDismissModal";
 import NodeView from "../../../components/NodeView";
 import RadioInput from "../../../components/RadioInput";
 import { findNodeById } from "../../../functions/extractInformationFromTree";
-import { makeid } from "../../../functions/misc";
 import { centerFlex, colors } from "../../../parameters";
 import { DnDZone, Skill, Tree, getDefaultSkillValue } from "../../../types";
+import { generate24CharHexId } from "@/functions/misc";
 
 type Props = {
     closeModal: () => void;
@@ -278,7 +278,7 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
             data: getDefaultSkillValue("", false, { isEmoji: false, text: "" }),
             isRoot: false,
             level: 0,
-            nodeId: makeid(24),
+            nodeId: generate24CharHexId(),
             parentId: "",
             x: 0,
             y: 0,

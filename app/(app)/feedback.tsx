@@ -1,14 +1,35 @@
 import AppText from "@/components/AppText";
 import { colors } from "@/parameters";
 import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
-import Animated, { interpolateColor, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
+import Animated, { ZoomIn, ZoomOut, interpolateColor, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 
 import AppTextInput from "@/components/AppTextInput";
+import LoadingIcon from "@/components/LoadingIcon";
+import { useAppSelector } from "@/redux/reduxHooks";
+import { selectUserId } from "@/redux/slices/userSlice";
+import { useMutation } from "@tanstack/react-query";
+import axiosClient from "axiosClient";
 import { useState } from "react";
 
 const PAGE_MARGIN = 30;
 
-const AppButton = ({ onPress }: { onPress: () => void }) => {
+type ButtonState = "error" | "idle" | "loading" | "success";
+
+const AppButton = ({
+    onPress,
+    disabled,
+    style,
+    state = "idle",
+    text,
+    disabledStyle,
+}: {
+    onPress: () => void;
+    disabled?: boolean;
+    style?: ViewStyle;
+    disabledStyle?: ViewStyle;
+    state?: ButtonState;
+    text?: { [key in ButtonState]?: string };
+}) => {
     const styles = StyleSheet.create({
         container: {
             backgroundColor: colors.darkGray,
@@ -22,34 +43,85 @@ const AppButton = ({ onPress }: { onPress: () => void }) => {
             borderColor: colors.accent,
         },
     });
+    const disabledStyles = disabled ? disabledStyle : undefined;
+
+    const animatedContainerStyles = useAnimatedStyle(() => {
+        let borderColor = "";
+
+        switch (state) {
+            case "idle":
+                borderColor = colors.accent;
+                break;
+            case "error":
+                borderColor = colors.red;
+                break;
+            case "success":
+                borderColor = colors.green;
+                break;
+            case "loading":
+                borderColor = "#E6E6E6";
+                break;
+            default:
+                borderColor = "#E6E6E6";
+                break;
+        }
+
+        return {
+            borderColor: withTiming(borderColor),
+        };
+    });
 
     return (
-        <Pressable onPress={onPress}>
-            <View style={styles.container}>
-                <AppText children={"Send"} fontSize={14} style={{ color: "#E6E8E6" }} />
-            </View>
+        <Pressable onPress={onPress} disabled={disabled}>
+            <Animated.View style={[styles.container, animatedContainerStyles, disabledStyles, style]}>
+                {state === "idle" && (
+                    <Animated.View entering={ZoomIn} exiting={ZoomOut}>
+                        <AppText children={text?.idle ?? "Send"} fontSize={14} style={{ color: "#E6E8E6" }} />
+                    </Animated.View>
+                )}
+                {state === "error" && (
+                    <Animated.View entering={ZoomIn} exiting={ZoomOut}>
+                        <AppText children={text?.error ?? "Error"} fontSize={14} style={{ color: "#E6E8E6" }} />
+                    </Animated.View>
+                )}
+                {state === "success" && (
+                    <Animated.View entering={ZoomIn} exiting={ZoomOut}>
+                        <AppText children={text?.success ?? "Sent!"} fontSize={14} style={{ color: "#E6E8E6" }} />
+                    </Animated.View>
+                )}
+                {state === "loading" && (
+                    <Animated.View entering={ZoomIn} exiting={ZoomOut}>
+                        <LoadingIcon backgroundColor={colors.darkGray} size={20} />
+                    </Animated.View>
+                )}
+            </Animated.View>
         </Pressable>
     );
 };
 
 const FeedbackInput = ({
     title,
-    allowMultiple,
     placeholder,
     containerStyles,
     onPress,
+    disabled,
+    buttonState,
+    buttonText,
 }: {
     title: string;
-    allowMultiple: boolean;
+    disabled: boolean;
     placeholder: string;
     containerStyles?: StyleProp<ViewStyle>;
     onPress: (data: string) => void;
+    buttonState?: ButtonState;
+    buttonText?: { [key in ButtonState]?: string };
 }) => {
     const [text, setText] = useState("");
 
     const styles = StyleSheet.create({
         container: { backgroundColor: colors.darkGray, width: "100%", padding: 15, borderRadius: 10 },
         textInput: { backgroundColor: "#515053", minHeight: 45, fontSize: 10, marginBottom: 20 },
+        disabledContainer: { opacity: 0.6 },
     });
 
     return (
@@ -59,16 +131,12 @@ const FeedbackInput = ({
             <AppTextInput
                 placeholder={placeholder}
                 textState={[text, setText]}
-                disable={false}
-                containerStyles={styles.textInput}
+                disable={disabled}
+                containerStyles={[styles.textInput, disabled ? styles.disabledContainer : undefined]}
                 textStyle={{ fontSize: 12 }}
                 inputProps={{ placeholderTextColor: "#FFFFFF7D", multiline: true }}
             />
-            <AppButton onPress={() => onPress(text)} />
-
-            {/* OK TENGO QUE EVITAR QUE CIERTOS INPUTS SE MANDEN MAS DE UNA VEZ
-            TENGO QUE AÑADIR UN INDICADOR AL BOTON DE QUE SE ENVIO BIEN EL FEEDBACK
-            HAY UN UI BUG CUANDO NO SCROLEE LO SUFICIENTE PARA QUE EL STICKY HEADER SE PEGUE Y ABRO UN TEXT INPUT (POSIBLE SOLUCION PUEDE SER HACER TRES KEYBOARD AVOIDING VIEW, UNA PARA CADA INPUT EN LUGAR DE UNA SOLA PARA LOS TRES INPUTS) */}
+            <AppButton onPress={() => onPress(text)} disabled={disabled} state={buttonState} text={buttonText} />
         </View>
     );
 };
@@ -149,66 +217,137 @@ type UserFeedback = {
     dislikes: DataAndDate[];
 };
 
+function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React.SetStateAction<UserFeedback>>) {
+    const userId = useAppSelector(selectUserId);
+
+    const { mutate: problems, status: problemsStatus } = useMutation({
+        mutationFn: (newProblem: DataAndDate) => axiosClient.patch(`feedback/${userId}/problems`, newProblem),
+        onSuccess: (_, newEntry) => {
+            setFeedbackState((prev) => {
+                const result = { ...prev, problems: [...prev.problems, newEntry] } as UserFeedback;
+
+                return result;
+            });
+        },
+    });
+    const { mutate: mainObstacle, status: mainObstacleStatus } = useMutation({
+        mutationFn: (newMainObstacle: DataAndDate) => axiosClient.patch(`feedback/${userId}/mainObstacle`, newMainObstacle),
+        onSuccess: (_, newEntry) => {
+            setFeedbackState((prev) => {
+                const result = { ...prev, mainObstacle: [...prev.mainObstacle, newEntry] } as UserFeedback;
+
+                return result;
+            });
+        },
+    });
+    const { mutate: suggestedFeatures, status: suggestedFeaturesStatus } = useMutation({
+        mutationFn: (newSuggestedFeature: DataAndDate) => axiosClient.patch(`feedback/${userId}/suggestedFeatures`, newSuggestedFeature),
+        onSuccess: (_, newEntry) => {
+            setFeedbackState((prev) => {
+                const result = { ...prev, suggestedFeatures: [...prev.suggestedFeatures, newEntry] } as UserFeedback;
+
+                return result;
+            });
+        },
+    });
+    const { mutate: dislikes, status: dislikesStatus } = useMutation({
+        mutationFn: (newDislike: DataAndDate) => axiosClient.patch(`feedback/${userId}/dislikes`, newDislike),
+        onSuccess: (_, newEntry) => {
+            setFeedbackState((prev) => {
+                const result = { ...prev, dislikes: [...prev.dislikes, newEntry] } as UserFeedback;
+
+                return result;
+            });
+        },
+    });
+
+    return { problems, problemsStatus, mainObstacle, mainObstacleStatus, suggestedFeatures, suggestedFeaturesStatus, dislikes, dislikesStatus };
+}
+
 function Feedback() {
     const mockReduxInitialState: UserFeedback = { dislikes: [], mainObstacle: [], problems: [], suggestedFeatures: [] };
+    const [feedbackState, setFeedbackState] = useState<UserFeedback>(mockReduxInitialState);
 
-    const [foo, setFoo] = useState<UserFeedback>(mockReduxInitialState);
+    const update = useCreateUpdateFeedbackMutations(setFeedbackState);
 
-    const progressPercentage = getProgressPercentage(foo);
+    const progressPercentage = getProgressPercentage(feedbackState);
 
-    const appendCoso = (key: keyof UserFeedback) => (data: string) => {
+    const appendToFeedbackField = (key: keyof UserFeedback) => (data: string) => {
         if (data === "") return Alert.alert("Input cannot be empty");
 
-        setFoo((prev) => {
-            return { ...prev, [key]: [...prev[key], { data, date: new Date() }] } as UserFeedback;
-        });
+        const newEntry = { data, date: new Date() };
+
+        switch (key) {
+            case "problems":
+                update.problems(newEntry);
+                break;
+            case "mainObstacle":
+                update.mainObstacle(newEntry);
+                break;
+            case "dislikes":
+                update.dislikes(newEntry);
+                break;
+            case "suggestedFeatures":
+                update.suggestedFeatures(newEntry);
+                break;
+            default:
+                Alert.alert("Invalid key in appendToFeedbackField");
+                break;
+        }
     };
+    //🚨
+    // HACER QUE LA INFORMACION PERSISTA EN REDUX y cambiar el icono del nav para que se muestre el porcentage
+    //Y HACER QUE LA ID DE LOS USUARIOS SEA HEX SI O SI
+    //🚨
 
     return (
-        <ScrollView style={{ flex: 1, padding: 10 }} stickyHeaderIndices={[3]}>
-            <AppText children={"Hey Beta Users!"} fontSize={18} style={{ color: "#E6E8E6", marginBottom: 20 }} />
-            <AppText
-                children={"Your feedback fuels our mission to help more people become who they are destined to be"}
-                fontSize={16}
-                style={{ color: "#E6E8E6", marginBottom: 20 }}
-            />
-            <AppText
-                children={"Share your feedback to boost the completion percentage and help us improve the Skill Trees!"}
-                fontSize={16}
-                style={{ color: "#E6E8E6", marginBottom: 30 }}
-            />
+        <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "position"}
+            style={{ backgroundColor: colors.background, flex: 1 }}
+            keyboardVerticalOffset={-60}>
+            <ScrollView style={{ padding: 10 }} stickyHeaderIndices={[3]}>
+                <AppText children={"Hey Beta Users!"} fontSize={18} style={{ color: "#E6E8E6", marginBottom: 20 }} />
+                <AppText
+                    children={"Your feedback fuels our mission to help more people become who they are destined to be"}
+                    fontSize={16}
+                    style={{ color: "#E6E8E6", marginBottom: 20 }}
+                />
+                <AppText
+                    children={"Share your feedback to boost the completion percentage and help us improve the Skill Trees!"}
+                    fontSize={16}
+                    style={{ color: "#E6E8E6", marginBottom: 30 }}
+                />
 
-            <ProgressBar progressPercentage={progressPercentage} />
+                <ProgressBar progressPercentage={progressPercentage} />
 
-            <Spacer style={{ marginBottom: PAGE_MARGIN }} />
+                <Spacer style={{ marginBottom: PAGE_MARGIN }} />
 
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "position"}
-                style={{ backgroundColor: colors.background }}
-                keyboardVerticalOffset={-60}>
                 <FeedbackInput
                     title={"What problem do you hope Skill Trees helps you solve?"}
                     placeholder={"Your answer"}
-                    allowMultiple={false}
                     containerStyles={{ marginBottom: PAGE_MARGIN }}
-                    onPress={appendCoso("problems")}
+                    onPress={appendToFeedbackField("problems")}
+                    disabled={feedbackState["problems"].length !== 0}
+                    buttonState={update.problemsStatus}
                 />
                 <FeedbackInput
                     title={"What's your main obstacle in solving it?"}
                     placeholder={"Your answer"}
-                    allowMultiple={false}
                     containerStyles={{ marginBottom: PAGE_MARGIN }}
-                    onPress={appendCoso("mainObstacle")}
+                    onPress={appendToFeedbackField("mainObstacle")}
+                    disabled={feedbackState["mainObstacle"].length !== 0}
+                    buttonState={update.mainObstacleStatus}
                 />
                 <FeedbackInput
                     title={"What don't you like about Skill Trees"}
                     placeholder={"Your answer"}
-                    allowMultiple={false}
                     containerStyles={{ marginBottom: PAGE_MARGIN }}
-                    onPress={appendCoso("dislikes")}
+                    onPress={appendToFeedbackField("dislikes")}
+                    disabled={feedbackState["dislikes"].length !== 0}
+                    buttonState={update.dislikesStatus}
                 />
-            </KeyboardAvoidingView>
-        </ScrollView>
+            </ScrollView>
+        </KeyboardAvoidingView>
         // <LinearGradient colors={["#BF5AF2", "#5A7BF2"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0.2 }} style={{ flex: 1 }}>
         //     <View style={{ width, height: 130, justifyContent: "center", alignItems: "center", gap: 20 }}>
         //         <AppText fontSize={36} style={{ color: "#FFFFFF", fontFamily: "helveticaBold" }}>

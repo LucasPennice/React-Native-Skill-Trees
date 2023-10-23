@@ -1,3 +1,4 @@
+import { TreeData } from "@/redux/slices/userTreesSlice";
 import { Dictionary } from "@reduxjs/toolkit";
 import { colors } from "../parameters";
 import {
@@ -12,18 +13,22 @@ import {
     UpdateRadiusPerLevelTable,
     getDefaultSkillValue,
 } from "../types";
-import { TreeData } from "@/redux/slices/userTreesSlice";
 
-export function makeid(length: number) {
-    let result = "";
-    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    const charactersLength = characters.length;
-    let counter = 0;
-    while (counter < length) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        counter += 1;
+export function generate24CharHexId() {
+    const hexChars = "0123456789abcdef";
+    let hexId = "";
+
+    for (let i = 0; i < 24; i++) {
+        const randomIndex = Math.floor(Math.random() * 16);
+        hexId += hexChars[randomIndex];
     }
-    return result;
+
+    return hexId;
+}
+
+export function isHexadecimal(str: string) {
+    const hexRegex = /^[0-9a-fA-F]+$/;
+    return hexRegex.test(str);
 }
 
 export function createTree(treeName: string, gradient: ColorGradient, isRoot: boolean, category: NodeCategory, data: Skill) {
@@ -32,9 +37,9 @@ export function createTree(treeName: string, gradient: ColorGradient, isRoot: bo
         accentColor: gradient,
         isRoot,
         parentId: null,
-        treeId: makeid(24),
+        treeId: generate24CharHexId(),
         level: 0,
-        nodeId: makeid(24),
+        nodeId: generate24CharHexId(),
         category,
         children: [],
         x: 0,

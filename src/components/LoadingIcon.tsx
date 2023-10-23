@@ -4,11 +4,11 @@ import { getWheelParams } from "../functions/misc";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-function LoadingIcon() {
-    const progressWheelProps = getWheelParams("#FFFFFF", `#FFFFFF00`, 100, 10);
+function LoadingIcon({ backgroundColor = "#FFFFFF00", size = 100 }: { size?: number; backgroundColor?: string }) {
+    const progressWheelProps = getWheelParams("#FFFFFF", backgroundColor, size, size / 10);
 
     const animatedProps = useAnimatedProps(() => {
-        const result = progressWheelProps.circumference - (progressWheelProps.circumference * 50) / 100;
+        const result = progressWheelProps.circumference - (progressWheelProps.circumference * 50) / size;
 
         return { strokeDashoffset: withSpring(result, { overshootClamping: true, damping: 65 }) };
     }, []);
@@ -30,6 +30,7 @@ function LoadingIcon() {
                     cy={progressWheelProps.centerCoordinate}
                     r={progressWheelProps.radius}
                     stroke={progressWheelProps.backgroundStroke}
+                    fillOpacity={0}
                 />
                 <AnimatedCircle
                     strokeWidth={progressWheelProps.strokeWidth}
@@ -40,6 +41,7 @@ function LoadingIcon() {
                     strokeDasharray={progressWheelProps.circumference}
                     strokeLinecap="round"
                     animatedProps={animatedProps}
+                    fillOpacity={0}
                 />
             </Svg>
         </Animated.View>
