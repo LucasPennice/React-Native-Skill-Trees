@@ -1,16 +1,29 @@
 import AppText from "@/components/AppText";
-import { colors } from "@/parameters";
-import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
-import Animated, { ZoomIn, ZoomOut, interpolateColor, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import AppTextInput from "@/components/AppTextInput";
 import LoadingIcon from "@/components/LoadingIcon";
+import { getUserFeedbackProgressPercentage } from "@/functions/misc";
+import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
+import { DataAndDate, UserFeedback, appendNewEntry, selectUserFeedbackSlice } from "@/redux/slices/userFeedbackSlice";
 import { selectUserId } from "@/redux/slices/userSlice";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { useMutation } from "@tanstack/react-query";
 import axiosClient from "axiosClient";
 import { useState } from "react";
-import { DataAndDate, UserFeedback, appendNewEntry, selectUserFeedbackSlice } from "@/redux/slices/userFeedbackSlice";
-import { getUserFeedbackProgressPercentage } from "@/functions/misc";
+import {
+    Alert,
+    Dimensions,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleProp,
+    StyleSheet,
+    TouchableHighlight,
+    View,
+    ViewStyle,
+} from "react-native";
+import Animated, { ZoomIn, ZoomOut, interpolateColor, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import { mixpanel } from "./_layout";
 
 const PAGE_MARGIN = 30;
@@ -262,8 +275,59 @@ function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React
             });
         },
     });
+    const { mutate: currentSolution, status: currentSolutionStatus } = useMutation({
+        mutationFn: (newDislike: DataAndDate) => axiosClient.patch(`feedback/${userId}/currentSolution`, newDislike),
+        onSuccess: async (_, newEntry) => {
+            await mixpanel.track(`UserFeedback-CurrentSolution`);
+            dispatch(appendNewEntry({ keyToUpdate: "currentSolution", newEntry }));
+            setFeedbackState((prev) => {
+                const result = { ...prev, currentSolution: [...prev.currentSolution, newEntry] } as UserFeedback;
 
-    return { problems, problemsStatus, mainObstacle, mainObstacleStatus, suggestedFeatures, suggestedFeaturesStatus, dislikes, dislikesStatus };
+                return result;
+            });
+        },
+    });
+    const { mutate: whyIsItHard, status: whyIsItHardStatus } = useMutation({
+        mutationFn: (newDislike: DataAndDate) => axiosClient.patch(`feedback/${userId}/whyIsItHard`, newDislike),
+        onSuccess: async (_, newEntry) => {
+            await mixpanel.track(`UserFeedback-WhyIsItHard`);
+            dispatch(appendNewEntry({ keyToUpdate: "whyIsItHard", newEntry }));
+            setFeedbackState((prev) => {
+                const result = { ...prev, whyIsItHard: [...prev.whyIsItHard, newEntry] } as UserFeedback;
+
+                return result;
+            });
+        },
+    });
+    const { mutate: reasonToSolveProblem, status: reasonToSolveProblemStatus } = useMutation({
+        mutationFn: (newDislike: DataAndDate) => axiosClient.patch(`feedback/${userId}/reasonToSolveProblem`, newDislike),
+        onSuccess: async (_, newEntry) => {
+            await mixpanel.track(`UserFeedback-ReasonToSolveProblem`);
+            dispatch(appendNewEntry({ keyToUpdate: "reasonToSolveProblem", newEntry }));
+            setFeedbackState((prev) => {
+                const result = { ...prev, reasonToSolveProblem: [...prev.reasonToSolveProblem, newEntry] } as UserFeedback;
+
+                return result;
+            });
+        },
+    });
+
+    return {
+        reasonToSolveProblem,
+        reasonToSolveProblemStatus,
+        whyIsItHard,
+        whyIsItHardStatus,
+        currentSolution,
+        currentSolutionStatus,
+        problems,
+        problemsStatus,
+        mainObstacle,
+        mainObstacleStatus,
+        suggestedFeatures,
+        suggestedFeaturesStatus,
+        dislikes,
+        dislikesStatus,
+    };
 }
 
 function Feedback() {
@@ -289,8 +353,17 @@ function Feedback() {
             case "dislikes":
                 update.dislikes(newEntry);
                 break;
+            case "currentSolution":
+                update.currentSolution(newEntry);
+                break;
+            case "reasonToSolveProblem":
+                update.reasonToSolveProblem(newEntry);
+                break;
             case "suggestedFeatures":
                 update.suggestedFeatures(newEntry);
+                break;
+            case "whyIsItHard":
+                update.whyIsItHard(newEntry);
                 break;
             default:
                 Alert.alert("Invalid key in appendToFeedbackField");
@@ -315,11 +388,8 @@ function Feedback() {
                     fontSize={16}
                     style={{ color: "#E6E8E6", marginBottom: 30 }}
                 />
-
                 <ProgressBar progressPercentage={progressPercentage} />
-
                 <Spacer style={{ marginBottom: PAGE_MARGIN }} />
-
                 <FeedbackInput
                     title={"What problem do you hope Skill Trees helps you solve?"}
                     placeholder={feedbackState["problems"].length !== 0 ? feedbackState["problems"][0].data : "Your answer"}
@@ -329,6 +399,22 @@ function Feedback() {
                     buttonState={feedbackState["problems"].length !== 0 ? "success" : update.problemsStatus}
                 />
                 <FeedbackInput
+                    title={"Why is it important for you to solve this problem?"}
+                    placeholder={feedbackState["reasonToSolveProblem"].length !== 0 ? feedbackState["reasonToSolveProblem"][0].data : "Your answer"}
+                    containerStyles={{ marginBottom: PAGE_MARGIN }}
+                    onPress={appendToFeedbackField("reasonToSolveProblem")}
+                    disabled={feedbackState["reasonToSolveProblem"].length !== 0}
+                    buttonState={feedbackState["reasonToSolveProblem"].length !== 0 ? "success" : update.reasonToSolveProblemStatus}
+                />
+                <FeedbackInput
+                    title={"How do you solve that problem today?"}
+                    placeholder={feedbackState["currentSolution"].length !== 0 ? feedbackState["currentSolution"][0].data : "Your answer"}
+                    containerStyles={{ marginBottom: PAGE_MARGIN }}
+                    onPress={appendToFeedbackField("currentSolution")}
+                    disabled={feedbackState["currentSolution"].length !== 0}
+                    buttonState={feedbackState["currentSolution"].length !== 0 ? "success" : update.currentSolutionStatus}
+                />
+                <FeedbackInput
                     title={"What's your main obstacle in solving it?"}
                     placeholder={feedbackState["mainObstacle"].length !== 0 ? feedbackState["mainObstacle"][0].data : "Your answer"}
                     containerStyles={{ marginBottom: PAGE_MARGIN }}
@@ -336,8 +422,22 @@ function Feedback() {
                     disabled={feedbackState["mainObstacle"].length !== 0}
                     buttonState={feedbackState["mainObstacle"].length !== 0 ? "success" : update.mainObstacleStatus}
                 />
+
                 <FeedbackInput
-                    title={"What don't you like about Skill Trees"}
+                    title={"Why is it hard to overcome?"}
+                    placeholder={feedbackState["whyIsItHard"].length !== 0 ? feedbackState["whyIsItHard"][0].data : "Your answer"}
+                    containerStyles={{ marginBottom: PAGE_MARGIN }}
+                    onPress={appendToFeedbackField("whyIsItHard")}
+                    disabled={feedbackState["whyIsItHard"].length !== 0}
+                    buttonState={feedbackState["whyIsItHard"].length !== 0 ? "success" : update.whyIsItHardStatus}
+                />
+
+                <Spacer style={{ marginBottom: PAGE_MARGIN }} />
+
+                <Contact />
+
+                <FeedbackInput
+                    title={"Is there anything you dislike about Skill Trees"}
                     placeholder={feedbackState["dislikes"].length !== 0 ? feedbackState["dislikes"][0].data : "Your answer"}
                     containerStyles={{ marginBottom: PAGE_MARGIN }}
                     onPress={appendToFeedbackField("dislikes")}
@@ -346,112 +446,53 @@ function Feedback() {
                 />
             </ScrollView>
         </KeyboardAvoidingView>
-        // <LinearGradient colors={["#BF5AF2", "#5A7BF2"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0.2 }} style={{ flex: 1 }}>
-        //     <View style={{ width, height: 130, justifyContent: "center", alignItems: "center", gap: 20 }}>
-        //         <AppText fontSize={36} style={{ color: "#FFFFFF", fontFamily: "helveticaBold" }}>
-        //             Hello!
-        //         </AppText>
-        //         <AppText fontSize={20} style={{ color: "#FFFFFF", fontFamily: "helveticaBold" }}>
-        //             I hope you are enjoying Skill Trees
-        //         </AppText>
-        //     </View>
-
-        //     <Animated.View style={{ flex: 1 }} entering={SlideInDown.duration(600).easing(Easing.inOut(Easing.cubic))}>
-        //         <LinearGradient
-        //             colors={["#515053", "#181A1C"]}
-        //             start={{ x: 0.5, y: -0.5 }}
-        //             end={{ x: 0.5, y: 1 }}
-        //             style={{ flex: 1, borderTopLeftRadius: 25, borderTopRightRadius: 25 }}>
-        //             <View style={{ flex: 1, padding: 25, justifyContent: "space-between", alignItems: "center" }}>
-        //                 <Animated.View style={{ gap: 0 }} entering={FadeInDown.duration(300).delay(650).easing(Easing.inOut(Easing.cubic))}>
-        //                     <AppText fontSize={16} style={{ color: "#FFFFFF", fontFamily: "helvetica", textAlign: "center", lineHeight: 23 }}>
-        //                         If you'd like to help shape the future of Skill Trees by giving feedback
-        //                     </AppText>
-        //                     <AppText fontSize={16} style={{ color: "#FFFFFF", fontFamily: "helvetica", textAlign: "center", lineHeight: 23 }}>
-        //                         Consider following me or reaching out
-        //                     </AppText>
-        //                     <AppText fontSize={16} style={{ color: "#FFFFFF", fontFamily: "helvetica", textAlign: "center", lineHeight: 23 }}>
-        //                         I'll run polls to figure out the best way to help you reach your life's goals
-        //                     </AppText>
-        //                 </Animated.View>
-        //                 <Animated.View entering={FadeInDown.duration(300).delay(700).easing(Easing.inOut(Easing.cubic))} style={{ gap: 30 }}>
-        //                     <Pressable
-        //                         onPress={async () => {
-        //                             await analytics().logEvent("ClickInstagramLink");
-        //                             Linking.openURL("https://instagram.com/lucas_pennice?igshid=NGVhN2U2NjQ0Yg%3D%3D&utm_source=qr");
-        //                         }}>
-        //                         <LinearGradient
-        //                             colors={["#BF5AF2", "#5A7BF2"]}
-        //                             start={{ x: 0, y: 0 }}
-        //                             end={{ x: 1, y: 1 }}
-        //                             style={{
-        //                                 width: width - 60,
-        //                                 height: 80,
-        //                                 borderRadius: 20,
-        //                                 flexDirection: "row",
-        //                                 justifyContent: "space-between",
-        //                                 alignItems: "center",
-        //                                 paddingHorizontal: 30,
-        //                             }}>
-        //                             <FontAwesome size={50} name="instagram" color={"#FFFFFF"} />
-        //                             <View>
-        //                                 <AppText
-        //                                     fontSize={16}
-        //                                     style={{ color: "#FFFFFF", fontFamily: "helveticaBold", textAlign: "center", marginBottom: 5 }}>
-        //                                     Follow me on
-        //                                 </AppText>
-        //                                 <AppText fontSize={16} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", textAlign: "center" }}>
-        //                                     Instagram
-        //                                 </AppText>
-        //                             </View>
-        //                         </LinearGradient>
-        //                     </Pressable>
-
-        //                     <Pressable
-        //                         onPress={async () => {
-        //                             await analytics().logEvent("ClickTwitterLink");
-        //                             Linking.openURL("https://twitter.com/LucasPennice");
-        //                         }}>
-        //                         <LinearGradient
-        //                             colors={["#5A7BF2", "#40C8E0"]}
-        //                             start={{ x: 0, y: 0 }}
-        //                             end={{ x: 1, y: 1 }}
-        //                             style={{
-        //                                 width: width - 60,
-        //                                 height: 80,
-        //                                 borderRadius: 20,
-        //                                 flexDirection: "row",
-        //                                 justifyContent: "space-between",
-        //                                 alignItems: "center",
-        //                                 paddingHorizontal: 30,
-        //                             }}>
-        //                             <FontAwesome size={50} name="twitter" color={"#FFFFFF"} />
-        //                             <View>
-        //                                 <AppText
-        //                                     fontSize={16}
-        //                                     style={{ color: "#FFFFFF", fontFamily: "helveticaBold", textAlign: "center", marginBottom: 5 }}>
-        //                                     Follow me on
-        //                                 </AppText>
-        //                                 <AppText fontSize={16} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", textAlign: "center" }}>
-        //                                     X (Twitter)
-        //                                 </AppText>
-        //                             </View>
-        //                         </LinearGradient>
-        //                     </Pressable>
-        //                 </Animated.View>
-        //                 <Animated.View entering={FadeInDown.duration(300).delay(750).easing(Easing.inOut(Easing.cubic))}>
-        //                     <AppText fontSize={16} style={{ color: colors.unmarkedText, fontFamily: "helvetica", textAlign: "center" }}>
-        //                         Or send me an email at:
-        //                     </AppText>
-        //                     <AppText fontSize={16} style={{ color: colors.unmarkedText, fontFamily: "helvetica", textAlign: "center" }}>
-        //                         skilltreesapp@gmail.com
-        //                     </AppText>
-        //                 </Animated.View>
-        //             </View>
-        //         </LinearGradient>
-        //     </Animated.View>
-        // </LinearGradient>
     );
 }
+
+const Contact = () => {
+    const copyEmailToClipboard = () => Clipboard.setString("lucaspennice@gmail.com");
+
+    const [copied, setCopied] = useState(false);
+
+    const animatedColor = useAnimatedStyle(() => {
+        return { borderColor: withTiming(copied ? colors.green : colors.accent) };
+    });
+
+    const styles = StyleSheet.create({
+        container: {
+            backgroundColor: colors.darkGray,
+            borderRadius: 10,
+            borderStyle: "solid",
+            borderWidth: 1,
+            height: 45,
+            marginBottom: 10,
+            justifyContent: "center",
+            alignItems: "center",
+        },
+    });
+
+    return (
+        <>
+            <AppText children={"Did you come across a bug?"} fontSize={18} style={{ color: "#E6E8E6", marginBottom: 20 }} />
+            <AppText children={"Please send me an email at:"} fontSize={16} style={{ color: "#E6E8E6", marginBottom: 10 }} />
+            <TouchableHighlight
+                onPress={() => {
+                    copyEmailToClipboard();
+                    setCopied(true);
+                }}>
+                <Animated.View style={[styles.container, animatedColor]}>
+                    <AppText children={"lucaspennice@gmail.com"} fontSize={16} style={{ color: "#E6E8E6" }} />
+                </Animated.View>
+            </TouchableHighlight>
+
+            <AppText
+                children={"That's my personal email so I should get back to you in no time"}
+                fontSize={16}
+                style={{ color: "#E6E8E6", marginBottom: 20 }}
+            />
+            <AppText children={"You can click the email to copy it"} fontSize={16} style={{ color: "#E6E8E6", marginBottom: 20 }} />
+        </>
+    );
+};
 
 export default Feedback;

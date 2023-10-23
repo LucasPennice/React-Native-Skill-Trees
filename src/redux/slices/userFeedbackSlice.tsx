@@ -7,6 +7,9 @@ export type UserFeedback = {
     mainObstacle: DataAndDate[];
     suggestedFeatures: DataAndDate[];
     dislikes: DataAndDate[];
+    currentSolution: DataAndDate[];
+    whyIsItHard: DataAndDate[];
+    reasonToSolveProblem: DataAndDate[];
 };
 
 // Define the initial state using that type
@@ -15,6 +18,9 @@ const initialState: UserFeedback = {
     mainObstacle: [],
     problems: [],
     suggestedFeatures: [],
+    currentSolution: [],
+    whyIsItHard: [],
+    reasonToSolveProblem: [],
 };
 
 export const userFeedbackSlice = createSlice({

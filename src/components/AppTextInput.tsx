@@ -46,6 +46,8 @@ function AppTextInput({
                 onBlur={disable ? undefined : onBlur}
                 value={text}
                 allowFontScaling={false}
+                editable={!disable}
+                selectTextOnFocus={!disable}
                 placeholderTextColor={colors.line}
                 style={[
                     {

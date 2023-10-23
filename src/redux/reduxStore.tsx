@@ -42,11 +42,19 @@ const migration: MigrationManifest = {
         updatedState["user"] = { userId: newID };
         return updatedState;
     },
+    //@ts-ignore
+    4: (state) => {
+        let updatedState = { ...state };
+        //@ts-ignore
+        //@ts-ignore
+        updatedState["userFeedback"] = { ...updatedState["userFeedback"], currentSolution: [], whyIsItHard: [], reasonToSolveProblem: [] };
+        return updatedState;
+    },
 };
 
 const persistConfig: PersistConfig<any> = {
     key: "root",
-    version: 3,
+    version: 4,
     storage: AsyncStorage,
     migrate: createMigrate(migration, { debug: false } as MigrationConfig),
     blacklist: ["addTree"],
