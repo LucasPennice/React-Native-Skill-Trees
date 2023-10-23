@@ -7,10 +7,7 @@ import RadialLabel from "../../components/treeRelated/radial/RadialLabel";
 import { CanvasDimensions, NodeCoordinate } from "../../types";
 
 type TreeProps = {
-    reactiveNodes: NodeCoordinate[];
-    staticNodes: NodeCoordinate[];
     allNodes: NodeCoordinate[];
-    selectedNode: string | null;
     canvasDimensions: CanvasDimensions;
     settings: {
         showLabel: boolean;
@@ -51,7 +48,7 @@ const LabelList = memo(function LabelList({ nodeCoordinates, font }: { nodeCoord
     });
 });
 
-function HomepageSkillTree({ allNodes, reactiveNodes, staticNodes, selectedNode, settings, drag, fonts, canvasDimensions }: TreeProps) {
+function HomepageSkillTree({ allNodes, settings, drag, fonts, canvasDimensions }: TreeProps) {
     const { emojiFont, labelFont, nodeLetterFont } = fonts;
 
     const rootNode = allNodes.find((n) => n.level === 0);
@@ -67,7 +64,7 @@ function HomepageSkillTree({ allNodes, reactiveNodes, staticNodes, selectedNode,
             <StaticNodeList
                 fonts={{ emojiFont, nodeLetterFont }}
                 allNodes={allNodes}
-                staticNodes={staticNodes}
+                staticNodes={allNodes}
                 settings={{ oneColorPerTree: settings.oneColorPerTree, showIcons: settings.showIcons }}
                 canvasDimensions={canvasDimensions}
             />

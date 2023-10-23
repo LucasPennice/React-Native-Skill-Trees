@@ -303,11 +303,8 @@ function HomepageTree({ canvasRef, openCanvasSettingsModal, selectedNodeCoordSta
                     {canvasDisplaySettings.showCircleGuide && <RadialTreeLevelCircles nodeCoordinates={treeState.treeCoordinate.nodeCoordinates} />}
                     {fonts && (
                         <RadialStaticSkillTree
-                            reactiveNodes={[]}
-                            staticNodes={treeState.treeCoordinate.nodeCoordinates}
                             canvasDimensions={treeState.treeCoordinate.canvasDimensions}
                             allNodes={treeState.treeCoordinate.nodeCoordinates}
-                            selectedNode={selectedNode?.nodeId ?? null}
                             fonts={fonts}
                             settings={{
                                 showLabel: canvasDisplaySettings.showLabel,
