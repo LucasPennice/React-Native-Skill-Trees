@@ -97,6 +97,7 @@ function checkIfTreeCoordinatesChanged(newState: NodeCoordinate[], oldState?: No
 
 function useTrackTreeNodesState(treeNodes: NodeCoordinate[]): Result {
     const [result, setResult] = useState<Result>({ behavior: "Exiting", reactiveNodes: [], staticNodes: treeNodes });
+
     //TESTEAR ESTO CUANDO CAMBIO EL NOMBRE U OTRA COSA QUE NO SEAN LAS COORDENADAS
     const prevTreeNodesState = useStorePreviousState<NodeCoordinate[]>(treeNodes);
 

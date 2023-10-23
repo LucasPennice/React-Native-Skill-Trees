@@ -37,7 +37,7 @@ function TakingScreenshotLoadingScreenModal({
     useEffect(() => {
         (async () => {
             if (takingScreenshot) {
-                mixpanel.track(`takingScreenshot`);
+                await mixpanel.track(`takingScreenshot`);
 
                 await analytics().logEvent("takingScreenshot");
 

@@ -72,7 +72,7 @@ function AddTreeModal() {
         dispatch(addUserTree(newUserTree));
 
         await analytics().logEvent("createTree", { treeName, isEmoji });
-        mixpanel.track("userCreatedTree");
+        await mixpanel.track("userCreatedTree");
 
         closeModal();
     };

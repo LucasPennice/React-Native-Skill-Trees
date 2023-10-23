@@ -437,5 +437,5 @@ export function getUserFeedbackProgressPercentage(userFeedback: UserFeedback) {
         }
     }
 
-    return acum;
+    return parseInt(`${acum}`);
 }

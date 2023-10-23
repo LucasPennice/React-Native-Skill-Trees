@@ -217,8 +217,8 @@ function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React
 
     const { mutate: problems, status: problemsStatus } = useMutation({
         mutationFn: (newProblem: DataAndDate) => axiosClient.patch(`feedback/${userId}/problems`, newProblem),
-        onSuccess: (_, newEntry) => {
-            mixpanel.track(`UserFeedback-MainUserProblemToSolve`);
+        onSuccess: async (_, newEntry) => {
+            await mixpanel.track(`UserFeedback-MainUserProblemToSolve`);
             dispatch(appendNewEntry({ keyToUpdate: "problems", newEntry }));
             setFeedbackState((prev) => {
                 const result = { ...prev, problems: [...prev.problems, newEntry] } as UserFeedback;
@@ -229,8 +229,8 @@ function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React
     });
     const { mutate: mainObstacle, status: mainObstacleStatus } = useMutation({
         mutationFn: (newMainObstacle: DataAndDate) => axiosClient.patch(`feedback/${userId}/mainObstacle`, newMainObstacle),
-        onSuccess: (_, newEntry) => {
-            mixpanel.track(`UserFeedback-MainObstacle`);
+        onSuccess: async (_, newEntry) => {
+            await mixpanel.track(`UserFeedback-MainObstacle`);
             dispatch(appendNewEntry({ keyToUpdate: "mainObstacle", newEntry }));
             setFeedbackState((prev) => {
                 const result = { ...prev, mainObstacle: [...prev.mainObstacle, newEntry] } as UserFeedback;
@@ -252,8 +252,8 @@ function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React
     });
     const { mutate: dislikes, status: dislikesStatus } = useMutation({
         mutationFn: (newDislike: DataAndDate) => axiosClient.patch(`feedback/${userId}/dislikes`, newDislike),
-        onSuccess: (_, newEntry) => {
-            mixpanel.track(`UserFeedback-DislikeAboutSkillTrees`);
+        onSuccess: async (_, newEntry) => {
+            await mixpanel.track(`UserFeedback-DislikeAboutSkillTrees`);
             dispatch(appendNewEntry({ keyToUpdate: "dislikes", newEntry }));
             setFeedbackState((prev) => {
                 const result = { ...prev, dislikes: [...prev.dislikes, newEntry] } as UserFeedback;

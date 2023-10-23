@@ -90,7 +90,7 @@ export default function RootLayout() {
                                 screen_class: currentRouteName,
                             });
 
-                            mixpanel.track(`Navigate to ${currentRouteName}`);
+                            await mixpanel.track(`Navigate to ${currentRouteName}`);
                         }
 
                         prevRouteName.current = currentRouteName;
