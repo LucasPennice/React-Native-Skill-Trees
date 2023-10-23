@@ -13,6 +13,7 @@ import {
     UpdateRadiusPerLevelTable,
     getDefaultSkillValue,
 } from "../types";
+import { UserFeedback } from "@/redux/slices/userFeedbackSlice";
 
 export function generate24CharHexId() {
     const hexChars = "0123456789abcdef";
@@ -407,4 +408,34 @@ export function reverseArray<T>(arr: T[]) {
 
         return arr[inversedIdx];
     });
+}
+
+export function getUserFeedbackProgressPercentage(userFeedback: UserFeedback) {
+    let acum = 0;
+
+    const keys = Object.keys(userFeedback);
+
+    const QTY_OF_KEYS_THAT_CONTRIBUTE_TO_PERCENTAGE = 3;
+    const percentageIncrease = 100 / QTY_OF_KEYS_THAT_CONTRIBUTE_TO_PERCENTAGE;
+
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i] as keyof UserFeedback;
+        const feedbackIssue = userFeedback[key];
+
+        switch (key) {
+            case "dislikes":
+                if (feedbackIssue.length !== 0) acum += percentageIncrease;
+                break;
+            case "mainObstacle":
+                if (feedbackIssue.length !== 0) acum += percentageIncrease;
+                break;
+            case "problems":
+                if (feedbackIssue.length !== 0) acum += percentageIncrease;
+                break;
+            default:
+                break;
+        }
+    }
+
+    return acum;
 }

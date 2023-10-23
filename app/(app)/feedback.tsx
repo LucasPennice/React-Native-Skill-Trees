@@ -2,14 +2,16 @@ import AppText from "@/components/AppText";
 import { colors } from "@/parameters";
 import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import Animated, { ZoomIn, ZoomOut, interpolateColor, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
-
 import AppTextInput from "@/components/AppTextInput";
 import LoadingIcon from "@/components/LoadingIcon";
-import { useAppSelector } from "@/redux/reduxHooks";
+import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { selectUserId } from "@/redux/slices/userSlice";
 import { useMutation } from "@tanstack/react-query";
 import axiosClient from "axiosClient";
 import { useState } from "react";
+import { DataAndDate, UserFeedback, appendNewEntry, selectUserFeedbackSlice } from "@/redux/slices/userFeedbackSlice";
+import { getUserFeedbackProgressPercentage } from "@/functions/misc";
+import { mixpanel } from "./_layout";
 
 const PAGE_MARGIN = 30;
 
@@ -209,20 +211,15 @@ const Spacer = ({ style }: { style?: ViewStyle }) => {
     return <View style={[styles.container, style]} />;
 };
 
-type DataAndDate = { data: string; date: Date };
-type UserFeedback = {
-    problems: DataAndDate[];
-    mainObstacle: DataAndDate[];
-    suggestedFeatures: DataAndDate[];
-    dislikes: DataAndDate[];
-};
-
 function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React.SetStateAction<UserFeedback>>) {
     const userId = useAppSelector(selectUserId);
+    const dispatch = useAppDispatch();
 
     const { mutate: problems, status: problemsStatus } = useMutation({
         mutationFn: (newProblem: DataAndDate) => axiosClient.patch(`feedback/${userId}/problems`, newProblem),
         onSuccess: (_, newEntry) => {
+            mixpanel.track(`UserFeedback-MainUserProblemToSolve`);
+            dispatch(appendNewEntry({ keyToUpdate: "problems", newEntry }));
             setFeedbackState((prev) => {
                 const result = { ...prev, problems: [...prev.problems, newEntry] } as UserFeedback;
 
@@ -233,6 +230,8 @@ function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React
     const { mutate: mainObstacle, status: mainObstacleStatus } = useMutation({
         mutationFn: (newMainObstacle: DataAndDate) => axiosClient.patch(`feedback/${userId}/mainObstacle`, newMainObstacle),
         onSuccess: (_, newEntry) => {
+            mixpanel.track(`UserFeedback-MainObstacle`);
+            dispatch(appendNewEntry({ keyToUpdate: "mainObstacle", newEntry }));
             setFeedbackState((prev) => {
                 const result = { ...prev, mainObstacle: [...prev.mainObstacle, newEntry] } as UserFeedback;
 
@@ -243,6 +242,7 @@ function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React
     const { mutate: suggestedFeatures, status: suggestedFeaturesStatus } = useMutation({
         mutationFn: (newSuggestedFeature: DataAndDate) => axiosClient.patch(`feedback/${userId}/suggestedFeatures`, newSuggestedFeature),
         onSuccess: (_, newEntry) => {
+            dispatch(appendNewEntry({ keyToUpdate: "suggestedFeatures", newEntry }));
             setFeedbackState((prev) => {
                 const result = { ...prev, suggestedFeatures: [...prev.suggestedFeatures, newEntry] } as UserFeedback;
 
@@ -253,6 +253,8 @@ function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React
     const { mutate: dislikes, status: dislikesStatus } = useMutation({
         mutationFn: (newDislike: DataAndDate) => axiosClient.patch(`feedback/${userId}/dislikes`, newDislike),
         onSuccess: (_, newEntry) => {
+            mixpanel.track(`UserFeedback-DislikeAboutSkillTrees`);
+            dispatch(appendNewEntry({ keyToUpdate: "dislikes", newEntry }));
             setFeedbackState((prev) => {
                 const result = { ...prev, dislikes: [...prev.dislikes, newEntry] } as UserFeedback;
 
@@ -265,17 +267,17 @@ function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React
 }
 
 function Feedback() {
-    const mockReduxInitialState: UserFeedback = { dislikes: [], mainObstacle: [], problems: [], suggestedFeatures: [] };
-    const [feedbackState, setFeedbackState] = useState<UserFeedback>(mockReduxInitialState);
+    const prevUserFeedback = useAppSelector(selectUserFeedbackSlice);
+    const [feedbackState, setFeedbackState] = useState<UserFeedback>(prevUserFeedback);
 
     const update = useCreateUpdateFeedbackMutations(setFeedbackState);
 
-    const progressPercentage = getProgressPercentage(feedbackState);
+    const progressPercentage = getUserFeedbackProgressPercentage(feedbackState);
 
     const appendToFeedbackField = (key: keyof UserFeedback) => (data: string) => {
         if (data === "") return Alert.alert("Input cannot be empty");
 
-        const newEntry = { data, date: new Date() };
+        const newEntry = { data, date: new Date().toISOString() };
 
         switch (key) {
             case "problems":
@@ -295,10 +297,6 @@ function Feedback() {
                 break;
         }
     };
-    //🚨
-    // HACER QUE LA INFORMACION PERSISTA EN REDUX y cambiar el icono del nav para que se muestre el porcentage
-    //Y HACER QUE LA ID DE LOS USUARIOS SEA HEX SI O SI
-    //🚨
 
     return (
         <KeyboardAvoidingView
@@ -324,27 +322,27 @@ function Feedback() {
 
                 <FeedbackInput
                     title={"What problem do you hope Skill Trees helps you solve?"}
-                    placeholder={"Your answer"}
+                    placeholder={feedbackState["problems"].length !== 0 ? feedbackState["problems"][0].data : "Your answer"}
                     containerStyles={{ marginBottom: PAGE_MARGIN }}
                     onPress={appendToFeedbackField("problems")}
                     disabled={feedbackState["problems"].length !== 0}
-                    buttonState={update.problemsStatus}
+                    buttonState={feedbackState["problems"].length !== 0 ? "success" : update.problemsStatus}
                 />
                 <FeedbackInput
                     title={"What's your main obstacle in solving it?"}
-                    placeholder={"Your answer"}
+                    placeholder={feedbackState["mainObstacle"].length !== 0 ? feedbackState["mainObstacle"][0].data : "Your answer"}
                     containerStyles={{ marginBottom: PAGE_MARGIN }}
                     onPress={appendToFeedbackField("mainObstacle")}
                     disabled={feedbackState["mainObstacle"].length !== 0}
-                    buttonState={update.mainObstacleStatus}
+                    buttonState={feedbackState["mainObstacle"].length !== 0 ? "success" : update.mainObstacleStatus}
                 />
                 <FeedbackInput
                     title={"What don't you like about Skill Trees"}
-                    placeholder={"Your answer"}
+                    placeholder={feedbackState["dislikes"].length !== 0 ? feedbackState["dislikes"][0].data : "Your answer"}
                     containerStyles={{ marginBottom: PAGE_MARGIN }}
                     onPress={appendToFeedbackField("dislikes")}
                     disabled={feedbackState["dislikes"].length !== 0}
-                    buttonState={update.dislikesStatus}
+                    buttonState={feedbackState["dislikes"].length !== 0 ? "success" : update.dislikesStatus}
                 />
             </ScrollView>
         </KeyboardAvoidingView>
@@ -454,24 +452,6 @@ function Feedback() {
         //     </Animated.View>
         // </LinearGradient>
     );
-}
-
-function getProgressPercentage(userFeedback: UserFeedback) {
-    let acum = 0;
-
-    const keys = Object.keys(userFeedback);
-
-    const percentageIncrease = 100 / keys.length;
-
-    for (let i = 0; i < keys.length; i++) {
-        const key = keys[i] as keyof UserFeedback;
-
-        const feedbackIssue = userFeedback[key];
-
-        if (feedbackIssue.length !== 0) acum += percentageIncrease;
-    }
-
-    return acum;
 }
 
 export default Feedback;

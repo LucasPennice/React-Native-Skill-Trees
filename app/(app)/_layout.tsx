@@ -13,6 +13,9 @@ import { routes } from "routes";
 import analytics from "@react-native-firebase/analytics";
 import { Mixpanel } from "mixpanel-react-native";
 import { selectUserId } from "@/redux/slices/userSlice";
+import { getUserFeedbackProgressPercentage, getWheelParams } from "@/functions/misc";
+import { Svg, Circle } from "react-native-svg";
+import { selectUserFeedbackSlice } from "@/redux/slices/userFeedbackSlice";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
     return <FontAwesome size={props.size ?? 28} style={{ marginBottom: -3 }} {...props} />;
@@ -28,12 +31,16 @@ function usePassMixPanelUserId() {
     }, [userId]);
 }
 
+const progressWheelProps = getWheelParams(colors.accent, colors.line, 45, 4);
+
 const trackAutomaticEvents = true;
 export const mixpanel = new Mixpanel("5a141ce3c43980d8fab68b96e1256525", trackAutomaticEvents);
 mixpanel.init();
 
 export default function RootLayout() {
     usePassMixPanelUserId();
+
+    const userFeedback = useAppSelector(selectUserFeedbackSlice);
 
     const { width, height } = Dimensions.get("window");
 
@@ -64,6 +71,9 @@ export default function RootLayout() {
     const prevRouteName = useRef<string | null>(null);
 
     if (!loaded) return <Text>Loading...</Text>;
+
+    const strokeDashoffset =
+        progressWheelProps.circumference - (progressWheelProps.circumference * getUserFeedbackProgressPercentage(userFeedback)) / 100;
 
     return (
         <View style={{ flex: 1, minHeight: Platform.OS === "android" ? height - NAV_HEGIHT : "auto" }}>
@@ -131,11 +141,36 @@ export default function RootLayout() {
                     </AppText>
                 </Pressable>
                 <Pressable
-                    style={{ width: width / 3, flex: 1, justifyContent: "center", alignItems: "center", gap: 6 }}
+                    style={{ width: width / 3, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                     onPress={() => router.replace("/(app)/feedback")}>
-                    <TabBarIcon name="thumbs-up" color={pathname.includes("feedback") ? colors.accent : colors.unmarkedText} />
-                    <AppText style={{ color: pathname.includes("feedback") ? colors.accent : colors.unmarkedText }} fontSize={10}>
-                        Feedback (NEW)
+                    <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
+                        <Circle
+                            strokeWidth={progressWheelProps.strokeWidth}
+                            cx={progressWheelProps.centerCoordinate}
+                            cy={progressWheelProps.centerCoordinate}
+                            r={progressWheelProps.radius}
+                            fillOpacity={0}
+                            stroke={progressWheelProps.backgroundStroke}
+                        />
+                        <Circle
+                            strokeWidth={progressWheelProps.strokeWidth}
+                            cx={progressWheelProps.centerCoordinate}
+                            cy={progressWheelProps.centerCoordinate}
+                            r={progressWheelProps.radius}
+                            stroke={pathname.includes("feedback") ? colors.accent : colors.unmarkedText}
+                            fillOpacity={0}
+                            strokeDasharray={progressWheelProps.circumference}
+                            strokeLinecap="round"
+                            strokeDashoffset={strokeDashoffset}
+                        />
+                    </Svg>
+                    <AppText
+                        fontSize={12}
+                        style={{
+                            position: "absolute",
+                            color: pathname.includes("feedback") ? colors.accent : colors.unmarkedText,
+                        }}>
+                        {getUserFeedbackProgressPercentage(userFeedback)}
                     </AppText>
                 </Pressable>
             </KeyboardAvoidingView>
