@@ -1,21 +1,20 @@
 import AppText from "@/components/AppText";
 import ChevronLeft from "@/components/Icons/ChevronLeft";
+import { getUserFeedbackProgressPercentage, getWheelParams } from "@/functions/misc";
 import { NAV_HEGIHT, colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { open } from "@/redux/slices/addTreeModalSlice";
+import { selectUserFeedbackSlice } from "@/redux/slices/userFeedbackSlice";
+import { selectUserId } from "@/redux/slices/userSlice";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import analytics from "@react-native-firebase/analytics";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
+import { Mixpanel } from "mixpanel-react-native";
 import { useEffect, useRef } from "react";
 import { Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { routes } from "routes";
-import analytics from "@react-native-firebase/analytics";
-import { Mixpanel } from "mixpanel-react-native";
-import { selectUserId } from "@/redux/slices/userSlice";
-import { getUserFeedbackProgressPercentage, getWheelParams } from "@/functions/misc";
-import { Svg, Circle } from "react-native-svg";
-import { selectUserFeedbackSlice } from "@/redux/slices/userFeedbackSlice";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
     return <FontAwesome size={props.size ?? 28} style={{ marginBottom: -3 }} {...props} />;
@@ -143,34 +142,9 @@ export default function RootLayout() {
                 <Pressable
                     style={{ width: width / 3, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                     onPress={() => router.replace("/(app)/feedback")}>
-                    <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
-                        <Circle
-                            strokeWidth={progressWheelProps.strokeWidth}
-                            cx={progressWheelProps.centerCoordinate}
-                            cy={progressWheelProps.centerCoordinate}
-                            r={progressWheelProps.radius}
-                            fillOpacity={0}
-                            stroke={progressWheelProps.backgroundStroke}
-                        />
-                        <Circle
-                            strokeWidth={progressWheelProps.strokeWidth}
-                            cx={progressWheelProps.centerCoordinate}
-                            cy={progressWheelProps.centerCoordinate}
-                            r={progressWheelProps.radius}
-                            stroke={pathname.includes("feedback") ? colors.accent : colors.unmarkedText}
-                            fillOpacity={0}
-                            strokeDasharray={progressWheelProps.circumference}
-                            strokeLinecap="round"
-                            strokeDashoffset={strokeDashoffset}
-                        />
-                    </Svg>
-                    <AppText
-                        fontSize={12}
-                        style={{
-                            position: "absolute",
-                            color: pathname.includes("feedback") ? colors.accent : colors.unmarkedText,
-                        }}>
-                        {getUserFeedbackProgressPercentage(userFeedback)}
+                    <TabBarIcon name="group" color={pathname.includes("feedback") ? colors.accent : colors.unmarkedText} />
+                    <AppText style={{ color: pathname.includes("feedback") ? colors.accent : colors.unmarkedText }} fontSize={12}>
+                        Community
                     </AppText>
                 </Pressable>
             </KeyboardAvoidingView>

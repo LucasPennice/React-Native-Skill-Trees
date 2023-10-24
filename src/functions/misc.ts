@@ -415,7 +415,7 @@ export function getUserFeedbackProgressPercentage(userFeedback: UserFeedback) {
 
     const keys = Object.keys(userFeedback);
 
-    const QTY_OF_KEYS_THAT_CONTRIBUTE_TO_PERCENTAGE = 5;
+    const QTY_OF_KEYS_THAT_CONTRIBUTE_TO_PERCENTAGE = 3;
     const percentageIncrease = 100 / QTY_OF_KEYS_THAT_CONTRIBUTE_TO_PERCENTAGE;
 
     for (let i = 0; i < keys.length; i++) {
@@ -424,12 +424,6 @@ export function getUserFeedbackProgressPercentage(userFeedback: UserFeedback) {
 
         switch (key) {
             case "currentSolution":
-                if (feedbackIssue.length !== 0) acum += percentageIncrease;
-                break;
-            case "reasonToSolveProblem":
-                if (feedbackIssue.length !== 0) acum += percentageIncrease;
-                break;
-            case "whyIsItHard":
                 if (feedbackIssue.length !== 0) acum += percentageIncrease;
                 break;
             case "mainObstacle":

@@ -10,9 +10,11 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { useMutation } from "@tanstack/react-query";
 import axiosClient from "axiosClient";
 import { useState } from "react";
+import CopyIcon from "@/components/Icons/CopyIcon";
 import {
     Alert,
     Dimensions,
+    Image,
     KeyboardAvoidingView,
     Platform,
     Pressable,
@@ -25,6 +27,7 @@ import {
 } from "react-native";
 import Animated, { ZoomIn, ZoomOut, interpolateColor, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import { mixpanel } from "./_layout";
+import { faceImage } from "@/images";
 
 const PAGE_MARGIN = 30;
 
@@ -134,7 +137,7 @@ const FeedbackInput = ({
     const [text, setText] = useState("");
 
     const styles = StyleSheet.create({
-        container: { backgroundColor: colors.darkGray, width: "100%", padding: 15, borderRadius: 10 },
+        container: { backgroundColor: colors.darkGray, width: "100%", padding: 15, borderRadius: 10, zIndex: 5 },
         textInput: { backgroundColor: "#515053", minHeight: 45, fontSize: 10, marginBottom: 20 },
         disabledContainer: { opacity: 0.6 },
     });
@@ -376,18 +379,8 @@ function Feedback() {
             behavior={Platform.OS === "ios" ? "padding" : "position"}
             style={{ backgroundColor: colors.background, flex: 1 }}
             keyboardVerticalOffset={-60}>
-            <ScrollView style={{ padding: 10 }} stickyHeaderIndices={[3]}>
-                <AppText children={"Hey Beta Users!"} fontSize={18} style={{ color: "#E6E8E6", marginBottom: 20 }} />
-                <AppText
-                    children={"Your feedback fuels our mission to help more people become who they are destined to be"}
-                    fontSize={16}
-                    style={{ color: "#E6E8E6", marginBottom: 20 }}
-                />
-                <AppText
-                    children={"Share your feedback to boost the completion percentage and help us improve the Skill Trees!"}
-                    fontSize={16}
-                    style={{ color: "#E6E8E6", marginBottom: 30 }}
-                />
+            <ScrollView style={{ padding: 10 }} stickyHeaderIndices={[1]}>
+                <Header />
                 <ProgressBar progressPercentage={progressPercentage} />
                 <Spacer style={{ marginBottom: PAGE_MARGIN }} />
                 <FeedbackInput
@@ -398,14 +391,14 @@ function Feedback() {
                     disabled={feedbackState["problems"].length !== 0}
                     buttonState={feedbackState["problems"].length !== 0 ? "success" : update.problemsStatus}
                 />
-                <FeedbackInput
+                {/* <FeedbackInput
                     title={"Why is it important for you to solve this problem?"}
                     placeholder={feedbackState["reasonToSolveProblem"].length !== 0 ? feedbackState["reasonToSolveProblem"][0].data : "Your answer"}
                     containerStyles={{ marginBottom: PAGE_MARGIN }}
                     onPress={appendToFeedbackField("reasonToSolveProblem")}
                     disabled={feedbackState["reasonToSolveProblem"].length !== 0}
                     buttonState={feedbackState["reasonToSolveProblem"].length !== 0 ? "success" : update.reasonToSolveProblemStatus}
-                />
+                /> */}
                 <FeedbackInput
                     title={"How do you solve that problem today?"}
                     placeholder={feedbackState["currentSolution"].length !== 0 ? feedbackState["currentSolution"][0].data : "Your answer"}
@@ -423,46 +416,84 @@ function Feedback() {
                     buttonState={feedbackState["mainObstacle"].length !== 0 ? "success" : update.mainObstacleStatus}
                 />
 
-                <FeedbackInput
+                {/* <FeedbackInput
                     title={"Why is it hard to overcome?"}
                     placeholder={feedbackState["whyIsItHard"].length !== 0 ? feedbackState["whyIsItHard"][0].data : "Your answer"}
                     containerStyles={{ marginBottom: PAGE_MARGIN }}
                     onPress={appendToFeedbackField("whyIsItHard")}
                     disabled={feedbackState["whyIsItHard"].length !== 0}
                     buttonState={feedbackState["whyIsItHard"].length !== 0 ? "success" : update.whyIsItHardStatus}
-                />
+                /> */}
 
-                <Spacer style={{ marginBottom: PAGE_MARGIN }} />
-
-                <Contact />
-
-                <FeedbackInput
+                {/* <FeedbackInput
                     title={"Is there anything you dislike about Skill Trees"}
                     placeholder={feedbackState["dislikes"].length !== 0 ? feedbackState["dislikes"][0].data : "Your answer"}
                     containerStyles={{ marginBottom: PAGE_MARGIN }}
                     onPress={appendToFeedbackField("dislikes")}
                     disabled={feedbackState["dislikes"].length !== 0}
                     buttonState={feedbackState["dislikes"].length !== 0 ? "success" : update.dislikesStatus}
-                />
+                /> */}
+
+                <Spacer style={{ marginBottom: PAGE_MARGIN }} />
+
+                <Contact />
             </ScrollView>
         </KeyboardAvoidingView>
     );
 }
 
+const Header = () => {
+    const styles = StyleSheet.create({
+        top: { flexDirection: "row", gap: 10, marginBottom: 10 },
+        photo: { height: 60, width: 60, backgroundColor: colors.unmarkedText, borderRadius: 60 },
+    });
+    return (
+        <>
+            <View style={styles.top}>
+                <View style={{ flex: 1 }}>
+                    <AppText children={"Hey Beta User!"} fontSize={16} style={{ color: "#E6E8E6", marginBottom: 10 }} />
+                    <AppText children={"My name is Lucas and I'm the creator of Skill Trees"} fontSize={14} style={{ color: "#E6E8E6" }} />
+                </View>
+                <Image style={styles.photo} source={faceImage} />
+            </View>
+            <AppText children={"I would appreciate it if you could leave some feedback"} fontSize={14} style={{ color: "#E6E8E6" }} />
+            <AppText children={"Why am I asking for this favor?"} fontSize={14} style={{ color: "#E6E8E6", marginBottom: 10 }} />
+            <AppText
+                children={"If I understand you more I can make a better product for you and 1200+ other gamers who downloaded Skill Trees"}
+                fontSize={14}
+                style={{ color: "#E6E8E6", marginBottom: 20 }}
+            />
+            <AppText children={"I made a Skill Trees Discord group to make communication easier"} fontSize={14} style={{ color: "#E6E8E6" }} />
+            <AppText
+                children={"You can also reach me at my personal email. Links below"}
+                fontSize={14}
+                style={{ color: "#E6E8E6", marginBottom: 20 }}
+            />
+        </>
+    );
+};
+
 const Contact = () => {
     const copyEmailToClipboard = () => Clipboard.setString("lucaspennice@gmail.com");
+    const copyDiscordServerToClipboard = () => Clipboard.setString("https://discord.gg/2MZQ5K6Kcw");
 
     const [copied, setCopied] = useState(false);
+    const [copiedServer, setCopiedServer] = useState(false);
 
     const animatedColor = useAnimatedStyle(() => {
         return { borderColor: withTiming(copied ? colors.green : colors.accent) };
     });
+    const animatedCopyServerColor = useAnimatedStyle(() => {
+        return { borderColor: withTiming(copiedServer ? colors.green : colors.accent) };
+    });
 
     const styles = StyleSheet.create({
-        container: {
+        container: { marginBottom: 20 },
+        clipboardTextContainer: {
             backgroundColor: colors.darkGray,
             borderRadius: 10,
             borderStyle: "solid",
+            flexDirection: "row",
             borderWidth: 1,
             height: 45,
             marginBottom: 10,
@@ -472,26 +503,34 @@ const Contact = () => {
     });
 
     return (
-        <>
-            <AppText children={"Did you come across a bug?"} fontSize={18} style={{ color: "#E6E8E6", marginBottom: 20 }} />
-            <AppText children={"Please send me an email at:"} fontSize={16} style={{ color: "#E6E8E6", marginBottom: 10 }} />
+        <View style={styles.container}>
+            <AppText children={"Contact"} fontSize={18} style={{ color: "#E6E8E6", marginBottom: 20 }} />
+
+            <AppText children={"Join out Discord server:"} fontSize={16} style={{ color: "#E6E8E6", marginBottom: 10 }} />
+
+            <TouchableHighlight
+                onPress={() => {
+                    copyDiscordServerToClipboard();
+                    setCopiedServer(true);
+                }}>
+                <Animated.View style={[styles.clipboardTextContainer, animatedCopyServerColor, { marginBottom: 20 }]}>
+                    <AppText children={"https://discord.gg/2MZQ5K6Kcw"} fontSize={16} style={{ color: "#E6E8E6" }} />
+                    <CopyIcon color={colors.accent} size={30} style={{ position: "absolute", right: 10 }} />
+                </Animated.View>
+            </TouchableHighlight>
+
+            <AppText children={"You can also reach out at:"} fontSize={16} style={{ color: "#E6E8E6", marginBottom: 10 }} />
             <TouchableHighlight
                 onPress={() => {
                     copyEmailToClipboard();
                     setCopied(true);
                 }}>
-                <Animated.View style={[styles.container, animatedColor]}>
+                <Animated.View style={[styles.clipboardTextContainer, animatedColor]}>
                     <AppText children={"lucaspennice@gmail.com"} fontSize={16} style={{ color: "#E6E8E6" }} />
+                    <CopyIcon color={colors.accent} size={30} style={{ position: "absolute", right: 10 }} />
                 </Animated.View>
             </TouchableHighlight>
-
-            <AppText
-                children={"That's my personal email so I should get back to you in no time"}
-                fontSize={16}
-                style={{ color: "#E6E8E6", marginBottom: 20 }}
-            />
-            <AppText children={"You can click the email to copy it"} fontSize={16} style={{ color: "#E6E8E6", marginBottom: 20 }} />
-        </>
+        </View>
     );
 };
 

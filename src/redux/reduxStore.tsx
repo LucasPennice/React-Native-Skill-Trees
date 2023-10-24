@@ -46,7 +46,6 @@ const migration: MigrationManifest = {
     4: (state) => {
         let updatedState = { ...state };
         //@ts-ignore
-        //@ts-ignore
         updatedState["userFeedback"] = { ...updatedState["userFeedback"], currentSolution: [], whyIsItHard: [], reasonToSolveProblem: [] };
         return updatedState;
     },
