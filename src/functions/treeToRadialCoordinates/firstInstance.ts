@@ -45,8 +45,10 @@ export function firstIteration(nodes: Dictionary<NormalizedNode>, rootNodeId: st
         if (isFirstNode === true) currentNodeWithCoordinates.x = polarToCartesianCoordinates(currentMod).x;
 
         for (let idx = 0; idx < currentNode.childrenIds.length; idx++) {
+            const currentNodeRoot = currentNode.isRoot;
+
             const childrenMod: RadialTreeMod = {
-                angleInRadians: currentMod.angleInRadians + idx * angleBetweenChildren - desiredAngleToCenterChildren,
+                angleInRadians: currentNodeRoot ? 0 : currentMod.angleInRadians + idx * angleBetweenChildren - desiredAngleToCenterChildren,
                 distanceToCenter: childrenDistanceToCenter,
                 level: currentMod.level + 1,
             };

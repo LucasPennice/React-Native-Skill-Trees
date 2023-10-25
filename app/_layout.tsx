@@ -9,12 +9,12 @@ import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import { SplashScreen, Stack } from "expo-router";
-import { Platform, SafeAreaView, StatusBar, StyleSheet, View } from "react-native";
+import { LogBox, Platform, SafeAreaView, StatusBar, StyleSheet, View } from "react-native";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-
 export { ErrorBoundary } from "expo-router";
-
+LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
+LogBox.ignoreAllLogs(); //Ignore all log notifications
 export const unstable_settings = {
     // Ensure that reloading on `/modal` keeps a back button present.
     initialRouteName: "(tabs)",

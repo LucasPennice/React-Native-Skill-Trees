@@ -3,7 +3,7 @@ import { Gesture } from "react-native-gesture-handler";
 import { SharedValue, runOnJS, useSharedValue, withSpring } from "react-native-reanimated";
 import { MENU_HIGH_DAMPENING, NAV_HEGIHT } from "../../../../parameters";
 import { ScreenDimentions } from "../../../../redux/slices/screenDimentionsSlice";
-import { CanvasDimensions, NodeCoordinate } from "../../../../types";
+import { CanvasDimensions, CartesianCoordinate, NodeCoordinate } from "../../../../types";
 import { getXBounds, getYBounds } from "../useHandleCanvasBounds";
 import { DEFAULT_SCALE } from "./params";
 
@@ -40,13 +40,14 @@ function useCanvasZoom(
     }, [canvasDimentions.canvasHeight, canvasDimentions.canvasWidth]);
 
     const canvasZoom = Gesture.Pinch()
-        .onBegin(() => {
+        .onStart((e) => {
+            if (e.numberOfPointers !== 2) return;
+
             shouldUpdateStartValue.value = false;
         })
         .onUpdate((e) => {
             if (foundNodeCoordinates) return;
             const newScaleValue = savedScale.value * e.scale;
-
             scale.value = newScaleValue;
         })
         .onEnd(() => {
@@ -92,6 +93,7 @@ function useCanvasZoom(
                 offsetY.value = withSpring(safeY, MENU_HIGH_DAMPENING);
             }
         });
+
     return { scaleState, canvasZoom };
 }
 

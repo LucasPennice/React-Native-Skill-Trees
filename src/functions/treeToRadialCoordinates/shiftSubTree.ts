@@ -52,7 +52,6 @@ export function shiftSubTreeToFinalAngle(nodes: Dictionary<NormalizedNode>, root
                 result = shiftNodesCounterClockWise(result, rootId, treesToShift, overlap.biggestOverlapAngle);
             }
         }
-
         // if (idx === 0) return result;
     }
 
