@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "551688349800",
+    "project_id": "skill-trees-b089a",
+    "storage_bucket": "skill-trees-b089a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:551688349800:android:ddf05412ac90a6c67373dd",
+        "android_client_info": {
+          "package_name": "com.lucaspennice.skilltrees"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCI7OOAggDBmKOUx5ygWd-QCARGsKBNEZ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

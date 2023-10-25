@@ -7,7 +7,7 @@
             "typedRoutes": true,
             "tsconfigPaths": true
         },
-        "version": "1.0.23",
+        "version": "1.0.24",
         "orientation": "portrait",
         "icon": "./assets/icon.png",
         "userInterfaceStyle": "light",
@@ -39,7 +39,7 @@
                 "android.permission.ACCESS_MEDIA_LOCATION",
                 "com.google.android.gms.permission.AD_ID"
             ],
-            "versionCode": 28,
+            "versionCode": 29,
             "package": "com.lucaspennice.skilltrees"
         },
         "web": {
