@@ -37,9 +37,7 @@ function ShareTreeScreenshot({ shouldShare, takingScreenshotState, treeData, can
     }, [handleScreenshotPermissions]);
 
     const MemoizedModal = useMemo(() => {
-        return (
-            <TakingScreenshotLoadingScreenModal canvasRef={canvasRef.current!} takingScreenshotState={takingScreenshotState} treeData={treeData} />
-        );
+        return <TakingScreenshotLoadingScreenModal takingScreenshotState={takingScreenshotState} treeData={treeData} />;
     }, [canvasRef, takingScreenshotState, treeData]);
 
     const opacity = useAnimatedStyle(() => {

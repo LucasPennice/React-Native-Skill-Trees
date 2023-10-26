@@ -27,6 +27,7 @@ export function getNodesCoordinates(
         scaledCoordinates = scaleCoordinatesAfterReingoldTiltford(unscaledCoordinates);
     } else {
         const unscaledCoordinates = plotCircularTree(nodes, treeData, subTreesData);
+        console.log(JSON.stringify(unscaledCoordinates));
         scaledCoordinates = scaleCoordinatesAfterRadialReingoldTiltford(unscaledCoordinates);
     }
 
