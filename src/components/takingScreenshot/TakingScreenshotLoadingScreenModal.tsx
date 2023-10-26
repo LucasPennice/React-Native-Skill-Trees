@@ -264,6 +264,7 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
 
                         return (
                             <AppText
+                                key={node.nodeId}
                                 fontSize={NODE_ICON_FONT_SIZE}
                                 children={text}
                                 style={{ fontFamily, position: "absolute", left: textX, top: textY - 20, color, lineHeight: 30 }}
