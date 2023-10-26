@@ -72,7 +72,7 @@ function paintSkillNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProp
     //Completed indicator outer edge
     const svg = getCircularPathSvgWithGradient(
         { center: { x: node.x, y: node.y }, gradient, radius: CIRCLE_SIZE, strokeWidth: strokeWidth },
-        canvasDimensions
+        { width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }
     );
 
     canvas.drawSvg(svg);
@@ -121,7 +121,7 @@ function paintSkillTreeNode(
             strokeWidth: 2,
             pathString: `fill-opacity='0'`,
         },
-        canvasDimensions
+        { width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }
     );
 
     canvas.drawSvg(outerEdge);
@@ -139,7 +139,7 @@ function paintSkillTreeNode(
                 2 * Math.PI * CIRCLE_SIZE - (2 * Math.PI * CIRCLE_SIZE * completionPercentage) / 100
             }'`,
         },
-        canvasDimensions
+        { width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }
     );
 
     canvas.drawSvg(completionOuterEdge);
@@ -179,7 +179,7 @@ function paintUserNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProps
             strokeWidth: strokeWidth,
             pathString: "fill='url(#grad1)'",
         },
-        canvasDimensions
+        { width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }
     );
 
     canvas.drawSvg(svg);
@@ -202,13 +202,13 @@ function paintUserNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProps
 
 export default StaticNodeList;
 
-function getCircularPathSvgWithGradient(
+export function getCircularPathSvgWithGradient<T extends { width: number; height: number }>(
     props: { gradient: ColorGradient; center: CartesianCoordinate; strokeWidth: number; radius: number; pathString?: string },
-    canvasDimensions: CanvasDimensions
+    svgDimensions: T
 ) {
     const { center, gradient, radius, strokeWidth, pathString = "" } = props;
     const svg = Skia.SVG.MakeFromString(
-        `<svg viewBox='0 0 ${canvasDimensions.canvasWidth} ${canvasDimensions.canvasHeight}' xmlns='http://www.w3.org/2000/svg'>
+        `<svg viewBox='0 0 ${svgDimensions.width} ${svgDimensions.height}' xmlns='http://www.w3.org/2000/svg'>
                 <defs>
                     <linearGradient id='grad1' x1='0%' y1='0%' x2='100%' y2='100%'>
                         <stop offset='0%' style='stop-color:${gradient.color1};stop-opacity:1' />
@@ -225,7 +225,7 @@ function getCircularPathSvgWithGradient(
     return svg;
 }
 
-function getTextWidth(text: string, isEmoji: boolean, font: SkFont) {
+export function getTextWidth(text: string, isEmoji: boolean, font: SkFont) {
     if (isEmoji) return font.getTextWidth(text);
     if (!isEmoji) return font.getTextWidth(text);
 

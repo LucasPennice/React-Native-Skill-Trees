@@ -34,7 +34,11 @@ export const StaticRadialPathList = memo(function StaticRadialPathList({
                     const centerOfNode = { x: p1x, y: p1y };
 
                     if (!rootNodeCoordinates) return <></>;
-                    const { p: path } = getCurvedPath(rootNodeCoordinates, parentNode, centerOfNode);
+                    const { c, m } = getCurvedPath(rootNodeCoordinates, parentNode, centerOfNode);
+                    const path = Skia.Path.Make();
+                    path.moveTo(m.x, m.y);
+                    path.cubicTo(c.x1, c.y1, c.x2, c.y2, c.x, c.y);
+
                     path.stroke({ width: 2 });
 
                     canvas.drawPath(path, paint);

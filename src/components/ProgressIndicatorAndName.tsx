@@ -1,6 +1,6 @@
 import { TreeData } from "@/redux/slices/userTreesSlice";
 import { memo, useEffect } from "react";
-import { View } from "react-native";
+import { View, ViewStyle } from "react-native";
 import Animated, { useAnimatedProps, useSharedValue, withSpring } from "react-native-reanimated";
 import { Circle, Defs, LinearGradient, Stop, Svg, Circle as SvgCircle } from "react-native-svg";
 import { countCompleteNodes } from "../functions/extractInformationFromTree";
@@ -13,7 +13,15 @@ import AppText from "./AppText";
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
 
-function ProgressIndicatorAndName({ nodesOfTree, treeData }: { treeData: Omit<TreeData, "nodes">; nodesOfTree: NormalizedNode[] }) {
+function ProgressIndicatorAndName({
+    nodesOfTree,
+    treeData,
+    containerStyle,
+}: {
+    treeData: Omit<TreeData, "nodes">;
+    nodesOfTree: NormalizedNode[];
+    containerStyle?: ViewStyle;
+}) {
     const { width } = useAppSelector(selectSafeScreenDimentions);
 
     const progressWheelProps = getWheelParams(treeData.accentColor.color1, `${treeData.accentColor.color1}3D`, 30, 4);
@@ -52,6 +60,7 @@ function ProgressIndicatorAndName({ nodesOfTree, treeData }: { treeData: Omit<Tr
                     maxWidth: width - 130,
                     gap: 15,
                 },
+                containerStyle,
             ]}>
             <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
                 <Defs>

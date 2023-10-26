@@ -22,24 +22,28 @@ function RadialCanvasPath({ coordinates, isRoot, nodeCoordinates }: Props) {
     const p1x = cx;
     const p1y = cy;
 
-    const centerOfNode = { x: p1x, y: p1y };
+    const node = { x: p1x, y: p1y };
     const parentOfNodeCoord = { ...pathInitialPoint };
     const rootNodeCoordinates = nodeCoordinates.find((c) => c.level === 0);
 
     if (!rootNodeCoordinates) return <></>;
     if (isRoot) return <></>;
 
-    const { p: path } = getCurvedPath(rootNodeCoordinates, parentOfNodeCoord, centerOfNode);
+    const { m, c } = getCurvedPath(rootNodeCoordinates, parentOfNodeCoord, node);
 
-    return <Path path={path} color={"#1C1C1D"} style="stroke" strokeWidth={2} />;
+    const p = Skia.Path.Make();
+    p.moveTo(m.x, m.y);
+    p.cubicTo(c.x1, c.y1, c.x2, c.y2, c.x, c.y);
+
+    return <Path path={p} color={"#1C1C1D"} style="stroke" strokeWidth={2} />;
 }
 
-export function getCurvedPath(rootCoordinates: NodeCoordinate, parentOfNodeCoord: CartesianCoordinate, centerOfNode: CartesianCoordinate) {
-    const finalPoint = getFinalPoint(rootCoordinates, centerOfNode);
-    const startingPoint = getStartingPoint(rootCoordinates, parentOfNodeCoord);
+export function getCurvedPath<T extends CartesianCoordinate>(rootNode: T, parentOfNodeCoord: T, node: T) {
+    const finalPoint = getFinalPoint(rootNode, node);
+    const startingPoint = getStartingPoint(rootNode, parentOfNodeCoord, node);
 
-    const translatedFinalPoint = { x: finalPoint.x - rootCoordinates.x, y: finalPoint.y - rootCoordinates.y };
-    const translatedStartingPoint = { x: startingPoint.x - rootCoordinates.x, y: startingPoint.y - rootCoordinates.y };
+    const translatedFinalPoint = { x: finalPoint.x - rootNode.x, y: finalPoint.y - rootNode.y };
+    const translatedStartingPoint = { x: startingPoint.x - rootNode.x, y: startingPoint.y - rootNode.y };
 
     const tentativeVectorAngle = Math.atan2(translatedFinalPoint.y, translatedFinalPoint.x);
     const vectorAngle = tentativeVectorAngle < 0 ? tentativeVectorAngle + 2 * Math.PI : tentativeVectorAngle;
@@ -62,85 +66,91 @@ export function getCurvedPath(rootCoordinates: NodeCoordinate, parentOfNodeCoord
     const [rotatedCP1X, rotatedCP1Y] = getConstantsRotated(-rotationAngle, [cpx1, cpy1]);
     const [rotatedCP2X, rotatedCP2Y] = getConstantsRotated(-rotationAngle, [cpx2, cpy2]);
 
-    const translatedAndRotatedCP1 = { x: rotatedCP1X + rootCoordinates.x, y: rotatedCP1Y + rootCoordinates.y };
-    const translatedAndRotatedCP2 = { x: rotatedCP2X + rootCoordinates.x, y: rotatedCP2Y + rootCoordinates.y };
+    const translatedAndRotatedCP1 = { x: rotatedCP1X + rootNode.x, y: rotatedCP1Y + rootNode.y };
+    const translatedAndRotatedCP2 = { x: rotatedCP2X + rootNode.x, y: rotatedCP2Y + rootNode.y };
 
-    const p = Skia.Path.Make();
-    p.moveTo(startingPoint.x, startingPoint.y);
-    p.cubicTo(translatedAndRotatedCP1.x, translatedAndRotatedCP1.y, translatedAndRotatedCP2.x, translatedAndRotatedCP2.y, finalPoint.x, finalPoint.y);
+    return {
+        m: { x: startingPoint.x, y: startingPoint.y },
+        c: {
+            x1: translatedAndRotatedCP1.x,
+            y1: translatedAndRotatedCP1.y,
+            x2: translatedAndRotatedCP2.x,
+            y2: translatedAndRotatedCP2.y,
+            x: finalPoint.x,
+            y: finalPoint.y,
+        },
+    };
+}
 
-    return { p, c1: { ...translatedAndRotatedCP1 }, c2: { ...translatedAndRotatedCP2 } };
+export function getStartingPoint<T extends CartesianCoordinate>(rootNode: T, parentOfNodeCoord: T, node: T) {
+    const p0 = { ...rootNode };
+    const p1 = { ...parentOfNodeCoord };
 
-    function getFinalPoint(rootCoordinates: NodeCoordinate, centerOfNode: CartesianCoordinate) {
-        const p0 = { ...rootCoordinates };
-        const p1 = { ...centerOfNode };
+    const rootNodeEqualsParentOfNode = p0.x === p1.x && p0.y === p1.y;
 
-        const deltaX = 0 - p0.x;
-        const deltaY = 0 - p0.y;
+    if (rootNodeEqualsParentOfNode) return startingPointWhenRootNodeEqualsParent();
 
-        const directionVector = { x: p1.x + deltaX, y: p1.y + deltaY };
+    const deltaX = 0 - p0.x;
+    const deltaY = 0 - p0.y;
 
-        const cateto1 = Math.pow(p1.x - p0.x, 2);
-        const cateto2 = Math.pow(p1.y - p0.y, 2);
+    const directionVector = { x: p1.x + deltaX, y: p1.y + deltaY };
 
-        const lineLongitude = Math.sqrt(cateto1 + cateto2);
+    const cateto1 = Math.pow(p1.x - p0.x, 2);
+    const cateto2 = Math.pow(p1.y - p0.y, 2);
 
-        const foo = (lineLongitude - CIRCLE_SIZE) / lineLongitude;
+    const lineLongitude = Math.sqrt(cateto1 + cateto2);
 
-        return { x: p0.x + foo * directionVector.x, y: p0.y + foo * directionVector.y };
-    }
+    const foo = (lineLongitude + CIRCLE_SIZE + 2) / lineLongitude;
 
-    function getStartingPoint(rootCoordinates: NodeCoordinate, parentOfNodeCoord: CartesianCoordinate) {
-        const p0 = { ...rootCoordinates };
-        const p1 = { ...parentOfNodeCoord };
+    return { x: p0.x + foo * directionVector.x, y: p0.y + foo * directionVector.y };
 
-        const rootNodeEqualsParentOfNode = p0.x === p1.x && p0.y === p1.y;
-
-        if (rootNodeEqualsParentOfNode) return startingPointWhenRootNodeEqualsParent();
-
-        const deltaX = 0 - p0.x;
-        const deltaY = 0 - p0.y;
-
-        const directionVector = { x: p1.x + deltaX, y: p1.y + deltaY };
-
-        const cateto1 = Math.pow(p1.x - p0.x, 2);
-        const cateto2 = Math.pow(p1.y - p0.y, 2);
-
-        const lineLongitude = Math.sqrt(cateto1 + cateto2);
-
-        const foo = (lineLongitude + CIRCLE_SIZE) / lineLongitude;
-
-        return { x: p0.x + foo * directionVector.x, y: p0.y + foo * directionVector.y };
-
-        function startingPointWhenRootNodeEqualsParent() {
-            if (centerOfNode.x === p0.x && centerOfNode.y > p0.y) {
-                return { x: p0.x, y: p0.y + CIRCLE_SIZE };
-            }
-            if (centerOfNode.x === p0.x && centerOfNode.y < p0.y) {
-                return { x: p0.x, y: p0.y - CIRCLE_SIZE };
-            }
-            if (centerOfNode.y === p0.y && centerOfNode.x > p0.x) {
-                return { x: p0.x + CIRCLE_SIZE, y: p0.y };
-            }
-            if (centerOfNode.y === p0.y && centerOfNode.x < p0.x) {
-                return { x: p0.x - CIRCLE_SIZE, y: p0.y };
-            }
-
-            const deltaX = 0 - centerOfNode.x;
-            const deltaY = 0 - centerOfNode.y;
-
-            const directionVector = { x: p1.x + deltaX, y: p1.y + deltaY };
-
-            const cateto1 = Math.pow(p1.x - centerOfNode.x, 2);
-            const cateto2 = Math.pow(p1.y - centerOfNode.y, 2);
-
-            const lineLongitude = Math.sqrt(cateto1 + cateto2);
-
-            const foo = (lineLongitude - CIRCLE_SIZE) / lineLongitude;
-
-            return { x: centerOfNode.x + foo * directionVector.x, y: centerOfNode.y + foo * directionVector.y };
+    function startingPointWhenRootNodeEqualsParent() {
+        if (node.x === p0.x && node.y > p0.y) {
+            return { x: p0.x, y: p0.y + CIRCLE_SIZE };
         }
+        if (node.x === p0.x && node.y < p0.y) {
+            return { x: p0.x, y: p0.y - CIRCLE_SIZE };
+        }
+        if (node.y === p0.y && node.x > p0.x) {
+            return { x: p0.x + CIRCLE_SIZE, y: p0.y };
+        }
+        if (node.y === p0.y && node.x < p0.x) {
+            return { x: p0.x - CIRCLE_SIZE, y: p0.y };
+        }
+
+        const deltaX = 0 - node.x;
+        const deltaY = 0 - node.y;
+
+        const directionVector = { x: p1.x + deltaX, y: p1.y + deltaY };
+
+        const cateto1 = Math.pow(p1.x - node.x, 2);
+        const cateto2 = Math.pow(p1.y - node.y, 2);
+
+        const lineLongitude = Math.sqrt(cateto1 + cateto2);
+
+        const foo = (lineLongitude - CIRCLE_SIZE - 1) / lineLongitude;
+
+        return { x: node.x + foo * directionVector.x, y: node.y + foo * directionVector.y };
     }
+}
+
+export function getFinalPoint<T extends CartesianCoordinate>(rootNode: T, node: T) {
+    const p0 = { ...rootNode };
+    const p1 = { ...node };
+
+    const deltaX = 0 - p0.x;
+    const deltaY = 0 - p0.y;
+
+    const directionVector = { x: p1.x + deltaX, y: p1.y + deltaY };
+
+    const cateto1 = Math.pow(p1.x - p0.x, 2);
+    const cateto2 = Math.pow(p1.y - p0.y, 2);
+
+    const lineLongitude = Math.sqrt(cateto1 + cateto2);
+
+    const foo = (lineLongitude - CIRCLE_SIZE) / lineLongitude;
+
+    return { x: p0.x + foo * directionVector.x, y: p0.y + foo * directionVector.y };
 }
 
 export default memo(RadialCanvasPath, arePropsEqual);

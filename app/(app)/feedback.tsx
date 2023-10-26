@@ -1,7 +1,8 @@
 import AppText from "@/components/AppText";
 import AppTextInput from "@/components/AppTextInput";
-import LoadingIcon from "@/components/LoadingIcon";
+import CopyIcon from "@/components/Icons/CopyIcon";
 import { getUserFeedbackProgressPercentage } from "@/functions/misc";
+import { faceImage } from "@/images";
 import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { DataAndDate, UserFeedback, appendNewEntry, selectUserFeedbackSlice } from "@/redux/slices/userFeedbackSlice";
@@ -10,14 +11,12 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { useMutation } from "@tanstack/react-query";
 import axiosClient from "axiosClient";
 import { useState } from "react";
-import CopyIcon from "@/components/Icons/CopyIcon";
 import {
     Alert,
     Dimensions,
     Image,
     KeyboardAvoidingView,
     Platform,
-    Pressable,
     ScrollView,
     StyleProp,
     StyleSheet,
@@ -25,97 +24,11 @@ import {
     View,
     ViewStyle,
 } from "react-native";
-import Animated, { ZoomIn, ZoomOut, interpolateColor, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
+import Animated, { interpolateColor, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import { mixpanel } from "./_layout";
-import { faceImage } from "@/images";
+import AppButton, { ButtonState } from "@/components/AppButton";
 
 const PAGE_MARGIN = 30;
-
-type ButtonState = "error" | "idle" | "loading" | "success";
-
-const AppButton = ({
-    onPress,
-    disabled,
-    style,
-    state = "idle",
-    text,
-    disabledStyle,
-}: {
-    onPress: () => void;
-    disabled?: boolean;
-    style?: ViewStyle;
-    disabledStyle?: ViewStyle;
-    state?: ButtonState;
-    text?: { [key in ButtonState]?: string };
-}) => {
-    const styles = StyleSheet.create({
-        container: {
-            backgroundColor: colors.darkGray,
-            width: "100%",
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 10,
-            borderStyle: "solid",
-            borderWidth: 1,
-            height: 45,
-            borderColor: colors.accent,
-        },
-    });
-    const disabledStyles = disabled ? disabledStyle : undefined;
-
-    const animatedContainerStyles = useAnimatedStyle(() => {
-        let borderColor = "";
-
-        switch (state) {
-            case "idle":
-                borderColor = colors.accent;
-                break;
-            case "error":
-                borderColor = colors.red;
-                break;
-            case "success":
-                borderColor = colors.green;
-                break;
-            case "loading":
-                borderColor = "#E6E6E6";
-                break;
-            default:
-                borderColor = "#E6E6E6";
-                break;
-        }
-
-        return {
-            borderColor: withTiming(borderColor),
-        };
-    });
-
-    return (
-        <Pressable onPress={onPress} disabled={disabled}>
-            <Animated.View style={[styles.container, animatedContainerStyles, disabledStyles, style]}>
-                {state === "idle" && (
-                    <Animated.View entering={ZoomIn} exiting={ZoomOut}>
-                        <AppText children={text?.idle ?? "Send"} fontSize={14} style={{ color: "#E6E8E6" }} />
-                    </Animated.View>
-                )}
-                {state === "error" && (
-                    <Animated.View entering={ZoomIn} exiting={ZoomOut}>
-                        <AppText children={text?.error ?? "Error"} fontSize={14} style={{ color: "#E6E8E6" }} />
-                    </Animated.View>
-                )}
-                {state === "success" && (
-                    <Animated.View entering={ZoomIn} exiting={ZoomOut}>
-                        <AppText children={text?.success ?? "Sent!"} fontSize={14} style={{ color: "#E6E8E6" }} />
-                    </Animated.View>
-                )}
-                {state === "loading" && (
-                    <Animated.View entering={ZoomIn} exiting={ZoomOut}>
-                        <LoadingIcon backgroundColor={colors.darkGray} size={20} />
-                    </Animated.View>
-                )}
-            </Animated.View>
-        </Pressable>
-    );
-};
 
 const FeedbackInput = ({
     title,
@@ -514,7 +427,7 @@ const Contact = () => {
                     setCopiedServer(true);
                 }}>
                 <Animated.View style={[styles.clipboardTextContainer, animatedCopyServerColor, { marginBottom: 20 }]}>
-                    <AppText children={"https://discord.gg/2MZQ5K6Kcw"} fontSize={16} style={{ color: "#E6E8E6" }} />
+                    <AppText children={"https://discord.gg/zbv5jsmumD"} fontSize={16} style={{ color: "#E6E8E6" }} />
                     <CopyIcon color={colors.accent} size={30} style={{ position: "absolute", right: 10 }} />
                 </Animated.View>
             </TouchableHighlight>
