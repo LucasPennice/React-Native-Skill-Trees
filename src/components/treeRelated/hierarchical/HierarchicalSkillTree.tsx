@@ -2,7 +2,7 @@ import { CIRCLE_SIZE } from "@/parameters";
 import { Picture, SkFont, Skia, createPicture } from "@shopify/react-native-skia";
 import { Fragment, memo, useMemo } from "react";
 import { SharedValue } from "react-native-reanimated";
-import { CanvasDimensions, InitialAndFinalCoord, NodeCoordinate, ReactiveNodeCoordinate } from "../../../types";
+import { CanvasDimensions, CartesianCoordinate, InitialAndFinalCoord, NodeCoordinate, ReactiveNodeCoordinate } from "../../../types";
 import ReactiveNodeList from "../general/ReactiveNodeList";
 import StaticNodeList from "../general/StaticNodeList";
 import useHandleReactiveAndStaticNodeList from "../hooks/useHandleReactiveAndStaticNodeList";
@@ -88,18 +88,13 @@ const StaticHierarchicalPathList = memo(function StaticHierarchicalPathList({
                     const parentOfNode = nodeCoordinates.find((node) => node.nodeId === nodeCoordinate.parentId);
                     if (!parentOfNode) throw new Error("parentOfNode undefined at StaticHierarchicalCanvasPath");
 
+                    const { c, m } = getHierarchicalPath(nodeCoordinate, parentOfNode);
+
                     const path = Skia.Path.Make();
 
-                    path.moveTo(nodeCoordinate.x, nodeCoordinate.y - CIRCLE_SIZE);
+                    path.moveTo(m.x, m.y);
 
-                    path.cubicTo(
-                        nodeCoordinate.x,
-                        nodeCoordinate.y - 0.87 * (nodeCoordinate.y - parentOfNode.y),
-                        parentOfNode.x,
-                        parentOfNode.y - 0.43 * (parentOfNode.y - nodeCoordinate.y),
-                        parentOfNode.x,
-                        parentOfNode.y + CIRCLE_SIZE
-                    );
+                    path.cubicTo(c.x1, c.y1, c.x2, c.y2, c.x, c.y);
 
                     path.stroke({ width: 2 });
 
@@ -111,6 +106,20 @@ const StaticHierarchicalPathList = memo(function StaticHierarchicalPathList({
 
     return <Picture picture={picture} />;
 });
+
+export function getHierarchicalPath<T extends CartesianCoordinate>(node: T, parentNode: T) {
+    return {
+        m: { x: node.x, y: node.y - CIRCLE_SIZE },
+        c: {
+            x1: node.x,
+            y1: node.y - 0.87 * (node.y - parentNode.y),
+            x2: parentNode.x,
+            y2: parentNode.y - 0.43 * (parentNode.y - node.y),
+            x: parentNode.x,
+            y: parentNode.y + CIRCLE_SIZE,
+        },
+    };
+}
 
 const LabelList = memo(function LabelList({ nodeCoordinates, font }: { nodeCoordinates: NodeCoordinate[]; font: SkFont }) {
     return nodeCoordinates.map((node, idx) => {

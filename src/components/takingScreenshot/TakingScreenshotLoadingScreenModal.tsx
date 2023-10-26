@@ -1,3 +1,6 @@
+import { completedSkillTreeTable } from "@/functions/extractInformationFromTree";
+import { getLabelTextColor } from "@/functions/misc";
+import { nodeToCircularPath } from "@/functions/svg/toSvg";
 import { getNodesCoordinates, treeHeightFromCoordinates, treeWidthFromCoordinates } from "@/functions/treeCalculateCoordinates";
 import { prepareNodesForHomeTreeBuild } from "@/pages/homepage/HomepageTree";
 import { useAppSelector } from "@/redux/reduxHooks";
@@ -6,45 +9,33 @@ import { TreeData, selectAllTreesEntities } from "@/redux/slices/userTreesSlice"
 import { CartesianCoordinate, NodeCoordinate, NormalizedNode } from "@/types";
 import analytics from "@react-native-firebase/analytics";
 import { Dictionary } from "@reduxjs/toolkit";
-import { ImageFormat, SkFont, SkiaDomView, useFont } from "@shopify/react-native-skia";
+import { SkFont, useFont } from "@shopify/react-native-skia";
 import { mixpanel } from "app/(app)/_layout";
 import { shareAsync } from "expo-sharing";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, Dimensions, Modal, Platform, Pressable, StatusBar, StyleSheet, View } from "react-native";
+import { Alert, Modal, Platform, Pressable, StatusBar, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector, gestureHandlerRootHOC } from "react-native-gesture-handler";
-import Animated, { Easing, SharedValue, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
-import { Circle, Defs, ForeignObject, LinearGradient, Path, Stop, Svg, Text } from "react-native-svg";
+import Animated, { SharedValue, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { Defs, LinearGradient, Path, Stop, Svg } from "react-native-svg";
 import ViewShot from "react-native-view-shot";
 import { CIRCLE_SIZE, HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, MENU_HIGH_DAMPENING, NODE_ICON_FONT_SIZE, colors } from "../../parameters";
 import AppButton from "../AppButton";
+import AppText from "../AppText";
 import ChevronLeft from "../Icons/ChevronLeft";
 import ProgressIndicatorAndName from "../ProgressIndicatorAndName";
-import { nodeToCircularPath } from "@/functions/svg/toSvg";
-import { completedSkillTreeTable } from "@/functions/extractInformationFromTree";
-import { getTextCoordinates } from "../treeRelated/general/useHandleNodeAnimatedCoordinates";
 import { getTextWidth } from "../treeRelated/general/StaticNodeList";
-import { getLabelTextColor } from "@/functions/misc";
-import { Canvas } from "@shopify/react-native-skia";
-import AppText from "../AppText";
+import { getTextCoordinates } from "../treeRelated/general/useHandleNodeAnimatedCoordinates";
 import { getCurvedPath } from "../treeRelated/radial/RadialCanvasPath";
-
-type Stage = "TAKING_SCREENSHOT" | "EDITING_LAYOUT";
+import { getHierarchicalPath } from "../treeRelated/hierarchical/HierarchicalSkillTree";
 
 function TakingScreenshotLoadingScreenModal({
-    canvasRef,
     takingScreenshotState,
     treeData,
 }: {
-    canvasRef: SkiaDomView;
     takingScreenshotState: readonly [boolean, { readonly openTakingScreenshotModal: () => void; readonly closeTakingScreenshotModal: () => void }];
     treeData: Omit<TreeData, "nodes">;
 }) {
-    const { width } = Dimensions.get("screen");
-
     const [takingScreenshot, { closeTakingScreenshotModal }] = takingScreenshotState;
-
-    const [stage, setStage] = useState<Stage>("TAKING_SCREENSHOT");
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     useEffect(() => {
         (async () => {
@@ -52,23 +43,8 @@ function TakingScreenshotLoadingScreenModal({
                 await mixpanel.track(`takingScreenshot`);
 
                 await analytics().logEvent("takingScreenshot");
-
-                getScreenShots();
             }
         })();
-    }, [takingScreenshot]);
-
-    useEffect(() => {
-        return () => {
-            setSelectedImage(null);
-            setStage("TAKING_SCREENSHOT");
-        };
-    }, []);
-
-    const BAR_WIDHT = width > 600 ? 550 : width - 50;
-
-    const styles = useAnimatedStyle(() => {
-        return { width: withTiming(takingScreenshot ? BAR_WIDHT : 0, { duration: 1000, easing: Easing.bezierFn(0.83, 0, 0.17, 1) }) };
     }, [takingScreenshot]);
 
     return (
@@ -80,54 +56,20 @@ function TakingScreenshotLoadingScreenModal({
             presentationStyle={Platform.OS === "android" ? "overFullScreen" : "formSheet"}>
             <StatusBar backgroundColor={colors.background} barStyle="light-content" />
             <LayoutSelector treeData={treeData} cancelSharing={closeTakingScreenshotModal} />
-
-            {/* <NewThingy cancelSharing={closeTakingScreenshotModal} treeId={treeData.treeId} /> */}
-            {/* <>
-                {stage === "TAKING_SCREENSHOT" && (
-                    <Animated.View style={[centerFlex, { flex: 1, opacity: 1 }]} entering={FadeInDown}>
-                        <AppText fontSize={24} style={{ color: "#FFFFFF", fontFamily: "helveticaBold", textAlign: "center", marginBottom: 25 }}>
-                            Turning your skill tree into an image
-                        </AppText>
-                        <View style={{ backgroundColor: `${colors.accent}5D`, height: 8, width: BAR_WIDHT, borderRadius: 5 }}>
-                            <Animated.View style={[styles, { backgroundColor: colors.accent, height: 8, borderRadius: 5 }]} />
-                        </View>
-                    </Animated.View>
-                )}
-
-                {stage === "EDITING_LAYOUT" && selectedImage !== null && (
-                    <LayoutSelector selectedImage={selectedImage} treeData={treeData} cancelSharing={closeTakingScreenshotModal} />
-                )}
-            </> */}
         </Modal>
     );
-
-    async function getScreenShots() {
-        setStage("TAKING_SCREENSHOT");
-
-        try {
-            await new Promise((resolve) =>
-                setTimeout(async () => {
-                    const image = canvasRef.makeImageSnapshot();
-
-                    const encodedImage = image.encodeToBase64(ImageFormat.PNG, 99);
-
-                    const formattedImage = `data:image/png;base64,${encodedImage}`;
-
-                    setSelectedImage(formattedImage);
-                    setStage("EDITING_LAYOUT");
-                }, 1000)
-            );
-        } catch (error) {
-            Alert.alert("Could not generate image, please try again");
-            closeTakingScreenshotModal();
-        }
-    }
 }
 
-const useHandleScreenshotCapture = (ref: React.MutableRefObject<ViewShot | null>, closeModal: () => void) => {
+const useHandleScreenshotCapture = (
+    ref: React.MutableRefObject<ViewShot | null>,
+    closeModal: () => void,
+    setLoadingShare: React.Dispatch<React.SetStateAction<boolean>>
+) => {
     const attemptCapture = () => {
         if (ref.current === null) return;
         if (ref.current.capture === undefined) return;
+
+        setLoadingShare(true);
 
         ref.current.capture();
     };
@@ -138,6 +80,8 @@ const useHandleScreenshotCapture = (ref: React.MutableRefObject<ViewShot | null>
             closeModal();
         } catch (error) {
             Alert.alert("Error onCapture");
+        } finally {
+            setLoadingShare(false);
         }
     }, []);
 
@@ -158,6 +102,9 @@ type Props = {
     };
     treeData: Omit<TreeData, "nodes">;
     fonts: { labelFont: SkFont; nodeLetterFont: SkFont; emojiFont: SkFont };
+    coordinatesInsideCanvas: NodeCoordinate[];
+    rootNodeInsideCanvas: NodeCoordinate;
+    svgDimensions: { width: number; height: number };
 };
 
 const useHandleGestures = (args: Props["sharedValues"], showBorder: SharedValue<boolean>) => {
@@ -212,14 +159,10 @@ function useSkiaFonts() {
     return { labelFont, nodeLetterFont, emojiFont };
 }
 
-const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts }: Props) => {
+const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coordinatesInsideCanvas, svgDimensions, rootNodeInsideCanvas }: Props) => {
     const { offsetX, offsetY, rotation, scale } = sharedValues;
 
-    const nodes = useAppSelector(selectNodesOfTree(treeData.treeId));
     const subTreesData = useAppSelector(selectAllTreesEntities);
-
-    const { height, width } = Dimensions.get("window");
-    const viewShotHeight = height - FOOTER_HEIGHT;
 
     const showBorder = useSharedValue(false);
 
@@ -237,24 +180,22 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts }: Pro
         };
     });
 
-    const PADDING = 2 * CIRCLE_SIZE;
-
-    const { coordinates, heightData, rootNode, widthData } = getNodeCoordinatesWithoutCenteringOrPadding(nodes, subTreesData, treeData);
-    const minY = Math.abs(heightData.minCoordinate);
-
-    const rootNodeInsideCanvas = { ...rootNode, x: rootNode.x - widthData.minCoordinate + PADDING / 2, y: rootNode.y + minY + PADDING / 2 };
-
-    const coordinatesInsideCanvas = coordinates.map((coord) => {
-        return { ...coord, x: coord.x - widthData.minCoordinate + PADDING / 2, y: coord.y + minY + PADDING / 2 };
-    });
-
-    const svgDimensions = { width: widthData.treeWidth + PADDING, height: heightData.treeHeight + PADDING };
-
-    const treeCompletionTable = completedSkillTreeTable(coordinates);
+    const treeCompletionTable = completedSkillTreeTable(coordinatesInsideCanvas);
 
     return (
         <GestureDetector gesture={canvasGestures}>
-            <Animated.View style={[transform, { width, height: viewShotHeight, borderStyle: "solid", borderWidth: 1 }]}>
+            <Animated.View
+                style={[
+                    transform,
+                    {
+                        width: svgDimensions.width + 1,
+                        height: svgDimensions.height + 1,
+                        borderStyle: "solid",
+                        borderWidth: 1,
+                        justifyContent: "center",
+                        alignItems: "center",
+                    },
+                ]}>
                 <View style={{ width: svgDimensions.width, height: svgDimensions.height, position: "relative" }}>
                     <Svg width={svgDimensions.width} height={svgDimensions.height} style={{ backgroundColor: colors.background }}>
                         <Defs>
@@ -280,7 +221,8 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts }: Pro
 
                             return (
                                 <>
-                                    {!node.isRoot && <CurvedPath node={node} />}
+                                    {!node.isRoot && treeData.treeId === HOMEPAGE_TREE_ID && <RadialPath node={node} />}
+                                    {!node.isRoot && treeData.treeId !== HOMEPAGE_TREE_ID && <HierarchicalPath node={node} />}
 
                                     <Path stroke={`url(#gray)`} strokeLinecap="round" strokeWidth={2} d={nodeToCircularPath(node)} />
 
@@ -333,12 +275,22 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts }: Pro
         </GestureDetector>
     );
 
-    function CurvedPath({ node }: { node: NodeCoordinate }) {
+    function RadialPath({ node }: { node: NodeCoordinate }) {
         const parentNode = coordinatesInsideCanvas.find((n) => n.nodeId === node.parentId);
 
         if (!parentNode && !node.isRoot) throw new Error("parentNode not found at MovableSvg");
 
         const { c, m } = getCurvedPath<CartesianCoordinate>(rootNodeInsideCanvas, parentNode!, { x: node.x, y: node.y });
+
+        return <Path stroke={"#1C1C1D"} strokeWidth={2} d={`M ${m.x} ${m.y} C ${c.x1} ${c.y1}, ${c.x2} ${c.y2}, ${c.x} ${c.y}`} />;
+    }
+
+    function HierarchicalPath({ node }: { node: NodeCoordinate }) {
+        const parentNode = coordinatesInsideCanvas.find((n) => n.nodeId === node.parentId);
+
+        if (!parentNode && !node.isRoot) throw new Error("parentNode not found at MovableSvg");
+
+        const { c, m } = getHierarchicalPath(node, parentNode!);
 
         return <Path stroke={"#1C1C1D"} strokeWidth={2} d={`M ${m.x} ${m.y} C ${c.x1} ${c.y1}, ${c.x2} ${c.y2}, ${c.x} ${c.y}`} />;
     }
@@ -362,12 +314,14 @@ const DefineGradients = ({ subTreesData }: { subTreesData: Dictionary<TreeData> 
 function LayoutSelector({ treeData, cancelSharing }: { treeData: Omit<TreeData, "nodes">; cancelSharing: () => void }) {
     const nodes = useAppSelector(selectNodesOfTree(treeData.treeId));
 
+    const [loadingShare, setLoadingShare] = useState(false);
+
     const styles = StyleSheet.create({
         container: { flex: 1, backgroundColor: colors.background, position: "relative" },
         closeIcon: { width: 45, height: 45, backgroundColor: colors.darkGray, borderRadius: 30, position: "absolute", left: 10, top: 10, zIndex: 10 },
         footerContainer: { height: FOOTER_HEIGHT, flexDirection: "row", padding: 10 },
         resetButton: { width: 100, marginRight: 10, borderColor: colors.darkGray },
-        shareButton: { flex: 1 },
+        shareButton: { flex: 1, backgroundColor: colors.accent },
         viewShotContainer: {
             display: "flex",
             justifyContent: "center",
@@ -378,7 +332,21 @@ function LayoutSelector({ treeData, cancelSharing }: { treeData: Omit<TreeData, 
         },
     });
 
-    const START_COORD = { x: 0, y: 0 };
+    const subTreesData = useAppSelector(selectAllTreesEntities);
+    const PADDING = 4 * CIRCLE_SIZE;
+
+    const { coordinates, heightData, rootNode, widthData } = getNodeCoordinatesWithoutCenteringOrPadding(nodes, subTreesData, treeData);
+    const minY = Math.abs(heightData.minCoordinate);
+
+    const rootNodeInsideCanvas = { ...rootNode, x: rootNode.x - widthData.minCoordinate + PADDING / 2, y: rootNode.y + minY + PADDING / 2 };
+
+    const coordinatesInsideCanvas = coordinates.map((coord) => {
+        return { ...coord, x: coord.x - widthData.minCoordinate + PADDING / 2, y: coord.y + minY + PADDING / 2 };
+    });
+
+    const svgDimensions = { width: widthData.treeWidth + PADDING, height: heightData.treeHeight + PADDING };
+
+    const START_COORD = { x: -svgDimensions.width / 4, y: -svgDimensions.height / 4 };
 
     const fonts = useSkiaFonts();
 
@@ -396,7 +364,7 @@ function LayoutSelector({ treeData, cancelSharing }: { treeData: Omit<TreeData, 
 
     const toggleImageSizeReset = () => {
         if (offsetX.value !== 0 || offsetY.value !== 0) {
-            start.value = { x: 0, y: START_COORD.y };
+            start.value = { x: START_COORD.x, y: START_COORD.y };
             offsetX.value = withSpring(START_COORD.x, MENU_HIGH_DAMPENING);
             offsetY.value = withSpring(START_COORD.y, MENU_HIGH_DAMPENING);
         }
@@ -411,7 +379,7 @@ function LayoutSelector({ treeData, cancelSharing }: { treeData: Omit<TreeData, 
     };
 
     const ref = useRef<ViewShot | null>(null);
-    const { attemptCapture, onCapture } = useHandleScreenshotCapture(ref, cancelSharing);
+    const { attemptCapture, onCapture } = useHandleScreenshotCapture(ref, cancelSharing, setLoadingShare);
 
     return (
         <View style={styles.container}>
@@ -423,7 +391,16 @@ function LayoutSelector({ treeData, cancelSharing }: { treeData: Omit<TreeData, 
                 style={styles.viewShotContainer}
                 onCapture={onCapture}
                 options={{ fileName: treeData.treeName, result: "tmpfile", format: "png", quality: 1 }}>
-                {fonts && <MovableSvg sharedValues={sharedValues} treeData={treeData} fonts={fonts} />}
+                {fonts && (
+                    <MovableSvg
+                        sharedValues={sharedValues}
+                        treeData={treeData}
+                        fonts={fonts}
+                        coordinatesInsideCanvas={coordinatesInsideCanvas}
+                        rootNodeInsideCanvas={rootNodeInsideCanvas}
+                        svgDimensions={svgDimensions}
+                    />
+                )}
                 <ProgressIndicatorAndName nodesOfTree={nodes} treeData={treeData} containerStyle={{ left: undefined, right: 10 }} />
             </ViewShot>
             <View style={styles.footerContainer}>
@@ -433,7 +410,14 @@ function LayoutSelector({ treeData, cancelSharing }: { treeData: Omit<TreeData, 
                     style={styles.resetButton}
                     color={{ idle: colors.darkGray }}
                 />
-                <AppButton onPress={attemptCapture} text={{ idle: "Share" }} pressableStyle={{ flex: 1, height: 45 }} style={styles.shareButton} />
+                <AppButton
+                    onPress={attemptCapture}
+                    text={{ idle: "Share" }}
+                    pressableStyle={{ flex: 1, height: 45 }}
+                    style={styles.shareButton}
+                    color={{ idle: colors.accent, loading: colors.accent }}
+                    state={loadingShare ? "loading" : "idle"}
+                />
             </View>
         </View>
     );

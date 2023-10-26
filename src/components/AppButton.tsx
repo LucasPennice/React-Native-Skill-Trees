@@ -67,7 +67,7 @@ const AppButton = ({
     });
 
     return (
-        <Pressable onPress={onPress} disabled={disabled} style={pressableStyle}>
+        <Pressable onPressIn={onPress} disabled={disabled} style={pressableStyle}>
             <Animated.View style={[styles.container, animatedContainerStyles, disabledStyles, style]}>
                 {state === "idle" && (
                     <Animated.View entering={ZoomIn} exiting={ZoomOut}>
@@ -86,7 +86,7 @@ const AppButton = ({
                 )}
                 {state === "loading" && (
                     <Animated.View entering={ZoomIn} exiting={ZoomOut}>
-                        <LoadingIcon backgroundColor={colors.darkGray} size={20} />
+                        <LoadingIcon backgroundColor={"#00000000"} size={20} />
                     </Animated.View>
                 )}
             </Animated.View>
