@@ -12,7 +12,7 @@ import { Dictionary } from "@reduxjs/toolkit";
 import { SkFont, useFont } from "@shopify/react-native-skia";
 import { mixpanel } from "app/(app)/_layout";
 import { shareAsync } from "expo-sharing";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { Alert, Modal, Platform, Pressable, StatusBar, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector, gestureHandlerRootHOC } from "react-native-gesture-handler";
 import Animated, { SharedValue, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
@@ -220,25 +220,35 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
                                     : undefined;
 
                             return (
-                                <>
-                                    {!node.isRoot && treeData.treeId === HOMEPAGE_TREE_ID && <RadialPath node={node} />}
-                                    {!node.isRoot && treeData.treeId !== HOMEPAGE_TREE_ID && <HierarchicalPath node={node} />}
+                                <Fragment key={node.nodeId}>
+                                    {!node.isRoot && treeData.treeId === HOMEPAGE_TREE_ID && (
+                                        <RadialPath
+                                            node={node}
+                                            coordinatesInsideCanvas={coordinatesInsideCanvas}
+                                            rootNodeInsideCanvas={rootNodeInsideCanvas}
+                                        />
+                                    )}
+                                    {!node.isRoot && treeData.treeId !== HOMEPAGE_TREE_ID && (
+                                        <HierarchicalPath node={node} coordinatesInsideCanvas={coordinatesInsideCanvas} />
+                                    )}
 
                                     <Path stroke={`url(#gray)`} strokeLinecap="round" strokeWidth={2} d={nodeToCircularPath(node)} />
 
-                                    {node.category !== "SKILL" && (
-                                        <Path
-                                            stroke={`url(#${node.treeId})`}
-                                            strokeLinecap="round"
-                                            strokeWidth={2}
-                                            d={nodeToCircularPath(node)}
-                                            strokeDasharray={node.category === "SKILL_TREE" ? 2 * Math.PI * CIRCLE_SIZE : undefined}
-                                            strokeDashoffset={strokeDashoffset}
-                                            fillOpacity={node.category === "USER" ? 1 : 0}
-                                            fill={node.nodeId === HOMETREE_ROOT_ID ? `url(#${node.treeId})` : undefined}
-                                        />
-                                    )}
-                                </>
+                                    <Path
+                                        stroke={
+                                            (node.category === "SKILL" && node.data.isCompleted) || node.category !== "SKILL"
+                                                ? `url(#${node.treeId})`
+                                                : undefined
+                                        }
+                                        strokeLinecap="round"
+                                        strokeWidth={2}
+                                        d={nodeToCircularPath(node)}
+                                        strokeDasharray={node.category === "SKILL_TREE" ? 2 * Math.PI * CIRCLE_SIZE : undefined}
+                                        strokeDashoffset={strokeDashoffset}
+                                        fillOpacity={node.category === "USER" ? 1 : 0}
+                                        fill={node.nodeId === HOMETREE_ROOT_ID ? `url(#${node.treeId})` : undefined}
+                                    />
+                                </Fragment>
                             );
                         })}
                     </Svg>
@@ -275,29 +285,37 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
             </Animated.View>
         </GestureDetector>
     );
-
-    function RadialPath({ node }: { node: NodeCoordinate }) {
-        const parentNode = coordinatesInsideCanvas.find((n) => n.nodeId === node.parentId);
-
-        if (!parentNode && !node.isRoot) throw new Error("parentNode not found at MovableSvg");
-
-        const { c, m } = getCurvedPath<CartesianCoordinate>(rootNodeInsideCanvas, parentNode!, { x: node.x, y: node.y });
-
-        return <Path stroke={"#1C1C1D"} strokeWidth={2} d={`M ${m.x} ${m.y} C ${c.x1} ${c.y1}, ${c.x2} ${c.y2}, ${c.x} ${c.y}`} />;
-    }
-
-    function HierarchicalPath({ node }: { node: NodeCoordinate }) {
-        const parentNode = coordinatesInsideCanvas.find((n) => n.nodeId === node.parentId);
-
-        if (!parentNode && !node.isRoot) throw new Error("parentNode not found at MovableSvg");
-
-        const { c, m } = getHierarchicalPath(node, parentNode!);
-
-        return <Path stroke={"#1C1C1D"} strokeWidth={2} d={`M ${m.x} ${m.y} C ${c.x1} ${c.y1}, ${c.x2} ${c.y2}, ${c.x} ${c.y}`} />;
-    }
 });
 
-const DefineGradients = ({ subTreesData }: { subTreesData: Dictionary<TreeData> }) => {
+export function RadialPath({
+    node,
+    coordinatesInsideCanvas,
+    rootNodeInsideCanvas,
+}: {
+    node: NodeCoordinate;
+    coordinatesInsideCanvas: NodeCoordinate[];
+    rootNodeInsideCanvas: NodeCoordinate;
+}) {
+    const parentNode = coordinatesInsideCanvas.find((n) => n.nodeId === node.parentId);
+
+    if (!parentNode && !node.isRoot) throw new Error("parentNode not found at MovableSvg");
+
+    const { c, m } = getCurvedPath<CartesianCoordinate>(rootNodeInsideCanvas, parentNode!, { x: node.x, y: node.y });
+
+    return <Path stroke={"#1C1C1D"} fill={"#00000000"} strokeWidth={2} d={`M ${m.x} ${m.y} C ${c.x1} ${c.y1}, ${c.x2} ${c.y2}, ${c.x} ${c.y}`} />;
+}
+
+export function HierarchicalPath({ node, coordinatesInsideCanvas }: { node: NodeCoordinate; coordinatesInsideCanvas: NodeCoordinate[] }) {
+    const parentNode = coordinatesInsideCanvas.find((n) => n.nodeId === node.parentId);
+
+    if (!parentNode && !node.isRoot) throw new Error("parentNode not found at MovableSvg");
+
+    const { c, m } = getHierarchicalPath(node, parentNode!);
+
+    return <Path stroke={"#1C1C1D"} fill={"#00000000"} strokeWidth={2} d={`M ${m.x} ${m.y} C ${c.x1} ${c.y1}, ${c.x2} ${c.y2}, ${c.x} ${c.y}`} />;
+}
+
+export const DefineGradients = ({ subTreesData }: { subTreesData: Dictionary<TreeData> }) => {
     const subTreeDataKeys = Object.keys(subTreesData);
 
     return subTreeDataKeys.map((subTreeId) => {

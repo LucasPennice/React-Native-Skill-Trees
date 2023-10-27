@@ -357,15 +357,15 @@ function Feedback() {
 
 const Header = () => {
     const styles = StyleSheet.create({
-        top: { flexDirection: "row", gap: 10, marginBottom: 10 },
+        top: { flexDirection: "row-reverse", gap: 10, marginBottom: 20 },
         photo: { height: 60, width: 60, backgroundColor: colors.unmarkedText, borderRadius: 60 },
     });
     return (
         <>
             <View style={styles.top}>
                 <View style={{ flex: 1 }}>
-                    <AppText children={"Hey Beta User!"} fontSize={16} style={{ color: "#E6E8E6", marginBottom: 10 }} />
-                    <AppText children={"My name is Lucas and I'm the creator of Skill Trees"} fontSize={14} style={{ color: "#E6E8E6" }} />
+                    <AppText children={"Hey Beta User!"} fontSize={18} style={{ color: "#E6E8E6", marginBottom: 10, fontFamily: "helveticaBold" }} />
+                    <AppText children={"My name is Lucas and I'm the creator of Skill Trees"} fontSize={16} style={{ color: "#E6E8E6" }} />
                 </View>
                 <Image style={styles.photo} source={faceImage} />
             </View>

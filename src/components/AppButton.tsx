@@ -1,7 +1,7 @@
 import AppText from "@/components/AppText";
 import LoadingIcon from "@/components/LoadingIcon";
 import { colors } from "@/parameters";
-import { Pressable, StyleSheet, ViewStyle } from "react-native";
+import { Pressable, StyleProp, StyleSheet, TextStyle, ViewStyle } from "react-native";
 import Animated, { ZoomIn, ZoomOut, useAnimatedStyle, withTiming } from "react-native-reanimated";
 
 export type ButtonState = "error" | "idle" | "loading" | "success";
@@ -15,6 +15,7 @@ const AppButton = ({
     disabledStyle,
     pressableStyle,
     color,
+    textStyle,
 }: {
     onPress: () => void;
     disabled?: boolean;
@@ -24,6 +25,7 @@ const AppButton = ({
     state?: ButtonState;
     text?: { [key in ButtonState]?: string };
     color?: { [key in ButtonState]?: string };
+    textStyle?: StyleProp<TextStyle>;
 }) => {
     const styles = StyleSheet.create({
         container: {
@@ -71,17 +73,17 @@ const AppButton = ({
             <Animated.View style={[styles.container, animatedContainerStyles, disabledStyles, style]}>
                 {state === "idle" && (
                     <Animated.View entering={ZoomIn} exiting={ZoomOut}>
-                        <AppText children={text?.idle ?? "Send"} fontSize={14} style={{ color: "#E6E8E6" }} />
+                        <AppText children={text?.idle ?? "Send"} fontSize={14} style={[{ color: "#E6E8E6" }, textStyle]} />
                     </Animated.View>
                 )}
                 {state === "error" && (
                     <Animated.View entering={ZoomIn} exiting={ZoomOut}>
-                        <AppText children={text?.error ?? "Error"} fontSize={14} style={{ color: "#E6E8E6" }} />
+                        <AppText children={text?.error ?? "Error"} fontSize={14} style={[{ color: "#E6E8E6" }, textStyle]} />
                     </Animated.View>
                 )}
                 {state === "success" && (
                     <Animated.View entering={ZoomIn} exiting={ZoomOut}>
-                        <AppText children={text?.success ?? "Sent!"} fontSize={14} style={{ color: "#E6E8E6" }} />
+                        <AppText children={text?.success ?? "Sent!"} fontSize={14} style={[{ color: "#E6E8E6" }, textStyle]} />
                     </Animated.View>
                 )}
                 {state === "loading" && (
