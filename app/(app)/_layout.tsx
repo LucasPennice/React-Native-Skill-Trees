@@ -1,7 +1,8 @@
 import AppText from "@/components/AppText";
 import ChevronLeft from "@/components/Icons/ChevronLeft";
+import SettingsIcon from "@/components/Icons/SettingsIcon";
 import { getUserFeedbackProgressPercentage, getWheelParams } from "@/functions/misc";
-import { NAV_HEGIHT, colors } from "@/parameters";
+import { MENU_HIGH_DAMPENING, NAV_HEGIHT, colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { open } from "@/redux/slices/addTreeModalSlice";
 import { selectUserFeedbackSlice } from "@/redux/slices/userFeedbackSlice";
@@ -11,9 +12,10 @@ import analytics from "@react-native-firebase/analytics";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
 import { Mixpanel } from "mixpanel-react-native";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import Animated, { useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { routes } from "routes";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
@@ -119,6 +121,7 @@ export default function RootLayout() {
                 <Stack.Screen name={routes.myTrees_skillId.name} />
                 <Stack.Screen name={"index"} />
             </Stack>
+            {/* <Onboarding /> */}
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "padding"}
                 enabled={false}
@@ -151,6 +154,55 @@ export default function RootLayout() {
         </View>
     );
 }
+
+const Onboarding = () => {
+    const { height, width } = Dimensions.get("window");
+
+    const [open, setOpen] = useState(true);
+
+    const DIMENSIONS = { closed: { width: 45, height: 45 }, open: { width, height: 170 } };
+    const CLOSED_POSITION = { left: 10, top: height - NAV_HEGIHT - DIMENSIONS.closed.height - 10 };
+    const style = StyleSheet.create({
+        container: {
+            width: DIMENSIONS.closed.width,
+            height: DIMENSIONS.closed.height,
+            backgroundColor: colors.darkGray,
+            position: "absolute",
+        },
+        icon: { width: DIMENSIONS.closed.width, height: DIMENSIONS.closed.height, position: "absolute" },
+    });
+
+    const animatedContainerStyle = useAnimatedStyle(() => {
+        return {
+            top: withSpring(open ? 0 : CLOSED_POSITION.top, MENU_HIGH_DAMPENING),
+            left: withSpring(open ? 0 : CLOSED_POSITION.left, MENU_HIGH_DAMPENING),
+            width: withSpring(open ? DIMENSIONS.open.width : DIMENSIONS.closed.width, MENU_HIGH_DAMPENING),
+            height: withSpring(open ? DIMENSIONS.open.height : DIMENSIONS.closed.height, MENU_HIGH_DAMPENING),
+            borderTopLeftRadius: withSpring(open ? 0 : DIMENSIONS.closed.width, MENU_HIGH_DAMPENING),
+            borderTopRightRadius: withSpring(open ? 0 : DIMENSIONS.closed.width, MENU_HIGH_DAMPENING),
+            borderBottomLeftRadius: withSpring(open ? 20 : DIMENSIONS.closed.width, MENU_HIGH_DAMPENING),
+            borderBottomRightRadius: withSpring(open ? 20 : DIMENSIONS.closed.width, MENU_HIGH_DAMPENING),
+        };
+    });
+
+    const animatedIconStyle = useAnimatedStyle(() => {
+        return {
+            top: withSpring(open ? DIMENSIONS.open.height : 10),
+            left: withSpring(open ? 0 : CLOSED_POSITION.left, MENU_HIGH_DAMPENING),
+        };
+    });
+
+    return (
+        <Animated.View style={[style.container, animatedContainerStyle]}>
+            {open && <Pressable onPressIn={() => setOpen(false)} style={{ width: 50, height: 50, backgroundColor: "red" }} />}
+            {!open && <Pressable onPressIn={() => setOpen(true)} style={{ width: 45, height: 45 }} />}
+
+            <Animated.View style={[style.icon, animatedIconStyle]} pointerEvents={"none"}>
+                <SettingsIcon />
+            </Animated.View>
+        </Animated.View>
+    );
+};
 
 function MyTreesHeader(openAddTreeModal: () => void) {
     const style = StyleSheet.create({

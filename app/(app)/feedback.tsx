@@ -27,6 +27,7 @@ import {
 import Animated, { interpolateColor, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import { mixpanel } from "./_layout";
 import AppButton, { ButtonState } from "@/components/AppButton";
+import Spacer from "@/components/Spacer";
 
 const PAGE_MARGIN = 30;
 
@@ -130,14 +131,6 @@ const ProgressBar = ({ progressPercentage }: { progressPercentage: number }) => 
             </View>
         </View>
     );
-};
-
-const Spacer = ({ style }: { style?: ViewStyle }) => {
-    const styles = StyleSheet.create({
-        container: { width: "100%", height: 2, backgroundColor: colors.darkGray, borderRadius: 10 },
-    });
-
-    return <View style={[styles.container, style]} />;
 };
 
 function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React.SetStateAction<UserFeedback>>) {
@@ -427,7 +420,7 @@ const Contact = () => {
                     setCopiedServer(true);
                 }}>
                 <Animated.View style={[styles.clipboardTextContainer, animatedCopyServerColor, { marginBottom: 20 }]}>
-                    <AppText children={"https://discord.gg/zbv5jsmumD"} fontSize={16} style={{ color: "#E6E8E6" }} />
+                    <AppText children={"https://discord.gg/ZHENer9yAW"} fontSize={16} style={{ color: "#E6E8E6" }} />
                     <CopyIcon color={colors.accent} size={30} style={{ position: "absolute", right: 10 }} />
                 </Animated.View>
             </TouchableHighlight>
