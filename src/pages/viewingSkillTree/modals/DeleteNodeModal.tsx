@@ -1,5 +1,5 @@
 import { normalizedNodeToTree } from "@/components/treeRelated/general/functions";
-import { deleteNodeAndHoistChild } from "@/functions/misc";
+import { deleteNodeAndChildren, deleteNodeAndHoistChild } from "@/functions/misc";
 import { removeNodes, selectNodesOfTree, updateNodes } from "@/redux/slices/nodesSlice";
 import { TreeData, selectTreeById } from "@/redux/slices/userTreesSlice";
 import { Update } from "@reduxjs/toolkit";
@@ -56,14 +56,24 @@ function DeleteNodeModal({ nodeToDelete, closeModalAndClearState, open }: Props)
                 changes: { childrenIds: updatedNode.childrenIds, parentId: updatedNode.parentId, level: updatedNode.level },
             };
         });
-        dispatch(updateNodes(updatedNodesReducerFormat));
-        dispatch(removeNodes({ treeId: childrenToHoist.treeId, nodesToDelete: [nodeIdToDelete] }));
 
         closeModalAndClearState();
+
+        dispatch(updateNodes(updatedNodesReducerFormat));
+        dispatch(removeNodes({ treeId: childrenToHoist.treeId, nodesToDelete: [nodeIdToDelete] }));
     };
 
     const deleteParentAndAllItsChildren = () => {
-        return Alert.alert("delete parent and all children");
+        const { nodesToDelete, updatedNodes } = deleteNodeAndChildren(nodesOfTree, nodeToDelete);
+
+        const updatedNodesReducerFormat: Update<NormalizedNode>[] = updatedNodes.map((updatedNode) => {
+            return { id: updatedNode.nodeId, changes: { childrenIds: updatedNode.childrenIds } };
+        });
+
+        closeModalAndClearState();
+
+        dispatch(updateNodes(updatedNodesReducerFormat));
+        dispatch(removeNodes({ treeId: nodeToDelete.treeId, nodesToDelete }));
     };
 
     const confirmDeleteNode = (children: NormalizedNode) => () => {

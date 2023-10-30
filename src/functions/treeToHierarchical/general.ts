@@ -65,7 +65,7 @@ function handleOverlap(nodesWithPossibleOverlap: Dictionary<NormalizedNode>, roo
 
     let limiter = 0;
 
-    while (overlapInTree && limiter < 1000) {
+    while (overlapInTree && limiter < Object.keys(result).length / 2) {
         const overlap = checkHierarchicalTreeOverlap(result, rootId);
 
         if (overlap !== undefined) {

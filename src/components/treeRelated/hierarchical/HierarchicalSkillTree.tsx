@@ -86,7 +86,8 @@ const StaticHierarchicalPathList = memo(function StaticHierarchicalPathList({
                     if (nodeCoordinate.isRoot) continue;
 
                     const parentOfNode = nodeCoordinates.find((node) => node.nodeId === nodeCoordinate.parentId);
-                    if (!parentOfNode) throw new Error("parentOfNode undefined at StaticHierarchicalCanvasPath");
+
+                    if (!parentOfNode) continue;
 
                     const { c, m } = getHierarchicalPath(nodeCoordinate, parentOfNode);
 

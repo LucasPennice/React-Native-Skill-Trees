@@ -14,6 +14,7 @@ import {
     getDefaultSkillValue,
 } from "../types";
 import { UserFeedback } from "@/redux/slices/userFeedbackSlice";
+import { arrayToDictionary, getDescendantsId } from "./extractInformationFromTree";
 
 export function generate24CharHexId() {
     const hexChars = "0123456789abcdef";
@@ -200,12 +201,38 @@ export function deleteNodeAndHoistChild(nodes: NormalizedNode[], nodeToHoist: No
         childrenIds: [...nodeToHoist.childrenIds, ...nodeToDelete.childrenIds.filter((childId) => childId !== nodeToHoist.nodeId)],
     };
 
+    const nodeToHoistChildren = nodes.filter((node) => nodeToHoist.childrenIds.includes(node.nodeId));
+
+    const updateNodeToHoistChildren = nodeToHoistChildren.map((node) => {
+        return { ...node, level: node.level - 1 };
+    });
+
     //Updating the parent id value of the children of the node to be deleted
     const updatedChildrenOfNodeToDelete: NormalizedNode[] = childrenOfNodeToDelete.map((node) => {
         return { ...node, parentId: nodeToHoist.nodeId };
     });
 
-    return { nodeIdToDelete: nodeToDelete.nodeId, updatedNodes: [updatedParentOfNodeToDelete, updatedNodeToHoist, ...updatedChildrenOfNodeToDelete] };
+    return {
+        nodeIdToDelete: nodeToDelete.nodeId,
+        updatedNodes: [updatedParentOfNodeToDelete, updatedNodeToHoist, ...updateNodeToHoistChildren, ...updatedChildrenOfNodeToDelete],
+    };
+}
+
+export function deleteNodeAndChildren(nodes: NormalizedNode[], nodeToDelete: NormalizedNode) {
+    const parentOfNodeToDelete = nodes.find((n) => n.nodeId === nodeToDelete.parentId);
+
+    if (!parentOfNodeToDelete) throw new Error("nodeToDelete undefined at deleteNodeAndChildren");
+
+    const updatedParentOfNodeToDelete: NormalizedNode = {
+        ...parentOfNodeToDelete,
+        childrenIds: parentOfNodeToDelete.childrenIds.filter((childId) => childId !== nodeToDelete.nodeId),
+    };
+
+    const nodeDictionary = arrayToDictionary(nodes);
+
+    const descendantsIds = getDescendantsId(nodeDictionary, nodeToDelete.nodeId);
+
+    return { nodesToDelete: [...descendantsIds, nodeToDelete.nodeId], updatedNodes: [updatedParentOfNodeToDelete] };
 }
 
 export function insertNodeAsParent(nodesOfTree: NormalizedNode[], nodeToAdd: NormalizedNode, newNodePosition: DnDZone) {

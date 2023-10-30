@@ -105,8 +105,8 @@ function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: 
         nodeCoordinatesCentered,
     } = useMemo(() => {
         const homeTreeNodes = prepareNodesForHomeTreeBuild(allNodes, homeTreeData.rootNodeId);
-
-        return handleTreeBuild({ nodes: homeTreeNodes, treeData: homeTreeData, screenDimensions, renderStyle: "radial", subTreesData });
+        const result = handleTreeBuild({ nodes: homeTreeNodes, treeData: homeTreeData, screenDimensions, renderStyle: "radial", subTreesData });
+        return result;
     }, [allNodes, homeTreeData, screenDimensions]);
 
     const treeCoordinate: TreeCoordinateData = {

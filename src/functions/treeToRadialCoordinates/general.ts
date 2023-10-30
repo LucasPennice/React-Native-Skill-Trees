@@ -21,10 +21,8 @@ import { shiftSubTreeToFinalAngle } from "./shiftSubTree";
 // Increasing the radius we will overlap the nodes, this is level overflow
 
 export function plotCircularTree(nodes: Dictionary<NormalizedNode>, treeData: Omit<TreeData, "nodes">, subTreesData?: Dictionary<TreeData>) {
-    const rootNode = nodes[treeData.rootNodeId];
-    if (!rootNode) throw new Error("rootNode undefined at plotCircularTree");
-
     //We invert the tree because the Skia canvas is mirrored vertically
+
     const invertedNodes = reverseNodeChildrenArray(nodes);
 
     let result: Dictionary<NormalizedNode> = { ...invertedNodes };
@@ -47,7 +45,7 @@ export function plotCircularTree(nodes: Dictionary<NormalizedNode>, treeData: Om
         if (levelOverflow) radiusPerLevelTable = updateRadiusPerLevelTable(radiusPerLevelTable, levelOverflow);
 
         limiter++;
-    } while (levelOverflow && limiter !== 100);
+    } while (levelOverflow && limiter !== Object.keys(radiusPerLevelTable).length);
 
     const treeCoordinates = normalizedNodeDictionaryToNodeCoordArray(result, treeData, subTreesData);
 

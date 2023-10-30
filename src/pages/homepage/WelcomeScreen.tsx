@@ -12,6 +12,7 @@ import { router } from "expo-router";
 import { Dimensions, StyleSheet, View } from "react-native";
 import { Defs, LinearGradient, Path, Stop, Svg } from "react-native-svg";
 import { CIRCLE_SIZE, HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, centerFlex, colors } from "../../parameters";
+import { Fragment } from "react";
 
 const TEXT_AND_BUTTON_HEIGHT = 150;
 
@@ -1022,14 +1023,14 @@ const OnboardingTree = () => {
 
                     <DefineGradients subTreesData={mockSubtreesData} />
 
-                    {mockCoordinatesInsideCanvas.map((node) => {
+                    {mockCoordinatesInsideCanvas.map((node, idx) => {
                         const strokeDashoffset =
                             node.category === "SKILL_TREE"
                                 ? 2 * Math.PI * CIRCLE_SIZE - (2 * Math.PI * CIRCLE_SIZE * treeCompletionTable[node.treeId]!.percentage) / 100
                                 : undefined;
 
                         return (
-                            <>
+                            <Fragment key={idx}>
                                 {!node.isRoot && mockTreeData.treeId === HOMEPAGE_TREE_ID && (
                                     <RadialPath
                                         node={node}
@@ -1057,7 +1058,7 @@ const OnboardingTree = () => {
                                     fillOpacity={node.category === "USER" ? 1 : 0}
                                     fill={node.nodeId === HOMETREE_ROOT_ID ? `url(#${node.treeId})` : undefined}
                                 />
-                            </>
+                            </Fragment>
                         );
                     })}
                 </Svg>

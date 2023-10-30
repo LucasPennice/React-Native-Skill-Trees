@@ -385,6 +385,7 @@ function IndividualSkillTreePage() {
     const selectedNodeCoordState = useSelectedNodeCoordState(dispatchModalState);
     const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
     //
+
     const selectedNewNodePositionState = useSelectedNewNodePositionState();
     const [selectedNewNodePosition, { clearSelectedNewNodePosition, updateSelectedNewNodePosition }] = selectedNewNodePositionState;
     //Local State

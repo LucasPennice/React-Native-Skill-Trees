@@ -64,7 +64,7 @@ export function fixSubTreeOverlapRadial(firstIterationNodesOfSubTree: Dictionary
 
     let limiter = 0;
 
-    while (overlapWithinTree && limiter < 100) {
+    while (overlapWithinTree && limiter < Object.keys(firstIterationNodesOfSubTree).length / 2) {
         let polarOverlap = checkForRadialOverlap(modifiedNodesOfSubTree, rootId);
 
         //Tolerance to avoid loops

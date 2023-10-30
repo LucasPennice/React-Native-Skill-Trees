@@ -11,6 +11,8 @@ export function radiusPerLevelToAvoidLevelOvercrowd(nodes: Dictionary<Normalized
 
     let distanceToCenterPerLevel = getDistanceToCenterPerLevel(nodes);
 
+    let limiter = 0;
+
     let levelOverflow: UpdateRadiusPerLevelTable = undefined;
 
     do {
@@ -19,7 +21,9 @@ export function radiusPerLevelToAvoidLevelOvercrowd(nodes: Dictionary<Normalized
         if (levelOverflow) {
             distanceToCenterPerLevel = updateRadiusPerLevelTable(distanceToCenterPerLevel, levelOverflow);
         }
-    } while (levelOverflow !== undefined);
+
+        limiter++;
+    } while (levelOverflow !== undefined && limiter !== Object.keys(nodesPerLevel).length);
 
     return distanceToCenterPerLevel;
 
@@ -37,15 +41,12 @@ export function radiusPerLevelToAvoidLevelOvercrowd(nodes: Dictionary<Normalized
 
             const minimumAngleBetweenNodes = arcToAngleRadians(ALLOWED_NODE_SPACING, distanceToCenterPerLevel[level]);
 
-            const overflowInLevel = averageAngleBetweenNodes < minimumAngleBetweenNodes;
+            const correctDistance = (ALLOWED_NODE_SPACING * nodesPerLevel[level]) / (2 * Math.PI);
+            const distanceToDisplace = correctDistance - distanceToCenterPerLevel[level];
 
-            if (overflowInLevel) {
-                const correctDistance = (ALLOWED_NODE_SPACING * nodesPerLevel[level]) / (2 * Math.PI);
+            const overflowInLevel = averageAngleBetweenNodes < minimumAngleBetweenNodes && distanceToDisplace !== 0;
 
-                const distanceToDisplace = correctDistance - distanceToCenterPerLevel[level];
-
-                return { distanceToDisplace, level };
-            }
+            if (overflowInLevel) return { distanceToDisplace, level };
         }
 
         return undefined;
