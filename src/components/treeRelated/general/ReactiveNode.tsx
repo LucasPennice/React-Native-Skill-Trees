@@ -4,6 +4,7 @@ import { SharedValue } from "react-native-reanimated";
 import { CartesianCoordinate, ColorGradient, NodeCategory } from "../../../types";
 import { NodeProps, SkillNode, SkillTreeNode, UserNode } from "./NodeCategories";
 import useHandleNodeAnimatedCoordinates from "./useHandleNodeAnimatedCoordinates";
+import { SpringConfig } from "react-native-reanimated/lib/typescript/reanimated2/animation/springUtils";
 
 export type CanvasNodeData = {
     isComplete: boolean;
@@ -28,13 +29,14 @@ type Props = {
               nodesToDragId: string[];
           }
         | undefined;
+    springConfig?: SpringConfig;
 };
 
-function ReactiveNode({ nodeData, state, nodeDrag }: Props) {
+function ReactiveNode({ nodeData, state, nodeDrag, springConfig }: Props) {
     const { category, finalCoordinates, initialCoordinates, isComplete, text, treeAccentColor } = nodeData;
     const { font, treeCompletedPercentage, showIcons } = state;
 
-    const { path, textX, textY, x, y } = useHandleNodeAnimatedCoordinates(initialCoordinates, finalCoordinates, text, font);
+    const { path, textX, textY, x, y } = useHandleNodeAnimatedCoordinates(initialCoordinates, finalCoordinates, text, font, springConfig);
 
     const nodeIcon = text.isEmoji ? text.letter : text.letter;
 

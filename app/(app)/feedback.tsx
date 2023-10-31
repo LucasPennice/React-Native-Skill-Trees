@@ -381,7 +381,7 @@ const Header = () => {
 
 const Contact = () => {
     const copyEmailToClipboard = () => Clipboard.setString("lucaspennice@gmail.com");
-    const copyDiscordServerToClipboard = () => Clipboard.setString("https://discord.gg/2MZQ5K6Kcw");
+    const copyDiscordServerToClipboard = () => Clipboard.setString("https://discord.com/invite/ZHENer9yAW");
 
     const [copied, setCopied] = useState(false);
     const [copiedServer, setCopiedServer] = useState(false);

@@ -3,17 +3,20 @@ import { completedSkillTreeTable } from "../../../functions/extractInformationFr
 import { getLabelTextColor } from "../../../functions/misc";
 import { NodeCoordinate, ReactiveNodeCoordinate } from "../../../types";
 import ReactiveNode, { CanvasNodeData } from "./ReactiveNode";
+import { SpringConfig } from "react-native-reanimated/lib/typescript/reanimated2/animation/springUtils";
 
 function ReactiveNodeList({
     allNodes,
     settings,
     reactiveNodes,
     fonts,
+    springConfigForNode,
 }: {
     allNodes: NodeCoordinate[];
     reactiveNodes: ReactiveNodeCoordinate[] | NodeCoordinate[];
     settings: { oneColorPerTree: boolean; showIcons: boolean };
     fonts: { nodeLetterFont: SkFont; emojiFont: SkFont };
+    springConfigForNode?: (node: ReactiveNodeCoordinate | NodeCoordinate) => SpringConfig;
 }) {
     const rootNode = allNodes.find((n) => n.level === 0);
     if (!rootNode) throw new Error("undefined rootNode at ReactiveNodeList");
@@ -38,8 +41,7 @@ function ReactiveNodeList({
 
         const nodeData: CanvasNodeData = {
             isComplete: node.data.isCompleted,
-            //@ts-ignore
-            initialCoordinates: { x: node.initialCoordinates.x ?? node.x, y: node.initialCoordinates.y ?? node.y },
+            initialCoordinates: getInitialCoordinates(node),
             finalCoordinates: { x: node.x, y: node.y },
             treeAccentColor: accentColor,
             text,
@@ -65,8 +67,23 @@ function ReactiveNodeList({
 
         const state = { font, treeCompletedPercentage: currentTreeCompletedPercentage, showIcons: showIcons };
 
-        return <ReactiveNode state={state} key={`${node.nodeId}_node`} nodeData={nodeData} nodeDrag={undefined} />;
+        return (
+            <ReactiveNode
+                state={state}
+                key={`${node.nodeId}_node`}
+                nodeData={nodeData}
+                nodeDrag={undefined}
+                springConfig={springConfigForNode ? springConfigForNode(node) : undefined}
+            />
+        );
     });
 }
 
 export default ReactiveNodeList;
+
+const getInitialCoordinates = (node: NodeCoordinate | ReactiveNodeCoordinate) => {
+    //@ts-ignore
+    if (node && node.initialCoordinates) return { x: node.initialCoordinates.x, y: node.initialCoordinates.y };
+
+    return { x: node.x, y: node.y };
+};
