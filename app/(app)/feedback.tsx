@@ -1,6 +1,8 @@
+import AppButton, { ButtonState } from "@/components/AppButton";
 import AppText from "@/components/AppText";
 import AppTextInput from "@/components/AppTextInput";
 import CopyIcon from "@/components/Icons/CopyIcon";
+import Spacer from "@/components/Spacer";
 import { getUserFeedbackProgressPercentage } from "@/functions/misc";
 import { faceImage } from "@/images";
 import { colors } from "@/parameters";
@@ -11,23 +13,10 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { useMutation } from "@tanstack/react-query";
 import axiosClient from "axiosClient";
 import { useState } from "react";
-import {
-    Alert,
-    Dimensions,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleProp,
-    StyleSheet,
-    TouchableHighlight,
-    View,
-    ViewStyle,
-} from "react-native";
-import Animated, { interpolateColor, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
+import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleProp, StyleSheet, TouchableHighlight, View, ViewStyle } from "react-native";
+import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { mixpanel } from "./_layout";
-import AppButton, { ButtonState } from "@/components/AppButton";
-import Spacer from "@/components/Spacer";
+import ProgressBarAndIndicator from "@/components/ProgressBarAndIndicator";
 
 const PAGE_MARGIN = 30;
 
@@ -69,66 +58,6 @@ const FeedbackInput = ({
                 inputProps={{ placeholderTextColor: "#FFFFFF7D", multiline: true }}
             />
             <AppButton onPress={() => onPress(text)} disabled={disabled} state={buttonState} text={buttonText} />
-        </View>
-    );
-};
-
-const ProgressBar = ({ progressPercentage }: { progressPercentage: number }) => {
-    const roundedProgressPercentage = parseInt(`${progressPercentage}`);
-
-    const MAX_PROGRESS_INDICATOR_WIDTH = 56;
-    const HORIZONTAL_PADDING = 20;
-
-    const { width } = Dimensions.get("window");
-
-    const widthWithPaddingAccounted = width - HORIZONTAL_PADDING;
-
-    const possiblyNegativeProgressIndicatorLeft = (widthWithPaddingAccounted * roundedProgressPercentage) / 100 - MAX_PROGRESS_INDICATOR_WIDTH;
-    const progressIndicatorLeft = possiblyNegativeProgressIndicatorLeft < 0 ? 0 : possiblyNegativeProgressIndicatorLeft;
-
-    const styles = StyleSheet.create({
-        container: {
-            width: "100%",
-            height: 50,
-            backgroundColor: colors.background,
-            marginBottom: 10,
-            position: "relative",
-            transform: [{ translateY: -10 }],
-        },
-        progressIndicator: {
-            alignItems: "center",
-            marginBottom: 20,
-            width: MAX_PROGRESS_INDICATOR_WIDTH,
-            position: "absolute",
-            textAlign: "center",
-            top: 0,
-            backgroundColor: colors.darkGray,
-            padding: 5,
-            borderRadius: 10,
-        },
-        progressBar: { height: "100%", backgroundColor: "#EFEFEF", borderRadius: 10 },
-        barContainer: { width: "100%", height: 10, backgroundColor: colors.line, borderRadius: 10, position: "absolute", bottom: 10 },
-    });
-
-    const animatedProgressBar = useAnimatedStyle(() => {
-        return {
-            width: withSpring(`${roundedProgressPercentage}%`, { dampingRatio: 0.7 }),
-            backgroundColor: withTiming(interpolateColor(roundedProgressPercentage, [0, 66, 100], [colors.red, colors.orange, colors.green])),
-        };
-    });
-
-    const animatedProgressIndicator = useAnimatedStyle(() => {
-        return { left: withSpring(progressIndicatorLeft, { dampingRatio: 0.7 }) };
-    });
-
-    return (
-        <View style={styles.container}>
-            <Animated.View style={[styles.progressIndicator, animatedProgressIndicator]}>
-                <AppText children={`${roundedProgressPercentage}%`} fontSize={18} style={{ color: "#E6E8E6" }} />
-            </Animated.View>
-            <View style={styles.barContainer}>
-                <Animated.View style={[styles.progressBar, animatedProgressBar]} />
-            </View>
         </View>
     );
 };
@@ -287,7 +216,9 @@ function Feedback() {
             keyboardVerticalOffset={-60}>
             <ScrollView style={{ padding: 10 }} stickyHeaderIndices={[1]}>
                 <Header />
-                <ProgressBar progressPercentage={progressPercentage} />
+
+                <ProgressBarAndIndicator progressPercentage={progressPercentage} />
+
                 <Spacer style={{ marginBottom: PAGE_MARGIN }} />
                 <FeedbackInput
                     title={"What problem do you hope Skill Trees helps you solve?"}

@@ -1,6 +1,7 @@
 import AppText from "@/components/AppText";
 import ChevronLeft from "@/components/Icons/ChevronLeft";
 import SettingsIcon from "@/components/Icons/SettingsIcon";
+import ProgressBarAndIndicator from "@/components/ProgressBarAndIndicator";
 import { getUserFeedbackProgressPercentage, getWheelParams } from "@/functions/misc";
 import { MENU_HIGH_DAMPENING, NAV_HEGIHT, colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
@@ -163,12 +164,7 @@ const Onboarding = () => {
     const DIMENSIONS = { closed: { width: 45, height: 45 }, open: { width, height: 170 } };
     const CLOSED_POSITION = { left: 10, top: height - NAV_HEGIHT - DIMENSIONS.closed.height - 10 };
     const style = StyleSheet.create({
-        container: {
-            width: DIMENSIONS.closed.width,
-            height: DIMENSIONS.closed.height,
-            backgroundColor: colors.darkGray,
-            position: "absolute",
-        },
+        container: { width: DIMENSIONS.closed.width, height: DIMENSIONS.closed.height, backgroundColor: colors.darkGray, position: "absolute" },
         icon: { width: DIMENSIONS.closed.width, height: DIMENSIONS.closed.height, position: "absolute" },
     });
 
@@ -178,25 +174,26 @@ const Onboarding = () => {
             left: withSpring(open ? 0 : CLOSED_POSITION.left, MENU_HIGH_DAMPENING),
             width: withSpring(open ? DIMENSIONS.open.width : DIMENSIONS.closed.width, MENU_HIGH_DAMPENING),
             height: withSpring(open ? DIMENSIONS.open.height : DIMENSIONS.closed.height, MENU_HIGH_DAMPENING),
-            borderTopLeftRadius: withSpring(open ? 0 : DIMENSIONS.closed.width, MENU_HIGH_DAMPENING),
-            borderTopRightRadius: withSpring(open ? 0 : DIMENSIONS.closed.width, MENU_HIGH_DAMPENING),
-            borderBottomLeftRadius: withSpring(open ? 20 : DIMENSIONS.closed.width, MENU_HIGH_DAMPENING),
-            borderBottomRightRadius: withSpring(open ? 20 : DIMENSIONS.closed.width, MENU_HIGH_DAMPENING),
+            borderRadius: withSpring(open ? 20 : DIMENSIONS.closed.width, MENU_HIGH_DAMPENING),
         };
     });
 
     const animatedIconStyle = useAnimatedStyle(() => {
         return {
-            top: withSpring(open ? DIMENSIONS.open.height : 10),
-            left: withSpring(open ? 0 : CLOSED_POSITION.left, MENU_HIGH_DAMPENING),
+            top: withSpring(open ? 80 : 7),
+            left: withSpring(open ? 10 : 7, MENU_HIGH_DAMPENING),
         };
     });
 
     return (
         <Animated.View style={[style.container, animatedContainerStyle]}>
-            {open && <Pressable onPressIn={() => setOpen(false)} style={{ width: 50, height: 50, backgroundColor: "red" }} />}
+            {open && (
+                <>
+                    <ProgressBarAndIndicator progressPercentage={0} containerStyles={{ backgroundColor: colors.darkGray }} />
+                    <Pressable onPressIn={() => setOpen(false)} style={{ width: 50, height: 50, backgroundColor: "red" }} />
+                </>
+            )}
             {!open && <Pressable onPressIn={() => setOpen(true)} style={{ width: 45, height: 45 }} />}
-
             <Animated.View style={[style.icon, animatedIconStyle]} pointerEvents={"none"}>
                 <SettingsIcon />
             </Animated.View>

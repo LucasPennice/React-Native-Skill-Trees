@@ -7,7 +7,12 @@ import { View } from "react-native";
 function Home() {
     const userTreeQty = useAppSelector(selectTotalTreeQty);
 
-    return <View style={{ position: "relative", flex: 1, overflow: "hidden" }}>{userTreeQty !== 0 ? <HomepageContents /> : <WelcomeScreen />}</View>;
+    return (
+        <View style={{ position: "relative", flex: 1, overflow: "hidden" }}>
+            <WelcomeScreen />
+        </View>
+    );
+    // return <View style={{ position: "relative", flex: 1, overflow: "hidden" }}>{userTreeQty !== 0 ? <HomepageContents /> : <WelcomeScreen />}</View>;
 }
 
 export default Home;
