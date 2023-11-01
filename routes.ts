@@ -1,4 +1,8 @@
 export const routes = {
+    welcomeScreen: {
+        name: "welcomeScreen",
+        route: "/welcomeScreen",
+    },
     home: {
         name: "home",
         route: "/home",

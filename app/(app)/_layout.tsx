@@ -123,35 +123,37 @@ export default function RootLayout() {
                 <Stack.Screen name={"index"} />
             </Stack>
             {/* <Onboarding /> */}
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "padding"}
-                enabled={false}
-                style={{ backgroundColor: colors.darkGray, height: NAV_HEGIHT, width, flexDirection: "row" }}>
-                <Pressable
-                    style={{ width: width / 3, flex: 1, justifyContent: "center", alignItems: "center", gap: 6 }}
-                    onPress={() => router.replace("/home")}>
-                    <TabBarIcon name="home" color={pathname.includes("home") ? colors.accent : colors.unmarkedText} />
-                    <AppText style={{ color: pathname.includes("home") ? colors.accent : colors.unmarkedText }} fontSize={12}>
-                        Home
-                    </AppText>
-                </Pressable>
-                <Pressable
-                    style={{ width: width / 3, flex: 1, justifyContent: "center", alignItems: "center", gap: 6 }}
-                    onPress={() => router.replace("/(app)/myTrees")}>
-                    <TabBarIcon name="tree" color={pathname.includes("myTrees") ? colors.accent : colors.unmarkedText} />
-                    <AppText style={{ color: pathname.includes("myTrees") ? colors.accent : colors.unmarkedText }} fontSize={12}>
-                        My Trees
-                    </AppText>
-                </Pressable>
-                <Pressable
-                    style={{ width: width / 3, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
-                    onPress={() => router.replace("/(app)/feedback")}>
-                    <TabBarIcon name="group" color={pathname.includes("feedback") ? colors.accent : colors.unmarkedText} />
-                    <AppText style={{ color: pathname.includes("feedback") ? colors.accent : colors.unmarkedText }} fontSize={12}>
-                        Community
-                    </AppText>
-                </Pressable>
-            </KeyboardAvoidingView>
+            {!pathname.includes("welcomeScreen") && (
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "padding"}
+                    enabled={false}
+                    style={{ backgroundColor: colors.darkGray, height: NAV_HEGIHT, width, flexDirection: "row" }}>
+                    <Pressable
+                        style={{ width: width / 3, flex: 1, justifyContent: "center", alignItems: "center", gap: 6 }}
+                        onPress={() => router.replace("/home")}>
+                        <TabBarIcon name="home" color={pathname.includes("home") ? colors.accent : colors.unmarkedText} />
+                        <AppText style={{ color: pathname.includes("home") ? colors.accent : colors.unmarkedText }} fontSize={12}>
+                            Home
+                        </AppText>
+                    </Pressable>
+                    <Pressable
+                        style={{ width: width / 3, flex: 1, justifyContent: "center", alignItems: "center", gap: 6 }}
+                        onPress={() => router.replace("/(app)/myTrees")}>
+                        <TabBarIcon name="tree" color={pathname.includes("myTrees") ? colors.accent : colors.unmarkedText} />
+                        <AppText style={{ color: pathname.includes("myTrees") ? colors.accent : colors.unmarkedText }} fontSize={12}>
+                            My Trees
+                        </AppText>
+                    </Pressable>
+                    <Pressable
+                        style={{ width: width / 3, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
+                        onPress={() => router.replace("/(app)/feedback")}>
+                        <TabBarIcon name="group" color={pathname.includes("feedback") ? colors.accent : colors.unmarkedText} />
+                        <AppText style={{ color: pathname.includes("feedback") ? colors.accent : colors.unmarkedText }} fontSize={12}>
+                            Community
+                        </AppText>
+                    </Pressable>
+                </KeyboardAvoidingView>
+            )}
         </View>
     );
 }
