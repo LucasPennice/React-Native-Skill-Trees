@@ -201,7 +201,11 @@ export function deleteNodeAndHoistChild(nodes: NormalizedNode[], nodeToHoist: No
         childrenIds: [...nodeToHoist.childrenIds, ...nodeToDelete.childrenIds.filter((childId) => childId !== nodeToHoist.nodeId)],
     };
 
-    const nodeToHoistChildren = nodes.filter((node) => nodeToHoist.childrenIds.includes(node.nodeId));
+    const nodeDictionary = arrayToDictionary(nodes);
+
+    const nodeToHoistDescendantsIds = getDescendantsId(nodeDictionary, nodeToHoist.nodeId);
+
+    const nodeToHoistChildren = nodes.filter((node) => nodeToHoistDescendantsIds.includes(node.nodeId));
 
     const updateNodeToHoistChildren = nodeToHoistChildren.map((node) => {
         return { ...node, level: node.level - 1 };

@@ -48,26 +48,12 @@ function useHandleNodeAnimatedCoordinates(
 
     const { textX, textY } = useIconPosition(x, y, textWidth);
 
-    const test = useMemo(() => {
+    const path = useDerivedValue(() => {
         const path = Skia.Path.Make();
-        path.moveTo(initialCoordinates.x, initialCoordinates.y);
-        path.addCircle(initialCoordinates.x, initialCoordinates.y, CIRCLE_SIZE);
+        path.moveTo(x.value, y.value);
+        path.addCircle(x.value, y.value, CIRCLE_SIZE);
         path.simplify();
         return path;
-    }, [initialCoordinates]);
-
-    const path = useDerivedValue(() => {
-        const matrix = Skia.Matrix();
-
-        const translation = matrix.translate(finalCoordinates.x - initialCoordinates.x, finalCoordinates.y - initialCoordinates.y);
-        // const path = Skia.Path.Make();
-        // path.moveTo(x.value, y.value);
-        // path.addCircle(x.value, y.value, CIRCLE_SIZE);
-        // path.simplify();
-
-        const newFOo = test.copy();
-        newFOo.transform(translation);
-        return newFOo;
     });
 
     return { path, textX, textY, x, y };

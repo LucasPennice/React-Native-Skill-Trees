@@ -126,7 +126,15 @@ const LabelList = memo(function LabelList({ nodeCoordinates, font }: { nodeCoord
     return nodeCoordinates.map((node, idx) => {
         if (node.isRoot) return <Fragment key={idx}></Fragment>;
 
-        return <HierarchicalLabel key={idx} font={font} text={node.data.name} coord={{ cx: node.x, cy: node.y }} />;
+        return (
+            <HierarchicalLabel
+                key={idx}
+                font={font}
+                text={node.nodeId}
+                // text={ node.data.name }
+                coord={{ cx: node.x, cy: node.y }}
+            />
+        );
     });
 });
 
