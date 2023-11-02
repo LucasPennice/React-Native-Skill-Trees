@@ -15,6 +15,7 @@ export const NAV_HEGIHT = 60;
 export const CANVAS_SPRING = { damping: 29 };
 export const MENU_DAMPENING = { damping: 20, stiffness: 300 };
 export const MENU_HIGH_DAMPENING = { damping: 26, stiffness: 300 };
+export const ONBOARDING_DAMPENING = { damping: 28, stiffness: 300 };
 
 export const PARENT_DND_ZONE_DIMENTIONS = { width: 4 * CIRCLE_SIZE, height: 75 / 2 };
 export const CHILD_DND_ZONE_DIMENTIONS = { ...PARENT_DND_ZONE_DIMENTIONS, height: 75 / 2 };

@@ -25,6 +25,7 @@ import newUserTreesSlice from "./slices/userTreesSlice";
 import { MigrationConfig } from "redux-persist/es/createMigrate";
 import { generate24CharHexId } from "@/functions/misc";
 import userFeedbackSlice from "./slices/userFeedbackSlice";
+import onboardingSlice from "./slices/onboardingSlice";
 
 const migration: MigrationManifest = {
     //@ts-ignore
@@ -69,6 +70,7 @@ const rootReducer = combineReducers({
     nodes: nodesSlice,
     homeTree: homeTreeSlice,
     userFeedback: userFeedbackSlice,
+    onboarding: onboardingSlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

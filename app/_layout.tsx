@@ -1,8 +1,10 @@
 import { IsSharingAvailableContext } from "@/context";
 import { colors } from "@/parameters";
-import { useAppDispatch } from "@/redux/reduxHooks";
+import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { persistor, store } from "@/redux/reduxStore";
+import { selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
 import { updateSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
+import { selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
 import useHandleUserId from "@/useHandleUserId";
 import useIsSharingAvailable from "@/useIsSharingAvailable";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
@@ -63,9 +65,24 @@ export default function RootLayout() {
     );
 }
 
+const useHandleOnboarding = () => {
+    const onboarding = useAppSelector(selectOnboarding);
+    const treeQty = useAppSelector(selectTotalTreeQty);
+    const dispatch = useAppDispatch();
+
+    if (onboarding.complete) return;
+
+    if (onboarding.currentStep !== 0) return;
+
+    const PAST_SKILLS_STEP = 2;
+
+    if (treeQty !== 0) dispatch(skipToStep(PAST_SKILLS_STEP));
+};
+
 function AppWithReduxContext() {
     const dispatch = useAppDispatch();
     useHandleUserId();
+    useHandleOnboarding();
 
     return (
         <View
