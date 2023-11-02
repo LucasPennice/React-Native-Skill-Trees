@@ -30,7 +30,7 @@ const ModalWithGesturesEnabled = gestureHandlerRootHOC(({ children, closeModal, 
         <GestureDetector gesture={flingGesture}>
             <SafeAreaView style={[{ justifyContent: "flex-end", backgroundColor: colors.darkGray, flex: 1, maxWidth: 600 }, modalContainerStyles]}>
                 <View style={{ borderRadius: 10, flex: 1, padding: MODAL_PADDING }}>
-                    <View style={[centerFlex, { position: "relative", height: 50 }]}>
+                    <View style={[centerFlex, { position: "relative", height: 45 }]}>
                         {leftHeaderButton && (
                             <Pressable
                                 onPress={closeModal}
@@ -54,7 +54,7 @@ const ModalWithGesturesEnabled = gestureHandlerRootHOC(({ children, closeModal, 
                             style={{
                                 backgroundColor: `${colors.line}`,
                                 width: DRAG_BAR_WIDTH,
-                                height: 6,
+                                height: 4,
                                 borderRadius: 10,
                                 position: "absolute",
                             }}

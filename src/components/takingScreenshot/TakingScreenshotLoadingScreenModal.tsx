@@ -1,8 +1,8 @@
-import { completedSkillTreeTable } from "@/functions/extractInformationFromTree";
+import { arrayToDictionary, completedSkillTreeTable, dictionaryToArray } from "@/functions/extractInformationFromTree";
 import { getLabelTextColor } from "@/functions/misc";
 import { nodeToCircularPath } from "@/functions/svg/toSvg";
 import { getNodesCoordinates, treeHeightFromCoordinates, treeWidthFromCoordinates } from "@/functions/treeCalculateCoordinates";
-import { prepareNodesForHomeTreeBuild } from "@/pages/homepage/HomepageTree";
+import { getNodesOfTreesToDisplay, prepareNodesForHomeTreeBuild } from "@/pages/homepage/HomepageTree";
 import { useAppSelector } from "@/redux/reduxHooks";
 import { selectNodesOfTree } from "@/redux/slices/nodesSlice";
 import { TreeData, selectAllTreesEntities } from "@/redux/slices/userTreesSlice";
@@ -12,7 +12,7 @@ import { Dictionary } from "@reduxjs/toolkit";
 import { SkFont, useFont } from "@shopify/react-native-skia";
 import { mixpanel } from "app/(app)/_layout";
 import { shareAsync } from "expo-sharing";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Modal, Platform, Pressable, StatusBar, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector, gestureHandlerRootHOC } from "react-native-gesture-handler";
 import Animated, { SharedValue, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
@@ -332,6 +332,21 @@ export const DefineGradients = ({ subTreesData }: { subTreesData: Dictionary<Tre
 
 function LayoutSelector({ treeData, cancelSharing }: { treeData: Omit<TreeData, "nodes">; cancelSharing: () => void }) {
     const nodes = useAppSelector(selectNodesOfTree(treeData.treeId));
+    const subTreesData = useAppSelector(selectAllTreesEntities);
+
+    const { filteredNodes, filteredSubTrees } = useMemo(() => {
+        if (treeData.treeId === HOMEPAGE_TREE_ID) {
+            const nodesDictionary = arrayToDictionary(nodes);
+            const { filteredNodes: filteredNodesDictionary, filteredTrees: filteredTreesDictionary } = getNodesOfTreesToDisplay(
+                nodesDictionary,
+                subTreesData
+            );
+
+            return { filteredNodes: dictionaryToArray(filteredNodesDictionary), filteredSubTrees: filteredTreesDictionary };
+        }
+
+        return { filteredNodes: nodes, filteredSubTrees: subTreesData };
+    }, [treeData, nodes, subTreesData]);
 
     const [loadingShare, setLoadingShare] = useState(false);
 
@@ -351,10 +366,9 @@ function LayoutSelector({ treeData, cancelSharing }: { treeData: Omit<TreeData, 
         },
     });
 
-    const subTreesData = useAppSelector(selectAllTreesEntities);
     const PADDING = 4 * CIRCLE_SIZE;
 
-    const { coordinates, heightData, rootNode, widthData } = getNodeCoordinatesWithoutCenteringOrPadding(nodes, subTreesData, treeData);
+    const { coordinates, heightData, rootNode, widthData } = getNodeCoordinatesWithoutCenteringOrPadding(filteredNodes, filteredSubTrees, treeData);
     const minY = Math.abs(heightData.minCoordinate);
 
     const rootNodeInsideCanvas = { ...rootNode, x: rootNode.x - widthData.minCoordinate + PADDING / 2, y: rootNode.y + minY + PADDING / 2 };
@@ -420,7 +434,7 @@ function LayoutSelector({ treeData, cancelSharing }: { treeData: Omit<TreeData, 
                         svgDimensions={svgDimensions}
                     />
                 )}
-                <ProgressIndicatorAndName nodesOfTree={nodes} treeData={treeData} containerStyle={{ left: undefined, right: 10 }} />
+                <ProgressIndicatorAndName nodesOfTree={filteredNodes} treeData={treeData} containerStyle={{ left: undefined, right: 10 }} />
             </ViewShot>
             <View style={styles.footerContainer}>
                 <AppButton

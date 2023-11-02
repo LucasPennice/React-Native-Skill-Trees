@@ -1,3 +1,4 @@
+import AppButton from "@/components/AppButton";
 import AppText from "@/components/AppText";
 import TreeCard from "@/pages/myTrees/TreeCard";
 import AddTreeModal from "@/pages/myTrees/modals/AddTreeModal";
@@ -8,6 +9,7 @@ import { open } from "@/redux/slices/addTreeModalSlice";
 import { selectAllTrees } from "@/redux/slices/userTreesSlice";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
+import { View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { RoutesParams } from "routes";
 
@@ -51,35 +53,46 @@ function MyTrees() {
     };
 
     return (
-        <>
-            <ScrollView style={{ backgroundColor: colors.background, flex: 1, paddingHorizontal: 10 }}>
-                <AppText style={{ color: "#FFFFFF", fontFamily: "helveticaBold", marginBottom: 5 }} fontSize={32}>
-                    My Skill Trees
-                </AppText>
-                <AppText style={{ color: colors.unmarkedText, marginBottom: 5 }} fontSize={16}>
-                    Click a Skill Tree to access it
-                </AppText>
-                <AppText style={{ color: colors.unmarkedText, marginBottom: 20 }} fontSize={16}>
-                    Long Press to options menu
-                </AppText>
-
-                {userTrees.length > 0 &&
-                    userTrees.map((element, idx) => {
-                        const changeTreeAndNavigateToViewingTree = factoryChangeTreeAndNavigateToViewingTree(element.treeId ?? "");
-                        return (
-                            <TreeCard
-                                openEditTreeModal={setEditingTreeId}
-                                element={element}
-                                changeTreeAndNavigateToViewingTree={changeTreeAndNavigateToViewingTree}
-                                key={idx}
-                            />
-                        );
-                    })}
-            </ScrollView>
+        <View style={{ flex: 1, padding: 10 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <View style={{ justifyContent: "center" }}>
+                    <AppText style={{ color: colors.white }} fontSize={18}>
+                        My Skill Trees
+                    </AppText>
+                    <AppText style={{ color: `${colors.white}80` }} fontSize={14}>
+                        Long Press to options menu
+                    </AppText>
+                </View>
+                <AppButton
+                    onPress={() => dispatch(open())}
+                    text={{ idle: "New Skill Tree" }}
+                    color={{ idle: colors.background }}
+                    style={{ paddingHorizontal: 20, borderRadius: 15, backgroundColor: colors.background }}
+                    textStyle={{ color: colors.accent }}
+                />
+            </View>
+            <View style={{ flex: 1 }}>
+                <ScrollView>
+                    {userTrees.length > 0 &&
+                        userTrees.map((element, idx) => {
+                            const changeTreeAndNavigateToViewingTree = factoryChangeTreeAndNavigateToViewingTree(element.treeId ?? "");
+                            return (
+                                <TreeCard
+                                    openEditTreeModal={setEditingTreeId}
+                                    element={element}
+                                    changeTreeAndNavigateToViewingTree={changeTreeAndNavigateToViewingTree}
+                                    animationDelay={idx * 100}
+                                    key={idx}
+                                />
+                            );
+                        })}
+                </ScrollView>
+            </View>
 
             {editingTreeId && <EditTreeModal editingTreeId={editingTreeId} closeModal={() => setEditingTreeId(null)} />}
+
             <AddTreeModal />
-        </>
+        </View>
     );
 }
 

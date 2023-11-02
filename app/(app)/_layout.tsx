@@ -1,5 +1,4 @@
 import AppText from "@/components/AppText";
-import ChevronLeft from "@/components/Icons/ChevronLeft";
 import OnboardingCompletionIcon from "@/components/Icons/OnboardingCompleteIcon";
 import SteppedProgressBarAndIndicator, { OnboardingStep } from "@/components/SteppedProgressBarAndIndicator";
 import { getUserFeedbackProgressPercentage, getWheelParams } from "@/functions/misc";
@@ -17,7 +16,6 @@ import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router
 import { Mixpanel } from "mixpanel-react-native";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, { FadeIn, FadeInRight, FadeOut, FadeOutLeft, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { RoutesParams, routes } from "routes";
 
@@ -110,8 +108,6 @@ export default function RootLayout() {
                 <Stack.Screen
                     name={routes.myTrees.name}
                     options={{
-                        headerShown: true,
-                        header: MyTreesHeader(openAddTreeModal),
                         title: "My Trees",
                     }}
                 />
@@ -333,7 +329,7 @@ const CurrentText = ({ steps, currentStepIdx, open }: { steps: OnboardingStep[];
     });
 
     const animatedIconStyle = useAnimatedStyle(() => {
-        const fooIcon = getFooForIcon(currentStepIdx);
+        const fooIcon = getIconSpacing(currentStepIdx);
         return {
             top: withSpring(open ? 0 : fooIcon.top),
             left: withSpring(open ? 0 : fooIcon.left, MENU_HIGH_DAMPENING),
@@ -365,7 +361,7 @@ const CurrentText = ({ steps, currentStepIdx, open }: { steps: OnboardingStep[];
     );
 };
 
-function getFooForIcon(currentIdx: number): { left: number; top: number } {
+function getIconSpacing(currentIdx: number): { left: number; top: number } {
     "worklet";
 
     switch (currentIdx) {
@@ -376,31 +372,4 @@ function getFooForIcon(currentIdx: number): { left: number; top: number } {
         default:
             return { left: 5, top: -12 };
     }
-}
-
-function MyTreesHeader(openAddTreeModal: () => void) {
-    const style = StyleSheet.create({
-        button: {
-            height: 48,
-            paddingHorizontal: 15,
-            alignItems: "flex-end",
-            justifyContent: "center",
-        },
-        backButton: {
-            paddingLeft: 0,
-            paddingRight: 30,
-        },
-    });
-    return () => (
-        <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
-            <TouchableOpacity onPress={router.back} style={[style.button, style.backButton]}>
-                <ChevronLeft />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={openAddTreeModal} style={style.button}>
-                <AppText style={{ color: colors.accent }} fontSize={16}>
-                    New Skill Tree
-                </AppText>
-            </TouchableOpacity>
-        </View>
-    );
 }

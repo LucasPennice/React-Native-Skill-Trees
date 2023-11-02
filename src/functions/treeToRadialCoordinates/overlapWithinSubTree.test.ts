@@ -13,15 +13,17 @@ import {
     shiftNodesCounterClockWise,
 } from "./overlapWithinSubTree";
 import { getSubTreesDictionary } from "../extractInformationFromTree";
+import { TreeData } from "@/redux/slices/userTreesSlice";
 
 const MOCK_SKILL_VALUE = getDefaultSkillValue("foo", false, { isEmoji: false, text: "foo" });
 
-const WHITE_HOME_TREE = {
+const WHITE_HOME_TREE: Omit<TreeData, "nodes"> = {
     accentColor: { label: "White", color1: "#FFFFFF", color2: "#CAEFD7" },
     icon: { isEmoji: false, text: "L" },
     rootNodeId: "homepageRoot",
     treeId: "HomepageTree",
     treeName: "Life Skills",
+    showOnHomeScreen: true,
 };
 
 //🚨 This is the tree I'm referencing when I say complete overlap case https://imgur.com/a/SqaqnnS
@@ -2857,6 +2859,7 @@ test("CircularTree1", () => {
             rootNodeId: "homepageRoot",
             treeId: "HomepageTree",
             treeName: "Life Skills",
+            showOnHomeScreen: true,
         })
     ).toStrictEqual(result);
 });

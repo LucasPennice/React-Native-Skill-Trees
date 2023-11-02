@@ -3,15 +3,17 @@ import { Dictionary } from "@reduxjs/toolkit";
 import { NormalizedNode, getDefaultSkillValue } from "../../types";
 import { plotCircularTree } from "./general";
 import { getAngleSpanPerLevelIncludingPadding } from "./levelOverflow";
+import { TreeData } from "@/redux/slices/userTreesSlice";
 
 const MOCK_SKILL_VALUE = getDefaultSkillValue("foo", false, { isEmoji: false, text: "foo" });
 
-const WHITE_HOME_TREE = {
+const WHITE_HOME_TREE: Omit<TreeData, "nodes"> = {
     accentColor: { label: "White", color1: "#FFFFFF", color2: "#CAEFD7" },
     icon: { isEmoji: false, text: "L" },
     rootNodeId: "homepageRoot",
     treeId: "HomepageTree",
     treeName: "Life Skills",
+    showOnHomeScreen: true,
 };
 
 test("getAngleSpanPerLevelIncludingPadding", () => {

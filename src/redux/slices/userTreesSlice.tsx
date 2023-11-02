@@ -11,11 +11,12 @@ export type TreeData = {
     nodes: string[];
     rootNodeId: string;
     icon: SkillIcon;
+    showOnHomeScreen: boolean;
 };
 
 const userTreesAdapter = createEntityAdapter<TreeData>({ selectId: (tree) => tree.treeId });
 
-const initialState: EntityState<TreeData> = userTreesAdapter.getInitialState({ selectedTree: null });
+const initialState: EntityState<TreeData> = userTreesAdapter.getInitialState({ showOnHomeScreen: true });
 
 export type UserTreeSlice = typeof initialState;
 
@@ -27,6 +28,7 @@ export const userTreesSlice = createSlice({
             userTreesAdapter.updateOne(state, action.payload.update);
         },
         addUserTree: userTreesAdapter.addOne,
+        updateUserTrees: userTreesAdapter.updateMany,
         removeUserTree: (state, action: PayloadAction<{ treeId: string; nodes: string[] }>) => {
             userTreesAdapter.removeOne(state, action.payload.treeId);
         },
@@ -55,7 +57,7 @@ export const userTreesSlice = createSlice({
     },
 });
 
-export const { addUserTree, removeUserTree, updateUserTree } = userTreesSlice.actions;
+export const { addUserTree, removeUserTree, updateUserTree, updateUserTrees } = userTreesSlice.actions;
 
 export default userTreesSlice.reducer;
 

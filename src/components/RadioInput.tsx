@@ -1,19 +1,22 @@
-import { Pressable, ViewProps } from "react-native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useEffect } from "react";
+import { Pressable, StyleSheet, View, ViewProps } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
+import { colors } from "../parameters";
 import AppText from "./AppText";
-import { centerFlex, colors } from "../parameters";
 
 function RadioInput({
     state,
     text,
     onPress,
     style,
+    iconProps,
 }: {
     state: [boolean, (v: boolean) => void];
     text: string;
     onPress?: () => void;
     style?: ViewProps["style"];
+    iconProps?: React.ComponentProps<typeof FontAwesome>;
 }) {
     const [mastered, setMastered] = state;
 
@@ -23,48 +26,59 @@ function RadioInput({
         isMastered.value = mastered;
     }, [mastered, isMastered]);
 
-    const left = useAnimatedStyle(() => {
-        return { left: withSpring(isMastered.value ? 35 : 5, { damping: 25, stiffness: 300 }) };
+    const TOGGLE_SIZE = 25;
+
+    const animatedLeft = useAnimatedStyle(() => {
+        return { left: withSpring(isMastered.value ? TOGGLE_SIZE + 2 : 5, { damping: 25, stiffness: 300 }) };
     }, [isMastered]);
 
-    const bgColor = useAnimatedStyle(() => {
+    const animatedBackgroundColor = useAnimatedStyle(() => {
         return { backgroundColor: withTiming(isMastered.value ? colors.accent : `${colors.accent}4D`) };
     }, [isMastered]);
 
+    const styles = StyleSheet.create({
+        container: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            backgroundColor: "#282A2C",
+            borderRadius: 15,
+            paddingHorizontal: 15,
+            height: 60,
+            marginBottom: 30,
+        },
+        toggleContainer: {
+            height: TOGGLE_SIZE,
+            width: 2 * TOGGLE_SIZE,
+            borderRadius: 25,
+            position: "relative",
+            borderWidth: 1,
+            borderColor: colors.line,
+        },
+        toggleStyles: {
+            height: TOGGLE_SIZE - 10,
+            width: TOGGLE_SIZE - 10,
+            position: "absolute",
+            top: 4,
+            backgroundColor: colors.accent,
+            borderRadius: 35,
+        },
+    });
+
     return (
         <Pressable
-            style={[
-                centerFlex,
-                {
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    backgroundColor: "#282A2C",
-                    borderRadius: 15,
-                    paddingHorizontal: 15,
-                    height: 60,
-                    marginBottom: 30,
-                },
-                style,
-            ]}
+            style={[styles.container, style]}
             onPress={() => {
                 const newValue = !mastered;
                 setMastered(newValue);
                 if (onPress) onPress();
             }}>
-            <AppText style={{ color: "#FFFFFF" }} fontSize={18}>
-                {text}
-            </AppText>
-            <Animated.View
-                style={[
-                    bgColor,
-                    {
-                        height: 40,
-                        width: 70,
-                        borderRadius: 25,
-                        position: "relative",
-                    },
-                ]}>
-                <Animated.View style={[left, { height: 30, width: 30, position: "absolute", top: 5, backgroundColor: "white", borderRadius: 35 }]} />
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                {iconProps && <FontAwesome size={iconProps.size ?? 28} style={{ marginBottom: 3 }} {...iconProps} />}
+                <AppText fontSize={18}>{text}</AppText>
+            </View>
+            <Animated.View style={[styles.toggleContainer]}>
+                <Animated.View style={[animatedLeft, styles.toggleStyles]} />
             </Animated.View>
         </Pressable>
     );

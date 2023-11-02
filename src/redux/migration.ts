@@ -150,6 +150,7 @@ export function migrateFromCurrentTreeToNormalizedSlice(userTrees: Tree<Skill>[]
             rootNodeId: userTree.nodeId,
             treeId: userTree.treeId,
             treeName: userTree.treeName,
+            showOnHomeScreen: true,
         };
     }
 }

@@ -13,6 +13,8 @@ import { Dimensions, StyleSheet, View } from "react-native";
 import { Defs, LinearGradient, Path, Stop, Svg } from "react-native-svg";
 import { CIRCLE_SIZE, HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, centerFlex, colors } from "../../src/parameters";
 import { Fragment } from "react";
+import { Dictionary } from "@reduxjs/toolkit";
+import { TreeData } from "@/redux/slices/userTreesSlice";
 
 const TEXT_AND_BUTTON_HEIGHT = 150;
 
@@ -898,7 +900,7 @@ const OnboardingTree = () => {
         treeId: "HomepageTree",
         treeName: "Life Skills",
     };
-    const mockSubtreesData = {
+    const mockSubtreesData: Dictionary<TreeData> = {
         d5c56276e6f38a411b3aa61b: {
             accentColor: { label: "Blue", color1: "#1982F9", color2: "#BF5AF2" },
             icon: { isEmoji: true, text: "🧠" },
@@ -912,6 +914,7 @@ const OnboardingTree = () => {
             rootNodeId: "48f11433ed140fc13567f129",
             treeId: "d5c56276e6f38a411b3aa61b",
             treeName: "Education",
+            showOnHomeScreen: true,
         },
         a13392a32a1e1cc3545332de: {
             accentColor: { label: "Yellow", color1: "#FED739", color2: "#FF9F23" },
@@ -927,6 +930,7 @@ const OnboardingTree = () => {
             rootNodeId: "025f1eb582ede1f45d12a127",
             treeId: "a13392a32a1e1cc3545332de",
             treeName: "Sports",
+            showOnHomeScreen: true,
         },
         dcfa6e82257214440370679f: {
             accentColor: { label: "Green", color1: "#50D158", color2: "#1982F9" },
@@ -945,6 +949,7 @@ const OnboardingTree = () => {
             rootNodeId: "a03d92f7e92c08df3f5a4c53",
             treeId: "dcfa6e82257214440370679f",
             treeName: "Skill Trees",
+            showOnHomeScreen: true,
         },
         "1354d83c2417b8e9c67d07e3": {
             accentColor: { label: "Purple", color1: "#BF5AF2", color2: "#5A7BF2" },
@@ -963,6 +968,7 @@ const OnboardingTree = () => {
             rootNodeId: "fd319e5f2a05d486557056b7",
             treeId: "1354d83c2417b8e9c67d07e3",
             treeName: "Software Development",
+            showOnHomeScreen: true,
         },
         aaef7335bdc162ccc6af6bfb: {
             accentColor: { label: "Magenta", color1: "#FC385F", color2: "#BF5AF2" },
@@ -971,6 +977,7 @@ const OnboardingTree = () => {
             rootNodeId: "bd406cf14bd863b1864ccdb8",
             treeId: "aaef7335bdc162ccc6af6bfb",
             treeName: "English",
+            showOnHomeScreen: true,
         },
         "8382cabfb188faed5f3b6f7c": {
             accentColor: { label: "Green", color1: "#50D158", color2: "#1982F9" },
@@ -979,6 +986,7 @@ const OnboardingTree = () => {
             rootNodeId: "0d7f3a29e5982380fe821be9",
             treeId: "8382cabfb188faed5f3b6f7c",
             treeName: "Business",
+            showOnHomeScreen: true,
         },
     };
 

@@ -10,6 +10,7 @@ export const homeTreeSliceInitialState: Omit<TreeData, "nodes"> = {
     rootNodeId: HOMETREE_ROOT_ID,
     treeId: HOMEPAGE_TREE_ID,
     treeName: "Life Skills",
+    showOnHomeScreen: true,
 };
 
 export type HomeTreeSlice = typeof homeTreeSliceInitialState;

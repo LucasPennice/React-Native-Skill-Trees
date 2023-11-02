@@ -56,7 +56,7 @@ function AppTextInput({
                         paddingBottom: 15,
                         paddingLeft: 20,
                         fontFamily: "helvetica",
-                        color: "#FFFFFF",
+                        color: colors.white,
                         flex: 1,
                         marginRight: disable ? 20 : 50,
                     },

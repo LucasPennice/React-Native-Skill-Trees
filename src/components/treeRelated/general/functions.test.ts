@@ -38,6 +38,7 @@ test("Normalizing Tree with 1 node", () => {
         nodes: ["rootId"],
         treeId: "mockTreeId",
         icon: { isEmoji: false, text: "text" },
+        showOnHomeScreen: true,
     };
 
     const expectedResult: Tree<Skill> = {
@@ -173,6 +174,7 @@ test("Normalizing Tree general", () => {
         nodes: ["rootId", "1-1", "1-2", "1-3", "2-1"],
         icon: { isEmoji: false, text: "text" },
         treeId: "mockTreeId",
+        showOnHomeScreen: true,
     };
 
     const rootNode = nodes[0];

@@ -4,10 +4,11 @@ import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { persistor, store } from "@/redux/reduxStore";
 import { selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
 import { updateSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
-import { selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
+import { TreeData, selectAllTrees, selectTotalTreeQty, updateUserTrees } from "@/redux/slices/userTreesSlice";
 import useHandleUserId from "@/useHandleUserId";
 import useIsSharingAvailable from "@/useIsSharingAvailable";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
+import { Update } from "@reduxjs/toolkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import { SplashScreen, Stack } from "expo-router";
@@ -79,10 +80,26 @@ const useHandleOnboarding = () => {
     if (treeQty !== 0) dispatch(skipToStep(PAST_SKILLS_STEP));
 };
 
+const useUpdateTreeDataForShowOnHomepage = () => {
+    const userTrees = useAppSelector(selectAllTrees);
+    const dispatch = useAppDispatch();
+
+    const treesToUpdate = userTrees.filter((t) => t.showOnHomeScreen === undefined);
+
+    if (treesToUpdate.length === 0) return;
+
+    const changes = treesToUpdate.map((tree) => {
+        return { id: tree.treeId, changes: { showOnHomeScreen: true } } as Update<TreeData>;
+    });
+
+    dispatch(updateUserTrees(changes));
+};
+
 function AppWithReduxContext() {
     const dispatch = useAppDispatch();
     useHandleUserId();
     useHandleOnboarding();
+    useUpdateTreeDataForShowOnHomepage();
 
     return (
         <View

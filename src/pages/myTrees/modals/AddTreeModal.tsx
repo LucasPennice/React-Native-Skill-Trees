@@ -1,3 +1,4 @@
+import { generate24CharHexId } from "@/functions/misc";
 import { TreeData, addUserTree } from "@/redux/slices/userTreesSlice";
 import analytics from "@react-native-firebase/analytics";
 import { mixpanel } from "app/(app)/_layout";
@@ -15,7 +16,6 @@ import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { close, selectAddTree } from "../../../redux/slices/addTreeModalSlice";
 import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
 import { ColorGradient } from "../../../types";
-import { generate24CharHexId } from "@/functions/misc";
 
 function AddTreeModal() {
     const { query } = useRequestProcessor();
@@ -67,6 +67,7 @@ function AddTreeModal() {
             rootNodeId,
             treeId: generate24CharHexId(),
             treeName,
+            showOnHomeScreen: true,
         };
 
         dispatch(addUserTree(newUserTree));

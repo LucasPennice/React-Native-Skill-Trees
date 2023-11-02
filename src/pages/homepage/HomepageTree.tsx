@@ -2,7 +2,7 @@ import SelectedNodeView from "@/components/treeRelated/general/SelectedNodeView"
 import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMenuFunctions";
 import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { selectNodeById, selectNodesTable } from "@/redux/slices/nodesSlice";
-import { removeUserTree, selectAllTreesEntities } from "@/redux/slices/userTreesSlice";
+import { TreeData, removeUserTree, selectAllTreesEntities } from "@/redux/slices/userTreesSlice";
 import { Dictionary } from "@reduxjs/toolkit";
 import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
 import { router } from "expo-router";
@@ -20,7 +20,7 @@ import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
 import { handleTreeBuild } from "../../functions/treeCalculateCoordinates";
-import { NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
+import { HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
@@ -104,10 +104,19 @@ function useGetTreeState(canvasRef: React.RefObject<SkiaDomView>, selectedNode: 
         canvasDimentions: canvasDimensions,
         nodeCoordinatesCentered,
     } = useMemo(() => {
-        const homeTreeNodes = prepareNodesForHomeTreeBuild(allNodes, homeTreeData.rootNodeId);
-        const result = handleTreeBuild({ nodes: homeTreeNodes, treeData: homeTreeData, screenDimensions, renderStyle: "radial", subTreesData });
+        const { filteredNodes, filteredTrees } = getNodesOfTreesToDisplay(allNodes, subTreesData);
+
+        const homeTreeNodes = prepareNodesForHomeTreeBuild(filteredNodes, homeTreeData.rootNodeId);
+
+        const result = handleTreeBuild({
+            nodes: homeTreeNodes,
+            treeData: homeTreeData,
+            screenDimensions,
+            renderStyle: "radial",
+            subTreesData: filteredTrees,
+        });
         return result;
-    }, [allNodes, homeTreeData, screenDimensions]);
+    }, [allNodes, homeTreeData, screenDimensions, subTreesData]);
 
     const treeCoordinate: TreeCoordinateData = {
         canvasDimensions,
@@ -359,3 +368,37 @@ function CanvasView({
 }
 
 export default memo(HomepageTree);
+
+export function getNodesOfTreesToDisplay(allNodes: Dictionary<NormalizedNode>, subTreesData: Dictionary<TreeData>) {
+    const filteredNodes: Dictionary<NormalizedNode> = {};
+    const filteredTrees: Dictionary<TreeData> = {};
+    const filteredTreeRootIds: string[] = [];
+
+    const treeIds = Object.keys(subTreesData);
+
+    for (let i = 0; i < treeIds.length; i++) {
+        const treeId = treeIds[i];
+
+        if (subTreesData[treeId]!.showOnHomeScreen) {
+            filteredTrees[treeId] = subTreesData[treeId]!;
+            filteredTreeRootIds.push(subTreesData[treeId]!.rootNodeId);
+        }
+    }
+
+    const nodeIds = Object.keys(allNodes);
+
+    for (let i = 0; i < nodeIds.length; i++) {
+        const nodeId = nodeIds[i];
+
+        const node = allNodes[nodeId]!;
+
+        if (nodeId === HOMETREE_ROOT_ID) {
+            filteredNodes[node.nodeId] = { ...node, childrenIds: node.childrenIds.filter((nodeId) => filteredTreeRootIds.includes(nodeId)) };
+            continue;
+        }
+
+        if (subTreesData[node.treeId]!.showOnHomeScreen) filteredNodes[node.nodeId] = node;
+    }
+
+    return { filteredNodes, filteredTrees };
+}

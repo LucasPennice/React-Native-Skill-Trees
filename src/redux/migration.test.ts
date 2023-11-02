@@ -454,6 +454,7 @@ test("migrateFromCurrentTreeToNormalizedSlice - General Case", () => {
                     rootNodeId: "YnOYZ6TzIXPO9n1ctCjYALBx",
                     treeId: "8sDjNU7jCKLgXmuY6Fa7N9Zw",
                     treeName: "TgHshshdhdj",
+                    showOnHomeScreen: true,
                 },
             },
             ids: ["8sDjNU7jCKLgXmuY6Fa7N9Zw"],

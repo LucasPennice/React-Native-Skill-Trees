@@ -626,6 +626,21 @@ export function arrayToDictionary<T extends { nodeId: string }>(arr: T[]) {
     return result;
 }
 
+export function dictionaryToArray<T>(dictionary: Dictionary<T>) {
+    const result: T[] = [];
+
+    const keys = Object.keys(dictionary);
+
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const element = dictionary[key]!;
+
+        result.push(element);
+    }
+
+    return result;
+}
+
 export function getSubTreesDictionary(nodes: Dictionary<NormalizedNode>, subTreeIdsAndSubTreeRootIds: SubTreeIdAndSubTreeRootId[], rootId: string) {
     //I consider a sub tree containing the root node of the tree, BUT that root should only contain one child
     //The root node of the subTree

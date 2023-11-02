@@ -9,17 +9,19 @@ function ColorGradientSelector({
     colorsArray,
     state,
     style,
+    containerStyle,
 }: {
     colorsArray: ColorGradient[];
     state: [ColorGradient | undefined, (v: ColorGradient) => void];
     style?: StyleProp<ViewStyle>;
+    containerStyle?: StyleProp<ViewStyle>;
 }) {
     const [selectedColor, setSelectedColor] = state;
 
     const selectColor = (color: ColorGradient) => () => setSelectedColor(color);
 
     return (
-        <View style={{ height: 70 }}>
+        <View style={[{ height: 70 }, containerStyle]}>
             <ScrollView contentContainerStyle={[style]} horizontal showsHorizontalScrollIndicator={false}>
                 {colorsArray.map((data, idx) => {
                     return <ColorOption key={idx} data={data} selectedColor={selectedColor} selectColor={selectColor(data)} />;

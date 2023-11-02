@@ -383,6 +383,7 @@ export const treeToNormalizedNodeAndTreeDataAdapter = (tree: Tree<Skill>) => {
         rootNodeId: tree.nodeId,
         treeId: tree.treeId,
         treeName: tree.treeName,
+        showOnHomeScreen: true,
     };
 
     const nodes: Dictionary<NormalizedNode> = {};
