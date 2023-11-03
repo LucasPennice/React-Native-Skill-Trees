@@ -170,8 +170,8 @@ export function getLevelBiggestOverlap(levelContour: PolarContour[], originalDis
         const leftToRightAngle = angleFromLeftToRightCounterClockWise(nextContourLeftNode, currentContourRightNode);
         const rightToLeftAngle = 2 * Math.PI - leftToRightAngle;
 
-        if (rightToLeftAngle > 2 * Math.PI || leftToRightAngle > 2 * Math.PI)
-            throw new Error("Angle greater than 2PI in checkForOverlapBetweenNodes");
+        // if (rightToLeftAngle > 2 * Math.PI || leftToRightAngle > 2 * Math.PI)
+        // throw new Error("Angle greater than 2PI in checkForOverlapBetweenNodes");
 
         const overlap = rightToLeftAngle < leftToRightAngle;
 
