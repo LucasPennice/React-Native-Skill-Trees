@@ -8,6 +8,7 @@ import AppTextInput from "../../../components/AppTextInput";
 import RadioInput from "../../../components/RadioInput";
 import { colors } from "../../../parameters";
 import { SkillIcon, SkillPropertiesEditableOnPopMenu } from "../../../types";
+import { toggleEmoji } from "@/functions/misc";
 
 function Editing({
     skillPropsState,
@@ -106,17 +107,11 @@ function Editing({
 
             <AppEmojiPicker
                 selectedEmojisName={emoji ? [emoji.name] : undefined}
-                onEmojiSelected={toggleEmoji}
+                onEmojiSelected={toggleEmoji(setEmoji, emoji)}
                 state={[emojiSelectorOpen, setEmojiSelectorOpen]}
             />
         </Animated.View>
     );
-
-    function toggleEmoji(newEmoji: Emoji) {
-        if (emoji && newEmoji.name === emoji.name) return setEmoji(undefined);
-
-        return setEmoji(newEmoji);
-    }
 }
 
 export default Editing;

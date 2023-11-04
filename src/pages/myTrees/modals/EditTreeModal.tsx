@@ -2,9 +2,10 @@ import AppButton from "@/components/AppButton";
 import AppEmojiPicker, { Emoji, findEmoji } from "@/components/AppEmojiPicker";
 import RadioInput from "@/components/RadioInput";
 import Spacer from "@/components/Spacer";
+import { toggleEmoji } from "@/functions/misc";
 import { TreeData, removeUserTree, selectTreeById, updateUserTree } from "@/redux/slices/userTreesSlice";
 import { useEffect, useState } from "react";
-import { Alert, Dimensions, Pressable, View } from "react-native";
+import { Alert, Pressable, View } from "react-native";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import ColorGradientSelector from "../../../components/ColorGradientSelector";
@@ -25,7 +26,6 @@ function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; c
     const [emoji, setEmoji] = useState<Emoji | undefined>(undefined);
     const [emojiSelectorOpen, setEmojiSelectorOpen] = useState(false);
     //
-    const { width } = Dimensions.get("screen");
 
     useEffect(() => {
         setTreeName(treeData.treeName);
@@ -165,18 +165,12 @@ function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; c
 
                 <AppEmojiPicker
                     selectedEmojisName={emoji ? [emoji.name] : undefined}
-                    onEmojiSelected={toggleEmoji}
+                    onEmojiSelected={toggleEmoji(setEmoji, emoji)}
                     state={[emojiSelectorOpen, setEmojiSelectorOpen]}
                 />
             </>
         </FlingToDismissModal>
     );
-
-    function toggleEmoji(newEmoji: Emoji) {
-        if (emoji && newEmoji.name === emoji.name) return setEmoji(undefined);
-
-        return setEmoji(newEmoji);
-    }
 }
 
 export default EditTreeModal;

@@ -1,5 +1,5 @@
 import AppEmojiPicker, { Emoji } from "@/components/AppEmojiPicker";
-import { generate24CharHexId } from "@/functions/misc";
+import { generate24CharHexId, toggleEmoji } from "@/functions/misc";
 import { TreeData, addUserTree } from "@/redux/slices/userTreesSlice";
 import analytics from "@react-native-firebase/analytics";
 import { mixpanel } from "app/(app)/_layout";
@@ -164,18 +164,12 @@ function AddTreeModal() {
                 )} */}
                 <AppEmojiPicker
                     selectedEmojisName={emoji ? [emoji.name] : undefined}
-                    onEmojiSelected={toggleEmoji}
+                    onEmojiSelected={toggleEmoji(setEmoji, emoji)}
                     state={[emojiSelectorOpen, setEmojiSelectorOpen]}
                 />
             </>
         </FlingToDismissModal>
     );
-
-    function toggleEmoji(newEmoji: Emoji) {
-        if (emoji && newEmoji.name === emoji.name) return setEmoji(undefined);
-
-        return setEmoji(newEmoji);
-    }
 
     function cleanup() {
         setTreeName("");

@@ -15,6 +15,7 @@ import {
 } from "../types";
 import { UserFeedback } from "@/redux/slices/userFeedbackSlice";
 import { arrayToDictionary, getDescendantsId } from "./extractInformationFromTree";
+import { Emoji } from "@/components/AppEmojiPicker";
 
 export function generate24CharHexId() {
     const hexChars = "0123456789abcdef";
@@ -471,3 +472,9 @@ export function getUserFeedbackProgressPercentage(userFeedback: UserFeedback) {
 
     return parseInt(`${acum}`);
 }
+
+export const toggleEmoji = (setter: (v: Emoji | undefined) => void, currentEmoji: Emoji | undefined) => (newEmoji: Emoji) => {
+    if (currentEmoji && newEmoji.name === currentEmoji.name) return setter(undefined);
+
+    return setter(newEmoji);
+};
