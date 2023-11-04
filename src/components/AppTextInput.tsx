@@ -1,5 +1,5 @@
 import { Pressable, StyleProp, TextInput, TextInputProps, TextStyle, View, ViewProps } from "react-native";
-import Animated, { FadeIn } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { centerFlex, colors } from "../parameters";
 import CloseIcon from "./Icons/CloseIcon";
 
@@ -35,7 +35,12 @@ function AppTextInput({
     };
 
     return (
-        <View style={[centerFlex, { flexDirection: "row", position: "relative", backgroundColor: "#282A2C", borderRadius: 10 }, containerStyles]}>
+        <View
+            style={[
+                centerFlex,
+                { flexDirection: "row", position: "relative", backgroundColor: colors.darkGray, borderRadius: 10, height: 45 },
+                containerStyles,
+            ]}>
             <TextInput
                 blurOnSubmit
                 //@ts-ignore
@@ -51,9 +56,7 @@ function AppTextInput({
                 placeholderTextColor={colors.line}
                 style={[
                     {
-                        fontSize: 20,
-                        paddingTop: 15,
-                        paddingBottom: 15,
+                        fontSize: 16,
                         paddingLeft: 20,
                         fontFamily: "helvetica",
                         color: colors.white,
@@ -64,7 +67,7 @@ function AppTextInput({
                 ]}
                 {...inputProps}
             />
-            {disable !== true && (
+            {disable !== true && text !== "" && (
                 <Animated.View
                     style={[
                         centerFlex,
@@ -75,6 +78,7 @@ function AppTextInput({
                             right: 0,
                         },
                     ]}
+                    exiting={FadeOut}
                     entering={FadeIn}>
                     <Pressable style={[centerFlex, { flex: 1, paddingHorizontal: 10 }]} onPress={() => setText("")}>
                         <CloseIcon />

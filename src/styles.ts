@@ -7,7 +7,7 @@ export const generalStyles = StyleSheet.create({
         backgroundColor: colors.darkGray,
         paddingHorizontal: 30,
         paddingVertical: 15,
-        minHeight: 48,
+        minHeight: 45,
         borderRadius: 10,
         display: "flex",
         justifyContent: "center",

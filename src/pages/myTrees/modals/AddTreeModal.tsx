@@ -1,10 +1,11 @@
+import AppEmojiPicker, { Emoji } from "@/components/AppEmojiPicker";
 import { generate24CharHexId } from "@/functions/misc";
 import { TreeData, addUserTree } from "@/redux/slices/userTreesSlice";
 import analytics from "@react-native-firebase/analytics";
 import { mixpanel } from "app/(app)/_layout";
 import { useEffect, useState } from "react";
-import { Alert, View } from "react-native";
-import Animated, { FadeInDown, useAnimatedStyle, withSpring } from "react-native-reanimated";
+import { Alert, Pressable, View } from "react-native";
+import { useAnimatedStyle, withSpring } from "react-native-reanimated";
 import axiosClient from "../../../../axiosClient";
 import { useRequestProcessor } from "../../../../requestProcessor";
 import AppText from "../../../components/AppText";
@@ -17,16 +18,24 @@ import { close, selectAddTree } from "../../../redux/slices/addTreeModalSlice";
 import { selectSafeScreenDimentions } from "../../../redux/slices/screenDimentionsSlice";
 import { ColorGradient } from "../../../types";
 
+const useClearStateOnOpen = (open: boolean, cleanup: () => void) => {
+    useEffect(() => {
+        cleanup();
+    }, [open]);
+};
+
 function AddTreeModal() {
     const { query } = useRequestProcessor();
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     const { width } = screenDimensions;
     //Local State
     const [treeName, setTreeName] = useState("");
-    const [icon, setIcon] = useState<string>("");
     const [treeImportKey, setTreeImportKey] = useState("");
     const [selectedColorGradient, setSelectedColorGradient] = useState<ColorGradient | undefined>(undefined);
     const [mode, setMode] = useState<"CREATE_TREE" | "IMPORT_TREE">("CREATE_TREE");
+
+    const [emoji, setEmoji] = useState<Emoji | undefined>(undefined);
+    const [emojiSelectorOpen, setEmojiSelectorOpen] = useState(false);
     //Redux State
     const { open } = useAppSelector(selectAddTree);
     const dispatch = useAppDispatch();
@@ -36,13 +45,7 @@ function AddTreeModal() {
         enabled: false,
     });
 
-    useEffect(() => {
-        setTreeName("");
-        setSelectedColorGradient(undefined);
-        setMode("CREATE_TREE");
-        setTreeImportKey("");
-        importTreeQuery.remove();
-    }, [open]);
+    useClearStateOnOpen(open, cleanup);
 
     useEffect(() => {
         setTreeImportKey("");
@@ -55,8 +58,8 @@ function AddTreeModal() {
         if (treeName === "") return Alert.alert("Please give the tree a name");
         if (!selectedColorGradient) return Alert.alert("Please select a color");
 
-        const isEmoji = icon === "" ? false : true;
-        const iconText = isEmoji ? icon : treeName[0];
+        const isEmoji = emoji === undefined ? false : true;
+        const iconText = emoji?.emoji ?? treeName[0];
 
         const rootNodeId = generate24CharHexId();
 
@@ -83,7 +86,11 @@ function AddTreeModal() {
     }, [mode]);
 
     return (
-        <FlingToDismissModal closeModal={closeModal} open={open} leftHeaderButton={{ onPress: createNewTree, title: "Confirm" }}>
+        <FlingToDismissModal
+            closeModal={closeModal}
+            open={open}
+            leftHeaderButton={{ onPress: createNewTree, title: "Confirm" }}
+            modalContainerStyles={{ backgroundColor: colors.background }}>
             <>
                 {/* <View style={[centerFlex, { flexDirection: "row", backgroundColor: "#282A2C", height: 50, borderRadius: 10, position: "relative" }]}>
                     <Animated.View
@@ -103,63 +110,82 @@ function AddTreeModal() {
                         </AppText>
                     </Pressable>
                 </View> */}
-                {mode === "CREATE_TREE" && (
-                    <Animated.View entering={FadeInDown}>
-                        <AppTextInput
-                            placeholder={"Tree Name"}
-                            textState={[treeName, setTreeName]}
-                            pattern={new RegExp(/^[^ ]/)}
-                            containerStyles={{ marginVertical: 20 }}
-                        />
-                        <View style={{ flexDirection: "row", marginBottom: 15, justifyContent: "space-between", alignItems: "center" }}>
-                            <View style={{ width: width - 160 }}>
-                                <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-                                    <AppText style={{ color: "#FFFFFF", marginBottom: 5 }} fontSize={20}>
-                                        Icon
-                                    </AppText>
-                                    <AppText style={{ color: colors.unmarkedText, marginLeft: 5, marginTop: 2 }} fontSize={16}>
-                                        (optional)
-                                    </AppText>
-                                </View>
-                                <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }} fontSize={14}>
-                                    Your keyboard can switch to an emoji mode. To access it, look for a button located near the bottom left of your
-                                    keyboard.
-                                </AppText>
-                            </View>
-                            <AppTextInput
-                                placeholder={"🧠"}
-                                textStyle={{ fontFamily: "emojisMono", fontSize: 40 }}
-                                textState={[icon, setIcon]}
-                                pattern={new RegExp(/\p{Extended_Pictographic}/u)}
-                                containerStyles={{ width: 130 }}
-                            />
-                        </View>
-                        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10, gap: 5 }}>
-                            <AppText fontSize={18} style={{ color: "#FFFFFF" }}>
-                                Tree Color
-                            </AppText>
-                            <AppText fontSize={14} style={{ color: colors.unmarkedText }}>
-                                (Required)
-                            </AppText>
-                        </View>
-                        <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 5 }}>
-                            Completed skills and progress bars will show with this color
-                        </AppText>
-                        <AppText fontSize={14} style={{ color: colors.unmarkedText, marginBottom: 10 }}>
-                            Scroll to see more colors
-                        </AppText>
 
-                        <ColorGradientSelector colorsArray={nodeGradients} state={[selectedColorGradient, setSelectedColorGradient]} />
-                    </Animated.View>
-                )}
+                {/* {mode === "CREATE_TREE" && ( */}
+                {/* // <Animated.View entering={FadeInDown}> */}
+                <AppText children={"Select your tree's name and icon"} fontSize={16} />
+                <AppText children={"Icon is optional"} fontSize={14} style={{ color: `${colors.white}80`, marginTop: 5, marginBottom: 10 }} />
+                <View style={{ flexDirection: "row", marginBottom: 20 }}>
+                    <AppTextInput
+                        placeholder={"Education"}
+                        textState={[treeName, setTreeName]}
+                        pattern={new RegExp(/^[^ ]/)}
+                        containerStyles={{ flex: 1 }}
+                    />
+                    <Pressable onPress={() => setEmojiSelectorOpen(true)}>
+                        <AppText
+                            children={emoji ? emoji.emoji : "🧠"}
+                            style={{
+                                fontFamily: "emojisMono",
+                                color: emoji ? (selectedColorGradient ? selectedColorGradient.color1 : colors.white) : colors.line,
+                                width: 45,
+                                paddingTop: 2,
+                                height: 45,
+                                backgroundColor: colors.darkGray,
+                                borderRadius: 10,
+                                marginLeft: 10,
+                                textAlign: "center",
+                                verticalAlign: "middle",
+                            }}
+                            fontSize={24}
+                        />
+                    </Pressable>
+                </View>
+
+                <AppText fontSize={16} style={{ color: colors.white }}>
+                    Tree Color
+                </AppText>
+
+                <AppText fontSize={14} style={{ color: `${colors.white}80`, marginBottom: 10 }}>
+                    Scroll to see more colors
+                </AppText>
+
+                <ColorGradientSelector
+                    colorsArray={nodeGradients}
+                    state={[selectedColorGradient, setSelectedColorGradient]}
+                    containerStyle={{ backgroundColor: colors.darkGray, borderRadius: 10 }}
+                />
+                {/* // </Animated.View> */}
+                {/* // )} */}
                 {/* {mode === "IMPORT_TREE" && (
                     <Animated.View entering={FadeInDown}>
                         <ImportTree importTreeQuery={importTreeQuery} linkState={[treeImportKey, setTreeImportKey]} closeModal={closeModal} />
                     </Animated.View>
                 )} */}
+                <AppEmojiPicker
+                    selectedEmojisName={emoji ? [emoji.name] : undefined}
+                    onEmojiSelected={toggleEmoji}
+                    state={[emojiSelectorOpen, setEmojiSelectorOpen]}
+                />
             </>
         </FlingToDismissModal>
     );
+
+    function toggleEmoji(newEmoji: Emoji) {
+        if (emoji && newEmoji.name === emoji.name) return setEmoji(undefined);
+
+        return setEmoji(newEmoji);
+    }
+
+    function cleanup() {
+        setTreeName("");
+        setSelectedColorGradient(undefined);
+        setEmojiSelectorOpen(false);
+        setMode("CREATE_TREE");
+        setTreeImportKey("");
+        setEmoji(undefined);
+        importTreeQuery.remove();
+    }
 }
 
 // function ImportTree({

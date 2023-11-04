@@ -30,16 +30,15 @@ function MotivesToLearnCard({ data, backgroundColor }: { data: MotiveToLearn; ba
                     gap: 15,
                     backgroundColor: backgroundColor ?? colors.darkGray,
                     width: "100%",
-                    paddingHorizontal: 15,
+                    padding: 10,
                     justifyContent: "flex-start",
-                    paddingVertical: 15,
                     borderRadius: 10,
                     borderWidth: 1,
                     borderColor: colors.darkGray,
                 },
             ]}>
             <View style={[centerFlex, { gap: 5, alignItems: "flex-start" }]}>
-                <AppText fontSize={20} style={{ color: "#FFFFFF" }}>
+                <AppText fontSize={16} style={{ color: "#FFFFFF" }}>
                     {data.text}
                 </AppText>
             </View>

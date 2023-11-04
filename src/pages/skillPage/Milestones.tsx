@@ -37,9 +37,8 @@ function MilestoneCard({ data, onPress, backgroundColor }: { data: Milestone; on
                     gap: 15,
                     backgroundColor: backgroundColor ?? colors.darkGray,
                     width: "100%",
-                    paddingHorizontal: 15,
                     justifyContent: "flex-start",
-                    paddingVertical: 15,
+                    padding: 10,
                     borderRadius: 10,
                     borderWidth: 1,
                     borderColor: data.complete ? colors.accent : colors.darkGray,
@@ -47,12 +46,10 @@ function MilestoneCard({ data, onPress, backgroundColor }: { data: Milestone; on
             ]}>
             <View style={[centerFlex, { gap: 5, alignItems: "flex-start" }]}>
                 <View style={[centerFlex, { flexDirection: "row", gap: 5 }]}>
-                    <AppText fontSize={20} style={{ color: "#FFFFFF" }}>
-                        {data.title}
-                    </AppText>
+                    <AppText fontSize={16}>{data.title}</AppText>
                 </View>
                 {data.description !== "" && (
-                    <AppText fontSize={18} style={{ color: colors.unmarkedText }}>
+                    <AppText fontSize={14} style={{ color: colors.unmarkedText }}>
                         {data.description}
                     </AppText>
                 )}

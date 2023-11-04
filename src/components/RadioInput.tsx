@@ -1,6 +1,6 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useEffect } from "react";
-import { Pressable, StyleSheet, View, ViewProps } from "react-native";
+import { Pressable, StyleProp, StyleSheet, TextStyle, View, ViewProps } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { colors } from "../parameters";
 import AppText from "./AppText";
@@ -11,12 +11,14 @@ function RadioInput({
     onPress,
     style,
     iconProps,
+    textProps,
 }: {
     state: [boolean, (v: boolean) => void];
     text: string;
     onPress?: () => void;
     style?: ViewProps["style"];
     iconProps?: React.ComponentProps<typeof FontAwesome>;
+    textProps?: StyleProp<TextStyle>;
 }) {
     const [mastered, setMastered] = state;
 
@@ -75,7 +77,9 @@ function RadioInput({
             }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                 {iconProps && <FontAwesome size={iconProps.size ?? 28} style={{ marginBottom: 3 }} {...iconProps} />}
-                <AppText fontSize={18}>{text}</AppText>
+                <AppText fontSize={18} style={textProps}>
+                    {text}
+                </AppText>
             </View>
             <Animated.View style={[styles.toggleContainer]}>
                 <Animated.View style={[animatedLeft, styles.toggleStyles]} />

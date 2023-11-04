@@ -35,26 +35,25 @@ function ResourceCard({ data, onPress, backgroundColor }: { data: SkillResource;
                         flexDirection: "row",
                         gap: 15,
                         backgroundColor: backgroundColor ?? colors.darkGray,
-                        paddingHorizontal: 15,
-                        paddingVertical: 15,
+                        padding: 10,
                         justifyContent: "flex-start",
                         borderRadius: 10,
                         borderWidth: 1,
                         borderColor: colors.darkGray,
                     },
                 ]}>
-                <View style={[centerFlex, { gap: 5, alignItems: "flex-start" }]}>
+                <View style={[centerFlex, { alignItems: "flex-start", justifyContent: "center" }]}>
                     <View style={[centerFlex, { flexDirection: "row", gap: 5 }]}>
                         {data.url && (
-                            <AppText fontSize={20} style={{ color: colors.accent, fontFamily: "emojisMono", lineHeight: 33 }}>
+                            <AppText fontSize={16} style={{ color: colors.accent, fontFamily: "emojisMono", lineHeight: 20 }}>
                                 {data.url && "🌎"}
                             </AppText>
                         )}
-                        <AppText fontSize={20} style={{ color: "#FFFFFF", fontFamily: "helveticaBold" }}>
+                        <AppText fontSize={16} style={{ fontFamily: "helveticaBold" }}>
                             {data.title}
                         </AppText>
                     </View>
-                    <AppText fontSize={18} style={{ color: colors.unmarkedText }}>
+                    <AppText fontSize={14} style={{ color: colors.unmarkedText }}>
                         {data.description}
                     </AppText>
                 </View>

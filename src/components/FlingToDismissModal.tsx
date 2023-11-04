@@ -45,7 +45,7 @@ const ModalWithGesturesEnabled = gestureHandlerRootHOC(({ children, closeModal, 
                                         paddingLeft: 10,
                                     },
                                 ]}>
-                                <AppText style={{ color: colors.accent }} fontSize={16}>
+                                <AppText style={{ color: colors.accent }} fontSize={14}>
                                     Close
                                 </AppText>
                             </Pressable>
@@ -73,7 +73,7 @@ const ModalWithGesturesEnabled = gestureHandlerRootHOC(({ children, closeModal, 
                                         paddingRight: 10,
                                     },
                                 ]}>
-                                <AppText style={{ color: colors.accent }} fontSize={16}>
+                                <AppText style={{ color: colors.accent }} fontSize={14}>
                                     {leftHeaderButton.title}
                                 </AppText>
                             </Pressable>
@@ -92,7 +92,7 @@ const ModalWithGesturesEnabled = gestureHandlerRootHOC(({ children, closeModal, 
                                         paddingRight: 10,
                                     },
                                 ]}>
-                                <AppText style={{ color: colors.accent }} fontSize={16}>
+                                <AppText style={{ color: colors.accent }} fontSize={14}>
                                     Close
                                 </AppText>
                             </Pressable>

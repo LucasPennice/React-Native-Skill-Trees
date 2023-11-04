@@ -9,6 +9,8 @@ type Props = {
     containerWidth: number;
 };
 
+const HEIGHT = 45;
+
 function SliderToggler({ toggleMode, isLeftSelected, containerWidth }: Props) {
     const transform = useAnimatedStyle(() => {
         return { left: withSpring(isLeftSelected ? 0 : containerWidth, MENU_HIGH_DAMPENING) };
@@ -20,8 +22,9 @@ function SliderToggler({ toggleMode, isLeftSelected, containerWidth }: Props) {
                 centerFlex,
                 {
                     flexDirection: "row",
-                    backgroundColor: "#282A2C",
-                    height: 50,
+                    borderColor: "#282A2C",
+                    borderWidth: 2,
+                    height: HEIGHT,
                     borderRadius: 10,
                     position: "relative",
                     marginBottom: 10,
@@ -31,7 +34,7 @@ function SliderToggler({ toggleMode, isLeftSelected, containerWidth }: Props) {
                 style={[
                     {
                         position: "absolute",
-                        height: 50,
+                        height: HEIGHT,
                         width: containerWidth,
                         borderRadius: 10,
                         borderWidth: 1,
@@ -40,13 +43,13 @@ function SliderToggler({ toggleMode, isLeftSelected, containerWidth }: Props) {
                     transform,
                 ]}
             />
-            <Pressable onPress={toggleMode} style={[centerFlex, { flex: 1, height: 50 }]}>
-                <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
+            <Pressable onPress={toggleMode} style={[centerFlex, { flex: 1, height: HEIGHT }]}>
+                <AppText fontSize={14} style={{ color: colors.white }}>
                     Details
                 </AppText>
             </Pressable>
-            <Pressable onPress={toggleMode} style={[centerFlex, { height: 50, flex: 1 }]}>
-                <AppText fontSize={16} style={{ color: colors.unmarkedText }}>
+            <Pressable onPress={toggleMode} style={[centerFlex, { height: HEIGHT, flex: 1 }]}>
+                <AppText fontSize={14} style={{ color: colors.white }}>
                     Edit
                 </AppText>
             </Pressable>

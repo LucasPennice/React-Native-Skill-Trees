@@ -27,15 +27,12 @@ function LogCard({ data, backgroundColor }: { data: SkillLogs; backgroundColor?:
                 {
                     backgroundColor: backgroundColor ?? colors.darkGray,
                     width: "100%",
-                    paddingHorizontal: 15,
+                    padding: 10,
                     alignItems: "flex-start",
-                    paddingVertical: 15,
                     borderRadius: 10,
                 },
             ]}>
-            <AppText fontSize={18} style={{ color: "#FFFFFF" }}>
-                {data.text}
-            </AppText>
+            <AppText fontSize={14}>{data.text}</AppText>
         </View>
     );
 }

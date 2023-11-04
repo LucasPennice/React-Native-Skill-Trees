@@ -1,9 +1,10 @@
 import AppButton from "@/components/AppButton";
+import AppEmojiPicker, { Emoji, findEmoji } from "@/components/AppEmojiPicker";
 import RadioInput from "@/components/RadioInput";
 import Spacer from "@/components/Spacer";
 import { TreeData, removeUserTree, selectTreeById, updateUserTree } from "@/redux/slices/userTreesSlice";
 import { useEffect, useState } from "react";
-import { Alert, Dimensions, View } from "react-native";
+import { Alert, Dimensions, Pressable, View } from "react-native";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import ColorGradientSelector from "../../../components/ColorGradientSelector";
@@ -19,8 +20,10 @@ function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; c
     //Local State
     const [treeName, setTreeName] = useState<string>("");
     const [selectedColor, setSelectedColor] = useState<ColorGradient | undefined>(undefined);
-    const [icon, setIcon] = useState<string>("");
     const [showOnHomeScreen, setShowOnHomeScreen] = useState<boolean>(treeData.showOnHomeScreen);
+
+    const [emoji, setEmoji] = useState<Emoji | undefined>(undefined);
+    const [emojiSelectorOpen, setEmojiSelectorOpen] = useState(false);
     //
     const { width } = Dimensions.get("screen");
 
@@ -28,7 +31,10 @@ function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; c
         setTreeName(treeData.treeName);
         setSelectedColor(treeData.accentColor);
 
-        if (treeData.icon.isEmoji) setIcon(treeData.icon.text);
+        if (treeData.icon.isEmoji) {
+            const selectedEmoji = findEmoji(treeData.icon.text);
+            setEmoji(selectedEmoji);
+        }
     }, []);
 
     const dispatch = useAppDispatch();
@@ -53,8 +59,8 @@ function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; c
         if (selectedColor === undefined) return Alert.alert("Please select a color");
         if (treeName === "") return Alert.alert("Please give the tree a name");
 
-        const newIsEmoji = icon !== "";
-        const newIcon = newIsEmoji ? icon : treeName[0];
+        const newIsEmoji = emoji !== undefined;
+        const newIcon = newIsEmoji ? emoji.emoji : treeName[0];
 
         dispatch(
             updateUserTree({
@@ -80,39 +86,35 @@ function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; c
                         Editing {treeData.treeName} properties
                     </AppText>
 
-                    <AppText style={{ color: colors.white, marginBottom: 5 }} fontSize={16}>
-                        Tree name
-                    </AppText>
-                    <AppTextInput
-                        placeholder={"Tree Name"}
-                        textState={[treeName, setTreeName]}
-                        textStyle={{ fontSize: 16 }}
-                        containerStyles={{ backgroundColor: colors.darkGray, marginBottom: 15 }}
-                    />
-                    <View style={{ flexDirection: "row", marginBottom: 15, justifyContent: "space-between", alignItems: "center" }}>
-                        <View style={{ width: width - 160 }}>
-                            <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-                                <AppText style={{ color: colors.white, marginBottom: 5 }} fontSize={16}>
-                                    Icon
-                                </AppText>
-                                <AppText style={{ color: colors.unmarkedText, marginLeft: 5, marginTop: 2 }} fontSize={16}>
-                                    (optional)
-                                </AppText>
-                            </View>
-                            <AppText style={{ color: `${colors.white}80`, marginBottom: 10 }} fontSize={14}>
-                                Your keyboard can switch to an emoji mode. To access it, look for a button located near the bottom left of your
-                                keyboard.
-                            </AppText>
-                        </View>
+                    <AppText children={"Select your tree's name and icon"} fontSize={16} />
+                    <AppText children={"Icon is optional"} fontSize={14} style={{ color: `${colors.white}80`, marginTop: 5, marginBottom: 10 }} />
+                    <View style={{ flexDirection: "row", marginBottom: 20 }}>
                         <AppTextInput
-                            placeholder={"🧠"}
-                            textStyle={{ fontFamily: "emojisMono", fontSize: 40 }}
-                            textState={[icon, setIcon]}
-                            pattern={new RegExp(/\p{Extended_Pictographic}/u)}
-                            inputProps={{ placeholderTextColor: `${colors.white}80` }}
-                            containerStyles={{ width: 130, backgroundColor: colors.darkGray }}
+                            placeholder={"Education"}
+                            textState={[treeName, setTreeName]}
+                            pattern={new RegExp(/^[^ ]/)}
+                            containerStyles={{ flex: 1 }}
                         />
+                        <Pressable onPress={() => setEmojiSelectorOpen(true)}>
+                            <AppText
+                                children={emoji ? emoji.emoji : "🧠"}
+                                style={{
+                                    fontFamily: "emojisMono",
+                                    color: emoji ? (selectedColor ? selectedColor.color1 : colors.white) : colors.line,
+                                    width: 45,
+                                    paddingTop: 2,
+                                    height: 45,
+                                    backgroundColor: colors.darkGray,
+                                    borderRadius: 10,
+                                    marginLeft: 10,
+                                    textAlign: "center",
+                                    verticalAlign: "middle",
+                                }}
+                                fontSize={24}
+                            />
+                        </Pressable>
                     </View>
+
                     <AppText fontSize={16} style={{ color: colors.white }}>
                         Tree Color
                     </AppText>
@@ -160,9 +162,21 @@ function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; c
                         color={{ idle: colors.pink }}
                     />
                 </View>
+
+                <AppEmojiPicker
+                    selectedEmojisName={emoji ? [emoji.name] : undefined}
+                    onEmojiSelected={toggleEmoji}
+                    state={[emojiSelectorOpen, setEmojiSelectorOpen]}
+                />
             </>
         </FlingToDismissModal>
     );
+
+    function toggleEmoji(newEmoji: Emoji) {
+        if (emoji && newEmoji.name === emoji.name) return setEmoji(undefined);
+
+        return setEmoji(newEmoji);
+    }
 }
 
 export default EditTreeModal;
