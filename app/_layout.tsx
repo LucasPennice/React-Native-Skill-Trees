@@ -20,6 +20,7 @@ import * as ExpoNavigationBar from "expo-navigation-bar";
 import { ErrorBoundaryProps, SplashScreen, Stack } from "expo-router";
 import { useEffect, useState } from "react";
 
+import { initializeFeedbackArrays } from "@/redux/slices/userFeedbackSlice";
 import { LogBox, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
@@ -105,11 +106,18 @@ const useUpdateTreeDataForShowOnHomepage = () => {
     dispatch(updateUserTrees(changes));
 };
 
+const useUpdateUserFeedback = () => {
+    const dispatch = useAppDispatch();
+
+    dispatch(initializeFeedbackArrays());
+};
+
 function AppWithReduxContext() {
     const dispatch = useAppDispatch();
     useHandleUserId();
     useHandleOnboarding();
     useUpdateTreeDataForShowOnHomepage();
+    useUpdateUserFeedback();
 
     return (
         <View
@@ -124,7 +132,6 @@ function AppWithReduxContext() {
 }
 
 export function ErrorBoundary(props: ErrorBoundaryProps) {
-    console.log("ERROR");
     const copyEmailToClipboard = () => Clipboard.setString("lucaspennice@gmail.com");
     const copyDiscordServerToClipboard = () => Clipboard.setString("https://discord.com/invite/ZHENer9yAW");
 

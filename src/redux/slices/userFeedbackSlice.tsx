@@ -35,10 +35,19 @@ export const userFeedbackSlice = createSlice({
 
             state[action.payload.keyToUpdate] = updatedFeedback;
         },
+        initializeFeedbackArrays: (state) => {
+            if (state.currentSolution === undefined) state.currentSolution = [];
+            if (state.dislikes === undefined) state.dislikes = [];
+            if (state.mainObstacle === undefined) state.mainObstacle = [];
+            if (state.problems === undefined) state.problems = [];
+            if (state.reasonToSolveProblem === undefined) state.reasonToSolveProblem = [];
+            if (state.suggestedFeatures === undefined) state.suggestedFeatures = [];
+            if (state.whyIsItHard === undefined) state.whyIsItHard = [];
+        },
     },
 });
 
-export const { appendNewEntry } = userFeedbackSlice.actions;
+export const { appendNewEntry, initializeFeedbackArrays } = userFeedbackSlice.actions;
 
 export const selectUserFeedbackSlice = (state: RootState) => state.userFeedback;
 

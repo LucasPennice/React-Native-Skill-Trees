@@ -82,7 +82,7 @@ function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; c
             modalContainerStyles={{ backgroundColor: colors.background }}>
             <>
                 <View style={{ flex: 1 }}>
-                    <AppText style={{ color: colors.white, marginBottom: 10 }} fontSize={18}>
+                    <AppText style={{ color: colors.white, marginBottom: 15 }} fontSize={18}>
                         Editing {treeData.treeName} properties
                     </AppText>
 
