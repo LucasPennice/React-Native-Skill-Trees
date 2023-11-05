@@ -2,13 +2,16 @@ import AppButton, { ButtonState } from "@/components/AppButton";
 import AppText from "@/components/AppText";
 import AppTextInput from "@/components/AppTextInput";
 import CopyIcon from "@/components/Icons/CopyIcon";
+import ProgressBarAndIndicator from "@/components/ProgressBarAndIndicator";
 import Spacer from "@/components/Spacer";
 import { getUserFeedbackProgressPercentage } from "@/functions/misc";
 import { faceImage } from "@/images";
 import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
+import { selectNodesTable } from "@/redux/slices/nodesSlice";
 import { DataAndDate, UserFeedback, appendNewEntry, selectUserFeedbackSlice } from "@/redux/slices/userFeedbackSlice";
 import { selectUserId } from "@/redux/slices/userSlice";
+import { selectAllTreesEntities } from "@/redux/slices/userTreesSlice";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { useMutation } from "@tanstack/react-query";
 import axiosClient from "axiosClient";
@@ -16,7 +19,6 @@ import { useState } from "react";
 import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleProp, StyleSheet, TouchableHighlight, View, ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { mixpanel } from "./_layout";
-import ProgressBarAndIndicator from "@/components/ProgressBarAndIndicator";
 
 const PAGE_MARGIN = 30;
 
@@ -168,6 +170,20 @@ function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React
     };
 }
 
+const useShareTree = () => {
+    const userId = useAppSelector(selectUserId);
+
+    const nodesTable = useAppSelector(selectNodesTable);
+    const treeDataTable = useAppSelector(selectAllTreesEntities);
+
+    const { mutate: sendTreeFeedback, status: treeFeedbackStatus } = useMutation({
+        mutationFn: () => axiosClient.patch(`treeBug/${userId}`, { nodesTable, treeDataTable }),
+        onSuccess: (_, newEntry) => mixpanel.track(`treeBug`),
+    });
+
+    return { sendTreeFeedback, treeFeedbackStatus };
+};
+
 function Feedback() {
     const prevUserFeedback = useAppSelector(selectUserFeedbackSlice);
     const [feedbackState, setFeedbackState] = useState<UserFeedback>(prevUserFeedback);
@@ -175,6 +191,8 @@ function Feedback() {
     const update = useCreateUpdateFeedbackMutations(setFeedbackState);
 
     const progressPercentage = getUserFeedbackProgressPercentage(feedbackState);
+
+    const { sendTreeFeedback, treeFeedbackStatus } = useShareTree();
 
     const appendToFeedbackField = (key: keyof UserFeedback) => (data: string) => {
         if (data === "") return Alert.alert("Input cannot be empty");
@@ -214,8 +232,10 @@ function Feedback() {
             behavior={Platform.OS === "ios" ? "padding" : "position"}
             style={{ backgroundColor: colors.background, flex: 1 }}
             keyboardVerticalOffset={-60}>
-            <ScrollView style={{ padding: 10 }} stickyHeaderIndices={[1]}>
+            <ScrollView style={{ padding: 10 }} stickyHeaderIndices={[2]}>
                 <Header />
+
+                <Contact />
 
                 <ProgressBarAndIndicator progressPercentage={progressPercentage} />
 
@@ -273,7 +293,12 @@ function Feedback() {
 
                 <Spacer style={{ marginBottom: PAGE_MARGIN }} />
 
-                <Contact />
+                <AppButton
+                    onPress={sendTreeFeedback}
+                    state={treeFeedbackStatus}
+                    style={{ marginBottom: PAGE_MARGIN }}
+                    text={{ idle: "Tree layout bug" }}
+                />
             </ScrollView>
         </KeyboardAvoidingView>
     );
@@ -341,9 +366,9 @@ const Contact = () => {
 
     return (
         <View style={styles.container}>
-            <AppText children={"Contact"} fontSize={18} style={{ color: "#E6E8E6", marginBottom: 20 }} />
+            <AppText children={"Contact"} fontSize={18} style={{ marginBottom: 20 }} />
 
-            <AppText children={"Join out Discord server:"} fontSize={16} style={{ color: "#E6E8E6", marginBottom: 10 }} />
+            <AppText children={"Join out Discord server:"} fontSize={16} style={{ marginBottom: 10 }} />
 
             <TouchableHighlight
                 onPress={() => {
@@ -351,19 +376,19 @@ const Contact = () => {
                     setCopiedServer(true);
                 }}>
                 <Animated.View style={[styles.clipboardTextContainer, animatedCopyServerColor, { marginBottom: 20 }]}>
-                    <AppText children={"https://discord.gg/ZHENer9yAW"} fontSize={16} style={{ color: "#E6E8E6" }} />
+                    <AppText children={"https://discord.gg/ZHENer9yAW"} fontSize={16} />
                     <CopyIcon color={colors.accent} size={30} style={{ position: "absolute", right: 10 }} />
                 </Animated.View>
             </TouchableHighlight>
 
-            <AppText children={"You can also reach out at:"} fontSize={16} style={{ color: "#E6E8E6", marginBottom: 10 }} />
+            <AppText children={"You can also reach out at:"} fontSize={16} style={{ marginBottom: 10 }} />
             <TouchableHighlight
                 onPress={() => {
                     copyEmailToClipboard();
                     setCopied(true);
                 }}>
                 <Animated.View style={[styles.clipboardTextContainer, animatedColor]}>
-                    <AppText children={"lucaspennice@gmail.com"} fontSize={16} style={{ color: "#E6E8E6" }} />
+                    <AppText children={"lucaspennice@gmail.com"} fontSize={16} />
                     <CopyIcon color={colors.accent} size={30} style={{ position: "absolute", right: 10 }} />
                 </Animated.View>
             </TouchableHighlight>
