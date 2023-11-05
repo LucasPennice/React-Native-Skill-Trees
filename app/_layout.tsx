@@ -3,7 +3,7 @@ import AppText from "@/components/AppText";
 import CopyIcon from "@/components/Icons/CopyIcon";
 import SadFaceIcon from "@/components/Icons/SadFaceIcon";
 import { IsSharingAvailableContext } from "@/context";
-import { colors } from "@/parameters";
+import { NODE_ICON_FONT_SIZE, colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { persistor, store } from "@/redux/reduxStore";
 import { selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
@@ -18,9 +18,10 @@ import { Update } from "@reduxjs/toolkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import { ErrorBoundaryProps, SplashScreen, Stack } from "expo-router";
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
 import { initializeFeedbackArrays } from "@/redux/slices/userFeedbackSlice";
+import { SkFont, useFont } from "@shopify/react-native-skia";
 import { LogBox, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
@@ -48,6 +49,18 @@ const Layout = StyleSheet.create({
     },
 });
 
+function useSkiaFonts() {
+    const labelFont = useFont(require("../assets/Helvetica.ttf"), 12);
+    const nodeLetterFont = useFont(require("../assets/Helvetica.ttf"), NODE_ICON_FONT_SIZE);
+    const emojiFont = useFont(require("../assets/NotoEmoji-Regular.ttf"), NODE_ICON_FONT_SIZE);
+
+    if (!labelFont || !nodeLetterFont || !emojiFont) return undefined;
+
+    return { labelFont, nodeLetterFont, emojiFont };
+}
+
+export const SkiaFontContext = createContext<{ labelFont: SkFont; nodeLetterFont: SkFont; emojiFont: SkFont } | undefined>(undefined);
+
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -56,23 +69,27 @@ const queryClient = new QueryClient();
 export default function RootLayout() {
     const isSharingAvailable = useIsSharingAvailable();
 
+    const skiaFonts = useSkiaFonts();
+
     if (Platform.OS === "android") ExpoNavigationBar.setBackgroundColorAsync(colors.darkGray);
 
     return (
         <Provider store={store}>
-            <PersistGate loading={null} persistor={persistor}>
-                <ThemeProvider value={DarkTheme}>
-                    <QueryClientProvider client={queryClient}>
-                        <IsSharingAvailableContext.Provider value={isSharingAvailable}>
-                            <SafeAreaView style={[{ flex: 1, backgroundColor: colors.darkGray, position: "relative" }, Layout.AndroidSafeArea]}>
-                                {Platform.OS === "ios" && <View style={Layout.IOsStatusBar} />}
-                                <StatusBar barStyle={"light-content"} backgroundColor={colors.background} />
-                                <AppWithReduxContext />
-                            </SafeAreaView>
-                        </IsSharingAvailableContext.Provider>
-                    </QueryClientProvider>
-                </ThemeProvider>
-            </PersistGate>
+            <SkiaFontContext.Provider value={skiaFonts}>
+                <PersistGate loading={null} persistor={persistor}>
+                    <ThemeProvider value={DarkTheme}>
+                        <QueryClientProvider client={queryClient}>
+                            <IsSharingAvailableContext.Provider value={isSharingAvailable}>
+                                <SafeAreaView style={[{ flex: 1, backgroundColor: colors.darkGray, position: "relative" }, Layout.AndroidSafeArea]}>
+                                    {Platform.OS === "ios" && <View style={Layout.IOsStatusBar} />}
+                                    <StatusBar barStyle={"light-content"} backgroundColor={colors.background} />
+                                    <AppWithReduxContext />
+                                </SafeAreaView>
+                            </IsSharingAvailableContext.Provider>
+                        </QueryClientProvider>
+                    </ThemeProvider>
+                </PersistGate>
+            </SkiaFontContext.Provider>
         </Provider>
     );
 }

@@ -6,15 +6,15 @@ import { getTextCoordinates } from "@/components/treeRelated/general/useHandleNo
 import { completedSkillTreeTable } from "@/functions/extractInformationFromTree";
 import { getLabelTextColor } from "@/functions/misc";
 import { nodeToCircularPath } from "@/functions/svg/toSvg";
+import { TreeData } from "@/redux/slices/userTreesSlice";
 import { NodeCoordinate } from "@/types";
-import { useFont } from "@shopify/react-native-skia";
+import { Dictionary } from "@reduxjs/toolkit";
+import { SkiaFontContext } from "app/_layout";
 import { router } from "expo-router";
+import { Fragment, useContext } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
 import { Defs, LinearGradient, Path, Stop, Svg } from "react-native-svg";
 import { CIRCLE_SIZE, HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, centerFlex, colors } from "../../src/parameters";
-import { Fragment } from "react";
-import { Dictionary } from "@reduxjs/toolkit";
-import { TreeData } from "@/redux/slices/userTreesSlice";
 
 const TEXT_AND_BUTTON_HEIGHT = 150;
 
@@ -55,20 +55,10 @@ function WelcomeScreen() {
     );
 }
 
-function useSkiaFonts() {
-    const labelFont = useFont(require("../../assets/Helvetica.ttf"), 12);
-    const nodeLetterFont = useFont(require("../../assets/Helvetica.ttf"), NODE_ICON_FONT_SIZE);
-    const emojiFont = useFont(require("../../assets/NotoEmoji-Regular.ttf"), NODE_ICON_FONT_SIZE);
-
-    if (!labelFont || !nodeLetterFont || !emojiFont) return undefined;
-
-    return { labelFont, nodeLetterFont, emojiFont };
-}
-
 const OnboardingTree = () => {
     const { width, height } = Dimensions.get("window");
 
-    const fonts = useSkiaFonts();
+    const fonts = useContext(SkiaFontContext);
 
     const mockCoordinatesInsideCanvas: NodeCoordinate[] = [
         {

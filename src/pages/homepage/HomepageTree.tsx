@@ -4,9 +4,10 @@ import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { selectNodeById, selectNodesTable } from "@/redux/slices/nodesSlice";
 import { TreeData, removeUserTree, selectAllTreesEntities } from "@/redux/slices/userTreesSlice";
 import { Dictionary } from "@reduxjs/toolkit";
-import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
+import { Canvas, SkiaDomView } from "@shopify/react-native-skia";
+import { SkiaFontContext } from "app/_layout";
 import { router } from "expo-router";
-import { ReactNode, memo, useEffect, useMemo, useState } from "react";
+import { ReactNode, memo, useContext, useEffect, useMemo, useState } from "react";
 import { Alert, View } from "react-native";
 import { Gesture, GestureDetector, SimultaneousGesture } from "react-native-gesture-handler";
 import Animated, { useSharedValue } from "react-native-reanimated";
@@ -20,7 +21,7 @@ import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
 import { handleTreeBuild } from "../../functions/treeCalculateCoordinates";
-import { HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, centerFlex } from "../../parameters";
+import { HOMETREE_ROOT_ID, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
@@ -224,16 +225,6 @@ function useRunOnTreeUpdate(treeCoordinate: TreeCoordinateData, functions: Inter
     }, [treeCoordinate]);
 }
 
-function useSkiaFonts() {
-    const labelFont = useFont(require("../../../assets/Helvetica.ttf"), 12);
-    const nodeLetterFont = useFont(require("../../../assets/Helvetica.ttf"), NODE_ICON_FONT_SIZE);
-    const emojiFont = useFont(require("../../../assets/NotoEmoji-Regular.ttf"), NODE_ICON_FONT_SIZE);
-
-    if (!labelFont || !nodeLetterFont || !emojiFont) return undefined;
-
-    return { labelFont, nodeLetterFont, emojiFont };
-}
-
 function HomepageTree({ canvasRef, openCanvasSettingsModal, selectedNodeCoordState }: Props) {
     const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
     const { screenDimensions, canvasDisplaySettings, selectedNode, homeTreeData } = useHomepageTreeState(selectedNodeCoord?.nodeId ?? undefined);
@@ -303,7 +294,7 @@ function HomepageTree({ canvasRef, openCanvasSettingsModal, selectedNodeCoordSta
     const drag = { ...dragDelta, nodesToDragId: ["bm2W4LgdatpqWFgnmJwBRVY1"] };
     //Interactive Tree Props - SelectedNodeMenu
 
-    const fonts = useSkiaFonts();
+    const fonts = useContext(SkiaFontContext);
 
     return (
         <View style={[centerFlex, { width: screenDimensions.width, flex: 1, position: "relative" }]}>

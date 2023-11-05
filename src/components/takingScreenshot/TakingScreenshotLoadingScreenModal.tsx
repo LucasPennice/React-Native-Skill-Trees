@@ -9,10 +9,11 @@ import { TreeData, selectAllTreesEntities } from "@/redux/slices/userTreesSlice"
 import { CartesianCoordinate, NodeCoordinate, NormalizedNode } from "@/types";
 import analytics from "@react-native-firebase/analytics";
 import { Dictionary } from "@reduxjs/toolkit";
-import { SkFont, useFont } from "@shopify/react-native-skia";
+import { SkFont } from "@shopify/react-native-skia";
 import { mixpanel } from "app/(app)/_layout";
+import { SkiaFontContext } from "app/_layout";
 import { shareAsync } from "expo-sharing";
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Modal, Platform, Pressable, StatusBar, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector, gestureHandlerRootHOC } from "react-native-gesture-handler";
 import Animated, { SharedValue, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
@@ -25,8 +26,8 @@ import ChevronLeft from "../Icons/ChevronLeft";
 import ProgressIndicatorAndName from "../ProgressIndicatorAndName";
 import { getTextWidth } from "../treeRelated/general/StaticNodeList";
 import { getTextCoordinates } from "../treeRelated/general/useHandleNodeAnimatedCoordinates";
-import { getCurvedPath } from "../treeRelated/radial/RadialCanvasPath";
 import { getHierarchicalPath } from "../treeRelated/hierarchical/HierarchicalSkillTree";
+import { getCurvedPath } from "../treeRelated/radial/RadialCanvasPath";
 
 function TakingScreenshotLoadingScreenModal({
     takingScreenshotState,
@@ -148,16 +149,6 @@ const useHandleGestures = (args: Props["sharedValues"], showBorder: SharedValue<
 
     return canvasGestures;
 };
-
-function useSkiaFonts() {
-    const labelFont = useFont(require("../../../assets/Helvetica.ttf"), 12);
-    const nodeLetterFont = useFont(require("../../../assets/Helvetica.ttf"), NODE_ICON_FONT_SIZE);
-    const emojiFont = useFont(require("../../../assets/NotoEmoji-Regular.ttf"), NODE_ICON_FONT_SIZE);
-
-    if (!labelFont || !nodeLetterFont || !emojiFont) return undefined;
-
-    return { labelFont, nodeLetterFont, emojiFont };
-}
 
 const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coordinatesInsideCanvas, svgDimensions, rootNodeInsideCanvas }: Props) => {
     const { offsetX, offsetY, rotation, scale } = sharedValues;
@@ -381,7 +372,7 @@ function LayoutSelector({ treeData, cancelSharing }: { treeData: Omit<TreeData, 
 
     const START_COORD = { x: -svgDimensions.width / 4, y: -svgDimensions.height / 4 };
 
-    const fonts = useSkiaFonts();
+    const fonts = useContext(SkiaFontContext);
 
     const start = useSharedValue<CartesianCoordinate>({ x: START_COORD.x, y: START_COORD.y });
     const offsetX = useSharedValue(START_COORD.x);

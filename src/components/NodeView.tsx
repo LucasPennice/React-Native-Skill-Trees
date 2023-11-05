@@ -1,4 +1,5 @@
-import { memo } from "react";
+import { SkiaFontContext } from "app/_layout";
+import { memo, useContext } from "react";
 import { View } from "react-native";
 import Animated from "react-native-reanimated";
 import { Circle, Defs, LinearGradient, Stop, Svg } from "react-native-svg";
@@ -27,6 +28,10 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
     const result = progressWheelProps.circumference - (progressWheelProps.circumference * completePercentage) / 100;
 
     const showIcon = useShowHideStylesWithoutTransitionView(showIcons);
+
+    const fonts = useContext(SkiaFontContext);
+
+    if (!fonts) return <></>;
 
     if (category === "SKILL") return <Skill />;
 
@@ -118,6 +123,19 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                         />
                     )}
                 </Svg>
+                {/* {
+                    <Canvas style={[centerFlex, { width: size - 1, height: size + 1, position: "absolute", right: 0, overflow: "hidden" }]}>
+                        {showIcons && (
+                            <Text
+                                font={isEmojiIcon ? fonts!.emojiFont : fonts!.nodeLetterFont}
+                                x={50}
+                                y={50}
+                                text={isEmojiIcon ? skill.icon.text : skill.icon.text[0]}
+                                color={"#515053"}
+                            />
+                        )}
+                    </Canvas>
+                } */}
                 {showIcons && (
                     <View style={[centerFlex, { width: size - 1, height: size + 1, position: "absolute", right: 0, overflow: "hidden" }]}>
                         <AppText

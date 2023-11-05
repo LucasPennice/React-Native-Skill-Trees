@@ -1,10 +1,12 @@
+import SelectedNodeView from "@/components/treeRelated/general/SelectedNodeView";
 import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMenuFunctions";
 import { removeNodes } from "@/redux/slices/nodesSlice";
 import { TreeData, removeUserTree } from "@/redux/slices/userTreesSlice";
-import { Canvas, SkiaDomView, useFont } from "@shopify/react-native-skia";
+import { Canvas, SkiaDomView } from "@shopify/react-native-skia";
 import { SelectedNewNodePositionState, SelectedNodeCoordState } from "app/(app)/myTrees/[treeId]";
+import { SkiaFontContext } from "app/_layout";
 import { router } from "expo-router";
-import { ReactNode, memo, useState } from "react";
+import { ReactNode, memo, useContext, useState } from "react";
 import { Alert, View } from "react-native";
 import { Gesture, GestureDetector, SimultaneousGesture } from "react-native-gesture-handler";
 import Animated, { useSharedValue } from "react-native-reanimated";
@@ -17,12 +19,11 @@ import useCanvasScroll from "../../components/treeRelated/hooks/gestures/useCanv
 import useCanvasTap, { CanvasTapProps } from "../../components/treeRelated/hooks/gestures/useCanvasTap";
 import useCanvasZoom from "../../components/treeRelated/hooks/gestures/useCanvasZoom";
 import NodeMenu from "../../components/treeRelated/nodeMenu/NodeMenu";
-import { NODE_ICON_FONT_SIZE, PURPLE_GRADIENT, centerFlex } from "../../parameters";
+import { PURPLE_GRADIENT, centerFlex } from "../../parameters";
 import { useAppDispatch, useAppSelector } from "../../redux/reduxHooks";
 import { selectCanvasDisplaySettings } from "../../redux/slices/canvasDisplaySettingsSlice";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
 import { CanvasDimensions, DnDZone, InteractiveTreeFunctions, NodeAction, NodeCoordinate, NormalizedNode, TreeCoordinateData } from "../../types";
-import SelectedNodeView from "@/components/treeRelated/general/SelectedNodeView";
 
 type Props = {
     state: {
@@ -146,16 +147,6 @@ function useNodeActionState() {
     return [nodeAction, { resetNodeAction, beginLongPress, openMenuAfterLongPress }] as const;
 }
 
-function useSkiaFonts() {
-    const labelFont = useFont(require("../../../assets/Helvetica.ttf"), 12);
-    const nodeLetterFont = useFont(require("../../../assets/Helvetica.ttf"), NODE_ICON_FONT_SIZE);
-    const emojiFont = useFont(require("../../../assets/NotoEmoji-Regular.ttf"), NODE_ICON_FONT_SIZE);
-
-    if (!labelFont || !nodeLetterFont || !emojiFont) return undefined;
-
-    return { labelFont, nodeLetterFont, emojiFont };
-}
-
 function IndividualSkillTree({ canvasRef, treeData, functions, state }: Props) {
     const { selectedNewNodePositionState, selectedNodeCoordState, showNewNodePositions, treeCoordinate } = state;
     const [selectedNodeCoord, { clearSelectedNodeCoord, updateSelectedNodeCoord }] = selectedNodeCoordState;
@@ -255,7 +246,7 @@ function IndividualSkillTree({ canvasRef, treeData, functions, state }: Props) {
     const drag = { ...dragDelta, nodesToDragId: ["bm2W4LgdatpqWFgnmJwBRVY1"] };
     //Interactive Tree Props - SelectedNodeMenu
 
-    const fonts = useSkiaFonts();
+    const fonts = useContext(SkiaFontContext);
 
     //11.6 ms
 
