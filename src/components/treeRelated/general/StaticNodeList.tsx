@@ -24,7 +24,7 @@ type PaintProps = {
     rootColor: ColorGradient;
 };
 
-function StaticNodeList({ allNodes, staticNodes, settings, fonts, canvasDimensions }: Props) {
+export function StaticNodeList({ allNodes, staticNodes, settings, fonts, canvasDimensions }: Props) {
     const { oneColorPerTree, showIcons } = settings;
 
     const rootNode = allNodes.find((node) => node.isRoot);
@@ -50,7 +50,7 @@ function StaticNodeList({ allNodes, staticNodes, settings, fonts, canvasDimensio
     return <Picture picture={picture} />;
 }
 
-function paintSkillNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProps) {
+export function paintSkillNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProps) {
     const { canvasDimensions, fonts, settings, rootColor } = props;
 
     const backgroundPaint = Skia.Paint();

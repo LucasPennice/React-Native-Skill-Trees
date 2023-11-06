@@ -8,6 +8,8 @@ import { PURPLE_GRADIENT, centerFlex, colors } from "../parameters";
 import { ColorGradient, NodeCategory, Skill } from "../types";
 import AppText from "./AppText";
 import useShowHideStylesWithoutTransitionView from "./treeRelated/hooks/useShowHideStylesWithoutTransitionView";
+import { Canvas, Text } from "@shopify/react-native-skia";
+import StaticNodeList from "./treeRelated/general/StaticNodeList";
 
 function NodeView<T extends { data: Skill; accentColor: ColorGradient; category: NodeCategory }>({
     node,
@@ -33,6 +35,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
 
     if (!fonts) return <></>;
 
+    // return <StaticNodeList allNodes={[node]} />;
     if (category === "SKILL") return <Skill />;
 
     if (category === "USER") return <User />;
@@ -123,19 +126,6 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                         />
                     )}
                 </Svg>
-                {/* {
-                    <Canvas style={[centerFlex, { width: size - 1, height: size + 1, position: "absolute", right: 0, overflow: "hidden" }]}>
-                        {showIcons && (
-                            <Text
-                                font={isEmojiIcon ? fonts!.emojiFont : fonts!.nodeLetterFont}
-                                x={50}
-                                y={50}
-                                text={isEmojiIcon ? skill.icon.text : skill.icon.text[0]}
-                                color={"#515053"}
-                            />
-                        )}
-                    </Canvas>
-                } */}
                 {showIcons && (
                     <View style={[centerFlex, { width: size - 1, height: size + 1, position: "absolute", right: 0, overflow: "hidden" }]}>
                         <AppText
