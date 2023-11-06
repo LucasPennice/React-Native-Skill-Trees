@@ -6,7 +6,7 @@ module.exports = {
         typedRoutes: true,
         tsconfigPaths: true,
     },
-    version: "1.0.32",
+    version: "1.0.33",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -38,7 +38,7 @@ module.exports = {
             "android.permission.ACCESS_MEDIA_LOCATION",
             "com.google.android.gms.permission.AD_ID",
         ],
-        versionCode: 38,
+        versionCode: 39,
         package: "com.lucaspennice.skilltrees",
     },
     web: {

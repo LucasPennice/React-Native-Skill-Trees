@@ -79,7 +79,6 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
     };
 
     const setIcon = (emoji?: Emoji) => {
-        console.log(emoji);
         setCurrentNode((p) => {
             if (emoji === undefined) {
                 return { ...p, data: { ...p.data, icon: { isEmoji: false, text: p.data.name[0] } } };
