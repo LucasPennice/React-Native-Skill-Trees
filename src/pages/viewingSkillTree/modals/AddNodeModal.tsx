@@ -1,8 +1,10 @@
-import { LinearGradient } from "expo-linear-gradient";
+import AppButton from "@/components/AppButton";
+import AppEmojiPicker, { Emoji, findEmoji } from "@/components/AppEmojiPicker";
+import { generate24CharHexId, toggleEmoji } from "@/functions/misc";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useEffect, useState } from "react";
-import { Alert, Dimensions, Keyboard, Platform, Pressable, View } from "react-native";
-import Animated, { Easing, FadeInDown, Layout, ZoomIn, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
-import { Line, Rect, Svg } from "react-native-svg";
+import { Alert, Dimensions, Keyboard, Platform, Pressable, StyleSheet, View } from "react-native";
+import Animated, { Easing, FadeInDown, Layout, ZoomIn, ZoomOut, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
@@ -11,7 +13,6 @@ import RadioInput from "../../../components/RadioInput";
 import { findNodeById } from "../../../functions/extractInformationFromTree";
 import { centerFlex, colors } from "../../../parameters";
 import { DnDZone, Skill, Tree, getDefaultSkillValue } from "../../../types";
-import { generate24CharHexId } from "@/functions/misc";
 
 type Props = {
     closeModal: () => void;
@@ -39,6 +40,7 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
     const [nodesToAdd, setNodesToAdd] = useState<Tree<Skill>[]>([]);
     const [currentNode, setCurrentNode] = useState<Tree<Skill>>(getInitialCurrentSkillValue());
     const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>(undefined);
+    const [emojiSelectorOpen, setEmojiSelectorOpen] = useState(false);
 
     const isEditing = selectedNodeId !== undefined;
 
@@ -76,17 +78,14 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
         });
     };
 
-    const setIcon = (v: string) => {
-        const emoji = v.match(/\p{Extended_Pictographic}/gu);
-
+    const setIcon = (emoji?: Emoji) => {
+        console.log(emoji);
         setCurrentNode((p) => {
-            if (v === "") {
-                return { ...p, data: { ...p.data, icon: { isEmoji: false, text: "" } } };
+            if (emoji === undefined) {
+                return { ...p, data: { ...p.data, icon: { isEmoji: false, text: p.data.name[0] } } };
             }
 
-            if (!emoji) return p;
-
-            return { ...p, data: { ...p.data, icon: { isEmoji: true, text: emoji[0] } } };
+            return { ...p, data: { ...p.data, icon: { isEmoji: true, text: emoji.emoji } } };
         });
     };
 
@@ -190,59 +189,61 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
 
     const nodeListStyles = useAnimatedStyle(() => {
         return {
-            backgroundColor: withTiming(nodesToAdd.length === 0 ? colors.darkGray : "#282A2C"),
+            backgroundColor: withTiming(nodesToAdd.length === 0 ? colors.background : colors.darkGray),
         };
     }, [nodesToAdd]);
 
+    const selectedNodeEmoji = currentNode.data.icon.isEmoji ? findEmoji(currentNode.data.icon.text) : undefined;
+
     return (
-        <FlingToDismissModal closeModal={closeModal} open={open} leftHeaderButton={{ onPress: handleConfirm, title: "Add to Tree" }}>
+        <FlingToDismissModal
+            closeModal={closeModal}
+            open={open}
+            leftHeaderButton={{ onPress: handleConfirm, title: "Add Skills" }}
+            modalContainerStyles={{ backgroundColor: colors.background }}>
             <View style={[centerFlex, { flex: 1, justifyContent: "flex-start", alignItems: "flex-start" }]}>
                 <View style={{ marginBottom: 10 }}>
-                    <AppText style={{ color: "#FFFFFF", marginBottom: 10, fontFamily: "helveticaBold" }} fontSize={24}>
+                    <AppText style={{ marginBottom: 5 }} fontSize={18}>
                         Add Skills
                     </AppText>
-                    <AppText style={{ color: colors.unmarkedText, marginBottom: 5 }} fontSize={16}>
-                        Add as many skills as you want, then hit “Add to Tree". Tap a node to edit it
-                    </AppText>
+                    <AppText style={{ color: `${colors.white}80`, marginBottom: 5 }} fontSize={16} children={"Tap a node to edit it"} />
                 </View>
 
-                <View style={{ width: "100%" }}>
-                    <AppText style={{ color: "#FFFFFF", marginBottom: 5, fontFamily: "helveticaBold" }} fontSize={20}>
-                        Name
-                    </AppText>
+                <AppText style={{ marginBottom: 5 }} fontSize={18} children={"Skill Name & Icon"} />
+                <View style={{ flexDirection: "row", marginBottom: 10 }}>
                     <AppTextInput
-                        placeholder={"Skill Name"}
+                        placeholder={"Education"}
                         textState={[currentNode.data.name, setName]}
                         pattern={new RegExp(/^[^ ]/)}
-                        containerStyles={{ marginBottom: 15 }}
+                        containerStyles={{ flex: 1 }}
                     />
-                    <View style={{ flexDirection: "row", marginBottom: 15, justifyContent: "space-between", alignItems: "center" }}>
-                        <View style={{ width: width - 160 }}>
-                            <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-                                <AppText style={{ color: "#FFFFFF", marginBottom: 5, fontFamily: "helveticaBold" }} fontSize={20}>
-                                    Icon
-                                </AppText>
-                                <AppText style={{ color: colors.unmarkedText, marginLeft: 5, marginTop: 2 }} fontSize={16}>
-                                    (optional)
-                                </AppText>
-                            </View>
-                            <AppText style={{ color: colors.unmarkedText, marginBottom: 10 }} fontSize={14}>
-                                Your keyboard can switch to an emoji mode. To access it, look for a button located near the bottom left of your
-                                keyboard.
-                            </AppText>
-                        </View>
-                        <AppTextInput
-                            placeholder={"🧠"}
-                            textStyle={{ fontFamily: "emojisMono", fontSize: 40 }}
-                            textState={[currentNode.data.icon.text, setIcon]}
-                            pattern={new RegExp(/\p{Extended_Pictographic}/u)}
-                            containerStyles={{ width: 130 }}
+                    <Pressable onPress={() => setEmojiSelectorOpen(true)}>
+                        <AppText
+                            children={currentNode.data.icon.isEmoji ? currentNode.data.icon.text : "🧠"}
+                            style={{
+                                fontFamily: "emojisMono",
+                                color: currentNode.data.icon.isEmoji ? colors.white : colors.line,
+                                width: 45,
+                                paddingTop: 2,
+                                height: 45,
+                                backgroundColor: colors.darkGray,
+                                borderRadius: 10,
+                                marginLeft: 10,
+                                textAlign: "center",
+                                verticalAlign: "middle",
+                            }}
+                            fontSize={24}
                         />
-                    </View>
-
-                    <RadioInput state={[currentNode.data.isCompleted, setCompletion]} text={"Complete"} style={{ marginBottom: 10 }} />
+                    </Pressable>
                 </View>
 
+                <RadioInput
+                    state={[currentNode.data.isCompleted, setCompletion]}
+                    text={"Complete"}
+                    iconProps={{ name: "pencil", size: 18, color: `${colors.white}80` }}
+                    textProps={{ fontSize: 16, paddingTop: 3 }}
+                    style={{ height: 45, backgroundColor: colors.darkGray, marginBottom: 10, width: "100%", borderRadius: 10 }}
+                />
                 <Animated.View
                     style={[nodeListStyles, { height: 90, width, justifyContent: "center", transform: [{ translateX: -10 }], marginTop: 10 }]}>
                     <Animated.ScrollView
@@ -264,6 +265,11 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
                 </Animated.View>
 
                 <AddAndEditButton handleAddNodeToList={handleAddNodeToList} isEditing={isEditing} shouldBlockAddButton={shouldBlockAddButton} />
+                <AppEmojiPicker
+                    selectedEmojisName={currentNode.data.icon.isEmoji ? [selectedNodeEmoji!.name] : undefined}
+                    onEmojiSelected={toggleEmoji(setIcon, currentNode.data.icon.isEmoji ? selectedNodeEmoji! : undefined)}
+                    state={[emojiSelectorOpen, setEmojiSelectorOpen]}
+                />
             </View>
         </FlingToDismissModal>
     );
@@ -306,10 +312,30 @@ function SelectableNodeView({
     selectNode: () => void;
     deleteNode: () => void;
 }) {
-    const styles = useAnimatedStyle(() => {
+    const styles = StyleSheet.create({
+        container: {
+            position: "relative",
+            height: 90,
+            width: 90,
+            borderRadius: 10,
+            marginRight: 35,
+            borderWidth: 1,
+        },
+        deleteButton: {
+            position: "absolute",
+            top: 0,
+            right: 0,
+            zIndex: 2,
+            width: 30,
+            height: 30,
+            justifyContent: "center",
+            alignItems: "center",
+        },
+    });
+
+    const animatedBorderColor = useAnimatedStyle(() => {
         return {
-            shadowOpacity: withTiming(isSelected ? 1 : 0, { duration: 150 }),
-            transform: [{ scale: withSpring(isSelected ? 1.1 : 1) }],
+            borderColor: withTiming(isSelected ? colors.accent : colors.line, { duration: 150 }),
         };
     }, [isSelected]);
 
@@ -317,45 +343,24 @@ function SelectableNodeView({
         <Animated.View
             key={n.nodeId}
             layout={Layout.duration(240).easing(Easing.inOut(Easing.ease))}
-            style={[
-                styles,
-
-                {
-                    position: "relative",
-                    backgroundColor: "#282A2C",
-                    height: 90,
-                    width: 90,
-                    borderRadius: 10,
-                    marginRight: 35,
-                    shadowColor: "#000",
-                    shadowOffset: {
-                        width: 0,
-                        height: 2,
-                    },
-                    shadowRadius: 3.84,
-                    elevation: 5,
-                },
-            ]}
+            style={[animatedBorderColor, styles.container]}
             entering={FadeInDown}>
             <Pressable onPress={selectNode} style={[centerFlex, { height: 90, width: 90 }]}>
                 <NodeView
                     node={n}
                     params={{
+                        fontSize: 18,
                         completePercentage: n.data.isCompleted ? 100 : 0,
-                        size: 65,
+                        size: 50,
                         oneColorPerTree: false,
                         showIcons: true,
                     }}
                 />
 
                 {isSelected && (
-                    <Pressable style={{ position: "absolute", top: 5, right: 5, zIndex: 2 }} onPress={deleteNode}>
-                        <Animated.View entering={ZoomIn.springify().stiffness(150).damping(16)}>
-                            <Svg width="39" height="39" viewBox="0 0 39 39" fill="none">
-                                <Rect width="39" height="39" rx="19.5" fill="#181A1C" />
-                                <Line x1="11.9006" y1="10.6478" x2="27.2555" y2="26.0026" stroke="#FE453A" strokeWidth="2" />
-                                <Line x1="11.5832" y1="26.0026" x2="26.9381" y2="10.6478" stroke="#FE453A" strokeWidth="2" />
-                            </Svg>
+                    <Pressable style={styles.deleteButton} onPress={deleteNode}>
+                        <Animated.View entering={ZoomIn} exiting={ZoomOut}>
+                            <FontAwesome size={20} name="trash" color={colors.line} />
                         </Animated.View>
                     </Pressable>
                 )}
@@ -373,24 +378,19 @@ function AddAndEditButton({
     handleAddNodeToList: () => void;
     isEditing: boolean;
 }) {
+    const handleClick = () => {
+        Keyboard.dismiss();
+        handleAddNodeToList();
+    };
+
     return (
         <View style={{ position: "absolute", bottom: Platform.OS === "ios" ? 65 : 0, right: 0 }}>
-            <LinearGradient
-                colors={["#BF5AF2", "#5A7BF2"]}
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                style={{ height: 60, width: "100%", borderRadius: 40, opacity: shouldBlockAddButton ? 0.5 : 1 }}>
-                <Pressable
-                    style={[centerFlex, { height: 60, width: "100%", paddingHorizontal: 20 }]}
-                    onPress={() => {
-                        Keyboard.dismiss();
-                        handleAddNodeToList();
-                    }}>
-                    <AppText style={{ color: "#FFFFFF" }} fontSize={20}>
-                        {isEditing ? "Edit Skill" : "Add Skill"}
-                    </AppText>
-                </Pressable>
-            </LinearGradient>
+            <AppButton
+                color={{ idle: isEditing ? colors.green : colors.accent }}
+                onPress={handleClick}
+                text={{ idle: isEditing ? "Edit Skill" : "Add Skill" }}
+                pressableStyle={{ width: 100, opacity: shouldBlockAddButton ? 0.5 : 1 }}
+            />
         </View>
     );
 }

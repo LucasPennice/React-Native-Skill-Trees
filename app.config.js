@@ -1,0 +1,75 @@
+module.exports = {
+    name: "Skill Trees",
+    slug: "SkillTrees",
+    scheme: ["skill-tree"],
+    experiments: {
+        typedRoutes: true,
+        tsconfigPaths: true,
+    },
+    version: "1.0.32",
+    orientation: "portrait",
+    icon: "./assets/icon.png",
+    userInterfaceStyle: "light",
+    splash: {
+        image: "./assets/splash.png",
+        resizeMode: "cover",
+        backgroundColor: "#000000",
+    },
+    assetBundlePatterns: ["**/*"],
+    ios: {
+        googleServicesFile: "./GoogleService-Info.plist",
+        supportsTablet: true,
+        infoPlist: {
+            NSPhotoLibraryUsageDescription: "Allow $(PRODUCT_NAME) to access your photos.",
+            NSPhotoLibraryAddUsageDescription: "Allow $(PRODUCT_NAME) to save photos.",
+        },
+        bundleIdentifier: "com.lucaspennice.skilltrees",
+    },
+    android: {
+        googleServicesFile: "./google-services.json",
+        adaptiveIcon: {
+            foregroundImage: "./assets/adaptive-icon.png",
+            backgroundImage: "./assets/backgroundImage.png",
+        },
+        icon: "./assets/icon.png",
+        permissions: [
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            "android.permission.ACCESS_MEDIA_LOCATION",
+            "com.google.android.gms.permission.AD_ID",
+        ],
+        versionCode: 38,
+        package: "com.lucaspennice.skilltrees",
+    },
+    web: {
+        favicon: "./assets/favicon.png",
+    },
+    plugins: [
+        [
+            "expo-media-library",
+            {
+                photosPermission: "Allow $(PRODUCT_NAME) to access your photos.",
+                savePhotosPermission: "Allow $(PRODUCT_NAME) to save photos.",
+                isAccessMediaLocationEnabled: true,
+            },
+        ],
+        "@react-native-firebase/app",
+        "@react-native-firebase/perf",
+        "@react-native-firebase/crashlytics",
+        [
+            "expo-build-properties",
+            {
+                ios: {
+                    useFrameworks: "static",
+                },
+            },
+        ],
+        "expo-router",
+    ],
+    extra: {
+        eas: {
+            projectId: "86b83f4d-998c-4e50-b891-c28787c3e0c8",
+        },
+        clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+    },
+};
