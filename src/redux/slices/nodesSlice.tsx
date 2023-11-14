@@ -1,9 +1,9 @@
+import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID } from "@/parameters";
 import { NormalizedNode, getDefaultSkillValue } from "@/types";
 import { PayloadAction, Update, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../reduxStore";
+import { updateHomeIcon, updateHomeName } from "./homeTreeSlice";
 import { addUserTree, removeUserTree, updateUserTree } from "./userTreesSlice";
-import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID } from "@/parameters";
-import { homeTreeSliceInitialState, updateHomeIcon, updateHomeName } from "./homeTreeSlice";
 
 const nodesAdapter = createEntityAdapter<NormalizedNode>({ selectId: (node) => node.nodeId });
 export const {
@@ -22,6 +22,7 @@ export const nodesSlice = createSlice({
     initialState,
     reducers: {
         updateNodes: nodesAdapter.updateMany,
+        addNode: nodesAdapter.addOne,
         addNodes: (state, action: PayloadAction<{ treeId: string; nodesToAdd: NormalizedNode[] }>) => {
             nodesAdapter.addMany(state, action.payload.nodesToAdd);
         },
@@ -65,29 +66,14 @@ export const nodesSlice = createSlice({
 
             const homeRootNode = state.entities[HOMETREE_ROOT_ID];
 
-            if (homeRootNode) {
-                nodesAdapter.updateOne(state, {
-                    id: HOMETREE_ROOT_ID,
-                    changes: { childrenIds: [...homeRootNode.childrenIds, newTreeRootNode.nodeId] },
-                });
-            } else {
-                const { icon } = homeTreeSliceInitialState;
+            if (!homeRootNode) throw new Error("homeRootNode not found at addUserTree extra reducer");
 
-                const homeRootNode: NormalizedNode = {
-                    nodeId: HOMETREE_ROOT_ID,
-                    isRoot: true,
-                    childrenIds: [newTreeRootNode.nodeId],
-                    data: getDefaultSkillValue("Life Skills", false, icon),
-                    level: 0,
-                    parentId: null,
-                    treeId: HOMEPAGE_TREE_ID,
-                    x: 0,
-                    y: 0,
-                    category: "USER",
-                };
+            nodesAdapter.updateOne(state, {
+                id: HOMETREE_ROOT_ID,
+                changes: { childrenIds: [...homeRootNode.childrenIds, newTreeRootNode.nodeId] },
+            });
 
-                nodesAdapter.addOne(state, homeRootNode);
-            }
+            nodesAdapter.addOne(state, homeRootNode);
         });
         builder.addCase(updateUserTree, (state, action) => {
             const rootNodeId = action.payload.rootNodeId;
@@ -151,7 +137,7 @@ export const nodesSlice = createSlice({
     },
 });
 
-export const { addNodes, removeNodes, updateNodes } = nodesSlice.actions;
+export const { addNodes, removeNodes, updateNodes, addNode } = nodesSlice.actions;
 
 export default nodesSlice.reducer;
 
@@ -185,7 +171,7 @@ export const selectNodeById = (nodeId?: string) => (state: RootState) => {
 
     const node = state.nodes.entities[nodeId];
 
-    if (!node) throw new Error("node undefined at selectNodeById");
+    if (!node) return undefined;
 
     return node;
 };

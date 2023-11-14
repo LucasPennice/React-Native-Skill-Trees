@@ -1,14 +1,12 @@
 import AppText from "@/components/AppText";
 import OnboardingCompletionIcon from "@/components/Icons/OnboardingCompleteIcon";
 import SteppedProgressBarAndIndicator, { OnboardingStep } from "@/components/SteppedProgressBarAndIndicator";
-import { getUserFeedbackProgressPercentage, getWheelParams } from "@/functions/misc";
 import { MENU_HIGH_DAMPENING, NAV_HEGIHT, colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
-import { open } from "@/redux/slices/addTreeModalSlice";
 import { selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
-import { selectUserFeedbackSlice } from "@/redux/slices/userFeedbackSlice";
 import { selectUserId } from "@/redux/slices/userSlice";
 import { selectAllTrees } from "@/redux/slices/userTreesSlice";
+import { useAuth } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import analytics from "@react-native-firebase/analytics";
 import { useFonts } from "expo-font";
@@ -17,7 +15,7 @@ import { Mixpanel } from "mixpanel-react-native";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { FadeIn, FadeInRight, FadeOut, FadeOutLeft, useAnimatedStyle, withSpring } from "react-native-reanimated";
-import { RoutesParams, routes } from "routes";
+import { RoutesParams, hideNavAndOnboarding, routes } from "routes";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
     return <FontAwesome size={props.size ?? 28} style={{ marginBottom: -3 }} {...props} />;
@@ -33,8 +31,6 @@ function usePassMixPanelUserId() {
     }, [userId]);
 }
 
-const progressWheelProps = getWheelParams(colors.accent, colors.line, 45, 4);
-
 const trackAutomaticEvents = true;
 export const mixpanel = new Mixpanel("5a141ce3c43980d8fab68b96e1256525", trackAutomaticEvents);
 mixpanel.init();
@@ -42,41 +38,45 @@ mixpanel.init();
 export default function RootLayout() {
     const onboarding = useAppSelector(selectOnboarding);
     usePassMixPanelUserId();
-
-    const userFeedback = useAppSelector(selectUserFeedbackSlice);
+    const { isSignedIn } = useAuth();
 
     const { width, height } = Dimensions.get("window");
 
     const pathname = usePathname();
     const router = useRouter();
 
-    const [loaded, error] = useFonts({
+    const [fontsLoaded, error] = useFonts({
         helvetica: require("../../assets/Helvetica.ttf"),
         helveticaBold: require("../../assets/Helvetica-Bold.ttf"),
         emojisMono: require("../../assets/NotoEmoji-Regular.ttf"),
         ...FontAwesome.font,
     });
 
-    const dispatch = useAppDispatch();
-
-    const openAddTreeModal = () => dispatch(open());
-
     useEffect(() => {
         if (error) throw error;
     }, [error]);
 
     useEffect(() => {
-        if (loaded) {
+        if (fontsLoaded) {
             SplashScreen.hideAsync();
         }
-    }, [loaded]);
+    }, [fontsLoaded]);
 
     const prevRouteName = useRef<string | null>(null);
 
-    if (!loaded) return <Text>Loading...</Text>;
+    useEffect(() => {
+        if (fontsLoaded && !isSignedIn) {
+            return router.push("/welcomeScreen");
+        }
 
-    const strokeDashoffset =
-        progressWheelProps.circumference - (progressWheelProps.circumference * getUserFeedbackProgressPercentage(userFeedback)) / 100;
+        if (fontsLoaded && isSignedIn) {
+            return router.push("/home");
+        }
+    }, [isSignedIn, fontsLoaded]);
+
+    if (!fontsLoaded) return <Text>Loading...</Text>;
+
+    const hide = !Boolean(hideNavAndOnboarding.find((route) => pathname.includes(route)));
 
     return (
         <View style={{ flex: 1, minHeight: Platform.OS === "android" ? height - NAV_HEGIHT : "auto" }}>
@@ -122,9 +122,9 @@ export default function RootLayout() {
                 <Stack.Screen name={"index"} />
             </Stack>
 
-            {/* {!onboarding.complete && <Onboarding />} */}
+            {hide && !onboarding.complete && <Onboarding />}
 
-            {!pathname.includes("welcomeScreen") && (
+            {hide && (
                 <KeyboardAvoidingView
                     behavior={Platform.OS === "ios" ? "padding" : "padding"}
                     enabled={false}

@@ -14,6 +14,7 @@
     "linter": "npx eslint 'src/**'"
   },
   "dependencies": {
+    "@clerk/clerk-expo": "^0.19.16",
     "@react-native-async-storage/async-storage": "1.18.2",
     "@react-native-clipboard/clipboard": "^1.12.1",
     "@react-native-firebase/analytics": "^18.5.0",
@@ -22,6 +23,7 @@
     "@react-native-firebase/perf": "^18.5.0",
     "@react-navigation/native": "^6.1.6",
     "@reduxjs/toolkit": "^1.9.3",
+    "@shopify/react-native-skia": "0.1.196",
     "@tanstack/react-query": "^4.29.7",
     "@types/react": "~18.2.14",
     "@types/react-redux": "^7.1.25",
@@ -54,7 +56,8 @@
     "redux-persist": "^6.0.0",
     "rn-emoji-keyboard": "^1.5.1",
     "typescript": "^5.1.3",
-    "@shopify/react-native-skia": "0.1.196"
+    "expo-web-browser": "~12.3.2",
+    "expo-crypto": "~12.4.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

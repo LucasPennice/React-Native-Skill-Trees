@@ -9,10 +9,9 @@ import { useAppSelector } from "@/redux/reduxHooks";
 import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { selectAllNodes } from "@/redux/slices/nodesSlice";
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
-import { selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
 import { NormalizedNode } from "@/types";
 import { useCanvasRef } from "@shopify/react-native-skia";
-import { Redirect, useNavigation } from "expo-router";
+import { useNavigation } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
 
@@ -65,8 +64,6 @@ function useCanvasSettingsState() {
 }
 
 function Home() {
-    const userTreeQty = useAppSelector(selectTotalTreeQty);
-
     const selectedNodeCoordState = useSelectedNodeCoordState();
 
     //🧠 .4ms
@@ -90,8 +87,6 @@ function Home() {
         selectedNode: selectedNode!,
         initialMode: "VIEWING",
     };
-
-    if (userTreeQty === 0) return <Redirect href={"/(app)/welcomeScreen"} />;
 
     return (
         <View style={{ position: "relative", flex: 1, overflow: "hidden" }}>

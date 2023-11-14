@@ -3,25 +3,28 @@ import AppText from "@/components/AppText";
 import CopyIcon from "@/components/Icons/CopyIcon";
 import SadFaceIcon from "@/components/Icons/SadFaceIcon";
 import { IsSharingAvailableContext } from "@/context";
-import { NODE_ICON_FONT_SIZE, colors } from "@/parameters";
+import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { persistor, store } from "@/redux/reduxStore";
+import { homeTreeSliceInitialState } from "@/redux/slices/homeTreeSlice";
+import { addNode, selectNodeById } from "@/redux/slices/nodesSlice";
 import { selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
 import { updateSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
+import { initializeFeedbackArrays } from "@/redux/slices/userFeedbackSlice";
 import { TreeData, selectAllTrees, selectTotalTreeQty, updateUserTrees } from "@/redux/slices/userTreesSlice";
+import { NormalizedNode, getDefaultSkillValue } from "@/types";
 import useHandleUserId from "@/useHandleUserId";
 import useIsSharingAvailable from "@/useIsSharingAvailable";
+import { ClerkProvider } from "@clerk/clerk-expo";
 import Clipboard from "@react-native-clipboard/clipboard";
 import analytics from "@react-native-firebase/analytics";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { Update } from "@reduxjs/toolkit";
+import { SkFont, useFont } from "@shopify/react-native-skia";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import { ErrorBoundaryProps, SplashScreen, Stack } from "expo-router";
 import { createContext, useEffect, useState } from "react";
-
-import { initializeFeedbackArrays } from "@/redux/slices/userFeedbackSlice";
-import { SkFont, useFont } from "@shopify/react-native-skia";
 import { LogBox, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
@@ -34,6 +37,8 @@ export const unstable_settings = {
     // Ensure that reloading on `/modal` keeps a back button present.
     initialRouteName: "(tabs)",
 };
+
+const clerkKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 const Layout = StyleSheet.create({
     AndroidSafeArea: {
@@ -74,23 +79,26 @@ export default function RootLayout() {
     if (Platform.OS === "android") ExpoNavigationBar.setBackgroundColorAsync(colors.darkGray);
 
     return (
-        <Provider store={store}>
-            <SkiaFontContext.Provider value={skiaFonts}>
-                <PersistGate loading={null} persistor={persistor}>
-                    <ThemeProvider value={DarkTheme}>
-                        <QueryClientProvider client={queryClient}>
-                            <IsSharingAvailableContext.Provider value={isSharingAvailable}>
-                                <SafeAreaView style={[{ flex: 1, backgroundColor: colors.darkGray, position: "relative" }, Layout.AndroidSafeArea]}>
-                                    {Platform.OS === "ios" && <View style={Layout.IOsStatusBar} />}
-                                    <StatusBar barStyle={"light-content"} backgroundColor={colors.background} />
-                                    <AppWithReduxContext />
-                                </SafeAreaView>
-                            </IsSharingAvailableContext.Provider>
-                        </QueryClientProvider>
-                    </ThemeProvider>
-                </PersistGate>
-            </SkiaFontContext.Provider>
-        </Provider>
+        <ClerkProvider publishableKey={clerkKey!}>
+            <Provider store={store}>
+                <SkiaFontContext.Provider value={skiaFonts}>
+                    <PersistGate loading={null} persistor={persistor}>
+                        <ThemeProvider value={DarkTheme}>
+                            <QueryClientProvider client={queryClient}>
+                                <IsSharingAvailableContext.Provider value={isSharingAvailable}>
+                                    <SafeAreaView
+                                        style={[{ flex: 1, backgroundColor: colors.darkGray, position: "relative" }, Layout.AndroidSafeArea]}>
+                                        {Platform.OS === "ios" && <View style={Layout.IOsStatusBar} />}
+                                        <StatusBar barStyle={"light-content"} backgroundColor={colors.background} />
+                                        <AppWithReduxContext />
+                                    </SafeAreaView>
+                                </IsSharingAvailableContext.Provider>
+                            </QueryClientProvider>
+                        </ThemeProvider>
+                    </PersistGate>
+                </SkiaFontContext.Provider>
+            </Provider>
+        </ClerkProvider>
     );
 }
 
@@ -129,12 +137,39 @@ const useUpdateUserFeedback = () => {
     dispatch(initializeFeedbackArrays());
 };
 
+const useGuaranteeHomeRootTree = () => {
+    const foundHomeNode = useAppSelector(selectNodeById(HOMETREE_ROOT_ID));
+    const dispatch = useAppDispatch();
+
+    if (foundHomeNode) return;
+
+    const { icon } = homeTreeSliceInitialState;
+
+    const homeNode: NormalizedNode = {
+        nodeId: HOMETREE_ROOT_ID,
+        isRoot: true,
+        childrenIds: [],
+        data: getDefaultSkillValue("Life Skills", false, icon),
+        level: 0,
+        parentId: null,
+        treeId: HOMEPAGE_TREE_ID,
+        x: 0,
+        y: 0,
+        category: "USER",
+    };
+
+    dispatch(addNode(homeNode));
+};
+
 function AppWithReduxContext() {
     const dispatch = useAppDispatch();
+    //
     useHandleUserId();
     useHandleOnboarding();
     useUpdateTreeDataForShowOnHomepage();
     useUpdateUserFeedback();
+    useGuaranteeHomeRootTree();
+    //
 
     return (
         <View

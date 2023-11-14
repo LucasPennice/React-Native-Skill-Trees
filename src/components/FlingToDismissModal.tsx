@@ -28,7 +28,7 @@ const ModalWithGesturesEnabled = gestureHandlerRootHOC(({ children, closeModal, 
 
     return (
         <GestureDetector gesture={flingGesture}>
-            <SafeAreaView style={[{ justifyContent: "flex-end", backgroundColor: colors.darkGray, flex: 1, maxWidth: 600 }, modalContainerStyles]}>
+            <SafeAreaView style={[{ justifyContent: "flex-end", backgroundColor: colors.background, flex: 1, maxWidth: 600 }, modalContainerStyles]}>
                 <View style={{ borderRadius: 10, flex: 1, padding: MODAL_PADDING }}>
                     <View style={[centerFlex, { position: "relative", height: 45 }]}>
                         {leftHeaderButton && (

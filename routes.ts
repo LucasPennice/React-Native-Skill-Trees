@@ -23,7 +23,17 @@ export const routes = {
         name: "feedback",
         route: "/feedback",
     },
+    logIn: {
+        name: "logIn",
+        route: "/logIn",
+    },
+    signUp: {
+        name: "signUp",
+        route: "/signUp",
+    },
 };
+
+export const hideNavAndOnboarding: (keyof typeof routes)[] = ["welcomeScreen", "logIn", "signUp"];
 
 export type RoutesParams = {
     myTrees_treeId: {
