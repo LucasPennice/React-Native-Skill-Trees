@@ -70,6 +70,6 @@ module.exports = {
         eas: {
             projectId: "86b83f4d-998c-4e50-b891-c28787c3e0c8",
         },
-        clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+        clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
     },
 };

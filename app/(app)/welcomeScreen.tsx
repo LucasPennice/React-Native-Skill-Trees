@@ -12,11 +12,21 @@ import { Dictionary } from "@reduxjs/toolkit";
 import { SkiaFontContext } from "app/_layout";
 import { router } from "expo-router";
 import { Fragment, useContext } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { Defs, LinearGradient, Path, Stop, Svg } from "react-native-svg";
 import { CIRCLE_SIZE, HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, centerFlex, colors } from "../../src/parameters";
+import LogoIcon from "@/components/Icons/LogoIcon";
 
-const TEXT_AND_BUTTON_HEIGHT = 150;
+const TEXT_AND_BUTTON_HEIGHT = 200;
+
+const Logo = () => {
+    return (
+        <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+            <LogoIcon />
+            <AppText children={"Skill Trees"} fontSize={24} style={{ fontFamily: "helveticaBold", paddingTop: 4 }} />
+        </View>
+    );
+};
 
 function WelcomeScreen() {
     const { width } = Dimensions.get("window");
@@ -30,27 +40,41 @@ function WelcomeScreen() {
         <View style={[centerFlex, { flex: 1, justifyContent: "flex-end", position: "relative" }]}>
             <OnboardingTree />
 
-            <View style={{ marginBottom: 10 }}>
-                <AppText
-                    children={"Visualize your life goals and"}
-                    fontSize={18}
-                    style={{ color: "#E6E8E6", fontFamily: "helveticaBold", textAlign: "center", marginBottom: 5 }}
-                />
-                <AppText
-                    children={"become who you are destined to be"}
-                    fontSize={18}
-                    style={{ color: "#E6E8E6", fontFamily: "helveticaBold", textAlign: "center" }}
-                />
-            </View>
+            <View style={{ height: TEXT_AND_BUTTON_HEIGHT, justifyContent: "center", alignItems: "center" }}>
+                <Logo />
 
-            <AppButton
-                onPress={openCreateNewTree}
-                text={{ idle: "Start your journey" }}
-                color={{ idle: colors.accent }}
-                pressableStyle={{ width, paddingHorizontal: 10, marginVertical: 20 }}
-                style={{ backgroundColor: colors.accent, borderRadius: 30 }}
-                textStyle={{ fontFamily: "helveticaBold" }}
-            />
+                <AppText children={"Track your life's progress. All in one place."} fontSize={16} style={{ textAlign: "center", marginTop: 15 }} />
+
+                <AppButton
+                    onPress={() => console.log("log")}
+                    text={{ idle: "CREATE ACCOUNT" }}
+                    color={{ idle: colors.accent }}
+                    pressableStyle={{ width, paddingHorizontal: 10 }}
+                    style={{
+                        backgroundColor: colors.background,
+                        marginTop: 20,
+                    }}
+                    textStyle={{ fontFamily: "helveticaBold" }}
+                />
+
+                <View style={{ flexDirection: "row" }}>
+                    <AppText children={"Already have an account?"} fontSize={12} style={{ verticalAlign: "bottom" }} />
+                    <Pressable onPressIn={console.log}>
+                        <AppText
+                            children={"Log In"}
+                            fontSize={12}
+                            style={{
+                                color: colors.accent,
+                                fontFamily: "helveticaBold",
+                                paddingLeft: 3,
+                                verticalAlign: "bottom",
+                                height: 35,
+                                width: 45,
+                            }}
+                        />
+                    </Pressable>
+                </View>
+            </View>
         </View>
     );
 }
