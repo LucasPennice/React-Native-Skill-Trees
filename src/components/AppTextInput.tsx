@@ -1,4 +1,4 @@
-import { Pressable, StyleProp, TextInput, TextInputProps, TextStyle, View, ViewProps } from "react-native";
+import { Platform, Pressable, StyleProp, TextInput, TextInputProps, TextStyle, View, ViewProps } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { centerFlex, colors } from "../parameters";
 import CloseIcon from "./Icons/CloseIcon";
@@ -12,6 +12,7 @@ function AppTextInput({
     inputProps,
     pattern,
     disable,
+    hideClearButton,
 }: {
     textState: [string, (v: string) => void];
     placeholder: string;
@@ -21,6 +22,7 @@ function AppTextInput({
     textStyle?: StyleProp<TextStyle>;
     pattern?: RegExp;
     inputProps?: TextInputProps;
+    hideClearButton?: true;
 }) {
     const [text, setText] = textState;
 
@@ -67,24 +69,25 @@ function AppTextInput({
                 ]}
                 {...inputProps}
             />
-            {disable !== true && text !== "" && (
-                <Animated.View
-                    style={[
-                        centerFlex,
-                        {
-                            position: "absolute",
-                            height: "100%",
-                            width: 50,
-                            right: 0,
-                        },
-                    ]}
-                    exiting={FadeOut}
-                    entering={FadeIn}>
-                    <Pressable style={[centerFlex, { flex: 1, paddingHorizontal: 10 }]} onPress={() => setText("")}>
-                        <CloseIcon />
-                    </Pressable>
-                </Animated.View>
-            )}
+            {hideClearButton ||
+                (disable !== true && text !== "" && (
+                    <Animated.View
+                        style={[
+                            centerFlex,
+                            {
+                                position: "absolute",
+                                height: "100%",
+                                width: 50,
+                                right: 0,
+                            },
+                        ]}
+                        exiting={FadeOut}
+                        entering={FadeIn}>
+                        <Pressable style={[centerFlex, { flex: 1, paddingHorizontal: 10 }]} onPress={() => setText("")}>
+                            <CloseIcon />
+                        </Pressable>
+                    </Animated.View>
+                ))}
         </View>
     );
 }

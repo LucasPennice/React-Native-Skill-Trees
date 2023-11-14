@@ -135,6 +135,7 @@ function DeleteNodeModal({ nodeToDelete, closeModalAndClearState, open }: Props)
                     onPress={deleteParentAndAllItsChildren}
                     text={{ idle: "Delete skill and children" }}
                     style={{ backgroundColor: colors.background }}
+                    color={{ idle: colors.pink }}
                 />
             </View>
         </FlingToDismissModal>

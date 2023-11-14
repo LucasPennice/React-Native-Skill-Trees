@@ -164,9 +164,9 @@ export function ErrorBoundary(props: ErrorBoundaryProps) {
 
     useEffect(() => {
         (async () => {
-            await analytics().logEvent("error", { message: props.error.message, stack: props.error.stack });
+            await analytics().logEvent("appError", { message: props.error.message, stack: props.error.stack });
 
-            await mixpanel.track(`error`, { message: props.error.message, stack: props.error.stack });
+            await mixpanel.track(`appError`, { message: props.error.message, stack: props.error.stack });
         })();
     }, []);
 

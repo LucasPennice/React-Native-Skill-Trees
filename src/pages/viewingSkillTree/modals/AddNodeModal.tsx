@@ -1,9 +1,10 @@
 import AppButton from "@/components/AppButton";
 import AppEmojiPicker, { Emoji, findEmoji } from "@/components/AppEmojiPicker";
+import Spacer from "@/components/Spacer";
 import { generate24CharHexId, toggleEmoji } from "@/functions/misc";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useEffect, useState } from "react";
-import { Alert, Dimensions, Keyboard, Platform, Pressable, StyleSheet, View } from "react-native";
+import { Alert, Dimensions, Keyboard, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { Easing, FadeInDown, Layout, ZoomIn, ZoomOut, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
@@ -13,6 +14,7 @@ import RadioInput from "../../../components/RadioInput";
 import { findNodeById } from "../../../functions/extractInformationFromTree";
 import { centerFlex, colors } from "../../../parameters";
 import { DnDZone, Skill, Tree, getDefaultSkillValue } from "../../../types";
+import GoalForm from "./AddNodeModal/GoalForm";
 
 type Props = {
     closeModal: () => void;
@@ -186,12 +188,6 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
         }
     };
 
-    const nodeListStyles = useAnimatedStyle(() => {
-        return {
-            backgroundColor: withTiming(nodesToAdd.length === 0 ? colors.background : colors.darkGray),
-        };
-    }, [nodesToAdd]);
-
     const selectedNodeEmoji = currentNode.data.icon.isEmoji ? findEmoji(currentNode.data.icon.text) : undefined;
 
     return (
@@ -201,50 +197,14 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
             leftHeaderButton={{ onPress: handleConfirm, title: "Add Skills" }}
             modalContainerStyles={{ backgroundColor: colors.background }}>
             <View style={[centerFlex, { flex: 1, justifyContent: "flex-start", alignItems: "flex-start" }]}>
-                <View style={{ marginBottom: 10 }}>
-                    <AppText style={{ marginBottom: 5 }} fontSize={18}>
-                        Add Skills
-                    </AppText>
-                    <AppText style={{ color: `${colors.white}80`, marginBottom: 5 }} fontSize={16} children={"Tap a node to edit it"} />
-                </View>
-
-                <AppText style={{ marginBottom: 5 }} fontSize={18} children={"Skill Name & Icon"} />
-                <View style={{ flexDirection: "row", marginBottom: 10 }}>
-                    <AppTextInput
-                        placeholder={"Education"}
-                        textState={[currentNode.data.name, setName]}
-                        pattern={new RegExp(/^[^ ]/)}
-                        containerStyles={{ flex: 1 }}
-                    />
-                    <Pressable onPress={() => setEmojiSelectorOpen(true)}>
-                        <AppText
-                            children={currentNode.data.icon.isEmoji ? currentNode.data.icon.text : "🧠"}
-                            style={{
-                                fontFamily: "emojisMono",
-                                color: currentNode.data.icon.isEmoji ? colors.white : colors.line,
-                                width: 45,
-                                paddingTop: 2,
-                                height: 45,
-                                backgroundColor: colors.darkGray,
-                                borderRadius: 10,
-                                marginLeft: 10,
-                                textAlign: "center",
-                                verticalAlign: "middle",
-                            }}
-                            fontSize={24}
-                        />
-                    </Pressable>
-                </View>
-
-                <RadioInput
-                    state={[currentNode.data.isCompleted, setCompletion]}
-                    text={"Complete"}
-                    iconProps={{ name: "pencil", size: 18, color: `${colors.white}80` }}
-                    textProps={{ fontSize: 16, paddingTop: 3 }}
-                    style={{ height: 45, backgroundColor: colors.darkGray, marginBottom: 10, width: "100%", borderRadius: 10 }}
-                />
                 <Animated.View
-                    style={[nodeListStyles, { height: 90, width, justifyContent: "center", transform: [{ translateX: -10 }], marginTop: 10 }]}>
+                    style={{
+                        height: 90,
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        backgroundColor: colors.darkGray,
+                        borderRadius: 10,
+                    }}>
                     <Animated.ScrollView
                         horizontal
                         layout={Layout}
@@ -262,13 +222,60 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
                         ))}
                     </Animated.ScrollView>
                 </Animated.View>
+                <AppText style={{ color: `${colors.white}80`, marginTop: 5 }} fontSize={14} children={"Tap a node to edit it"} />
 
+                <View style={[centerFlex, { width: "100%", justifyContent: "flex-start", alignItems: "flex-start", flex: 1, marginTop: 10 }]}>
+                    <ScrollView style={{ width: "100%" }}>
+                        <AppText style={{ marginBottom: 5 }} fontSize={18} children={"Skill Name & Icon"} />
+                        <View style={{ flexDirection: "row", marginBottom: 10 }}>
+                            <AppTextInput
+                                placeholder={"Education"}
+                                textState={[currentNode.data.name, setName]}
+                                pattern={new RegExp(/^[^ ]/)}
+                                containerStyles={{ flex: 1 }}
+                            />
+                            <Pressable onPress={() => setEmojiSelectorOpen(true)}>
+                                <AppText
+                                    children={currentNode.data.icon.isEmoji ? currentNode.data.icon.text : "🧠"}
+                                    style={{
+                                        fontFamily: "emojisMono",
+                                        color: currentNode.data.icon.isEmoji ? colors.white : colors.line,
+                                        width: 45,
+                                        paddingTop: 2,
+                                        height: 45,
+                                        backgroundColor: colors.darkGray,
+                                        borderRadius: 10,
+                                        marginLeft: 10,
+                                        textAlign: "center",
+                                        verticalAlign: "middle",
+                                    }}
+                                    fontSize={24}
+                                />
+                            </Pressable>
+                        </View>
+
+                        <View style={{ flexDirection: "row" }}>
+                            <RadioInput
+                                state={[currentNode.data.isCompleted, setCompletion]}
+                                text={"Complete"}
+                                iconProps={{ name: "pencil", size: 18, color: `${colors.white}80` }}
+                                textProps={{ fontSize: 16, paddingTop: 3 }}
+                                style={{ height: 45, backgroundColor: colors.darkGray, marginBottom: 0, flex: 1, borderRadius: 10 }}
+                            />
+                        </View>
+
+                        <AppEmojiPicker
+                            selectedEmojisName={currentNode.data.icon.isEmoji ? [selectedNodeEmoji!.name] : undefined}
+                            onEmojiSelected={toggleEmoji(setIcon, currentNode.data.icon.isEmoji ? selectedNodeEmoji! : undefined)}
+                            state={[emojiSelectorOpen, setEmojiSelectorOpen]}
+                        />
+
+                        {/* <Spacer style={{ marginVertical: 10 }} /> */}
+
+                        {/* <GoalForm blockInteraction={currentNode.data.isCompleted} /> */}
+                    </ScrollView>
+                </View>
                 <AddAndEditButton handleAddNodeToList={handleAddNodeToList} isEditing={isEditing} shouldBlockAddButton={shouldBlockAddButton} />
-                <AppEmojiPicker
-                    selectedEmojisName={currentNode.data.icon.isEmoji ? [selectedNodeEmoji!.name] : undefined}
-                    onEmojiSelected={toggleEmoji(setIcon, currentNode.data.icon.isEmoji ? selectedNodeEmoji! : undefined)}
-                    state={[emojiSelectorOpen, setEmojiSelectorOpen]}
-                />
             </View>
         </FlingToDismissModal>
     );

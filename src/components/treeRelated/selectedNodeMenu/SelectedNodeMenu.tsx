@@ -176,7 +176,7 @@ function SelectedNodeMenu({ mutateFunctions, functions, state, allowEdit }: Prop
                         </AppText>
 
                         {editingEnabled && (
-                            <SliderToggler containerWidth={menuWidth / 2 - 10} isLeftSelected={mode === "VIEWING"} toggleMode={toggleMode} />
+                            <SliderToggler indicatorWidth={menuWidth / 2 - 10} isLeftSelected={mode === "VIEWING"} toggleMode={toggleMode} />
                         )}
 
                         {mode === "EDITING" && editingEnabled && (
