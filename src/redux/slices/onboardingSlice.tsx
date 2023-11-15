@@ -14,12 +14,14 @@ export enum OnboardingSteps {
 type OnboardignState = {
     currentStep: OnboardingSteps;
     complete: boolean;
+    open: boolean;
 };
 
 // Define the initial state using that type
 const initialState: OnboardignState = {
     complete: false,
     currentStep: 0,
+    open: false,
 };
 
 export const onboardingSlice = createSlice({
@@ -31,6 +33,12 @@ export const onboardingSlice = createSlice({
         },
         skipToStep: (state, action: PayloadAction<OnboardingSteps>) => {
             state.currentStep = action.payload;
+        },
+        expandOnboardingMenu: (state) => {
+            state.open = true;
+        },
+        closeOnboardingMenu: (state) => {
+            state.open = false;
         },
     },
     extraReducers: (builder) => {
@@ -45,7 +53,7 @@ export const onboardingSlice = createSlice({
     },
 });
 
-export const { completeOnboarding, skipToStep } = onboardingSlice.actions;
+export const { completeOnboarding, skipToStep, closeOnboardingMenu, expandOnboardingMenu } = onboardingSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectOnboarding = (state: RootState) => state.onboarding;

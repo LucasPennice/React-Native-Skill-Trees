@@ -7,16 +7,16 @@ import { getTextCoordinates } from "@/components/treeRelated/general/useHandleNo
 import { completedSkillTreeTable } from "@/functions/extractInformationFromTree";
 import { getLabelTextColor } from "@/functions/misc";
 import { nodeToCircularPath } from "@/functions/svg/toSvg";
-import { CIRCLE_SIZE, HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, MENU_HIGH_DAMPENING, NODE_ICON_FONT_SIZE, centerFlex, colors } from "@/parameters";
+import { CIRCLE_SIZE, HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, centerFlex, colors } from "@/parameters";
 import { SkiaFontContext } from "app/_layout";
 import { router } from "expo-router";
 import { Fragment, useContext } from "react";
 import { Dimensions, Pressable, StyleSheet, View } from "react-native";
 import Animated, { SharedTransition, withSpring } from "react-native-reanimated";
 import { Defs, LinearGradient, Path, Stop, Svg } from "react-native-svg";
-import { mockCoordinatesInsideCanvas, mockRootCoordinateInsideCanvas, mockSubtreesData, mockSvgDimensions, mockTreeData } from "../../data";
+import { mockCoordinatesInsideCanvas, mockRootCoordinateInsideCanvas, mockSubtreesData, mockSvgDimensions, mockTreeData } from "../data";
 
-const TEXT_AND_BUTTON_HEIGHT = 200;
+const TEXT_AND_BUTTON_HEIGHT = 230;
 
 export const logoSharedTransitionStyle = SharedTransition.custom((values) => {
     "worklet";
@@ -29,13 +29,8 @@ export const logoSharedTransitionStyle = SharedTransition.custom((values) => {
 function WelcomeScreen() {
     const { width } = Dimensions.get("window");
 
-    const openCreateNewTree = () => {
-        //@ts-ignore
-        router.push({ pathname: "/myTrees", params: { openNewTreeModal: true } });
-    };
-
-    const navigateToLogin = () => router.push("/(app)/logIn");
-    const navigateToSignUp = () => router.push("/(app)/signUp");
+    const navigateToLogin = () => router.push("/logIn");
+    const navigateToSignUp = () => router.push("/signUp");
 
     return (
         <View style={[centerFlex, { flex: 1, justifyContent: "flex-end", position: "relative" }]}>
@@ -58,11 +53,11 @@ function WelcomeScreen() {
                 />
 
                 <View style={{ flexDirection: "row" }}>
-                    <AppText children={"Already have an account?"} fontSize={12} style={{ verticalAlign: "bottom" }} />
+                    <AppText children={"Already have an account?"} fontSize={14} style={{ verticalAlign: "bottom" }} />
                     <Pressable onPressIn={navigateToLogin}>
                         <AppText
                             children={"Log In"}
-                            fontSize={12}
+                            fontSize={14}
                             style={{
                                 color: colors.accent,
                                 fontFamily: "helveticaBold",

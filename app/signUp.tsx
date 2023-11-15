@@ -3,11 +3,12 @@ import AppText from "@/components/AppText";
 import AppTextInput from "@/components/AppTextInput";
 import XMarkIcon from "@/components/Icons/XMarkIcon";
 import Logo from "@/components/Logo";
+import PasswordInput from "@/components/PasswordInput";
 import { colors } from "@/parameters";
 import { useSignUp } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { logoSharedTransitionStyle } from "./welcomeScreen";
 
@@ -110,6 +111,7 @@ function SignUp() {
             const completeSignUp = await signUp.attemptEmailAddressVerification({ code });
 
             await setActive({ session: completeSignUp.createdSessionId });
+            router.push("/(app)/home");
         } catch (err: any) {
             const errors: { meta: { paramName: string }; longMessage: string }[] = err.errors;
 
@@ -142,7 +144,8 @@ function SignUp() {
                             placeholder={"Email"}
                         />
                         {error.email !== "" && <AppText children={error.email} fontSize={14} style={{ color: colors.pink }} />}
-                        <AppTextInput textState={[password, setPassword]} inputProps={{ secureTextEntry: true }} placeholder={"Password"} />
+                        <PasswordInput textState={[password, setPassword]} inputProps={{ secureTextEntry: true }} placeholder={"Password"} />
+
                         {error.password !== "" && <AppText children={error.password} fontSize={14} style={{ color: colors.pink }} />}
 
                         <AppButton
@@ -156,7 +159,18 @@ function SignUp() {
                 )}
                 {pendingVerification && (
                     <Animated.View style={{ width: "100%", gap: 10, marginTop: 20 }} entering={FadeInRight} exiting={FadeOutLeft}>
-                        <AppTextInput textState={[code, setCode]} inputProps={{ autoCapitalize: "none", spellCheck: false }} placeholder={"Code"} />
+                        <AppText children={"Please verify your email address"} fontSize={18} />
+                        <AppText children={"Check your e-mail account a 6-digit code"} fontSize={16} style={{ color: `${colors.white}80` }} />
+                        <AppTextInput
+                            textState={[code.toString(), (v: string) => setCode(validateNumber(v))]}
+                            inputProps={{
+                                autoCapitalize: "none",
+                                spellCheck: false,
+                                keyboardType: Platform.OS === "android" ? "numeric" : "number-pad",
+                            }}
+                            hideClearButton
+                            placeholder={"Code"}
+                        />
                         {error.code !== "" && <AppText children={error.code} fontSize={14} style={{ color: colors.pink }} />}
 
                         <AppButton
@@ -178,7 +192,7 @@ const Header = () => {
         container: { flexDirection: "row", justifyContent: "center", alignItems: "center", width: "100%", position: "relative" },
     });
 
-    const goToWelcomeScreen = () => router.push("/(app)/welcomeScreen");
+    const goToWelcomeScreen = () => router.push("/welcomeScreen");
 
     return (
         <View style={style.container}>
@@ -192,3 +206,9 @@ const Header = () => {
 };
 
 export default SignUp;
+
+const validateNumber = (tentativeNumber: string) => {
+    const cleanNumber = tentativeNumber.replace(/[^0-9]/g, "");
+
+    return cleanNumber;
+};

@@ -3,6 +3,7 @@ import AppText from "@/components/AppText";
 import AppTextInput from "@/components/AppTextInput";
 import XMarkIcon from "@/components/Icons/XMarkIcon";
 import Logo from "@/components/Logo";
+import PasswordInput from "@/components/PasswordInput";
 import { colors } from "@/parameters";
 import { useSignIn } from "@clerk/clerk-expo";
 import { router } from "expo-router";
@@ -18,7 +19,7 @@ const style = StyleSheet.create({
 
 export default function SignInScreen() {
     const { error, resetErrors, updateIdentifierError, updatePasswordError } = useHandleClerkErrorMessages();
-    const { setSubmitError, setSubmitLoading, submitState, resetSubmitState } = useHandleButtonState();
+    const { setSubmitError, setSubmitLoading, submitState } = useHandleButtonState();
 
     const { signIn, setActive, isLoaded } = useSignIn();
 
@@ -36,7 +37,7 @@ export default function SignInScreen() {
             // This is an important step,
             // This indicates the user is signed in
             await setActive({ session: completeSignIn.createdSessionId });
-            resetSubmitState();
+            router.push("/(app)/home");
         } catch (err: any) {
             const errors: { meta: { paramName: string }; longMessage: string }[] = err.errors;
 
@@ -72,7 +73,7 @@ export default function SignInScreen() {
                         placeholder={"Email"}
                     />
                     {error.identifier !== "" && <AppText children={error.identifier} fontSize={14} style={{ color: colors.pink }} />}
-                    <AppTextInput textState={[password, setPassword]} inputProps={{ secureTextEntry: true }} placeholder={"Password"} />
+                    <PasswordInput textState={[password, setPassword]} inputProps={{ secureTextEntry: true }} placeholder={"Password"} />
                     {error.password !== "" && <AppText children={error.password} fontSize={14} style={{ color: colors.pink }} />}
 
                     <AppButton
@@ -93,7 +94,7 @@ const Header = () => {
         container: { flexDirection: "row", justifyContent: "center", alignItems: "center", width: "100%", position: "relative" },
     });
 
-    const goToWelcomeScreen = () => router.push("/(app)/welcomeScreen");
+    const goToWelcomeScreen = () => router.push("/welcomeScreen");
 
     return (
         <View style={style.container}>

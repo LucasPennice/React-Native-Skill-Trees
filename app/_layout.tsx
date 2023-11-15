@@ -79,26 +79,26 @@ export default function RootLayout() {
     if (Platform.OS === "android") ExpoNavigationBar.setBackgroundColorAsync(colors.darkGray);
 
     return (
-        <ClerkProvider publishableKey={clerkKey!}>
-            <Provider store={store}>
-                <SkiaFontContext.Provider value={skiaFonts}>
-                    <PersistGate loading={null} persistor={persistor}>
-                        <ThemeProvider value={DarkTheme}>
-                            <QueryClientProvider client={queryClient}>
-                                <IsSharingAvailableContext.Provider value={isSharingAvailable}>
+        <Provider store={store}>
+            <SkiaFontContext.Provider value={skiaFonts}>
+                <PersistGate loading={null} persistor={persistor}>
+                    <ThemeProvider value={DarkTheme}>
+                        <QueryClientProvider client={queryClient}>
+                            <IsSharingAvailableContext.Provider value={isSharingAvailable}>
+                                <ClerkProvider publishableKey={clerkKey!}>
                                     <SafeAreaView
                                         style={[{ flex: 1, backgroundColor: colors.darkGray, position: "relative" }, Layout.AndroidSafeArea]}>
                                         {Platform.OS === "ios" && <View style={Layout.IOsStatusBar} />}
                                         <StatusBar barStyle={"light-content"} backgroundColor={colors.background} />
                                         <AppWithReduxContext />
                                     </SafeAreaView>
-                                </IsSharingAvailableContext.Provider>
-                            </QueryClientProvider>
-                        </ThemeProvider>
-                    </PersistGate>
-                </SkiaFontContext.Provider>
-            </Provider>
-        </ClerkProvider>
+                                </ClerkProvider>
+                            </IsSharingAvailableContext.Provider>
+                        </QueryClientProvider>
+                    </ThemeProvider>
+                </PersistGate>
+            </SkiaFontContext.Provider>
+        </Provider>
     );
 }
 

@@ -1,7 +1,19 @@
-import { Platform, Pressable, StyleProp, TextInput, TextInputProps, TextStyle, View, ViewProps } from "react-native";
+import { Pressable, StyleProp, TextInput, TextInputProps, TextStyle, View, ViewProps } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { centerFlex, colors } from "../parameters";
 import CloseIcon from "./Icons/CloseIcon";
+
+export type AppTextInputProps = {
+    textState: [string, (v: string) => void];
+    placeholder: string;
+    containerStyles?: ViewProps["style"];
+    onBlur?: () => void;
+    disable?: boolean;
+    textStyle?: StyleProp<TextStyle>;
+    pattern?: RegExp;
+    inputProps?: TextInputProps;
+    hideClearButton?: true;
+};
 
 function AppTextInput({
     textState,
@@ -13,17 +25,7 @@ function AppTextInput({
     pattern,
     disable,
     hideClearButton,
-}: {
-    textState: [string, (v: string) => void];
-    placeholder: string;
-    containerStyles?: ViewProps["style"];
-    onBlur?: () => void;
-    disable?: boolean;
-    textStyle?: StyleProp<TextStyle>;
-    pattern?: RegExp;
-    inputProps?: TextInputProps;
-    hideClearButton?: true;
-}) {
+}: AppTextInputProps) {
     const [text, setText] = textState;
 
     const updateText = (tentativeInput: string) => {
@@ -36,6 +38,8 @@ function AppTextInput({
         return setText(tentativeInput);
     };
 
+    const blockMultilineOnSecureTextEmpty = inputProps?.secureTextEntry ? undefined : true;
+
     return (
         <View
             style={[
@@ -47,7 +51,7 @@ function AppTextInput({
                 blurOnSubmit
                 //@ts-ignore
                 enterKeyHint="done"
-                multiline
+                {...{ multiline: blockMultilineOnSecureTextEmpty }}
                 onChangeText={disable ? undefined : updateText}
                 placeholder={placeholder}
                 onBlur={disable ? undefined : onBlur}

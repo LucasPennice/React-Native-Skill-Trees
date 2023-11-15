@@ -3,16 +3,16 @@ import OnboardingCompletionIcon from "@/components/Icons/OnboardingCompleteIcon"
 import SteppedProgressBarAndIndicator, { OnboardingStep } from "@/components/SteppedProgressBarAndIndicator";
 import { MENU_HIGH_DAMPENING, NAV_HEGIHT, colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
-import { selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
+import { closeOnboardingMenu, expandOnboardingMenu, selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
 import { selectUserId } from "@/redux/slices/userSlice";
 import { selectAllTrees } from "@/redux/slices/userTreesSlice";
 import { useAuth } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import analytics from "@react-native-firebase/analytics";
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
+import { Redirect, SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
 import { Mixpanel } from "mixpanel-react-native";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { FadeIn, FadeInRight, FadeOut, FadeOutLeft, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { RoutesParams, hideNavAndOnboarding, routes } from "routes";
@@ -36,9 +36,9 @@ export const mixpanel = new Mixpanel("5a141ce3c43980d8fab68b96e1256525", trackAu
 mixpanel.init();
 
 export default function RootLayout() {
-    const onboarding = useAppSelector(selectOnboarding);
     usePassMixPanelUserId();
-    const { isSignedIn } = useAuth();
+    const onboarding = useAppSelector(selectOnboarding);
+    const { isSignedIn, isLoaded } = useAuth();
 
     const { width, height } = Dimensions.get("window");
 
@@ -57,26 +57,17 @@ export default function RootLayout() {
     }, [error]);
 
     useEffect(() => {
-        if (fontsLoaded) {
-            SplashScreen.hideAsync();
-        }
-    }, [fontsLoaded]);
+        if (fontsLoaded && isLoaded) SplashScreen.hideAsync();
+    }, [fontsLoaded, isLoaded]);
 
     const prevRouteName = useRef<string | null>(null);
 
-    useEffect(() => {
-        if (fontsLoaded && !isSignedIn) {
-            return router.push("/welcomeScreen");
-        }
+    if (!fontsLoaded || !isLoaded) return <Text>Loading...</Text>;
 
-        if (fontsLoaded && isSignedIn) {
-            return router.push("/home");
-        }
-    }, [isSignedIn, fontsLoaded]);
+    if (!isSignedIn) return <Redirect href="/welcomeScreen" />;
+    // if (process.env.NODE_ENV === "production" && !isSignedIn) return <Redirect href="/welcomeScreen" />;
 
-    if (!fontsLoaded) return <Text>Loading...</Text>;
-
-    const hide = !Boolean(hideNavAndOnboarding.find((route) => pathname.includes(route)));
+    const hide = !Boolean(pathname === "/" || hideNavAndOnboarding.find((route) => pathname.includes(route)));
 
     return (
         <View style={{ flex: 1, minHeight: Platform.OS === "android" ? height - NAV_HEGIHT : "auto" }}>
@@ -172,11 +163,9 @@ const DIMENSIONS = { closed: { width: 45, height: 45 }, open: { width, height: 1
 const CLOSED_POSITION = { left: 10, bottom: NAV_HEGIHT + 10 };
 
 const Onboarding = () => {
-    const { currentStep } = useAppSelector(selectOnboarding);
+    const { currentStep, open } = useAppSelector(selectOnboarding);
     const userTrees = useAppSelector(selectAllTrees);
     const dispatch = useAppDispatch();
-
-    const [open, setOpen] = useState(false);
 
     const style = StyleSheet.create({
         container: {
@@ -206,10 +195,9 @@ const Onboarding = () => {
         router.push({ pathname: "/myTrees", params: { openNewTreeModal: true } });
     };
 
-    const closeOnboardingMenu = () => setOpen(false);
+    const closeMenu = () => dispatch(closeOnboardingMenu());
 
     const handleOnboardingAction = (action: () => void) => () => {
-        closeOnboardingMenu();
         setTimeout(action, 200);
     };
 
@@ -289,7 +277,7 @@ const Onboarding = () => {
                         )}
                     </View>
                     <View style={{ flexDirection: "row" }}>
-                        <Pressable style={{ height: 45, justifyContent: "center" }} onPress={closeOnboardingMenu}>
+                        <Pressable style={{ height: 45, justifyContent: "center" }} onPress={closeMenu}>
                             <AppText
                                 fontSize={12}
                                 children={"Dismiss"}
@@ -324,7 +312,7 @@ const Onboarding = () => {
                 </Animated.View>
             )}
 
-            {!open && <Pressable onPressIn={() => setOpen(true)} style={{ width: 45, height: 45, position: "absolute" }} />}
+            {!open && <Pressable onPressIn={() => dispatch(expandOnboardingMenu())} style={{ width: 45, height: 45, position: "absolute" }} />}
         </Animated.View>
     );
 };

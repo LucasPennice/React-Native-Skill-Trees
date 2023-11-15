@@ -68,7 +68,13 @@ const SteppedProgressBarAndIndicator = ({ containerStyles, steps, initialStep, p
             </Animated.View>
             <View style={{ flexDirection: "row", flex: 1, position: "absolute", bottom: 0 }}>
                 {steps.map((step, idx) => {
-                    return <PartialProgressBar isComplete={currentStep > idx} shouldAddMargin={steps.length !== 0 && idx !== steps.length - 1} />;
+                    return (
+                        <PartialProgressBar
+                            key={idx}
+                            isComplete={currentStep > idx}
+                            shouldAddMargin={steps.length !== 0 && idx !== steps.length - 1}
+                        />
+                    );
                 })}
             </View>
         </View>
