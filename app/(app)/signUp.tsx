@@ -11,8 +11,8 @@ import { Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { logoSharedTransitionStyle } from "./welcomeScreen";
 
-const useHandleErrorMessages = () => {
-    const [error, setState] = useState({ email: "", password: "", code: "" });
+export const useHandleClerkErrorMessages = () => {
+    const [error, setState] = useState({ email: "", password: "", code: "", identifier: "" });
 
     const updatePasswordError = (message: string) =>
         setState((prev) => {
@@ -24,17 +24,22 @@ const useHandleErrorMessages = () => {
             return { ...prev, code: message };
         });
 
+    const updateIdentifierError = (message: string) =>
+        setState((prev) => {
+            return { ...prev, identifier: message };
+        });
+
     const updateEmailError = (message: string) =>
         setState((prev) => {
             return { ...prev, email: message };
         });
 
-    const resetErrors = () => setState({ email: "", password: "", code: "" });
+    const resetErrors = () => setState({ email: "", password: "", code: "", identifier: "" });
 
-    return { error, updateEmailError, updatePasswordError, resetErrors, updateCodeError };
+    return { error, updateEmailError, updatePasswordError, resetErrors, updateCodeError, updateIdentifierError };
 };
 
-const useHandleSubmitState = () => {
+export const useHandleButtonState = () => {
     const [submitState, setState] = useState<ButtonState>("idle");
 
     const setSubmitError = () => setState("error");
@@ -49,8 +54,8 @@ function SignUp() {
         container: { alignItems: "center", flex: 1, padding: 15 },
     });
 
-    const { error, updateEmailError, updatePasswordError, resetErrors, updateCodeError } = useHandleErrorMessages();
-    const { setSubmitError, setSubmitLoading, submitState, resetSubmitState } = useHandleSubmitState();
+    const { error, updateEmailError, updatePasswordError, resetErrors, updateCodeError } = useHandleClerkErrorMessages();
+    const { setSubmitError, setSubmitLoading, submitState, resetSubmitState } = useHandleButtonState();
 
     const { isLoaded, signUp, setActive } = useSignUp();
 
@@ -157,7 +162,7 @@ function SignUp() {
                         <AppButton
                             state={submitState}
                             onPress={onPressVerify}
-                            text={{ idle: "Verify Email", error: "Error", success: "Success!" }}
+                            text={{ idle: "Verify Email", error: "Please try again", success: "Success!" }}
                             style={{ backgroundColor: colors.background, marginTop: 10 }}
                             textStyle={{ fontFamily: "helveticaBold" }}
                         />
