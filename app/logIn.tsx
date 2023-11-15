@@ -1,10 +1,13 @@
 import AppButton from "@/components/AppButton";
 import AppText from "@/components/AppText";
 import AppTextInput from "@/components/AppTextInput";
-import XMarkIcon from "@/components/Icons/XMarkIcon";
 import Logo from "@/components/Logo";
 import PasswordInput from "@/components/PasswordInput";
+import Spacer from "@/components/Spacer";
+import LogInWithDiscordButton from "@/components/auth/LogInWithDiscordButton";
+import LogInWithGoogleButton from "@/components/auth/LogInWithGoogleButton";
 import { colors } from "@/parameters";
+import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useSignIn } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import React from "react";
@@ -20,6 +23,8 @@ const style = StyleSheet.create({
 export default function SignInScreen() {
     const { error, resetErrors, updateIdentifierError, updatePasswordError } = useHandleClerkErrorMessages();
     const { setSubmitError, setSubmitLoading, submitState } = useHandleButtonState();
+
+    useWarmUpBrowser();
 
     const { signIn, setActive, isLoaded } = useSignIn();
 
@@ -57,20 +62,37 @@ export default function SignInScreen() {
             setSubmitError();
         }
     };
+
+    const navigateToSignUp = () => router.push("/signUp");
+
     return (
         <View style={style.container}>
-            <Header />
-
-            <View style={{ width: "100%", flex: 1, gap: 10, alignItems: "center", marginTop: 70 }}>
-                <Animated.View sharedTransitionTag="sharedTag" sharedTransitionStyle={logoSharedTransitionStyle}>
+            <View style={{ width: "100%", flex: 1, gap: 10, alignItems: "center" }}>
+                <Animated.View sharedTransitionTag="sharedTag" sharedTransitionStyle={logoSharedTransitionStyle} style={{ marginBottom: 50 }}>
                     <Logo />
                 </Animated.View>
 
                 <Animated.View style={{ width: "100%", gap: 10, marginTop: 20 }} entering={FadeInRight}>
+                    <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-evenly" }}>
+                        <LogInWithGoogleButton />
+                        <LogInWithDiscordButton />
+                    </View>
+
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            marginVertical: 10,
+                            alignItems: "center",
+                        }}>
+                        <Spacer style={{ flex: 1 }} />
+                        <AppText children={`or`} fontSize={18} style={{ color: "#E6E8E680", marginBottom: 5, width: 150, textAlign: "center" }} />
+                        <Spacer style={{ flex: 1 }} />
+                    </View>
+
                     <AppTextInput
                         textState={[emailAddress, setEmailAddress]}
                         inputProps={{ autoCapitalize: "none", spellCheck: false }}
-                        placeholder={"Email"}
+                        placeholder={"Username or Email"}
                     />
                     {error.identifier !== "" && <AppText children={error.identifier} fontSize={14} style={{ color: colors.pink }} />}
                     <PasswordInput textState={[password, setPassword]} inputProps={{ secureTextEntry: true }} placeholder={"Password"} />
@@ -83,26 +105,26 @@ export default function SignInScreen() {
                         style={{ backgroundColor: colors.background, marginTop: 10 }}
                         textStyle={{ fontFamily: "helveticaBold" }}
                     />
+
+                    <View style={{ flexDirection: "row" }}>
+                        <AppText children={"No account?"} fontSize={14} style={{ verticalAlign: "bottom" }} />
+                        <Pressable onPressIn={navigateToSignUp}>
+                            <AppText
+                                children={"Sign up"}
+                                fontSize={14}
+                                style={{
+                                    color: colors.accent,
+                                    fontFamily: "helveticaBold",
+                                    paddingLeft: 3,
+                                    verticalAlign: "bottom",
+                                    height: 35,
+                                    width: 60,
+                                }}
+                            />
+                        </Pressable>
+                    </View>
                 </Animated.View>
             </View>
         </View>
     );
 }
-
-const Header = () => {
-    const style = StyleSheet.create({
-        container: { flexDirection: "row", justifyContent: "center", alignItems: "center", width: "100%", position: "relative" },
-    });
-
-    const goToWelcomeScreen = () => router.push("/welcomeScreen");
-
-    return (
-        <View style={style.container}>
-            <Pressable onPressIn={goToWelcomeScreen} style={{ position: "absolute", left: 0, width: 45, height: 45 }}>
-                <XMarkIcon width={25} height={25} fill={colors.unmarkedText} />
-            </Pressable>
-            <AppText fontSize={18} children={"Log In"} style={{ paddingTop: 2, fontFamily: "helveticaBold" }} />
-            <View />
-        </View>
-    );
-};

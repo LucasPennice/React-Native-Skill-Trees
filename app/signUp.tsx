@@ -1,10 +1,13 @@
 import AppButton, { ButtonState } from "@/components/AppButton";
 import AppText from "@/components/AppText";
 import AppTextInput from "@/components/AppTextInput";
-import XMarkIcon from "@/components/Icons/XMarkIcon";
 import Logo from "@/components/Logo";
 import PasswordInput from "@/components/PasswordInput";
+import Spacer from "@/components/Spacer";
+import LogInWithDiscordButton from "@/components/auth/LogInWithDiscordButton";
+import LogInWithGoogleButton from "@/components/auth/LogInWithGoogleButton";
 import { colors } from "@/parameters";
+import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useSignUp } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -13,7 +16,7 @@ import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { logoSharedTransitionStyle } from "./welcomeScreen";
 
 export const useHandleClerkErrorMessages = () => {
-    const [error, setState] = useState({ email: "", password: "", code: "", identifier: "" });
+    const [error, setState] = useState({ email: "", password: "", code: "", identifier: "", username: "" });
 
     const updatePasswordError = (message: string) =>
         setState((prev) => {
@@ -35,9 +38,14 @@ export const useHandleClerkErrorMessages = () => {
             return { ...prev, email: message };
         });
 
-    const resetErrors = () => setState({ email: "", password: "", code: "", identifier: "" });
+    const updateUsernameError = (message: string) =>
+        setState((prev) => {
+            return { ...prev, username: message };
+        });
 
-    return { error, updateEmailError, updatePasswordError, resetErrors, updateCodeError, updateIdentifierError };
+    const resetErrors = () => setState({ email: "", password: "", code: "", identifier: "", username: "" });
+
+    return { error, updateEmailError, updatePasswordError, resetErrors, updateCodeError, updateIdentifierError, updateUsernameError };
 };
 
 export const useHandleButtonState = () => {
@@ -51,15 +59,18 @@ export const useHandleButtonState = () => {
 };
 
 function SignUp() {
+    useWarmUpBrowser();
+
     const style = StyleSheet.create({
         container: { alignItems: "center", flex: 1, padding: 15 },
     });
 
-    const { error, updateEmailError, updatePasswordError, resetErrors, updateCodeError } = useHandleClerkErrorMessages();
+    const { error, updateEmailError, updatePasswordError, resetErrors, updateCodeError, updateUsernameError } = useHandleClerkErrorMessages();
     const { setSubmitError, setSubmitLoading, submitState, resetSubmitState } = useHandleButtonState();
 
     const { isLoaded, signUp, setActive } = useSignUp();
 
+    const [username, setUsername] = useState("");
     const [emailAddress, setEmailAddress] = useState("");
     const [password, setPassword] = useState("");
     const [pendingVerification, setPendingVerification] = useState(false);
@@ -73,7 +84,7 @@ function SignUp() {
         resetErrors();
 
         try {
-            await signUp.create({ emailAddress, password });
+            await signUp.create({ emailAddress, password, username });
 
             // send the email.
             await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
@@ -93,6 +104,11 @@ function SignUp() {
 
                 if (er.meta.paramName === "password") {
                     updatePasswordError(er.longMessage);
+                    continue;
+                }
+
+                if (er.meta.paramName === "username") {
+                    updateUsernameError(er.longMessage);
                     continue;
                 }
             }
@@ -127,17 +143,39 @@ function SignUp() {
         }
     };
 
+    const navigateToLogin = () => router.push("/logIn");
+
     return (
         <View style={style.container}>
-            <Header />
-
-            <View style={{ width: "100%", flex: 1, gap: 10, alignItems: "center", marginTop: 70 }}>
-                <Animated.View sharedTransitionTag="sharedTag" sharedTransitionStyle={logoSharedTransitionStyle}>
+            <View style={{ width: "100%", flex: 1, gap: 10, alignItems: "center" }}>
+                <Animated.View sharedTransitionTag="sharedTag" sharedTransitionStyle={logoSharedTransitionStyle} style={{ marginBottom: 50 }}>
                     <Logo />
                 </Animated.View>
 
                 {!pendingVerification && (
                     <Animated.View style={{ width: "100%", gap: 10, marginTop: 20 }} entering={FadeInRight} exiting={FadeOutLeft}>
+                        <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-evenly" }}>
+                            <LogInWithGoogleButton />
+                            <LogInWithDiscordButton />
+                        </View>
+
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                marginVertical: 10,
+                                alignItems: "center",
+                            }}>
+                            <Spacer style={{ flex: 1 }} />
+                            <AppText children={`or`} fontSize={18} style={{ color: "#E6E8E680", marginBottom: 5, width: 150, textAlign: "center" }} />
+                            <Spacer style={{ flex: 1 }} />
+                        </View>
+                        <AppTextInput
+                            textState={[username, setUsername]}
+                            inputProps={{ autoCapitalize: "none", spellCheck: false }}
+                            placeholder={"Username"}
+                        />
+                        {error.username !== "" && <AppText children={error.username} fontSize={14} style={{ color: colors.pink }} />}
+
                         <AppTextInput
                             textState={[emailAddress, setEmailAddress]}
                             inputProps={{ autoCapitalize: "none", spellCheck: false }}
@@ -145,9 +183,7 @@ function SignUp() {
                         />
                         {error.email !== "" && <AppText children={error.email} fontSize={14} style={{ color: colors.pink }} />}
                         <PasswordInput textState={[password, setPassword]} inputProps={{ secureTextEntry: true }} placeholder={"Password"} />
-
                         {error.password !== "" && <AppText children={error.password} fontSize={14} style={{ color: colors.pink }} />}
-
                         <AppButton
                             state={submitState}
                             onPress={onSignUpPress}
@@ -155,6 +191,24 @@ function SignUp() {
                             style={{ backgroundColor: colors.background, marginTop: 10 }}
                             textStyle={{ fontFamily: "helveticaBold" }}
                         />
+
+                        <View style={{ flexDirection: "row" }}>
+                            <AppText children={"Have an account?"} fontSize={14} style={{ verticalAlign: "bottom" }} />
+                            <Pressable onPressIn={navigateToLogin}>
+                                <AppText
+                                    children={"Log In"}
+                                    fontSize={14}
+                                    style={{
+                                        color: colors.accent,
+                                        fontFamily: "helveticaBold",
+                                        paddingLeft: 3,
+                                        verticalAlign: "bottom",
+                                        height: 35,
+                                        width: 45,
+                                    }}
+                                />
+                            </Pressable>
+                        </View>
                     </Animated.View>
                 )}
                 {pendingVerification && (
@@ -186,24 +240,6 @@ function SignUp() {
         </View>
     );
 }
-
-const Header = () => {
-    const style = StyleSheet.create({
-        container: { flexDirection: "row", justifyContent: "center", alignItems: "center", width: "100%", position: "relative" },
-    });
-
-    const goToWelcomeScreen = () => router.push("/welcomeScreen");
-
-    return (
-        <View style={style.container}>
-            <Pressable onPressIn={goToWelcomeScreen} style={{ position: "absolute", left: 0, width: 45, height: 45 }}>
-                <XMarkIcon width={25} height={25} fill={colors.unmarkedText} />
-            </Pressable>
-            <AppText fontSize={18} children={"Sign Up"} style={{ paddingTop: 2, fontFamily: "helveticaBold" }} />
-            <View />
-        </View>
-    );
-};
 
 export default SignUp;
 

@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { closeOnboardingMenu, expandOnboardingMenu, selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
 import { selectUserId } from "@/redux/slices/userSlice";
 import { selectAllTrees } from "@/redux/slices/userTreesSlice";
-import { useAuth } from "@clerk/clerk-expo";
+import { useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import analytics from "@react-native-firebase/analytics";
 import { useFonts } from "expo-font";
@@ -38,7 +38,7 @@ mixpanel.init();
 export default function RootLayout() {
     usePassMixPanelUserId();
     const onboarding = useAppSelector(selectOnboarding);
-    const { isSignedIn, isLoaded } = useAuth();
+    const { isSignedIn, isLoaded } = useUser();
 
     const { width, height } = Dimensions.get("window");
 
