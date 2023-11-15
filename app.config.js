@@ -6,7 +6,7 @@ module.exports = {
         typedRoutes: true,
         tsconfigPaths: true,
     },
-    version: "1.0.33",
+    version: "1.0.37",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -38,7 +38,7 @@ module.exports = {
             "android.permission.ACCESS_MEDIA_LOCATION",
             "com.google.android.gms.permission.AD_ID",
         ],
-        versionCode: 39,
+        versionCode: 43,
         package: "com.lucaspennice.skilltrees",
     },
     web: {
@@ -70,6 +70,6 @@ module.exports = {
         eas: {
             projectId: "86b83f4d-998c-4e50-b891-c28787c3e0c8",
         },
-        clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
+        expoPublicClerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
     },
 };
