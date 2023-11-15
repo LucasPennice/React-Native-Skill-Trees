@@ -129,7 +129,8 @@ function useHandleRouteParams(
         updateSelectedNodeCoord: (node: NormalizedNode, menuMode: "EDITING" | "VIEWING") => void;
     }
 ) {
-    const { nodeId, addNewNodePosition, selectedNodeMenuMode }: RoutesParams["myTrees_treeId"] = useLocalSearchParams();
+    const params: RoutesParams["myTrees_treeId"] = useLocalSearchParams();
+    const { nodeId, addNewNodePosition, selectedNodeMenuMode } = params;
 
     const selectedNode = useAppSelector(selectNodeById(nodeId))!;
 
@@ -148,7 +149,7 @@ function useHandleRouteParams(
         const updatedSelectedNodeCoord = treeCoordinate.nodeCoordinates.find((n) => n.nodeId === nodeId);
 
         if (updatedSelectedNodeCoord) functions.updateSelectedNodeCoord(selectedNode, selectedNodeMenuMode ?? "VIEWING");
-    }, []);
+    }, [params]);
 }
 
 function useNodeToDelete() {

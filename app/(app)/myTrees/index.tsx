@@ -15,6 +15,7 @@ import { RoutesParams } from "routes";
 
 function MyTrees() {
     const localParams = useLocalSearchParams();
+
     //@ts-ignore
     const { openNewTreeModal, editingTreeId: paramsEditingTreeId }: { openNewTreeModal?: boolean; editingTreeId?: string } = localParams;
 
@@ -30,7 +31,7 @@ function MyTrees() {
             //@ts-ignore
             router.setParams({ openNewTreeModal: undefined } as RoutesParams["myTrees"]);
         }
-    }, []);
+    }, [localParams]);
 
     const openEditModal = useCallback(() => {
         if (paramsEditingTreeId) {
@@ -56,9 +57,7 @@ function MyTrees() {
         <View style={{ flex: 1, padding: 10 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                 <View style={{ justifyContent: "center" }}>
-                    <AppText style={{ color: colors.white }} fontSize={18}>
-                        My Skill Trees
-                    </AppText>
+                    <AppText fontSize={18} children={"My Skill Trees"} />
                     <AppText style={{ color: `${colors.white}80` }} fontSize={14}>
                         Long Press to options menu
                     </AppText>

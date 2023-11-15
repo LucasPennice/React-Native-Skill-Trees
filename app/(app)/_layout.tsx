@@ -10,7 +10,7 @@ import { useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import analytics from "@react-native-firebase/analytics";
 import { useFonts } from "expo-font";
-import { Redirect, SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
+import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
 import { Mixpanel } from "mixpanel-react-native";
 import { Fragment, useEffect, useRef } from "react";
 import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
@@ -57,14 +57,16 @@ export default function RootLayout() {
     }, [error]);
 
     useEffect(() => {
-        if (fontsLoaded && isLoaded) SplashScreen.hideAsync();
+        if (fontsLoaded) SplashScreen.hideAsync();
+        // if (fontsLoaded && isLoaded) SplashScreen.hideAsync();
     }, [fontsLoaded, isLoaded]);
 
     const prevRouteName = useRef<string | null>(null);
 
-    if (!fontsLoaded || !isLoaded) return <Text>Loading...</Text>;
+    if (!fontsLoaded) return <Text>Loading...</Text>;
+    // if (!fontsLoaded || !isLoaded) return <Text>Loading...</Text>;
 
-    if (!isSignedIn) return <Redirect href="/welcomeScreen" />;
+    // if (!isSignedIn) return <Redirect href="/welcomeScreen" />;
     // if (process.env.NODE_ENV === "production" && !isSignedIn) return <Redirect href="/welcomeScreen" />;
 
     const hide = !Boolean(pathname === "/" || hideNavAndOnboarding.find((route) => pathname.includes(route)));
@@ -113,7 +115,7 @@ export default function RootLayout() {
                 <Stack.Screen name={"index"} />
             </Stack>
 
-            {hide && !onboarding.complete && <Onboarding />}
+            {/* {hide && !onboarding.complete && <Onboarding />} */}
 
             {hide && (
                 <KeyboardAvoidingView

@@ -11,7 +11,7 @@ import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useSignIn } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 import { useHandleButtonState, useHandleClerkErrorMessages } from "./signUp";
 import { logoSharedTransitionStyle } from "./welcomeScreen";
@@ -39,9 +39,9 @@ export default function SignInScreen() {
 
         try {
             const completeSignIn = await signIn.create({ identifier: emailAddress, password });
-            // This is an important step,
-            // This indicates the user is signed in
+
             await setActive({ session: completeSignIn.createdSessionId });
+
             router.push("/(app)/home");
         } catch (err: any) {
             const errors: { meta: { paramName: string }; longMessage: string }[] = err.errors;
@@ -66,9 +66,9 @@ export default function SignInScreen() {
     const navigateToSignUp = () => router.push("/signUp");
 
     return (
-        <View style={style.container}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "position"} style={style.container}>
             <View style={{ width: "100%", flex: 1, gap: 10, alignItems: "center" }}>
-                <Animated.View sharedTransitionTag="sharedTag" sharedTransitionStyle={logoSharedTransitionStyle} style={{ marginBottom: 50 }}>
+                <Animated.View sharedTransitionTag="sharedTag" sharedTransitionStyle={logoSharedTransitionStyle} style={{ marginBottom: 20 }}>
                     <Logo />
                 </Animated.View>
 
@@ -106,25 +106,12 @@ export default function SignInScreen() {
                         textStyle={{ fontFamily: "helveticaBold" }}
                     />
 
-                    <View style={{ flexDirection: "row" }}>
-                        <AppText children={"No account?"} fontSize={14} style={{ verticalAlign: "bottom" }} />
-                        <Pressable onPressIn={navigateToSignUp}>
-                            <AppText
-                                children={"Sign up"}
-                                fontSize={14}
-                                style={{
-                                    color: colors.accent,
-                                    fontFamily: "helveticaBold",
-                                    paddingLeft: 3,
-                                    verticalAlign: "bottom",
-                                    height: 35,
-                                    width: 60,
-                                }}
-                            />
-                        </Pressable>
-                    </View>
+                    <Pressable onPressIn={navigateToSignUp} style={{ flexDirection: "row", alignItems: "center", height: 45 }}>
+                        <AppText children={"No account?"} fontSize={14} />
+                        <AppText children={"Sign up"} fontSize={14} style={{ color: colors.accent, fontFamily: "helveticaBold", paddingLeft: 3 }} />
+                    </Pressable>
                 </Animated.View>
             </View>
-        </View>
+        </KeyboardAvoidingView>
     );
 }

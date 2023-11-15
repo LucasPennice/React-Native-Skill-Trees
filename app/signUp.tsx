@@ -11,7 +11,7 @@ import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useSignUp } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Platform, Pressable, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { logoSharedTransitionStyle } from "./welcomeScreen";
 
@@ -146,9 +146,9 @@ function SignUp() {
     const navigateToLogin = () => router.push("/logIn");
 
     return (
-        <View style={style.container}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "position"} style={style.container}>
             <View style={{ width: "100%", flex: 1, gap: 10, alignItems: "center" }}>
-                <Animated.View sharedTransitionTag="sharedTag" sharedTransitionStyle={logoSharedTransitionStyle} style={{ marginBottom: 50 }}>
+                <Animated.View sharedTransitionTag="sharedTag" sharedTransitionStyle={logoSharedTransitionStyle} style={{ marginBottom: 20 }}>
                     <Logo />
                 </Animated.View>
 
@@ -192,23 +192,14 @@ function SignUp() {
                             textStyle={{ fontFamily: "helveticaBold" }}
                         />
 
-                        <View style={{ flexDirection: "row" }}>
-                            <AppText children={"Have an account?"} fontSize={14} style={{ verticalAlign: "bottom" }} />
-                            <Pressable onPressIn={navigateToLogin}>
-                                <AppText
-                                    children={"Log In"}
-                                    fontSize={14}
-                                    style={{
-                                        color: colors.accent,
-                                        fontFamily: "helveticaBold",
-                                        paddingLeft: 3,
-                                        verticalAlign: "bottom",
-                                        height: 35,
-                                        width: 45,
-                                    }}
-                                />
-                            </Pressable>
-                        </View>
+                        <Pressable onPressIn={navigateToLogin} style={{ flexDirection: "row", alignItems: "center", height: 45 }}>
+                            <AppText children={"Have an account?"} fontSize={14} />
+                            <AppText
+                                children={"Log In"}
+                                fontSize={14}
+                                style={{ color: colors.accent, fontFamily: "helveticaBold", paddingLeft: 3 }}
+                            />
+                        </Pressable>
                     </Animated.View>
                 )}
                 {pendingVerification && (
@@ -237,7 +228,7 @@ function SignUp() {
                     </Animated.View>
                 )}
             </View>
-        </View>
+        </KeyboardAvoidingView>
     );
 }
 

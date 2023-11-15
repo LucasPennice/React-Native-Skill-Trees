@@ -16,7 +16,7 @@ import Animated, { SharedTransition, withSpring } from "react-native-reanimated"
 import { Defs, LinearGradient, Path, Stop, Svg } from "react-native-svg";
 import { mockCoordinatesInsideCanvas, mockRootCoordinateInsideCanvas, mockSubtreesData, mockSvgDimensions, mockTreeData } from "../data";
 
-const TEXT_AND_BUTTON_HEIGHT = 230;
+const TEXT_AND_BUTTON_HEIGHT = 200;
 
 export const logoSharedTransitionStyle = SharedTransition.custom((values) => {
     "worklet";
@@ -52,23 +52,10 @@ function WelcomeScreen() {
                     textStyle={{ fontFamily: "helveticaBold" }}
                 />
 
-                <View style={{ flexDirection: "row" }}>
+                <Pressable onPressIn={navigateToLogin} style={{ flexDirection: "row", alignItems: "center", height: 45 }}>
                     <AppText children={"Already have an account?"} fontSize={14} style={{ verticalAlign: "bottom" }} />
-                    <Pressable onPressIn={navigateToLogin}>
-                        <AppText
-                            children={"Log In"}
-                            fontSize={14}
-                            style={{
-                                color: colors.accent,
-                                fontFamily: "helveticaBold",
-                                paddingLeft: 3,
-                                verticalAlign: "bottom",
-                                height: 35,
-                                width: 45,
-                            }}
-                        />
-                    </Pressable>
-                </View>
+                    <AppText children={"Log In"} fontSize={14} style={{ color: colors.accent, fontFamily: "helveticaBold", paddingLeft: 3 }} />
+                </Pressable>
             </View>
         </View>
     );
