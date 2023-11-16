@@ -18,7 +18,7 @@ import Animated, { FadeIn, FadeInRight, FadeOut, FadeOutLeft, useAnimatedStyle, 
 import { RoutesParams, hideNavAndOnboarding, routes } from "routes";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
-    return <FontAwesome size={props.size ?? 28} style={{ marginBottom: -3 }} {...props} />;
+    return <FontAwesome size={props.size ?? 24} style={{ marginBottom: -3 }} {...props} />;
 }
 
 function useIdentifyMixPanelUserId() {
@@ -140,12 +140,20 @@ export default function RootLayout() {
                     </Pressable>
                     <Pressable
                         style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
+                        onPress={() => router.replace("/(app)/userProgress")}>
+                        <TabBarIcon name="check-circle" color={pathname.includes("userProgress") ? colors.accent : colors.unmarkedText} />
+                        <AppText style={{ color: pathname.includes("userProgress") ? colors.accent : colors.unmarkedText }} fontSize={12}>
+                            Habits
+                        </AppText>
+                    </Pressable>
+                    {/* <Pressable
+                        style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                         onPress={() => router.replace("/(app)/feedback")}>
                         <TabBarIcon name="group" color={pathname.includes("feedback") ? colors.accent : colors.unmarkedText} />
                         <AppText style={{ color: pathname.includes("feedback") ? colors.accent : colors.unmarkedText }} fontSize={12}>
                             Community
                         </AppText>
-                    </Pressable>
+                    </Pressable> */}
                     <Pressable
                         style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                         onPress={() => router.replace("/(app)/userProfile")}>
