@@ -4,8 +4,8 @@ import SteppedProgressBarAndIndicator, { OnboardingStep } from "@/components/Ste
 import { MENU_HIGH_DAMPENING, NAV_HEGIHT, colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { closeOnboardingMenu, expandOnboardingMenu, selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
-import { selectUserId } from "@/redux/slices/userSlice";
 import { selectAllTrees } from "@/redux/slices/userTreesSlice";
+import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import { useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import analytics from "@react-native-firebase/analytics";
@@ -21,13 +21,13 @@ function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["nam
     return <FontAwesome size={props.size ?? 28} style={{ marginBottom: -3 }} {...props} />;
 }
 
-function usePassMixPanelUserId() {
-    const userId = useAppSelector(selectUserId);
+function useIdentifyMixPanelUserId() {
+    const userId = useMongoCompliantUserId();
 
     useEffect(() => {
-        if (userId !== "") mixpanel.identify(userId);
+        if (userId !== null) mixpanel.identify(userId);
 
-        //WHEN A USER LOGS OUT I'M SUPPOUSED TO CALL mixpanel.reset()
+        //WHEN A USER LOGS OUT I CALL mixpanel.reset()
     }, [userId]);
 }
 
@@ -36,7 +36,7 @@ export const mixpanel = new Mixpanel("5a141ce3c43980d8fab68b96e1256525", trackAu
 mixpanel.init();
 
 export default function RootLayout() {
-    usePassMixPanelUserId();
+    useIdentifyMixPanelUserId();
     const onboarding = useAppSelector(selectOnboarding);
     const { isSignedIn, isLoaded } = useUser();
 

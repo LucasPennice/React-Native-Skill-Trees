@@ -20,7 +20,6 @@ import homeTreeSlice from "./slices/homeTreeSlice";
 import loginReducer from "./slices/loginSlice";
 import nodesSlice from "./slices/nodesSlice";
 import screenDimentionsReducer from "./slices/screenDimentionsSlice";
-import userReducer from "./slices/userSlice";
 import newUserTreesSlice from "./slices/userTreesSlice";
 import { MigrationConfig } from "redux-persist/es/createMigrate";
 import { generateMongoCompliantId } from "@/functions/misc";
@@ -65,7 +64,6 @@ const rootReducer = combineReducers({
     canvasDisplaySettings: canvasDisplaySettingsReducer,
     screenDimentions: screenDimentionsReducer,
     addTree: addTreeReducer,
-    user: userReducer,
     userTrees: newUserTreesSlice,
     nodes: nodesSlice,
     homeTree: homeTreeSlice,

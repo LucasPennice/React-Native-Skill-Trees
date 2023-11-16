@@ -1,22 +1,21 @@
+import useMongoCompliantUserId from "@/useMongoCompliantUserId";
+import { memo } from "react";
 import { Dimensions, Pressable } from "react-native";
 import Animated, { FadeInDown, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import axiosClient from "../../axiosClient";
 import { useRequestProcessor } from "../../requestProcessor";
 import { centerFlex, colors } from "../parameters";
-import { useAppSelector } from "../redux/reduxHooks";
-import { selectUserId } from "../redux/slices/userSlice";
 import { Skill, Tree } from "../types";
 import AppText from "./AppText";
 import AppTextInput from "./AppTextInput";
 import FlingToDismissModal from "./FlingToDismissModal";
 import ExportTreeIcon from "./Icons/ExportTreeIcon";
 import LoadingIcon from "./LoadingIcon";
-import { memo } from "react";
 
 function ShareTree({ tree, show }: { tree: Tree<Skill>; show?: boolean }) {
     const { mutate } = useRequestProcessor();
     const { width } = Dimensions.get("screen");
-    const userId = useAppSelector(selectUserId);
+    const userId = useMongoCompliantUserId();
 
     const {
         mutate: runMutation,

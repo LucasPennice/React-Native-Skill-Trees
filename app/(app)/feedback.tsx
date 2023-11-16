@@ -10,8 +10,8 @@ import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { selectNodesTable } from "@/redux/slices/nodesSlice";
 import { DataAndDate, UserFeedback, appendNewEntry, selectUserFeedbackSlice } from "@/redux/slices/userFeedbackSlice";
-import { selectUserId } from "@/redux/slices/userSlice";
 import { selectAllTreesEntities } from "@/redux/slices/userTreesSlice";
+import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { useMutation } from "@tanstack/react-query";
 import axiosClient from "axiosClient";
@@ -65,7 +65,7 @@ const FeedbackInput = ({
 };
 
 function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React.SetStateAction<UserFeedback>>) {
-    const userId = useAppSelector(selectUserId);
+    const userId = useMongoCompliantUserId();
     const dispatch = useAppDispatch();
 
     const { mutate: problems, status: problemsStatus } = useMutation({
@@ -171,7 +171,7 @@ function useCreateUpdateFeedbackMutations(setFeedbackState: React.Dispatch<React
 }
 
 const useShareTree = () => {
-    const userId = useAppSelector(selectUserId);
+    const userId = useMongoCompliantUserId();
 
     const nodesTable = useAppSelector(selectNodesTable);
     const treeDataTable = useAppSelector(selectAllTreesEntities);

@@ -23,7 +23,7 @@ const idToHexString = (userId: string) => {
 function useMongoCompliantUserId() {
     const { userId } = useAuth();
 
-    if (userId === null || userId === undefined) return "";
+    if (userId === null || userId === undefined) return null;
 
     return idToHexString(userId);
 }

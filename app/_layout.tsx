@@ -13,7 +13,6 @@ import { updateSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice
 import { initializeFeedbackArrays } from "@/redux/slices/userFeedbackSlice";
 import { TreeData, selectAllTrees, selectTotalTreeQty, updateUserTrees } from "@/redux/slices/userTreesSlice";
 import { NormalizedNode, getDefaultSkillValue } from "@/types";
-import useHandleUserId from "@/useHandleUserId";
 import useIsSharingAvailable from "@/useIsSharingAvailable";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import Clipboard from "@react-native-clipboard/clipboard";
@@ -24,6 +23,7 @@ import { SkFont, useFont } from "@shopify/react-native-skia";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import { ErrorBoundaryProps, SplashScreen, Stack } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { createContext, useEffect, useState } from "react";
 import { LogBox, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
@@ -31,7 +31,6 @@ import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated"
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { mixpanel } from "./(app)/_layout";
-import * as SecureStore from "expo-secure-store";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -183,7 +182,6 @@ const useGuaranteeHomeRootTree = () => {
 function AppWithReduxContext() {
     const dispatch = useAppDispatch();
     //
-    useHandleUserId();
     useHandleOnboarding();
     useUpdateTreeDataForShowOnHomepage();
     useUpdateUserFeedback();
