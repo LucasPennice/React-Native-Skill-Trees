@@ -17,7 +17,9 @@ import { UserFeedback } from "@/redux/slices/userFeedbackSlice";
 import { arrayToDictionary, getDescendantsId } from "./extractInformationFromTree";
 import { Emoji } from "@/components/AppEmojiPicker";
 
-export function generate24CharHexId() {
+export function generateMongoCompliantId() {
+    //This generates a 24 long hex id
+
     const hexChars = "0123456789abcdef";
     let hexId = "";
 
@@ -40,9 +42,9 @@ export function createTree(treeName: string, gradient: ColorGradient, isRoot: bo
         accentColor: gradient,
         isRoot,
         parentId: null,
-        treeId: generate24CharHexId(),
+        treeId: generateMongoCompliantId(),
         level: 0,
-        nodeId: generate24CharHexId(),
+        nodeId: generateMongoCompliantId(),
         category,
         children: [],
         x: 0,

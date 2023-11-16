@@ -31,6 +31,8 @@ import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated"
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { mixpanel } from "./(app)/_layout";
+import * as SecureStore from "expo-secure-store";
+
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
 export const unstable_settings = {
@@ -78,6 +80,23 @@ export default function RootLayout() {
 
     if (Platform.OS === "android") ExpoNavigationBar.setBackgroundColorAsync(colors.darkGray);
 
+    const tokenCache = {
+        async getToken(key: string) {
+            try {
+                return SecureStore.getItemAsync(key);
+            } catch (err) {
+                return null;
+            }
+        },
+        async saveToken(key: string, value: string) {
+            try {
+                return SecureStore.setItemAsync(key, value);
+            } catch (err) {
+                return;
+            }
+        },
+    };
+
     return (
         <Provider store={store}>
             <SkiaFontContext.Provider value={skiaFonts}>
@@ -85,7 +104,7 @@ export default function RootLayout() {
                     <ThemeProvider value={DarkTheme}>
                         <QueryClientProvider client={queryClient}>
                             <IsSharingAvailableContext.Provider value={isSharingAvailable}>
-                                <ClerkProvider publishableKey={clerkKey!}>
+                                <ClerkProvider publishableKey={clerkKey!} tokenCache={tokenCache}>
                                     <SafeAreaView
                                         style={[{ flex: 1, backgroundColor: colors.darkGray, position: "relative" }, Layout.AndroidSafeArea]}>
                                         {Platform.OS === "ios" && <View style={Layout.IOsStatusBar} />}

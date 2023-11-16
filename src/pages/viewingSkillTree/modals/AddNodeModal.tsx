@@ -1,7 +1,7 @@
 import AppButton from "@/components/AppButton";
 import AppEmojiPicker, { Emoji, findEmoji } from "@/components/AppEmojiPicker";
 import Spacer from "@/components/Spacer";
-import { generate24CharHexId, toggleEmoji } from "@/functions/misc";
+import { generateMongoCompliantId, toggleEmoji } from "@/functions/misc";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useEffect, useState } from "react";
 import { Alert, Dimensions, Keyboard, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
@@ -290,7 +290,7 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
             data: getDefaultSkillValue("", false, { isEmoji: false, text: "" }),
             isRoot: false,
             level: 0,
-            nodeId: generate24CharHexId(),
+            nodeId: generateMongoCompliantId(),
             parentId: "",
             x: 0,
             y: 0,

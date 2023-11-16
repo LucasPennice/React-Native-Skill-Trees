@@ -1,5 +1,5 @@
 import AppEmojiPicker, { Emoji } from "@/components/AppEmojiPicker";
-import { generate24CharHexId, toggleEmoji } from "@/functions/misc";
+import { generateMongoCompliantId, toggleEmoji } from "@/functions/misc";
 import { TreeData, addUserTree } from "@/redux/slices/userTreesSlice";
 import analytics from "@react-native-firebase/analytics";
 import { mixpanel } from "app/(app)/_layout";
@@ -61,14 +61,14 @@ function AddTreeModal() {
         const isEmoji = emoji === undefined ? false : true;
         const iconText = emoji?.emoji ?? treeName[0];
 
-        const rootNodeId = generate24CharHexId();
+        const rootNodeId = generateMongoCompliantId();
 
         const newUserTree: TreeData = {
             accentColor: selectedColorGradient,
             icon: { isEmoji, text: iconText },
             nodes: [rootNodeId],
             rootNodeId,
-            treeId: generate24CharHexId(),
+            treeId: generateMongoCompliantId(),
             treeName,
             showOnHomeScreen: true,
         };

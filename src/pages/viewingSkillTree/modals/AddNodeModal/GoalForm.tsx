@@ -4,7 +4,7 @@ import AppTextInput from "@/components/AppTextInput";
 import CheckIcon from "@/components/Icons/CheckIcon";
 import TrashIcon from "@/components/Icons/TrashIcon";
 import SliderToggler from "@/components/SliderToggler";
-import { generate24CharHexId } from "@/functions/misc";
+import { generateMongoCompliantId } from "@/functions/misc";
 import { MENU_HIGH_DAMPENING, colors } from "@/parameters";
 import { useEffect, useState } from "react";
 import { Alert, Dimensions, Platform, Pressable, StyleSheet, View } from "react-native";
@@ -89,7 +89,7 @@ const useHandleMilestoneList = () => {
 
         if (isEmptyMilestone) return Alert.alert("Empty milestone found");
 
-        const newMilestone: Milestone = { complete: false, id: generate24CharHexId(), text: "" };
+        const newMilestone: Milestone = { complete: false, id: generateMongoCompliantId(), text: "" };
 
         setState((p) => [...p, newMilestone]);
     };
@@ -256,7 +256,7 @@ const initialState: Habit = {
     quantity: 1,
     startedAt: new Date().toString(),
     unit: "",
-    id: generate24CharHexId(),
+    id: generateMongoCompliantId(),
     deadlineAt: undefined,
     streakToComplete: 1,
 };

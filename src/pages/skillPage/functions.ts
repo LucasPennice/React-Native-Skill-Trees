@@ -1,18 +1,18 @@
-import { generate24CharHexId } from "@/functions/misc";
+import { generateMongoCompliantId } from "@/functions/misc";
 import { Milestone, MotiveToLearn, SkillLogs, SkillResource } from "../../types";
 
 export const getDefaultFns = {
     milestones: (): Milestone => {
-        return { complete: false, completedOn: undefined, description: "", title: "", id: generate24CharHexId() };
+        return { complete: false, completedOn: undefined, description: "", title: "", id: generateMongoCompliantId() };
     },
     logs: (): SkillLogs => {
-        return { date: new Date().toLocaleDateString(), text: "", id: generate24CharHexId() };
+        return { date: new Date().toLocaleDateString(), text: "", id: generateMongoCompliantId() };
     },
     motivesToLearn: (): MotiveToLearn => {
-        return { text: "", id: generate24CharHexId() };
+        return { text: "", id: generateMongoCompliantId() };
     },
 
     usefulResources: (): SkillResource => {
-        return { description: "", title: "", url: undefined, id: generate24CharHexId() };
+        return { description: "", title: "", url: undefined, id: generateMongoCompliantId() };
     },
 };

@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "./../reduxStore";
-import { generate24CharHexId } from "@/functions/misc";
+import { generateMongoCompliantId } from "@/functions/misc";
 
 // Define a type for the slice state
 type UserSlice = {
@@ -19,7 +19,7 @@ export const userSlice = createSlice({
     initialState,
     reducers: {
         populateUserId: (state) => {
-            const newUserId = generate24CharHexId();
+            const newUserId = generateMongoCompliantId();
             state.userId = newUserId;
         },
     },

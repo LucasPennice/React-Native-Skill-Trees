@@ -23,7 +23,7 @@ import screenDimentionsReducer from "./slices/screenDimentionsSlice";
 import userReducer from "./slices/userSlice";
 import newUserTreesSlice from "./slices/userTreesSlice";
 import { MigrationConfig } from "redux-persist/es/createMigrate";
-import { generate24CharHexId } from "@/functions/misc";
+import { generateMongoCompliantId } from "@/functions/misc";
 import userFeedbackSlice from "./slices/userFeedbackSlice";
 import onboardingSlice from "./slices/onboardingSlice";
 
@@ -38,7 +38,7 @@ const migration: MigrationManifest = {
     3: (state) => {
         let updatedState = { ...state };
         //@ts-ignore
-        const newID = generate24CharHexId();
+        const newID = generateMongoCompliantId();
         //@ts-ignore
         updatedState["user"] = { userId: newID };
         return updatedState;
