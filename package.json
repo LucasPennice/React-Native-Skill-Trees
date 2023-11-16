@@ -59,7 +59,8 @@
     "expo-web-browser": "~12.3.2",
     "expo-crypto": "~12.4.1",
     "expo-auth-session": "~5.0.2",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "expo-secure-store": "~12.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -24,6 +24,9 @@ module.exports = {
             NSPhotoLibraryAddUsageDescription: "Allow $(PRODUCT_NAME) to save photos.",
         },
         bundleIdentifier: "com.lucaspennice.skilltrees",
+        config: {
+            usesNonExemptEncryption: false,
+        },
     },
     android: {
         googleServicesFile: "./google-services.json",
