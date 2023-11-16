@@ -28,10 +28,19 @@ export const homeTreeSlice = createSlice({
         updateHomeName: (state, action: PayloadAction<string>) => {
             state.treeName = action.payload;
         },
+        overwriteHomeTreeSlice: (state, action: PayloadAction<HomeTreeSlice>) => {
+            console.log("hometree");
+            state.accentColor = action.payload.accentColor;
+            state.icon = action.payload.icon;
+            state.rootNodeId = action.payload.rootNodeId;
+            state.showOnHomeScreen = action.payload.showOnHomeScreen;
+            state.treeId = action.payload.treeId;
+            state.treeName = action.payload.treeName;
+        },
     },
 });
 
-export const { updateHomeAccentColor, updateHomeIcon, updateHomeName } = homeTreeSlice.actions;
+export const { updateHomeAccentColor, updateHomeIcon, updateHomeName, overwriteHomeTreeSlice } = homeTreeSlice.actions;
 
 export default homeTreeSlice.reducer;
 

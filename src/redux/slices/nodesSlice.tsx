@@ -46,6 +46,11 @@ export const nodesSlice = createSlice({
             //Remove the nodes to delete
             nodesAdapter.removeMany(state, action.payload.nodesToDelete);
         },
+        overwriteNodeSlice: (state, action: PayloadAction<NodeSlice>) => {
+            console.log("nodos");
+            state.entities = action.payload.entities;
+            state.ids = action.payload.ids;
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(addUserTree, (state, action) => {
@@ -137,7 +142,7 @@ export const nodesSlice = createSlice({
     },
 });
 
-export const { addNodes, removeNodes, updateNodes, addNode } = nodesSlice.actions;
+export const { addNodes, removeNodes, updateNodes, addNode, overwriteNodeSlice } = nodesSlice.actions;
 
 export default nodesSlice.reducer;
 

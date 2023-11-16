@@ -11,7 +11,7 @@ export enum OnboardingSteps {
 }
 
 // Define a type for the slice state
-type OnboardignState = {
+export type OnboardignState = {
     currentStep: OnboardingSteps;
     complete: boolean;
     open: boolean;
@@ -40,6 +40,12 @@ export const onboardingSlice = createSlice({
         closeOnboardingMenu: (state) => {
             state.open = false;
         },
+        overwriteOnboardingSlice: (state, action: PayloadAction<OnboardignState>) => {
+            console.log("onboarding");
+            state.complete = action.payload.complete;
+            state.currentStep = action.payload.currentStep;
+            state.open = action.payload.open;
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(addUserTree, (state, action) => {
@@ -53,7 +59,7 @@ export const onboardingSlice = createSlice({
     },
 });
 
-export const { completeOnboarding, skipToStep, closeOnboardingMenu, expandOnboardingMenu } = onboardingSlice.actions;
+export const { completeOnboarding, skipToStep, closeOnboardingMenu, expandOnboardingMenu, overwriteOnboardingSlice } = onboardingSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectOnboarding = (state: RootState) => state.onboarding;

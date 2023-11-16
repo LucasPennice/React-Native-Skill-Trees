@@ -19,11 +19,12 @@ import canvasDisplaySettingsReducer from "./slices/canvasDisplaySettingsSlice";
 import homeTreeSlice from "./slices/homeTreeSlice";
 import nodesSlice from "./slices/nodesSlice";
 import screenDimentionsReducer from "./slices/screenDimentionsSlice";
-import newUserTreesSlice from "./slices/userTreesSlice";
+import userTreesSlice from "./slices/userTreesSlice";
 import { MigrationConfig } from "redux-persist/es/createMigrate";
 import { generateMongoCompliantId } from "@/functions/misc";
 import userFeedbackSlice from "./slices/userFeedbackSlice";
 import onboardingSlice from "./slices/onboardingSlice";
+import syncSlice from "./slices/syncSlice";
 
 const migration: MigrationManifest = {
     //@ts-ignore
@@ -62,9 +63,10 @@ const rootReducer = combineReducers({
     canvasDisplaySettings: canvasDisplaySettingsReducer,
     screenDimentions: screenDimentionsReducer,
     addTree: addTreeReducer,
-    userTrees: newUserTreesSlice,
+    userTrees: userTreesSlice,
     nodes: nodesSlice,
     homeTree: homeTreeSlice,
+    sync: syncSlice,
     userFeedback: userFeedbackSlice,
     onboarding: onboardingSlice,
 });

@@ -5,16 +5,21 @@ import CanvasSettingsModal from "@/components/treeRelated/canvasSettingsModal/Ca
 import SelectedNodeMenu, { SelectedNodeMenuState } from "@/components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { selectedNodeMenuQueryFns } from "@/components/treeRelated/selectedNodeMenu/SelectedNodeMenuFunctions";
 import HomepageTree from "@/pages/homepage/HomepageTree";
-import { useAppSelector } from "@/redux/reduxHooks";
-import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
-import { selectAllNodes } from "@/redux/slices/nodesSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
+import { overwriteHomeTreeSlice, selectHomeTree } from "@/redux/slices/homeTreeSlice";
+import { NodeSlice, overwriteNodeSlice, selectAllNodeIds, selectAllNodes, selectNodesTable } from "@/redux/slices/nodesSlice";
+import { OnboardignState, overwriteOnboardingSlice, selectOnboarding } from "@/redux/slices/onboardingSlice";
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
-import { selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
+import { selectSyncSlice } from "@/redux/slices/syncSlice";
+import { TreeData, UserTreeSlice, overwriteUserTreesSlice, selectAllTreesEntities, selectTreeIds } from "@/redux/slices/userTreesSlice";
 import { NormalizedNode } from "@/types";
+import useMongoCompliantUserId from "@/useMongoCompliantUserId";
+import { Dictionary } from "@reduxjs/toolkit";
 import { useCanvasRef } from "@shopify/react-native-skia";
+import axiosClient from "axiosClient";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { View } from "react-native";
+import { Alert, View } from "react-native";
 import { RoutesParams } from "routes";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
@@ -65,53 +70,88 @@ function useCanvasSettingsState() {
     return [canvasSettings, { openCanvasSettingsModal, closeCanvasSettingsModal }] as const;
 }
 
-function useIsStoreEmpty() {
-    const userTreeQty = useAppSelector(selectTotalTreeQty);
+export type UserBackup = {
+    nodeSlice: NodeSlice;
+    userTreesSlice: UserTreeSlice;
+    homeTree: Omit<TreeData, "nodes">;
+    onboarding: OnboardignState;
+    lastUpdateUTC_Timestamp: number;
+};
 
-    return userTreeQty === 0;
-}
+const createInitialBackup = async (userId: string, newUserBackup: UserBackup) => {
+    try {
+        await axiosClient.post(`backup/${userId}`, newUserBackup);
+    } catch (error) {
+        Alert.alert("There was an error creating your backup", `Please contact the developer ${error}`);
+    }
+};
 
 function useHandleSyncOnLoginOrSignUp() {
     const localParams = useLocalSearchParams<RoutesParams["home"]>();
+    const skipSync = localParams.handleLogInSync === undefined && localParams.handleSignUpSync === undefined;
+
+    const userId = useMongoCompliantUserId();
+    const nodesTable = useAppSelector(selectNodesTable);
+    const nodesIds = useAppSelector(selectAllNodeIds);
+    const treesTable = useAppSelector(selectAllTreesEntities);
+    const treesIds = useAppSelector(selectTreeIds);
+    const homeTree = useAppSelector(selectHomeTree);
+    const onboarding = useAppSelector(selectOnboarding);
+    const { lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);
+
+    const dispatch = useAppDispatch();
 
     const { handleLogInSync, handleSignUpSync } = localParams;
 
-    const isStoreEmpty = useIsStoreEmpty();
+    const getUserExistsOnDB = () => axiosClient.get<boolean>(`userExists/${userId}`);
 
-    const isCloudEmpty = true;
+    const getUserBackup = () => axiosClient.get<UserBackup>(`backup/${userId}`);
 
-    const localLastModification = new Date();
-    const cloudLastModification = new Date();
-
-    const backUpLocalData = () => {};
-
-    async function logInSync() {
-        if (isCloudEmpty) {
-            if (isStoreEmpty) return;
-
-            return await backUpLocalData();
-        }
-
-        if (localLastModification === cloudLastModification) return;
-
-        return console.log("el usuario elige entre cual de las dos consumir");
-    }
-
-    async function signUpSync() {
-        if (isStoreEmpty) return;
-
-        return await backUpLocalData();
-    }
+    const initialUserBackup: UserBackup = {
+        nodeSlice: { entities: nodesTable, ids: nodesIds },
+        userTreesSlice: { entities: treesTable, ids: treesIds },
+        homeTree,
+        onboarding,
+        lastUpdateUTC_Timestamp,
+    };
 
     useEffect(() => {
-        if (handleLogInSync === "true") {
-            logInSync();
-            return;
+        (async () => {
+            if (skipSync) return;
+            if (!userId) throw new Error("Couldn't get userId");
+
+            const { data: userExistsOnDB } = await getUserExistsOnDB();
+
+            if (handleLogInSync === "true") {
+                logInSync(userExistsOnDB);
+                return;
+            }
+
+            if (handleSignUpSync === "true" && !userExistsOnDB) {
+                signUpSync();
+                return;
+            }
+        })();
+
+        async function logInSync(userExistsOnDB: boolean) {
+            if (!userExistsOnDB) return createInitialBackup(userId!, initialUserBackup);
+
+            try {
+                const { data: userBackup } = await getUserBackup();
+
+                dispatch(overwriteNodeSlice(userBackup.nodeSlice));
+                dispatch(overwriteHomeTreeSlice(userBackup.homeTree));
+                dispatch(overwriteOnboardingSlice(userBackup.onboarding));
+                dispatch(overwriteUserTreesSlice(userBackup.userTreesSlice));
+
+                return console.log("Inyecto la data de la base de datos en mi store", userBackup);
+            } catch (error) {
+                Alert.alert("There was an error loading you backup", `Please contact the developer ${error}`);
+            }
         }
 
-        if (handleSignUpSync === "true") {
-            signUpSync();
-            return;
+        function signUpSync() {
+            return createInitialBackup(userId!, initialUserBackup);
         }
     }, [localParams]);
 }
