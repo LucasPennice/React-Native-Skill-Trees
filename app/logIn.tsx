@@ -15,6 +15,7 @@ import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "rea
 import Animated, { FadeInRight } from "react-native-reanimated";
 import { useHandleButtonState, useHandleClerkErrorMessages } from "./signUp";
 import { logoSharedTransitionStyle } from "./welcomeScreen";
+import { RoutesParams } from "routes";
 
 const style = StyleSheet.create({
     container: { alignItems: "center", flex: 1, padding: 15 },
@@ -42,7 +43,8 @@ export default function SignInScreen() {
 
             await setActive({ session: completeSignIn.createdSessionId });
 
-            router.push("/(app)/home");
+            const params: RoutesParams["home"] = { handleLogInSync: "true" };
+            router.push({ pathname: "/(app)/home", params });
         } catch (err: any) {
             const errors: { meta: { paramName: string }; longMessage: string }[] = err.errors;
 

@@ -154,6 +154,7 @@ package-lock.json
 
 #Ignore android dev builds
 *.apk
+*.aab
 
 # E2E files
 /packages/rn-tester-e2e/apps/*.apk

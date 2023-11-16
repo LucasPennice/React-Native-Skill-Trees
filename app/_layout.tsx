@@ -31,6 +31,7 @@ import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated"
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { mixpanel } from "./(app)/_layout";
+import "../globals";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications

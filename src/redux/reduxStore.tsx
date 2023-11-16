@@ -17,7 +17,6 @@ import { migrationFunction } from "./migration";
 import addTreeReducer from "./slices/addTreeModalSlice";
 import canvasDisplaySettingsReducer from "./slices/canvasDisplaySettingsSlice";
 import homeTreeSlice from "./slices/homeTreeSlice";
-import loginReducer from "./slices/loginSlice";
 import nodesSlice from "./slices/nodesSlice";
 import screenDimentionsReducer from "./slices/screenDimentionsSlice";
 import newUserTreesSlice from "./slices/userTreesSlice";
@@ -60,7 +59,6 @@ const persistConfig: PersistConfig<any> = {
 };
 
 const rootReducer = combineReducers({
-    login: loginReducer,
     canvasDisplaySettings: canvasDisplaySettingsReducer,
     screenDimentions: screenDimentionsReducer,
     addTree: addTreeReducer,

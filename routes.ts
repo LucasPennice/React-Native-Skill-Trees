@@ -50,4 +50,8 @@ export type RoutesParams = {
         openNewTreeModal?: boolean;
         editingTreeId?: string;
     };
+    home: {
+        handleLogInSync?: "true";
+        handleSignUpSync?: "true";
+    };
 };

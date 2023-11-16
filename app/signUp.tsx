@@ -14,6 +14,7 @@ import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { logoSharedTransitionStyle } from "./welcomeScreen";
+import { RoutesParams } from "routes";
 
 export const useHandleClerkErrorMessages = () => {
     const [error, setState] = useState({ email: "", password: "", code: "", identifier: "", username: "" });
@@ -127,7 +128,9 @@ function SignUp() {
             const completeSignUp = await signUp.attemptEmailAddressVerification({ code });
 
             await setActive({ session: completeSignUp.createdSessionId });
-            router.push("/(app)/home");
+
+            const params: RoutesParams["home"] = { handleSignUpSync: "true" };
+            router.push({ pathname: "/(app)/home", params });
         } catch (err: any) {
             const errors: { meta: { paramName: string }; longMessage: string }[] = err.errors;
 

@@ -2,14 +2,16 @@ import { useAuth } from "@clerk/clerk-expo";
 
 const idToHexString = (userId: string) => {
     const encoder = new TextEncoder();
-
     const uint8Array = encoder.encode(userId);
-
     const hexEncoded: string = Array.from(uint8Array)
         .map((byte) => byte.toString(16).padStart(2, "0"))
         .join("");
 
-    return hexEncoded;
+    // Ensure the hexadecimal string is 24 characters long
+    const desiredLength = 24;
+    const paddedHexEncoded: string = hexEncoded.length >= desiredLength ? hexEncoded.slice(0, desiredLength) : hexEncoded.padEnd(desiredLength, "0");
+
+    return paddedHexEncoded;
 };
 
 // const hexToOriginalString = (hexString: string) => {

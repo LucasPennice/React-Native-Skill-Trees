@@ -9,11 +9,13 @@ import { useAppSelector } from "@/redux/reduxHooks";
 import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { selectAllNodes } from "@/redux/slices/nodesSlice";
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
+import { selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
 import { NormalizedNode } from "@/types";
 import { useCanvasRef } from "@shopify/react-native-skia";
-import { useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
+import { RoutesParams } from "routes";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();
@@ -63,9 +65,61 @@ function useCanvasSettingsState() {
     return [canvasSettings, { openCanvasSettingsModal, closeCanvasSettingsModal }] as const;
 }
 
+function useIsStoreEmpty() {
+    const userTreeQty = useAppSelector(selectTotalTreeQty);
+
+    return userTreeQty === 0;
+}
+
+function useHandleSyncOnLoginOrSignUp() {
+    const localParams = useLocalSearchParams<RoutesParams["home"]>();
+
+    const { handleLogInSync, handleSignUpSync } = localParams;
+
+    const isStoreEmpty = useIsStoreEmpty();
+
+    const isCloudEmpty = true;
+
+    const localLastModification = new Date();
+    const cloudLastModification = new Date();
+
+    const backUpLocalData = () => {};
+
+    async function logInSync() {
+        if (isCloudEmpty) {
+            if (isStoreEmpty) return;
+
+            return await backUpLocalData();
+        }
+
+        if (localLastModification === cloudLastModification) return;
+
+        return console.log("el usuario elige entre cual de las dos consumir");
+    }
+
+    async function signUpSync() {
+        if (isStoreEmpty) return;
+
+        return await backUpLocalData();
+    }
+
+    useEffect(() => {
+        if (handleLogInSync === "true") {
+            logInSync();
+            return;
+        }
+
+        if (handleSignUpSync === "true") {
+            signUpSync();
+            return;
+        }
+    }, [localParams]);
+}
+
 function Home() {
     const selectedNodeCoordState = useSelectedNodeCoordState();
 
+    useHandleSyncOnLoginOrSignUp();
     //🧠 .4ms
     const { screenDimensions, allNodes, homePageTreeData } = useHomepageContentsState();
 
