@@ -4,7 +4,7 @@ import SteppedProgressBarAndIndicator, { OnboardingStep } from "@/components/Ste
 import { MENU_HIGH_DAMPENING, NAV_HEGIHT, colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { closeOnboardingMenu, expandOnboardingMenu, selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
-import { selectSyncSlice, setShouldWaitForClerkToLoad } from "@/redux/slices/syncSlice";
+import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import { selectAllTrees } from "@/redux/slices/userTreesSlice";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import { useUser } from "@clerk/clerk-expo";
@@ -58,6 +58,10 @@ export default function RootLayout() {
     useEffect(() => {
         if (error) throw error;
     }, [error]);
+
+    useEffect(() => {
+        console.log(isSignedIn);
+    }, [isSignedIn]);
 
     useEffect(() => {
         if (fontsLoaded && isClerkLoaded) SplashScreen.hideAsync();

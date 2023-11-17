@@ -3,7 +3,9 @@ import { useOAuth } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import { useCallback } from "react";
 import { Pressable, StyleSheet } from "react-native";
-import DiscordIcon from "../Icons/DiscordIcon";
+import GoogleIcon from "../Icons/GoogleIcon";
+import { SocialAuthButton } from "@/types";
+import { RoutesParams } from "routes";
 
 const style = StyleSheet.create({
     container: {
@@ -19,16 +21,22 @@ const style = StyleSheet.create({
 
 // 🚨 the screen that calls this component should run useWarmUpBrowser 🚨
 
-export const LogInWithDiscordButton = () => {
-    const { startOAuthFlow } = useOAuth({ strategy: "oauth_discord" });
+export const SocialAuthGoogleButton = ({ actingAs }: SocialAuthButton) => {
+    const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
 
-    const logInDiscord = useCallback(async () => {
+    const logInGoogle = useCallback(async () => {
         try {
             const { createdSessionId, setActive } = await startOAuthFlow();
 
             if (createdSessionId && setActive) {
                 await setActive({ session: createdSessionId });
-                router.push("/(app)/home");
+
+                let params: RoutesParams["home"] = {};
+
+                if (actingAs === "logIn") params.handleLogInSync = "true";
+                if (actingAs === "signUp") params.handleSignUpSync = "true";
+
+                router.push({ pathname: "/(app)/home", params });
             }
         } catch (err) {
             console.error("OAuth error", err);
@@ -36,10 +44,10 @@ export const LogInWithDiscordButton = () => {
     }, []);
 
     return (
-        <Pressable onPressIn={logInDiscord} style={style.container}>
-            <DiscordIcon width={35} height={35} fill={colors.white} />
+        <Pressable onPressIn={logInGoogle} style={style.container}>
+            <GoogleIcon width={30} height={30} fill={colors.white} pointerEvents={"none"} />
         </Pressable>
     );
 };
 
-export default LogInWithDiscordButton;
+export default SocialAuthGoogleButton;

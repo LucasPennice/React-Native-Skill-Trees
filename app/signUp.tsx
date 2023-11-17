@@ -4,8 +4,6 @@ import AppTextInput from "@/components/AppTextInput";
 import Logo from "@/components/Logo";
 import PasswordInput from "@/components/PasswordInput";
 import Spacer from "@/components/Spacer";
-import LogInWithDiscordButton from "@/components/auth/LogInWithDiscordButton";
-import LogInWithGoogleButton from "@/components/auth/LogInWithGoogleButton";
 import { colors } from "@/parameters";
 import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useSignUp } from "@clerk/clerk-expo";
@@ -13,8 +11,10 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
-import { logoSharedTransitionStyle } from "./welcomeScreen";
 import { RoutesParams } from "routes";
+import { logoSharedTransitionStyle } from "./welcomeScreen";
+import SocialAuthDiscordButton from "@/components/auth/SocialAuthDiscordButton";
+import SocialAuthGoogleButton from "@/components/auth/SocialAuthGoogleButton";
 
 export const useHandleClerkErrorMessages = () => {
     const [error, setState] = useState({ email: "", password: "", code: "", identifier: "", username: "" });
@@ -159,8 +159,8 @@ function SignUp() {
                 {!pendingVerification && (
                     <Animated.View style={{ width: "100%", gap: 10, marginTop: 20 }} entering={FadeInRight} exiting={FadeOutLeft}>
                         <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-evenly" }}>
-                            <LogInWithGoogleButton />
-                            <LogInWithDiscordButton />
+                            <SocialAuthGoogleButton actingAs={"signUp"} />
+                            <SocialAuthDiscordButton actingAs={"signUp"} />
                         </View>
 
                         <View

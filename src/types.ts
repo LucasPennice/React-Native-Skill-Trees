@@ -254,3 +254,5 @@ export type DistanceToCenterPerLevel = { [level: string]: number };
 export type TreesToShift = { [key: string]: "overlap" | "halfOverlap" };
 
 export type SubTreeIdAndSubTreeRootId = { subTreeId: string; subTreeRootId: string };
+
+export type SocialAuthButton = { actingAs: "logIn" | "signUp" };

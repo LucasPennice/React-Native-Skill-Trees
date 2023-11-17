@@ -144,12 +144,14 @@ function useHandleSyncOnLoginOrSignUp(
             const { data: userExistsOnDB } = await getUserExistsOnDB();
 
             if (handleLogInSync === "true") {
+                console.log("log");
                 setShowModal(true);
                 logInSync(userExistsOnDB);
                 return;
             }
 
             if (handleSignUpSync === "true" && !userExistsOnDB) {
+                console.log("sign");
                 signUpSync();
                 return;
             }

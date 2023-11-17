@@ -4,8 +4,8 @@ import AppTextInput from "@/components/AppTextInput";
 import Logo from "@/components/Logo";
 import PasswordInput from "@/components/PasswordInput";
 import Spacer from "@/components/Spacer";
-import LogInWithDiscordButton from "@/components/auth/LogInWithDiscordButton";
-import LogInWithGoogleButton from "@/components/auth/LogInWithGoogleButton";
+import { SocialAuthDiscordButton } from "@/components/auth/SocialAuthDiscordButton";
+import { SocialAuthGoogleButton } from "@/components/auth/SocialAuthGoogleButton";
 import { colors } from "@/parameters";
 import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useSignIn } from "@clerk/clerk-expo";
@@ -13,9 +13,9 @@ import { router } from "expo-router";
 import React from "react";
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
+import { RoutesParams } from "routes";
 import { useHandleButtonState, useHandleClerkErrorMessages } from "./signUp";
 import { logoSharedTransitionStyle } from "./welcomeScreen";
-import { RoutesParams } from "routes";
 
 const style = StyleSheet.create({
     container: { alignItems: "center", flex: 1, padding: 15 },
@@ -76,8 +76,8 @@ export default function SignInScreen() {
 
                 <Animated.View style={{ width: "100%", gap: 10, marginTop: 20 }} entering={FadeInRight}>
                     <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-evenly" }}>
-                        <LogInWithGoogleButton />
-                        <LogInWithDiscordButton />
+                        <SocialAuthGoogleButton actingAs={"logIn"} />
+                        <SocialAuthDiscordButton actingAs={"logIn"} />
                     </View>
 
                     <View
