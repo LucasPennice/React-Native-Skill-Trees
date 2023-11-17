@@ -4,6 +4,7 @@ import SteppedProgressBarAndIndicator, { OnboardingStep } from "@/components/Ste
 import { MENU_HIGH_DAMPENING, NAV_HEGIHT, colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { closeOnboardingMenu, expandOnboardingMenu, selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
+import { selectSyncSlice, setShouldWaitForClerkToLoad } from "@/redux/slices/syncSlice";
 import { selectAllTrees } from "@/redux/slices/userTreesSlice";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import { useUser } from "@clerk/clerk-expo";
@@ -38,7 +39,9 @@ mixpanel.init();
 export default function RootLayout() {
     useIdentifyMixPanelUserId();
     const onboarding = useAppSelector(selectOnboarding);
+    const { shouldWaitForClerkToLoad } = useAppSelector(selectSyncSlice);
     const { isSignedIn, isLoaded } = useUser();
+    const isClerkLoaded = shouldWaitForClerkToLoad === false ? true : isLoaded;
 
     const { width, height } = Dimensions.get("window");
 
@@ -57,16 +60,14 @@ export default function RootLayout() {
     }, [error]);
 
     useEffect(() => {
-        // if (fontsLoaded) SplashScreen.hideAsync();
-        if (fontsLoaded && isLoaded) SplashScreen.hideAsync();
-    }, [fontsLoaded, isLoaded]);
+        if (fontsLoaded && isClerkLoaded) SplashScreen.hideAsync();
+    }, [fontsLoaded, isClerkLoaded]);
 
     const prevRouteName = useRef<string | null>(null);
 
-    // if (!fontsLoaded) return <Text>Loading...</Text>;
-    if (!fontsLoaded || !isLoaded) return <Text>Loading...</Text>;
+    if (!fontsLoaded || !isClerkLoaded) return <Text>Loading...</Text>;
 
-    if (!isSignedIn) return <Redirect href="/welcomeScreen" />;
+    if (isLoaded && !isSignedIn) return <Redirect href="/welcomeScreen" />;
     // if (process.env.NODE_ENV === "production" && !isSignedIn) return <Redirect href="/welcomeScreen" />;
 
     const hide = !Boolean(pathname === "/" || hideNavAndOnboarding.find((route) => pathname.includes(route)));

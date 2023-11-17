@@ -1,10 +1,10 @@
 import AppButton from "@/components/AppButton";
 import AppText from "@/components/AppText";
-import { useAppSelector } from "@/redux/reduxHooks";
+import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { selectAllNodeIds, selectNodesTable } from "@/redux/slices/nodesSlice";
 import { selectOnboarding } from "@/redux/slices/onboardingSlice";
-import { selectSyncSlice } from "@/redux/slices/syncSlice";
+import { selectSyncSlice, setShouldWaitForClerkToLoad } from "@/redux/slices/syncSlice";
 import { selectAllTreesEntities, selectTreeIds } from "@/redux/slices/userTreesSlice";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import { useAuth } from "@clerk/clerk-expo";
@@ -18,14 +18,28 @@ const updateBackup = async (userId: string, newUserBackup: UserBackup) => {
     try {
         await axiosClient.patch(`backup/${userId}`, newUserBackup);
     } catch (error) {
-        Alert.alert("There was an error creating your backup", `Please contact the developer ${error}`);
+        throw new Error(`There was an error creating your backup\nPlease contact the developer ${error}`);
     }
 };
 
 function UserProfile() {
-    const { signOut } = useAuth();
+    return (
+        <View style={{ flex: 1, padding: 10, gap: 20 }}>
+            <AppText fontSize={18} children={"My Profile"} />
+
+            <SignOutButton />
+        </View>
+    );
+}
+
+export default UserProfile;
+
+const SignOutButton = () => {
+    const { signOut, isLoaded } = useAuth();
 
     const { setSubmitLoading, setSubmitError, submitState } = useHandleButtonState();
+
+    const dispatch = useAppDispatch();
 
     const userId = useMongoCompliantUserId();
     const nodesTable = useAppSelector(selectNodesTable);
@@ -44,27 +58,36 @@ function UserProfile() {
         lastUpdateUTC_Timestamp,
     };
 
+    const runOnSignOut = () => {
+        mixpanel.reset();
+        dispatch(setShouldWaitForClerkToLoad(true));
+    };
+
     const handleSignOut = async () => {
         try {
             setSubmitLoading();
 
-            mixpanel.reset();
-
             await updateBackup(userId!, newUserBackup);
+
+            runOnSignOut();
 
             signOut();
         } catch (error) {
             setSubmitError();
+            Alert.alert("Error creating a backup", `All progress after ${new Date().toString()} will be lost\nQuit anyway?`, [
+                { text: "No", style: "default", isPreferred: true },
+                {
+                    text: "Yes",
+                    style: "destructive",
+                    onPress: () => {
+                        runOnSignOut();
+
+                        signOut();
+                    },
+                },
+            ]);
         }
     };
 
-    return (
-        <View style={{ flex: 1, padding: 10, gap: 20 }}>
-            <AppText fontSize={18} children={"My Profile"} />
-
-            <AppButton onPress={handleSignOut} text={{ idle: "Sign Out" }} state={submitState} />
-        </View>
-    );
-}
-
-export default UserProfile;
+    return <AppButton disabled={!isLoaded} onPress={handleSignOut} text={{ idle: "Sign Out" }} state={submitState} />;
+};

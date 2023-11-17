@@ -15,7 +15,7 @@ import { overwriteHomeTreeSlice, selectHomeTree } from "@/redux/slices/homeTreeS
 import { NodeSlice, overwriteNodeSlice, selectAllNodeIds, selectAllNodes, selectNodesTable } from "@/redux/slices/nodesSlice";
 import { OnboardignState, overwriteOnboardingSlice, selectOnboarding } from "@/redux/slices/onboardingSlice";
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
-import { selectSyncSlice } from "@/redux/slices/syncSlice";
+import { selectSyncSlice, setShouldWaitForClerkToLoad } from "@/redux/slices/syncSlice";
 import { TreeData, UserTreeSlice, overwriteUserTreesSlice, selectAllTreesEntities, selectTreeIds } from "@/redux/slices/userTreesSlice";
 import { NormalizedNode } from "@/types";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
@@ -163,14 +163,16 @@ function useHandleSyncOnLoginOrSignUp(
             try {
                 const { data: userBackup } = await getUserBackup();
 
-                dispatch(overwriteNodeSlice(userBackup.nodeSlice));
-                dispatch(overwriteHomeTreeSlice(userBackup.homeTree));
                 dispatch(overwriteOnboardingSlice(userBackup.onboarding));
+                dispatch(overwriteHomeTreeSlice(userBackup.homeTree));
                 dispatch(overwriteUserTreesSlice(userBackup.userTreesSlice));
+                dispatch(overwriteNodeSlice(userBackup.nodeSlice));
 
                 setSyncSuccess();
 
                 setTimeout(() => setShowModal(false), 1000);
+
+                dispatch(setShouldWaitForClerkToLoad(false));
 
                 return;
             } catch (error) {
@@ -181,7 +183,10 @@ function useHandleSyncOnLoginOrSignUp(
         }
 
         function signUpSync() {
-            return createInitialBackup(userId!, initialUserBackup);
+            try {
+                dispatch(setShouldWaitForClerkToLoad(false));
+                return createInitialBackup(userId!, initialUserBackup);
+            } catch (error) {}
         }
     }, [localParams]);
 }
