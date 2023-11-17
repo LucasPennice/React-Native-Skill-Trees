@@ -15,7 +15,6 @@ import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "rea
 import Animated, { FadeInRight } from "react-native-reanimated";
 import { RoutesParams } from "routes";
 import { useHandleButtonState, useHandleClerkErrorMessages } from "./signUp";
-import { logoSharedTransitionStyle } from "./welcomeScreen";
 
 const style = StyleSheet.create({
     container: { alignItems: "center", flex: 1, padding: 15 },
@@ -68,11 +67,9 @@ export default function SignInScreen() {
     const navigateToSignUp = () => router.push("/signUp");
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "position"} style={style.container}>
+        <View style={style.container}>
             <View style={{ width: "100%", flex: 1, gap: 10, alignItems: "center" }}>
-                <Animated.View sharedTransitionTag="sharedTag" sharedTransitionStyle={logoSharedTransitionStyle} style={{ marginBottom: 20 }}>
-                    <Logo />
-                </Animated.View>
+                <Logo />
 
                 <Animated.View style={{ width: "100%", gap: 10, marginTop: 20 }} entering={FadeInRight}>
                     <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-evenly" }}>
@@ -91,29 +88,43 @@ export default function SignInScreen() {
                         <Spacer style={{ flex: 1 }} />
                     </View>
 
-                    <AppTextInput
-                        textState={[emailAddress, setEmailAddress]}
-                        inputProps={{ autoCapitalize: "none", spellCheck: false }}
-                        placeholder={"Username or Email"}
-                    />
-                    {error.identifier !== "" && <AppText children={error.identifier} fontSize={14} style={{ color: colors.pink }} />}
-                    <PasswordInput textState={[password, setPassword]} inputProps={{ secureTextEntry: true }} placeholder={"Password"} />
-                    {error.password !== "" && <AppText children={error.password} fontSize={14} style={{ color: colors.pink }} />}
+                    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "position"} style={{ height: 250 }}>
+                        <AppTextInput
+                            textState={[emailAddress, setEmailAddress]}
+                            inputProps={{ autoCapitalize: "none", spellCheck: false }}
+                            placeholder={"Username or Email"}
+                            containerStyles={{ marginBottom: 10 }}
+                        />
+                        {error.identifier !== "" && (
+                            <AppText children={error.identifier} fontSize={14} style={{ color: colors.pink, marginBottom: 10 }} />
+                        )}
+                        <PasswordInput
+                            textState={[password, setPassword]}
+                            inputProps={{ secureTextEntry: true }}
+                            placeholder={"Password"}
+                            containerStyles={{ marginBottom: 10 }}
+                        />
+                        {error.password !== "" && <AppText children={error.password} fontSize={14} style={{ color: colors.pink }} />}
 
-                    <AppButton
-                        state={submitState}
-                        onPress={onSignInPress}
-                        text={{ idle: "SIGN IN", error: "Please try again", success: "Success!" }}
-                        style={{ backgroundColor: colors.background, marginTop: 10 }}
-                        textStyle={{ fontFamily: "helveticaBold" }}
-                    />
+                        <AppButton
+                            state={submitState}
+                            onPress={onSignInPress}
+                            text={{ idle: "SIGN IN", error: "Please try again", success: "Success!" }}
+                            style={{ backgroundColor: colors.background, marginTop: 10 }}
+                            textStyle={{ fontFamily: "helveticaBold" }}
+                        />
 
-                    <Pressable onPressIn={navigateToSignUp} style={{ flexDirection: "row", alignItems: "center", height: 45 }}>
-                        <AppText children={"No account?"} fontSize={14} />
-                        <AppText children={"Sign up"} fontSize={14} style={{ color: colors.accent, fontFamily: "helveticaBold", paddingLeft: 3 }} />
-                    </Pressable>
+                        <Pressable onPressIn={navigateToSignUp} style={{ flexDirection: "row", alignItems: "center", height: 45 }}>
+                            <AppText children={"No account?"} fontSize={14} />
+                            <AppText
+                                children={"Sign up"}
+                                fontSize={14}
+                                style={{ color: colors.accent, fontFamily: "helveticaBold", paddingLeft: 3 }}
+                            />
+                        </Pressable>
+                    </KeyboardAvoidingView>
                 </Animated.View>
             </View>
-        </KeyboardAvoidingView>
+        </View>
     );
 }

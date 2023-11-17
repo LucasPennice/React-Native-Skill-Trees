@@ -1,11 +1,11 @@
 import { colors } from "@/parameters";
+import { SocialAuthButton } from "@/types";
 import { useOAuth } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import { useCallback } from "react";
-import { Pressable, StyleSheet } from "react-native";
-import DiscordIcon from "../Icons/DiscordIcon";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { RoutesParams } from "routes";
-import { SocialAuthButton } from "@/types";
+import DiscordIcon from "../Icons/DiscordIcon";
 
 const style = StyleSheet.create({
     container: {
@@ -45,9 +45,9 @@ export const SocialAuthDiscordButton = ({ actingAs }: SocialAuthButton) => {
     }, []);
 
     return (
-        <Pressable onPressIn={logInDiscord} style={style.container}>
+        <TouchableOpacity onPressIn={logInDiscord} style={style.container}>
             <DiscordIcon width={35} height={35} fill={colors.white} pointerEvents={"none"} />
-        </Pressable>
+        </TouchableOpacity>
     );
 };
 

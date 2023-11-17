@@ -4,6 +4,8 @@ import AppTextInput from "@/components/AppTextInput";
 import Logo from "@/components/Logo";
 import PasswordInput from "@/components/PasswordInput";
 import Spacer from "@/components/Spacer";
+import SocialAuthDiscordButton from "@/components/auth/SocialAuthDiscordButton";
+import SocialAuthGoogleButton from "@/components/auth/SocialAuthGoogleButton";
 import { colors } from "@/parameters";
 import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useSignUp } from "@clerk/clerk-expo";
@@ -12,9 +14,6 @@ import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { RoutesParams } from "routes";
-import { logoSharedTransitionStyle } from "./welcomeScreen";
-import SocialAuthDiscordButton from "@/components/auth/SocialAuthDiscordButton";
-import SocialAuthGoogleButton from "@/components/auth/SocialAuthGoogleButton";
 
 export const useHandleClerkErrorMessages = () => {
     const [error, setState] = useState({ email: "", password: "", code: "", identifier: "", username: "" });
@@ -150,89 +149,93 @@ function SignUp() {
     const navigateToLogin = () => router.push("/logIn");
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "position"} style={style.container}>
+        <View style={style.container}>
             <View style={{ width: "100%", flex: 1, gap: 10, alignItems: "center" }}>
-                <Animated.View sharedTransitionTag="sharedTag" sharedTransitionStyle={logoSharedTransitionStyle} style={{ marginBottom: 20 }}>
-                    <Logo />
-                </Animated.View>
+                <Logo />
 
-                {!pendingVerification && (
-                    <Animated.View style={{ width: "100%", gap: 10, marginTop: 20 }} entering={FadeInRight} exiting={FadeOutLeft}>
-                        <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-evenly" }}>
-                            <SocialAuthGoogleButton actingAs={"signUp"} />
-                            <SocialAuthDiscordButton actingAs={"signUp"} />
-                        </View>
+                <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "position"}>
+                    {!pendingVerification && (
+                        <Animated.View style={{ width: "100%", gap: 10, marginTop: 20 }} entering={FadeInRight} exiting={FadeOutLeft}>
+                            <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-evenly" }}>
+                                <SocialAuthGoogleButton actingAs={"signUp"} />
+                                <SocialAuthDiscordButton actingAs={"signUp"} />
+                            </View>
 
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                marginVertical: 10,
-                                alignItems: "center",
-                            }}>
-                            <Spacer style={{ flex: 1 }} />
-                            <AppText children={`or`} fontSize={18} style={{ color: "#E6E8E680", marginBottom: 5, width: 150, textAlign: "center" }} />
-                            <Spacer style={{ flex: 1 }} />
-                        </View>
-                        <AppTextInput
-                            textState={[username, setUsername]}
-                            inputProps={{ autoCapitalize: "none", spellCheck: false }}
-                            placeholder={"Username"}
-                        />
-                        {error.username !== "" && <AppText children={error.username} fontSize={14} style={{ color: colors.pink }} />}
-
-                        <AppTextInput
-                            textState={[emailAddress, setEmailAddress]}
-                            inputProps={{ autoCapitalize: "none", spellCheck: false }}
-                            placeholder={"Email"}
-                        />
-                        {error.email !== "" && <AppText children={error.email} fontSize={14} style={{ color: colors.pink }} />}
-                        <PasswordInput textState={[password, setPassword]} inputProps={{ secureTextEntry: true }} placeholder={"Password"} />
-                        {error.password !== "" && <AppText children={error.password} fontSize={14} style={{ color: colors.pink }} />}
-                        <AppButton
-                            state={submitState}
-                            onPress={onSignUpPress}
-                            text={{ idle: "CREATE ACCOUNT", error: "Fix errors and try again", success: "Success!" }}
-                            style={{ backgroundColor: colors.background, marginTop: 10 }}
-                            textStyle={{ fontFamily: "helveticaBold" }}
-                        />
-
-                        <Pressable onPressIn={navigateToLogin} style={{ flexDirection: "row", alignItems: "center", height: 45 }}>
-                            <AppText children={"Have an account?"} fontSize={14} />
-                            <AppText
-                                children={"Log In"}
-                                fontSize={14}
-                                style={{ color: colors.accent, fontFamily: "helveticaBold", paddingLeft: 3 }}
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    marginVertical: 10,
+                                    alignItems: "center",
+                                }}>
+                                <Spacer style={{ flex: 1 }} />
+                                <AppText
+                                    children={`or`}
+                                    fontSize={18}
+                                    style={{ color: "#E6E8E680", marginBottom: 5, width: 150, textAlign: "center" }}
+                                />
+                                <Spacer style={{ flex: 1 }} />
+                            </View>
+                            <AppTextInput
+                                textState={[username, setUsername]}
+                                inputProps={{ autoCapitalize: "none", spellCheck: false }}
+                                placeholder={"Username"}
                             />
-                        </Pressable>
-                    </Animated.View>
-                )}
-                {pendingVerification && (
-                    <Animated.View style={{ width: "100%", gap: 10, marginTop: 20 }} entering={FadeInRight} exiting={FadeOutLeft}>
-                        <AppText children={"Please verify your email address"} fontSize={18} />
-                        <AppText children={"Check your e-mail account a 6-digit code"} fontSize={16} style={{ color: `${colors.white}80` }} />
-                        <AppTextInput
-                            textState={[code.toString(), (v: string) => setCode(validateNumber(v))]}
-                            inputProps={{
-                                autoCapitalize: "none",
-                                spellCheck: false,
-                                keyboardType: Platform.OS === "android" ? "numeric" : "number-pad",
-                            }}
-                            hideClearButton
-                            placeholder={"Code"}
-                        />
-                        {error.code !== "" && <AppText children={error.code} fontSize={14} style={{ color: colors.pink }} />}
+                            {error.username !== "" && <AppText children={error.username} fontSize={14} style={{ color: colors.pink }} />}
 
-                        <AppButton
-                            state={submitState}
-                            onPress={onPressVerify}
-                            text={{ idle: "Verify Email", error: "Please try again", success: "Success!" }}
-                            style={{ backgroundColor: colors.background, marginTop: 10 }}
-                            textStyle={{ fontFamily: "helveticaBold" }}
-                        />
-                    </Animated.View>
-                )}
+                            <AppTextInput
+                                textState={[emailAddress, setEmailAddress]}
+                                inputProps={{ autoCapitalize: "none", spellCheck: false }}
+                                placeholder={"Email"}
+                            />
+                            {error.email !== "" && <AppText children={error.email} fontSize={14} style={{ color: colors.pink }} />}
+                            <PasswordInput textState={[password, setPassword]} inputProps={{ secureTextEntry: true }} placeholder={"Password"} />
+                            {error.password !== "" && <AppText children={error.password} fontSize={14} style={{ color: colors.pink }} />}
+                            <AppButton
+                                state={submitState}
+                                onPress={onSignUpPress}
+                                text={{ idle: "CREATE ACCOUNT", error: "Fix errors and try again", success: "Success!" }}
+                                style={{ backgroundColor: colors.background, marginTop: 10 }}
+                                textStyle={{ fontFamily: "helveticaBold" }}
+                            />
+
+                            <Pressable onPressIn={navigateToLogin} style={{ flexDirection: "row", alignItems: "center", height: 45 }}>
+                                <AppText children={"Have an account?"} fontSize={14} />
+                                <AppText
+                                    children={"Log In"}
+                                    fontSize={14}
+                                    style={{ color: colors.accent, fontFamily: "helveticaBold", paddingLeft: 3 }}
+                                />
+                            </Pressable>
+                        </Animated.View>
+                    )}
+                    {pendingVerification && (
+                        <Animated.View style={{ width: "100%", gap: 10, marginTop: 20 }} entering={FadeInRight} exiting={FadeOutLeft}>
+                            <AppText children={"Please verify your email address"} fontSize={18} />
+                            <AppText children={"Check your e-mail account a 6-digit code"} fontSize={16} style={{ color: `${colors.white}80` }} />
+                            <AppTextInput
+                                textState={[code.toString(), (v: string) => setCode(validateNumber(v))]}
+                                inputProps={{
+                                    autoCapitalize: "none",
+                                    spellCheck: false,
+                                    keyboardType: Platform.OS === "android" ? "numeric" : "number-pad",
+                                }}
+                                hideClearButton
+                                placeholder={"Code"}
+                            />
+                            {error.code !== "" && <AppText children={error.code} fontSize={14} style={{ color: colors.pink }} />}
+
+                            <AppButton
+                                state={submitState}
+                                onPress={onPressVerify}
+                                text={{ idle: "Verify Email", error: "Please try again", success: "Success!" }}
+                                style={{ backgroundColor: colors.background, marginTop: 10 }}
+                                textStyle={{ fontFamily: "helveticaBold" }}
+                            />
+                        </Animated.View>
+                    )}
+                </KeyboardAvoidingView>
             </View>
-        </KeyboardAvoidingView>
+        </View>
     );
 }
 

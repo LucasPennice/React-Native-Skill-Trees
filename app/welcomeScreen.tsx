@@ -12,7 +12,7 @@ import { SkiaFontContext } from "app/_layout";
 import { router } from "expo-router";
 import { Fragment, useContext } from "react";
 import { Dimensions, Pressable, StyleSheet, View } from "react-native";
-import Animated, { SharedTransition, withSpring } from "react-native-reanimated";
+import { SharedTransition, withSpring } from "react-native-reanimated";
 import { Defs, LinearGradient, Path, Stop, Svg } from "react-native-svg";
 import { mockCoordinatesInsideCanvas, mockRootCoordinateInsideCanvas, mockSubtreesData, mockSvgDimensions, mockTreeData } from "../data";
 
@@ -37,9 +37,7 @@ function WelcomeScreen() {
             <OnboardingTree />
 
             <View style={{ height: TEXT_AND_BUTTON_HEIGHT, justifyContent: "center", alignItems: "center" }}>
-                <Animated.View sharedTransitionTag="sharedTag" sharedTransitionStyle={logoSharedTransitionStyle}>
-                    <Logo />
-                </Animated.View>
+                <Logo />
 
                 <AppText children={"Track your life's progress. All in one place."} fontSize={16} style={{ textAlign: "center", marginTop: 15 }} />
 

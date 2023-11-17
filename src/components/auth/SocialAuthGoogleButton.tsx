@@ -1,11 +1,11 @@
 import { colors } from "@/parameters";
+import { SocialAuthButton } from "@/types";
 import { useOAuth } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import { useCallback } from "react";
-import { Pressable, StyleSheet } from "react-native";
-import GoogleIcon from "../Icons/GoogleIcon";
-import { SocialAuthButton } from "@/types";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { RoutesParams } from "routes";
+import GoogleIcon from "../Icons/GoogleIcon";
 
 const style = StyleSheet.create({
     container: {
@@ -44,9 +44,9 @@ export const SocialAuthGoogleButton = ({ actingAs }: SocialAuthButton) => {
     }, []);
 
     return (
-        <Pressable onPressIn={logInGoogle} style={style.container}>
+        <TouchableOpacity onPressIn={logInGoogle} style={style.container}>
             <GoogleIcon width={30} height={30} fill={colors.white} pointerEvents={"none"} />
-        </Pressable>
+        </TouchableOpacity>
     );
 };
 
