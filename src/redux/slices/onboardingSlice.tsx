@@ -41,7 +41,6 @@ export const onboardingSlice = createSlice({
             state.open = false;
         },
         overwriteOnboardingSlice: (state, action: PayloadAction<OnboardignState>) => {
-            console.log("onboarding");
             state.complete = action.payload.complete;
             state.currentStep = action.payload.currentStep;
             state.open = action.payload.open;

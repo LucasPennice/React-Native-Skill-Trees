@@ -335,7 +335,7 @@ const Header = () => {
     );
 };
 
-const Contact = () => {
+export const Contact = () => {
     const copyEmailToClipboard = () => Clipboard.setString("lucaspennice@gmail.com");
     const copyDiscordServerToClipboard = () => Clipboard.setString("https://discord.com/invite/ZHENer9yAW");
 
@@ -350,7 +350,7 @@ const Contact = () => {
     });
 
     const styles = StyleSheet.create({
-        container: { marginBottom: 20 },
+        container: { marginBottom: 20, width: "100%" },
         clipboardTextContainer: {
             backgroundColor: colors.darkGray,
             borderRadius: 10,

@@ -55,8 +55,9 @@ export const useHandleButtonState = () => {
     const setSubmitError = () => setState("error");
     const setSubmitLoading = () => setState("loading");
     const resetSubmitState = () => setState("idle");
+    const setSubmitSuccess = () => setState("success");
 
-    return { submitState, setSubmitError, setSubmitLoading, resetSubmitState };
+    return { submitState, setSubmitError, setSubmitLoading, resetSubmitState, setSubmitSuccess };
 };
 
 function SignUp() {

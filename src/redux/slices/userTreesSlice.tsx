@@ -33,7 +33,6 @@ export const userTreesSlice = createSlice({
             userTreesAdapter.removeOne(state, action.payload.treeId);
         },
         overwriteUserTreesSlice: (state, action: PayloadAction<UserTreeSlice>) => {
-            console.log("usertrees");
             state.entities = action.payload.entities;
             state.ids = action.payload.ids;
         },

@@ -47,7 +47,6 @@ export const nodesSlice = createSlice({
             nodesAdapter.removeMany(state, action.payload.nodesToDelete);
         },
         overwriteNodeSlice: (state, action: PayloadAction<NodeSlice>) => {
-            console.log("nodos");
             state.entities = action.payload.entities;
             state.ids = action.payload.ids;
         },

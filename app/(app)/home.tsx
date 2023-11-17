@@ -1,3 +1,7 @@
+import AppButton, { ButtonState } from "@/components/AppButton";
+import AppText from "@/components/AppText";
+import SadFaceIcon from "@/components/Icons/SadFaceIcon";
+import LoadingIcon from "@/components/LoadingIcon";
 import OpenSettingsMenu from "@/components/OpenSettingsMenu";
 import ProgressIndicatorAndName from "@/components/ProgressIndicatorAndName";
 import ShareTreeScreenshot from "@/components/takingScreenshot/ShareTreeScreenshot";
@@ -5,6 +9,7 @@ import CanvasSettingsModal from "@/components/treeRelated/canvasSettingsModal/Ca
 import SelectedNodeMenu, { SelectedNodeMenuState } from "@/components/treeRelated/selectedNodeMenu/SelectedNodeMenu";
 import { selectedNodeMenuQueryFns } from "@/components/treeRelated/selectedNodeMenu/SelectedNodeMenuFunctions";
 import HomepageTree from "@/pages/homepage/HomepageTree";
+import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { overwriteHomeTreeSlice, selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { NodeSlice, overwriteNodeSlice, selectAllNodeIds, selectAllNodes, selectNodesTable } from "@/redux/slices/nodesSlice";
@@ -14,13 +19,17 @@ import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import { TreeData, UserTreeSlice, overwriteUserTreesSlice, selectAllTreesEntities, selectTreeIds } from "@/redux/slices/userTreesSlice";
 import { NormalizedNode } from "@/types";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
-import { Dictionary } from "@reduxjs/toolkit";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useCanvasRef } from "@shopify/react-native-skia";
+import { useHandleButtonState } from "app/signUp";
 import axiosClient from "axiosClient";
+import * as ExpoNavigationBar from "expo-navigation-bar";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, View } from "react-native";
+import { Alert, Modal, Platform, StatusBar, StyleSheet, View } from "react-native";
+import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
 import { RoutesParams } from "routes";
+import { Contact } from "./feedback";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();
@@ -86,7 +95,18 @@ const createInitialBackup = async (userId: string, newUserBackup: UserBackup) =>
     }
 };
 
-function useHandleSyncOnLoginOrSignUp() {
+function useHandleSyncOnLoginOrSignUp(
+    syncStateObj: {
+        submitState: ButtonState;
+        setSubmitError: () => void;
+        setSubmitLoading: () => void;
+        resetSubmitState: () => void;
+        setSubmitSuccess: () => void;
+    },
+    setShowModal: (v: boolean) => void
+) {
+    const { setSubmitSuccess: setSyncSuccess, setSubmitError: setSyncError, setSubmitLoading: setSyncLoading } = syncStateObj;
+
     const localParams = useLocalSearchParams<RoutesParams["home"]>();
     const skipSync = localParams.handleLogInSync === undefined && localParams.handleSignUpSync === undefined;
 
@@ -118,11 +138,13 @@ function useHandleSyncOnLoginOrSignUp() {
     useEffect(() => {
         (async () => {
             if (skipSync) return;
+
             if (!userId) throw new Error("Couldn't get userId");
 
             const { data: userExistsOnDB } = await getUserExistsOnDB();
 
             if (handleLogInSync === "true") {
+                setShowModal(true);
                 logInSync(userExistsOnDB);
                 return;
             }
@@ -136,6 +158,8 @@ function useHandleSyncOnLoginOrSignUp() {
         async function logInSync(userExistsOnDB: boolean) {
             if (!userExistsOnDB) return createInitialBackup(userId!, initialUserBackup);
 
+            setSyncLoading();
+
             try {
                 const { data: userBackup } = await getUserBackup();
 
@@ -144,9 +168,15 @@ function useHandleSyncOnLoginOrSignUp() {
                 dispatch(overwriteOnboardingSlice(userBackup.onboarding));
                 dispatch(overwriteUserTreesSlice(userBackup.userTreesSlice));
 
-                return console.log("Inyecto la data de la base de datos en mi store", userBackup);
+                setSyncSuccess();
+
+                setTimeout(() => setShowModal(false), 1000);
+
+                return;
             } catch (error) {
                 Alert.alert("There was an error loading you backup", `Please contact the developer ${error}`);
+
+                setSyncError();
             }
         }
 
@@ -159,7 +189,12 @@ function useHandleSyncOnLoginOrSignUp() {
 function Home() {
     const selectedNodeCoordState = useSelectedNodeCoordState();
 
-    useHandleSyncOnLoginOrSignUp();
+    const syncStateObj = useHandleButtonState();
+
+    const { submitState: syncState } = syncStateObj;
+    const [showModal, setShowModal] = useState(false);
+
+    useHandleSyncOnLoginOrSignUp(syncStateObj, setShowModal);
     //🧠 .4ms
     const { screenDimensions, allNodes, homePageTreeData } = useHomepageContentsState();
 
@@ -182,6 +217,8 @@ function Home() {
         initialMode: "VIEWING",
     };
 
+    const closeModal = () => setShowModal(false);
+
     return (
         <View style={{ position: "relative", flex: 1, overflow: "hidden" }}>
             <HomepageTree selectedNodeCoordState={selectedNodeCoordState} canvasRef={canvasRef} openCanvasSettingsModal={openCanvasSettingsModal} />
@@ -197,8 +234,53 @@ function Home() {
             {selectedNodeCoord && <SelectedNodeMenu functions={selectedNodeQueryFns} state={selectedNodeMenuState} />}
 
             <CanvasSettingsModal open={canvasSettings} closeModal={closeCanvasSettingsModal} />
+
+            <SyncStateModal showModal={showModal} state={syncState} closeModal={closeModal} />
         </View>
     );
 }
+
+const SyncStateModal = ({ state, closeModal, showModal }: { state: ButtonState; closeModal: () => void; showModal: boolean }) => {
+    if (Platform.OS === "android") ExpoNavigationBar.setBackgroundColorAsync(colors.darkGray);
+
+    const styles = StyleSheet.create({
+        container: { flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center", position: "relative" },
+        foo: { justifyContent: "center", alignItems: "center", gap: 20, width: "100%", padding: 20 },
+        text: { textAlign: "center" },
+    });
+
+    return (
+        <Modal
+            animationType="fade"
+            visible={showModal}
+            onRequestClose={undefined}
+            presentationStyle={Platform.OS === "android" ? "overFullScreen" : "formSheet"}>
+            <StatusBar backgroundColor={colors.background} barStyle="light-content" />
+            <View style={styles.container}>
+                {state === "loading" && (
+                    <Animated.View style={styles.foo} entering={FadeInDown} exiting={FadeOutUp}>
+                        <LoadingIcon />
+                        <AppText style={styles.text} fontSize={24} children={"Fetching your trees from far away..."} />
+                        <AppText style={styles.text} fontSize={24} children={"Depending on where you live"} />
+                    </Animated.View>
+                )}
+                {state === "success" && (
+                    <Animated.View style={styles.foo} entering={FadeInDown} exiting={FadeOutUp}>
+                        <FontAwesome size={130} name="check" color={colors.green} />
+                        <AppText style={styles.text} fontSize={24} children={"Success"} />
+                    </Animated.View>
+                )}
+                {state === "error" && (
+                    <Animated.View style={styles.foo} entering={FadeInDown} exiting={FadeOutUp}>
+                        <SadFaceIcon height={100} width={100} />
+                        <AppText style={styles.text} fontSize={24} children={"There was an error"} />
+                        <Contact />
+                        <AppButton onPress={closeModal} text={{ idle: "Close" }} style={{ width: 150 }} />
+                    </Animated.View>
+                )}
+            </View>
+        </Modal>
+    );
+};
 
 export default Home;

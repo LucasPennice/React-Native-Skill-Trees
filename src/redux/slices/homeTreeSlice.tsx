@@ -29,7 +29,6 @@ export const homeTreeSlice = createSlice({
             state.treeName = action.payload;
         },
         overwriteHomeTreeSlice: (state, action: PayloadAction<HomeTreeSlice>) => {
-            console.log("hometree");
             state.accentColor = action.payload.accentColor;
             state.icon = action.payload.icon;
             state.rootNodeId = action.payload.rootNodeId;
