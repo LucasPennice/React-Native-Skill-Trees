@@ -36,7 +36,6 @@ export const SocialAuthDiscordButton = ({ actingAs }: SocialAuthButton) => {
                 if (actingAs === "logIn") params.handleLogInSync = "true";
                 if (actingAs === "signUp") params.handleSignUpSync = "true";
 
-                console.log(params);
                 router.push({ pathname: "/(app)/home", params });
             }
         } catch (err) {

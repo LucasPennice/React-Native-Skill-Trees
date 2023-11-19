@@ -15,7 +15,7 @@ import { overwriteHomeTreeSlice, selectHomeTree } from "@/redux/slices/homeTreeS
 import { NodeSlice, overwriteNodeSlice, selectAllNodeIds, selectAllNodes, selectNodesTable } from "@/redux/slices/nodesSlice";
 import { OnboardignState, overwriteOnboardingSlice, selectOnboarding } from "@/redux/slices/onboardingSlice";
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
-import { selectSyncSlice, setShouldWaitForClerkToLoad } from "@/redux/slices/syncSlice";
+import { selectSyncSlice, setShouldWaitForClerkToLoad, updateLastBackupTime } from "@/redux/slices/syncSlice";
 import { TreeData, UserTreeSlice, overwriteUserTreesSlice, selectAllTreesEntities, selectTreeIds } from "@/redux/slices/userTreesSlice";
 import { NormalizedNode } from "@/types";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
@@ -87,14 +87,6 @@ export type UserBackup = {
     lastUpdateUTC_Timestamp: number;
 };
 
-const createInitialBackup = async (userId: string, newUserBackup: UserBackup) => {
-    try {
-        await axiosClient.post(`backup/${userId}`, newUserBackup);
-    } catch (error) {
-        Alert.alert("There was an error creating your backup", `Please contact the developer ${error}`);
-    }
-};
-
 function useHandleSyncOnLoginOrSignUp(
     syncStateObj: {
         submitState: ButtonState;
@@ -144,14 +136,12 @@ function useHandleSyncOnLoginOrSignUp(
             const { data: userExistsOnDB } = await getUserExistsOnDB();
 
             if (handleLogInSync === "true") {
-                console.log("log");
                 setShowModal(true);
                 logInSync(userExistsOnDB);
                 return;
             }
 
             if (handleSignUpSync === "true" && !userExistsOnDB) {
-                console.log("sign");
                 signUpSync();
                 return;
             }
@@ -191,6 +181,16 @@ function useHandleSyncOnLoginOrSignUp(
             } catch (error) {}
         }
     }, [localParams]);
+
+    const createInitialBackup = async (userId: string, newUserBackup: UserBackup) => {
+        try {
+            await axiosClient.post(`backup/${userId}`, newUserBackup);
+
+            dispatch(updateLastBackupTime());
+        } catch (error) {
+            Alert.alert("There was an error creating your backup", `Please contact the developer ${error}`);
+        }
+    };
 }
 
 function Home() {

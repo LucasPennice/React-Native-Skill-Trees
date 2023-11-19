@@ -1,4 +1,5 @@
 import AppText from "@/components/AppText";
+import ChevronLeft from "@/components/Icons/ChevronLeft";
 import OnboardingCompletionIcon from "@/components/Icons/OnboardingCompleteIcon";
 import SteppedProgressBarAndIndicator, { OnboardingStep } from "@/components/SteppedProgressBarAndIndicator";
 import { MENU_HIGH_DAMPENING, NAV_HEGIHT, colors } from "@/parameters";
@@ -14,7 +15,7 @@ import { useFonts } from "expo-font";
 import { Redirect, SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
 import { Mixpanel } from "mixpanel-react-native";
 import { Fragment, useEffect, useRef } from "react";
-import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, FadeInRight, FadeOut, FadeOutLeft, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { RoutesParams, hideNavAndOnboarding, routes } from "routes";
 
@@ -60,10 +61,6 @@ export default function RootLayout() {
     }, [error]);
 
     useEffect(() => {
-        console.log(isSignedIn);
-    }, [isSignedIn]);
-
-    useEffect(() => {
         if (fontsLoaded && isClerkLoaded) SplashScreen.hideAsync();
     }, [fontsLoaded, isClerkLoaded]);
 
@@ -72,14 +69,36 @@ export default function RootLayout() {
     if (!fontsLoaded || !isClerkLoaded) return <Text>Loading...</Text>;
 
     if (isLoaded && !isSignedIn) return <Redirect href="/welcomeScreen" />;
-    // if (process.env.NODE_ENV === "production" && !isSignedIn) return <Redirect href="/welcomeScreen" />;
+    // if (process.env.NODE_ENV === "production" && isLoaded && !isSignedIn) return <Redirect href="/welcomeScreen" />;
 
     const hide = !Boolean(pathname === "/" || hideNavAndOnboarding.find((route) => pathname.includes(route)));
 
     return (
         <View style={{ flex: 1, minHeight: Platform.OS === "android" ? height - NAV_HEGIHT : "auto" }}>
             <Stack
-                screenOptions={{ headerShown: false }}
+                screenOptions={{
+                    headerShown: false,
+                    header: ({ navigation, options, route, back }) => {
+                        return (
+                            <View
+                                style={{
+                                    height: 45,
+                                    backgroundColor: colors.darkGray,
+                                    alignItems: "center",
+                                    position: "relative",
+                                    justifyContent: "center",
+                                }}>
+                                <TouchableOpacity
+                                    onPress={navigation.goBack}
+                                    style={{ position: "absolute", left: 0, flexDirection: "row", alignItems: "center", height: 45, width: 100 }}>
+                                    <ChevronLeft height={30} width={30} color={colors.accent} />
+                                </TouchableOpacity>
+
+                                <AppText fontSize={16} children={route.name} style={{ textTransform: "capitalize" }} />
+                            </View>
+                        );
+                    },
+                }}
                 screenListeners={{
                     state: async (e) => {
                         //@ts-ignore
@@ -101,6 +120,13 @@ export default function RootLayout() {
                     name={routes.home.name}
                     options={{
                         title: "Home",
+                    }}
+                />
+                <Stack.Screen
+                    name={routes.backup.name}
+                    options={{
+                        title: "Backup",
+                        headerShown: true,
                     }}
                 />
                 <Stack.Screen

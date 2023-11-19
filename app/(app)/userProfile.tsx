@@ -1,62 +1,98 @@
 import AppButton from "@/components/AppButton";
 import AppText from "@/components/AppText";
-import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
-import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
-import { selectAllNodeIds, selectNodesTable } from "@/redux/slices/nodesSlice";
-import { selectOnboarding } from "@/redux/slices/onboardingSlice";
-import { selectSyncSlice, setShouldWaitForClerkToLoad } from "@/redux/slices/syncSlice";
-import { selectAllTreesEntities, selectTreeIds } from "@/redux/slices/userTreesSlice";
-import useMongoCompliantUserId from "@/useMongoCompliantUserId";
-import { useAuth } from "@clerk/clerk-expo";
-import { useHandleButtonState } from "app/signUp";
-import axiosClient from "axiosClient";
-import { Alert, View } from "react-native";
+import ChevronRight from "@/components/Icons/ChevronRight";
+import CrownIcon from "@/components/Icons/CrownIcon";
+import TicketIcon from "@/components/Icons/TicketIcon";
+import { colors } from "@/parameters";
+import { useAppDispatch } from "@/redux/reduxHooks";
+import { setShouldWaitForClerkToLoad, updateLastBackupTime } from "@/redux/slices/syncSlice";
+import useUpdateBackup from "@/useUpdateBackup";
+import { useAuth, useUser } from "@clerk/clerk-expo";
+import * as Application from "expo-application";
+import { router } from "expo-router";
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 import { mixpanel } from "./_layout";
-import { UserBackup } from "./home";
-
-const updateBackup = async (userId: string, newUserBackup: UserBackup) => {
-    try {
-        await axiosClient.patch(`backup/${userId}`, newUserBackup);
-    } catch (error) {
-        throw new Error(`There was an error creating your backup\nPlease contact the developer ${error}`);
-    }
-};
 
 function UserProfile() {
-    return (
-        <View style={{ flex: 1, padding: 10, gap: 20 }}>
-            <AppText fontSize={18} children={"My Profile"} />
+    const style = StyleSheet.create({
+        container: { flex: 1, padding: 10, gap: 20 },
+        settingContainer: { flex: 1 },
+        versionText: { textAlign: "center", color: colors.line, marginTop: 10 },
+    });
 
-            <SignOutButton />
+    return (
+        <View style={style.container}>
+            <AppText fontSize={18} children={"My Account"} />
+
+            <UserCard />
+
+            <View style={style.settingContainer}>
+                <TouchableOpacity
+                    onPress={() => router.push("/(app)/backup")}
+                    style={{
+                        backgroundColor: colors.darkGray,
+                        borderRadius: 10,
+                        height: 45,
+                        paddingHorizontal: 10,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                    }}>
+                    <AppText fontSize={14} children={"Backup Settings"} />
+                    <ChevronRight color={colors.unmarkedText} />
+                </TouchableOpacity>
+            </View>
+
+            <View>
+                <SignOutButton />
+                <AppText fontSize={14} children={`Version ${Application.nativeBuildVersion}`} style={style.versionText} />
+            </View>
         </View>
     );
 }
 
 export default UserProfile;
 
+const UserCard = () => {
+    const { user } = useUser();
+
+    const style = StyleSheet.create({
+        container: { flexDirection: "row", gap: 15, alignItems: "center" },
+        photo: { height: 60, width: 60, borderRadius: 30 },
+        premiumStatus: { flexDirection: "row", gap: 5 },
+    });
+
+    const freeTrial = true;
+
+    return (
+        <View style={style.container}>
+            {/* <Image style={style.photo} source={faceImage} /> */}
+            <View style={{ gap: 5 }}>
+                <AppText fontSize={20} children={user?.username ?? "Username"} />
+
+                {freeTrial && (
+                    <View style={style.premiumStatus}>
+                        <TicketIcon width={14} height={14} fill={colors.gold} />
+                        <AppText fontSize={14} children={"Free Trial"} style={{ color: colors.gold, paddingTop: 1 }} />
+                    </View>
+                )}
+                {!freeTrial && (
+                    <View style={style.premiumStatus}>
+                        <CrownIcon width={15} height={15} fill={colors.gold} />
+                        <AppText fontSize={14} children={"Premium Member"} style={{ color: colors.gold, paddingTop: 2 }} />
+                    </View>
+                )}
+            </View>
+        </View>
+    );
+};
+
 const SignOutButton = () => {
     const { signOut, isLoaded } = useAuth();
 
-    const { setSubmitLoading, setSubmitError, submitState } = useHandleButtonState();
-
     const dispatch = useAppDispatch();
 
-    const userId = useMongoCompliantUserId();
-    const nodesTable = useAppSelector(selectNodesTable);
-    const nodesIds = useAppSelector(selectAllNodeIds);
-    const treesTable = useAppSelector(selectAllTreesEntities);
-    const treesIds = useAppSelector(selectTreeIds);
-    const homeTree = useAppSelector(selectHomeTree);
-    const onboarding = useAppSelector(selectOnboarding);
-    const { lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);
-
-    const newUserBackup: UserBackup = {
-        nodeSlice: { entities: nodesTable, ids: nodesIds },
-        userTreesSlice: { entities: treesTable, ids: treesIds },
-        homeTree,
-        onboarding,
-        lastUpdateUTC_Timestamp,
-    };
+    const { backupState, handleUserBackup } = useUpdateBackup();
 
     const runOnSignOut = () => {
         mixpanel.reset();
@@ -65,15 +101,14 @@ const SignOutButton = () => {
 
     const handleSignOut = async () => {
         try {
-            setSubmitLoading();
-
-            await updateBackup(userId!, newUserBackup);
+            await handleUserBackup();
 
             runOnSignOut();
 
+            dispatch(updateLastBackupTime());
+
             signOut();
         } catch (error) {
-            setSubmitError();
             Alert.alert("Error creating a backup", `All progress after ${new Date().toString()} will be lost\nQuit anyway?`, [
                 { text: "No", style: "default", isPreferred: true },
                 {
@@ -89,5 +124,14 @@ const SignOutButton = () => {
         }
     };
 
-    return <AppButton disabled={!isLoaded} onPress={handleSignOut} text={{ idle: "Sign Out" }} state={submitState} />;
+    return (
+        <AppButton
+            disabled={!isLoaded}
+            onPress={handleSignOut}
+            text={{ idle: "Sign Out", success: "Backup Successful", error: "Error Backing Up Data" }}
+            color={{ idle: colors.line }}
+            state={backupState}
+            style={{ backgroundColor: colors.background }}
+        />
+    );
 };

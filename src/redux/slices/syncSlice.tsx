@@ -20,7 +20,7 @@ export const syncSlice = createSlice({
         resetShouldSync: (state) => {
             state.shouldSync = false;
         },
-        updateShouldSync: (state) => {
+        updateLastBackupTime: (state) => {
             state.lastUpdateUTC_Timestamp = new Date().getTime();
             state.shouldSync = false;
         },
@@ -30,7 +30,7 @@ export const syncSlice = createSlice({
     },
 });
 
-export const { resetShouldSync, updateShouldSync, setShouldWaitForClerkToLoad } = syncSlice.actions;
+export const { resetShouldSync, updateLastBackupTime, setShouldWaitForClerkToLoad } = syncSlice.actions;
 
 export default syncSlice.reducer;
 

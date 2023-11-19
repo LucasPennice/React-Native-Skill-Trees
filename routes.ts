@@ -31,6 +31,10 @@ export const routes = {
         name: "signUp",
         route: "/signUp",
     },
+    backup: {
+        name: "backup",
+        route: "/(app)/backup",
+    },
 };
 
 export const hideNavAndOnboarding: (keyof typeof routes)[] = ["welcomeScreen", "logIn", "signUp"];
