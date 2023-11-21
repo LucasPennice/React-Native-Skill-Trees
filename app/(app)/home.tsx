@@ -30,6 +30,7 @@ import { Alert, Modal, Platform, StatusBar, StyleSheet, View } from "react-nativ
 import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
 import { RoutesParams } from "routes";
 import { Contact } from "./feedback";
+import { batch } from "react-redux";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();
@@ -95,7 +96,7 @@ function useHandleSyncOnLoginOrSignUp(
         resetSubmitState: () => void;
         setSubmitSuccess: () => void;
     },
-    setShowModal: (v: boolean) => void
+    setShowSyncModal: (v: boolean) => void
 ) {
     const { setSubmitSuccess: setSyncSuccess, setSubmitError: setSyncError, setSubmitLoading: setSyncLoading } = syncStateObj;
 
@@ -119,6 +120,16 @@ function useHandleSyncOnLoginOrSignUp(
 
     const getUserBackup = () => axiosClient.get<UserBackup>(`backup/${userId}`);
 
+    const batchUpdateUserStore = (userBackup: UserBackup) => {
+        // should only result in one combined re-render, not four
+        batch(() => {
+            dispatch(overwriteOnboardingSlice(userBackup.onboarding));
+            dispatch(overwriteHomeTreeSlice(userBackup.homeTree));
+            dispatch(overwriteUserTreesSlice(userBackup.userTreesSlice));
+            dispatch(overwriteNodeSlice(userBackup.nodeSlice));
+        });
+    };
+
     const initialUserBackup: UserBackup = {
         nodeSlice: { entities: nodesTable, ids: nodesIds },
         userTreesSlice: { entities: treesTable, ids: treesIds },
@@ -136,7 +147,7 @@ function useHandleSyncOnLoginOrSignUp(
             const { data: userExistsOnDB } = await getUserExistsOnDB();
 
             if (handleLogInSync === "true") {
-                setShowModal(true);
+                setShowSyncModal(true);
                 logInSync(userExistsOnDB);
                 return;
             }
@@ -155,14 +166,11 @@ function useHandleSyncOnLoginOrSignUp(
             try {
                 const { data: userBackup } = await getUserBackup();
 
-                dispatch(overwriteOnboardingSlice(userBackup.onboarding));
-                dispatch(overwriteHomeTreeSlice(userBackup.homeTree));
-                dispatch(overwriteUserTreesSlice(userBackup.userTreesSlice));
-                dispatch(overwriteNodeSlice(userBackup.nodeSlice));
+                batchUpdateUserStore(userBackup);
 
                 setSyncSuccess();
 
-                setTimeout(() => setShowModal(false), 1000);
+                setTimeout(() => setShowSyncModal(false), 1000);
 
                 dispatch(setShouldWaitForClerkToLoad(false));
 
@@ -199,10 +207,10 @@ function Home() {
     const syncStateObj = useHandleButtonState();
 
     const { submitState: syncState } = syncStateObj;
-    const [showModal, setShowModal] = useState(false);
+    const [showSyncModal, setShowSyncModal] = useState(false);
 
-    useHandleSyncOnLoginOrSignUp(syncStateObj, setShowModal);
-    //🧠 .4ms
+    useHandleSyncOnLoginOrSignUp(syncStateObj, setShowSyncModal);
+
     const { screenDimensions, allNodes, homePageTreeData } = useHomepageContentsState();
 
     const takingScreenShotState = useTakingScreenshotState();
@@ -224,7 +232,7 @@ function Home() {
         initialMode: "VIEWING",
     };
 
-    const closeModal = () => setShowModal(false);
+    const closeModal = () => setShowSyncModal(false);
 
     return (
         <View style={{ position: "relative", flex: 1, overflow: "hidden" }}>
@@ -242,12 +250,12 @@ function Home() {
 
             <CanvasSettingsModal open={canvasSettings} closeModal={closeCanvasSettingsModal} />
 
-            <SyncStateModal showModal={showModal} state={syncState} closeModal={closeModal} />
+            <SyncStateModal showSyncModal={showSyncModal} state={syncState} closeModal={closeModal} />
         </View>
     );
 }
 
-const SyncStateModal = ({ state, closeModal, showModal }: { state: ButtonState; closeModal: () => void; showModal: boolean }) => {
+const SyncStateModal = ({ state, closeModal, showSyncModal }: { state: ButtonState; closeModal: () => void; showSyncModal: boolean }) => {
     if (Platform.OS === "android") ExpoNavigationBar.setBackgroundColorAsync(colors.darkGray);
 
     const styles = StyleSheet.create({
@@ -259,7 +267,7 @@ const SyncStateModal = ({ state, closeModal, showModal }: { state: ButtonState; 
     return (
         <Modal
             animationType="fade"
-            visible={showModal}
+            visible={showSyncModal}
             onRequestClose={undefined}
             presentationStyle={Platform.OS === "android" ? "overFullScreen" : "formSheet"}>
             <StatusBar backgroundColor={colors.background} barStyle="light-content" />
@@ -267,14 +275,11 @@ const SyncStateModal = ({ state, closeModal, showModal }: { state: ButtonState; 
                 {state === "loading" && (
                     <Animated.View style={styles.foo} entering={FadeInDown} exiting={FadeOutUp}>
                         <LoadingIcon />
-                        <AppText style={styles.text} fontSize={24} children={"Fetching your trees from far away..."} />
-                        <AppText style={styles.text} fontSize={24} children={"Depending on where you live"} />
                     </Animated.View>
                 )}
                 {state === "success" && (
                     <Animated.View style={styles.foo} entering={FadeInDown} exiting={FadeOutUp}>
                         <FontAwesome size={130} name="check" color={colors.green} />
-                        <AppText style={styles.text} fontSize={24} children={"Success"} />
                     </Animated.View>
                 )}
                 {state === "error" && (

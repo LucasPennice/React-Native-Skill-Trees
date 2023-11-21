@@ -43,7 +43,7 @@ function WelcomeScreen() {
 
                 <AppButton
                     onPress={navigateToSignUp}
-                    text={{ idle: "CREATE ACCOUNT" }}
+                    text={{ idle: "JOIN 1400+ USERS" }}
                     color={{ idle: colors.accent }}
                     pressableStyle={{ width, paddingHorizontal: 10 }}
                     style={{ backgroundColor: colors.background, marginTop: 20 }}

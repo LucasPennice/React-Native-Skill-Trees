@@ -28,8 +28,6 @@ function useIdentifyMixPanelUserId() {
 
     useEffect(() => {
         if (userId !== null) mixpanel.identify(userId);
-
-        //WHEN A USER LOGS OUT I CALL mixpanel.reset()
     }, [userId]);
 }
 
@@ -69,6 +67,7 @@ export default function RootLayout() {
     if (!fontsLoaded || !isClerkLoaded) return <Text>Loading...</Text>;
 
     if (isLoaded && !isSignedIn) return <Redirect href="/welcomeScreen" />;
+
     // if (process.env.NODE_ENV === "production" && isLoaded && !isSignedIn) return <Redirect href="/welcomeScreen" />;
 
     const hide = !Boolean(pathname === "/" || hideNavAndOnboarding.find((route) => pathname.includes(route)));

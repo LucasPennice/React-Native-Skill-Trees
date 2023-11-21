@@ -10,7 +10,7 @@ import useUpdateBackup from "@/useUpdateBackup";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import * as Application from "expo-application";
 import { router } from "expo-router";
-import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { mixpanel } from "./_layout";
 
 function UserProfile() {
@@ -58,7 +58,7 @@ const UserCard = () => {
 
     const style = StyleSheet.create({
         container: { flexDirection: "row", gap: 15, alignItems: "center" },
-        photo: { height: 60, width: 60, borderRadius: 30 },
+        photo: { height: 60, width: 60, borderRadius: 30, backgroundColor: colors.darkGray },
         premiumStatus: { flexDirection: "row", gap: 5 },
     });
 
@@ -66,7 +66,7 @@ const UserCard = () => {
 
     return (
         <View style={style.container}>
-            {/* <Image style={style.photo} source={faceImage} /> */}
+            <Image style={style.photo} source={{ uri: user?.imageUrl }} />
             <View style={{ gap: 5 }}>
                 <AppText fontSize={20} children={user?.username ?? "Username"} />
 

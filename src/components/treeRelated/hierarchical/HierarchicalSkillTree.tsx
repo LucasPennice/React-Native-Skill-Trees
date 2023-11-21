@@ -1,4 +1,4 @@
-import { CIRCLE_SIZE } from "@/parameters";
+import { CIRCLE_SIZE, colors } from "@/parameters";
 import { Picture, SkFont, Skia, createPicture } from "@shopify/react-native-skia";
 import { Fragment, memo, useMemo } from "react";
 import { SharedValue } from "react-native-reanimated";
@@ -81,6 +81,8 @@ const StaticHierarchicalPathList = memo(function StaticHierarchicalPathList({
             createPicture({ x: 0, y: 0, width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }, (canvas) => {
                 const paint = Skia.Paint();
                 paint.setColor(Skia.Color("#1C1C1D"));
+                const completePaint = Skia.Paint();
+                completePaint.setColor(Skia.Color(`${colors.orange}F0`));
 
                 for (const nodeCoordinate of staticNodes) {
                     if (nodeCoordinate.isRoot) continue;
@@ -100,6 +102,7 @@ const StaticHierarchicalPathList = memo(function StaticHierarchicalPathList({
                     path.stroke({ width: 2 });
 
                     canvas.drawPath(path, paint);
+                    // canvas.drawPath(path, nodeCoordinate.data.isCompleted ? completePaint : paint);
                 }
             }),
         [nodeCoordinates, staticNodes, canvasDimensions]

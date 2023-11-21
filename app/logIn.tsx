@@ -98,12 +98,7 @@ export default function SignInScreen() {
                         {error.identifier !== "" && (
                             <AppText children={error.identifier} fontSize={14} style={{ color: colors.pink, marginBottom: 10 }} />
                         )}
-                        <PasswordInput
-                            textState={[password, setPassword]}
-                            inputProps={{ secureTextEntry: true }}
-                            placeholder={"Password"}
-                            containerStyles={{ marginBottom: 10 }}
-                        />
+                        <PasswordInput textState={[password, setPassword]} inputProps={{ secureTextEntry: true }} placeholder={"Password"} />
                         {error.password !== "" && <AppText children={error.password} fontSize={14} style={{ color: colors.pink }} />}
 
                         <AppButton

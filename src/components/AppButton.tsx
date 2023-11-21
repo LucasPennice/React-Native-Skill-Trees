@@ -1,7 +1,7 @@
 import AppText from "@/components/AppText";
 import LoadingIcon from "@/components/LoadingIcon";
 import { colors } from "@/parameters";
-import { Pressable, StyleProp, StyleSheet, TextStyle, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, TextStyle, TouchableOpacity, ViewStyle } from "react-native";
 import Animated, { ZoomIn, ZoomOut, useAnimatedStyle, withTiming } from "react-native-reanimated";
 
 export type ButtonState = "error" | "idle" | "loading" | "success";
@@ -69,7 +69,7 @@ const AppButton = ({
     });
 
     return (
-        <Pressable onPressIn={onPress} disabled={disabled} style={pressableStyle}>
+        <TouchableOpacity onPressIn={onPress} disabled={disabled} style={pressableStyle}>
             <Animated.View style={[styles.container, animatedContainerStyles, disabledStyles, style]}>
                 {state === "idle" && (
                     <Animated.View entering={ZoomIn} exiting={ZoomOut}>
@@ -92,7 +92,7 @@ const AppButton = ({
                     </Animated.View>
                 )}
             </Animated.View>
-        </Pressable>
+        </TouchableOpacity>
     );
 };
 export default AppButton;

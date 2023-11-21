@@ -204,6 +204,7 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
                         justifyContent: "center",
                         backgroundColor: colors.darkGray,
                         borderRadius: 10,
+                        overflow: "hidden",
                     }}>
                     <Animated.ScrollView
                         horizontal

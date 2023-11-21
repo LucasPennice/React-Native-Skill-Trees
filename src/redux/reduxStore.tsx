@@ -1,3 +1,4 @@
+import { generateMongoCompliantId } from "@/functions/misc";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import {
@@ -13,18 +14,17 @@ import {
     persistReducer,
     persistStore,
 } from "redux-persist";
+import { MigrationConfig } from "redux-persist/es/createMigrate";
 import { migrationFunction } from "./migration";
 import addTreeReducer from "./slices/addTreeModalSlice";
 import canvasDisplaySettingsReducer from "./slices/canvasDisplaySettingsSlice";
 import homeTreeSlice from "./slices/homeTreeSlice";
 import nodesSlice from "./slices/nodesSlice";
-import screenDimentionsReducer from "./slices/screenDimentionsSlice";
-import userTreesSlice from "./slices/userTreesSlice";
-import { MigrationConfig } from "redux-persist/es/createMigrate";
-import { generateMongoCompliantId } from "@/functions/misc";
-import userFeedbackSlice from "./slices/userFeedbackSlice";
 import onboardingSlice from "./slices/onboardingSlice";
+import screenDimentionsReducer from "./slices/screenDimentionsSlice";
 import syncSlice from "./slices/syncSlice";
+import userFeedbackSlice from "./slices/userFeedbackSlice";
+import userTreesSlice from "./slices/userTreesSlice";
 
 const migration: MigrationManifest = {
     //@ts-ignore
