@@ -21,6 +21,7 @@ import RadioInput from "../../RadioInput";
 import GeneralTreeExample from "./GeneralTreeExample";
 import HomePageTreeExample from "./HomePageTreeExample";
 import Spacer from "@/components/Spacer";
+import useIsFirstRender from "@/useIsFirstRender";
 
 type Props = {
     closeModal: () => void;
@@ -39,6 +40,8 @@ function useSetInitialIconValue(treeDataIcon: SkillIcon, setEmoji: (v: Emoji) =>
 function CanvasSettingsModal({ closeModal, open }: Props) {
     const { oneColorPerTree, showCircleGuide, showLabel, showIcons } = useAppSelector(selectCanvasDisplaySettings);
     const { accentColor, icon, treeName } = useAppSelector(selectHomeTree);
+
+    const isFirstRender = useIsFirstRender();
 
     const dispatch = useAppDispatch();
 
@@ -70,13 +73,18 @@ function CanvasSettingsModal({ closeModal, open }: Props) {
     useSetInitialIconValue(icon, setEmoji);
 
     useEffect(() => {
+        if (isFirstRender) return;
+
         if (newHomeTreeName === "") return;
+
         dispatch(updateHomeName(newHomeTreeName));
 
         if (emoji === undefined) dispatch(updateHomeIcon({ isEmoji: false, text: newHomeTreeName[0] }));
     }, [newHomeTreeName]);
 
     useEffect(() => {
+        if (isFirstRender) return;
+
         if (emoji) {
             dispatch(updateHomeIcon({ isEmoji: true, text: emoji.emoji }));
             return;

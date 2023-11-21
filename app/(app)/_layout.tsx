@@ -14,10 +14,12 @@ import analytics from "@react-native-firebase/analytics";
 import { useFonts } from "expo-font";
 import { Redirect, SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
 import { Mixpanel } from "mixpanel-react-native";
-import { Fragment, useEffect, useRef } from "react";
-import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { Alert, AppState, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, FadeInRight, FadeOut, FadeOutLeft, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { RoutesParams, hideNavAndOnboarding, routes } from "routes";
+import { dayInMilliseconds } from "./backup";
+import useUpdateBackup from "@/useUpdateBackup";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
     return <FontAwesome size={props.size ?? 24} style={{ marginBottom: -3 }} {...props} />;
@@ -35,8 +37,43 @@ const trackAutomaticEvents = true;
 export const mixpanel = new Mixpanel("5a141ce3c43980d8fab68b96e1256525", trackAutomaticEvents);
 mixpanel.init();
 
+const useHandleUpdateBackup = () => {
+    const { localMutationsSinceBackups, lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);
+
+    const appState = useRef(AppState.currentState);
+    const [appStateVisible, setAppStateVisible] = useState(appState.current);
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener("change", (nextAppState) => {
+            appState.current = nextAppState;
+            setAppStateVisible(appState.current);
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, []);
+
+    const { handleUserBackup } = useUpdateBackup();
+
+    useEffect(() => {
+        (async () => {
+            const dayOrMoreSinceLastBackup = new Date().getTime() - lastUpdateUTC_Timestamp >= dayInMilliseconds;
+            if (!(dayOrMoreSinceLastBackup && localMutationsSinceBackups)) return;
+            if (appStateVisible !== "active") return;
+
+            try {
+                await handleUserBackup();
+            } catch (error) {
+                Alert.alert("Error creating a backup", `Please contact the developer ${error}`);
+            }
+        })();
+    }, [appStateVisible]);
+};
+
 export default function RootLayout() {
     useIdentifyMixPanelUserId();
+    useHandleUpdateBackup();
     const onboarding = useAppSelector(selectOnboarding);
     const { shouldWaitForClerkToLoad } = useAppSelector(selectSyncSlice);
     const { isSignedIn, isLoaded } = useUser();

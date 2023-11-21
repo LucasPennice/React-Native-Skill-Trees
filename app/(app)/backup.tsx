@@ -12,7 +12,7 @@ const style = StyleSheet.create({
     cloudContainer: { flexDirection: "row", backgroundColor: colors.darkGray, padding: 10, borderRadius: 10, alignItems: "center", gap: 10 },
 });
 
-const dayInMilliseconds = 1000 * 60 * 60 * 24;
+export const dayInMilliseconds = 1000 * 60 * 60 * 24;
 
 function BackupScreen() {
     const { lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);
