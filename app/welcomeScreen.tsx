@@ -1,5 +1,6 @@
 import AppButton from "@/components/AppButton";
 import AppText from "@/components/AppText";
+import CloudIcon from "@/components/Icons/CloudIcon";
 import Logo from "@/components/Logo";
 import { DefineGradients, HierarchicalPath, RadialPath } from "@/components/takingScreenshot/TakingScreenshotLoadingScreenModal";
 import { getTextWidth } from "@/components/treeRelated/general/StaticNodeList";
@@ -8,6 +9,9 @@ import { completedSkillTreeTable } from "@/functions/extractInformationFromTree"
 import { getLabelTextColor } from "@/functions/misc";
 import { nodeToCircularPath } from "@/functions/svg/toSvg";
 import { CIRCLE_SIZE, HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, centerFlex, colors } from "@/parameters";
+import { useAppSelector } from "@/redux/reduxHooks";
+import { selectTotalNodeNumber } from "@/redux/slices/nodesSlice";
+import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import { SkiaFontContext } from "app/_layout";
 import { router } from "expo-router";
 import { Fragment, useContext } from "react";
@@ -26,11 +30,57 @@ export const logoSharedTransitionStyle = SharedTransition.custom((values) => {
     };
 });
 
+const useCheckIfUserIsTransitioningFromNoLogin = () => {
+    const nodeQty = useAppSelector(selectTotalNodeNumber);
+    const { firstTimeOpeningApp } = useAppSelector(selectSyncSlice);
+
+    if (nodeQty > 1 && firstTimeOpeningApp) return true;
+
+    return false;
+};
+
 function WelcomeScreen() {
     const { width } = Dimensions.get("window");
 
+    const isUserTransitioningFromNoLogin = useCheckIfUserIsTransitioningFromNoLogin();
+
     const navigateToLogin = () => router.push("/logIn");
-    const navigateToSignUp = () => router.push("/signUp");
+    const navigateToSignUp = (hideRedirectToLogin: boolean) => () =>
+        router.push({ pathname: "/signUp", params: { hideRedirectToLogin: `${hideRedirectToLogin}` } });
+
+    if (isUserTransitioningFromNoLogin)
+        return (
+            <View style={[centerFlex, { flex: 1, justifyContent: "space-between", padding: 10 }]}>
+                <Logo />
+
+                <View style={{ alignItems: "center", paddingHorizontal: 10, gap: 10 }}>
+                    <CloudIcon width={80} height={80} fill={colors.blue} />
+
+                    <AppText children={"Welcome Back"} fontSize={20} style={{ marginBottom: 10, textAlign: "center" }} />
+
+                    <AppText
+                        children={"All your trees are right where you left them"}
+                        fontSize={18}
+                        style={{ marginBottom: 10, textAlign: "center" }}
+                    />
+
+                    <AppText
+                        children={"Create an account to keep your progress safe in the cloud"}
+                        fontSize={18}
+                        style={{ marginBottom: 10, textAlign: "center" }}
+                    />
+                </View>
+
+                <AppButton
+                    onPress={navigateToSignUp(true)}
+                    text={{ idle: "CREATE ACCOUNT" }}
+                    color={{ idle: colors.accent }}
+                    pressableStyle={{ width, paddingHorizontal: 10 }}
+                    style={{ backgroundColor: colors.background, marginTop: 20 }}
+                    textStyle={{ fontFamily: "helveticaBold" }}
+                />
+            </View>
+        );
 
     return (
         <View style={[centerFlex, { flex: 1, justifyContent: "flex-end", position: "relative" }]}>
@@ -42,7 +92,7 @@ function WelcomeScreen() {
                 <AppText children={"Track your life's progress. All in one place."} fontSize={16} style={{ textAlign: "center", marginTop: 15 }} />
 
                 <AppButton
-                    onPress={navigateToSignUp}
+                    onPress={navigateToSignUp(false)}
                     text={{ idle: "JOIN 1400+ USERS" }}
                     color={{ idle: colors.accent }}
                     pressableStyle={{ width, paddingHorizontal: 10 }}

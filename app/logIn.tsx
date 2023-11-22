@@ -15,6 +15,8 @@ import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "rea
 import Animated, { FadeInRight } from "react-native-reanimated";
 import { RoutesParams } from "routes";
 import { useHandleButtonState, useHandleClerkErrorMessages } from "./signUp";
+import { useAppDispatch } from "@/redux/reduxHooks";
+import { updateFirstTimeOpeningApp } from "@/redux/slices/syncSlice";
 
 const style = StyleSheet.create({
     container: { alignItems: "center", flex: 1, padding: 15 },
@@ -23,7 +25,7 @@ const style = StyleSheet.create({
 export default function SignInScreen() {
     const { error, resetErrors, updateIdentifierError, updatePasswordError } = useHandleClerkErrorMessages();
     const { setSubmitError, setSubmitLoading, submitState } = useHandleButtonState();
-
+    const dispatch = useAppDispatch();
     useWarmUpBrowser();
 
     const { signIn, setActive, isLoaded } = useSignIn();
@@ -38,9 +40,11 @@ export default function SignInScreen() {
         resetErrors();
 
         try {
-            const completeSignIn = await signIn.create({ identifier: emailAddress, password });
+            const completeSignIn = await signIn.create({ identifier: emailAddress.replace(" ", ""), password });
 
             await setActive({ session: completeSignIn.createdSessionId });
+
+            dispatch(updateFirstTimeOpeningApp());
 
             const params: RoutesParams["home"] = { handleLogInSync: "true" };
             router.push({ pathname: "/(app)/home", params });
@@ -73,7 +77,7 @@ export default function SignInScreen() {
 
                 <Animated.View style={{ width: "100%", gap: 10, marginTop: 20 }} entering={FadeInRight}>
                     <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-evenly" }}>
-                        <SocialAuthGoogleButton actingAs={"logIn"} />
+                        {/* <SocialAuthGoogleButton actingAs={"logIn"} /> */}
                         <SocialAuthDiscordButton actingAs={"logIn"} />
                     </View>
 
@@ -98,7 +102,12 @@ export default function SignInScreen() {
                         {error.identifier !== "" && (
                             <AppText children={error.identifier} fontSize={14} style={{ color: colors.pink, marginBottom: 10 }} />
                         )}
-                        <PasswordInput textState={[password, setPassword]} inputProps={{ secureTextEntry: true }} placeholder={"Password"} />
+                        <PasswordInput
+                            textState={[password, setPassword]}
+                            inputProps={{ secureTextEntry: true }}
+                            placeholder={"Password"}
+                            onBlur={onSignInPress}
+                        />
                         {error.password !== "" && <AppText children={error.password} fontSize={14} style={{ color: colors.pink }} />}
 
                         <AppButton

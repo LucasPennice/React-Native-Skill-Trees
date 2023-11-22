@@ -58,4 +58,7 @@ export type RoutesParams = {
         handleLogInSync?: "true";
         handleSignUpSync?: "true";
     };
+    signUp: {
+        hideRedirectToLogin?: "true";
+    };
 };

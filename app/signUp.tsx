@@ -5,12 +5,13 @@ import Logo from "@/components/Logo";
 import PasswordInput from "@/components/PasswordInput";
 import Spacer from "@/components/Spacer";
 import SocialAuthDiscordButton from "@/components/auth/SocialAuthDiscordButton";
-import SocialAuthGoogleButton from "@/components/auth/SocialAuthGoogleButton";
 import { colors } from "@/parameters";
+import { useAppDispatch } from "@/redux/reduxHooks";
+import { updateFirstTimeOpeningApp } from "@/redux/slices/syncSlice";
 import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useSignUp } from "@clerk/clerk-expo";
-import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { RoutesParams } from "routes";
@@ -61,6 +62,9 @@ export const useHandleButtonState = () => {
 
 function SignUp() {
     useWarmUpBrowser();
+    const { hideRedirectToLogin } = useLocalSearchParams<RoutesParams["signUp"]>();
+
+    const dispatch = useAppDispatch();
 
     const style = StyleSheet.create({
         container: { alignItems: "center", flex: 1, padding: 15 },
@@ -85,7 +89,7 @@ function SignUp() {
         resetErrors();
 
         try {
-            await signUp.create({ emailAddress, password, username });
+            await signUp.create({ emailAddress: emailAddress.replace(" ", ""), password, username });
 
             // send the email.
             await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
@@ -129,6 +133,8 @@ function SignUp() {
 
             await setActive({ session: completeSignUp.createdSessionId });
 
+            dispatch(updateFirstTimeOpeningApp());
+
             const params: RoutesParams["home"] = { handleSignUpSync: "true" };
             router.push({ pathname: "/(app)/home", params });
         } catch (err: any) {
@@ -157,7 +163,7 @@ function SignUp() {
                 {!pendingVerification && (
                     <Animated.View style={{ width: "100%", gap: 10, marginTop: 20 }} exiting={FadeOutLeft}>
                         <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-evenly" }}>
-                            <SocialAuthGoogleButton actingAs={"signUp"} />
+                            {/* <SocialAuthGoogleButton actingAs={"signUp"} /> */}
                             <SocialAuthDiscordButton actingAs={"signUp"} />
                         </View>
 
@@ -221,12 +227,14 @@ function SignUp() {
                     </Animated.View>
                 )}
             </KeyboardAvoidingView>
-            <Pressable
-                onPressIn={navigateToLogin}
-                style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-start", width: "100%", height: 45 }}>
-                <AppText children={"Have an account?"} fontSize={14} />
-                <AppText children={"Log In"} fontSize={14} style={{ color: colors.accent, fontFamily: "helveticaBold", paddingLeft: 3 }} />
-            </Pressable>
+            {hideRedirectToLogin !== "true" && (
+                <Pressable
+                    onPressIn={navigateToLogin}
+                    style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-start", width: "100%", height: 45 }}>
+                    <AppText children={"Have an account?"} fontSize={14} />
+                    <AppText children={"Log In"} fontSize={14} style={{ color: colors.accent, fontFamily: "helveticaBold", paddingLeft: 3 }} />
+                </Pressable>
+            )}
         </Animated.View>
     );
 

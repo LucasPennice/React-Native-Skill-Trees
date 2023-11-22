@@ -5,12 +5,14 @@ export type SyncSlice = {
     lastUpdateUTC_Timestamp: number;
     localMutationsSinceBackups: boolean;
     shouldWaitForClerkToLoad: boolean;
+    firstTimeOpeningApp: boolean;
 };
 
 export const syncSliceInitialState: SyncSlice = {
     lastUpdateUTC_Timestamp: new Date().getTime(),
     localMutationsSinceBackups: false,
     shouldWaitForClerkToLoad: true,
+    firstTimeOpeningApp: true,
 };
 
 export const syncSlice = createSlice({
@@ -19,6 +21,9 @@ export const syncSlice = createSlice({
     reducers: {
         resetLocalMutationsSinceBackups: (state) => {
             state.localMutationsSinceBackups = false;
+        },
+        updateFirstTimeOpeningApp: (state) => {
+            state.firstTimeOpeningApp = false;
         },
         updateLastBackupTime: (state) => {
             state.lastUpdateUTC_Timestamp = new Date().getTime();
@@ -35,7 +40,7 @@ export const syncSlice = createSlice({
     },
 });
 
-export const { resetLocalMutationsSinceBackups, updateLastBackupTime, setShouldWaitForClerkToLoad } = syncSlice.actions;
+export const { resetLocalMutationsSinceBackups, updateLastBackupTime, setShouldWaitForClerkToLoad, updateFirstTimeOpeningApp } = syncSlice.actions;
 
 export default syncSlice.reducer;
 

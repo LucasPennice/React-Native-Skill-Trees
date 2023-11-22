@@ -26,10 +26,14 @@ export const SocialAuthGoogleButton = ({ actingAs }: SocialAuthButton) => {
 
     const logInGoogle = useCallback(async () => {
         try {
+            console.log("1");
             const { createdSessionId, setActive } = await startOAuthFlow();
 
+            console.log("2");
+            console.log(createdSessionId && setActive, createdSessionId, setActive);
             if (createdSessionId && setActive) {
                 await setActive({ session: createdSessionId });
+                console.log("3");
 
                 let params: RoutesParams["home"] = {};
 
