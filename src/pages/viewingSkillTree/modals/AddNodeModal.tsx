@@ -271,9 +271,9 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
                             state={[emojiSelectorOpen, setEmojiSelectorOpen]}
                         />
 
-                        <Spacer style={{ marginVertical: 10 }} />
+                        {/* <Spacer style={{ marginVertical: 10 }} /> */}
 
-                        <GoalForm blockInteraction={currentNode.data.isCompleted} />
+                        {/* <GoalForm blockInteraction={currentNode.data.isCompleted} /> */}
                     </ScrollView>
                 </View>
                 <AddAndEditButton handleAddNodeToList={handleAddNodeToList} isEditing={isEditing} shouldBlockAddButton={shouldBlockAddButton} />

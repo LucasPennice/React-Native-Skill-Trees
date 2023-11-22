@@ -205,22 +205,22 @@ export default function RootLayout() {
                             My Trees
                         </AppText>
                     </Pressable>
-                    <Pressable
+                    {/* <Pressable
                         style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                         onPress={() => router.replace("/(app)/userProgress")}>
                         <TabBarIcon name="check-circle" color={pathname.includes("userProgress") ? colors.accent : colors.unmarkedText} />
                         <AppText style={{ color: pathname.includes("userProgress") ? colors.accent : colors.unmarkedText }} fontSize={12}>
                             Habits
                         </AppText>
-                    </Pressable>
-                    {/* <Pressable
+                    </Pressable> */}
+                    <Pressable
                         style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                         onPress={() => router.replace("/(app)/feedback")}>
                         <TabBarIcon name="group" color={pathname.includes("feedback") ? colors.accent : colors.unmarkedText} />
                         <AppText style={{ color: pathname.includes("feedback") ? colors.accent : colors.unmarkedText }} fontSize={12}>
                             Community
                         </AppText>
-                    </Pressable> */}
+                    </Pressable>
                     <Pressable
                         style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                         onPress={() => router.replace("/(app)/userProfile")}>
