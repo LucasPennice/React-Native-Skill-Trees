@@ -12,6 +12,8 @@ import * as Application from "expo-application";
 import { router } from "expo-router";
 import { Alert, Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { mixpanel } from "./_layout";
+import LoadingIcon from "@/components/LoadingIcon";
+import { useState } from "react";
 
 function UserProfile() {
     const style = StyleSheet.create({
@@ -56,9 +58,13 @@ export default UserProfile;
 const UserCard = () => {
     const { user } = useUser();
 
+    const [showLoading, setShowLoading] = useState(false);
+
     const style = StyleSheet.create({
         container: { flexDirection: "row", gap: 15, alignItems: "center" },
         photo: { height: 60, width: 60, borderRadius: 30, backgroundColor: colors.darkGray },
+        photoContainer: { position: "relative", justifyContent: "center", alignItems: "center" },
+        loadingIndicator: { position: "absolute" },
         premiumStatus: { flexDirection: "row", gap: 5 },
     });
 
@@ -66,7 +72,19 @@ const UserCard = () => {
 
     return (
         <View style={style.container}>
-            <Image style={style.photo} source={{ uri: user?.imageUrl }} />
+            <View style={style.photoContainer}>
+                <Image
+                    style={style.photo}
+                    source={{ uri: user?.imageUrl }}
+                    onLoadStart={() => setShowLoading(true)}
+                    onLoadEnd={() => setShowLoading(false)}
+                />
+                {showLoading && (
+                    <View style={style.loadingIndicator}>
+                        <LoadingIcon size={30} />
+                    </View>
+                )}
+            </View>
             <View style={{ gap: 5 }}>
                 <AppText fontSize={20} children={user?.username ?? "Username"} />
 

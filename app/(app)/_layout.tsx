@@ -8,18 +8,18 @@ import { closeOnboardingMenu, expandOnboardingMenu, selectOnboarding, skipToStep
 import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import { selectAllTrees } from "@/redux/slices/userTreesSlice";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
+import useUpdateBackup from "@/useUpdateBackup";
 import { useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import analytics from "@react-native-firebase/analytics";
 import { useFonts } from "expo-font";
-import { Redirect, SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
+import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
 import { Mixpanel } from "mixpanel-react-native";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Alert, AppState, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, FadeInRight, FadeOut, FadeOutLeft, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { RoutesParams, hideNavAndOnboarding, routes } from "routes";
 import { dayInMilliseconds } from "./backup";
-import useUpdateBackup from "@/useUpdateBackup";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
     return <FontAwesome size={props.size ?? 24} style={{ marginBottom: -3 }} {...props} />;
@@ -114,10 +114,6 @@ export default function RootLayout() {
     useRedirectToWelcomeScreen(attemptToRedirect, isLoaded, isSignedIn);
 
     if (!fontsLoaded || !isClerkLoaded) return <Text>Loading...</Text>;
-
-    // if (isLoaded && !isSignedIn) return <Redirect href="/welcomeScreen" />;
-
-    // if (process.env.NODE_ENV === "production" && isLoaded && !isSignedIn) return <Redirect href="/welcomeScreen" />;
 
     const hide = !Boolean(pathname === "/" || hideNavAndOnboarding.find((route) => pathname.includes(route)));
 

@@ -5,18 +5,17 @@ import Logo from "@/components/Logo";
 import PasswordInput from "@/components/PasswordInput";
 import Spacer from "@/components/Spacer";
 import { SocialAuthDiscordButton } from "@/components/auth/SocialAuthDiscordButton";
-import { SocialAuthGoogleButton } from "@/components/auth/SocialAuthGoogleButton";
 import { colors } from "@/parameters";
+import { useAppDispatch } from "@/redux/reduxHooks";
+import { updateFirstTimeOpeningApp } from "@/redux/slices/syncSlice";
 import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useSignIn } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import React from "react";
-import { Button, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 import { RoutesParams } from "routes";
 import { useHandleButtonState, useHandleClerkErrorMessages } from "./signUp";
-import { useAppDispatch } from "@/redux/reduxHooks";
-import { updateFirstTimeOpeningApp } from "@/redux/slices/syncSlice";
 
 const style = StyleSheet.create({
     container: { alignItems: "center", flex: 1, padding: 15 },
@@ -47,6 +46,7 @@ export default function SignInScreen() {
             dispatch(updateFirstTimeOpeningApp());
 
             const params: RoutesParams["home"] = { handleLogInSync: "true" };
+
             router.push({ pathname: "/home", params });
         } catch (err: any) {
             const errors: { meta: { paramName: string }; longMessage: string }[] = err.errors;
