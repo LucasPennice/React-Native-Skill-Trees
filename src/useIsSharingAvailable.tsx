@@ -1,3 +1,4 @@
+import { mixpanel } from "app/(app)/_layout";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import * as Sharing from "expo-sharing";
@@ -35,5 +36,6 @@ export async function sharePNG(fileName: string, data: string) {
     } catch (error) {
         console.error(error);
         Alert.alert("There was an error sharing your skill tree");
+        mixpanel.track(`appError`, { message: error, stack: error });
     }
 }

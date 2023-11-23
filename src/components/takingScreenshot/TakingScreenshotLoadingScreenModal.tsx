@@ -81,6 +81,7 @@ const useHandleScreenshotCapture = (
             closeModal();
         } catch (error) {
             Alert.alert("Error onCapture");
+            mixpanel.track(`appError`, { message: error, stack: error });
         } finally {
             setLoadingShare(false);
         }

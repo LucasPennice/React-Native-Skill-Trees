@@ -6,6 +6,7 @@ import { useAppSelector } from "@/redux/reduxHooks";
 import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import useUpdateBackup from "@/useUpdateBackup";
 import { Alert, StyleSheet, View } from "react-native";
+import { mixpanel } from "./_layout";
 
 const style = StyleSheet.create({
     container: { flex: 1, padding: 10, gap: 20 },
@@ -22,6 +23,8 @@ function BackupScreen() {
         try {
             await handleUserBackup();
         } catch (error) {
+            mixpanel.track(`appError`, { message: error, stack: error });
+
             Alert.alert(`There was an error creating your backup`, `Please contact the developer ${error}`);
         }
     };

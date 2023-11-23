@@ -31,6 +31,7 @@ import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
 import { RoutesParams } from "routes";
 import { Contact } from "./feedback";
 import { batch } from "react-redux";
+import { mixpanel } from "./_layout";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();
@@ -177,6 +178,7 @@ function useHandleSyncOnLoginOrSignUp(
                 return;
             } catch (error) {
                 Alert.alert("There was an error loading you backup", `Please contact the developer ${error}`);
+                mixpanel.track(`appError`, { message: error, stack: error });
 
                 setSyncError();
             }
@@ -197,6 +199,7 @@ function useHandleSyncOnLoginOrSignUp(
             dispatch(updateLastBackupTime());
         } catch (error) {
             Alert.alert("There was an error creating your backup", `Please contact the developer ${error}`);
+            mixpanel.track(`appError`, { message: error, stack: error });
         }
     };
 }

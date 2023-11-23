@@ -127,6 +127,7 @@ const SignOutButton = () => {
 
             signOut();
         } catch (error) {
+            mixpanel.track(`appError`, { message: error, stack: error });
             Alert.alert("Error creating a backup", `All progress after ${new Date().toString()} will be lost\nQuit anyway?`, [
                 { text: "No", style: "default", isPreferred: true },
                 {

@@ -10,6 +10,7 @@ import { selectOnboarding } from "./redux/slices/onboardingSlice";
 import { selectSyncSlice, updateLastBackupTime } from "./redux/slices/syncSlice";
 import { selectAllTreesEntities, selectTreeIds } from "./redux/slices/userTreesSlice";
 import useMongoCompliantUserId from "./useMongoCompliantUserId";
+import { mixpanel } from "app/(app)/_layout";
 
 function useUpdateBackup() {
     const { setSubmitLoading, setSubmitError, submitState: backupState, setSubmitSuccess } = useHandleButtonState();
@@ -39,6 +40,7 @@ function useUpdateBackup() {
             setSubmitSuccess();
         } catch (error) {
             setSubmitError();
+            mixpanel.track(`appError`, { message: error, stack: error });
             throw new Error(`${error}`);
         }
     };
