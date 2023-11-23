@@ -11,7 +11,7 @@ import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useSignIn } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import React from "react";
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
+import { Button, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 import { RoutesParams } from "routes";
 import { useHandleButtonState, useHandleClerkErrorMessages } from "./signUp";
@@ -47,7 +47,7 @@ export default function SignInScreen() {
             dispatch(updateFirstTimeOpeningApp());
 
             const params: RoutesParams["home"] = { handleLogInSync: "true" };
-            router.push({ pathname: "/(app)/home", params });
+            router.push({ pathname: "/home", params });
         } catch (err: any) {
             const errors: { meta: { paramName: string }; longMessage: string }[] = err.errors;
 

@@ -71,6 +71,14 @@ const useHandleUpdateBackup = () => {
     }, [appStateVisible]);
 };
 
+const useRedirectToWelcomeScreen = (attemptToRedirect: boolean, isLoaded: boolean, isSignedIn: boolean | undefined) => {
+    useEffect(() => {
+        if (!attemptToRedirect) return;
+        if (isLoaded && !isSignedIn) return router.push("/welcomeScreen");
+        // if (process.env.NODE_ENV === "production" && isLoaded && !isSignedIn) return router.push("/welcomeScreen");
+    }, [isLoaded, isSignedIn, attemptToRedirect]);
+};
+
 export default function RootLayout() {
     useIdentifyMixPanelUserId();
     useHandleUpdateBackup();
@@ -101,9 +109,13 @@ export default function RootLayout() {
 
     const prevRouteName = useRef<string | null>(null);
 
+    const attemptToRedirect = !(!fontsLoaded || !isClerkLoaded);
+
+    useRedirectToWelcomeScreen(attemptToRedirect, isLoaded, isSignedIn);
+
     if (!fontsLoaded || !isClerkLoaded) return <Text>Loading...</Text>;
 
-    if (isLoaded && !isSignedIn) return <Redirect href="/welcomeScreen" />;
+    // if (isLoaded && !isSignedIn) return <Redirect href="/welcomeScreen" />;
 
     // if (process.env.NODE_ENV === "production" && isLoaded && !isSignedIn) return <Redirect href="/welcomeScreen" />;
 
@@ -152,12 +164,7 @@ export default function RootLayout() {
                         prevRouteName.current = currentRouteName;
                     },
                 }}>
-                <Stack.Screen
-                    name={routes.home.name}
-                    options={{
-                        title: "Home",
-                    }}
-                />
+                <Stack.Screen name={routes.home.name} options={{ title: "Home" }} />
                 <Stack.Screen
                     name={routes.backup.name}
                     options={{

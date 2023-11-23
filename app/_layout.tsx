@@ -153,7 +153,9 @@ const useUpdateTreeDataForShowOnHomepage = () => {
 const useUpdateUserFeedback = () => {
     const dispatch = useAppDispatch();
 
-    dispatch(initializeFeedbackArrays());
+    useEffect(() => {
+        dispatch(initializeFeedbackArrays);
+    }, []);
 };
 
 const useGuaranteeHomeRootTree = () => {
