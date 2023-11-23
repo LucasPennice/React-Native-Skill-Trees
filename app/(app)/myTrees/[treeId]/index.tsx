@@ -459,7 +459,6 @@ function IndividualSkillTreePage() {
                 takingScreenshotState={takingScreenshotState}
                 treeData={treeData}
             />
-            {/* <ShareTree tree={selectedTree} show={modalState === "IDLE"} /> */}
 
             <OpenSettingsMenu show={modalState === "IDLE"} openModal={() => dispatchModalState("openEditCanvasSettings")} />
 
