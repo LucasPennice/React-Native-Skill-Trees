@@ -25,13 +25,15 @@ import * as ExpoNavigationBar from "expo-navigation-bar";
 import { ErrorBoundaryProps, SplashScreen, Stack } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { createContext, useEffect, useState } from "react";
-import { LogBox, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, View } from "react-native";
+import { LogBox, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { mixpanel } from "./(app)/_layout";
 import "../globals";
+import { routes } from "routes";
+import ChevronLeft from "@/components/Icons/ChevronLeft";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -198,7 +200,32 @@ function AppWithReduxContext() {
                 var { width, height } = event.nativeEvent.layout;
                 dispatch(updateSafeScreenDimentions({ width, height }));
             }}>
-            <Stack screenOptions={{ headerShown: false }} />
+            <Stack
+                screenOptions={{
+                    headerShown: false,
+                    header: ({ navigation, options, route, back }) => {
+                        return (
+                            <View
+                                style={{
+                                    height: 45,
+                                    backgroundColor: colors.darkGray,
+                                    alignItems: "center",
+                                    position: "relative",
+                                    justifyContent: "center",
+                                }}>
+                                <TouchableOpacity
+                                    onPress={navigation.goBack}
+                                    style={{ position: "absolute", left: 0, flexDirection: "row", alignItems: "center", height: 45, width: 100 }}>
+                                    <ChevronLeft height={30} width={30} color={colors.accent} />
+                                </TouchableOpacity>
+
+                                <AppText fontSize={16} children={route.name} style={{ textTransform: "capitalize" }} />
+                            </View>
+                        );
+                    },
+                }}>
+                <Stack.Screen name={routes.support.name} options={{ title: routes.support.name, headerShown: true }} />
+            </Stack>
         </View>
     );
 }

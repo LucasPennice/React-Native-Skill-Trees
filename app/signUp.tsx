@@ -4,6 +4,7 @@ import AppTextInput from "@/components/AppTextInput";
 import Logo from "@/components/Logo";
 import PasswordInput from "@/components/PasswordInput";
 import Spacer from "@/components/Spacer";
+import RedirectToSupportPage from "@/components/auth/RedirectToSupportPage";
 import SocialAuthDiscordButton from "@/components/auth/SocialAuthDiscordButton";
 import { colors } from "@/parameters";
 import { useAppDispatch } from "@/redux/reduxHooks";
@@ -235,6 +236,7 @@ function SignUp() {
                     <AppText children={"Log In"} fontSize={14} style={{ color: colors.accent, fontFamily: "helveticaBold", paddingLeft: 3 }} />
                 </Pressable>
             )}
+            <RedirectToSupportPage />
         </Animated.View>
     );
 
