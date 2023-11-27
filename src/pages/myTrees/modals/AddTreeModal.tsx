@@ -1,6 +1,6 @@
 import AppEmojiPicker, { Emoji } from "@/components/AppEmojiPicker";
 import { generateMongoCompliantId, toggleEmoji } from "@/functions/misc";
-import { TreeData, addUserTree } from "@/redux/slices/userTreesSlice";
+import { TreeData, addUserTrees } from "@/redux/slices/userTreesSlice";
 import analytics from "@react-native-firebase/analytics";
 import { mixpanel } from "app/(app)/_layout";
 import { useEffect, useState } from "react";
@@ -73,7 +73,7 @@ function AddTreeModal() {
             showOnHomeScreen: true,
         };
 
-        dispatch(addUserTree(newUserTree));
+        dispatch(addUserTrees([newUserTree]));
 
         await analytics().logEvent("createTree", { treeName, isEmoji });
         await mixpanel.track("userCreatedTree");

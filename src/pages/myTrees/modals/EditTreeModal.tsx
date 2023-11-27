@@ -3,7 +3,7 @@ import AppEmojiPicker, { Emoji, findEmoji } from "@/components/AppEmojiPicker";
 import RadioInput from "@/components/RadioInput";
 import Spacer from "@/components/Spacer";
 import { toggleEmoji } from "@/functions/misc";
-import { TreeData, removeUserTree, selectTreeById, updateUserTree } from "@/redux/slices/userTreesSlice";
+import { TreeData, removeUserTrees, selectTreeById, updateUserTree } from "@/redux/slices/userTreesSlice";
 import { useEffect, useState } from "react";
 import { Alert, Pressable, View } from "react-native";
 import AppText from "../../../components/AppText";
@@ -41,7 +41,7 @@ function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; c
 
     const deleteTree = () => {
         closeModal();
-        dispatch(removeUserTree({ treeId: treeData.treeId, nodes: treeData.nodes }));
+        dispatch(removeUserTrees({ treeIds: [treeData.treeId], nodes: treeData.nodes }));
     };
 
     const confirmDeleteTree = () =>

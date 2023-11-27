@@ -2,7 +2,7 @@ import SelectedNodeView from "@/components/treeRelated/general/SelectedNodeView"
 import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMenuFunctions";
 import { selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { selectNodeById, selectNodesTable } from "@/redux/slices/nodesSlice";
-import { TreeData, removeUserTree, selectAllTreesEntities } from "@/redux/slices/userTreesSlice";
+import { TreeData, removeUserTrees, selectAllTreesEntities } from "@/redux/slices/userTreesSlice";
 import { Dictionary } from "@reduxjs/toolkit";
 import { Canvas, SkiaDomView } from "@shopify/react-native-skia";
 import { SkiaFontContext } from "app/_layout";
@@ -73,7 +73,7 @@ function useCreateTreeFunctions(updateSelectedNodeCoord: (value: NormalizedNode)
                     "",
                     [
                         { text: "No", style: "cancel" },
-                        { text: "Yes", onPress: () => dispatch(removeUserTree({ treeId, nodes: nodesIdOfTree })), style: "destructive" },
+                        { text: "Yes", onPress: () => dispatch(removeUserTrees({ treeIds: [treeId], nodes: nodesIdOfTree })), style: "destructive" },
                     ],
                     { cancelable: true }
                 );

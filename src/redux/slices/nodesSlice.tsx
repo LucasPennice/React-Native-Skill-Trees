@@ -3,7 +3,7 @@ import { NormalizedNode, getDefaultSkillValue } from "@/types";
 import { PayloadAction, Update, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../reduxStore";
 import { updateHomeIcon, updateHomeName } from "./homeTreeSlice";
-import { TreeData, addUserTree, addUserTrees, removeUserTree, removeUserTrees, updateUserTree } from "./userTreesSlice";
+import { TreeData, addUserTrees, removeUserTrees, updateUserTree } from "./userTreesSlice";
 
 const nodesAdapter = createEntityAdapter<NormalizedNode>({ selectId: (node) => node.nodeId });
 export const {
@@ -21,8 +21,8 @@ export const nodesSlice = createSlice({
     name: "nodesSlice",
     initialState,
     reducers: {
-        updateNodes: nodesAdapter.updateMany,
         createHomeRootNode: nodesAdapter.addOne,
+        updateNodes: nodesAdapter.updateMany,
         addNodes: nodesAdapter.addMany,
         removeNodes: (state, action: PayloadAction<{ treeId: string; nodesToDelete: string[] }>) => {
             //Remove the nodeToDelete id from the parent node
@@ -50,6 +50,40 @@ export const nodesSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
+        builder.addCase(addUserTrees, (state, action) => {
+            const homeRootNode = state.entities[HOMETREE_ROOT_ID];
+            if (!homeRootNode) throw new Error("homeRootNode not found at addUserTrees extra reducer");
+
+            const treesToAdd = action.payload as readonly TreeData[];
+
+            const newRootNodes: NormalizedNode[] = [];
+
+            for (let i = 0; i < treesToAdd.length; i++) {
+                const treeToAdd = treesToAdd[i];
+
+                const rootNode: NormalizedNode = {
+                    category: "SKILL_TREE",
+                    childrenIds: [],
+                    data: getDefaultSkillValue(treeToAdd.treeName, false, treeToAdd.icon),
+                    isRoot: true,
+                    level: 0,
+                    nodeId: treeToAdd.rootNodeId,
+                    parentId: null,
+                    treeId: treeToAdd.treeId,
+                    x: 0,
+                    y: 0,
+                };
+
+                newRootNodes.push(rootNode);
+            }
+
+            nodesAdapter.addMany(state, newRootNodes);
+
+            nodesAdapter.updateOne(state, {
+                id: HOMETREE_ROOT_ID,
+                changes: { childrenIds: [...homeRootNode.childrenIds, ...newRootNodes.map((n) => n.nodeId)] },
+            });
+        });
         builder.addCase(updateUserTree, (state, action) => {
             const rootNodeId = action.payload.rootNodeId;
             const rootNode = state.entities[rootNodeId];
@@ -72,23 +106,7 @@ export const nodesSlice = createSlice({
 
             nodesAdapter.updateOne(state, updates);
         });
-        builder.addCase(removeUserTree, (state, action) => {
-            const nodeIds = Object.keys(state.entities);
-            const rootNodeIdOfTreeToDelete = nodeIds.find((id) => state.entities[id]!.isRoot && state.entities[id]?.treeId === action.payload.treeId);
 
-            if (!rootNodeIdOfTreeToDelete) throw new Error(`rootNodeIdOfTreeToDelete undefined at extraReducer for removeUserTree`);
-
-            nodesAdapter.removeMany(state, action.payload.nodes);
-
-            const homeRootNode = state.entities[HOMETREE_ROOT_ID];
-
-            if (!homeRootNode) throw new Error("homeRootNode is undefined at extraReducer for removeUserTree");
-
-            nodesAdapter.updateOne(state, {
-                id: HOMETREE_ROOT_ID,
-                changes: { childrenIds: homeRootNode.childrenIds.filter((cId) => cId !== rootNodeIdOfTreeToDelete) },
-            });
-        });
         builder.addCase(removeUserTrees, (state, action) => {
             const { nodes, treeIds } = action.payload;
 
@@ -143,7 +161,7 @@ export const nodesSlice = createSlice({
     },
 });
 
-export const { addNodes, removeNodes, createHomeRootNode, updateNodes, overwriteNodeSlice } = nodesSlice.actions;
+export const { addNodes, removeNodes, updateNodes, createHomeRootNode, overwriteNodeSlice } = nodesSlice.actions;
 
 export default nodesSlice.reducer;
 

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../reduxStore";
-import { addUserTree } from "./userTreesSlice";
 import { addNodes } from "./nodesSlice";
+import { addUserTrees } from "./userTreesSlice";
 
 export enum OnboardingSteps {
     "CreateTree" = 0,
@@ -47,7 +47,7 @@ export const onboardingSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        builder.addCase(addUserTree, (state, action) => {
+        builder.addCase(addUserTrees, (state, action) => {
             if (state.currentStep === OnboardingSteps.CreateTree) state.currentStep = 1;
 
             if (state.currentStep === OnboardingSteps.PastSkills) state.currentStep = 3;

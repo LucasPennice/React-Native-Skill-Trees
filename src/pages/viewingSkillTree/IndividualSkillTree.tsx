@@ -1,7 +1,7 @@
 import SelectedNodeView from "@/components/treeRelated/general/SelectedNodeView";
 import useReturnNodeMenuFunctions from "@/components/treeRelated/useReturnNodeMenuFunctions";
 import { removeNodes } from "@/redux/slices/nodesSlice";
-import { TreeData, removeUserTree } from "@/redux/slices/userTreesSlice";
+import { TreeData, removeUserTrees } from "@/redux/slices/userTreesSlice";
 import { Canvas, SkiaDomView } from "@shopify/react-native-skia";
 import { SelectedNewNodePositionState, SelectedNodeCoordState } from "app/(app)/myTrees/[treeId]";
 import { SkiaFontContext } from "app/_layout";
@@ -86,7 +86,7 @@ function useCreateTreeFunctions(
                             onPress: () => {
                                 //@ts-ignore
                                 router.push("/myTrees");
-                                dispatch(removeUserTree({ treeId, nodes: nodesIdOfTree }));
+                                dispatch(removeUserTrees({ treeIds: [treeId], nodes: nodesIdOfTree }));
                             },
                             style: "destructive",
                         },

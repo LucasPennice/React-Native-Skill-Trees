@@ -1,22 +1,21 @@
 import AppText from "@/components/AppText";
 import FlingToDismissModal from "@/components/FlingToDismissModal";
+import PlusIcon from "@/components/Icons/PlusIcon";
 import LoadingIcon from "@/components/LoadingIcon";
 import { dictionaryToArray } from "@/functions/extractInformationFromTree";
-import { TreeData, addUserTrees, removeUserTree, removeUserTrees, selectAllTreesEntities, selectTreeIds } from "@/redux/slices/userTreesSlice";
+import { colors } from "@/parameters";
+import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
+import { addNodes } from "@/redux/slices/nodesSlice";
+import { TreeData, addUserTrees, removeUserTrees, selectTreeIds } from "@/redux/slices/userTreesSlice";
 import { ColorGradient, NormalizedNode } from "@/types";
 import { Dictionary } from "@reduxjs/toolkit";
 import { mixpanel } from "app/(app)/_layout";
 import axiosClient from "axiosClient";
 import { useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
-import TreeCard, { TreeCardProps } from "../TreeCard";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import ShareIcon from "@/components/Icons/ShareIcon";
-import { colors } from "@/parameters";
-import PlusIcon from "@/components/Icons/PlusIcon";
-import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { batch } from "react-redux";
-import { addNodes, selectAllNodeIds } from "@/redux/slices/nodesSlice";
+import TreeCard, { TreeCardProps } from "../TreeCard";
 
 const styles = StyleSheet.create({
     container: { flex: 1, justifyContent: "center", alignItems: "center" },

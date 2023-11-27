@@ -27,12 +27,8 @@ export const userTreesSlice = createSlice({
         updateUserTree: (state, action: PayloadAction<{ update: Update<TreeData>; rootNodeId: string }>) => {
             userTreesAdapter.updateOne(state, action.payload.update);
         },
-        addUserTree: userTreesAdapter.addOne,
         addUserTrees: userTreesAdapter.addMany,
         updateUserTrees: userTreesAdapter.updateMany,
-        removeUserTree: (state, action: PayloadAction<{ treeId: string; nodes: string[] }>) => {
-            userTreesAdapter.removeOne(state, action.payload.treeId);
-        },
         removeUserTrees: (state, action: PayloadAction<{ treeIds: string[]; nodes: string[] }>) => {
             userTreesAdapter.removeMany(state, action.payload.treeIds);
         },
@@ -82,8 +78,7 @@ export const userTreesSlice = createSlice({
     },
 });
 
-export const { addUserTree, removeUserTree, addUserTrees, removeUserTrees, updateUserTree, updateUserTrees, overwriteUserTreesSlice } =
-    userTreesSlice.actions;
+export const { addUserTrees, removeUserTrees, updateUserTree, updateUserTrees, overwriteUserTreesSlice } = userTreesSlice.actions;
 
 export default userTreesSlice.reducer;
 
