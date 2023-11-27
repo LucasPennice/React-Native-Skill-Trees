@@ -22,7 +22,7 @@ export const nodesSlice = createSlice({
     initialState,
     reducers: {
         updateNodes: nodesAdapter.updateMany,
-        addNode: nodesAdapter.addOne,
+        createHomeRootNode: nodesAdapter.addOne,
         addNodes: nodesAdapter.addMany,
         removeNodes: (state, action: PayloadAction<{ treeId: string; nodesToDelete: string[] }>) => {
             //Remove the nodeToDelete id from the parent node
@@ -143,7 +143,7 @@ export const nodesSlice = createSlice({
     },
 });
 
-export const { addNodes, removeNodes, updateNodes, addNode, overwriteNodeSlice } = nodesSlice.actions;
+export const { addNodes, removeNodes, createHomeRootNode, updateNodes, overwriteNodeSlice } = nodesSlice.actions;
 
 export default nodesSlice.reducer;
 

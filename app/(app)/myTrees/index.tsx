@@ -104,8 +104,8 @@ const useHandleLocalParams = (editTree: (treeId: string) => void, openImportTree
 };
 
 const useHandleImportTreesModal = () => {
-    const [importTreesModal, setImportTreesModal] = useState(true);
-    // const [importTreesModal, setImportTreesModal] = useState(false);
+    // const [importTreesModal, setImportTreesModal] = useState(true);
+    const [importTreesModal, setImportTreesModal] = useState(false);
 
     const closeImportTreesModal = () => setImportTreesModal(false);
     const openImportTreesModal = () => setImportTreesModal(true);

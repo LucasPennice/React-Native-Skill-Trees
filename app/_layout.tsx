@@ -8,7 +8,7 @@ import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, colors } from 
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { persistor, store } from "@/redux/reduxStore";
 import { homeTreeSliceInitialState } from "@/redux/slices/homeTreeSlice";
-import { addNode, selectAllNodeIds, selectAllNodes, selectNodeById } from "@/redux/slices/nodesSlice";
+import { addNodes, createHomeRootNode, selectAllNodes, selectNodeById } from "@/redux/slices/nodesSlice";
 import { selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
 import { updateSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
 import { initializeFeedbackArrays } from "@/redux/slices/userFeedbackSlice";
@@ -181,7 +181,7 @@ const useGuaranteeHomeRootTree = () => {
         category: "USER",
     };
 
-    dispatch(addNode(homeNode));
+    dispatch(createHomeRootNode(homeNode));
 };
 
 const useDebug = () => {
