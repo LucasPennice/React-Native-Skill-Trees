@@ -104,7 +104,6 @@ const useHandleLocalParams = (editTree: (treeId: string) => void, openImportTree
 };
 
 const useHandleImportTreesModal = () => {
-    // const [importTreesModal, setImportTreesModal] = useState(true);
     const [importTreesModal, setImportTreesModal] = useState(false);
 
     const closeImportTreesModal = () => setImportTreesModal(false);
@@ -161,7 +160,6 @@ function MyTrees() {
             {editingTreeId && <EditTreeModal editingTreeId={editingTreeId} closeModal={closeEditTreeModal} />}
             {generateLinkModal && <GenerateShareLinkModal closeModal={closeGenerateLinkModal} selectedTreeIds={selectedTreeIds} />}
             <ImportTreesModal
-                // open={true}
                 open={importTreesModal}
                 closeModal={closeImportTreesModal}
                 data={{ treesToImport: '["b657c74eb3652187372c53ce","b0ecd33e08782a6ff6efda8e","ajwdwa"]', userIdImport: "757365725f32595953705742" }}

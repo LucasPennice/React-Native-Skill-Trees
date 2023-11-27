@@ -5,8 +5,7 @@ import LoadingIcon from "@/components/LoadingIcon";
 import { dictionaryToArray } from "@/functions/extractInformationFromTree";
 import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
-import { addNodes } from "@/redux/slices/nodesSlice";
-import { TreeData, addUserTrees, removeUserTrees, selectTreeIds } from "@/redux/slices/userTreesSlice";
+import { TreeData, importUserTrees, removeUserTrees, selectTreeIds } from "@/redux/slices/userTreesSlice";
 import { ColorGradient, NormalizedNode } from "@/types";
 import { Dictionary } from "@reduxjs/toolkit";
 import { mixpanel } from "app/(app)/_layout";
@@ -128,12 +127,9 @@ const ShowTreesToImport = ({ importTreeResponse }: { importTreeResponse: ImportT
         const treesToDeleteId = treesToDelete.map((t) => t.treeId);
         const nodesToDeleteId = treesToDelete.flatMap((t) => t.nodes);
 
-        console.log("nodesToImportArray", JSON.stringify(nodesToImportArray));
-
         batch(() => {
             if (treesToDelete.length !== 0) dispatch(removeUserTrees({ nodes: nodesToDeleteId, treeIds: treesToDeleteId }));
-            dispatch(addUserTrees(treesFoundArray));
-            dispatch(addNodes(nodesToImportArray));
+            dispatch(importUserTrees({ trees: treesFoundArray, nodes: nodesToImportArray }));
         });
     };
 

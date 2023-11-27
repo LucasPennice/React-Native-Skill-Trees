@@ -3,7 +3,7 @@ import { NormalizedNode, getDefaultSkillValue } from "@/types";
 import { PayloadAction, Update, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../reduxStore";
 import { updateHomeIcon, updateHomeName } from "./homeTreeSlice";
-import { TreeData, addUserTrees, removeUserTrees, updateUserTree } from "./userTreesSlice";
+import { TreeData, addUserTrees, importUserTrees, removeUserTrees, updateUserTree } from "./userTreesSlice";
 
 const nodesAdapter = createEntityAdapter<NormalizedNode>({ selectId: (node) => node.nodeId });
 export const {
@@ -82,6 +82,17 @@ export const nodesSlice = createSlice({
             nodesAdapter.updateOne(state, {
                 id: HOMETREE_ROOT_ID,
                 changes: { childrenIds: [...homeRootNode.childrenIds, ...newRootNodes.map((n) => n.nodeId)] },
+            });
+        });
+        builder.addCase(importUserTrees, (state, action) => {
+            const homeRootNode = state.entities[HOMETREE_ROOT_ID];
+            if (!homeRootNode) throw new Error("homeRootNode not found at addUserTrees extra reducer");
+
+            nodesAdapter.addMany(state, action.payload.nodes);
+
+            nodesAdapter.updateOne(state, {
+                id: HOMETREE_ROOT_ID,
+                changes: { childrenIds: [...homeRootNode.childrenIds, ...action.payload.trees.map((n) => n.rootNodeId)] },
             });
         });
         builder.addCase(updateUserTree, (state, action) => {

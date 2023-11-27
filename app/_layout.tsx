@@ -8,11 +8,11 @@ import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, colors } from 
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { persistor, store } from "@/redux/reduxStore";
 import { homeTreeSliceInitialState } from "@/redux/slices/homeTreeSlice";
-import { addNodes, createHomeRootNode, selectAllNodes, selectNodeById } from "@/redux/slices/nodesSlice";
+import { createHomeRootNode, selectNodeById } from "@/redux/slices/nodesSlice";
 import { selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
 import { updateSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
 import { initializeFeedbackArrays } from "@/redux/slices/userFeedbackSlice";
-import { TreeData, selectAllTrees, selectAllTreesEntities, selectTotalTreeQty, updateUserTrees } from "@/redux/slices/userTreesSlice";
+import { TreeData, selectAllTrees, selectTotalTreeQty, updateUserTrees } from "@/redux/slices/userTreesSlice";
 import { NormalizedNode, getDefaultSkillValue } from "@/types";
 import useIsSharingAvailable from "@/useIsSharingAvailable";
 import { ClerkProvider } from "@clerk/clerk-expo";
@@ -184,19 +184,6 @@ const useGuaranteeHomeRootTree = () => {
     dispatch(createHomeRootNode(homeNode));
 };
 
-const useDebug = () => {
-    const nodes = useAppSelector(selectAllNodes);
-    const treeData = useAppSelector(selectAllTreesEntities);
-
-    useEffect(() => {
-        console.log("nodes", JSON.stringify(nodes));
-    }, [nodes]);
-
-    useEffect(() => {
-        console.log("treeData", treeData);
-    }, [treeData]);
-};
-
 function AppWithReduxContext() {
     const dispatch = useAppDispatch();
     //
@@ -205,7 +192,6 @@ function AppWithReduxContext() {
     useUpdateUserFeedback();
     useGuaranteeHomeRootTree();
     //
-    useDebug();
     return (
         <View
             style={{ flex: 1 }}
