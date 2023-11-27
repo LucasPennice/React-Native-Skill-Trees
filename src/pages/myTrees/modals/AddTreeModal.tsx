@@ -25,12 +25,12 @@ const useClearStateOnOpen = (open: boolean, cleanup: () => void) => {
 };
 
 function AddTreeModal() {
-    const { query } = useRequestProcessor();
+    // const { query } = useRequestProcessor();
     const screenDimensions = useAppSelector(selectSafeScreenDimentions);
     const { width } = screenDimensions;
     //Local State
     const [treeName, setTreeName] = useState("");
-    const [treeImportKey, setTreeImportKey] = useState("");
+    // const [treeImportKey, setTreeImportKey] = useState("");
     const [selectedColorGradient, setSelectedColorGradient] = useState<ColorGradient | undefined>(undefined);
     const [mode, setMode] = useState<"CREATE_TREE" | "IMPORT_TREE">("CREATE_TREE");
 
@@ -40,17 +40,17 @@ function AddTreeModal() {
     const { open } = useAppSelector(selectAddTree);
     const dispatch = useAppDispatch();
     //
-    const importTreeQuery = query(["getTreeById", treeImportKey], () => axiosClient.get(`getTreeByKey/${treeImportKey}`).then((res) => res.data), {
-        cacheTime: 0,
-        enabled: false,
-    });
+    // const importTreeQuery = query(["getTreeById", treeImportKey], () => axiosClient.get(`getTreeByKey/${treeImportKey}`).then((res) => res.data), {
+    //     cacheTime: 0,
+    //     enabled: false,
+    // });
 
     useClearStateOnOpen(open, cleanup);
 
-    useEffect(() => {
-        setTreeImportKey("");
-        importTreeQuery.remove();
-    }, [mode]);
+    // useEffect(() => {
+    //     setTreeImportKey("");
+    //     importTreeQuery.remove();
+    // }, [mode]);
 
     const closeModal = () => dispatch(close());
 
@@ -89,7 +89,7 @@ function AddTreeModal() {
         <FlingToDismissModal
             closeModal={closeModal}
             open={open}
-            leftHeaderButton={{ onPress: createNewTree, title: "Confirm" }}
+            rightHeaderButton={{ onPress: createNewTree, title: "Add" }}
             modalContainerStyles={{ backgroundColor: colors.background }}>
             <>
                 {/* <View style={[centerFlex, { flexDirection: "row", backgroundColor: "#282A2C", height: 50, borderRadius: 10, position: "relative" }]}>
@@ -176,9 +176,9 @@ function AddTreeModal() {
         setSelectedColorGradient(undefined);
         setEmojiSelectorOpen(false);
         setMode("CREATE_TREE");
-        setTreeImportKey("");
+        // setTreeImportKey("");
         setEmoji(undefined);
-        importTreeQuery.remove();
+        // importTreeQuery.remove();
     }
 }
 

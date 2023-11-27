@@ -1,6 +1,6 @@
 import { HOMEPAGE_TREE_ID } from "@/parameters";
-import { ColorGradient, SkillIcon } from "@/types";
-import { EntityState, PayloadAction, Update, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
+import { ColorGradient, NormalizedNode, SkillIcon } from "@/types";
+import { Dictionary, EntityState, PayloadAction, Update, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../reduxStore";
 import { addNodes, removeNodes } from "./nodesSlice";
 
@@ -28,9 +28,13 @@ export const userTreesSlice = createSlice({
             userTreesAdapter.updateOne(state, action.payload.update);
         },
         addUserTree: userTreesAdapter.addOne,
+        addUserTrees: userTreesAdapter.addMany,
         updateUserTrees: userTreesAdapter.updateMany,
         removeUserTree: (state, action: PayloadAction<{ treeId: string; nodes: string[] }>) => {
             userTreesAdapter.removeOne(state, action.payload.treeId);
+        },
+        removeUserTrees: (state, action: PayloadAction<{ treeIds: string[]; nodes: string[] }>) => {
+            userTreesAdapter.removeMany(state, action.payload.treeIds);
         },
         overwriteUserTreesSlice: (state, action: PayloadAction<UserTreeSlice>) => {
             state.entities = action.payload.entities;
@@ -50,18 +54,36 @@ export const userTreesSlice = createSlice({
             userTreesAdapter.updateOne(state, { id: action.payload.treeId, changes: { nodes: nodesNotRemoved } });
         });
         builder.addCase(addNodes, (state, action) => {
-            const treeOfNewNodes = state.entities[action.payload.treeId];
+            const nodesToAdd = action.payload as readonly NormalizedNode[];
 
-            if (!treeOfNewNodes) throw new Error("treeOfNewNodes undefined addNodes at builder.add");
+            const newNodeIdPerTree: Dictionary<string[]> = {};
 
-            const newNodeIds = action.payload.nodesToAdd.map((n) => n.nodeId);
+            for (let i = 0; i < nodesToAdd.length; i++) {
+                const nodeToAdd = nodesToAdd[i];
 
-            userTreesAdapter.updateOne(state, { id: action.payload.treeId, changes: { nodes: [...treeOfNewNodes.nodes, ...newNodeIds] } });
+                if (newNodeIdPerTree[nodeToAdd.treeId] === undefined) {
+                    newNodeIdPerTree[nodeToAdd.treeId] = [nodeToAdd.nodeId];
+                    continue;
+                }
+
+                newNodeIdPerTree[nodeToAdd.treeId]!.push(nodeToAdd.nodeId);
+            }
+
+            const treesIdToUpdate = Object.keys(newNodeIdPerTree);
+
+            const treeUpdates: Update<TreeData>[] = treesIdToUpdate.map((id) => {
+                if (!state.entities[id]) throw new Error("entity undefined at addNodes extra reducer");
+
+                return { id, changes: { nodes: [...state.entities[id]!.nodes, ...newNodeIdPerTree[id]!] } };
+            });
+
+            userTreesAdapter.updateMany(state, treeUpdates);
         });
     },
 });
 
-export const { addUserTree, removeUserTree, updateUserTree, updateUserTrees, overwriteUserTreesSlice } = userTreesSlice.actions;
+export const { addUserTree, removeUserTree, addUserTrees, removeUserTrees, updateUserTree, updateUserTrees, overwriteUserTreesSlice } =
+    userTreesSlice.actions;
 
 export default userTreesSlice.reducer;
 

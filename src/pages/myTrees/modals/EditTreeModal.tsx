@@ -80,66 +80,64 @@ function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; c
             open={true}
             leftHeaderButton={{ onPress: updateTree(selectedColor, treeName), title: "Save" }}
             modalContainerStyles={{ backgroundColor: colors.background }}>
-            <>
-                <View style={{ flex: 1 }}>
-                    <AppText style={{ color: colors.white, marginBottom: 15 }} fontSize={18}>
-                        Editing {treeData.treeName} properties
-                    </AppText>
+            <View style={{ flex: 1, paddingTop: 10 }}>
+                <AppText style={{ color: colors.white, marginBottom: 15 }} fontSize={18}>
+                    Editing {treeData.treeName} properties
+                </AppText>
 
-                    <AppText children={"Select your tree's name and icon"} fontSize={16} />
-                    <AppText children={"Icon is optional"} fontSize={14} style={{ color: `${colors.white}80`, marginTop: 5, marginBottom: 10 }} />
-                    <View style={{ flexDirection: "row", marginBottom: 20 }}>
-                        <AppTextInput
-                            placeholder={"Education"}
-                            textState={[treeName, setTreeName]}
-                            pattern={new RegExp(/^[^ ]/)}
-                            containerStyles={{ flex: 1 }}
+                <AppText children={"Select your tree's name and icon"} fontSize={16} />
+                <AppText children={"Icon is optional"} fontSize={14} style={{ color: `${colors.white}80`, marginTop: 5, marginBottom: 10 }} />
+                <View style={{ flexDirection: "row", marginBottom: 20 }}>
+                    <AppTextInput
+                        placeholder={"Education"}
+                        textState={[treeName, setTreeName]}
+                        pattern={new RegExp(/^[^ ]/)}
+                        containerStyles={{ flex: 1 }}
+                    />
+                    <Pressable onPress={() => setEmojiSelectorOpen(true)}>
+                        <AppText
+                            children={emoji ? emoji.emoji : "🧠"}
+                            style={{
+                                fontFamily: "emojisMono",
+                                color: emoji ? (selectedColor ? selectedColor.color1 : colors.white) : colors.line,
+                                width: 45,
+                                paddingTop: 2,
+                                height: 45,
+                                backgroundColor: colors.darkGray,
+                                borderRadius: 10,
+                                marginLeft: 10,
+                                textAlign: "center",
+                                verticalAlign: "middle",
+                            }}
+                            fontSize={24}
                         />
-                        <Pressable onPress={() => setEmojiSelectorOpen(true)}>
-                            <AppText
-                                children={emoji ? emoji.emoji : "🧠"}
-                                style={{
-                                    fontFamily: "emojisMono",
-                                    color: emoji ? (selectedColor ? selectedColor.color1 : colors.white) : colors.line,
-                                    width: 45,
-                                    paddingTop: 2,
-                                    height: 45,
-                                    backgroundColor: colors.darkGray,
-                                    borderRadius: 10,
-                                    marginLeft: 10,
-                                    textAlign: "center",
-                                    verticalAlign: "middle",
-                                }}
-                                fontSize={24}
-                            />
-                        </Pressable>
-                    </View>
-
-                    <AppText fontSize={16} style={{ color: colors.white }}>
-                        Tree Color
-                    </AppText>
-
-                    <AppText fontSize={14} style={{ color: `${colors.white}80`, marginBottom: 10 }}>
-                        Scroll to see more colors
-                    </AppText>
-
-                    <ColorGradientSelector
-                        colorsArray={nodeGradients}
-                        state={[selectedColor, setSelectedColor]}
-                        containerStyle={{ backgroundColor: colors.darkGray, borderRadius: 10 }}
-                    />
-
-                    <Spacer style={{ marginVertical: 10 }} />
-
-                    <RadioInput
-                        iconProps={{ name: "eye-slash", color: colors.white, size: 20 }}
-                        state={[showOnHomeScreen, setShowOnHomeScreen]}
-                        text={"Show on homescreen"}
-                        style={{ backgroundColor: colors.background }}
-                    />
+                    </Pressable>
                 </View>
 
-                <View>
+                <AppText fontSize={16} style={{ color: colors.white }}>
+                    Tree Color
+                </AppText>
+
+                <AppText fontSize={14} style={{ color: `${colors.white}80`, marginBottom: 10 }}>
+                    Scroll to see more colors
+                </AppText>
+
+                <ColorGradientSelector
+                    colorsArray={nodeGradients}
+                    state={[selectedColor, setSelectedColor]}
+                    containerStyle={{ backgroundColor: colors.darkGray, borderRadius: 10 }}
+                />
+
+                <Spacer style={{ marginVertical: 10 }} />
+
+                <RadioInput
+                    iconProps={{ name: "eye-slash", color: colors.white, size: 20 }}
+                    state={[showOnHomeScreen, setShowOnHomeScreen]}
+                    text={"Show on homescreen"}
+                    style={{ backgroundColor: colors.background }}
+                />
+
+                <View style={{ flex: 1, justifyContent: "flex-end" }}>
                     <View
                         style={{
                             flexDirection: "row",
@@ -168,7 +166,7 @@ function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; c
                     onEmojiSelected={toggleEmoji(setEmoji, emoji)}
                     state={[emojiSelectorOpen, setEmojiSelectorOpen]}
                 />
-            </>
+            </View>
         </FlingToDismissModal>
     );
 }

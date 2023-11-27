@@ -27,6 +27,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { View } from "react-native";
 import { Dictionary } from "@reduxjs/toolkit";
+import { batch } from "react-redux";
 
 export type ModalState =
     | "TAKING_SCREENSHOT"
@@ -226,48 +227,59 @@ function useAddNodeModalFunctions(
             case "CHILDREN":
                 let childCase = insertNodeAsChild(nodesOfTree, normalizedNewNodes, dnDZone);
 
-                dispatch(
-                    updateNodes(
-                        childCase.nodesToUpdate.map((node) => {
-                            return { id: node.nodeId, changes: node };
-                        })
-                    )
-                );
-                dispatch(addNodes({ treeId: selectedTree.treeId, nodesToAdd: childCase.nodesToAdd }));
+                batch(() => {
+                    dispatch(
+                        updateNodes(
+                            childCase.nodesToUpdate.map((node) => {
+                                return { id: node.nodeId, changes: node };
+                            })
+                        )
+                    );
+                    dispatch(addNodes(childCase.nodesToAdd));
+                });
                 break;
             case "LEFT_BROTHER":
                 const leftCase = insertNodeAsSibling(nodesOfTree, normalizedNewNodes, dnDZone);
-                dispatch(
-                    updateNodes(
-                        leftCase.nodesToUpdate.map((node) => {
-                            return { id: node.nodeId, changes: node };
-                        })
-                    )
-                );
-                dispatch(addNodes({ treeId: selectedTree.treeId, nodesToAdd: leftCase.nodesToAdd }));
+                batch(() => {
+                    dispatch(
+                        updateNodes(
+                            leftCase.nodesToUpdate.map((node) => {
+                                return { id: node.nodeId, changes: node };
+                            })
+                        )
+                    );
+                    dispatch(addNodes(leftCase.nodesToAdd));
+                });
+
                 break;
             case "RIGHT_BROTHER":
                 const rightCase = insertNodeAsSibling(nodesOfTree, normalizedNewNodes, dnDZone);
-                dispatch(
-                    updateNodes(
-                        rightCase.nodesToUpdate.map((node) => {
-                            return { id: node.nodeId, changes: node };
-                        })
-                    )
-                );
-                dispatch(addNodes({ treeId: selectedTree.treeId, nodesToAdd: rightCase.nodesToAdd }));
+                batch(() => {
+                    dispatch(
+                        updateNodes(
+                            rightCase.nodesToUpdate.map((node) => {
+                                return { id: node.nodeId, changes: node };
+                            })
+                        )
+                    );
+                    dispatch(addNodes(rightCase.nodesToAdd));
+                });
+
                 break;
 
             default:
                 const parentCase = insertNodeAsParent(nodesOfTree, normalizedNewNodes[0], dnDZone);
-                dispatch(
-                    updateNodes(
-                        parentCase.nodesToUpdate.map((node) => {
-                            return { id: node.nodeId, changes: node };
-                        })
-                    )
-                );
-                dispatch(addNodes({ treeId: selectedTree.treeId, nodesToAdd: [parentCase.nodeToAdd] }));
+                batch(() => {
+                    dispatch(
+                        updateNodes(
+                            parentCase.nodesToUpdate.map((node) => {
+                                return { id: node.nodeId, changes: node };
+                            })
+                        )
+                    );
+                    dispatch(addNodes([parentCase.nodeToAdd]));
+                });
+
                 break;
         }
 

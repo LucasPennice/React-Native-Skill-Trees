@@ -30,6 +30,12 @@ const styles = StyleSheet.create({
     container: { flex: 1, justifyContent: "center", padding: 10, alignItems: "center" },
 });
 
+const generateShareLink = (userId: string, selectedTreeIds: string[]) => {
+    const APP_SCHEME = "skilltrees";
+
+    return `${APP_SCHEME}://myTrees/import?userId=${userId}&treesToImportIds=[${selectedTreeIds.map((id) => `"${id}"`).join(",")}]`;
+};
+
 function GenerateShareLinkModal({ closeModal, selectedTreeIds }: { closeModal: () => void; selectedTreeIds: string[] }) {
     const [mode, setMode] = useState<"UpdatingBackup" | "ShowLink">("UpdatingBackup");
 
@@ -56,7 +62,7 @@ function GenerateShareLinkModal({ closeModal, selectedTreeIds }: { closeModal: (
         <FlingToDismissModal closeModal={closeModal} open={true}>
             <>
                 {mode === "UpdatingBackup" && <UpdatingBackup />}
-                {mode === "ShowLink" && <ShowLink userId={userId} selectedTreeIds={selectedTreeIds} />}
+                {mode === "ShowLink" && <ShowLink userId={userId!} selectedTreeIds={selectedTreeIds} />}
             </>
         </FlingToDismissModal>
     );
@@ -71,8 +77,8 @@ const UpdatingBackup = () => {
     );
 };
 
-const ShowLink = ({ selectedTreeIds, userId }: { selectedTreeIds: string[]; userId: string | null }) => {
-    const copyShareLink = () => Clipboard.setString(`https://skilltreesapp.com/import/userId=?${userId}trees:[${selectedTreeIds.join(",")}]`);
+const ShowLink = ({ selectedTreeIds, userId }: { selectedTreeIds: string[]; userId: string }) => {
+    const copyShareLink = () => Clipboard.setString(generateShareLink(userId, selectedTreeIds));
 
     const [copied, setCopied] = useState(false);
 

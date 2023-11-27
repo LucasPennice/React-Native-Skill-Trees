@@ -194,7 +194,7 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
         <FlingToDismissModal
             closeModal={closeModal}
             open={open}
-            leftHeaderButton={{ onPress: handleConfirm, title: "Add Skills" }}
+            rightHeaderButton={{ onPress: handleConfirm, title: "Add Skills" }}
             modalContainerStyles={{ backgroundColor: colors.background }}>
             <View style={[centerFlex, { flex: 1, justifyContent: "flex-start", alignItems: "flex-start" }]}>
                 <Animated.View

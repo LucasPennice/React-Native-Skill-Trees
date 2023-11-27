@@ -1,3 +1,4 @@
+import * as Linking from "expo-linking";
 import AppText from "@/components/AppText";
 import ChevronLeft from "@/components/Icons/ChevronLeft";
 import OnboardingCompletionIcon from "@/components/Icons/OnboardingCompleteIcon";
@@ -37,7 +38,7 @@ const trackAutomaticEvents = true;
 export const mixpanel = new Mixpanel("5a141ce3c43980d8fab68b96e1256525", trackAutomaticEvents);
 mixpanel.init();
 
-const useHandleUpdateBackup = () => {
+const useHandleUpdateBackup = (isSignedIn: boolean | undefined) => {
     const { localMutationsSinceBackups, lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);
 
     const appState = useRef(AppState.currentState);
@@ -60,6 +61,8 @@ const useHandleUpdateBackup = () => {
         (async () => {
             const dayOrMoreSinceLastBackup = new Date().getTime() - lastUpdateUTC_Timestamp >= dayInMilliseconds;
             if (!(dayOrMoreSinceLastBackup && localMutationsSinceBackups)) return;
+            if (!isSignedIn) return;
+
             if (appStateVisible !== "active") return;
 
             try {
@@ -68,7 +71,7 @@ const useHandleUpdateBackup = () => {
                 Alert.alert("Error creating a backup", `Please contact the developer ${error}`);
             }
         })();
-    }, [appStateVisible]);
+    }, [appStateVisible, isSignedIn]);
 };
 
 const useRedirectToWelcomeScreen = (attemptToRedirect: boolean, isLoaded: boolean, isSignedIn: boolean | undefined) => {
@@ -79,12 +82,37 @@ const useRedirectToWelcomeScreen = (attemptToRedirect: boolean, isLoaded: boolea
     }, [isLoaded, isSignedIn, attemptToRedirect]);
 };
 
+const useHandleDeepLinking = (attemptToRedirect: boolean) => {
+    const url = Linking.useURL();
+
+    useEffect(() => {
+        if (url === null) return;
+        if (!attemptToRedirect) return;
+
+        const { hostname: redirectTo, path: action, queryParams } = Linking.parse(url);
+
+        //Handle import case
+        if (action === "import" && redirectTo?.toLowerCase() === "mytrees") {
+            if (!queryParams) return Alert.alert("Invalid import link");
+            if (queryParams.userId === undefined) return Alert.alert("User id doesn't exist in import link");
+            if (queryParams.treesToImportIds === undefined) return Alert.alert("The trees to import do not exist at the provided import link.");
+
+            router.push({
+                pathname: `/(app)/myTrees`,
+                //@ts-ignore
+                params: { userIdImport: queryParams.userId, treesToImportIds: queryParams.treesToImportIds } as RoutesParams["myTrees"],
+            });
+            return;
+        }
+    }, [url, attemptToRedirect]);
+};
+
 export default function RootLayout() {
     useIdentifyMixPanelUserId();
-    useHandleUpdateBackup();
     const onboarding = useAppSelector(selectOnboarding);
     const { shouldWaitForClerkToLoad } = useAppSelector(selectSyncSlice);
     const { isSignedIn, isLoaded } = useUser();
+    useHandleUpdateBackup(isSignedIn);
     const isClerkLoaded = shouldWaitForClerkToLoad === false ? true : isLoaded;
 
     const { width, height } = Dimensions.get("window");
@@ -112,6 +140,8 @@ export default function RootLayout() {
     const attemptToRedirect = !(!fontsLoaded || !isClerkLoaded);
 
     useRedirectToWelcomeScreen(attemptToRedirect, isLoaded, isSignedIn);
+
+    useHandleDeepLinking(attemptToRedirect);
 
     if (!fontsLoaded || !isClerkLoaded) return <Text>Loading...</Text>;
 

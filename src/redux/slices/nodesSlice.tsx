@@ -3,7 +3,7 @@ import { NormalizedNode, getDefaultSkillValue } from "@/types";
 import { PayloadAction, Update, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../reduxStore";
 import { updateHomeIcon, updateHomeName } from "./homeTreeSlice";
-import { addUserTree, removeUserTree, updateUserTree } from "./userTreesSlice";
+import { TreeData, addUserTree, addUserTrees, removeUserTree, removeUserTrees, updateUserTree } from "./userTreesSlice";
 
 const nodesAdapter = createEntityAdapter<NormalizedNode>({ selectId: (node) => node.nodeId });
 export const {
@@ -23,9 +23,7 @@ export const nodesSlice = createSlice({
     reducers: {
         updateNodes: nodesAdapter.updateMany,
         addNode: nodesAdapter.addOne,
-        addNodes: (state, action: PayloadAction<{ treeId: string; nodesToAdd: NormalizedNode[] }>) => {
-            nodesAdapter.addMany(state, action.payload.nodesToAdd);
-        },
+        addNodes: nodesAdapter.addMany,
         removeNodes: (state, action: PayloadAction<{ treeId: string; nodesToDelete: string[] }>) => {
             //Remove the nodeToDelete id from the parent node
             action.payload.nodesToDelete.forEach((nodeToDeleteId) => {
@@ -52,33 +50,6 @@ export const nodesSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        builder.addCase(addUserTree, (state, action) => {
-            const newTreeRootNode: NormalizedNode = {
-                category: "SKILL_TREE",
-                childrenIds: [],
-                data: getDefaultSkillValue(action.payload.treeName, false, action.payload.icon),
-                isRoot: true,
-                level: 0,
-                nodeId: action.payload.rootNodeId,
-                parentId: null,
-                treeId: action.payload.treeId,
-                x: 0,
-                y: 0,
-            };
-
-            nodesAdapter.addOne(state, newTreeRootNode);
-
-            const homeRootNode = state.entities[HOMETREE_ROOT_ID];
-
-            if (!homeRootNode) throw new Error("homeRootNode not found at addUserTree extra reducer");
-
-            nodesAdapter.updateOne(state, {
-                id: HOMETREE_ROOT_ID,
-                changes: { childrenIds: [...homeRootNode.childrenIds, newTreeRootNode.nodeId] },
-            });
-
-            nodesAdapter.addOne(state, homeRootNode);
-        });
         builder.addCase(updateUserTree, (state, action) => {
             const rootNodeId = action.payload.rootNodeId;
             const rootNode = state.entities[rootNodeId];
@@ -116,6 +87,37 @@ export const nodesSlice = createSlice({
             nodesAdapter.updateOne(state, {
                 id: HOMETREE_ROOT_ID,
                 changes: { childrenIds: homeRootNode.childrenIds.filter((cId) => cId !== rootNodeIdOfTreeToDelete) },
+            });
+        });
+        builder.addCase(removeUserTrees, (state, action) => {
+            const { nodes, treeIds } = action.payload;
+
+            const nodeIds = Object.keys(state.entities);
+
+            const getRootIdOfTreesToDelete = (nodeId: string) => {
+                //Exists
+                if (!state.entities[nodeId]) return false;
+                //Is a root
+                if (!state.entities[nodeId]!.isRoot) return false;
+                //Their treeId is in the remove list
+                if (!treeIds.includes(state.entities[nodeId]!.treeId)) return false;
+
+                return true;
+            };
+
+            const rootIdOfTreesToDelete = nodeIds.filter(getRootIdOfTreesToDelete);
+
+            if (rootIdOfTreesToDelete.length === 0) throw new Error(`rootIdOfTreesToDelete empty at extraReducer for removeUserTrees`);
+
+            nodesAdapter.removeMany(state, nodes);
+
+            const homeRootNode = state.entities[HOMETREE_ROOT_ID];
+
+            if (!homeRootNode) throw new Error("homeRootNode is undefined at extraReducer for removeUserTrees");
+
+            nodesAdapter.updateOne(state, {
+                id: HOMETREE_ROOT_ID,
+                changes: { childrenIds: homeRootNode.childrenIds.filter((childId) => !rootIdOfTreesToDelete.includes(childId)) },
             });
         });
         builder.addCase(updateHomeIcon, (state, action) => {

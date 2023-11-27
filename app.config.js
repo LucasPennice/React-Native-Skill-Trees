@@ -1,7 +1,7 @@
 module.exports = {
     name: "Skill Trees",
     slug: "SkillTrees",
-    scheme: ["skill-tree"],
+    scheme: "skilltrees",
     experiments: {
         typedRoutes: true,
         tsconfigPaths: true,

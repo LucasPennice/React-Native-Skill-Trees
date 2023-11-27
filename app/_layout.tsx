@@ -1,5 +1,6 @@
 import AppButton from "@/components/AppButton";
 import AppText from "@/components/AppText";
+import ChevronLeft from "@/components/Icons/ChevronLeft";
 import CopyIcon from "@/components/Icons/CopyIcon";
 import SadFaceIcon from "@/components/Icons/SadFaceIcon";
 import { IsSharingAvailableContext } from "@/context";
@@ -7,11 +8,11 @@ import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, colors } from 
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { persistor, store } from "@/redux/reduxStore";
 import { homeTreeSliceInitialState } from "@/redux/slices/homeTreeSlice";
-import { addNode, selectNodeById } from "@/redux/slices/nodesSlice";
+import { addNode, selectAllNodeIds, selectAllNodes, selectNodeById } from "@/redux/slices/nodesSlice";
 import { selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
 import { updateSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
 import { initializeFeedbackArrays } from "@/redux/slices/userFeedbackSlice";
-import { TreeData, selectAllTrees, selectTotalTreeQty, updateUserTrees } from "@/redux/slices/userTreesSlice";
+import { TreeData, selectAllTrees, selectAllTreesEntities, selectTotalTreeQty, updateUserTrees } from "@/redux/slices/userTreesSlice";
 import { NormalizedNode, getDefaultSkillValue } from "@/types";
 import useIsSharingAvailable from "@/useIsSharingAvailable";
 import { ClerkProvider } from "@clerk/clerk-expo";
@@ -30,10 +31,9 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { mixpanel } from "./(app)/_layout";
-import "../globals";
 import { routes } from "routes";
-import ChevronLeft from "@/components/Icons/ChevronLeft";
+import "../globals";
+import { mixpanel } from "./(app)/_layout";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -184,6 +184,19 @@ const useGuaranteeHomeRootTree = () => {
     dispatch(addNode(homeNode));
 };
 
+const useDebug = () => {
+    const nodes = useAppSelector(selectAllNodes);
+    const treeData = useAppSelector(selectAllTreesEntities);
+
+    useEffect(() => {
+        console.log("nodes", JSON.stringify(nodes));
+    }, [nodes]);
+
+    useEffect(() => {
+        console.log("treeData", treeData);
+    }, [treeData]);
+};
+
 function AppWithReduxContext() {
     const dispatch = useAppDispatch();
     //
@@ -192,7 +205,7 @@ function AppWithReduxContext() {
     useUpdateUserFeedback();
     useGuaranteeHomeRootTree();
     //
-
+    useDebug();
     return (
         <View
             style={{ flex: 1 }}

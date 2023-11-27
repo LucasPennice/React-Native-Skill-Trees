@@ -1,16 +1,20 @@
 import AppText from "@/components/AppText";
 import PlusIcon from "@/components/Icons/PlusIcon";
 import ShareIcon from "@/components/Icons/ShareIcon";
-import TreeCard from "@/pages/myTrees/TreeCard";
+import { countCompleteNodes } from "@/functions/extractInformationFromTree";
+import TreeCard, { TreeCardProps } from "@/pages/myTrees/TreeCard";
 import AddTreeModal from "@/pages/myTrees/modals/AddTreeModal";
 import EditTreeModal from "@/pages/myTrees/modals/EditTreeModal";
 import GenerateShareLinkModal from "@/pages/myTrees/modals/GenerateShareLinkModal";
+import ImportTreesModal from "@/pages/myTrees/modals/ImportTreesModal";
 import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { open } from "@/redux/slices/addTreeModalSlice";
-import { selectAllTrees } from "@/redux/slices/userTreesSlice";
+import { selectNodeById, selectNodesOfTree } from "@/redux/slices/nodesSlice";
+import { TreeData, selectAllTrees } from "@/redux/slices/userTreesSlice";
+import { ColorGradient, NormalizedNode } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { RoutesParams } from "routes";
@@ -75,38 +79,38 @@ const useHandleShareTrees = () => {
     };
 };
 
-const useHandleLocalParams = (editTree: (treeId: string) => void) => {
+const useHandleLocalParams = (editTree: (treeId: string) => void, openImportTreesModal: () => void) => {
     const localParams = useLocalSearchParams();
     const dispatch = useAppDispatch();
-    const { openNewTreeModal, editingTreeId }: { openNewTreeModal?: boolean; editingTreeId?: string } = localParams;
 
-    const doOpenNewTreeModal = useCallback(() => {
-        if (openNewTreeModal) {
-            dispatch(open());
+    useEffect(() => {
+        const { openNewTreeModal, editingTreeId, treesToImportIds, userIdImport }: RoutesParams["myTrees"] = localParams;
 
-            const newParams: RoutesParams["myTrees"] = { openNewTreeModal: undefined };
-            //@ts-ignore
-            router.setParams(newParams);
-        }
-    }, [localParams]);
-
-    const openEditModal = useCallback(() => {
         if (editingTreeId) {
             editTree(editingTreeId);
+            return;
+        }
 
-            const newParams: RoutesParams["myTrees"] = { editingTreeId: undefined };
-            //@ts-ignore
-            router.setParams(newParams);
+        if (openNewTreeModal) {
+            dispatch(open());
+            return;
+        }
+
+        if (treesToImportIds && userIdImport) {
+            openImportTreesModal();
+            return;
         }
     }, [localParams]);
+};
 
-    useEffect(() => {
-        doOpenNewTreeModal();
-    }, [doOpenNewTreeModal]);
+const useHandleImportTreesModal = () => {
+    const [importTreesModal, setImportTreesModal] = useState(true);
+    // const [importTreesModal, setImportTreesModal] = useState(false);
 
-    useEffect(() => {
-        openEditModal();
-    }, [openEditModal]);
+    const closeImportTreesModal = () => setImportTreesModal(false);
+    const openImportTreesModal = () => setImportTreesModal(true);
+
+    return { importTreesModal, closeImportTreesModal, openImportTreesModal };
 };
 
 function MyTrees() {
@@ -115,7 +119,9 @@ function MyTrees() {
     const handleShareTrees = useHandleShareTrees();
     const { selectionMode, toggleSelection, selectedTreeIds, closeGenerateLinkModal, generateLinkModal } = handleShareTrees;
 
-    useHandleLocalParams(editTree);
+    const { closeImportTreesModal, importTreesModal, openImportTreesModal } = useHandleImportTreesModal();
+
+    useHandleLocalParams(editTree, openImportTreesModal);
     const userTrees = useAppSelector(selectAllTrees);
 
     //@ts-ignore
@@ -138,7 +144,7 @@ function MyTrees() {
                             const selected = selectedTreeIds.includes(element.treeId);
 
                             return (
-                                <TreeCard
+                                <TreeCardWrapper
                                     onLongPress={editTree}
                                     onPress={onPress}
                                     element={element}
@@ -154,11 +160,51 @@ function MyTrees() {
 
             {editingTreeId && <EditTreeModal editingTreeId={editingTreeId} closeModal={closeEditTreeModal} />}
             {generateLinkModal && <GenerateShareLinkModal closeModal={closeGenerateLinkModal} selectedTreeIds={selectedTreeIds} />}
+            <ImportTreesModal
+                // open={true}
+                open={importTreesModal}
+                closeModal={closeImportTreesModal}
+                data={{ treesToImport: '["b657c74eb3652187372c53ce","b0ecd33e08782a6ff6efda8e","ajwdwa"]', userIdImport: "757365725f32595953705742" }}
+            />
 
             <AddTreeModal />
         </View>
     );
 }
+
+const TreeCardWrapper = ({
+    element,
+    onLongPress,
+    onPress,
+    animationDelay,
+    blockLongPress,
+    containerStyles,
+    selected,
+}: Omit<TreeCardProps<NormalizedNode>, "data"> & { element: TreeData }) => {
+    const nodesOfTree = useAppSelector(selectNodesOfTree(element.treeId));
+    const rootNodeOfTree = useAppSelector(selectNodeById(element.rootNodeId))!;
+    const completedSkillsQty = countCompleteNodes(nodesOfTree);
+    const skillsQty = nodesOfTree.length - 1;
+    const completePercentage = skillsQty === 0 ? 0 : (completedSkillsQty / skillsQty) * 100;
+
+    const data: TreeCardProps<NormalizedNode & { accentColor: ColorGradient }>["data"] = {
+        tree: element,
+        completionPercentage: completePercentage,
+        nodeToDisplay: { ...rootNodeOfTree, accentColor: element.accentColor },
+    };
+
+    return (
+        <TreeCard
+            onLongPress={onLongPress}
+            onPress={onPress}
+            data={data}
+            containerStyles={containerStyles}
+            blockLongPress={blockLongPress}
+            animationDelay={animationDelay}
+            selected={selected}
+        />
+    );
+};
 
 const HeaderButtons = ({ handleShareTrees }: { handleShareTrees: HandleShareTreesHook }) => {
     const { cancelSelection, selectionMode, startSelectionMode, selectedTreeIds, openGenerateLinkModal } = handleShareTrees;

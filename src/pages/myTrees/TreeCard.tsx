@@ -1,44 +1,52 @@
 import ChevronRight from "@/components/Icons/ChevronRight";
+import OnboardingCompletionIcon from "@/components/Icons/OnboardingCompleteIcon";
 import { ProgressBar } from "@/components/ProgressBarAndIndicator";
-import { selectNodeById, selectNodesOfTree } from "@/redux/slices/nodesSlice";
 import { TreeData } from "@/redux/slices/userTreesSlice";
+import { ColorGradient, NodeCategory, Skill } from "@/types";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, ViewStyle } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { Easing, ZoomIn, ZoomOut, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import AppText from "../../components/AppText";
 import NodeView from "../../components/NodeView";
-import { countCompleteNodes } from "../../functions/extractInformationFromTree";
 import { colors } from "../../parameters";
 import { useAppSelector } from "../../redux/reduxHooks";
 import { selectSafeScreenDimentions } from "../../redux/slices/screenDimentionsSlice";
-import OnboardingCompletionIcon from "@/components/Icons/OnboardingCompleteIcon";
 
-function TreeCard({
-    element,
-    onPress,
-    onLongPress,
-    animationDelay,
-    selected,
-    blockLongPress,
-}: {
-    element: TreeData;
+export type TreeCardProps<T> = {
+    data: TreeCardData<T>;
     onPress: (treeId: string) => void;
     onLongPress: (treeId: string) => void;
     animationDelay?: number;
     selected?: boolean;
     blockLongPress?: boolean;
-}) {
+    containerStyles?: ViewStyle;
+};
+
+type TreeCardData<T> = {
+    nodeToDisplay: T;
+    tree: TreeData;
+    completionPercentage: number;
+};
+
+function TreeCard<T extends { data: Skill; accentColor: ColorGradient; category: NodeCategory }>({
+    data,
+    onPress,
+    onLongPress,
+    animationDelay,
+    selected,
+    blockLongPress,
+    containerStyles,
+}: TreeCardProps<T>) {
+    const { completionPercentage, nodeToDisplay, tree } = data;
+
     const { width } = useAppSelector(selectSafeScreenDimentions);
-    //
-    const nodesOfTree = useAppSelector(selectNodesOfTree(element.treeId));
-    const rootNodeOfTree = useAppSelector(selectNodeById(element.rootNodeId))!;
-    const completedSkillsQty = countCompleteNodes(nodesOfTree);
-    const skillsQty = nodesOfTree.length - 1;
-    const completePercentage = skillsQty === 0 ? 0 : (completedSkillsQty / skillsQty) * 100;
+    // I SUBTRACT ONE BECAUSE I DON'T COUNT THE SKILL_TREE NODE AS A VALID NODE
+    const treeSkillNodes = tree.nodes.length - 1;
+    const completedSkillsQty = (treeSkillNodes * completionPercentage) / 100;
 
     const tapGesture = Gesture.Tap().onEnd((e) => {
-        runOnJS(onPress)(element.treeId);
+        runOnJS(onPress)(tree.treeId);
     });
 
     const scale = useSharedValue(1);
@@ -50,7 +58,7 @@ function TreeCard({
             scale.value = withTiming(1.05, { duration: 1000, easing: Easing.bezier(0.83, 0, 0.17, 1) });
         })
         .onStart(() => {
-            runOnJS(onLongPress)(element.treeId);
+            runOnJS(onLongPress)(tree.treeId);
         })
         .onFinalize(() => {
             scale.value = withSpring(1);
@@ -84,29 +92,29 @@ function TreeCard({
     return (
         <GestureDetector gesture={gestures}>
             <View style={{ position: "relative" }}>
-                <Animated.View style={[animatedStyles, style.container]}>
+                <Animated.View style={[animatedStyles, style.container, containerStyles]}>
                     <NodeView
-                        node={{ accentColor: element.accentColor, category: "SKILL_TREE", data: rootNodeOfTree.data }}
+                        node={nodeToDisplay}
                         params={{ completePercentage: 0, size: NODE_SIZE, oneColorPerTree: false, showIcons: true, fontSize: 22 }}
                     />
                     <View style={{ height: NODE_SIZE, justifyContent: "space-between", width: width - 150 }}>
                         <View style={{ flexDirection: "row" }}>
-                            {!element.showOnHomeScreen && (
+                            {!tree.showOnHomeScreen && (
                                 <FontAwesome size={16} style={{ marginBottom: 1, marginRight: 5 }} color={`${colors.white}80`} name="eye-slash" />
                             )}
                             <AppText
                                 textProps={{ numberOfLines: 1, ellipsizeMode: "tail" }}
                                 fontSize={16}
                                 style={{ color: colors.white, maxWidth: width - 170 }}>
-                                {element.treeName}
+                                {tree.treeName}
                             </AppText>
                         </View>
 
                         <AppText fontSize={14} style={{ color: `${colors.white}80` }}>
-                            {completePercentage.toFixed(0)}% Complete ({completedSkillsQty}/{skillsQty})
+                            {completionPercentage.toFixed(0)}% Complete ({Math.ceil(completedSkillsQty)}/{treeSkillNodes})
                         </AppText>
 
-                        <ProgressBar progress={completePercentage} containerStyle={{ height: 5 }} delay={animationDelay} />
+                        <ProgressBar progress={completionPercentage} containerStyle={{ height: 5 }} delay={animationDelay} />
                     </View>
                     <ChevronRight color={colors.white} />
                 </Animated.View>

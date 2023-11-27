@@ -10,13 +10,14 @@ type PropsContextType = {
     open: boolean;
     children: JSX.Element;
     leftHeaderButton?: { onPress: () => void; title: string };
+    rightHeaderButton?: { onPress: () => void; title: string };
     modalContainerStyles?: ViewStyle;
     hideFlingToDismiss?: boolean;
 };
 
 const { width } = Dimensions.get("screen");
 
-const DRAG_BAR_WIDTH = 150;
+const DRAG_BAR_WIDTH = 100;
 const MODAL_PADDING = 10;
 const buttonWidth = (width - DRAG_BAR_WIDTH) / 2 - MODAL_PADDING;
 
@@ -36,7 +37,7 @@ const styles = StyleSheet.create({
 });
 
 const ModalWithGesturesEnabled = gestureHandlerRootHOC(
-    ({ children, closeModal, leftHeaderButton, modalContainerStyles, hideFlingToDismiss }: PropsContextType) => {
+    ({ children, closeModal, leftHeaderButton, modalContainerStyles, hideFlingToDismiss, rightHeaderButton }: PropsContextType) => {
         const flingGesture = Gesture.Fling()
             .direction(Directions.DOWN)
             .onStart((e) => {
@@ -53,19 +54,26 @@ const ModalWithGesturesEnabled = gestureHandlerRootHOC(
                                 {leftHeaderButton && (
                                     <TouchableOpacity onPress={leftHeaderButton.onPress} style={styles.leftButton}>
                                         <View style={styles.container}>
+                                            <AppText fontSize={14} children={leftHeaderButton.title} />
+                                        </View>
+                                    </TouchableOpacity>
+                                )}
+                                {rightHeaderButton && !leftHeaderButton && (
+                                    <TouchableOpacity onPress={closeModal} style={styles.leftButton}>
+                                        <View style={styles.container}>
                                             <AppText fontSize={14} children={"Close"} />
                                         </View>
                                     </TouchableOpacity>
                                 )}
                                 <View style={styles.dragBar} />
-                                {leftHeaderButton && (
-                                    <TouchableOpacity onPress={leftHeaderButton.onPress} style={styles.rightButton}>
+                                {rightHeaderButton && (
+                                    <TouchableOpacity onPress={rightHeaderButton.onPress} style={styles.rightButton}>
                                         <View style={styles.container}>
-                                            <AppText fontSize={14} children={leftHeaderButton.title} />
+                                            <AppText fontSize={14} children={rightHeaderButton.title} />
                                         </View>
                                     </TouchableOpacity>
                                 )}
-                                {!leftHeaderButton && (
+                                {!rightHeaderButton && (
                                     <TouchableOpacity onPress={closeModal} style={styles.rightButton}>
                                         <View style={styles.container}>
                                             <AppText fontSize={14} children={"Close"} />

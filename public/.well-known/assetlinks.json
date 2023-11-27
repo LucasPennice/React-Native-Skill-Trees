@@ -1,0 +1,10 @@
+[
+    {
+        "relation": ["delegate_permission/common.handle_all_urls"],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.lucaspennice.skilltrees",
+            "sha256_cert_fingerprints": ["B4:2D:F2:EF:7F:51:1D:26:AC:A1:1D:F9:9E:D0:C1:19:42:5B:2C:CE:D7:E9:2B:0B:DB:D6:F7:6A:62:77:46:27"]
+        }
+    }
+]

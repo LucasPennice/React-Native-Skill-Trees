@@ -8,8 +8,6 @@ import { PURPLE_GRADIENT, centerFlex, colors } from "../parameters";
 import { ColorGradient, NodeCategory, Skill } from "../types";
 import AppText from "./AppText";
 import useShowHideStylesWithoutTransitionView from "./treeRelated/hooks/useShowHideStylesWithoutTransitionView";
-import { Canvas, Text } from "@shopify/react-native-skia";
-import StaticNodeList from "./treeRelated/general/StaticNodeList";
 
 function NodeView<T extends { data: Skill; accentColor: ColorGradient; category: NodeCategory }>({
     node,

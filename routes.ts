@@ -57,6 +57,8 @@ export type RoutesParams = {
     myTrees: {
         openNewTreeModal?: boolean;
         editingTreeId?: string;
+        treesToImportIds?: string;
+        userIdImport?: string;
     };
     home: {
         handleLogInSync?: "true";
