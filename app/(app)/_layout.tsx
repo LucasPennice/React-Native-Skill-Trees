@@ -1,4 +1,3 @@
-import * as Linking from "expo-linking";
 import AppText from "@/components/AppText";
 import ChevronLeft from "@/components/Icons/ChevronLeft";
 import OnboardingCompletionIcon from "@/components/Icons/OnboardingCompleteIcon";
@@ -9,11 +8,12 @@ import { closeOnboardingMenu, expandOnboardingMenu, selectOnboarding, skipToStep
 import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import { selectAllTrees } from "@/redux/slices/userTreesSlice";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
+import useTrackNavigationEvents from "@/useTrackNavigationEvents";
 import useUpdateBackup from "@/useUpdateBackup";
 import { useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import analytics from "@react-native-firebase/analytics";
 import { useFonts } from "expo-font";
+import * as Linking from "expo-linking";
 import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
 import { Mixpanel } from "mixpanel-react-native";
 import { Fragment, useEffect, useRef, useState } from "react";
@@ -155,7 +155,7 @@ export default function RootLayout() {
         if (fontsLoaded && isClerkLoaded) SplashScreen.hideAsync();
     }, [fontsLoaded, isClerkLoaded]);
 
-    const prevRouteName = useRef<string | null>(null);
+    const trackScreenNavigation = useTrackNavigationEvents();
 
     const attemptToRedirect = !(!fontsLoaded || !isClerkLoaded);
 
@@ -193,24 +193,7 @@ export default function RootLayout() {
                         );
                     },
                 }}
-                screenListeners={{
-                    state: async (e) => {
-                        //@ts-ignore
-                        const currentRouteName = e.data.state.routes[e.data.state.routes.length - 1].name as string;
-
-                        if (prevRouteName.current !== currentRouteName) {
-                            await analytics().logScreenView({
-                                screen_name: currentRouteName,
-                                screen_class: currentRouteName,
-                            });
-
-                            await mixpanel.track(`Navigate to ${currentRouteName}`);
-                        }
-
-                        prevRouteName.current = currentRouteName;
-                    },
-                }}>
-                <Stack.Screen name={routes.home.name} options={{ title: "Home" }} />
+                screenListeners={trackScreenNavigation}>
                 <Stack.Screen
                     name={routes.backup.name}
                     options={{

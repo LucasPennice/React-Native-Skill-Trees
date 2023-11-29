@@ -34,6 +34,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { routes } from "routes";
 import "../globals";
 import { mixpanel } from "./(app)/_layout";
+import useTrackNavigationEvents from "@/useTrackNavigationEvents";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -191,6 +192,8 @@ function AppWithReduxContext() {
     useUpdateTreeDataForShowOnHomepage();
     useUpdateUserFeedback();
     useGuaranteeHomeRootTree();
+    const trackScreenNavigation = useTrackNavigationEvents();
+
     //
     return (
         <View
@@ -200,6 +203,7 @@ function AppWithReduxContext() {
                 dispatch(updateSafeScreenDimentions({ width, height }));
             }}>
             <Stack
+                screenListeners={trackScreenNavigation}
                 screenOptions={{
                     headerShown: false,
                     header: ({ navigation, options, route, back }) => {
