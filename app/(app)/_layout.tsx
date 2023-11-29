@@ -82,6 +82,24 @@ const useRedirectToWelcomeScreen = (attemptToRedirect: boolean, isLoaded: boolea
     }, [isLoaded, isSignedIn, attemptToRedirect]);
 };
 
+const manuallyParseParams = (url: string) => {
+    //
+    const splitUrl = url.split("?");
+    const paramArray = splitUrl.slice(1);
+
+    const result: { [key: string]: string | number } = {};
+
+    paramArray
+        .map((s) => s.replace("=", ":"))
+        .forEach((s) => {
+            const [key, data] = s.split(":");
+
+            result[key] = data;
+        });
+
+    return result;
+};
+
 const useHandleDeepLinking = (attemptToRedirect: boolean) => {
     const url = Linking.useURL();
 
@@ -89,10 +107,12 @@ const useHandleDeepLinking = (attemptToRedirect: boolean) => {
         if (url === null) return;
         if (!attemptToRedirect) return;
 
-        const { hostname: redirectTo, path: action, queryParams } = Linking.parse(url);
+        const { path: action } = Linking.parse(url);
+
+        const queryParams = manuallyParseParams(url);
 
         //Handle import case
-        if (action === "import" && redirectTo?.toLowerCase() === "mytrees") {
+        if (action === "redirect/import") {
             if (!queryParams) return Alert.alert("Invalid import link");
             if (queryParams.userId === undefined) return Alert.alert("User id doesn't exist in import link");
             if (queryParams.treesToImportIds === undefined) return Alert.alert("The trees to import do not exist at the provided import link.");

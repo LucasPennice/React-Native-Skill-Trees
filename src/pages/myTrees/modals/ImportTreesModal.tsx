@@ -52,19 +52,25 @@ function ImportTreesModal({
 }: {
     open: boolean;
     closeModal: () => void;
-    data: { treesToImport: '["b657c74eb3652187372c53ce","b0ecd33e08782a6ff6efda8e","ajwdwa"]'; userIdImport: "757365725f32595953705742" };
+    data: { userIdImport: string; treesToImportIds: string };
 }) {
     const { importTreeResponse, mode, showTreesToImport } = useHandleTreesToImport();
 
-    const getTreesToImport = () => axiosClient.get<ImportTreeResponse>(`backup/${data.userIdImport}?treesToImportIds=${data.treesToImport}`);
+    const formattedTreesToImportIds = `[${data.treesToImportIds
+        .slice(1, -1)
+        .split(",")
+        .map((id) => `"${id}"`)}]`;
+
+    const getTreesToImport = () => axiosClient.get<ImportTreeResponse>(`backup/${data.userIdImport}?treesToImportIds=${formattedTreesToImportIds}`);
 
     useEffect(() => {
         if (open === false) return;
 
         (async () => {
             try {
-                const { data } = await getTreesToImport();
-                showTreesToImport(data);
+                // console.log(`backup/${data.userIdImport}?treesToImportIds=${formattedTreesToImportIds}`);
+                const { data: response } = await getTreesToImport();
+                showTreesToImport(response);
             } catch (error) {
                 Alert.alert("There was an error importing your trees", "Please contact the developer");
                 mixpanel.track(`appError`, { message: error, stack: error });
@@ -77,7 +83,9 @@ function ImportTreesModal({
         <FlingToDismissModal closeModal={closeModal} open={open}>
             <>
                 {mode === "Fetching" && <Fetching />}
-                {mode === "ShowTreesToImport" && importTreeResponse && <ShowTreesToImport importTreeResponse={importTreeResponse} />}
+                {mode === "ShowTreesToImport" && importTreeResponse && (
+                    <ShowTreesToImport importTreeResponse={importTreeResponse} closeModal={closeModal} />
+                )}
             </>
         </FlingToDismissModal>
     );
@@ -110,7 +118,7 @@ const useHandleSelectTreesToImport = () => {
     return { cancelSelection, toggleSelection, selectedTreeIds };
 };
 
-const ShowTreesToImport = ({ importTreeResponse }: { importTreeResponse: ImportTreeResponse }) => {
+const ShowTreesToImport = ({ importTreeResponse, closeModal }: { importTreeResponse: ImportTreeResponse; closeModal: () => void }) => {
     const { treesFound, treesNotFound, nodesToImport } = importTreeResponse;
 
     const userTreeIds = useAppSelector(selectTreeIds);
@@ -131,6 +139,8 @@ const ShowTreesToImport = ({ importTreeResponse }: { importTreeResponse: ImportT
             if (treesToDelete.length !== 0) dispatch(removeUserTrees({ nodes: nodesToDeleteId, treeIds: treesToDeleteId }));
             dispatch(importUserTrees({ trees: treesFoundArray, nodes: nodesToImportArray }));
         });
+
+        closeModal();
     };
 
     return (

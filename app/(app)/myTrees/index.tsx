@@ -82,6 +82,7 @@ const useHandleShareTrees = () => {
 const useHandleLocalParams = (editTree: (treeId: string) => void, openImportTreesModal: () => void) => {
     const localParams = useLocalSearchParams();
     const dispatch = useAppDispatch();
+    const [importData, setImportData] = useState<{ userIdImport: string; treesToImportIds: string } | null>(null);
 
     useEffect(() => {
         const { openNewTreeModal, editingTreeId, treesToImportIds, userIdImport }: RoutesParams["myTrees"] = localParams;
@@ -98,9 +99,12 @@ const useHandleLocalParams = (editTree: (treeId: string) => void, openImportTree
 
         if (treesToImportIds && userIdImport) {
             openImportTreesModal();
+            setImportData({ treesToImportIds, userIdImport });
             return;
         }
     }, [localParams]);
+
+    return importData;
 };
 
 const useHandleImportTreesModal = () => {
@@ -120,7 +124,7 @@ function MyTrees() {
 
     const { closeImportTreesModal, importTreesModal, openImportTreesModal } = useHandleImportTreesModal();
 
-    useHandleLocalParams(editTree, openImportTreesModal);
+    const importData = useHandleLocalParams(editTree, openImportTreesModal);
     const userTrees = useAppSelector(selectAllTrees);
 
     //@ts-ignore
@@ -159,11 +163,7 @@ function MyTrees() {
 
             {editingTreeId && <EditTreeModal editingTreeId={editingTreeId} closeModal={closeEditTreeModal} />}
             {generateLinkModal && <GenerateShareLinkModal closeModal={closeGenerateLinkModal} selectedTreeIds={selectedTreeIds} />}
-            <ImportTreesModal
-                open={importTreesModal}
-                closeModal={closeImportTreesModal}
-                data={{ treesToImport: '["b657c74eb3652187372c53ce","b0ecd33e08782a6ff6efda8e","ajwdwa"]', userIdImport: "757365725f32595953705742" }}
-            />
+            {importData && <ImportTreesModal open={importTreesModal} closeModal={closeImportTreesModal} data={importData} />}
 
             <AddTreeModal />
         </View>

@@ -6,7 +6,7 @@ module.exports = {
         typedRoutes: true,
         tsconfigPaths: true,
     },
-    version: "1.0.46",
+    version: "1.0.48",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -41,7 +41,7 @@ module.exports = {
             "android.permission.ACCESS_MEDIA_LOCATION",
             "com.google.android.gms.permission.AD_ID",
         ],
-        versionCode: 52,
+        versionCode: 54,
         package: "com.lucaspennice.skilltrees",
         intentFilters: [
             {
@@ -50,11 +50,16 @@ module.exports = {
                 data: [
                     {
                         scheme: "https",
-                        host: "*.skilltreesapp.com",
-                        // pathPrefix: "/records",
+                        host: "app.skilltreesapp.com",
+                        pathPrefix: "/redirect",
+                    },
+                    {
+                        scheme: "http",
+                        host: "app.skilltreesapp.com",
+                        pathPrefix: "/redirect",
                     },
                 ],
-                category: ["BROWSABLE", "DEFAULT"],
+                category: ["DEFAULT", "BROWSABLE"],
             },
         ],
     },
