@@ -97,7 +97,7 @@ function TreeCard<T extends { data: Skill; accentColor: ColorGradient; category:
                         node={nodeToDisplay}
                         params={{ completePercentage: 0, size: NODE_SIZE, oneColorPerTree: false, showIcons: true, fontSize: 22 }}
                     />
-                    <View style={{ height: NODE_SIZE, justifyContent: "space-between", width: width - 150 }}>
+                    <View style={{ height: NODE_SIZE, justifyContent: "space-between", flex: 1 }}>
                         <View style={{ flexDirection: "row" }}>
                             {!tree.showOnHomeScreen && (
                                 <FontAwesome size={16} style={{ marginBottom: 1, marginRight: 5 }} color={`${colors.white}80`} name="eye-slash" />
@@ -105,7 +105,7 @@ function TreeCard<T extends { data: Skill; accentColor: ColorGradient; category:
                             <AppText
                                 textProps={{ numberOfLines: 1, ellipsizeMode: "tail" }}
                                 fontSize={16}
-                                style={{ color: colors.white, maxWidth: width - 170 }}>
+                                style={{ color: colors.white, maxWidth: width - 150 }}>
                                 {tree.treeName}
                             </AppText>
                         </View>

@@ -13,7 +13,7 @@ import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useSignUp } from "@clerk/clerk-expo";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Keyboard, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
+import { Dimensions, Keyboard, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { RoutesParams } from "routes";
 
@@ -61,15 +61,17 @@ export const useHandleButtonState = () => {
     return { submitState, setSubmitError, setSubmitLoading, resetSubmitState, setSubmitSuccess };
 };
 
+const { height } = Dimensions.get("window");
+
+const style = StyleSheet.create({
+    container: { alignItems: "center", height, padding: 15, position: "relative" },
+});
+
 function SignUp() {
     useWarmUpBrowser();
     const { hideRedirectToLogin } = useLocalSearchParams<RoutesParams["signUp"]>();
 
     const dispatch = useAppDispatch();
-
-    const style = StyleSheet.create({
-        container: { alignItems: "center", flex: 1, padding: 15 },
-    });
 
     const { error, updateEmailError, updatePasswordError, resetErrors, updateCodeError, updateUsernameError } = useHandleClerkErrorMessages();
     const { setSubmitError, setSubmitLoading, submitState, resetSubmitState } = useHandleButtonState();

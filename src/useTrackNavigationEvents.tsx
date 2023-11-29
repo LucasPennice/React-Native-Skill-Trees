@@ -15,7 +15,6 @@ function useTrackNavigationEvents() {
                     screen_name: currentRouteName,
                     screen_class: currentRouteName,
                 });
-                console.log(`Navigate to ${currentRouteName}`);
                 await mixpanel.track(`Navigate to ${currentRouteName}`);
             }
 

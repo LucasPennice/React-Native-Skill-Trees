@@ -15,6 +15,7 @@ import { initializeFeedbackArrays } from "@/redux/slices/userFeedbackSlice";
 import { TreeData, selectAllTrees, selectTotalTreeQty, updateUserTrees } from "@/redux/slices/userTreesSlice";
 import { NormalizedNode, getDefaultSkillValue } from "@/types";
 import useIsSharingAvailable from "@/useIsSharingAvailable";
+import useTrackNavigationEvents from "@/useTrackNavigationEvents";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import Clipboard from "@react-native-clipboard/clipboard";
 import analytics from "@react-native-firebase/analytics";
@@ -34,7 +35,6 @@ import { PersistGate } from "redux-persist/integration/react";
 import { routes } from "routes";
 import "../globals";
 import { mixpanel } from "./(app)/_layout";
-import useTrackNavigationEvents from "@/useTrackNavigationEvents";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -194,7 +194,6 @@ function AppWithReduxContext() {
     useGuaranteeHomeRootTree();
     const trackScreenNavigation = useTrackNavigationEvents();
 
-    //
     return (
         <View
             style={{ flex: 1 }}

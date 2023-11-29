@@ -13,13 +13,15 @@ import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useSignIn } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import React from "react";
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
+import { Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 import { RoutesParams } from "routes";
 import { useHandleButtonState, useHandleClerkErrorMessages } from "./signUp";
 
+const { height } = Dimensions.get("window");
+
 const style = StyleSheet.create({
-    container: { alignItems: "center", flex: 1, padding: 15 },
+    container: { alignItems: "center", height, padding: 15, position: "relative" },
 });
 
 export default function SignInScreen() {

@@ -7,7 +7,7 @@ import { router } from "expo-router";
 const style = StyleSheet.create({
     container: {
         position: "absolute",
-        bottom: 0,
+        bottom: 15,
         left: 0,
         flexDirection: "row",
         gap: 5,
