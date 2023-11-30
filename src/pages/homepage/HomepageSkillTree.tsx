@@ -5,6 +5,7 @@ import { SharedValue } from "react-native-reanimated";
 import StaticNodeList from "../../components/treeRelated/general/StaticNodeList";
 import RadialLabel from "../../components/treeRelated/radial/RadialLabel";
 import { CanvasDimensions, NodeCoordinate } from "../../types";
+import { SkiaAppFonts } from "app/_layout";
 
 type TreeProps = {
     allNodes: NodeCoordinate[];
@@ -19,11 +20,7 @@ type TreeProps = {
         y: SharedValue<number>;
         nodesToDragId: string[];
     };
-    fonts: {
-        labelFont: SkFont;
-        nodeLetterFont: SkFont;
-        emojiFont: SkFont;
-    };
+    fonts: SkiaAppFonts;
 };
 
 const LabelList = memo(function LabelList({ nodeCoordinates, font }: { nodeCoordinates: NodeCoordinate[]; font: SkFont }) {
@@ -49,7 +46,7 @@ const LabelList = memo(function LabelList({ nodeCoordinates, font }: { nodeCoord
 });
 
 function HomepageSkillTree({ allNodes, settings, drag, fonts, canvasDimensions }: TreeProps) {
-    const { emojiFont, labelFont, nodeLetterFont } = fonts;
+    const { labelFont } = fonts;
 
     const rootNode = allNodes.find((n) => n.level === 0);
 
@@ -62,7 +59,7 @@ function HomepageSkillTree({ allNodes, settings, drag, fonts, canvasDimensions }
             {settings.showLabel && <LabelList font={labelFont} nodeCoordinates={allNodes} />}
 
             <StaticNodeList
-                fonts={{ emojiFont, nodeLetterFont }}
+                fonts={fonts}
                 allNodes={allNodes}
                 staticNodes={allNodes}
                 settings={{ oneColorPerTree: settings.oneColorPerTree, showIcons: settings.showIcons }}

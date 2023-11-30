@@ -33,7 +33,6 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
 
     if (!fonts) return <></>;
 
-    // return <StaticNodeList allNodes={[node]} />;
     if (category === "SKILL") return <Skill />;
 
     if (category === "USER") return <User />;
@@ -55,7 +54,17 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                         cx={progressWheelProps.centerCoordinate}
                         cy={progressWheelProps.centerCoordinate}
                         r={progressWheelProps.radius}
-                        fill={"url(#progressColor)"}
+                        fill={colors.background}
+                    />
+                    <Circle
+                        strokeWidth={progressWheelProps.strokeWidth}
+                        cx={progressWheelProps.centerCoordinate}
+                        cy={progressWheelProps.centerCoordinate}
+                        r={progressWheelProps.radius}
+                        stroke={"url(#progressColor)"}
+                        fillOpacity={0}
+                        strokeDasharray={progressWheelProps.circumference}
+                        strokeLinecap="round"
                     />
                 </Svg>
                 {showIcons && (
@@ -65,7 +74,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                             fontSize={fontSize}
                             style={{
                                 position: "absolute",
-                                color: colors.background,
+                                color: rootColor.color1,
                                 width: size,
                                 textAlign: "center",
                                 lineHeight: isEmojiIcon ? size : undefined,

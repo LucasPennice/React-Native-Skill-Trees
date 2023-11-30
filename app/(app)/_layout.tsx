@@ -99,7 +99,7 @@ const manuallyParseParams = (url: string) => {
 };
 
 const onUrlChange = (url: string | null, isLoaded: boolean, userId: string | null) => {
-    if (url === null) return;
+    if (url === null || !url.includes("https://www.skilltreesapp.com")) return;
     if (!isLoaded) return;
     if (!userId) return Alert.alert("Please create an account or log in", "Before clicking a skill trees link");
 

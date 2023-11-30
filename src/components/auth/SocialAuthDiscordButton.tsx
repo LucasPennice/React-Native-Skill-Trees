@@ -3,9 +3,11 @@ import { SocialAuthButton } from "@/types";
 import { useOAuth } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import { useCallback } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { Alert, StyleSheet, TouchableOpacity } from "react-native";
 import { RoutesParams } from "routes";
 import DiscordIcon from "../Icons/DiscordIcon";
+import { updateFirstTimeOpeningApp } from "@/redux/slices/syncSlice";
+import { useAppDispatch } from "@/redux/reduxHooks";
 
 const style = StyleSheet.create({
     container: {
@@ -23,6 +25,7 @@ const style = StyleSheet.create({
 
 export const SocialAuthDiscordButton = ({ actingAs }: SocialAuthButton) => {
     const { startOAuthFlow } = useOAuth({ strategy: "oauth_discord" });
+    const dispatch = useAppDispatch();
 
     const logInDiscord = useCallback(async () => {
         try {
@@ -30,6 +33,8 @@ export const SocialAuthDiscordButton = ({ actingAs }: SocialAuthButton) => {
 
             if (createdSessionId && setActive) {
                 await setActive({ session: createdSessionId });
+
+                dispatch(updateFirstTimeOpeningApp());
 
                 let params: RoutesParams["home"] = {};
 
@@ -39,7 +44,7 @@ export const SocialAuthDiscordButton = ({ actingAs }: SocialAuthButton) => {
                 router.push({ pathname: "/(app)/home", params });
             }
         } catch (err) {
-            console.error("OAuth error", err);
+            return Alert.alert("Navigator error", "Please reset the app and try again, if the issue persists please contact the developer");
         }
     }, []);
 

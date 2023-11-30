@@ -80,7 +80,7 @@ export const EmojiRegex = /\p{Extended_Pictographic}/gu;
 
 export const HOMETREE_ROOT_ID = "homepageRoot";
 
-export const NODE_ICON_FONT_SIZE = 17;
+export const NODE_ICON_FONT_SIZE = 15;
 
 export const RADIAL_LABEL_FONT_SIZE = 14;
 
@@ -106,3 +106,5 @@ export const CANVAS_SETTINGS_EXAMPLE_NODE_SIZE = 57;
 export const DESELECT_NODE_ANIMATION_DURATION = 400;
 
 export const TIME_TO_REORDER_TREE = 1000;
+
+export const USER_ICON_FONT_SIZE = 22;

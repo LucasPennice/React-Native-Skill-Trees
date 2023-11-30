@@ -1,6 +1,5 @@
 import AppButton from "@/components/AppButton";
 import AppEmojiPicker, { Emoji, findEmoji } from "@/components/AppEmojiPicker";
-import Spacer from "@/components/Spacer";
 import { generateMongoCompliantId, toggleEmoji } from "@/functions/misc";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useEffect, useState } from "react";
@@ -14,7 +13,6 @@ import RadioInput from "../../../components/RadioInput";
 import { findNodeById } from "../../../functions/extractInformationFromTree";
 import { centerFlex, colors } from "../../../parameters";
 import { DnDZone, Skill, Tree, getDefaultSkillValue } from "../../../types";
-import GoalForm from "./AddNodeModal/GoalForm";
 
 type Props = {
     closeModal: () => void;
@@ -208,7 +206,6 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
                     }}>
                     <Animated.ScrollView
                         horizontal
-                        layout={Layout}
                         showsHorizontalScrollIndicator={false}
                         style={{ overflow: "visible" }}
                         contentContainerStyle={{ paddingLeft: 10 }}>

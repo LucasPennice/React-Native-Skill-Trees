@@ -4,7 +4,7 @@ import ChevronLeft from "@/components/Icons/ChevronLeft";
 import CopyIcon from "@/components/Icons/CopyIcon";
 import SadFaceIcon from "@/components/Icons/SadFaceIcon";
 import { IsSharingAvailableContext } from "@/context";
-import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, colors } from "@/parameters";
+import { HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, NODE_ICON_FONT_SIZE, USER_ICON_FONT_SIZE, colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { persistor, store } from "@/redux/reduxStore";
 import { homeTreeSliceInitialState } from "@/redux/slices/homeTreeSlice";
@@ -59,17 +59,25 @@ const Layout = StyleSheet.create({
     },
 });
 
+export type SkiaAppFonts = {
+    labelFont: SkFont;
+    nodeLetterFont: SkFont;
+    emojiFont: SkFont;
+    userEmojiFont: SkFont;
+};
+
 function useSkiaFonts() {
     const labelFont = useFont(require("../assets/Helvetica.ttf"), 12);
     const nodeLetterFont = useFont(require("../assets/Helvetica.ttf"), NODE_ICON_FONT_SIZE);
     const emojiFont = useFont(require("../assets/NotoEmoji-Regular.ttf"), NODE_ICON_FONT_SIZE);
+    const userEmojiFont = useFont(require("../assets/NotoEmoji-Regular.ttf"), USER_ICON_FONT_SIZE);
 
-    if (!labelFont || !nodeLetterFont || !emojiFont) return undefined;
+    if (!labelFont || !nodeLetterFont || !emojiFont || !userEmojiFont) return undefined;
 
-    return { labelFont, nodeLetterFont, emojiFont };
+    return { labelFont, nodeLetterFont, emojiFont, userEmojiFont };
 }
 
-export const SkiaFontContext = createContext<{ labelFont: SkFont; nodeLetterFont: SkFont; emojiFont: SkFont } | undefined>(undefined);
+export const SkiaFontContext = createContext<SkiaAppFonts | undefined>(undefined);
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

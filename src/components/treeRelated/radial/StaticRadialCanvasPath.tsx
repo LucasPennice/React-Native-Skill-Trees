@@ -34,6 +34,10 @@ export const StaticRadialPathList = memo(function StaticRadialPathList({
                     const centerOfNode = { x: p1x, y: p1y };
 
                     if (!rootNodeCoordinates) return <></>;
+
+                    const complete = Skia.Paint();
+                    complete.setColor(Skia.Color(nodeCoordinate.accentColor.color1));
+
                     const { c, m } = getCurvedPath(rootNodeCoordinates, parentNode, centerOfNode);
                     const path = Skia.Path.Make();
                     path.moveTo(m.x, m.y);
@@ -41,7 +45,7 @@ export const StaticRadialPathList = memo(function StaticRadialPathList({
 
                     path.stroke({ width: 2 });
 
-                    canvas.drawPath(path, paint);
+                    canvas.drawPath(path, nodeCoordinate.data.isCompleted || nodeCoordinate.level === 1 ? complete : paint);
                 }
             }),
         [allNodes, staticNodes, canvasDimensions]

@@ -1,8 +1,8 @@
 import { completedSkillTreeTable } from "@/functions/extractInformationFromTree";
-import { getLabelTextColor } from "@/functions/misc";
 import { CIRCLE_SIZE, colors } from "@/parameters";
 import { Dictionary } from "@reduxjs/toolkit";
 import { Picture, SkCanvas, SkFont, Skia, createPicture } from "@shopify/react-native-skia";
+import { SkiaAppFonts } from "app/_layout";
 import { useMemo } from "react";
 import { CanvasDimensions, CartesianCoordinate, ColorGradient, NodeCoordinate } from "../../../types";
 import { getTextCoordinates } from "./useHandleNodeAnimatedCoordinates";
@@ -14,7 +14,7 @@ type Props = {
     staticNodes: NodeCoordinate[];
     settings: { oneColorPerTree: boolean; showIcons: boolean };
     canvasDimensions: CanvasDimensions;
-    fonts: { nodeLetterFont: SkFont; emojiFont: SkFont };
+    fonts: SkiaAppFonts;
 };
 
 type PaintProps = {
@@ -175,9 +175,8 @@ function paintUserNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProps
         {
             center: { x: node.x, y: node.y },
             gradient: node.accentColor,
-            radius: CIRCLE_SIZE,
+            radius: 1.5 * CIRCLE_SIZE,
             strokeWidth: strokeWidth,
-            pathString: "fill='url(#grad1)'",
         },
         { width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }
     );
@@ -185,14 +184,12 @@ function paintUserNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProps
     canvas.drawSvg(svg);
 
     if (settings.showIcons) {
-        const highContrastTextColor = getLabelTextColor(node.accentColor.color1);
-
         const textColor = Skia.Paint();
-        textColor.setColor(Skia.Color(highContrastTextColor));
+        textColor.setColor(Skia.Color(node.accentColor.color1));
 
         const text = node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0];
 
-        const font = node.data.icon.isEmoji ? fonts.emojiFont : fonts.nodeLetterFont;
+        const font = node.data.icon.isEmoji ? fonts.userEmojiFont : fonts.nodeLetterFont;
 
         const { x: textX, y: textY } = getTextCoordinates({ x: node.x, y: node.y }, getTextWidth(text, node.data.icon.isEmoji, font));
 

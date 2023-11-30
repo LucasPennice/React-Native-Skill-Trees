@@ -4,9 +4,9 @@ import { useDerivedValue, useSharedValue, withSpring } from "react-native-reanim
 import { CIRCLE_SIZE, TIME_TO_REORDER_TREE } from "../../../parameters";
 import { InitialAndFinalCoord } from "../../../types";
 
-type Props = { pathFinalPoint: InitialAndFinalCoord; isRoot?: boolean; pathInitialPoint: InitialAndFinalCoord };
+type Props = { pathFinalPoint: InitialAndFinalCoord; isRoot?: boolean; pathInitialPoint: InitialAndFinalCoord; color: string };
 
-function HierarchicalReactiveCanvasPath({ pathFinalPoint, pathInitialPoint, isRoot }: Props) {
+function HierarchicalReactiveCanvasPath({ pathFinalPoint, pathInitialPoint, isRoot, color }: Props) {
     const initialPointX = useSharedValue(pathInitialPoint.initialCoordinates.x);
     const initialPointY = useSharedValue(pathInitialPoint.initialCoordinates.y);
 
@@ -41,7 +41,7 @@ function HierarchicalReactiveCanvasPath({ pathFinalPoint, pathInitialPoint, isRo
     if (isRoot) return <></>;
 
     //eslint-disable-next-line
-    return <Path path={path} color={"#1C1C1D"} style="stroke" strokeWidth={2} />;
+    return <Path path={path} color={color} style="stroke" strokeWidth={2} />;
 }
 
 export default HierarchicalReactiveCanvasPath;

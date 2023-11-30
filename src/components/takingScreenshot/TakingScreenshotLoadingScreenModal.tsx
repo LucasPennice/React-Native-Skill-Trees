@@ -9,9 +9,8 @@ import { TreeData, selectAllTreesEntities } from "@/redux/slices/userTreesSlice"
 import { CartesianCoordinate, NodeCoordinate, NormalizedNode } from "@/types";
 import analytics from "@react-native-firebase/analytics";
 import { Dictionary } from "@reduxjs/toolkit";
-import { SkFont } from "@shopify/react-native-skia";
 import { mixpanel } from "app/(app)/_layout";
-import { SkiaFontContext } from "app/_layout";
+import { SkiaAppFonts, SkiaFontContext } from "app/_layout";
 import { shareAsync } from "expo-sharing";
 import { Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Modal, Platform, Pressable, StatusBar, StyleSheet, View } from "react-native";
@@ -19,7 +18,15 @@ import { Gesture, GestureDetector, gestureHandlerRootHOC } from "react-native-ge
 import Animated, { SharedValue, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { Defs, LinearGradient, Path, Stop, Svg } from "react-native-svg";
 import ViewShot from "react-native-view-shot";
-import { CIRCLE_SIZE, HOMEPAGE_TREE_ID, HOMETREE_ROOT_ID, MENU_HIGH_DAMPENING, NODE_ICON_FONT_SIZE, colors } from "../../parameters";
+import {
+    CIRCLE_SIZE,
+    HOMEPAGE_TREE_ID,
+    HOMETREE_ROOT_ID,
+    MENU_HIGH_DAMPENING,
+    NODE_ICON_FONT_SIZE,
+    USER_ICON_FONT_SIZE,
+    colors,
+} from "../../parameters";
 import AppButton from "../AppButton";
 import AppText from "../AppText";
 import ChevronLeft from "../Icons/ChevronLeft";
@@ -103,7 +110,7 @@ type Props = {
         savedRotation: SharedValue<number>;
     };
     treeData: Omit<TreeData, "nodes">;
-    fonts: { labelFont: SkFont; nodeLetterFont: SkFont; emojiFont: SkFont };
+    fonts: SkiaAppFonts;
     coordinatesInsideCanvas: NodeCoordinate[];
     rootNodeInsideCanvas: NodeCoordinate;
     svgDimensions: { width: number; height: number };
@@ -206,11 +213,6 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
                         <DefineGradients subTreesData={subTreesData} />
 
                         {coordinatesInsideCanvas.map((node) => {
-                            const strokeDashoffset =
-                                node.category === "SKILL_TREE"
-                                    ? 2 * Math.PI * CIRCLE_SIZE - (2 * Math.PI * CIRCLE_SIZE * treeCompletionTable[node.treeId]!.percentage) / 100
-                                    : undefined;
-
                             return (
                                 <Fragment key={node.nodeId}>
                                     {!node.isRoot && treeData.treeId === HOMEPAGE_TREE_ID && (
@@ -223,8 +225,21 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
                                     {!node.isRoot && treeData.treeId !== HOMEPAGE_TREE_ID && (
                                         <HierarchicalPath node={node} coordinatesInsideCanvas={coordinatesInsideCanvas} />
                                     )}
+                                </Fragment>
+                            );
+                        })}
 
-                                    <Path stroke={`url(#gray)`} strokeLinecap="round" strokeWidth={2} d={nodeToCircularPath(node)} />
+                        {coordinatesInsideCanvas.map((node) => {
+                            const radius = node.category === "USER" ? 1.5 * CIRCLE_SIZE : CIRCLE_SIZE;
+
+                            const strokeDashoffset =
+                                node.category === "SKILL_TREE"
+                                    ? 2 * Math.PI * radius - (2 * Math.PI * radius * treeCompletionTable[node.treeId]!.percentage) / 100
+                                    : undefined;
+
+                            return (
+                                <Fragment key={node.nodeId}>
+                                    <Path stroke={`url(#gray)`} strokeLinecap="round" strokeWidth={2} d={nodeToCircularPath(node, radius)} />
 
                                     <Path
                                         stroke={
@@ -234,11 +249,9 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
                                         }
                                         strokeLinecap="round"
                                         strokeWidth={2}
-                                        d={nodeToCircularPath(node)}
-                                        strokeDasharray={node.category === "SKILL_TREE" ? 2 * Math.PI * CIRCLE_SIZE : undefined}
+                                        d={nodeToCircularPath(node, radius)}
+                                        strokeDasharray={node.category === "SKILL_TREE" ? 2 * Math.PI * radius : undefined}
                                         strokeDashoffset={strokeDashoffset}
-                                        fillOpacity={node.category === "USER" ? 1 : 0}
-                                        fill={node.nodeId === HOMETREE_ROOT_ID ? `url(#${node.treeId})` : undefined}
                                     />
                                 </Fragment>
                             );
@@ -246,7 +259,11 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
                     </Svg>
                     {coordinatesInsideCanvas.map((node) => {
                         const text = node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0];
-                        const font = node.data.icon.isEmoji ? fonts.emojiFont : fonts.nodeLetterFont;
+                        const font = node.data.icon.isEmoji
+                            ? node.category === "USER"
+                                ? fonts.userEmojiFont
+                                : fonts.emojiFont
+                            : fonts.nodeLetterFont;
                         const fontFamily = node.data.icon.isEmoji ? "emojisMono" : "helvetica";
                         const { x: textX, y: textY } = getTextCoordinates({ x: node.x, y: node.y }, getTextWidth(text, node.data.icon.isEmoji, font));
 
@@ -259,6 +276,9 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
                             case "SKILL_TREE":
                                 color = node.accentColor.color1;
                                 break;
+                            case "USER":
+                                color = node.accentColor.color1;
+                                break;
                             default:
                                 color = getLabelTextColor(node.accentColor.color1);
                                 break;
@@ -267,7 +287,7 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
                         return (
                             <AppText
                                 key={node.nodeId}
-                                fontSize={NODE_ICON_FONT_SIZE}
+                                fontSize={node.category === "USER" ? USER_ICON_FONT_SIZE : NODE_ICON_FONT_SIZE}
                                 children={text}
                                 style={{ fontFamily, position: "absolute", left: textX, top: textY - 20, color, lineHeight: 30 }}
                             />
@@ -294,7 +314,16 @@ export function RadialPath({
 
     const { c, m } = getCurvedPath<CartesianCoordinate>(rootNodeInsideCanvas, parentNode!, { x: node.x, y: node.y });
 
-    return <Path stroke={"#1C1C1D"} fill={"#00000000"} strokeWidth={2} d={`M ${m.x} ${m.y} C ${c.x1} ${c.y1}, ${c.x2} ${c.y2}, ${c.x} ${c.y}`} />;
+    const shouldAccentPath = node.data.isCompleted || node.parentId === HOMETREE_ROOT_ID;
+
+    return (
+        <Path
+            stroke={shouldAccentPath ? node.accentColor.color1 : "#1C1C1D"}
+            fill={"#00000000"}
+            strokeWidth={2}
+            d={`M ${m.x} ${m.y} C ${c.x1} ${c.y1}, ${c.x2} ${c.y2}, ${c.x} ${c.y}`}
+        />
+    );
 }
 
 export function HierarchicalPath({ node, coordinatesInsideCanvas }: { node: NodeCoordinate; coordinatesInsideCanvas: NodeCoordinate[] }) {
@@ -304,7 +333,16 @@ export function HierarchicalPath({ node, coordinatesInsideCanvas }: { node: Node
 
     const { c, m } = getHierarchicalPath(node, parentNode!);
 
-    return <Path stroke={"#1C1C1D"} fill={"#00000000"} strokeWidth={2} d={`M ${m.x} ${m.y} C ${c.x1} ${c.y1}, ${c.x2} ${c.y2}, ${c.x} ${c.y}`} />;
+    const shouldAccentPath = node.data.isCompleted;
+
+    return (
+        <Path
+            stroke={shouldAccentPath ? node.accentColor.color1 : "#1C1C1D"}
+            fill={"#00000000"}
+            strokeWidth={2}
+            d={`M ${m.x} ${m.y} C ${c.x1} ${c.y1}, ${c.x2} ${c.y2}, ${c.x} ${c.y}`}
+        />
+    );
 }
 
 export const DefineGradients = ({ subTreesData }: { subTreesData: Dictionary<TreeData> }) => {
@@ -409,7 +447,7 @@ function LayoutSelector({ treeData, cancelSharing }: { treeData: Omit<TreeData, 
     return (
         <View style={styles.container}>
             <Pressable style={styles.closeIcon} onPress={cancelSharing}>
-                <ChevronLeft color={colors.line} />
+                <ChevronLeft color={colors.unmarkedText} />
             </Pressable>
             <ViewShot
                 ref={ref}

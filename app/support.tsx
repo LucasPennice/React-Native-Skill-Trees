@@ -7,7 +7,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 
 const style = StyleSheet.create({
-    container: { flex: 1, padding: 20, justifyContent: "center", alignItems: "center", maxWidth: 360 },
+    container: { flex: 1, padding: 20, justifyContent: "center", alignItems: "center" },
     clipboardTextContainer: {
         backgroundColor: colors.darkGray,
         borderRadius: 30,

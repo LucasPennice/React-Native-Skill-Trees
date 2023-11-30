@@ -1,5 +1,6 @@
-import { CIRCLE_SIZE, colors } from "@/parameters";
+import { CIRCLE_SIZE } from "@/parameters";
 import { Picture, SkFont, Skia, createPicture } from "@shopify/react-native-skia";
+import { SkiaAppFonts } from "app/_layout";
 import { Fragment, memo, useMemo } from "react";
 import { SharedValue } from "react-native-reanimated";
 import { CanvasDimensions, CartesianCoordinate, InitialAndFinalCoord, NodeCoordinate, ReactiveNodeCoordinate } from "../../../types";
@@ -21,11 +22,7 @@ type TreeProps = {
         y: SharedValue<number>;
         nodesToDragId: string[];
     };
-    fonts: {
-        labelFont: SkFont;
-        nodeLetterFont: SkFont;
-        emojiFont: SkFont;
-    };
+    fonts: SkiaAppFonts;
 };
 
 const ReactiveHierarchicalPathList = memo(function ReactiveHierarchicalPathList({
@@ -59,6 +56,7 @@ const ReactiveHierarchicalPathList = memo(function ReactiveHierarchicalPathList(
         return (
             <HierarchicalCanvasPath
                 key={`${node.nodeId}_path`}
+                color={node.data.isCompleted ? node.accentColor.color1 : "#1C1C1D"}
                 pathFinalPoint={pathFinalPoint}
                 pathInitialPoint={pathInitialPoint}
                 isRoot={node.isRoot}
@@ -81,8 +79,9 @@ const StaticHierarchicalPathList = memo(function StaticHierarchicalPathList({
             createPicture({ x: 0, y: 0, width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }, (canvas) => {
                 const paint = Skia.Paint();
                 paint.setColor(Skia.Color("#1C1C1D"));
-                const completePaint = Skia.Paint();
-                completePaint.setColor(Skia.Color(`${colors.orange}F0`));
+
+                const complete = Skia.Paint();
+                complete.setColor(Skia.Color(`${nodeCoordinates[0].accentColor.color1}`));
 
                 for (const nodeCoordinate of staticNodes) {
                     if (nodeCoordinate.isRoot) continue;
@@ -101,8 +100,7 @@ const StaticHierarchicalPathList = memo(function StaticHierarchicalPathList({
 
                     path.stroke({ width: 2 });
 
-                    canvas.drawPath(path, paint);
-                    // canvas.drawPath(path, nodeCoordinate.data.isCompleted ? completePaint : paint);
+                    canvas.drawPath(path, nodeCoordinate.data.isCompleted ? complete : paint);
                 }
             }),
         [nodeCoordinates, staticNodes, canvasDimensions]
@@ -159,7 +157,7 @@ function HierarchicalSkillTree({ nodeCoordinatesCentered, settings, drag, fonts,
             />
 
             <StaticNodeList
-                fonts={{ emojiFont, nodeLetterFont }}
+                fonts={fonts}
                 allNodes={nodeCoordinatesCentered}
                 staticNodes={staticNodes}
                 settings={{ oneColorPerTree: true, showIcons }}
