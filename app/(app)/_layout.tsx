@@ -100,34 +100,55 @@ const manuallyParseParams = (url: string) => {
     return result;
 };
 
-const useHandleDeepLinking = (isLoaded: boolean, isSignedIn?: boolean) => {
+const onUrlChange = (url: string | null, isLoaded: boolean, userId: string | null) => {
+    if (url === null) return;
+    if (!isLoaded) return;
+    if (!userId) return Alert.alert("Please create an account or log in", "Before clicking a skill trees link");
+
+    const { path: action } = Linking.parse(url);
+
+    const queryParams = manuallyParseParams(url);
+
+    //Handle import case
+    if (action === "redirect/import") {
+        if (!queryParams) return Alert.alert("Invalid import link");
+        if (queryParams.userId === undefined) return Alert.alert("User id doesn't exist in import link");
+        if (queryParams.treesToImportIds === undefined) return Alert.alert("The trees to import do not exist at the provided import link.");
+
+        //HANDLES THE ROUTING FOR INITIAL AND SUBSEQUENT EVENTS - AND THE PARAM SETTING FOR ONLY THE FIRST EVENT
+        router.push({
+            pathname: `/(app)/myTrees`,
+            //@ts-ignore
+            params: { userIdImport: queryParams.userId, treesToImportIds: queryParams.treesToImportIds } as RoutesParams["myTrees"],
+        });
+
+        //PARAM SETTING FOR ONLY SUBSEQUENT EVENTS
+        //@ts-ignore
+        router.setParams({ userIdImport: queryParams.userId, treesToImportIds: queryParams.treesToImportIds } as RoutesParams["myTrees"]);
+        return;
+    }
+};
+
+const useHandleDeepLinking = (isLoaded: boolean) => {
     const url = Linking.useURL();
 
     const userId = useMongoCompliantUserId();
 
     useEffect(() => {
-        if (url === null) return;
-        if (!isLoaded) return;
-        if (!userId) return Alert.alert("Please create an account or log in", "Before clicking a skill trees link");
+        onUrlChange(url, isLoaded, userId);
+    }, [userId, isLoaded]);
 
-        const { path: action } = Linking.parse(url);
+    useEffect(() => {
+        const eventEmmiter = Linking.addEventListener("url", (e) => {
+            const url = e.url;
 
-        const queryParams = manuallyParseParams(url);
+            onUrlChange(url, isLoaded, userId);
+        });
 
-        //Handle import case
-        if (action === "redirect/import") {
-            if (!queryParams) return Alert.alert("Invalid import link");
-            if (queryParams.userId === undefined) return Alert.alert("User id doesn't exist in import link");
-            if (queryParams.treesToImportIds === undefined) return Alert.alert("The trees to import do not exist at the provided import link.");
-
-            router.push({
-                pathname: `/(app)/myTrees`,
-                //@ts-ignore
-                params: { userIdImport: queryParams.userId, treesToImportIds: queryParams.treesToImportIds } as RoutesParams["myTrees"],
-            });
-            return;
-        }
-    }, [url, isLoaded]);
+        return () => {
+            eventEmmiter.remove();
+        };
+    }, [userId, isLoaded]);
 };
 
 export default function RootLayout() {
@@ -164,7 +185,7 @@ export default function RootLayout() {
 
     useRedirectToWelcomeScreen(attemptToRedirect, isLoaded, isSignedIn);
 
-    useHandleDeepLinking(isLoaded, isSignedIn);
+    useHandleDeepLinking(isLoaded);
 
     if (!fontsLoaded || !isClerkLoaded) return <Text>Loading...</Text>;
 
