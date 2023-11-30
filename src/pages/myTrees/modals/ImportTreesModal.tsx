@@ -83,9 +83,9 @@ function ImportTreesModal({
         <FlingToDismissModal closeModal={closeModal} open={open}>
             <>
                 {mode === "Fetching" && <Fetching />}
-                {/* {mode === "ShowTreesToImport" && importTreeResponse && (
+                {mode === "ShowTreesToImport" && importTreeResponse !== null && (
                     <ShowTreesToImport importTreeResponse={importTreeResponse} closeModal={closeModal} />
-                )} */}
+                )}
             </>
         </FlingToDismissModal>
     );

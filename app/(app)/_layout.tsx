@@ -150,12 +150,14 @@ const useHandleDeepLinking = (isLoaded: boolean) => {
 };
 
 export default function RootLayout() {
+    const deepLinkOpenedApp = Linking.useURL() !== null;
+
     useIdentifyMixPanelUserId();
     const onboarding = useAppSelector(selectOnboarding);
     const { shouldWaitForClerkToLoad } = useAppSelector(selectSyncSlice);
     const { isSignedIn, isLoaded } = useUser();
     useHandleUpdateBackup(isSignedIn);
-    const isClerkLoaded = shouldWaitForClerkToLoad === false ? true : isLoaded;
+    const isClerkLoaded = deepLinkOpenedApp ? isLoaded : shouldWaitForClerkToLoad === false ? true : isLoaded;
 
     const { width, height } = Dimensions.get("window");
 

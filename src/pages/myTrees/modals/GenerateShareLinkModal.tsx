@@ -80,7 +80,10 @@ const UpdatingBackup = () => {
 };
 
 const ShowLink = ({ selectedTreeIds, userId }: { selectedTreeIds: string[]; userId: string }) => {
-    const copyShareLink = () => Clipboard.setString(generateShareLink(userId, selectedTreeIds));
+    const copyShareLink = () => {
+        Clipboard.setString(generateShareLink(userId, selectedTreeIds));
+        mixpanel.track("generateShareTreesLink");
+    };
 
     const [copied, setCopied] = useState(false);
 
