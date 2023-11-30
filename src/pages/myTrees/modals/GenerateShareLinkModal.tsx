@@ -35,7 +35,7 @@ const generateShareLink = (userId: string, selectedTreeIds: string[]) => {
     const PREFIX = "redirect";
     const ACTION = "import";
 
-    return `${HOST_DOMAIN}/${PREFIX}/${ACTION}?userId=${userId}?treesToImportIds=[${selectedTreeIds.map((id) => `"${id}"`).join(",")}]`;
+    return `${HOST_DOMAIN}/${PREFIX}/${ACTION}?userId=${userId}?treesToImportIds=${selectedTreeIds.map((id) => `${id}`).join(",")}`;
 };
 
 function GenerateShareLinkModal({ closeModal, selectedTreeIds }: { closeModal: () => void; selectedTreeIds: string[] }) {

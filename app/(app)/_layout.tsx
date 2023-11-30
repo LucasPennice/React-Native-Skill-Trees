@@ -87,15 +87,13 @@ const manuallyParseParams = (url: string) => {
     const splitUrl = url.split("?");
     const paramArray = splitUrl.slice(1);
 
-    const result: { [key: string]: string | number } = {};
+    const result: { [key: string]: string } = {};
 
-    paramArray
-        .map((s) => s.replace("=", ":"))
-        .forEach((s) => {
-            const [key, data] = s.split(":");
+    paramArray.forEach((s) => {
+        const [key, data] = s.split("=");
 
-            result[key] = data;
-        });
+        result[key] = data;
+    });
 
     return result;
 };

@@ -57,9 +57,9 @@ function ImportTreesModal({
     const { importTreeResponse, mode, showTreesToImport } = useHandleTreesToImport();
 
     const formattedTreesToImportIds = `[${data.treesToImportIds
-        .slice(1, -1)
         .split(",")
-        .map((id) => `"${id}"`)}]`;
+        .map((id) => `"${id}"`)
+        .join(",")}]`;
 
     const getTreesToImport = () => axiosClient.get<ImportTreeResponse>(`backup/${data.userIdImport}?treesToImportIds=${formattedTreesToImportIds}`);
 
@@ -83,9 +83,9 @@ function ImportTreesModal({
         <FlingToDismissModal closeModal={closeModal} open={open}>
             <>
                 {mode === "Fetching" && <Fetching />}
-                {mode === "ShowTreesToImport" && importTreeResponse && (
+                {/* {mode === "ShowTreesToImport" && importTreeResponse && (
                     <ShowTreesToImport importTreeResponse={importTreeResponse} closeModal={closeModal} />
-                )}
+                )} */}
             </>
         </FlingToDismissModal>
     );
