@@ -100,12 +100,15 @@ const manuallyParseParams = (url: string) => {
     return result;
 };
 
-const useHandleDeepLinking = (attemptToRedirect: boolean) => {
+const useHandleDeepLinking = (isLoaded: boolean, isSignedIn?: boolean) => {
     const url = Linking.useURL();
+
+    const userId = useMongoCompliantUserId();
 
     useEffect(() => {
         if (url === null) return;
-        if (!attemptToRedirect) return;
+        if (!isLoaded) return;
+        if (!userId) return Alert.alert("Please create an account or log in", "Before clicking a skill trees link");
 
         const { path: action } = Linking.parse(url);
 
@@ -124,7 +127,7 @@ const useHandleDeepLinking = (attemptToRedirect: boolean) => {
             });
             return;
         }
-    }, [url, attemptToRedirect]);
+    }, [url, isLoaded]);
 };
 
 export default function RootLayout() {
@@ -161,7 +164,7 @@ export default function RootLayout() {
 
     useRedirectToWelcomeScreen(attemptToRedirect, isLoaded, isSignedIn);
 
-    useHandleDeepLinking(attemptToRedirect);
+    useHandleDeepLinking(isLoaded, isSignedIn);
 
     if (!fontsLoaded || !isClerkLoaded) return <Text>Loading...</Text>;
 

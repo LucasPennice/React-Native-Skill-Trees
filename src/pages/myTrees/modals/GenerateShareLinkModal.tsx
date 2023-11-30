@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
 });
 
 const generateShareLink = (userId: string, selectedTreeIds: string[]) => {
-    const HOST_DOMAIN = "https://app.skilltreesapp.com";
+    const HOST_DOMAIN = "https://www.skilltreesapp.com";
     const PREFIX = "redirect";
     const ACTION = "import";
 
