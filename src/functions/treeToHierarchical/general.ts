@@ -311,9 +311,6 @@ export function getNodesInBetweenConflictingTrees(
     const leftConflictingChildIdx = lcaChildrenIds.findIndex((childId) => childId === leftConflictingChildId);
     const rightConflictingChildIdx = lcaChildrenIds.findIndex((childId) => childId === rightConflictingChildId);
 
-    if (leftConflictingChildIdx === -1 || rightConflictingChildIdx === -1)
-        throw new Error("LCANode children not found at fn getNodesInBetweenConflictingTrees");
-
     for (let i = leftConflictingChildIdx + 1; i < rightConflictingChildIdx; i++) {
         const childId = lcaChildrenIds[i];
 
