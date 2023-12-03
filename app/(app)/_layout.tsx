@@ -187,6 +187,26 @@ export default function RootLayout() {
 
     useHandleDeepLinking(isLoaded);
 
+    // const dispatch = useAppDispatch();
+    // useEffect(() => {
+    //     const getUserBackup = () => axiosClient.get<UserBackup>(`backup/757365725f32595a47524158`);
+
+    //     const batchUpdateUserStore = (userBackup: UserBackup) => {
+    //         // should only result in one combined re-render, not four
+    //         batch(() => {
+    //             dispatch(overwriteOnboardingSlice(userBackup.onboarding));
+    //             dispatch(overwriteHomeTreeSlice(userBackup.homeTree));
+    //             dispatch(overwriteUserTreesSlice(userBackup.userTreesSlice));
+    //             dispatch(overwriteNodeSlice(userBackup.nodeSlice));
+    //         });
+    //     };
+
+    //     (async () => {
+    //         const { data: userBackup } = await getUserBackup();
+    //         batchUpdateUserStore(userBackup);
+    //     })();
+    // }, []);
+
     if (!fontsLoaded || !isClerkLoaded) return <Text>Loading...</Text>;
 
     const hide = !Boolean(pathname === "/" || hideNavAndOnboarding.find((route) => pathname.includes(route)));

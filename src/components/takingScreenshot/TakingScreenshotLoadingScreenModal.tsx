@@ -180,7 +180,8 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
     });
 
     const treeCompletionTable = completedSkillTreeTable(coordinatesInsideCanvas);
-
+    // console.log(svgDimensions.width, svgDimensions.height);
+    // console.log(treeData.accentColor);
     return (
         <GestureDetector gesture={canvasGestures}>
             <Animated.View
@@ -236,6 +237,22 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
                                 node.category === "SKILL_TREE"
                                     ? 2 * Math.PI * radius - (2 * Math.PI * radius * treeCompletionTable[node.treeId]!.percentage) / 100
                                     : undefined;
+
+                            // console.log(
+                            //     `<path d="${nodeToCircularPath(
+                            //         node,
+                            //         radius
+                            //     )}" stroke-linecap="round" stroke="url(#gray)" fill="transparent" stroke-width="2"/>`
+                            // );
+                            // console.log(
+                            //     `<path d="${nodeToCircularPath(node, radius)}" ${
+                            //         ((node.category === "SKILL" && node.data.isCompleted) || node.category !== "SKILL") &&
+                            //         `stroke="url(#${node.treeId})"`
+                            //     } fill="transparent" stroke-linecap="round" ${
+                            //         node.category === "SKILL_TREE" &&
+                            //         `stroke-dasharray="${2 * Math.PI * radius}" stroke-dashoffset="${strokeDashoffset}"`
+                            //     }  stroke-width="2"/>`
+                            // );
 
                             return (
                                 <Fragment key={node.nodeId}>
@@ -316,6 +333,13 @@ export function RadialPath({
 
     const shouldAccentPath = node.data.isCompleted || node.parentId === HOMETREE_ROOT_ID;
 
+    // console.log(
+    //     `<path d="M ${m.x} ${m.y} C ${c.x1} ${c.y1}, ${c.x2} ${c.y2}, ${c.x} ${c.y} stroke={${
+    //         shouldAccentPath ? node.accentColor.color1 : "#1C1C1D"
+    //     }}  fill={"#00000000"}
+    //         strokeWidth={2}"/>`
+    // );
+
     return (
         <Path
             stroke={shouldAccentPath ? node.accentColor.color1 : "#1C1C1D"}
@@ -349,6 +373,14 @@ export const DefineGradients = ({ subTreesData }: { subTreesData: Dictionary<Tre
     const subTreeDataKeys = Object.keys(subTreesData);
 
     return subTreeDataKeys.map((subTreeId) => {
+        // console.log(
+        //     `<defs><linearGradient id="${subTreeId}" x1="0" x2="100" y1="0" y2="100"><stop offset="0%" stop-color="${
+        //         subTreesData[subTreeId]!.accentColor.color1
+        //     }" stop-opacity="1" /><stop offset="100%" stop-color="${
+        //         subTreesData[subTreeId]!.accentColor.color2
+        //     }" stop-opacity="1" /></linearGradient></defs>`
+        // );
+
         return (
             <Defs key={subTreeId}>
                 <LinearGradient id={subTreeId} x1="0%" x2="100%" y1="0%" y2="100%">

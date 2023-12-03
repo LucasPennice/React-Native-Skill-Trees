@@ -31,12 +31,7 @@ const nodeMenuConfig: Config = {
     horizontalSize: NODE_MENU_SIZE,
     verticalSize: NODE_MENU_SIZE,
     circular: true,
-    directions: ["horizontal", "vertical"],
-    triggerZoneSize: 1,
-    allowFling: true,
     allowTap: true,
-    runActionOnTouchUp: true,
-    maxTapDuration: 999,
 };
 
 export type NodeMenuFunctions = {
@@ -97,10 +92,12 @@ function NodeMenu({
         };
     }, [menuMode]);
 
+    //🚨 El problema esta abajo de esto
+
     return (
         <Animated.View
             entering={FadeIn.duration(250)}
-            exiting={exitOpacityScale(renderScaleForNodeActionMenu(scale))}
+            // exiting={exitOpacityScale(renderScaleForNodeActionMenu(scale))}
             style={{ position: "absolute", top: position.y, left: position.x, transform: [{ scale: renderScaleForNodeActionMenu(scale) }] }}>
             <Animated.View
                 style={[
