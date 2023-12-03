@@ -1,3 +1,4 @@
+import { mixpanel } from "app/(app)/_layout";
 import { Fragment, useEffect, useState } from "react";
 import { Platform, StyleSheet, View, ViewStyle } from "react-native";
 import Animated, {
@@ -10,20 +11,19 @@ import Animated, {
     FadeOutLeft,
     FadeOutRight,
     FadeOutUp,
+    ZoomOut,
     interpolateColor,
     useAnimatedStyle,
     useSharedValue,
     withSpring,
     withTiming,
 } from "react-native-reanimated";
-import { exitOpacityScale } from "../../../constants/reanimatedAnimations";
 import { renderScaleForNodeActionMenu } from "../../../functions/misc";
 import { colors } from "../../../parameters";
 import { NodeCoordinate } from "../../../types";
 import AppText from "../../AppText";
 import DirectionMenu, { Config } from "../../DirectionMenu";
 import useWrapNodeMenuFunctions from "./useWrapNodeMenuFunctions";
-import { mixpanel } from "app/(app)/_layout";
 
 export const NODE_MENU_SIZE = 150;
 
@@ -92,12 +92,10 @@ function NodeMenu({
         };
     }, [menuMode]);
 
-    //🚨 El problema esta abajo de esto
-
     return (
         <Animated.View
             entering={FadeIn.duration(250)}
-            // exiting={exitOpacityScale(renderScaleForNodeActionMenu(scale))}
+            exiting={ZoomOut.duration(250).withInitialValues({ transform: [{ scale: renderScaleForNodeActionMenu(scale) }] })}
             style={{ position: "absolute", top: position.y, left: position.x, transform: [{ scale: renderScaleForNodeActionMenu(scale) }] }}>
             <Animated.View
                 style={[
