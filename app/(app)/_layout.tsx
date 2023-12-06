@@ -170,6 +170,13 @@ export default function RootLayout() {
                     }}
                 />
                 <Stack.Screen
+                    name={routes.subscriptionDetails.name}
+                    options={{
+                        title: "Membership Plan",
+                        headerShown: true,
+                    }}
+                />
+                <Stack.Screen
                     name={routes.backup.name}
                     options={{
                         title: "Backup",

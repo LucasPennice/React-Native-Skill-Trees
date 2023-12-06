@@ -8,25 +8,25 @@ import { useAppDispatch } from "@/redux/reduxHooks";
 import { setShouldWaitForClerkToLoad, updateLastBackupTime } from "@/redux/slices/syncSlice";
 import useUpdateBackup from "@/useUpdateBackup";
 import { useAuth, useUser } from "@clerk/clerk-expo";
+import { SubscriptionContext, mixpanel } from "app/_layout";
 import * as Application from "expo-application";
 import { router } from "expo-router";
 import { Alert, Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import { mixpanel } from "app/_layout";
 
 import LoadingIcon from "@/components/LoadingIcon";
-import { useState } from "react";
+import { useContext, useState } from "react";
+
+const style = StyleSheet.create({
+    container: { flex: 1, padding: 10, gap: 20 },
+    settingContainer: { flex: 1, gap: 15 },
+    versionText: { textAlign: "center", color: colors.line, marginTop: 10 },
+});
 
 function UserProfile() {
-    const style = StyleSheet.create({
-        container: { flex: 1, padding: 10, gap: 20 },
-        settingContainer: { flex: 1, gap: 15 },
-        versionText: { textAlign: "center", color: colors.line, marginTop: 10 },
-    });
+    const { customerInfo } = useContext(SubscriptionContext);
 
     return (
         <View style={style.container}>
-            <AppText fontSize={18} children={"My Account"} />
-
             <UserCard />
 
             <View style={style.settingContainer}>
@@ -58,6 +58,22 @@ function UserProfile() {
                     <AppText fontSize={14} children={"Illustration Credits"} />
                     <ChevronRight color={colors.unmarkedText} />
                 </TouchableOpacity>
+                {customerInfo && (
+                    <TouchableOpacity
+                        onPress={() => router.push("/(app)/subscriptionDetails")}
+                        style={{
+                            backgroundColor: colors.darkGray,
+                            borderRadius: 10,
+                            height: 45,
+                            paddingHorizontal: 10,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}>
+                        <AppText fontSize={14} children={"Membership Plan"} />
+                        <ChevronRight color={colors.unmarkedText} />
+                    </TouchableOpacity>
+                )}
             </View>
 
             <View>

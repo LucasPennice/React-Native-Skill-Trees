@@ -59,11 +59,12 @@ const useUserSubscriptionInformation = () => {
         };
     }, [userId]);
 
-    return isProUser;
+    return { isProUser, customerInfo };
 };
 
 export type SubscriptionHandler = {
     currentOffering: PurchasesOffering | null;
+    customerInfo: CustomerInfo | null;
     isProUser: boolean | null;
     onFreeTrial: boolean | null;
 };
@@ -92,11 +93,11 @@ function useSubscriptionHandler(): SubscriptionHandler {
     }, [userId]);
 
     const currentOffering = useFetchOffers();
-    const isProUser = useUserSubscriptionInformation();
+    const { isProUser, customerInfo } = useUserSubscriptionInformation();
 
     const onFreeTrial: boolean | null = false;
 
-    return { currentOffering, isProUser, onFreeTrial };
+    return { currentOffering, isProUser, customerInfo, onFreeTrial };
 }
 
 export default useSubscriptionHandler;

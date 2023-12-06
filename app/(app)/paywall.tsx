@@ -72,9 +72,7 @@ const handlePurchase = (availablePackages: PurchasesPackage[], entitlementId: st
 
 const handleRestore = async () => {
     try {
-        const restore = await Purchases.restorePurchases();
-        // ... check restored customerInfo to see if entitlement is now active
-        console.log(JSON.stringify(restore));
+        await Purchases.restorePurchases();
     } catch (e) {
         mixpanel.track("purchaseError", { error: e });
     }
@@ -83,12 +81,9 @@ const handleRestore = async () => {
 const useBlockGoBack = () => {
     const navigation = useNavigation();
 
-    // Effect
     useEffect(() => {
         navigation.addListener("beforeRemove", (e) => {
             e.preventDefault();
-            console.log("onback");
-            // Do your stuff here
             navigation.dispatch(e.data.action);
         });
     }, []);
