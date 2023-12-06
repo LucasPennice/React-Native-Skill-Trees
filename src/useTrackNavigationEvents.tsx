@@ -1,5 +1,5 @@
 import analytics from "@react-native-firebase/analytics";
-import { mixpanel } from "app/(app)/_layout";
+import { mixpanel } from "app/_layout";
 import { router } from "expo-router";
 import { useRef } from "react";
 

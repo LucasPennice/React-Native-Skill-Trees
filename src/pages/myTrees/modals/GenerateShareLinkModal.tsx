@@ -12,7 +12,7 @@ import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import useUpdateBackup from "@/useUpdateBackup";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import LoadingIcon from "@/components/LoadingIcon";
-import { mixpanel } from "app/(app)/_layout";
+import { mixpanel } from "app/_layout";
 
 const styles = StyleSheet.create({
     clipboardTextContainer: {

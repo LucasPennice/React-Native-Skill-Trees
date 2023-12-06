@@ -1,4 +1,4 @@
-import { mixpanel } from "app/(app)/_layout";
+import { mixpanel } from "app/_layout";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import * as Sharing from "expo-sharing";

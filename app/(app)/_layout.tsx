@@ -8,19 +8,19 @@ import { closeOnboardingMenu, expandOnboardingMenu, selectOnboarding, skipToStep
 import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import { selectAllTrees } from "@/redux/slices/userTreesSlice";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
+import useRunDailyBackup from "@/useRunDailyBackup";
+import useSubscriptionHandler from "@/useSubscriptionHandler";
 import useTrackNavigationEvents from "@/useTrackNavigationEvents";
-import useUpdateBackup from "@/useUpdateBackup";
 import { useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { mixpanel } from "app/_layout";
 import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
 import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
-import { Mixpanel } from "mixpanel-react-native";
-import { Fragment, useEffect, useRef, useState } from "react";
-import { Alert, AppState, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Fragment, useEffect } from "react";
+import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, FadeInRight, FadeOut, FadeOutLeft, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { RoutesParams, hideNavAndOnboarding, routes } from "routes";
-import { dayInMilliseconds } from "./backup";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
     return <FontAwesome size={props.size ?? 24} style={{ marginBottom: -3 }} {...props} />;
@@ -33,46 +33,6 @@ function useIdentifyMixPanelUserId() {
         if (userId !== null) mixpanel.identify(userId);
     }, [userId]);
 }
-
-const trackAutomaticEvents = true;
-export const mixpanel = new Mixpanel("5a141ce3c43980d8fab68b96e1256525", trackAutomaticEvents);
-mixpanel.init();
-
-const useHandleUpdateBackup = (isSignedIn: boolean | undefined) => {
-    const { localMutationsSinceBackups, lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);
-
-    const appState = useRef(AppState.currentState);
-    const [appStateVisible, setAppStateVisible] = useState(appState.current);
-
-    useEffect(() => {
-        const subscription = AppState.addEventListener("change", (nextAppState) => {
-            appState.current = nextAppState;
-            setAppStateVisible(appState.current);
-        });
-
-        return () => {
-            subscription.remove();
-        };
-    }, []);
-
-    const { handleUserBackup } = useUpdateBackup();
-
-    useEffect(() => {
-        (async () => {
-            const dayOrMoreSinceLastBackup = new Date().getTime() - lastUpdateUTC_Timestamp >= dayInMilliseconds;
-            if (!(dayOrMoreSinceLastBackup && localMutationsSinceBackups)) return;
-            if (!isSignedIn) return;
-
-            if (appStateVisible !== "active") return;
-
-            try {
-                await handleUserBackup();
-            } catch (error) {
-                Alert.alert("Error creating a backup", `Please contact the developer ${error}`);
-            }
-        })();
-    }, [appStateVisible, isSignedIn]);
-};
 
 const useRedirectToWelcomeScreen = (attemptToRedirect: boolean, isLoaded: boolean, isSignedIn: boolean | undefined) => {
     useEffect(() => {
@@ -156,8 +116,9 @@ export default function RootLayout() {
     const onboarding = useAppSelector(selectOnboarding);
     const { shouldWaitForClerkToLoad } = useAppSelector(selectSyncSlice);
     const { isSignedIn, isLoaded } = useUser();
-    useHandleUpdateBackup(isSignedIn);
+    useRunDailyBackup(isSignedIn);
     const isClerkLoaded = deepLinkOpenedApp ? isLoaded : shouldWaitForClerkToLoad === false ? true : isLoaded;
+    useSubscriptionHandler();
 
     const { width, height } = Dimensions.get("window");
 

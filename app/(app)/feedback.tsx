@@ -14,11 +14,11 @@ import { selectAllTreesEntities } from "@/redux/slices/userTreesSlice";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { useMutation } from "@tanstack/react-query";
+import { mixpanel } from "app/_layout";
 import axiosClient from "axiosClient";
 import { useState } from "react";
 import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleProp, StyleSheet, TouchableHighlight, View, ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
-import { mixpanel } from "./_layout";
 
 const PAGE_MARGIN = 30;
 

@@ -11,7 +11,8 @@ import { useAuth, useUser } from "@clerk/clerk-expo";
 import * as Application from "expo-application";
 import { router } from "expo-router";
 import { Alert, Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import { mixpanel } from "./_layout";
+import { mixpanel } from "app/_layout";
+
 import LoadingIcon from "@/components/LoadingIcon";
 import { useState } from "react";
 

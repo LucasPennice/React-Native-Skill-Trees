@@ -1,19 +1,17 @@
 import AppButton from "@/components/AppButton";
 import AppText from "@/components/AppText";
 import CloudIcon from "@/components/Icons/CloudIcon";
-import { colors } from "@/parameters";
+import { colors, dayInMilliseconds } from "@/parameters";
 import { useAppSelector } from "@/redux/reduxHooks";
 import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import useUpdateBackup from "@/useUpdateBackup";
+import { mixpanel } from "app/_layout";
 import { Alert, StyleSheet, View } from "react-native";
-import { mixpanel } from "./_layout";
 
 const style = StyleSheet.create({
     container: { flex: 1, padding: 10, gap: 20 },
     cloudContainer: { flexDirection: "row", backgroundColor: colors.darkGray, padding: 10, borderRadius: 10, alignItems: "center", gap: 10 },
 });
-
-export const dayInMilliseconds = 1000 * 60 * 60 * 24;
 
 function BackupScreen() {
     const { lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);

@@ -1,4 +1,4 @@
-import { mixpanel } from "app/(app)/_layout";
+import { mixpanel } from "app/_layout";
 import { Fragment, useEffect, useState } from "react";
 import { Platform, StyleSheet, View, ViewStyle } from "react-native";
 import Animated, {

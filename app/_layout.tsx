@@ -33,8 +33,8 @@ import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated"
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { routes } from "routes";
+import { Mixpanel } from "mixpanel-react-native";
 import "../globals";
-import { mixpanel } from "./(app)/_layout";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -42,6 +42,10 @@ export const unstable_settings = {
     // Ensure that reloading on `/modal` keeps a back button present.
     initialRouteName: "(tabs)",
 };
+
+const trackAutomaticEvents = true;
+export const mixpanel = new Mixpanel("5a141ce3c43980d8fab68b96e1256525", trackAutomaticEvents);
+mixpanel.init();
 
 const clerkKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 

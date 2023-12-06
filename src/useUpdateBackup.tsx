@@ -10,7 +10,7 @@ import { selectOnboarding } from "./redux/slices/onboardingSlice";
 import { selectSyncSlice, updateLastBackupTime } from "./redux/slices/syncSlice";
 import { selectAllTreesEntities, selectTreeIds } from "./redux/slices/userTreesSlice";
 import useMongoCompliantUserId from "./useMongoCompliantUserId";
-import { mixpanel } from "app/(app)/_layout";
+import { mixpanel } from "app/_layout";
 
 function useUpdateBackup() {
     const { setSubmitLoading, setSubmitError, submitState: backupState, setSubmitSuccess } = useHandleButtonState();

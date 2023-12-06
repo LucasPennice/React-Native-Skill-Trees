@@ -9,7 +9,7 @@ import { TreeData, selectAllTreesEntities } from "@/redux/slices/userTreesSlice"
 import { CartesianCoordinate, NodeCoordinate, NormalizedNode } from "@/types";
 import analytics from "@react-native-firebase/analytics";
 import { Dictionary } from "@reduxjs/toolkit";
-import { mixpanel } from "app/(app)/_layout";
+import { mixpanel } from "app/_layout";
 import { SkiaAppFonts, SkiaFontContext } from "app/_layout";
 import { shareAsync } from "expo-sharing";
 import { Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";

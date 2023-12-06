@@ -31,7 +31,7 @@ import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
 import { RoutesParams } from "routes";
 import { Contact } from "./feedback";
 import { batch } from "react-redux";
-import { mixpanel } from "./_layout";
+import { mixpanel } from "app/_layout";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();

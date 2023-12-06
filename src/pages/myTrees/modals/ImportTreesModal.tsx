@@ -8,7 +8,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { TreeData, importUserTrees, removeUserTrees, selectTreeIds } from "@/redux/slices/userTreesSlice";
 import { ColorGradient, NormalizedNode } from "@/types";
 import { Dictionary } from "@reduxjs/toolkit";
-import { mixpanel } from "app/(app)/_layout";
+import { mixpanel } from "app/_layout";
 import axiosClient from "axiosClient";
 import { useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
