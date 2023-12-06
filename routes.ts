@@ -39,9 +39,13 @@ export const routes = {
         name: "support",
         route: "/support",
     },
+    paywall: {
+        name: "paywall",
+        route: "/paywall",
+    },
 };
 
-export const hideNavAndOnboarding: (keyof typeof routes)[] = ["welcomeScreen", "logIn", "signUp"];
+export const routesToHideNavBar: (keyof typeof routes)[] = ["welcomeScreen", "logIn", "signUp", "paywall"];
 
 export type RoutesParams = {
     myTrees_treeId: {

@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { closeOnboardingMenu, expandOnboardingMenu, selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
 import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import { selectAllTrees } from "@/redux/slices/userTreesSlice";
+import useHandleDeepLinking from "@/useHandleDeepLinking";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import useRunDailyBackup from "@/useRunDailyBackup";
 import useSubscriptionHandler from "@/useSubscriptionHandler";
@@ -20,7 +21,7 @@ import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router
 import { Fragment, useEffect } from "react";
 import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, FadeInRight, FadeOut, FadeOutLeft, useAnimatedStyle, withSpring } from "react-native-reanimated";
-import { RoutesParams, hideNavAndOnboarding, routes } from "routes";
+import { RoutesParams, routesToHideNavBar, routes } from "routes";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
     return <FontAwesome size={props.size ?? 24} style={{ marginBottom: -3 }} {...props} />;
@@ -34,79 +35,13 @@ function useIdentifyMixPanelUserId() {
     }, [userId]);
 }
 
-const useRedirectToWelcomeScreen = (attemptToRedirect: boolean, isLoaded: boolean, isSignedIn: boolean | undefined) => {
+const useRedirectOnNavigation = (readyToRedirect: boolean, redirectToWelcomeScreen: boolean, redirectToPaywall: boolean) => {
     useEffect(() => {
-        if (!attemptToRedirect) return;
-        if (isLoaded && !isSignedIn) return router.push("/welcomeScreen");
-        // if (process.env.NODE_ENV === "production" && isLoaded && !isSignedIn) return router.push("/welcomeScreen");
-    }, [isLoaded, isSignedIn, attemptToRedirect]);
-};
-
-const manuallyParseParams = (url: string) => {
-    //
-    const splitUrl = url.split("?");
-    const paramArray = splitUrl.slice(1);
-
-    const result: { [key: string]: string } = {};
-
-    paramArray.forEach((s) => {
-        const [key, data] = s.split("=");
-
-        result[key] = data;
-    });
-
-    return result;
-};
-
-const onUrlChange = (url: string | null, isLoaded: boolean, userId: string | null) => {
-    if (url === null || !url.includes("https://www.skilltreesapp.com")) return;
-    if (!isLoaded) return;
-    if (!userId) return Alert.alert("Please create an account or log in", "Before clicking a skill trees link");
-
-    const { path: action } = Linking.parse(url);
-
-    const queryParams = manuallyParseParams(url);
-
-    //Handle import case
-    if (action === "redirect/import") {
-        if (!queryParams) return Alert.alert("Invalid import link");
-        if (queryParams.userId === undefined) return Alert.alert("User id doesn't exist in import link");
-        if (queryParams.treesToImportIds === undefined) return Alert.alert("The trees to import do not exist at the provided import link.");
-
-        //HANDLES THE ROUTING FOR INITIAL AND SUBSEQUENT EVENTS - AND THE PARAM SETTING FOR ONLY THE FIRST EVENT
-        router.push({
-            pathname: `/(app)/myTrees`,
-            //@ts-ignore
-            params: { userIdImport: queryParams.userId, treesToImportIds: queryParams.treesToImportIds } as RoutesParams["myTrees"],
-        });
-
-        //PARAM SETTING FOR ONLY SUBSEQUENT EVENTS
-        //@ts-ignore
-        router.setParams({ userIdImport: queryParams.userId, treesToImportIds: queryParams.treesToImportIds } as RoutesParams["myTrees"]);
-        return;
-    }
-};
-
-const useHandleDeepLinking = (isLoaded: boolean) => {
-    const url = Linking.useURL();
-
-    const userId = useMongoCompliantUserId();
-
-    useEffect(() => {
-        onUrlChange(url, isLoaded, userId);
-    }, [userId, isLoaded]);
-
-    useEffect(() => {
-        const eventEmmiter = Linking.addEventListener("url", (e) => {
-            const url = e.url;
-
-            onUrlChange(url, isLoaded, userId);
-        });
-
-        return () => {
-            eventEmmiter.remove();
-        };
-    }, [userId, isLoaded]);
+        if (!readyToRedirect) return;
+        if (redirectToWelcomeScreen) return router.push("/welcomeScreen");
+        if (redirectToPaywall) return router.push("/(app)/paywall");
+        // if (process.env.NODE_ENV === "production" && redirectToWelcomeScreen) return router.push("/welcomeScreen");
+    }, [redirectToWelcomeScreen, readyToRedirect]);
 };
 
 export default function RootLayout() {
@@ -118,7 +53,8 @@ export default function RootLayout() {
     const { isSignedIn, isLoaded } = useUser();
     useRunDailyBackup(isSignedIn);
     const isClerkLoaded = deepLinkOpenedApp ? isLoaded : shouldWaitForClerkToLoad === false ? true : isLoaded;
-    useSubscriptionHandler();
+
+    const { isProUser, onFreeTrial } = useSubscriptionHandler();
 
     const { width, height } = Dimensions.get("window");
 
@@ -142,11 +78,16 @@ export default function RootLayout() {
 
     const trackScreenNavigation = useTrackNavigationEvents();
 
-    const attemptToRedirect = !(!fontsLoaded || !isClerkLoaded);
+    const readyToRedirect = !(!fontsLoaded || !isClerkLoaded);
 
-    useRedirectToWelcomeScreen(attemptToRedirect, isLoaded, isSignedIn);
+    const redirectToWelcomeScreen = isLoaded && !isSignedIn;
+    const redirectToPaywall = isLoaded && isSignedIn && !isProUser && !onFreeTrial;
 
-    useHandleDeepLinking(isLoaded);
+    useRedirectOnNavigation(readyToRedirect, redirectToWelcomeScreen, redirectToPaywall);
+
+    const shouldHandleDeepLink = isLoaded && (Boolean(isProUser) || onFreeTrial);
+
+    useHandleDeepLinking(shouldHandleDeepLink);
 
     // const dispatch = useAppDispatch();
     // useEffect(() => {
@@ -170,7 +111,7 @@ export default function RootLayout() {
 
     if (!fontsLoaded || !isClerkLoaded) return <Text>Loading...</Text>;
 
-    const hide = !Boolean(pathname === "/" || hideNavAndOnboarding.find((route) => pathname.includes(route)));
+    const hide = !Boolean(pathname === "/" || routesToHideNavBar.find((route) => pathname.includes(route)));
 
     return (
         <View style={{ flex: 1, minHeight: Platform.OS === "android" ? height - NAV_HEGIHT : "auto" }}>
