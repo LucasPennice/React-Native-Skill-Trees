@@ -37,11 +37,33 @@ function useIdentifyMixPanelUserId() {
 const useRedirectOnNavigation = (readyToRedirect: boolean, redirectToWelcomeScreen: boolean, redirectToPaywall: boolean) => {
     useEffect(() => {
         if (!readyToRedirect) return;
-        if (redirectToWelcomeScreen) return router.push("/welcomeScreen");
-        if (redirectToPaywall) return router.push("/(app)/paywall");
-        // if (process.env.NODE_ENV === "production" && redirectToWelcomeScreen) return router.push("/welcomeScreen");
-    }, [redirectToWelcomeScreen, readyToRedirect]);
+        if (redirectToWelcomeScreen) {
+            console.log("redirecting to welcome screen");
+            return router.push("/welcomeScreen");
+        }
+        if (redirectToPaywall) {
+            console.log("redirecting to paywall");
+            return router.replace("/(app)/paywall");
+        }
+    }, [redirectToWelcomeScreen, readyToRedirect, redirectToPaywall]);
+    // useEffect(() => {
+    //     if (!readyToRedirect) return;
+    //     if (redirectToWelcomeScreen) return router.push("/welcomeScreen");
+    // }, [redirectToWelcomeScreen, readyToRedirect, redirectToPaywall]);
 };
+
+// const useRedirectToPaywall = (redirectToPaywall: boolean) => {
+//     const handleRedirectToPaywall = useCallback(() => {
+//         console.log("correfn");
+//         if (redirectToPaywall) return router.push("/(app)/paywall");
+//     }, [redirectToPaywall]);
+
+//     useEffect(() => {
+//         handleRedirectToPaywall();
+//     }, [handleRedirectToPaywall]);
+
+//     return handleRedirectToPaywall;
+// };
 
 export default function RootLayout() {
     const deepLinkOpenedApp = Linking.useURL() !== null;
@@ -53,7 +75,7 @@ export default function RootLayout() {
     useRunDailyBackup(isSignedIn);
     const isClerkLoaded = deepLinkOpenedApp ? isLoaded : shouldWaitForClerkToLoad === false ? true : isLoaded;
 
-    const { isProUser, onFreeTrial } = useContext(SubscriptionContext);
+    const { isProUser, onFreeTrial, currentOffering } = useContext(SubscriptionContext);
 
     const { width, height } = Dimensions.get("window");
 
@@ -80,11 +102,12 @@ export default function RootLayout() {
     const readyToRedirect = !(!fontsLoaded || !isClerkLoaded);
 
     const redirectToWelcomeScreen = isLoaded && !isSignedIn;
-    const redirectToPaywall = isLoaded && isSignedIn && !isProUser && !onFreeTrial;
+
+    const redirectToPaywall = isSignedIn === true && isProUser === false && onFreeTrial === false && currentOffering !== null;
 
     useRedirectOnNavigation(readyToRedirect, redirectToWelcomeScreen, redirectToPaywall);
 
-    const shouldHandleDeepLink = isLoaded && (Boolean(isProUser) || Boolean(onFreeTrial));
+    const shouldHandleDeepLink = isLoaded && (isProUser === true || onFreeTrial === true);
 
     useHandleDeepLinking(shouldHandleDeepLink);
 

@@ -1,9 +1,12 @@
 import AppButton from "@/components/AppButton";
 import AppText from "@/components/AppText";
 import { colors } from "@/parameters";
+import { SubscriptionContext, mixpanel } from "app/_layout";
 import PaywallSvg from "assets/PaywallSvg";
-import { useEffect, useState } from "react";
-import { Dimensions, Pressable, StatusBar, StyleSheet, View } from "react-native";
+import { router, useNavigation } from "expo-router";
+import { useContext, useEffect, useState } from "react";
+import { Alert, Dimensions, Pressable, StatusBar, StyleSheet, View } from "react-native";
+import Purchases, { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
 import Animated, { Easing, FadeInDown, useAnimatedStyle, useDerivedValue, withTiming } from "react-native-reanimated";
 import Svg, { Circle, Path, SvgProps } from "react-native-svg";
 
@@ -11,7 +14,9 @@ const { height } = Dimensions.get("window");
 
 const SVG_DIMENSIONS = { width: 361, height: 361 };
 
-const OFFER_CONTAINER_HEIGHT = height - SVG_DIMENSIONS.height / 1.25;
+const MIN_OFFER_CONTAINER_HEIGHT = 470;
+const OFFER_CONTAINER_HEIGHT =
+    height - SVG_DIMENSIONS.height / 1.25 > MIN_OFFER_CONTAINER_HEIGHT ? height - SVG_DIMENSIONS.height / 1.25 : MIN_OFFER_CONTAINER_HEIGHT;
 
 const style = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#FFFFFF", alignItems: "center", position: "relative" },
@@ -48,8 +53,53 @@ const animations = {
             .duration(animationConstants.childEnteringDuration),
 };
 
+const handlePurchase = (availablePackages: PurchasesPackage[], entitlementId: string) => async () => {
+    try {
+        const selectedPackage = availablePackages.find((p) => p.product.identifier === entitlementId);
+
+        if (!selectedPackage) throw new Error(`Couldn't find ${entitlementId} in available packages`);
+
+        await Purchases.purchasePackage(selectedPackage);
+
+        Alert.alert("Congratulations");
+
+        router.push("/(app)/home");
+    } catch (e) {
+        //@ts-ignore
+        if (!e.userCancelled) mixpanel.track("purchaseError", { error: e });
+    }
+};
+
+const handleRestore = async () => {
+    try {
+        const restore = await Purchases.restorePurchases();
+        // ... check restored customerInfo to see if entitlement is now active
+        console.log(JSON.stringify(restore));
+    } catch (e) {
+        mixpanel.track("purchaseError", { error: e });
+    }
+};
+
+const useBlockGoBack = () => {
+    const navigation = useNavigation();
+
+    // Effect
+    useEffect(() => {
+        navigation.addListener("beforeRemove", (e) => {
+            e.preventDefault();
+            console.log("onback");
+            // Do your stuff here
+            navigation.dispatch(e.data.action);
+        });
+    }, []);
+};
+
 function PaywallPage() {
-    useEffect(() => {}, []);
+    const [selected, setSelected] = useState<string>("pro_annual_1:p1a");
+
+    const { currentOffering } = useContext(SubscriptionContext);
+
+    useBlockGoBack();
 
     return (
         <View style={style.container}>
@@ -57,57 +107,74 @@ function PaywallPage() {
 
             <PaywallSvg width={SVG_DIMENSIONS.width} height={SVG_DIMENSIONS.height} />
 
-            <Animated.View entering={animations.offerContainEntering} style={style.offerContainer}>
-                <Animated.View entering={animations.nthChildEntering(0)}>
-                    <AppText
-                        children={"Keep moving forward with Skill Trees Pro"}
-                        fontSize={30}
-                        style={{ color: "#FFFFFF", fontFamily: "helveticaBold", textAlign: "center", marginBottom: 20 }}
-                    />
-                    <AppText children={"And watch your future take shape in real time"} fontSize={18} style={{ textAlign: "center" }} />
-                </Animated.View>
+            {currentOffering && (
+                <Animated.View entering={animations.offerContainEntering} style={style.offerContainer}>
+                    <Animated.View entering={animations.nthChildEntering(0)}>
+                        <AppText
+                            children={"Keep moving forward with Skill Trees Pro"}
+                            fontSize={30}
+                            style={{ color: "#FFFFFF", fontFamily: "helveticaBold", textAlign: "center", marginBottom: 20 }}
+                        />
+                        <AppText children={"And watch your future take shape in real time"} fontSize={18} style={{ textAlign: "center" }} />
+                    </Animated.View>
 
-                <ProductSelector />
+                    <ProductSelector currentOffering={currentOffering} selectedProduct={selected} setSelectedProduct={setSelected} />
 
-                <Animated.View entering={animations.nthChildEntering(2)}>
-                    <AppButton
-                        onPress={() => {}}
-                        text={{ idle: "CONTINUE" }}
-                        style={{ backgroundColor: colors.accent, borderRadius: 30 }}
-                        textStyle={{ fontFamily: "helveticaBold", fontSize: 18, lineHeight: 18 }}
-                    />
-                    <AppButton
-                        onPress={() => {}}
-                        text={{ idle: "Restore" }}
-                        color={{ idle: "transparent" }}
-                        textStyle={{ fontSize: 16, lineHeight: 16, opacity: 0.5 }}
-                    />
+                    <Animated.View entering={animations.nthChildEntering(2)}>
+                        <AppButton
+                            onPress={handlePurchase(currentOffering.availablePackages, selected)}
+                            text={{ idle: "CONTINUE" }}
+                            style={{ backgroundColor: colors.accent, borderRadius: 30, height: 60 }}
+                            textStyle={{ fontFamily: "helveticaBold", fontSize: 18, lineHeight: 60 }}
+                        />
+                        <AppButton
+                            onPress={handleRestore}
+                            text={{ idle: "Restore" }}
+                            color={{ idle: "transparent" }}
+                            textStyle={{ fontSize: 16, lineHeight: 16, opacity: 0.5 }}
+                        />
+                    </Animated.View>
                 </Animated.View>
-            </Animated.View>
+            )}
         </View>
     );
 }
 
 export default PaywallPage;
 
-const ProductSelector = () => {
-    const [selected, setSelected] = useState<"Month" | "Year">("Year");
+const ProductSelector = ({
+    currentOffering,
+    setSelectedProduct,
+    selectedProduct,
+}: {
+    currentOffering: PurchasesOffering;
+    setSelectedProduct: (productId: string) => void;
+    selectedProduct: string;
+}) => {
+    const monthlyPackage = currentOffering.availablePackages.find((p) => p.packageType === "MONTHLY");
+    const annualPackage = currentOffering.availablePackages.find((p) => p.packageType === "ANNUAL");
 
-    const selectMonth = () => setSelected("Month");
-    const selectYear = () => setSelected("Year");
+    if (!monthlyPackage || !annualPackage) throw new Error("monthly or annual package not found");
+
+    const selectMonth = () => setSelectedProduct(monthlyPackage.product.identifier);
+    const selectYear = () => setSelectedProduct(annualPackage.product.identifier);
 
     return (
         <Animated.View entering={animations.nthChildEntering(1)}>
-            <AppText children={"Regional discount applied (80% off)"} fontSize={16} style={{ opacity: 0.4, marginBottom: 5 }} />
+            <AppText children={"Regional discount applied (80% off) - USD currency"} fontSize={16} style={{ opacity: 0.4, marginBottom: 5 }} />
             <View style={{ gap: 18 }}>
                 <Product
-                    selected={selected === "Month"}
-                    data={{ name: "Monthly", discountedPriceString: "$4.99/mo", priceString: "$0.99/mo" }}
+                    selected={selectedProduct === monthlyPackage.product.identifier}
+                    data={{ name: monthlyPackage.packageType, discountedPriceString: null, priceString: `$${monthlyPackage.product.price}/mo` }}
                     onPress={selectMonth}
                 />
                 <Product
-                    selected={selected === "Year"}
-                    data={{ name: "Annual", discountedPriceString: "$39.99/yr ($3.33/mo)", priceString: "$9.99/yr ($0.83/mo)" }}
+                    selected={selectedProduct === annualPackage.product.identifier}
+                    data={{
+                        name: annualPackage.packageType,
+                        discountedPriceString: null,
+                        priceString: `$${annualPackage.product.price}/yr ($${(annualPackage.product.price / 12).toFixed(2)}/mo)`,
+                    }}
                     onPress={selectYear}
                 />
             </View>
@@ -120,8 +187,8 @@ type ProductProps = {
     onPress: () => void;
     data: {
         name: string;
-        discountedPriceString?: string;
-        priceString?: string;
+        discountedPriceString: string | null;
+        priceString: string | null;
     };
 };
 
@@ -162,7 +229,10 @@ const Product = ({ selected, onPress, data }: ProductProps) => {
                     <SelectedProductIcon fill={selected ? "#000000" : colors.white} stroke={selected ? "#FFFFFF" : colors.white} />
                     <Animated.Text
                         allowFontScaling={false}
-                        style={[{ fontFamily: "helvetica", fontSize: 18, lineHeight: 18, marginLeft: 4, paddingTop: 2 }, animatedTextColor]}
+                        style={[
+                            { fontFamily: "helvetica", fontSize: 18, lineHeight: 18, marginLeft: 4, paddingTop: 2, textTransform: "capitalize" },
+                            animatedTextColor,
+                        ]}
                         children={data.name}
                     />
                 </View>

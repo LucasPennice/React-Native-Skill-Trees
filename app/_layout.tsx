@@ -196,7 +196,11 @@ const useGuaranteeHomeRootTree = () => {
     dispatch(createHomeRootNode(homeNode));
 };
 
-export const SubscriptionContext = createContext<SubscriptionHandler>({ currentOffering: null, isProUser: null, onFreeTrial: null });
+export const SubscriptionContext = createContext<SubscriptionHandler>({
+    currentOffering: null,
+    isProUser: null,
+    onFreeTrial: null,
+});
 
 function AppWithReduxContext() {
     const dispatch = useAppDispatch();

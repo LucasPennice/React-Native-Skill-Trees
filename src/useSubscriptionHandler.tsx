@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
-import Purchases, { LOG_LEVEL, PurchasesOffering } from "react-native-purchases";
+import Purchases, { CustomerInfo, LOG_LEVEL, PurchasesOffering } from "react-native-purchases";
 import useMongoCompliantUserId from "./useMongoCompliantUserId";
 
 const APIKeys = {
@@ -13,16 +13,10 @@ const useFetchOffers = () => {
     const userId = useMongoCompliantUserId();
 
     useEffect(() => {
+        if (userId === null) return;
+
         (async () => {
-            if (userId === null) return;
-
             try {
-                if (Platform.OS === "android") {
-                    Purchases.configure({ apiKey: APIKeys.google });
-                } else {
-                    Purchases.configure({ apiKey: APIKeys.apple });
-                }
-
                 const offerings = await Purchases.getOfferings();
 
                 setCurrentOffering(offerings.current);
@@ -35,26 +29,34 @@ const useFetchOffers = () => {
     return currentOffering;
 };
 
+const getIsPro = (customerInfo: null | CustomerInfo) => {
+    if (customerInfo === null) return null;
+
+    return customerInfo.entitlements.active.Pro !== undefined;
+};
+
 const useUserSubscriptionInformation = () => {
-    const [isProUser, setIsProUser] = useState<null | boolean>(null);
+    const [customerInfo, setCustomerInfo] = useState<null | CustomerInfo>(null);
     const userId = useMongoCompliantUserId();
 
+    const isProUser: boolean | null = getIsPro(customerInfo);
+
+    const handleCustomerInfoUpdate = (customerInfo: CustomerInfo) => {
+        try {
+            setCustomerInfo(customerInfo);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     useEffect(() => {
-        (async () => {
-            if (userId === null) return;
+        if (userId === null) return;
 
-            try {
-                const customerInfo = await Purchases.getCustomerInfo();
+        Purchases.addCustomerInfoUpdateListener(handleCustomerInfoUpdate);
 
-                const activeEntitlements = customerInfo.entitlements.active;
-
-                if (Object.keys(activeEntitlements).length !== 0) return setIsProUser(true);
-
-                return setIsProUser(false);
-            } catch (error) {
-                console.error(error);
-            }
-        })();
+        return () => {
+            Purchases.removeCustomerInfoUpdateListener(handleCustomerInfoUpdate);
+        };
     }, [userId]);
 
     return isProUser;
@@ -70,6 +72,24 @@ export type SubscriptionHandler = {
 
 function useSubscriptionHandler(): SubscriptionHandler {
     Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+
+    const userId = useMongoCompliantUserId();
+
+    useEffect(() => {
+        (async () => {
+            if (userId === null) return;
+
+            try {
+                if (Platform.OS === "android") {
+                    Purchases.configure({ apiKey: APIKeys.google, appUserID: userId });
+                } else {
+                    Purchases.configure({ apiKey: APIKeys.apple, appUserID: userId });
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        })();
+    }, [userId]);
 
     const currentOffering = useFetchOffers();
     const isProUser = useUserSubscriptionInformation();
