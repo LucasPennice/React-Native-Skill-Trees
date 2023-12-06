@@ -134,12 +134,19 @@ export default function RootLayout() {
                                     <ChevronLeft height={30} width={30} color={colors.accent} />
                                 </TouchableOpacity>
 
-                                <AppText fontSize={16} children={route.name} style={{ textTransform: "capitalize" }} />
+                                <AppText fontSize={16} children={options.title} style={{ textTransform: "capitalize" }} />
                             </View>
                         );
                     },
                 }}
                 screenListeners={trackScreenNavigation}>
+                <Stack.Screen
+                    name={routes.illustrationCredits.name}
+                    options={{
+                        title: "Illustration Credits",
+                        headerShown: true,
+                    }}
+                />
                 <Stack.Screen
                     name={routes.backup.name}
                     options={{

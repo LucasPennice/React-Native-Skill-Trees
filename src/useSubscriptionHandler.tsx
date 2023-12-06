@@ -66,7 +66,7 @@ function useSubscriptionHandler() {
     const currentOffering = useFetchOffers();
     const isProUser = useUserSubscriptionInformation();
 
-    const onFreeTrial = false;
+    const onFreeTrial = true;
 
     return { currentOffering, isProUser, onFreeTrial };
 }

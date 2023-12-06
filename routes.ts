@@ -43,6 +43,10 @@ export const routes = {
         name: "paywall",
         route: "/paywall",
     },
+    illustrationCredits: {
+        name: "illustrationCredits",
+        route: "/(app)/illustrationCredits",
+    },
 };
 
 export const routesToHideNavBar: (keyof typeof routes)[] = ["welcomeScreen", "logIn", "signUp", "paywall"];

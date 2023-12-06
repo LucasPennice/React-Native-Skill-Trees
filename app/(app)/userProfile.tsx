@@ -19,7 +19,7 @@ import { useState } from "react";
 function UserProfile() {
     const style = StyleSheet.create({
         container: { flex: 1, padding: 10, gap: 20 },
-        settingContainer: { flex: 1 },
+        settingContainer: { flex: 1, gap: 15 },
         versionText: { textAlign: "center", color: colors.line, marginTop: 10 },
     });
 
@@ -42,6 +42,20 @@ function UserProfile() {
                         justifyContent: "space-between",
                     }}>
                     <AppText fontSize={14} children={"Backup Settings"} />
+                    <ChevronRight color={colors.unmarkedText} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => router.push("/(app)/illustrationCredits")}
+                    style={{
+                        backgroundColor: colors.darkGray,
+                        borderRadius: 10,
+                        height: 45,
+                        paddingHorizontal: 10,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                    }}>
+                    <AppText fontSize={14} children={"Illustration Credits"} />
                     <ChevronRight color={colors.unmarkedText} />
                 </TouchableOpacity>
             </View>
