@@ -10,18 +10,17 @@ import { selectAllTrees } from "@/redux/slices/userTreesSlice";
 import useHandleDeepLinking from "@/useHandleDeepLinking";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import useRunDailyBackup from "@/useRunDailyBackup";
-import useSubscriptionHandler from "@/useSubscriptionHandler";
 import useTrackNavigationEvents from "@/useTrackNavigationEvents";
 import { useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { mixpanel } from "app/_layout";
+import { SubscriptionContext, mixpanel } from "app/_layout";
 import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
 import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
-import { Fragment, useEffect } from "react";
+import { Fragment, useContext, useEffect } from "react";
 import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, FadeInRight, FadeOut, FadeOutLeft, useAnimatedStyle, withSpring } from "react-native-reanimated";
-import { RoutesParams, routesToHideNavBar, routes } from "routes";
+import { RoutesParams, routes, routesToHideNavBar } from "routes";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
     return <FontAwesome size={props.size ?? 24} style={{ marginBottom: -3 }} {...props} />;
@@ -54,7 +53,7 @@ export default function RootLayout() {
     useRunDailyBackup(isSignedIn);
     const isClerkLoaded = deepLinkOpenedApp ? isLoaded : shouldWaitForClerkToLoad === false ? true : isLoaded;
 
-    const { isProUser, onFreeTrial } = useSubscriptionHandler();
+    const { isProUser, onFreeTrial } = useContext(SubscriptionContext);
 
     const { width, height } = Dimensions.get("window");
 
@@ -85,7 +84,7 @@ export default function RootLayout() {
 
     useRedirectOnNavigation(readyToRedirect, redirectToWelcomeScreen, redirectToPaywall);
 
-    const shouldHandleDeepLink = isLoaded && (Boolean(isProUser) || onFreeTrial);
+    const shouldHandleDeepLink = isLoaded && (Boolean(isProUser) || Boolean(onFreeTrial));
 
     useHandleDeepLinking(shouldHandleDeepLink);
 

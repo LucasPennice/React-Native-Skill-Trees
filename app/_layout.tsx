@@ -35,6 +35,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { routes } from "routes";
 import { Mixpanel } from "mixpanel-react-native";
 import "../globals";
+import useSubscriptionHandler, { SubscriptionHandler } from "@/useSubscriptionHandler";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -82,7 +83,6 @@ function useSkiaFonts() {
 }
 
 export const SkiaFontContext = createContext<SkiaAppFonts | undefined>(undefined);
-
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -90,7 +90,6 @@ const queryClient = new QueryClient();
 
 export default function RootLayout() {
     const isSharingAvailable = useIsSharingAvailable();
-
     const skiaFonts = useSkiaFonts();
 
     if (Platform.OS === "android") ExpoNavigationBar.setBackgroundColorAsync(colors.darkGray);
@@ -197,6 +196,8 @@ const useGuaranteeHomeRootTree = () => {
     dispatch(createHomeRootNode(homeNode));
 };
 
+export const SubscriptionContext = createContext<SubscriptionHandler>({ currentOffering: null, isProUser: null, onFreeTrial: null });
+
 function AppWithReduxContext() {
     const dispatch = useAppDispatch();
     //
@@ -206,41 +207,45 @@ function AppWithReduxContext() {
     useGuaranteeHomeRootTree();
     const trackScreenNavigation = useTrackNavigationEvents();
 
-    return (
-        <View
-            style={{ flex: 1 }}
-            onLayout={(event) => {
-                var { width, height } = event.nativeEvent.layout;
-                dispatch(updateSafeScreenDimentions({ width, height }));
-            }}>
-            <Stack
-                screenListeners={trackScreenNavigation}
-                screenOptions={{
-                    headerShown: false,
-                    header: ({ navigation, options, route, back }) => {
-                        return (
-                            <View
-                                style={{
-                                    height: 45,
-                                    backgroundColor: colors.darkGray,
-                                    alignItems: "center",
-                                    position: "relative",
-                                    justifyContent: "center",
-                                }}>
-                                <TouchableOpacity
-                                    onPress={navigation.goBack}
-                                    style={{ position: "absolute", left: 0, flexDirection: "row", alignItems: "center", height: 45, width: 100 }}>
-                                    <ChevronLeft height={30} width={30} color={colors.accent} />
-                                </TouchableOpacity>
+    const subscriptionHandler = useSubscriptionHandler();
 
-                                <AppText fontSize={16} children={route.name} style={{ textTransform: "capitalize" }} />
-                            </View>
-                        );
-                    },
+    return (
+        <SubscriptionContext.Provider value={subscriptionHandler}>
+            <View
+                style={{ flex: 1 }}
+                onLayout={(event) => {
+                    var { width, height } = event.nativeEvent.layout;
+                    dispatch(updateSafeScreenDimentions({ width, height }));
                 }}>
-                <Stack.Screen name={routes.support.name} options={{ title: routes.support.name, headerShown: true }} />
-            </Stack>
-        </View>
+                <Stack
+                    screenListeners={trackScreenNavigation}
+                    screenOptions={{
+                        headerShown: false,
+                        header: ({ navigation, options, route, back }) => {
+                            return (
+                                <View
+                                    style={{
+                                        height: 45,
+                                        backgroundColor: colors.darkGray,
+                                        alignItems: "center",
+                                        position: "relative",
+                                        justifyContent: "center",
+                                    }}>
+                                    <TouchableOpacity
+                                        onPress={navigation.goBack}
+                                        style={{ position: "absolute", left: 0, flexDirection: "row", alignItems: "center", height: 45, width: 100 }}>
+                                        <ChevronLeft height={30} width={30} color={colors.accent} />
+                                    </TouchableOpacity>
+
+                                    <AppText fontSize={16} children={route.name} style={{ textTransform: "capitalize" }} />
+                                </View>
+                            );
+                        },
+                    }}>
+                    <Stack.Screen name={routes.support.name} options={{ title: routes.support.name, headerShown: true }} />
+                </Stack>
+            </View>
+        </SubscriptionContext.Provider>
     );
 }
 

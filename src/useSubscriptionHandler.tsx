@@ -60,13 +60,21 @@ const useUserSubscriptionInformation = () => {
     return isProUser;
 };
 
-function useSubscriptionHandler() {
+export type SubscriptionHandler = {
+    currentOffering: PurchasesOffering | null;
+    isProUser: boolean | null;
+    onFreeTrial: boolean | null;
+};
+
+//🚨 Ideally we only run this hook once and pass it's value to the context provider
+
+function useSubscriptionHandler(): SubscriptionHandler {
     Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
 
     const currentOffering = useFetchOffers();
     const isProUser = useUserSubscriptionInformation();
 
-    const onFreeTrial = true;
+    const onFreeTrial: boolean | null = false;
 
     return { currentOffering, isProUser, onFreeTrial };
 }

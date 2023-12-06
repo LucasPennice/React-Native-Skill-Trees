@@ -29,8 +29,24 @@ const style = StyleSheet.create({
     },
 });
 
-const DELAY = 900;
-const DELAY_P = 100;
+const animationConstants = {
+    easing: Easing.bezierFn(0.83, 0, 0.17, 1),
+    offerContainerEnteringDuration: 1000,
+    childEnteringDuration: 800,
+    baseChildrenDelay: 900,
+    nthChildDelay: (n: number) => 900 + 100 * (n - 1),
+};
+
+const animations = {
+    offerContainEntering: FadeInDown.withInitialValues({ transform: [{ translateY: OFFER_CONTAINER_HEIGHT }] })
+        .duration(animationConstants.offerContainerEnteringDuration)
+        .easing(animationConstants.easing),
+    nthChildEntering: (n: number) =>
+        FadeInDown.easing(animationConstants.easing)
+            .withInitialValues({ transform: [{ translateY: 80 }] })
+            .delay(animationConstants.nthChildDelay(n))
+            .duration(animationConstants.childEnteringDuration),
+};
 
 function PaywallPage() {
     useEffect(() => {}, []);
@@ -41,16 +57,8 @@ function PaywallPage() {
 
             <PaywallSvg width={SVG_DIMENSIONS.width} height={SVG_DIMENSIONS.height} />
 
-            <Animated.View
-                entering={FadeInDown.withInitialValues({ transform: [{ translateY: OFFER_CONTAINER_HEIGHT }] })
-                    .duration(1000)
-                    .easing(Easing.bezierFn(0.83, 0, 0.17, 1))}
-                style={style.offerContainer}>
-                <Animated.View
-                    entering={FadeInDown.easing(Easing.bezierFn(0.83, 0, 0.17, 1))
-                        .withInitialValues({ transform: [{ translateY: 80 }] })
-                        .delay(DELAY)
-                        .duration(800)}>
+            <Animated.View entering={animations.offerContainEntering} style={style.offerContainer}>
+                <Animated.View entering={animations.nthChildEntering(0)}>
                     <AppText
                         children={"Keep moving forward with Skill Trees Pro"}
                         fontSize={30}
@@ -61,11 +69,7 @@ function PaywallPage() {
 
                 <ProductSelector />
 
-                <Animated.View
-                    entering={FadeInDown.easing(Easing.bezierFn(0.83, 0, 0.17, 1))
-                        .withInitialValues({ transform: [{ translateY: 80 }] })
-                        .delay(DELAY + 2 * DELAY_P)
-                        .duration(800)}>
+                <Animated.View entering={animations.nthChildEntering(2)}>
                     <AppButton
                         onPress={() => {}}
                         text={{ idle: "CONTINUE" }}
@@ -93,11 +97,7 @@ const ProductSelector = () => {
     const selectYear = () => setSelected("Year");
 
     return (
-        <Animated.View
-            entering={FadeInDown.easing(Easing.bezierFn(0.83, 0, 0.17, 1))
-                .withInitialValues({ transform: [{ translateY: 80 }] })
-                .delay(DELAY + DELAY_P)
-                .duration(800)}>
+        <Animated.View entering={animations.nthChildEntering(1)}>
             <AppText children={"Regional discount applied (80% off)"} fontSize={16} style={{ opacity: 0.4, marginBottom: 5 }} />
             <View style={{ gap: 18 }}>
                 <Product
