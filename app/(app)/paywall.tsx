@@ -1,11 +1,11 @@
 import AppButton from "@/components/AppButton";
 import AppText from "@/components/AppText";
 import { colors } from "@/parameters";
-import { SubscriptionContext, mixpanel } from "app/_layout";
+import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
 import PaywallSvg from "assets/PaywallSvg";
 import { router, useNavigation } from "expo-router";
 import { useContext, useEffect, useState } from "react";
-import { Alert, Dimensions, Pressable, StatusBar, StyleSheet, View } from "react-native";
+import { Alert, Dimensions, Pressable, StyleSheet, View } from "react-native";
 import Purchases, { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
 import Animated, { Easing, FadeInDown, useAnimatedStyle, useDerivedValue, withTiming } from "react-native-reanimated";
 import Svg, { Circle, Path, SvgProps } from "react-native-svg";
@@ -53,7 +53,7 @@ const animations = {
             .duration(animationConstants.childEnteringDuration),
 };
 
-const handlePurchase = (availablePackages: PurchasesPackage[], entitlementId: string) => async () => {
+const handlePurchase = (availablePackages: PurchasesPackage[], entitlementId: string, openSuccessAlert: () => void) => async () => {
     try {
         const selectedPackage = availablePackages.find((p) => p.product.identifier === entitlementId);
 
@@ -61,7 +61,7 @@ const handlePurchase = (availablePackages: PurchasesPackage[], entitlementId: st
 
         await Purchases.purchasePackage(selectedPackage);
 
-        Alert.alert("Congratulations");
+        openSuccessAlert();
 
         router.push("/(app)/home");
     } catch (e) {
@@ -93,13 +93,15 @@ function PaywallPage() {
     const [selected, setSelected] = useState<string>("pro_annual_1:p1a");
 
     const { currentOffering } = useContext(SubscriptionContext);
+    const { open } = useContext(HandleAlertContext);
+
+    const openSuccessAlert = () =>
+        open({ state: "success", subtitle: "To check your membership details visit your profile", title: "Congratulations" });
 
     useBlockGoBack();
 
     return (
         <View style={style.container}>
-            <StatusBar barStyle={"light-content"} backgroundColor={"#FFFFFF"} />
-
             <PaywallSvg width={SVG_DIMENSIONS.width} height={SVG_DIMENSIONS.height} />
 
             {currentOffering && (
@@ -117,7 +119,7 @@ function PaywallPage() {
 
                     <Animated.View entering={animations.nthChildEntering(2)}>
                         <AppButton
-                            onPress={handlePurchase(currentOffering.availablePackages, selected)}
+                            onPress={handlePurchase(currentOffering.availablePackages, selected, openSuccessAlert)}
                             text={{ idle: "CONTINUE" }}
                             style={{ backgroundColor: colors.accent, borderRadius: 30, height: 60 }}
                             textStyle={{ fontFamily: "helveticaBold", fontSize: 18, lineHeight: 60 }}

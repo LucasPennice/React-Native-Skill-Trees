@@ -21,17 +21,17 @@ import { NormalizedNode } from "@/types";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useCanvasRef } from "@shopify/react-native-skia";
+import { HandleAlertContext, mixpanel } from "app/_layout";
 import { useHandleButtonState } from "app/signUp";
 import axiosClient from "axiosClient";
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Alert, Modal, Platform, StatusBar, StyleSheet, View } from "react-native";
 import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
+import { batch } from "react-redux";
 import { RoutesParams } from "routes";
 import { Contact } from "./feedback";
-import { batch } from "react-redux";
-import { mixpanel } from "app/_layout";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();
@@ -237,11 +237,17 @@ function Home() {
 
     const closeModal = () => setShowSyncModal(false);
 
+    const { open } = useContext(HandleAlertContext);
+
+    const openSuccessAlert = () =>
+        open({ state: "success", subtitle: "To check your membership details visit your profile", title: "Congratulations" });
+
     return (
         <View style={{ position: "relative", flex: 1, overflow: "hidden" }}>
             <HomepageTree selectedNodeCoordState={selectedNodeCoordState} canvasRef={canvasRef} openCanvasSettingsModal={openCanvasSettingsModal} />
             <ProgressIndicatorAndName treeData={homePageTreeData} nodesOfTree={allNodes} />
-            <OpenSettingsMenu openModal={openCanvasSettingsModal} show={selectedNodeCoord === null} />
+            <OpenSettingsMenu openModal={openSuccessAlert} show={selectedNodeCoord === null} />
+            {/* <OpenSettingsMenu openModal={openCanvasSettingsModal} show={selectedNodeCoord === null} /> */}
             <ShareTreeScreenshot
                 canvasRef={canvasRef}
                 shouldShare={selectedNodeCoord === null}

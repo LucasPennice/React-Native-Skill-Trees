@@ -36,6 +36,7 @@ import { routes } from "routes";
 import { Mixpanel } from "mixpanel-react-native";
 import "../globals";
 import useSubscriptionHandler, { SubscriptionHandler } from "@/useSubscriptionHandler";
+import AlertModal, { AlertProps, defaultAlertValues } from "@/components/AlertModal";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -82,6 +83,10 @@ function useSkiaFonts() {
     return { labelFont, nodeLetterFont, emojiFont, userEmojiFont };
 }
 
+export const HandleAlertContext = createContext<{ open: (v: Omit<AlertProps, "open">) => void; close: () => void }>({
+    close: () => {},
+    open: () => {},
+});
 export const SkiaFontContext = createContext<SkiaAppFonts | undefined>(undefined);
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -91,6 +96,10 @@ const queryClient = new QueryClient();
 export default function RootLayout() {
     const isSharingAvailable = useIsSharingAvailable();
     const skiaFonts = useSkiaFonts();
+    const [alertProps, setAlertProps] = useState<AlertProps>(defaultAlertValues);
+
+    const openAlert = (params: Omit<AlertProps, "open">) => setAlertProps({ ...params, open: true });
+    const closeAlert = () => setAlertProps(defaultAlertValues);
 
     if (Platform.OS === "android") ExpoNavigationBar.setBackgroundColorAsync(colors.darkGray);
 
@@ -114,22 +123,25 @@ export default function RootLayout() {
     return (
         <Provider store={store}>
             <SkiaFontContext.Provider value={skiaFonts}>
-                <PersistGate loading={null} persistor={persistor}>
-                    <ThemeProvider value={DarkTheme}>
-                        <QueryClientProvider client={queryClient}>
-                            <IsSharingAvailableContext.Provider value={isSharingAvailable}>
-                                <ClerkProvider publishableKey={clerkKey!} tokenCache={tokenCache}>
-                                    <SafeAreaView
-                                        style={[{ flex: 1, backgroundColor: colors.darkGray, position: "relative" }, Layout.AndroidSafeArea]}>
-                                        {Platform.OS === "ios" && <View style={Layout.IOsStatusBar} />}
-                                        <StatusBar barStyle={"light-content"} backgroundColor={colors.background} />
-                                        <AppWithReduxContext />
-                                    </SafeAreaView>
-                                </ClerkProvider>
-                            </IsSharingAvailableContext.Provider>
-                        </QueryClientProvider>
-                    </ThemeProvider>
-                </PersistGate>
+                <HandleAlertContext.Provider value={{ open: openAlert, close: closeAlert }}>
+                    <PersistGate loading={null} persistor={persistor}>
+                        <ThemeProvider value={DarkTheme}>
+                            <QueryClientProvider client={queryClient}>
+                                <IsSharingAvailableContext.Provider value={isSharingAvailable}>
+                                    <ClerkProvider publishableKey={clerkKey!} tokenCache={tokenCache}>
+                                        <SafeAreaView
+                                            style={[{ flex: 1, backgroundColor: colors.darkGray, position: "relative" }, Layout.AndroidSafeArea]}>
+                                            {Platform.OS === "ios" && <View style={Layout.IOsStatusBar} />}
+                                            <StatusBar barStyle={"light-content"} backgroundColor={colors.background} />
+                                            <AppWithReduxContext />
+                                            <AlertModal {...alertProps} />
+                                        </SafeAreaView>
+                                    </ClerkProvider>
+                                </IsSharingAvailableContext.Provider>
+                            </QueryClientProvider>
+                        </ThemeProvider>
+                    </PersistGate>
+                </HandleAlertContext.Provider>
             </SkiaFontContext.Provider>
         </Provider>
     );
@@ -200,6 +212,7 @@ export const SubscriptionContext = createContext<SubscriptionHandler>({
     currentOffering: null,
     isProUser: null,
     onFreeTrial: null,
+    customerInfo: null,
 });
 
 function AppWithReduxContext() {
