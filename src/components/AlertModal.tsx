@@ -1,10 +1,14 @@
+import { HandleAlertContext } from "app/_layout";
+import LottieView from "lottie-react-native";
+import { useContext, useEffect, useRef } from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
-import Animated, { Easing, FadeInDown, FadeOutDown, ZoomOut } from "react-native-reanimated";
+import Animated, { Easing, FadeInDown, ZoomOut } from "react-native-reanimated";
 import { colors } from "../parameters";
 import AppButton, { ButtonState } from "./AppButton";
 import AppText from "./AppText";
-import { useContext } from "react";
-import { HandleAlertContext } from "app/_layout";
+import Loading from "@/../assets/lotties/loading.json";
+import Error from "@/../assets/lotties/error.json";
+import Success from "@/../assets/lotties/success.json";
 
 const ALERT_HEIGHT = 350;
 const ICON_HEIGHT = 90;
@@ -45,18 +49,59 @@ const styles = StyleSheet.create({
     iconContainer: {
         width: ICON_HEIGHT,
         height: ICON_HEIGHT,
+        overflow: "hidden",
         borderRadius: ICON_HEIGHT,
-        backgroundColor: colors.line,
+        backgroundColor: "#2A2D2F",
         position: "absolute",
+        justifyContent: "center",
+        alignItems: "center",
         top: 0,
     },
 });
 
-// ME FALTA CONECTAR ESTE COMPONENTE CON EL ESTADO QUE SACO DE<LAYOUT></LAYOUT >
-//     Y METER LOS ICONOS (CON UN POCO DE SUERTE UNOS LOTTIE?)
+const useHandlePlay = (open: boolean) => {
+    const animation = useRef<LottieView>(null);
+
+    useEffect(() => {
+        let timeoutId: NodeJS.Timeout;
+
+        if (open) {
+            timeoutId = setTimeout(() => {
+                animation.current?.reset();
+                animation.current?.play();
+            }, 1000);
+        }
+
+        if (!open) {
+            animation.current?.reset();
+            animation.current?.pause();
+        }
+
+        return () => {
+            clearTimeout(timeoutId);
+        };
+    }, [open]);
+
+    return animation;
+};
+
+const getLottieSource = (state: ButtonState) => {
+    switch (state) {
+        case "error":
+            return Error;
+        case "success":
+            return Success;
+        case "loading":
+            return Loading;
+        default:
+            return Loading;
+    }
+};
 
 function AlertModal({ open, state, subtitle, title, buttonAction, buttonText }: AlertProps) {
     const { close } = useContext(HandleAlertContext);
+
+    const animationRef = useHandlePlay(open);
 
     return (
         <Modal animationType="fade" transparent={true} visible={open} onRequestClose={close} presentationStyle={"overFullScreen"}>
@@ -79,7 +124,9 @@ function AlertModal({ open, state, subtitle, title, buttonAction, buttonText }: 
                             textStyle={{ fontSize: 18, lineHeight: 18 }}
                         />
                     </View>
-                    <View style={styles.iconContainer} />
+                    <View style={styles.iconContainer}>
+                        <LottieView source={getLottieSource(state)} ref={animationRef} loop={state === "loading"} style={{ width: ICON_HEIGHT }} />
+                    </View>
                 </Animated.View>
             </View>
         </Modal>
