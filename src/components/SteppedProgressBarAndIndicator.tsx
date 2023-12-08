@@ -1,14 +1,11 @@
 import AppText from "@/components/AppText";
 import { colors } from "@/parameters";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Dimensions, StyleSheet, View, ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, withSpring } from "react-native-reanimated";
 
 export type OnboardingStep = {
-    text: string;
-    iconName: React.ComponentProps<typeof FontAwesome>["name"];
-    skippeable?: boolean;
-    actionButtonText: string;
+    title: string;
+    subtitle: string;
     onActionButtonPress: () => void;
 };
 

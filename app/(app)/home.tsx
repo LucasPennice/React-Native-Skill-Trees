@@ -13,7 +13,7 @@ import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { overwriteHomeTreeSlice, selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { NodeSlice, overwriteNodeSlice, selectAllNodeIds, selectAllNodes, selectNodesTable } from "@/redux/slices/nodesSlice";
-import { OnboardignState, overwriteOnboardingSlice, selectOnboarding } from "@/redux/slices/onboardingSlice";
+import { OnboardignState, selectOnboarding } from "@/redux/slices/onboardingSlice";
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
 import { selectSyncSlice, setShouldWaitForClerkToLoad, updateLastBackupTime } from "@/redux/slices/syncSlice";
 import { TreeData, UserTreeSlice, overwriteUserTreesSlice, selectAllTreesEntities, selectTreeIds } from "@/redux/slices/userTreesSlice";
@@ -32,8 +32,6 @@ import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
 import { batch } from "react-redux";
 import { RoutesParams } from "routes";
 import { Contact } from "./feedback";
-import PostOnboardingSurvey from "@/components/surveys/PostOnboardingSurvey";
-import MarketFitSurvey from "@/components/surveys/MarketFitSurvey";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();
@@ -126,7 +124,8 @@ function useHandleSyncOnLoginOrSignUp(
     const batchUpdateUserStore = (userBackup: UserBackup) => {
         // should only result in one combined re-render, not four
         batch(() => {
-            dispatch(overwriteOnboardingSlice(userBackup.onboarding));
+            Alert.alert("Calcular el paso del onboardign en base al backup que estoy metiendo");
+            // dispatch(overwriteOnboardingSlice(userBackup.onboarding));
             dispatch(overwriteHomeTreeSlice(userBackup.homeTree));
             dispatch(overwriteUserTreesSlice(userBackup.userTreesSlice));
             dispatch(overwriteNodeSlice(userBackup.nodeSlice));
@@ -206,34 +205,8 @@ function useHandleSyncOnLoginOrSignUp(
     };
 }
 
-const useHandleSurveyModals = () => {
-    const [postOnboarding, setPostOnboarding] = useState(false);
-    const [marketFit, setMarketFit] = useState(true);
-
-    const openPostOnboardingModal = () => setPostOnboarding(true);
-    const closePostOnboardingModal = () => setPostOnboarding(false);
-
-    const openMarketFitModal = () => setMarketFit(true);
-    const closeMarketFitModal = () => setMarketFit(false);
-
-    return {
-        postOnboarding: {
-            state: postOnboarding,
-            open: openPostOnboardingModal,
-            close: closePostOnboardingModal,
-        },
-        marketFit: {
-            state: marketFit,
-            open: openMarketFitModal,
-            close: closeMarketFitModal,
-        },
-    };
-};
-
 function Home() {
     const selectedNodeCoordState = useSelectedNodeCoordState();
-
-    const { postOnboarding, marketFit } = useHandleSurveyModals();
 
     const syncStateObj = useHandleButtonState();
 
@@ -282,10 +255,6 @@ function Home() {
             <CanvasSettingsModal open={canvasSettings} closeModal={closeCanvasSettingsModal} />
 
             <SyncStateModal showSyncModal={showSyncModal} state={syncState} closeModal={closeModal} />
-
-            {postOnboarding.state && <PostOnboardingSurvey open={postOnboarding.state} close={postOnboarding.close} />}
-
-            {marketFit.state && <MarketFitSurvey open={marketFit.state} close={marketFit.close} />}
         </View>
     );
 }

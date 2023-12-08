@@ -1,12 +1,13 @@
+import OnboardingModal from "@/OnboardingModal";
 import AppText from "@/components/AppText";
 import ChevronLeft from "@/components/Icons/ChevronLeft";
-import OnboardingCompletionIcon from "@/components/Icons/OnboardingCompleteIcon";
-import SteppedProgressBarAndIndicator, { OnboardingStep } from "@/components/SteppedProgressBarAndIndicator";
+import { OnboardingStep } from "@/components/SteppedProgressBarAndIndicator";
+import MarketFitSurvey from "@/components/surveys/MarketFitSurvey";
+import PostOnboardingSurvey from "@/components/surveys/PostOnboardingSurvey";
 import { MENU_HIGH_DAMPENING, NAV_HEGIHT, colors } from "@/parameters";
-import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
-import { closeOnboardingMenu, expandOnboardingMenu, selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
+import { useAppSelector } from "@/redux/reduxHooks";
+import { selectOnboarding } from "@/redux/slices/onboardingSlice";
 import { selectSyncSlice } from "@/redux/slices/syncSlice";
-import { selectAllTrees } from "@/redux/slices/userTreesSlice";
 import useHandleDeepLinking from "@/useHandleDeepLinking";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import useRunDailyBackup from "@/useRunDailyBackup";
@@ -17,10 +18,10 @@ import { SubscriptionContext, mixpanel } from "app/_layout";
 import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
 import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
-import { Fragment, useContext, useEffect } from "react";
-import { Alert, Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Animated, { FadeIn, FadeInRight, FadeOut, FadeOutLeft, useAnimatedStyle, withSpring } from "react-native-reanimated";
-import { RoutesParams, routes, routesToHideNavBar } from "routes";
+import { Fragment, useContext, useEffect, useState } from "react";
+import { Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, { FadeInRight, FadeOut, FadeOutLeft, useAnimatedStyle, withSpring } from "react-native-reanimated";
+import { routes, routesToHideNavBar } from "routes";
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
     return <FontAwesome size={props.size ?? 24} style={{ marginBottom: -3 }} {...props} />;
@@ -44,9 +45,34 @@ const useRedirectOnNavigation = (readyToRedirect: boolean, redirectToWelcomeScre
     }, [redirectToWelcomeScreen, readyToRedirect, redirectToPaywall]);
 };
 
+const useHandleSurveyModals = () => {
+    const [postOnboarding, setPostOnboarding] = useState(false);
+    const [marketFit, setMarketFit] = useState(false);
+
+    const openPostOnboardingModal = () => setPostOnboarding(true);
+    const closePostOnboardingModal = () => setPostOnboarding(false);
+
+    const openMarketFitModal = () => setMarketFit(true);
+    const closeMarketFitModal = () => setMarketFit(false);
+
+    return {
+        postOnboarding: {
+            state: postOnboarding,
+            open: openPostOnboardingModal,
+            close: closePostOnboardingModal,
+        },
+        marketFit: {
+            state: marketFit,
+            open: openMarketFitModal,
+            close: closeMarketFitModal,
+        },
+    };
+};
+
 export default function RootLayout() {
     const deepLinkOpenedApp = Linking.useURL() !== null;
 
+    const { postOnboarding, marketFit } = useHandleSurveyModals();
     useIdentifyMixPanelUserId();
     const onboarding = useAppSelector(selectOnboarding);
     const { shouldWaitForClerkToLoad } = useAppSelector(selectSyncSlice);
@@ -179,6 +205,11 @@ export default function RootLayout() {
                 <Stack.Screen name={"index"} />
             </Stack>
 
+            {postOnboarding.state && <PostOnboardingSurvey open={postOnboarding.state} close={postOnboarding.close} />}
+
+            {marketFit.state && <MarketFitSurvey open={marketFit.state} close={marketFit.close} />}
+
+            {true && <OnboardingModal close={() => {}} open={true} />}
             {/* {hide && !onboarding.complete && <Onboarding />} */}
 
             {hide && (
@@ -232,214 +263,214 @@ export default function RootLayout() {
     );
 }
 
-const { height, width } = Dimensions.get("window");
-const DIMENSIONS = { closed: { width: 45, height: 45 }, open: { width, height: 150 } };
-const CLOSED_POSITION = { left: 10, bottom: NAV_HEGIHT + 10 };
+// const { height, width } = Dimensions.get("window");
+// const DIMENSIONS = { closed: { width: 45, height: 45 }, open: { width, height: 150 } };
+// const CLOSED_POSITION = { left: 10, bottom: NAV_HEGIHT + 10 };
 
-const Onboarding = () => {
-    const { currentStep, open } = useAppSelector(selectOnboarding);
-    const userTrees = useAppSelector(selectAllTrees);
-    const dispatch = useAppDispatch();
+// const Onboarding = () => {
+//     const { currentStep, open } = useAppSelector(selectOnboarding);
+//     const userTrees = useAppSelector(selectAllTrees);
+//     const dispatch = useAppDispatch();
 
-    const style = StyleSheet.create({
-        container: {
-            width: DIMENSIONS.closed.width,
-            height: DIMENSIONS.closed.height,
-            backgroundColor: colors.darkGray,
-            position: "absolute",
-            paddingHorizontal: 10,
-            paddingTop: 5,
-            overflow: "hidden",
-        },
-        buttonsContainer: { flexDirection: "row", justifyContent: "space-between" },
-    });
+//     const style = StyleSheet.create({
+//         container: {
+//             width: DIMENSIONS.closed.width,
+//             height: DIMENSIONS.closed.height,
+//             backgroundColor: colors.darkGray,
+//             position: "absolute",
+//             paddingHorizontal: 10,
+//             paddingTop: 5,
+//             overflow: "hidden",
+//         },
+//         buttonsContainer: { flexDirection: "row", justifyContent: "space-between" },
+//     });
 
-    const animatedContainerStyle = useAnimatedStyle(() => {
-        return {
-            bottom: withSpring(open ? height - DIMENSIONS.open.height : CLOSED_POSITION.bottom, { duration: 1000, dampingRatio: 0.9 }),
-            left: withSpring(open ? 0 : CLOSED_POSITION.left, { duration: 1000, dampingRatio: 0.9 }),
-            width: withSpring(open ? DIMENSIONS.open.width : DIMENSIONS.closed.width, { duration: 1000, dampingRatio: 0.9 }),
-            height: withSpring(open ? DIMENSIONS.open.height : DIMENSIONS.closed.height, { duration: 1000, dampingRatio: 0.9 }),
-            borderRadius: withSpring(open ? 20 : DIMENSIONS.closed.width, { duration: 1000, dampingRatio: 0.9 }),
-        };
-    });
+//     const animatedContainerStyle = useAnimatedStyle(() => {
+//         return {
+//             bottom: withSpring(open ? height - DIMENSIONS.open.height : CLOSED_POSITION.bottom, { duration: 1000, dampingRatio: 0.9 }),
+//             left: withSpring(open ? 0 : CLOSED_POSITION.left, { duration: 1000, dampingRatio: 0.9 }),
+//             width: withSpring(open ? DIMENSIONS.open.width : DIMENSIONS.closed.width, { duration: 1000, dampingRatio: 0.9 }),
+//             height: withSpring(open ? DIMENSIONS.open.height : DIMENSIONS.closed.height, { duration: 1000, dampingRatio: 0.9 }),
+//             borderRadius: withSpring(open ? 20 : DIMENSIONS.closed.width, { duration: 1000, dampingRatio: 0.9 }),
+//         };
+//     });
 
-    const openCreateNewTree = () => {
-        //@ts-ignore
-        router.push({ pathname: "/myTrees", params: { openNewTreeModal: true } });
-    };
+//     const openCreateNewTree = () => {
+//         //@ts-ignore
+//         router.push({ pathname: "/myTrees", params: { openNewTreeModal: true } });
+//     };
 
-    const closeMenu = () => dispatch(closeOnboardingMenu());
+//     const closeMenu = () => dispatch(closeOnboardingMenu());
 
-    const handleOnboardingAction = (action: () => void) => () => {
-        setTimeout(action, 200);
-    };
+//     const handleOnboardingAction = (action: () => void) => () => {
+//         setTimeout(action, 200);
+//     };
 
-    const openAddSkillModal = () => {
-        if (userTrees.length === 0) return Alert.alert("You should at least have one user tree");
+//     const openAddSkillModal = () => {
+//         if (userTrees.length === 0) return Alert.alert("You should at least have one user tree");
 
-        const firstUserTree = userTrees[0];
+//         const firstUserTree = userTrees[0];
 
-        const params: RoutesParams["myTrees_treeId"] = {
-            nodeId: firstUserTree.rootNodeId,
-            treeId: firstUserTree.treeId,
-            addNewNodePosition: "CHILDREN",
-        };
-        //@ts-ignore
-        router.push({ pathname: `/myTrees/${firstUserTree.treeId}`, params });
-    };
+//         const params: RoutesParams["myTrees_treeId"] = {
+//             nodeId: firstUserTree.rootNodeId,
+//             treeId: firstUserTree.treeId,
+//             addNewNodePosition: "CHILDREN",
+//         };
+//         //@ts-ignore
+//         router.push({ pathname: `/myTrees/${firstUserTree.treeId}`, params });
+//     };
 
-    const ONBOARDING_STEPS: OnboardingStep[] = [
-        {
-            text: "What do you want to learn?",
-            actionButtonText: "Create my first Skill Tree",
-            iconName: "tree",
-            onActionButtonPress: handleOnboardingAction(openCreateNewTree),
-        },
-        {
-            text: "What's the first Skill you want to master?",
-            actionButtonText: "Add my first Skill",
-            iconName: "star",
-            onActionButtonPress: handleOnboardingAction(openAddSkillModal),
-        },
-        {
-            text: "Don't lose your past achievements",
-            skippeable: true,
-            actionButtonText: "Add them as Skill Trees",
-            iconName: "trophy",
-            onActionButtonPress: handleOnboardingAction(openCreateNewTree),
-        },
-        {
-            text: "Keep your progress secured",
-            actionButtonText: "Log in to backup",
-            iconName: "shield",
-            onActionButtonPress: () => Alert.alert("Log in to back up"),
-        },
-    ];
+//     const ONBOARDING_STEPS: OnboardingStep[] = [
+//         {
+//             text: "What do you want to learn?",
+//             actionButtonText: "Create my first Skill Tree",
+//             iconName: "tree",
+//             onActionButtonPress: handleOnboardingAction(openCreateNewTree),
+//         },
+//         {
+//             text: "What's the first Skill you want to master?",
+//             actionButtonText: "Add my first Skill",
+//             iconName: "star",
+//             onActionButtonPress: handleOnboardingAction(openAddSkillModal),
+//         },
+//         {
+//             text: "Don't lose your past achievements",
+//             skippeable: true,
+//             actionButtonText: "Add them as Skill Trees",
+//             iconName: "trophy",
+//             onActionButtonPress: handleOnboardingAction(openCreateNewTree),
+//         },
+//         {
+//             text: "Keep your progress secured",
+//             actionButtonText: "Log in to backup",
+//             iconName: "shield",
+//             onActionButtonPress: () => Alert.alert("Log in to back up"),
+//         },
+//     ];
 
-    return (
-        <Animated.View style={[style.container, animatedContainerStyle]}>
-            {open && (
-                <Animated.View exiting={FadeOut} entering={FadeIn}>
-                    <SteppedProgressBarAndIndicator currentStep={currentStep} steps={ONBOARDING_STEPS} />
-                    <View style={{ position: "absolute", right: 0, top: 23 }}>
-                        <OnboardingCompletionIcon />
-                    </View>
-                </Animated.View>
-            )}
+//     return (
+//         <Animated.View style={[style.container, animatedContainerStyle]}>
+//             {open && (
+//                 <Animated.View exiting={FadeOut} entering={FadeIn}>
+//                     <SteppedProgressBarAndIndicator currentStep={currentStep} steps={ONBOARDING_STEPS} />
+//                     <View style={{ position: "absolute", right: 0, top: 23 }}>
+//                         <OnboardingCompletionIcon />
+//                     </View>
+//                 </Animated.View>
+//             )}
 
-            <CurrentText steps={ONBOARDING_STEPS} currentStepIdx={currentStep} open={open} />
+//             <CurrentText steps={ONBOARDING_STEPS} currentStepIdx={currentStep} open={open} />
 
-            {open && (
-                <Animated.View style={style.buttonsContainer} exiting={FadeOut} entering={FadeIn}>
-                    <View>
-                        {ONBOARDING_STEPS[currentStep].skippeable && (
-                            <Pressable style={{ height: 45, justifyContent: "center" }} onPress={() => dispatch(skipToStep(currentStep + 1))}>
-                                <AppText
-                                    fontSize={12}
-                                    children={"Skip"}
-                                    style={{
-                                        paddingHorizontal: 15,
-                                        height: 34,
-                                        borderRadius: 10,
-                                        marginRight: 5,
-                                        color: "#E6E8E6",
-                                        verticalAlign: "middle",
-                                    }}
-                                />
-                            </Pressable>
-                        )}
-                    </View>
-                    <View style={{ flexDirection: "row" }}>
-                        <Pressable style={{ height: 45, justifyContent: "center" }} onPress={closeMenu}>
-                            <AppText
-                                fontSize={12}
-                                children={"Dismiss"}
-                                style={{
-                                    paddingHorizontal: 15,
-                                    height: 34,
-                                    borderRadius: 10,
-                                    marginRight: 5,
-                                    color: "#E6E8E6",
-                                    textAlign: "center",
-                                    verticalAlign: "middle",
-                                }}
-                            />
-                        </Pressable>
+//             {open && (
+//                 <Animated.View style={style.buttonsContainer} exiting={FadeOut} entering={FadeIn}>
+//                     <View>
+//                         {ONBOARDING_STEPS[currentStep].skippeable && (
+//                             <Pressable style={{ height: 45, justifyContent: "center" }} onPress={() => dispatch(skipToStep(currentStep + 1))}>
+//                                 <AppText
+//                                     fontSize={12}
+//                                     children={"Skip"}
+//                                     style={{
+//                                         paddingHorizontal: 15,
+//                                         height: 34,
+//                                         borderRadius: 10,
+//                                         marginRight: 5,
+//                                         color: "#E6E8E6",
+//                                         verticalAlign: "middle",
+//                                     }}
+//                                 />
+//                             </Pressable>
+//                         )}
+//                     </View>
+//                     <View style={{ flexDirection: "row" }}>
+//                         <Pressable style={{ height: 45, justifyContent: "center" }} onPress={closeMenu}>
+//                             <AppText
+//                                 fontSize={12}
+//                                 children={"Dismiss"}
+//                                 style={{
+//                                     paddingHorizontal: 15,
+//                                     height: 34,
+//                                     borderRadius: 10,
+//                                     marginRight: 5,
+//                                     color: "#E6E8E6",
+//                                     textAlign: "center",
+//                                     verticalAlign: "middle",
+//                                 }}
+//                             />
+//                         </Pressable>
 
-                        <Pressable style={{ height: 45, justifyContent: "center" }} onPress={ONBOARDING_STEPS[currentStep].onActionButtonPress}>
-                            <AppText
-                                fontSize={12}
-                                children={ONBOARDING_STEPS[currentStep].actionButtonText}
-                                style={{
-                                    paddingHorizontal: 15,
-                                    height: 34,
-                                    backgroundColor: colors.accent,
-                                    borderRadius: 10,
-                                    color: "#E6E8E6",
-                                    textAlign: "center",
-                                    verticalAlign: "middle",
-                                }}
-                            />
-                        </Pressable>
-                    </View>
-                </Animated.View>
-            )}
+//                         <Pressable style={{ height: 45, justifyContent: "center" }} onPress={ONBOARDING_STEPS[currentStep].onActionButtonPress}>
+//                             <AppText
+//                                 fontSize={12}
+//                                 children={ONBOARDING_STEPS[currentStep].actionButtonText}
+//                                 style={{
+//                                     paddingHorizontal: 15,
+//                                     height: 34,
+//                                     backgroundColor: colors.accent,
+//                                     borderRadius: 10,
+//                                     color: "#E6E8E6",
+//                                     textAlign: "center",
+//                                     verticalAlign: "middle",
+//                                 }}
+//                             />
+//                         </Pressable>
+//                     </View>
+//                 </Animated.View>
+//             )}
 
-            {!open && <Pressable onPressIn={() => dispatch(expandOnboardingMenu())} style={{ width: 45, height: 45, position: "absolute" }} />}
-        </Animated.View>
-    );
-};
+//             {!open && <Pressable onPressIn={() => dispatch(expandOnboardingMenu())} style={{ width: 45, height: 45, position: "absolute" }} />}
+//         </Animated.View>
+//     );
+// };
 
-const CurrentText = ({ steps, currentStepIdx, open }: { steps: OnboardingStep[]; currentStepIdx: number; open: boolean }) => {
-    const style = StyleSheet.create({
-        container: { height: 55, justifyContent: "center" },
-        textContainer: { flexDirection: "row", alignItems: "center", gap: 10 },
-        text: { color: "#E6E8E6", marginTop: 6 },
-    });
+// const CurrentText = ({ steps, currentStepIdx, open }: { steps: OnboardingStep[]; currentStepIdx: number; open: boolean }) => {
+//     const style = StyleSheet.create({
+//         container: { height: 55, justifyContent: "center" },
+//         textContainer: { flexDirection: "row", alignItems: "center", gap: 10 },
+//         text: { color: "#E6E8E6", marginTop: 6 },
+//     });
 
-    const animatedIconStyle = useAnimatedStyle(() => {
-        const fooIcon = getIconSpacing(currentStepIdx);
-        return {
-            top: withSpring(open ? 0 : fooIcon.top),
-            left: withSpring(open ? 0 : fooIcon.left, MENU_HIGH_DAMPENING),
-        };
-    });
+//     const animatedIconStyle = useAnimatedStyle(() => {
+//         const fooIcon = getIconSpacing(currentStepIdx);
+//         return {
+//             top: withSpring(open ? 0 : fooIcon.top),
+//             left: withSpring(open ? 0 : fooIcon.left, MENU_HIGH_DAMPENING),
+//         };
+//     });
 
-    return (
-        <View style={style.container} pointerEvents={"none"}>
-            {steps.map((step, idx) => {
-                if (idx !== currentStepIdx) return <Fragment key={idx} />;
+//     return (
+//         <View style={style.container} pointerEvents={"none"}>
+//             {steps.map((step, idx) => {
+//                 if (idx !== currentStepIdx) return <Fragment key={idx} />;
 
-                return (
-                    <Animated.View
-                        pointerEvents={"none"}
-                        key={idx}
-                        style={[style.textContainer, animatedIconStyle]}
-                        entering={FadeInRight}
-                        exiting={FadeOutLeft}>
-                        <TabBarIcon color={open ? "#E6E8E6" : colors.accent} name={step.iconName} size={16} />
-                        {open && (
-                            <Animated.View exiting={FadeOut}>
-                                <AppText children={step.text} fontSize={16} style={style.text} />
-                            </Animated.View>
-                        )}
-                    </Animated.View>
-                );
-            })}
-        </View>
-    );
-};
+//                 return (
+//                     <Animated.View
+//                         pointerEvents={"none"}
+//                         key={idx}
+//                         style={[style.textContainer, animatedIconStyle]}
+//                         entering={FadeInRight}
+//                         exiting={FadeOutLeft}>
+//                         <TabBarIcon color={open ? "#E6E8E6" : colors.accent} name={step.iconName} size={16} />
+//                         {open && (
+//                             <Animated.View exiting={FadeOut}>
+//                                 <AppText children={step.text} fontSize={16} style={style.text} />
+//                             </Animated.View>
+//                         )}
+//                     </Animated.View>
+//                 );
+//             })}
+//         </View>
+//     );
+// };
 
-function getIconSpacing(currentIdx: number): { left: number; top: number } {
-    "worklet";
+// function getIconSpacing(currentIdx: number): { left: number; top: number } {
+//     "worklet";
 
-    switch (currentIdx) {
-        case 0:
-            return { left: 6, top: -12 };
-        case 3:
-            return { left: 7, top: -11 };
-        default:
-            return { left: 5, top: -12 };
-    }
-}
+//     switch (currentIdx) {
+//         case 0:
+//             return { left: 6, top: -12 };
+//         case 3:
+//             return { left: 7, top: -11 };
+//         default:
+//             return { left: 5, top: -12 };
+//     }
+// }

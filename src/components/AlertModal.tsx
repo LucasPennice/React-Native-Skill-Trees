@@ -1,14 +1,15 @@
+import Error from "@/../assets/lotties/error.json";
+import Loading from "@/../assets/lotties/loading.json";
+import Success from "@/../assets/lotties/success.json";
+import { useHandleLottiePlay } from "@/useHandleLottiePlay";
 import { HandleAlertContext } from "app/_layout";
 import LottieView from "lottie-react-native";
-import { useContext, useEffect, useRef } from "react";
+import { useContext } from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
 import Animated, { Easing, FadeInDown, ZoomOut } from "react-native-reanimated";
 import { colors } from "../parameters";
 import AppButton, { ButtonState } from "./AppButton";
 import AppText from "./AppText";
-import Loading from "@/../assets/lotties/loading.json";
-import Error from "@/../assets/lotties/error.json";
-import Success from "@/../assets/lotties/success.json";
 
 const ALERT_HEIGHT = 350;
 const ICON_HEIGHT = 90;
@@ -59,32 +60,6 @@ const styles = StyleSheet.create({
     },
 });
 
-const useHandlePlay = (open: boolean) => {
-    const animation = useRef<LottieView>(null);
-
-    useEffect(() => {
-        let timeoutId: NodeJS.Timeout;
-
-        if (open) {
-            timeoutId = setTimeout(() => {
-                animation.current?.reset();
-                animation.current?.play();
-            }, 1000);
-        }
-
-        if (!open) {
-            animation.current?.reset();
-            animation.current?.pause();
-        }
-
-        return () => {
-            clearTimeout(timeoutId);
-        };
-    }, [open]);
-
-    return animation;
-};
-
 const getLottieSource = (state: ButtonState) => {
     switch (state) {
         case "error":
@@ -101,7 +76,7 @@ const getLottieSource = (state: ButtonState) => {
 function AlertModal({ open, state, subtitle, title, buttonAction, buttonText }: AlertProps) {
     const { close } = useContext(HandleAlertContext);
 
-    const animationRef = useHandlePlay(open);
+    const animationRef = useHandleLottiePlay(open);
 
     return (
         <Modal animationType="fade" transparent={true} visible={open} onRequestClose={close} presentationStyle={"overFullScreen"}>

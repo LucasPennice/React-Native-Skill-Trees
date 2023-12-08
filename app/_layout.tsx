@@ -10,10 +10,9 @@ import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { persistor, store } from "@/redux/reduxStore";
 import { homeTreeSliceInitialState } from "@/redux/slices/homeTreeSlice";
 import { createHomeRootNode, selectNodeById } from "@/redux/slices/nodesSlice";
-import { selectOnboarding, skipToStep } from "@/redux/slices/onboardingSlice";
 import { updateSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
 import { initializeFeedbackArrays } from "@/redux/slices/userFeedbackSlice";
-import { TreeData, selectAllTrees, selectTotalTreeQty, updateUserTrees } from "@/redux/slices/userTreesSlice";
+import { TreeData, selectAllTrees, updateUserTrees } from "@/redux/slices/userTreesSlice";
 import { NormalizedNode, getDefaultSkillValue } from "@/types";
 import useIsSharingAvailable from "@/useIsSharingAvailable";
 import useSubscriptionHandler, { SubscriptionHandler } from "@/useSubscriptionHandler";
@@ -147,20 +146,6 @@ export default function RootLayout() {
     );
 }
 
-const useHandleOnboarding = () => {
-    const onboarding = useAppSelector(selectOnboarding);
-    const treeQty = useAppSelector(selectTotalTreeQty);
-    const dispatch = useAppDispatch();
-
-    if (onboarding.complete) return;
-
-    if (onboarding.currentStep !== 0) return;
-
-    const PAST_SKILLS_STEP = 2;
-
-    if (treeQty !== 0) dispatch(skipToStep(PAST_SKILLS_STEP));
-};
-
 const useUpdateTreeDataForShowOnHomepage = () => {
     const userTrees = useAppSelector(selectAllTrees);
     const dispatch = useAppDispatch();
@@ -218,7 +203,6 @@ export const SubscriptionContext = createContext<SubscriptionHandler>({
 function AppWithReduxContext() {
     const dispatch = useAppDispatch();
     //
-    useHandleOnboarding();
     useUpdateTreeDataForShowOnHomepage();
     useUpdateUserFeedback();
     useGuaranteeHomeRootTree();

@@ -1,56 +1,50 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../reduxStore";
 import { addNodes } from "./nodesSlice";
 import { addUserTrees } from "./userTreesSlice";
+import { mixpanel } from "app/_layout";
 
-export enum OnboardingSteps {
+enum OnboardingSteps {
     "CreateTree" = 0,
     "AddSkill" = 1,
-    "PastSkills" = 2,
-    "LogIn" = 3,
+    "LogIn/SignUp" = 2,
 }
 
 // Define a type for the slice state
 export type OnboardignState = {
-    currentStep: OnboardingSteps;
-    complete: boolean;
-    open: boolean;
+    currentStep: number;
 };
 
 // Define the initial state using that type
 const initialState: OnboardignState = {
-    complete: false,
     currentStep: 0,
-    open: false,
 };
 
 export const onboardingSlice = createSlice({
-    name: "logged",
+    name: "onboarding",
     initialState,
     reducers: {
-        completeOnboarding: (state) => {
-            state.complete = true;
-        },
-        skipToStep: (state, action: PayloadAction<OnboardingSteps>) => {
-            state.currentStep = action.payload;
-        },
-        expandOnboardingMenu: (state) => {
-            state.open = true;
-        },
-        closeOnboardingMenu: (state) => {
-            state.open = false;
-        },
-        overwriteOnboardingSlice: (state, action: PayloadAction<OnboardignState>) => {
-            state.complete = action.payload.complete;
-            state.currentStep = action.payload.currentStep;
-            state.open = action.payload.open;
-        },
+        // skipToStep: (state, action: PayloadAction<OnboardingSteps>) => {
+        //     state.currentStep = action.payload;
+        // },
+        // expandOnboardingMenu: (state) => {
+        //     state.open = true;
+        // },
+        // closeOnboardingMenu: (state) => {
+        //     state.open = false;
+        // },
+        // overwriteOnboardingSlice: (state, action: PayloadAction<OnboardignState>) => {
+        //     state.complete = action.payload.complete;
+        //     state.currentStep = action.payload.currentStep;
+        //     state.open = action.payload.open;
+        // },
     },
     extraReducers: (builder) => {
         builder.addCase(addUserTrees, (state, action) => {
-            if (state.currentStep === OnboardingSteps.CreateTree) state.currentStep = 1;
+            if (state.currentStep !== OnboardingSteps.CreateTree) return;
 
-            if (state.currentStep === OnboardingSteps.PastSkills) state.currentStep = 3;
+            state.currentStep = 1;
+            mixpanel.track(`onboarding step 0 (Create Tree) complete`);
         });
         builder.addCase(addNodes, (state, action) => {
             if (state.currentStep === OnboardingSteps.AddSkill) state.currentStep = 2;
@@ -58,9 +52,9 @@ export const onboardingSlice = createSlice({
     },
 });
 
-export const { completeOnboarding, skipToStep, closeOnboardingMenu, expandOnboardingMenu, overwriteOnboardingSlice } = onboardingSlice.actions;
+export const {} = onboardingSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
-export const selectOnboarding = (state: RootState) => state.onboarding;
+export const selectOnboarding = (state: RootState) => state.newOnboarding;
 
 export default onboardingSlice.reducer;

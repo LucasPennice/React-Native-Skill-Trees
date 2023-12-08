@@ -69,7 +69,7 @@ const rootReducer = combineReducers({
     homeTree: homeTreeSlice,
     sync: syncSlice,
     userFeedback: userFeedbackSlice,
-    onboarding: onboardingSlice,
+    newOnboarding: onboardingSlice,
     survey: surveysSlice,
 });
 

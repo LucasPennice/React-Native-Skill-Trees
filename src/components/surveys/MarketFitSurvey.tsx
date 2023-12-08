@@ -1,10 +1,11 @@
 import QuestionMark from "@/../assets/lotties/questionMark.json";
 import Selected from "@/../assets/lotties/success.json";
 import { colors } from "@/parameters";
+import { useHandleLottiePlay } from "@/useHandleLottiePlay";
 import { useFormspark } from "@formspark/use-formspark";
 import { mixpanel } from "app/_layout";
 import LottieView from "lottie-react-native";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { Easing, FadeInDown, ZoomOut } from "react-native-reanimated";
 import AppButton from "../AppButton";
@@ -41,32 +42,6 @@ const styles = StyleSheet.create({
     },
 });
 
-const useHandlePlay = (open: boolean, delay = 1000) => {
-    const animation = useRef<LottieView>(null);
-
-    useEffect(() => {
-        let timeoutId: NodeJS.Timeout;
-
-        if (open) {
-            timeoutId = setTimeout(() => {
-                animation.current?.reset();
-                animation.current?.play();
-            }, delay);
-        }
-
-        if (!open) {
-            animation.current?.reset();
-            animation.current?.pause();
-        }
-
-        return () => {
-            clearTimeout(timeoutId);
-        };
-    }, [open]);
-
-    return animation;
-};
-
 function MarketFitSurvey({ open, close }: { open: boolean; close: () => void }) {
     const [selected, setSelected] = useState<null | string>(null);
     const [avatar, setAvatar] = useState("");
@@ -83,7 +58,7 @@ function MarketFitSurvey({ open, close }: { open: boolean; close: () => void }) 
         close();
     };
 
-    const animationRef = useHandlePlay(open);
+    const animationRef = useHandleLottiePlay(open);
 
     return (
         <Modal animationType="fade" transparent={true} visible={open} onRequestClose={close} presentationStyle={"overFullScreen"}>
@@ -203,7 +178,7 @@ const RadialInput = ({ selected, onPress, title }: { selected: boolean; onPress:
         },
     });
 
-    const animationRef = useHandlePlay(selected, 0);
+    const animationRef = useHandleLottiePlay(selected, 0);
 
     return (
         <TouchableOpacity onPress={onPress}>
