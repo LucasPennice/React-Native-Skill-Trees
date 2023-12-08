@@ -1,3 +1,4 @@
+import AlertModal, { AlertProps, defaultAlertValues } from "@/components/AlertModal";
 import AppButton from "@/components/AppButton";
 import AppText from "@/components/AppText";
 import ChevronLeft from "@/components/Icons/ChevronLeft";
@@ -15,6 +16,7 @@ import { initializeFeedbackArrays } from "@/redux/slices/userFeedbackSlice";
 import { TreeData, selectAllTrees, selectTotalTreeQty, updateUserTrees } from "@/redux/slices/userTreesSlice";
 import { NormalizedNode, getDefaultSkillValue } from "@/types";
 import useIsSharingAvailable from "@/useIsSharingAvailable";
+import useSubscriptionHandler, { SubscriptionHandler } from "@/useSubscriptionHandler";
 import useTrackNavigationEvents from "@/useTrackNavigationEvents";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import Clipboard from "@react-native-clipboard/clipboard";
@@ -26,6 +28,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import { ErrorBoundaryProps, SplashScreen, Stack } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import { Mixpanel } from "mixpanel-react-native";
 import { createContext, useEffect, useState } from "react";
 import { LogBox, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
@@ -33,10 +36,7 @@ import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated"
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { routes } from "routes";
-import { Mixpanel } from "mixpanel-react-native";
 import "../globals";
-import useSubscriptionHandler, { SubscriptionHandler } from "@/useSubscriptionHandler";
-import AlertModal, { AlertProps, defaultAlertValues } from "@/components/AlertModal";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications

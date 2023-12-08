@@ -37,33 +37,12 @@ function useIdentifyMixPanelUserId() {
 const useRedirectOnNavigation = (readyToRedirect: boolean, redirectToWelcomeScreen: boolean, redirectToPaywall: boolean) => {
     useEffect(() => {
         if (!readyToRedirect) return;
-        if (redirectToWelcomeScreen) {
-            console.log("redirecting to welcome screen");
-            return router.push("/welcomeScreen");
-        }
-        if (redirectToPaywall) {
-            console.log("redirecting to paywall");
-            return router.replace("/(app)/paywall");
-        }
+        // return router.replace("/(app)/paywall");
+
+        if (redirectToWelcomeScreen) return router.push("/welcomeScreen");
+        if (redirectToPaywall) return router.replace("/(app)/paywall");
     }, [redirectToWelcomeScreen, readyToRedirect, redirectToPaywall]);
-    // useEffect(() => {
-    //     if (!readyToRedirect) return;
-    //     if (redirectToWelcomeScreen) return router.push("/welcomeScreen");
-    // }, [redirectToWelcomeScreen, readyToRedirect, redirectToPaywall]);
 };
-
-// const useRedirectToPaywall = (redirectToPaywall: boolean) => {
-//     const handleRedirectToPaywall = useCallback(() => {
-//         console.log("correfn");
-//         if (redirectToPaywall) return router.push("/(app)/paywall");
-//     }, [redirectToPaywall]);
-
-//     useEffect(() => {
-//         handleRedirectToPaywall();
-//     }, [handleRedirectToPaywall]);
-
-//     return handleRedirectToPaywall;
-// };
 
 export default function RootLayout() {
     const deepLinkOpenedApp = Linking.useURL() !== null;

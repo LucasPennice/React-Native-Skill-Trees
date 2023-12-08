@@ -72,7 +72,7 @@ const AppButton = ({
         <TouchableOpacity onPressIn={onPress} disabled={disabled} style={pressableStyle}>
             <Animated.View style={[styles.container, animatedContainerStyles, disabledStyles, style]}>
                 {state === "idle" && (
-                    <Animated.View entering={ZoomIn} exiting={ZoomOut}>
+                    <Animated.View exiting={ZoomOut}>
                         <AppText children={text?.idle ?? "Send"} fontSize={14} style={[{ color: "#E6E8E6" }, textStyle]} />
                     </Animated.View>
                 )}
