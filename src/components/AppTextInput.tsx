@@ -15,6 +15,8 @@ export type AppTextInputProps = {
     hideClearButton?: true;
 };
 
+const MIN_HEIGHT = 45;
+
 function AppTextInput({
     textState,
     placeholder,
@@ -44,7 +46,7 @@ function AppTextInput({
         <View
             style={[
                 centerFlex,
-                { flexDirection: "row", position: "relative", backgroundColor: colors.darkGray, borderRadius: 10, height: 45 },
+                { flexDirection: "row", position: "relative", backgroundColor: colors.darkGray, borderRadius: 10, height: MIN_HEIGHT },
                 containerStyles,
             ]}>
             <TextInput
@@ -64,6 +66,8 @@ function AppTextInput({
                     {
                         fontSize: 16,
                         paddingLeft: 20,
+                        // @ts-ignore
+                        height: containerStyles?.height ?? MIN_HEIGHT,
                         fontFamily: "helvetica",
                         color: colors.white,
                         flex: 1,

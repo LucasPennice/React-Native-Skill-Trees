@@ -22,6 +22,7 @@ import homeTreeSlice from "./slices/homeTreeSlice";
 import nodesSlice from "./slices/nodesSlice";
 import onboardingSlice from "./slices/onboardingSlice";
 import screenDimentionsReducer from "./slices/screenDimentionsSlice";
+import surveysSlice from "./slices/surveysSlice";
 import syncSlice from "./slices/syncSlice";
 import userFeedbackSlice from "./slices/userFeedbackSlice";
 import userTreesSlice from "./slices/userTreesSlice";
@@ -69,6 +70,7 @@ const rootReducer = combineReducers({
     sync: syncSlice,
     userFeedback: userFeedbackSlice,
     onboarding: onboardingSlice,
+    survey: surveysSlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

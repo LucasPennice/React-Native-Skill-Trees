@@ -37,7 +37,7 @@ function useIdentifyMixPanelUserId() {
 const useRedirectOnNavigation = (readyToRedirect: boolean, redirectToWelcomeScreen: boolean, redirectToPaywall: boolean) => {
     useEffect(() => {
         if (!readyToRedirect) return;
-        // return router.replace("/(app)/paywall");
+        if (process.env.NODE_ENV === "development") return;
 
         if (redirectToWelcomeScreen) return router.push("/welcomeScreen");
         if (redirectToPaywall) return router.replace("/(app)/paywall");

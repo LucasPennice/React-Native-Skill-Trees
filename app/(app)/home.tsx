@@ -32,6 +32,8 @@ import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
 import { batch } from "react-redux";
 import { RoutesParams } from "routes";
 import { Contact } from "./feedback";
+import PostOnboardingSurvey from "@/components/surveys/PostOnboardingSurvey";
+import MarketFitSurvey from "@/components/surveys/MarketFitSurvey";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();
@@ -204,8 +206,34 @@ function useHandleSyncOnLoginOrSignUp(
     };
 }
 
+const useHandleSurveyModals = () => {
+    const [postOnboarding, setPostOnboarding] = useState(false);
+    const [marketFit, setMarketFit] = useState(true);
+
+    const openPostOnboardingModal = () => setPostOnboarding(true);
+    const closePostOnboardingModal = () => setPostOnboarding(false);
+
+    const openMarketFitModal = () => setMarketFit(true);
+    const closeMarketFitModal = () => setMarketFit(false);
+
+    return {
+        postOnboarding: {
+            state: postOnboarding,
+            open: openPostOnboardingModal,
+            close: closePostOnboardingModal,
+        },
+        marketFit: {
+            state: marketFit,
+            open: openMarketFitModal,
+            close: closeMarketFitModal,
+        },
+    };
+};
+
 function Home() {
     const selectedNodeCoordState = useSelectedNodeCoordState();
+
+    const { postOnboarding, marketFit } = useHandleSurveyModals();
 
     const syncStateObj = useHandleButtonState();
 
@@ -254,6 +282,10 @@ function Home() {
             <CanvasSettingsModal open={canvasSettings} closeModal={closeCanvasSettingsModal} />
 
             <SyncStateModal showSyncModal={showSyncModal} state={syncState} closeModal={closeModal} />
+
+            {postOnboarding.state && <PostOnboardingSurvey open={postOnboarding.state} close={postOnboarding.close} />}
+
+            {marketFit.state && <MarketFitSurvey open={marketFit.state} close={marketFit.close} />}
         </View>
     );
 }
