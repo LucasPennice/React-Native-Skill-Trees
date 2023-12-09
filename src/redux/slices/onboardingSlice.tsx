@@ -4,10 +4,11 @@ import { addNodes } from "./nodesSlice";
 import { addUserTrees } from "./userTreesSlice";
 import { mixpanel } from "app/_layout";
 
-enum OnboardingSteps {
+export enum OnboardingSteps {
     "CreateTree" = 0,
     "AddSkill" = 1,
-    "LogIn/SignUp" = 2,
+    "CustomizeHomeTree" = 2,
+    "LogIn/SignUp" = 3,
 }
 
 // Define a type for the slice state
@@ -38,6 +39,9 @@ export const onboardingSlice = createSlice({
         //     state.currentStep = action.payload.currentStep;
         //     state.open = action.payload.open;
         // },
+        completeCustomizeHomeTree: (state) => {
+            state.currentStep = 3;
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(addUserTrees, (state, action) => {
@@ -52,7 +56,7 @@ export const onboardingSlice = createSlice({
     },
 });
 
-export const {} = onboardingSlice.actions;
+export const { completeCustomizeHomeTree } = onboardingSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectOnboarding = (state: RootState) => state.newOnboarding;

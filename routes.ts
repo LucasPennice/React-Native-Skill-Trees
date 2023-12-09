@@ -75,6 +75,7 @@ export type RoutesParams = {
     home: {
         handleLogInSync?: "true";
         handleSignUpSync?: "true";
+        openEditCanvasSettings?: "true";
     };
     signUp: {
         hideRedirectToLogin?: "true";

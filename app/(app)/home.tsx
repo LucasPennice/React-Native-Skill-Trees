@@ -13,7 +13,7 @@ import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { overwriteHomeTreeSlice, selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { NodeSlice, overwriteNodeSlice, selectAllNodeIds, selectAllNodes, selectNodesTable } from "@/redux/slices/nodesSlice";
-import { OnboardignState, selectOnboarding } from "@/redux/slices/onboardingSlice";
+import { OnboardignState, OnboardingSteps, completeCustomizeHomeTree, selectOnboarding } from "@/redux/slices/onboardingSlice";
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
 import { selectSyncSlice, setShouldWaitForClerkToLoad, updateLastBackupTime } from "@/redux/slices/syncSlice";
 import { TreeData, UserTreeSlice, overwriteUserTreesSlice, selectAllTreesEntities, selectTreeIds } from "@/redux/slices/userTreesSlice";
@@ -74,9 +74,14 @@ function useSelectedNodeCoordState() {
 
 function useCanvasSettingsState() {
     const [canvasSettings, setCanvasSettings] = useState(false);
+    const { currentStep } = useAppSelector(selectOnboarding);
+    const dispatch = useAppDispatch();
 
     const openCanvasSettingsModal = useCallback(() => setCanvasSettings(true), []);
-    const closeCanvasSettingsModal = useCallback(() => setCanvasSettings(false), []);
+    const closeCanvasSettingsModal = useCallback(() => {
+        if (currentStep === OnboardingSteps["CustomizeHomeTree"]) dispatch(completeCustomizeHomeTree());
+        setCanvasSettings(false);
+    }, [currentStep]);
 
     return [canvasSettings, { openCanvasSettingsModal, closeCanvasSettingsModal }] as const;
 }
@@ -205,6 +210,19 @@ function useHandleSyncOnLoginOrSignUp(
     };
 }
 
+const useHandleLocalParams = (openCanvasSettingsModal: () => void) => {
+    const localParams = useLocalSearchParams();
+
+    useEffect(() => {
+        const { openEditCanvasSettings }: RoutesParams["home"] = localParams;
+
+        if (openEditCanvasSettings) {
+            openCanvasSettingsModal();
+            return;
+        }
+    }, [localParams]);
+};
+
 function Home() {
     const selectedNodeCoordState = useSelectedNodeCoordState();
 
@@ -221,6 +239,8 @@ function Home() {
     const [selectedNodeCoord, { clearSelectedNodeCoord }] = selectedNodeCoordState;
 
     const [canvasSettings, { openCanvasSettingsModal, closeCanvasSettingsModal }] = useCanvasSettingsState();
+
+    useHandleLocalParams(openCanvasSettingsModal);
 
     useHandleNavigationListener(clearSelectedNodeCoord);
 

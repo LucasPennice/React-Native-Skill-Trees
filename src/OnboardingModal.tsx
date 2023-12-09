@@ -1,4 +1,6 @@
 import OnboardingCreateTree from "@/../assets/lotties/onboardingCreateTree.json";
+import OnboardingAddSkill from "@/../assets/lotties/onboardingAddSkills.json";
+import OnboardingCustomizeHomeTree from "@/../assets/lotties/onboardingCustomizeHomeTree.json";
 import { colors } from "@/parameters";
 import LottieView from "lottie-react-native";
 import { Alert, Modal, Pressable, StyleSheet, View } from "react-native";
@@ -20,7 +22,7 @@ const ICON_HEIGHT = 90;
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#00000080" },
-    tapToCloseZone: { flex: 1 },
+    opaqueZone: { flex: 1 },
     alertContainer: { height: MODAL_HEIGHT, position: "relative", alignItems: "center", justifyContent: "flex-end" },
     alertContentContainer: {
         height: MODAL_HEIGHT - ICON_HEIGHT / 2,
@@ -81,6 +83,12 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
         router.push({ pathname: `/myTrees/${firstUserTree.treeId}`, params });
     };
 
+    const openCanvasSettingsModal = () => {
+        const params: RoutesParams["home"] = { openEditCanvasSettings: "true" };
+        //@ts-ignore
+        router.push({ pathname: `/home`, params });
+    };
+
     const ONBOARDING_STEPS: OnboardingStep[] = [
         {
             title: "Create your first Skill Tree",
@@ -89,8 +97,13 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
         },
         {
             title: "Add Skills to your Tree",
-            subtitle: "Add my first Skill",
+            subtitle: "Long press any skill to open the add menu. You can add many skills at once",
             onActionButtonPress: handleOnboardingAction(openAddSkillModal),
+        },
+        {
+            title: "Customize your Home Tree",
+            subtitle: "Tap the settings icon to customize a tree's appearance",
+            onActionButtonPress: handleOnboardingAction(openCanvasSettingsModal),
         },
         {
             title: "Keep your progress secured",
@@ -110,10 +123,24 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
         });
     }, [open, currentStep]);
 
+    const getLottieAnimation = () => {
+        console.log(currentStep);
+        switch (currentStep) {
+            case 0:
+                return OnboardingCreateTree;
+            case 1:
+                return OnboardingAddSkill;
+            case 2:
+                return OnboardingCustomizeHomeTree;
+            default:
+                return OnboardingAddSkill;
+        }
+    };
+
     return (
         <Modal animationType="fade" transparent={true} visible={open} onRequestClose={close} presentationStyle={"overFullScreen"}>
             <View style={styles.container}>
-                <Pressable onPress={close} style={styles.tapToCloseZone} />
+                <View style={styles.opaqueZone} />
                 <Animated.View
                     style={styles.alertContainer}
                     exiting={ZoomOut.easing(Easing.bezierFn(0.83, 0, 0.17, 1))}
@@ -129,7 +156,7 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
                         />
 
                         <Pressable onPress={resetAnimation}>
-                            <LottieView source={OnboardingCreateTree} loop={false} ref={animationRef} style={{ width: "100%", maxWidth: 350 }} />
+                            <LottieView source={getLottieAnimation()} loop={false} ref={animationRef} style={{ width: "100%", maxWidth: 350 }} />
                         </Pressable>
 
                         <AppButton
