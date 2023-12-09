@@ -9,13 +9,13 @@ import { RoutesParams } from "routes";
 import AppButton from "./components/AppButton";
 import AppText from "./components/AppText";
 import { OnboardingStep } from "./components/SteppedProgressBarAndIndicator";
-import { useAppSelector } from "./redux/reduxHooks";
+import { useAppDispatch, useAppSelector } from "./redux/reduxHooks";
 import { selectAllTrees } from "./redux/slices/userTreesSlice";
 import { useHandleLottiePlay } from "./useHandleLottiePlay";
 import { router } from "expo-router";
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { mixpanel } from "app/_layout";
-import { selectOnboarding } from "./redux/slices/onboardingSlice";
+import { completeCustomizeHomeTree, selectUserVariables } from "./redux/slices/userVariablesSlice";
 
 const MODAL_HEIGHT = 500;
 const ICON_HEIGHT = 90;
@@ -55,7 +55,7 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
 
     const resetAnimation = () => animationRef?.current?.play();
 
-    const { currentStep } = useAppSelector(selectOnboarding);
+    const { onboardingStep } = useAppSelector(selectUserVariables);
 
     const userTrees = useAppSelector(selectAllTrees);
 
@@ -112,20 +112,19 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
         },
     ];
 
-    const currentOnboardingData = ONBOARDING_STEPS[currentStep];
+    const currentOnboardingData = ONBOARDING_STEPS[onboardingStep];
 
     useEffect(() => {
         if (open !== true) return;
 
-        mixpanel.track(`onboarding step ${currentStep} (Create tree) viewed v1.0`, {
+        mixpanel.track(`onboarding step ${onboardingStep} (Create tree) viewed v1.0`, {
             title: currentOnboardingData.title,
             subtitle: currentOnboardingData.subtitle,
         });
-    }, [open, currentStep]);
+    }, [open, onboardingStep]);
 
     const getLottieAnimation = () => {
-        console.log(currentStep);
-        switch (currentStep) {
+        switch (onboardingStep) {
             case 0:
                 return OnboardingCreateTree;
             case 1:
@@ -169,7 +168,7 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
                         />
                     </View>
                     <View style={styles.iconContainer}>
-                        <AppText children={currentStep + 1} fontSize={50} style={{ paddingTop: 5 }} />
+                        <AppText children={onboardingStep + 1} fontSize={50} style={{ paddingTop: 5 }} />
                     </View>
                 </Animated.View>
             </View>
@@ -177,4 +176,4 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
     );
 }
 
-export default OnboardingModal;
+export default memo(OnboardingModal);

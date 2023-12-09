@@ -13,7 +13,6 @@ import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { overwriteHomeTreeSlice, selectHomeTree } from "@/redux/slices/homeTreeSlice";
 import { NodeSlice, overwriteNodeSlice, selectAllNodeIds, selectAllNodes, selectNodesTable } from "@/redux/slices/nodesSlice";
-import { OnboardignState, OnboardingSteps, completeCustomizeHomeTree, selectOnboarding } from "@/redux/slices/onboardingSlice";
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
 import { selectSyncSlice, setShouldWaitForClerkToLoad, updateLastBackupTime } from "@/redux/slices/syncSlice";
 import { TreeData, UserTreeSlice, overwriteUserTreesSlice, selectAllTreesEntities, selectTreeIds } from "@/redux/slices/userTreesSlice";
@@ -32,6 +31,7 @@ import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
 import { batch } from "react-redux";
 import { RoutesParams } from "routes";
 import { Contact } from "./feedback";
+import { OnboardingSteps, completeCustomizeHomeTree, selectUserVariables } from "@/redux/slices/userVariablesSlice";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();
@@ -74,14 +74,14 @@ function useSelectedNodeCoordState() {
 
 function useCanvasSettingsState() {
     const [canvasSettings, setCanvasSettings] = useState(false);
-    const { currentStep } = useAppSelector(selectOnboarding);
+    const { onboardingStep } = useAppSelector(selectUserVariables);
     const dispatch = useAppDispatch();
 
     const openCanvasSettingsModal = useCallback(() => setCanvasSettings(true), []);
     const closeCanvasSettingsModal = useCallback(() => {
-        if (currentStep === OnboardingSteps["CustomizeHomeTree"]) dispatch(completeCustomizeHomeTree());
+        if (onboardingStep === OnboardingSteps["CustomizeHomeTree"]) dispatch(completeCustomizeHomeTree());
         setCanvasSettings(false);
-    }, [currentStep]);
+    }, [onboardingStep]);
 
     return [canvasSettings, { openCanvasSettingsModal, closeCanvasSettingsModal }] as const;
 }
@@ -90,7 +90,6 @@ export type UserBackup = {
     nodeSlice: NodeSlice;
     userTreesSlice: UserTreeSlice;
     homeTree: Omit<TreeData, "nodes">;
-    onboarding: OnboardignState;
     lastUpdateUTC_Timestamp: number;
 };
 
@@ -115,7 +114,7 @@ function useHandleSyncOnLoginOrSignUp(
     const treesTable = useAppSelector(selectAllTreesEntities);
     const treesIds = useAppSelector(selectTreeIds);
     const homeTree = useAppSelector(selectHomeTree);
-    const onboarding = useAppSelector(selectOnboarding);
+    // const onboarding = useAppSelector(selectOnboarding);
     const { lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);
 
     const dispatch = useAppDispatch();
@@ -141,7 +140,6 @@ function useHandleSyncOnLoginOrSignUp(
         nodeSlice: { entities: nodesTable, ids: nodesIds },
         userTreesSlice: { entities: treesTable, ids: treesIds },
         homeTree,
-        onboarding,
         lastUpdateUTC_Timestamp,
     };
 

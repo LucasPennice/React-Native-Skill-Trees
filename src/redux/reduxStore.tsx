@@ -20,7 +20,6 @@ import addTreeReducer from "./slices/addTreeModalSlice";
 import canvasDisplaySettingsReducer from "./slices/canvasDisplaySettingsSlice";
 import homeTreeSlice from "./slices/homeTreeSlice";
 import nodesSlice from "./slices/nodesSlice";
-import onboardingSlice from "./slices/onboardingSlice";
 import screenDimentionsReducer from "./slices/screenDimentionsSlice";
 import syncSlice from "./slices/syncSlice";
 import userFeedbackSlice from "./slices/userFeedbackSlice";
@@ -69,7 +68,6 @@ const rootReducer = combineReducers({
     homeTree: homeTreeSlice,
     sync: syncSlice,
     userFeedback: userFeedbackSlice,
-    newOnboarding: onboardingSlice,
     userVariables: userVariablesSlice,
 });
 
