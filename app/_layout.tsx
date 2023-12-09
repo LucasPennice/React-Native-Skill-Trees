@@ -13,6 +13,7 @@ import { createHomeRootNode, selectNodeById } from "@/redux/slices/nodesSlice";
 import { updateSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
 import { initializeFeedbackArrays } from "@/redux/slices/userFeedbackSlice";
 import { TreeData, selectAllTrees, updateUserTrees } from "@/redux/slices/userTreesSlice";
+import { increaseAppOpenAccum, updateLaunchVersion } from "@/redux/slices/userVariablesSlice";
 import { NormalizedNode, getDefaultSkillValue } from "@/types";
 import useIsSharingAvailable from "@/useIsSharingAvailable";
 import useSubscriptionHandler, { SubscriptionHandler } from "@/useSubscriptionHandler";
@@ -24,6 +25,7 @@ import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { Update } from "@reduxjs/toolkit";
 import { SkFont, useFont } from "@shopify/react-native-skia";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as Application from "expo-application";
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import { ErrorBoundaryProps, SplashScreen, Stack } from "expo-router";
 import * as SecureStore from "expo-secure-store";
@@ -200,9 +202,20 @@ export const SubscriptionContext = createContext<SubscriptionHandler>({
     customerInfo: null,
 });
 
+function useUpdateUserVariables() {
+    const dispatch = useAppDispatch();
+    //
+
+    useEffect(() => {
+        dispatch(increaseAppOpenAccum());
+        if (Platform.OS !== "web") dispatch(updateLaunchVersion(Application.nativeApplicationVersion!));
+    }, []);
+}
+
 function AppWithReduxContext() {
     const dispatch = useAppDispatch();
     //
+    useUpdateUserVariables();
     useUpdateTreeDataForShowOnHomepage();
     useUpdateUserFeedback();
     useGuaranteeHomeRootTree();

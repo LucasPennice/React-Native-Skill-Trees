@@ -22,10 +22,10 @@ import homeTreeSlice from "./slices/homeTreeSlice";
 import nodesSlice from "./slices/nodesSlice";
 import onboardingSlice from "./slices/onboardingSlice";
 import screenDimentionsReducer from "./slices/screenDimentionsSlice";
-import surveysSlice from "./slices/surveysSlice";
 import syncSlice from "./slices/syncSlice";
 import userFeedbackSlice from "./slices/userFeedbackSlice";
 import userTreesSlice from "./slices/userTreesSlice";
+import userVariablesSlice from "./slices/userVariablesSlice";
 
 const migration: MigrationManifest = {
     //@ts-ignore
@@ -70,7 +70,7 @@ const rootReducer = combineReducers({
     sync: syncSlice,
     userFeedback: userFeedbackSlice,
     newOnboarding: onboardingSlice,
-    survey: surveysSlice,
+    userVariables: userVariablesSlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
