@@ -23,7 +23,11 @@ const style = StyleSheet.create({
 });
 
 function UserProfile() {
+    const { isSignedIn } = useAuth();
     const { customerInfo } = useContext(SubscriptionContext);
+
+    const navigateToLogin = () => router.push("/logIn");
+    const navigateToSignUp = () => router.push("/signUp");
 
     return (
         <View style={style.container}>
@@ -77,7 +81,27 @@ function UserProfile() {
             </View>
 
             <View>
-                <SignOutButton />
+                {!isSignedIn && (
+                    <>
+                        <AppButton
+                            onPress={navigateToSignUp}
+                            pressableStyle={{ width: "100%" }}
+                            text={{ idle: "Create account" }}
+                            color={{ loading: colors.accent }}
+                            style={{ backgroundColor: colors.accent, height: 50, marginBottom: 10 }}
+                            textStyle={{ fontSize: 18, lineHeight: 18 }}
+                        />
+                        <AppButton
+                            onPress={navigateToLogin}
+                            pressableStyle={{ width: "100%" }}
+                            text={{ idle: "I have an account" }}
+                            color={{ idle: colors.darkGray }}
+                            style={{ backgroundColor: colors.darkGray, height: 50 }}
+                            textStyle={{ fontSize: 18, lineHeight: 18 }}
+                        />
+                    </>
+                )}
+                {isSignedIn && <SignOutButton />}
                 <AppText fontSize={14} children={`Version ${Application.nativeBuildVersion}`} style={style.versionText} />
             </View>
         </View>

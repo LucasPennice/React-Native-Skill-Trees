@@ -14,6 +14,7 @@ import { useAppSelector } from "./redux/reduxHooks";
 import { selectAllTrees } from "./redux/slices/userTreesSlice";
 import { selectUserVariables } from "./redux/slices/userVariablesSlice";
 import { useHandleLottiePlay } from "./useHandleLottiePlay";
+import { RoutesParams } from "routes";
 
 type OnboardingStep = {
     title: string;
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
     },
 });
 
-function OnboardingModal({ open, close }: { open: boolean; close: () => void }) {
+function OnboardingModal({ open, close, openPostOnboardingModal }: { open: boolean; close: () => void; openPostOnboardingModal: () => void }) {
     const animationRef = useHandleLottiePlay(open);
 
     const resetAnimation = () => animationRef?.current?.play();
@@ -82,7 +83,10 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
         router.push({ pathname: `/myTrees/${firstUserTree.treeId}` });
     };
 
-    const openCanvasSettingsModal = () => router.push("/(app)/home");
+    const openCanvasSettingsModal = () => {
+        const params: RoutesParams["home"] = { openEditCanvasSettings: "true" };
+        router.push({ pathname: "/(app)/home", params });
+    };
 
     const ONBOARDING_STEPS: OnboardingStep[] = [
         {
@@ -135,10 +139,15 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
     const navigateToLogin = () => router.push("/logIn");
     const navigateToSignUp = () => router.push("/signUp");
 
+    const ignoreAndOpenPostOnboardingModal = () => {
+        close();
+        openPostOnboardingModal();
+    };
+
     return (
         <Modal animationType="fade" transparent={true} visible={open} onRequestClose={close} presentationStyle={"overFullScreen"}>
             <View style={styles.container}>
-                <Pressable style={styles.opaqueZone} onPress={currentOnboardingData.optional ? close : undefined} />
+                <Pressable style={styles.opaqueZone} onPress={currentOnboardingData.optional ? ignoreAndOpenPostOnboardingModal : undefined} />
                 <Animated.View
                     style={styles.alertContainer}
                     exiting={ZoomOut.easing(Easing.bezierFn(0.83, 0, 0.17, 1))}

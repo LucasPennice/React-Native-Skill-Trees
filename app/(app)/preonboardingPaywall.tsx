@@ -1,19 +1,17 @@
 import AppButton from "@/components/AppButton";
 import AppText from "@/components/AppText";
+import DropdownProductSelector from "@/components/subscription/DropdownProductSelector";
+import { BACKGROUND_COLOR, PRICE_CARD_HEIGHT, getSubscribeButtonText, handlePurchase } from "@/components/subscription/functions";
 import { colors } from "@/parameters";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
 import * as NavigationBar from "expo-navigation-bar";
 import { router, useNavigation } from "expo-router";
 import { useContext, useEffect, useState } from "react";
-import { Dimensions, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import Purchases, { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
-import Animated, { FadeIn, useAnimatedStyle, withTiming } from "react-native-reanimated";
+import { Dimensions, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { HandleOnboardingModalContext } from "./_layout";
 
 const { height } = Dimensions.get("window");
-
-const BACKGROUND_COLOR = "#101111";
 
 const style = StyleSheet.create({
     container: {
@@ -23,49 +21,6 @@ const style = StyleSheet.create({
         position: "relative",
     },
 });
-
-const PRICE_CARD_HEIGHT = 140;
-const PRICE_CARD_SMALL_HEIGHT = 100;
-
-const handlePurchase =
-    (availablePackages: PurchasesPackage[], entitlementId: string, openSuccessAlert: () => void, setLoading: (v: boolean) => void) => async () => {
-        try {
-            setLoading(true);
-
-            const selectedPackage = availablePackages.find((p) => p.product.identifier === entitlementId);
-
-            if (!selectedPackage) throw new Error(`Couldn't find ${entitlementId} in available packages`);
-
-            await Purchases.purchasePackage(selectedPackage);
-
-            openSuccessAlert();
-
-            router.push("/(app)/home");
-        } catch (e) {
-            //@ts-ignore
-            if (!e.userCancelled) mixpanel.track("purchaseError", { error: e });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-const restorePurchase = (setLoading: (v: boolean) => void, openSuccessAlert: () => void) => async () => {
-    try {
-        setLoading(true);
-        const restore = await Purchases.restorePurchases();
-
-        if (restore.activeSubscriptions.length !== 0) {
-            openSuccessAlert();
-
-            router.push("/(app)/home");
-        }
-    } catch (error) {
-        //@ts-ignore
-        mixpanel.track("purchaseError", { error });
-    } finally {
-        setLoading(false);
-    }
-};
 
 const useBlockGoBack = () => {
     const navigation = useNavigation();
@@ -89,7 +44,7 @@ function PreOnboardingPaywallPage() {
     const { open } = useContext(HandleAlertContext);
 
     useEffect(() => {
-        mixpanel.track("Paywall view v1.0");
+        mixpanel.track("Pre onboarding paywall view v1.0");
         NavigationBar.setBackgroundColorAsync(BACKGROUND_COLOR);
     }, []);
 
@@ -97,12 +52,6 @@ function PreOnboardingPaywallPage() {
         open({ state: "success", subtitle: "To check your membership details visit your profile", title: "Congratulations" });
 
     useBlockGoBack();
-
-    const getSubscribeButtonText = () => {
-        if (selected === "pro_lifetime") return "Start your journey, forever";
-        if (selected === "pro_monthly_1:p1m") return "Start your journey";
-        return "Start your 7 days free trial";
-    };
 
     return (
         <View style={style.container}>
@@ -150,8 +99,13 @@ function PreOnboardingPaywallPage() {
                             disabled={loading}
                             state={loading ? "loading" : "idle"}
                             color={{ loading: colors.accent }}
-                            onPress={handlePurchase(currentOffering.availablePackages, selected, openSuccessAlert, setLoading)}
-                            text={{ idle: getSubscribeButtonText() }}
+                            onPress={handlePurchase(
+                                currentOffering.availablePackages.find((p) => p.identifier === selected)!,
+                                openSuccessAlert,
+                                setLoading,
+                                "Pre onboarding paywall subscription v1.0"
+                            )}
+                            text={{ idle: getSubscribeButtonText(selected) }}
                             style={{ backgroundColor: colors.accent, height: 60 }}
                             textStyle={{ fontSize: 20, lineHeight: 60, color: colors.white }}
                         />
@@ -161,87 +115,6 @@ function PreOnboardingPaywallPage() {
         </View>
     );
 }
-
-const DropdownProductSelector = ({
-    state,
-    currentOffering,
-    openSuccessAlert,
-    setLoading,
-}: {
-    state: [string, (v: string) => void];
-    currentOffering: PurchasesOffering;
-    setLoading: (v: boolean) => void;
-    openSuccessAlert: () => void;
-}) => {
-    const [open, setOpen] = useState(false);
-    const [selected, setSelected] = state;
-
-    const style = StyleSheet.create({
-        container: { width: "100%", backgroundColor: colors.darkGray, borderRadius: 15 },
-        footerContainer: { width: "100%", flexDirection: "row", justifyContent: "space-between" },
-    });
-
-    const toggleOpen = () => setOpen((p) => !p);
-
-    const animatedHeight = useAnimatedStyle(() => {
-        return { height: withTiming(open ? PRICE_CARD_HEIGHT + 2 * PRICE_CARD_SMALL_HEIGHT : PRICE_CARD_HEIGHT) };
-    });
-
-    const monthlyPackage = currentOffering.availablePackages.find((p) => p.packageType === "MONTHLY");
-    const annualPackage = currentOffering.availablePackages.find((p) => p.packageType === "ANNUAL");
-    const lifetimePackage = currentOffering.availablePackages.find((p) => p.packageType === "LIFETIME");
-
-    if (!monthlyPackage || !annualPackage || !lifetimePackage) throw new Error("monthly or annual package not found");
-
-    const selectMonth = () => setSelected(monthlyPackage.product.identifier);
-    const selectYear = () => setSelected(annualPackage.product.identifier);
-    const selectLifetime = () => setSelected(lifetimePackage.product.identifier);
-
-    return (
-        <>
-            <Animated.View style={[style.container, animatedHeight]}>
-                <RadialInput
-                    border={open}
-                    title={`Annual - US$ ${annualPackage.product.price}`}
-                    onPress={selectYear}
-                    selected={selected === annualPackage.product.identifier}
-                    subtitle={`US$ ${(annualPackage.product.price / 12).toFixed(2)} per month, billed annually, 7 days free trial`}
-                    bestValue
-                    regionalPrice
-                />
-                {open && (
-                    <Animated.View entering={FadeIn}>
-                        <RadialInput
-                            title={`Monthly - US$ ${monthlyPackage.product.price}`}
-                            onPress={selectMonth}
-                            selected={selected === monthlyPackage.product.identifier}
-                            regionalPrice
-                            subtitle={"Billed monthly"}
-                            border={open}
-                        />
-                        <RadialInput
-                            title={`Lifetime - US$ ${lifetimePackage.product.price}`}
-                            regionalPrice
-                            onPress={selectLifetime}
-                            selected={selected === lifetimePackage.product.identifier}
-                            subtitle={"One time payment, your forever"}
-                            border={false}
-                        />
-                    </Animated.View>
-                )}
-            </Animated.View>
-            <View style={style.footerContainer}>
-                <TouchableOpacity style={{ paddingVertical: 15 }} onPress={restorePurchase(setLoading, openSuccessAlert)}>
-                    <AppText fontSize={14} children={"Restore Purchase"} style={{ color: colors.softPurle }} />
-                </TouchableOpacity>
-                <TouchableOpacity style={{ paddingVertical: 15, flexDirection: "row", gap: 5 }} onPress={toggleOpen}>
-                    <AppText fontSize={14} children={"More Subscription Plans"} style={{ color: colors.softPurle }} />
-                    <FontAwesome name={open ? "chevron-up" : "chevron-down"} size={12} color={colors.softPurle} />
-                </TouchableOpacity>
-            </View>
-        </>
-    );
-};
 
 const TrialExplanation = () => {
     const style = StyleSheet.create({
@@ -309,103 +182,6 @@ const TrialExplanation = () => {
                 </View>
             </View>
         </View>
-    );
-};
-
-const RadialInput = ({
-    selected,
-    onPress,
-    title,
-    subtitle,
-    bestValue,
-    border,
-}: // regionalPrice,
-{
-    selected: boolean;
-    onPress: () => void;
-    title: string;
-    border: boolean;
-    subtitle: string;
-    bestValue?: true;
-    regionalPrice?: true;
-}) => {
-    const style = StyleSheet.create({
-        container: {
-            width: "100%",
-            height: bestValue ? PRICE_CARD_HEIGHT : PRICE_CARD_SMALL_HEIGHT,
-            alignItems: "center",
-            gap: 8,
-            paddingHorizontal: 15,
-            borderBottomWidth: border ? 1 : 0,
-            borderColor: `${colors.line}80`,
-            flexDirection: "row",
-        },
-        selectedIndicator: {
-            width: 35,
-            height: 35,
-            borderRadius: 30,
-            borderWidth: 2,
-            backgroundColor: colors.line,
-            justifyContent: "center",
-            alignItems: "center",
-        },
-    });
-
-    const displayTags = bestValue;
-    // const displayTags = regionalPrice || bestValue;
-
-    return (
-        <TouchableOpacity style={style.container} onPress={onPress}>
-            <View style={{ flex: 1, height: PRICE_CARD_HEIGHT, gap: 9, justifyContent: "center" }}>
-                {displayTags && (
-                    <View style={{ flexDirection: "row", gap: 5 }}>
-                        {bestValue && (
-                            <AppText
-                                fontSize={12}
-                                style={{
-                                    backgroundColor: `${colors.gold}30`,
-                                    color: colors.gold,
-                                    width: 90,
-                                    paddingTop: 2,
-                                    height: 25,
-                                    textAlign: "center",
-                                    verticalAlign: "middle",
-                                    borderRadius: 5,
-                                }}
-                                children={"BEST VALUE"}
-                            />
-                        )}
-                        {/* {regionalPrice && (
-                            <AppText
-                                fontSize={12}
-                                style={{
-                                    backgroundColor: `${colors.softPurle}30`,
-                                    color: colors.softPurle,
-                                    width: 150,
-                                    paddingTop: 2,
-                                    height: 25,
-                                    textAlign: "center",
-                                    verticalAlign: "middle",
-                                    borderRadius: 5,
-                                }}
-                                children={"REGIONAL DISCOUNT"}
-                            />
-                        )} */}
-                    </View>
-                )}
-                <AppText fontSize={22} children={title} />
-                <AppText fontSize={14} style={{ opacity: 0.5 }} children={subtitle} />
-            </View>
-            <View style={{ width: 60, alignItems: "center" }}>
-                <View
-                    style={[
-                        style.selectedIndicator,
-                        { backgroundColor: selected ? colors.softPurle : "transparent", borderColor: selected ? colors.softPurle : colors.line },
-                    ]}>
-                    {selected && <FontAwesome name={"check"} size={16} color={colors.darkGray} />}
-                </View>
-            </View>
-        </TouchableOpacity>
     );
 };
 

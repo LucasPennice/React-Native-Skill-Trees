@@ -43,9 +43,9 @@ export const routes = {
         name: "paywall",
         route: "/paywall",
     },
-    preonboardingPaywall: {
-        name: "preonboardingPaywall",
-        route: "/preonboardingPaywall",
+    preOnboardingPaywall: {
+        name: "preOnboardingPaywall",
+        route: "/preOnboardingPaywall",
     },
     welcomeNewUser: {
         name: "welcomeNewUser",
@@ -61,7 +61,7 @@ export const routes = {
     },
 };
 
-export const routesToHideNavBar: (keyof typeof routes)[] = ["welcomeScreen", "welcomeNewUser", "logIn", "signUp", "paywall", "preonboardingPaywall"];
+export const routesToHideNavBar: (keyof typeof routes)[] = ["welcomeScreen", "welcomeNewUser", "logIn", "signUp", "paywall", "preOnboardingPaywall"];
 
 export type RoutesParams = {
     myTrees_treeId: {

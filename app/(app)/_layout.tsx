@@ -43,7 +43,7 @@ const useInitialRedirect = (readyToRedirect: boolean, redirectToWelcomeScreen: b
         if (nthAppOpen === 0 || onboardingStep === 0) return router.push("/welcomeNewUser");
 
         // if (redirectToWelcomeScreen) return router.push("/welcomeScreen");
-        if (redirectToPaywall) return router.replace("/(app)/paywall");
+        if (redirectToPaywall) return router.replace("/(app)/postOnboardingPaywall");
     }, [redirectToWelcomeScreen, readyToRedirect, redirectToPaywall]);
 };
 
@@ -52,7 +52,10 @@ const useHandleSurveyModals = () => {
     const [marketFit, setMarketFit] = useState(false);
 
     const openPostOnboardingModal = () => setPostOnboarding(true);
-    const closePostOnboardingModal = () => setPostOnboarding(false);
+    const closePostOnboardingModal = () => {
+        setPostOnboarding(false);
+        router.push("/(app)/postOnboardingPaywall");
+    };
 
     const openMarketFitModal = () => setMarketFit(true);
     const closeMarketFitModal = () => setMarketFit(false);
@@ -84,10 +87,6 @@ export default function RootLayout() {
     const { isSignedIn, isLoaded } = useUser();
     useRunDailyBackup(isSignedIn);
     const isClerkLoaded = deepLinkOpenedApp ? isLoaded : shouldWaitForClerkToLoad === false ? true : isLoaded;
-
-    useEffect(() => {
-        console.log(onboardingStep);
-    }, [onboardingStep]);
 
     const { isProUser, onFreeTrial, currentOffering } = useContext(SubscriptionContext);
 
@@ -127,9 +126,17 @@ export default function RootLayout() {
 
     useEffect(() => {
         const userDidFirstOnboardingStep = onboardingStep > 0;
-        const userDidntFinishOnboarding = onboardingStep <= LAST_ONBOARDING_STEP;
+        const userDidntFinishOnboarding = onboardingStep < LAST_ONBOARDING_STEP;
         if (userDidFirstOnboardingStep && userDidntFinishOnboarding) setShowOnboarding(true);
     }, []);
+
+    useEffect(() => {
+        if (!readyToRedirect) return;
+
+        const userFinishOnboarding = onboardingStep >= LAST_ONBOARDING_STEP;
+
+        if (userFinishOnboarding && isProUser === false) router.push("/(app)/postOnboardingPaywall");
+    }, [readyToRedirect, isProUser]);
 
     // const dispatch = useAppDispatch();
     // useEffect(() => {
@@ -227,7 +234,7 @@ export default function RootLayout() {
 
                 {marketFit.state && <MarketFitSurvey open={marketFit.state} close={marketFit.close} />}
 
-                <OnboardingModal close={closeOnboarding} open={showOnboarding} />
+                <OnboardingModal close={closeOnboarding} open={showOnboarding} openPostOnboardingModal={postOnboarding.open} />
 
                 {hide && (
                     <KeyboardAvoidingView

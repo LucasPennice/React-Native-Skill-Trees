@@ -49,7 +49,7 @@ const style = StyleSheet.create({
 });
 function WelcomeNewUser() {
     const redirectToPreOnboardingPaywall = () => {
-        router.push("/preonboardingPaywall");
+        router.push("/preOnboardingPaywall");
     };
 
     useEffect(() => {
