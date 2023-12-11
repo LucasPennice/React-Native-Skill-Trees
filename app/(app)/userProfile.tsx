@@ -48,20 +48,7 @@ function UserProfile() {
                     <AppText fontSize={14} children={"Backup Settings"} />
                     <ChevronRight color={colors.unmarkedText} />
                 </TouchableOpacity>
-                <TouchableOpacity
-                    onPress={() => router.push("/(app)/illustrationCredits")}
-                    style={{
-                        backgroundColor: colors.darkGray,
-                        borderRadius: 10,
-                        height: 45,
-                        paddingHorizontal: 10,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                    }}>
-                    <AppText fontSize={14} children={"Illustration Credits"} />
-                    <ChevronRight color={colors.unmarkedText} />
-                </TouchableOpacity>
+
                 {customerInfo && (
                     <TouchableOpacity
                         onPress={() => router.push("/(app)/subscriptionDetails")}
