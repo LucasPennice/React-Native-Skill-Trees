@@ -1,9 +1,13 @@
 import AppButton from "@/components/AppButton";
 import AppEmojiPicker, { Emoji, findEmoji } from "@/components/AppEmojiPicker";
 import { generateMongoCompliantId, toggleEmoji } from "@/functions/misc";
+import { useAppSelector } from "@/redux/reduxHooks";
+import { selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useEffect, useState } from "react";
-import { Alert, Dimensions, Keyboard, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { HandleOnboardingModalContext } from "app/(app)/_layout";
+import { mixpanel } from "app/_layout";
+import { useContext, useEffect, useState } from "react";
+import { Alert, Keyboard, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { Easing, FadeInDown, Layout, ZoomIn, ZoomOut, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
@@ -35,7 +39,8 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
         parentNode = n;
     }
 
-    const { width } = Dimensions.get("screen");
+    const { onboardingStep } = useAppSelector(selectUserVariables);
+    const setShowOnboarding = useContext(HandleOnboardingModalContext);
 
     const [nodesToAdd, setNodesToAdd] = useState<Tree<Skill>[]>([]);
     const [currentNode, setCurrentNode] = useState<Tree<Skill>>(getInitialCurrentSkillValue());
@@ -169,9 +174,21 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
 
         const inputsEmpty = currentNode.data.name === "" && currentNode.data.icon.text === "";
 
-        if (inputsEmpty) return saveToTreeElementsOfArray(nodesToAdd);
+        if (inputsEmpty) {
+            if (onboardingStep === 1) {
+                mixpanel.track("completeOnboardingStep 2 - Add Skills");
+                setShowOnboarding(true);
+            }
+            return saveToTreeElementsOfArray(nodesToAdd);
+        }
 
-        if (checkIfInputsValid()) return addNodeToListAndSave();
+        if (checkIfInputsValid()) {
+            if (onboardingStep === 1) {
+                mixpanel.track("completeOnboardingStep 2 - Add Skills");
+                setShowOnboarding(true);
+            }
+            return addNodeToListAndSave();
+        }
 
         return Alert.alert("Please enter a name for the new skill");
 

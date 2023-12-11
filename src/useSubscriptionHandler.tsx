@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import Purchases, { CustomerInfo, LOG_LEVEL, PurchasesOffering } from "react-native-purchases";
-import useMongoCompliantUserId from "./useMongoCompliantUserId";
 
 const APIKeys = {
     apple: "your_revenuecat_apple_api_key",
@@ -10,11 +9,8 @@ const APIKeys = {
 
 const useFetchOffers = () => {
     const [currentOffering, setCurrentOffering] = useState<PurchasesOffering | null>(null);
-    const userId = useMongoCompliantUserId();
 
     useEffect(() => {
-        if (userId === null) return;
-
         (async () => {
             try {
                 const offerings = await Purchases.getOfferings();
@@ -24,7 +20,7 @@ const useFetchOffers = () => {
                 console.error(error);
             }
         })();
-    }, [userId]);
+    }, []);
 
     return currentOffering;
 };
@@ -37,7 +33,6 @@ const getIsPro = (customerInfo: null | CustomerInfo) => {
 
 const useUserSubscriptionInformation = () => {
     const [customerInfo, setCustomerInfo] = useState<null | CustomerInfo>(null);
-    const userId = useMongoCompliantUserId();
 
     const isProUser: boolean | null = getIsPro(customerInfo);
 
@@ -50,14 +45,12 @@ const useUserSubscriptionInformation = () => {
     };
 
     useEffect(() => {
-        if (userId === null) return;
-
         Purchases.addCustomerInfoUpdateListener(handleCustomerInfoUpdate);
 
         return () => {
             Purchases.removeCustomerInfoUpdateListener(handleCustomerInfoUpdate);
         };
-    }, [userId]);
+    }, []);
 
     return { isProUser, customerInfo };
 };
@@ -74,23 +67,19 @@ export type SubscriptionHandler = {
 function useSubscriptionHandler(): SubscriptionHandler {
     Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
 
-    const userId = useMongoCompliantUserId();
-
     useEffect(() => {
         (async () => {
-            if (userId === null) return;
-
             try {
                 if (Platform.OS === "android") {
-                    Purchases.configure({ apiKey: APIKeys.google, appUserID: userId });
+                    Purchases.configure({ apiKey: APIKeys.google });
                 } else {
-                    Purchases.configure({ apiKey: APIKeys.apple, appUserID: userId });
+                    Purchases.configure({ apiKey: APIKeys.apple });
                 }
             } catch (error) {
                 console.error(error);
             }
         })();
-    }, [userId]);
+    }, []);
 
     const currentOffering = useFetchOffers();
     const { isProUser, customerInfo } = useUserSubscriptionInformation();

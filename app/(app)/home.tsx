@@ -25,13 +25,14 @@ import { useHandleButtonState } from "app/signUp";
 import axiosClient from "axiosClient";
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Alert, Modal, Platform, StatusBar, StyleSheet, View } from "react-native";
 import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
 import { batch } from "react-redux";
 import { RoutesParams } from "routes";
 import { Contact } from "./feedback";
 import { OnboardingSteps, completeCustomizeHomeTree, selectUserVariables } from "@/redux/slices/userVariablesSlice";
+import { HandleOnboardingModalContext } from "./_layout";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();
@@ -76,10 +77,16 @@ function useCanvasSettingsState() {
     const [canvasSettings, setCanvasSettings] = useState(false);
     const { onboardingStep } = useAppSelector(selectUserVariables);
     const dispatch = useAppDispatch();
+    const setShowOnboarding = useContext(HandleOnboardingModalContext);
 
     const openCanvasSettingsModal = useCallback(() => setCanvasSettings(true), []);
+
     const closeCanvasSettingsModal = useCallback(() => {
         if (onboardingStep === OnboardingSteps["CustomizeHomeTree"]) dispatch(completeCustomizeHomeTree());
+        if (onboardingStep === 2) {
+            mixpanel.track("completeOnboardingStep 3 - Customize Home Tree");
+            setShowOnboarding(true);
+        }
         setCanvasSettings(false);
     }, [onboardingStep]);
 

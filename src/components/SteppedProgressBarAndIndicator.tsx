@@ -3,7 +3,7 @@ import { colors } from "@/parameters";
 import { Dimensions, StyleSheet, View, ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, withSpring } from "react-native-reanimated";
 
-export type OnboardingStep = {
+type OnboardingStep = {
     title: string;
     subtitle: string;
     onActionButtonPress: () => void;

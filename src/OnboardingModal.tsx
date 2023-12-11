@@ -8,14 +8,19 @@ import LottieView from "lottie-react-native";
 import { memo, useEffect } from "react";
 import { Alert, Modal, Pressable, StyleSheet, View } from "react-native";
 import Animated, { Easing, FadeInDown, ZoomOut } from "react-native-reanimated";
-import { RoutesParams } from "routes";
 import AppButton from "./components/AppButton";
 import AppText from "./components/AppText";
-import { OnboardingStep } from "./components/SteppedProgressBarAndIndicator";
 import { useAppSelector } from "./redux/reduxHooks";
 import { selectAllTrees } from "./redux/slices/userTreesSlice";
 import { selectUserVariables } from "./redux/slices/userVariablesSlice";
 import { useHandleLottiePlay } from "./useHandleLottiePlay";
+
+type OnboardingStep = {
+    title: string;
+    subtitle: string;
+    onActionButtonPress: () => void;
+    optional?: true;
+};
 
 const MODAL_HEIGHT = 500;
 const ICON_HEIGHT = 90;
@@ -74,20 +79,10 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
 
         const firstUserTree = userTrees[0];
 
-        const params: RoutesParams["myTrees_treeId"] = {
-            nodeId: firstUserTree.rootNodeId,
-            treeId: firstUserTree.treeId,
-            addNewNodePosition: "CHILDREN",
-        };
-        //@ts-ignore
-        router.push({ pathname: `/myTrees/${firstUserTree.treeId}`, params });
+        router.push({ pathname: `/myTrees/${firstUserTree.treeId}` });
     };
 
-    const openCanvasSettingsModal = () => {
-        const params: RoutesParams["home"] = { openEditCanvasSettings: "true" };
-        //@ts-ignore
-        router.push({ pathname: `/home`, params });
-    };
+    const openCanvasSettingsModal = () => router.push("/(app)/home");
 
     const ONBOARDING_STEPS: OnboardingStep[] = [
         {
@@ -106,9 +101,10 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
             onActionButtonPress: handleOnboardingAction(openCanvasSettingsModal),
         },
         {
-            title: "Keep your progress secured",
-            subtitle: "Log in to backup",
+            title: "Sign in to Skill Trees",
+            subtitle: "To back up your progress. Click outside this message to close",
             onActionButtonPress: () => Alert.alert("Log in to back up"),
+            optional: true,
         },
     ];
 
@@ -117,7 +113,7 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
     useEffect(() => {
         if (open !== true) return;
 
-        mixpanel.track(`onboarding step ${onboardingStep} (Create tree) viewed v1.0`, {
+        mixpanel.track(`onboarding step ${onboardingStep + 1} viewed v1.0`, {
             title: currentOnboardingData.title,
             subtitle: currentOnboardingData.subtitle,
         });
@@ -136,10 +132,13 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
         }
     };
 
+    const navigateToLogin = () => router.push("/logIn");
+    const navigateToSignUp = () => router.push("/signUp");
+
     return (
         <Modal animationType="fade" transparent={true} visible={open} onRequestClose={close} presentationStyle={"overFullScreen"}>
             <View style={styles.container}>
-                <View style={styles.opaqueZone} />
+                <Pressable style={styles.opaqueZone} onPress={currentOnboardingData.optional ? close : undefined} />
                 <Animated.View
                     style={styles.alertContainer}
                     exiting={ZoomOut.easing(Easing.bezierFn(0.83, 0, 0.17, 1))}
@@ -154,18 +153,49 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
                             style={{ textAlign: "center", color: "#FFFFFF", opacity: 0.8 }}
                         />
 
-                        <Pressable onPress={resetAnimation}>
-                            <LottieView source={getLottieAnimation()} loop={false} ref={animationRef} style={{ width: "100%", maxWidth: 350 }} />
-                        </Pressable>
+                        {onboardingStep !== 3 && (
+                            <>
+                                <Pressable onPress={resetAnimation}>
+                                    <LottieView
+                                        source={getLottieAnimation()}
+                                        loop={false}
+                                        ref={animationRef}
+                                        style={{ width: "100%", maxWidth: 350 }}
+                                    />
+                                </Pressable>
+                                <AppButton
+                                    onPress={currentOnboardingData.onActionButtonPress}
+                                    pressableStyle={{ width: "100%" }}
+                                    text={{ idle: "Continue" }}
+                                    color={{ loading: colors.accent }}
+                                    style={{ backgroundColor: colors.accent }}
+                                    textStyle={{ fontSize: 18, lineHeight: 18 }}
+                                />
+                            </>
+                        )}
 
-                        <AppButton
-                            onPress={currentOnboardingData.onActionButtonPress}
-                            pressableStyle={{ width: "100%" }}
-                            text={{ idle: "Continue" }}
-                            color={{ loading: colors.softPurle }}
-                            style={{ backgroundColor: colors.softPurle }}
-                            textStyle={{ fontSize: 18, lineHeight: 18 }}
-                        />
+                        {onboardingStep === 3 && (
+                            <>
+                                <View style={{ height: 250, justifyContent: "flex-end", marginTop: 10, gap: 15, width: "100%" }}>
+                                    <AppButton
+                                        onPress={navigateToSignUp}
+                                        pressableStyle={{ width: "100%" }}
+                                        text={{ idle: "Create account" }}
+                                        color={{ loading: colors.accent }}
+                                        style={{ backgroundColor: colors.accent, height: 50 }}
+                                        textStyle={{ fontSize: 18, lineHeight: 18 }}
+                                    />
+                                    <AppButton
+                                        onPress={navigateToLogin}
+                                        pressableStyle={{ width: "100%" }}
+                                        text={{ idle: "I have an account" }}
+                                        color={{ idle: colors.line }}
+                                        style={{ backgroundColor: colors.line, height: 50 }}
+                                        textStyle={{ fontSize: 18, lineHeight: 18 }}
+                                    />
+                                </View>
+                            </>
+                        )}
                     </View>
                     <View style={styles.iconContainer}>
                         <AppText children={onboardingStep + 1} fontSize={50} style={{ paddingTop: 5 }} />

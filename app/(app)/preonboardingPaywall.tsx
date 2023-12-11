@@ -9,6 +9,7 @@ import { useContext, useEffect, useState } from "react";
 import { Dimensions, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import Purchases, { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
 import Animated, { FadeIn, useAnimatedStyle, withTiming } from "react-native-reanimated";
+import { HandleOnboardingModalContext } from "./_layout";
 
 const { height } = Dimensions.get("window");
 
@@ -420,8 +421,13 @@ const Header = () => {
         },
     });
 
+    const setShowOnboarding = useContext(HandleOnboardingModalContext);
+
     const redirectToLogin = () => router.push("/logIn");
-    const redirectToHome = () => router.push("/home");
+    const redirectToHome = () => {
+        setShowOnboarding(true);
+        router.push("/home");
+    };
 
     return (
         <View style={style.container}>

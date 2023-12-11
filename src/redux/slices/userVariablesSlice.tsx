@@ -11,6 +11,8 @@ export enum OnboardingSteps {
     "LogIn/SignUp" = 3,
 }
 
+export const LAST_ONBOARDING_STEP = 3;
+
 // Define a type for the slice state
 export type UserVariablesSlice = {
     marketFitSurvey: boolean;
