@@ -1,21 +1,21 @@
-import OnboardingCreateTree from "@/../assets/lotties/onboardingCreateTree.json";
 import OnboardingAddSkill from "@/../assets/lotties/onboardingAddSkills.json";
+import OnboardingCreateTree from "@/../assets/lotties/onboardingCreateTree.json";
 import OnboardingCustomizeHomeTree from "@/../assets/lotties/onboardingCustomizeHomeTree.json";
 import { colors } from "@/parameters";
+import { mixpanel } from "app/_layout";
+import { router } from "expo-router";
 import LottieView from "lottie-react-native";
+import { memo, useEffect } from "react";
 import { Alert, Modal, Pressable, StyleSheet, View } from "react-native";
 import Animated, { Easing, FadeInDown, ZoomOut } from "react-native-reanimated";
 import { RoutesParams } from "routes";
 import AppButton from "./components/AppButton";
 import AppText from "./components/AppText";
 import { OnboardingStep } from "./components/SteppedProgressBarAndIndicator";
-import { useAppDispatch, useAppSelector } from "./redux/reduxHooks";
+import { useAppSelector } from "./redux/reduxHooks";
 import { selectAllTrees } from "./redux/slices/userTreesSlice";
+import { selectUserVariables } from "./redux/slices/userVariablesSlice";
 import { useHandleLottiePlay } from "./useHandleLottiePlay";
-import { router } from "expo-router";
-import { memo, useEffect } from "react";
-import { mixpanel } from "app/_layout";
-import { completeCustomizeHomeTree, selectUserVariables } from "./redux/slices/userVariablesSlice";
 
 const MODAL_HEIGHT = 500;
 const ICON_HEIGHT = 90;
@@ -162,8 +162,8 @@ function OnboardingModal({ open, close }: { open: boolean; close: () => void }) 
                             onPress={currentOnboardingData.onActionButtonPress}
                             pressableStyle={{ width: "100%" }}
                             text={{ idle: "Continue" }}
-                            color={{ loading: "#B863E3" }}
-                            style={{ backgroundColor: "#B863E3" }}
+                            color={{ loading: colors.softPurle }}
+                            style={{ backgroundColor: colors.softPurle }}
                             textStyle={{ fontSize: 18, lineHeight: 18 }}
                         />
                     </View>

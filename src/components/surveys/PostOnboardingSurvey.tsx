@@ -87,9 +87,9 @@ function PostOnboardingSurvey({ open, close }: { open: boolean; close: () => voi
                             pressableStyle={{ width: "100%" }}
                             text={{ idle: "Submit" }}
                             disabled={text === ""}
-                            color={{ loading: "#B863E3" }}
+                            color={{ loading: colors.softPurle }}
                             state={submitting ? "loading" : "idle"}
-                            style={{ backgroundColor: "#B863E3" }}
+                            style={{ backgroundColor: colors.softPurle }}
                             textStyle={{ fontSize: 18, lineHeight: 18 }}
                         />
                     </View>

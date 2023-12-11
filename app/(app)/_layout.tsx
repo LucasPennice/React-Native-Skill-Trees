@@ -6,6 +6,7 @@ import PostOnboardingSurvey from "@/components/surveys/PostOnboardingSurvey";
 import { NAV_HEGIHT, colors } from "@/parameters";
 import { useAppSelector } from "@/redux/reduxHooks";
 import { selectSyncSlice } from "@/redux/slices/syncSlice";
+import { selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import useHandleDeepLinking from "@/useHandleDeepLinking";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import useRunDailyBackup from "@/useRunDailyBackup";
@@ -32,10 +33,14 @@ function useIdentifyMixPanelUserId() {
     }, [userId]);
 }
 
-const useRedirectOnNavigation = (readyToRedirect: boolean, redirectToWelcomeScreen: boolean, redirectToPaywall: boolean) => {
+const useInitialRedirect = (readyToRedirect: boolean, redirectToWelcomeScreen: boolean, redirectToPaywall: boolean) => {
+    const { nthAppOpen } = useAppSelector(selectUserVariables);
+
     useEffect(() => {
         if (!readyToRedirect) return;
-        if (process.env.NODE_ENV === "development") return;
+
+        if (true) return router.push("/welcomeNewUser");
+        // if (nthAppOpen === 0) return router.push("/welcomeNewUser");
 
         if (redirectToWelcomeScreen) return router.push("/welcomeScreen");
         if (redirectToPaywall) return router.replace("/(app)/paywall");
@@ -106,7 +111,7 @@ export default function RootLayout() {
 
     const redirectToPaywall = isSignedIn === true && isProUser === false && onFreeTrial === false && currentOffering !== null;
 
-    useRedirectOnNavigation(readyToRedirect, redirectToWelcomeScreen, redirectToPaywall);
+    useInitialRedirect(fontsLoaded, redirectToWelcomeScreen, redirectToPaywall);
 
     const shouldHandleDeepLink = isLoaded && (isProUser === true || onFreeTrial === true);
 
@@ -205,8 +210,7 @@ export default function RootLayout() {
 
             {marketFit.state && <MarketFitSurvey open={marketFit.state} close={marketFit.close} />}
 
-            {true && <OnboardingModal close={() => {}} open={true} />}
-            {/* {hide && !onboarding.complete && <Onboarding />} */}
+            <OnboardingModal close={() => {}} open={false} />
 
             {hide && (
                 <KeyboardAvoidingView

@@ -39,6 +39,7 @@ export const colors = {
     teal: "#40C8E0",
     blue: "#1982F9",
     purple: "#BF5AF2",
+    softPurle: "#B863E3",
     pink: "#FC385F",
 };
 

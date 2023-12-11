@@ -95,7 +95,7 @@ function AlertModal({ open, state, subtitle, title, buttonAction, buttonText }: 
                             onPress={buttonAction ?? close}
                             pressableStyle={{ width: "100%" }}
                             text={{ idle: buttonText ?? "Confirm" }}
-                            style={{ backgroundColor: "#B863E3" }}
+                            style={{ backgroundColor: colors.softPurle }}
                             textStyle={{ fontSize: 18, lineHeight: 18 }}
                         />
                     </View>

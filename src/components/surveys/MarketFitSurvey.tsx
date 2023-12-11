@@ -1,16 +1,16 @@
 import QuestionMark from "@/../assets/lotties/questionMark.json";
-import Selected from "@/../assets/lotties/success.json";
 import { colors } from "@/parameters";
 import { useHandleLottiePlay } from "@/useHandleLottiePlay";
 import { useFormspark } from "@formspark/use-formspark";
 import { mixpanel } from "app/_layout";
 import LottieView from "lottie-react-native";
 import { useState } from "react";
-import { Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { Easing, FadeInDown, ZoomOut } from "react-native-reanimated";
 import AppButton from "../AppButton";
 import AppText from "../AppText";
 import AppTextInput from "../AppTextInput";
+import RadialInput from "../RadialInput";
 
 const { height } = Dimensions.get("window");
 
@@ -137,9 +137,9 @@ function MarketFitSurvey({ open, close }: { open: boolean; close: () => void }) 
                                     pressableStyle={{ width: "100%" }}
                                     text={{ idle: "Submit" }}
                                     disabled={disableSubmit}
-                                    color={{ loading: "#B863E3" }}
+                                    color={{ loading: colors.softPurle }}
                                     state={submitting ? "loading" : "idle"}
-                                    style={{ backgroundColor: "#B863E3" }}
+                                    style={{ backgroundColor: colors.softPurle }}
                                     textStyle={{ fontSize: 18, lineHeight: 18 }}
                                 />
                             </KeyboardAvoidingView>
@@ -153,43 +153,5 @@ function MarketFitSurvey({ open, close }: { open: boolean; close: () => void }) 
         </Modal>
     );
 }
-
-const RadialInput = ({ selected, onPress, title }: { selected: boolean; onPress: () => void; title: string }) => {
-    const style = StyleSheet.create({
-        container: {
-            width: "100%",
-            height: 50,
-            alignItems: "center",
-            gap: 8,
-            borderRadius: 15,
-            paddingHorizontal: 10,
-            flexDirection: "row",
-            backgroundColor: "#2A2D2F",
-            marginBottom: 10,
-        },
-        selectedIndicator: {
-            width: 30,
-            height: 30,
-            overflow: "hidden",
-            borderRadius: 30,
-            backgroundColor: colors.line,
-            justifyContent: "center",
-            alignItems: "center",
-        },
-    });
-
-    const animationRef = useHandleLottiePlay(selected, 0);
-
-    return (
-        <TouchableOpacity onPress={onPress}>
-            <Animated.View style={style.container}>
-                <View style={style.selectedIndicator}>
-                    <LottieView source={Selected} loop={false} ref={animationRef} style={{ width: 25 }} speed={1.25} />
-                </View>
-                <AppText fontSize={18} style={{ marginLeft: 4 }} children={title} />
-            </Animated.View>
-        </TouchableOpacity>
-    );
-};
 
 export default MarketFitSurvey;
