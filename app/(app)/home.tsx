@@ -21,7 +21,7 @@ import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useCanvasRef } from "@shopify/react-native-skia";
 import { mixpanel } from "app/_layout";
-import { useHandleButtonState } from "app/signUp";
+import { useHandleButtonState } from "app/(app)/auth/signUp";
 import axiosClient from "axiosClient";
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import { useLocalSearchParams, useNavigation } from "expo-router";

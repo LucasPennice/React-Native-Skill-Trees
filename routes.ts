@@ -29,7 +29,7 @@ export const routes = {
     },
     signUp: {
         name: "signUp",
-        route: "/signUp",
+        route: "/(app)/auth/signUp",
     },
     backup: {
         name: "backup",

@@ -33,7 +33,7 @@ function UserProfile() {
     const hoursSinceLastUpdate = parseInt(`${(new Date().getTime() - lastUpdateUTC_Timestamp) / millisecondsToHours}`);
 
     const navigateToSignIn = () => router.push("/(app)/auth/signIn");
-    const navigateToSignUp = () => router.push("/signUp");
+    const navigateToSignUp = () => router.push("/(app)/auth/signUp");
 
     return (
         <View style={style.container}>
@@ -42,14 +42,14 @@ function UserProfile() {
             <View style={style.settingContainer}>
                 <SettingLink
                     icon={"user"}
-                    href={isSignedIn ? "/(app)/account" : "/signUp"}
+                    href={isSignedIn ? "/(app)/account" : "/(app)/auth/signUp"}
                     title={"Account"}
                     subtitle={user ? user.emailAddresses[0].emailAddress : "No active account"}
                     warning={!isSignedIn}
                 />
                 <SettingLink
                     icon={"cloud-upload"}
-                    href={isSignedIn ? "/(app)/backup" : "/signUp"}
+                    href={isSignedIn ? "/(app)/backup" : "/(app)/auth/signUp"}
                     title={"Cloud Sync"}
                     subtitle={
                         isSignedIn ? `Last updated ${hoursSinceLastUpdate} ${hoursSinceLastUpdate === 1 ? "hour" : "hours"} ago` : "Log in to backup"

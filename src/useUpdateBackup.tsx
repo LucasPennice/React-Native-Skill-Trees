@@ -1,7 +1,7 @@
 import { useUser } from "@clerk/clerk-expo";
 import { UserBackup } from "app/(app)/home";
 import { mixpanel } from "app/_layout";
-import { useHandleButtonState } from "app/signUp";
+import { useHandleButtonState } from "app/(app)/auth/signUp";
 import axiosClient from "axiosClient";
 import { useAppDispatch, useAppSelector } from "./redux/reduxHooks";
 import { selectHomeTree } from "./redux/slices/homeTreeSlice";

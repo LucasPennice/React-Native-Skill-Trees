@@ -137,7 +137,7 @@ function OnboardingModal({ open, close, openPostOnboardingModal }: { open: boole
     };
 
     const navigateToSignIn = () => router.push("/(app)/auth/signIn");
-    const navigateToSignUp = () => router.push("/signUp");
+    const navigateToSignUp = () => router.push("/(app)/auth/signUp");
 
     const ignoreAndOpenPostOnboardingModal = () => {
         close();

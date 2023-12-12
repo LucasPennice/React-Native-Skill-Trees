@@ -46,7 +46,7 @@ function WelcomeScreen() {
 
     const navigateToLogin = () => router.push("/logIn");
     const navigateToSignUp = (hideRedirectToLogin: boolean) => () =>
-        router.push({ pathname: "/signUp", params: { hideRedirectToLogin: `${hideRedirectToLogin}` } });
+        router.push({ pathname: "/(app)/auth/signUp", params: { hideRedirectToLogin: `${hideRedirectToLogin}` } });
 
     if (isUserTransitioningFromNoLogin)
         return (
