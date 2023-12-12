@@ -16,7 +16,7 @@ import React from "react";
 import { Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 import { RoutesParams } from "routes";
-import { useHandleButtonState, useHandleClerkErrorMessages } from "./signUp";
+import { useHandleButtonState, useHandleClerkErrorMessages } from "../../signUp";
 
 const { height } = Dimensions.get("window");
 

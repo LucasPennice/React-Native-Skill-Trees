@@ -23,9 +23,9 @@ export const routes = {
         name: "feedback",
         route: "/feedback",
     },
-    logIn: {
-        name: "logIn",
-        route: "/logIn",
+    signIn: {
+        name: "signIn",
+        route: "/(app)/auth/signIn",
     },
     signUp: {
         name: "signUp",
@@ -64,7 +64,7 @@ export const routes = {
 export const routesToHideNavBar: (keyof typeof routes)[] = [
     "welcomeScreen",
     "welcomeNewUser",
-    "logIn",
+    "signIn",
     "signUp",
     "paywall",
     "preOnboardingPaywall",

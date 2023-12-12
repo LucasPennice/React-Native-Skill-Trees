@@ -155,7 +155,7 @@ function SignUp() {
         }
     };
 
-    const navigateToLogin = () => router.push("/logIn");
+    const navigateToLogin = () => router.push("/(app)/auth/signIn");
 
     return (
         <Animated.View style={style.container} entering={FadeInRight} exiting={FadeOutLeft}>

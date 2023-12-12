@@ -32,7 +32,7 @@ function UserProfile() {
 
     const hoursSinceLastUpdate = parseInt(`${(new Date().getTime() - lastUpdateUTC_Timestamp) / millisecondsToHours}`);
 
-    const navigateToLogin = () => router.push("/logIn");
+    const navigateToSignIn = () => router.push("/(app)/auth/signIn");
     const navigateToSignUp = () => router.push("/signUp");
 
     return (
@@ -79,7 +79,7 @@ function UserProfile() {
                             textStyle={{ fontSize: 18, lineHeight: 18 }}
                         />
                         <AppButton
-                            onPress={navigateToLogin}
+                            onPress={navigateToSignIn}
                             pressableStyle={{ width: "100%" }}
                             text={{ idle: "I have an account" }}
                             color={{ idle: colors.darkGray }}

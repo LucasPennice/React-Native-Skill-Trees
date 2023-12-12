@@ -205,7 +205,7 @@ const Header = () => {
 
     const { modal: setShowOnboarding } = useContext(HandleModalsContext);
 
-    const redirectToLogin = () => router.push("/logIn");
+    const redirectToSignIn = () => router.push("/(app)/auth/signIn");
     const redirectToHome = () => {
         setShowOnboarding(true);
         router.push("/home");
@@ -214,7 +214,7 @@ const Header = () => {
     return (
         <View style={style.container}>
             <AppButton
-                onPress={redirectToLogin}
+                onPress={redirectToSignIn}
                 text={{ idle: "Log In" }}
                 color={{ idle: "transparent" }}
                 style={{ width: 100, alignItems: "flex-start", backgroundColor: BACKGROUND_COLOR }}

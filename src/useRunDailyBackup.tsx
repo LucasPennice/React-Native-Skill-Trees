@@ -26,9 +26,9 @@ const useRunDailyBackup = (isSignedIn: boolean | undefined) => {
 
     useEffect(() => {
         (async () => {
+            if (!isSignedIn) return;
             const dayOrMoreSinceLastBackup = new Date().getTime() - lastUpdateUTC_Timestamp >= dayInMilliseconds;
             if (!(dayOrMoreSinceLastBackup && localMutationsSinceBackups)) return;
-            if (!isSignedIn) return;
 
             if (appStateVisible !== "active") return;
 

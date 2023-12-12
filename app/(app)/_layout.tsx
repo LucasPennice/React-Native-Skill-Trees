@@ -144,6 +144,7 @@ export default function RootLayout() {
 
     useEffect(() => {
         if (!readyToRedirect) return;
+        if (process.env.NODE_ENV === "development") return;
 
         const userFinishOnboarding = onboardingStep >= LAST_ONBOARDING_STEP;
 

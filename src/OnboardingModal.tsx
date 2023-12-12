@@ -136,7 +136,7 @@ function OnboardingModal({ open, close, openPostOnboardingModal }: { open: boole
         }
     };
 
-    const navigateToLogin = () => router.push("/logIn");
+    const navigateToSignIn = () => router.push("/(app)/auth/signIn");
     const navigateToSignUp = () => router.push("/signUp");
 
     const ignoreAndOpenPostOnboardingModal = () => {
@@ -195,7 +195,7 @@ function OnboardingModal({ open, close, openPostOnboardingModal }: { open: boole
                                         textStyle={{ fontSize: 18, lineHeight: 18 }}
                                     />
                                     <AppButton
-                                        onPress={navigateToLogin}
+                                        onPress={navigateToSignIn}
                                         pressableStyle={{ width: "100%" }}
                                         text={{ idle: "I have an account" }}
                                         color={{ idle: colors.line }}
