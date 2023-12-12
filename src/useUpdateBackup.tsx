@@ -1,15 +1,14 @@
 import { useUser } from "@clerk/clerk-expo";
 import { UserBackup } from "app/(app)/home";
+import { mixpanel } from "app/_layout";
 import { useHandleButtonState } from "app/signUp";
 import axiosClient from "axiosClient";
-import { Alert } from "react-native";
 import { useAppDispatch, useAppSelector } from "./redux/reduxHooks";
 import { selectHomeTree } from "./redux/slices/homeTreeSlice";
 import { selectAllNodeIds, selectNodesTable } from "./redux/slices/nodesSlice";
 import { selectSyncSlice, updateLastBackupTime } from "./redux/slices/syncSlice";
 import { selectAllTreesEntities, selectTreeIds } from "./redux/slices/userTreesSlice";
 import useMongoCompliantUserId from "./useMongoCompliantUserId";
-import { mixpanel } from "app/_layout";
 
 function useUpdateBackup() {
     const { setSubmitLoading, setSubmitError, submitState: backupState, setSubmitSuccess } = useHandleButtonState();
@@ -27,7 +26,7 @@ function useUpdateBackup() {
     const { lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);
 
     const updateBackup = async (userId: string, newUserBackup: UserBackup) => {
-        if (!isSignedIn) return Alert.alert(`You are not signed in`, `Please check your internet connection`);
+        if (!isSignedIn) return;
 
         setSubmitLoading();
 

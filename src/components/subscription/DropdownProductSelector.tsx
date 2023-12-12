@@ -47,24 +47,24 @@ const DropdownProductSelector = ({
             <Animated.View style={[style.container, animatedHeight]}>
                 <RadialInput
                     border={open}
-                    title={`Annual - US$ ${annualPackage.product.price}`}
+                    title={`Annual - ${annualPackage.product.priceString}`}
                     onPress={selectYear}
                     selected={selected === annualPackage.product.identifier}
-                    subtitle={`US$ ${(annualPackage.product.price / 12).toFixed(2)} per month, billed annually, 7 days free trial`}
+                    subtitle={`US$ ${(annualPackage.product.price / 12).toFixed(2).replace(".", ",")} per month, billed annually, 7 days free trial`}
                     bestValue
                     regionalPrice
                 />
                 {open && (
                     <Animated.View entering={FadeIn}>
                         <RadialInput
-                            title={`Monthly - US$ ${monthlyPackage.product.price}`}
+                            title={`Monthly - ${monthlyPackage.product.priceString}`}
                             onPress={selectMonth}
                             selected={selected === monthlyPackage.product.identifier}
                             subtitle={"Billed monthly"}
                             border={open}
                         />
                         <RadialInput
-                            title={`Lifetime - US$ ${lifetimePackage.product.price}`}
+                            title={`Lifetime - ${lifetimePackage.product.priceString}`}
                             onPress={selectLifetime}
                             selected={selected === lifetimePackage.product.identifier}
                             subtitle={"One time payment, your forever"}

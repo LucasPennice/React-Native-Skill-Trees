@@ -14,7 +14,6 @@ export const handlePurchase =
             await Purchases.purchasePackage(selectedPackage);
 
             mixpanel.track(`${eventName} - ${selectedPackage.identifier}`);
-            // mixpanel.track(`Pre onboarding paywall ${selectedPackage.identifier} subscription v1.0`);
 
             openSuccessAlert();
 

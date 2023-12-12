@@ -291,9 +291,9 @@ export default function RootLayout() {
                         <Pressable
                             style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                             onPress={() => router.replace("/(app)/userProfile")}>
-                            <TabBarIcon name="user" color={pathname.includes("userProfile") ? colors.accent : colors.line} />
+                            <TabBarIcon name="user-circle-o" color={pathname.includes("userProfile") ? colors.accent : colors.line} />
                             <AppText style={{ color: pathname.includes("userProfile") ? colors.accent : colors.line }} fontSize={12}>
-                                Profile
+                                Settings
                             </AppText>
                         </Pressable>
                     </KeyboardAvoidingView>

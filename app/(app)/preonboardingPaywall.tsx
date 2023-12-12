@@ -7,7 +7,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
 import * as NavigationBar from "expo-navigation-bar";
 import { router, useNavigation } from "expo-router";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Dimensions, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { HandleModalsContext } from "./_layout";
 
@@ -52,6 +52,17 @@ function PreOnboardingPaywallPage() {
         open({ state: "success", subtitle: "To check your membership details visit your profile", title: "Congratulations" });
 
     useBlockGoBack();
+
+    const purchase = useCallback(() => {
+        if (currentOffering === null) return;
+
+        handlePurchase(
+            currentOffering.availablePackages.find((p) => p.product.identifier === selected)!,
+            openSuccessAlert,
+            setLoading,
+            "Pre onboarding paywall subscription v1.0"
+        )();
+    }, [currentOffering, selected]);
 
     return (
         <View style={style.container}>
@@ -99,12 +110,7 @@ function PreOnboardingPaywallPage() {
                             disabled={loading}
                             state={loading ? "loading" : "idle"}
                             color={{ loading: colors.accent }}
-                            onPress={handlePurchase(
-                                currentOffering.availablePackages.find((p) => p.identifier === selected)!,
-                                openSuccessAlert,
-                                setLoading,
-                                "Pre onboarding paywall subscription v1.0"
-                            )}
+                            onPress={purchase}
                             text={{ idle: getSubscribeButtonText(selected) }}
                             style={{ backgroundColor: colors.accent, height: 60 }}
                             textStyle={{ fontSize: 20, lineHeight: 60, color: colors.white }}
