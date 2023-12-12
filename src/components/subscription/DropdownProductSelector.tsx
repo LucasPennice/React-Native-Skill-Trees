@@ -22,7 +22,7 @@ const DropdownProductSelector = ({
     const [selected, setSelected] = state;
 
     const style = StyleSheet.create({
-        container: { width: "100%", backgroundColor: colors.darkGray, borderRadius: 15 },
+        container: { width: "100%", backgroundColor: colors.darkGray, borderRadius: 15, overflow: "hidden" },
         footerContainer: { width: "100%", flexDirection: "row", justifyContent: "space-between" },
     });
 

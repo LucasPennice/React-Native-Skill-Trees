@@ -16,6 +16,7 @@ export const LAST_ONBOARDING_STEP = 3;
 // Define a type for the slice state
 export type UserVariablesSlice = {
     marketFitSurvey: boolean;
+    exitPaywallSurvey: boolean;
     onboardingExperience: boolean;
     launchVersion: { prev: string; current: string };
     nthAppOpen: number;
@@ -25,6 +26,7 @@ export type UserVariablesSlice = {
 // Define the initial state using that type
 const initialState: UserVariablesSlice = {
     marketFitSurvey: false,
+    exitPaywallSurvey: false,
     onboardingExperience: false,
     launchVersion: { prev: "foo", current: "doo" },
     nthAppOpen: 0,

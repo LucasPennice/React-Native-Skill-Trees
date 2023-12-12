@@ -4,10 +4,12 @@ import DropdownProductSelector from "@/components/subscription/DropdownProductSe
 import { BACKGROUND_COLOR, getSubscribeButtonText, handlePurchase } from "@/components/subscription/functions";
 import { colors } from "@/parameters";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { EventArg } from "@react-navigation/native";
 import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
 import { useNavigation } from "expo-router";
 import { useContext, useEffect, useState } from "react";
-import { Platform, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+import Svg, { Path, SvgProps } from "react-native-svg";
 
 const style = StyleSheet.create({
     container: {
@@ -15,21 +17,41 @@ const style = StyleSheet.create({
         backgroundColor: BACKGROUND_COLOR,
         alignItems: "center",
         position: "relative",
+        padding: 20,
     },
 });
+
+type GoBackEvent = EventArg<
+    "beforeRemove",
+    true,
+    {
+        action: Readonly<{
+            type: string;
+            payload?: object | undefined;
+            source?: string | undefined;
+            target?: string | undefined;
+        }>;
+    }
+>;
 
 const useBlockGoBack = () => {
     const navigation = useNavigation();
 
     useEffect(() => {
-        navigation.addListener("beforeRemove", (e) => {
+        const openFeedbackForm = (e: GoBackEvent) => {
             e.preventDefault();
             navigation.dispatch(e.data.action);
-        });
+        };
+
+        navigation.addListener("beforeRemove", openFeedbackForm);
+
+        return () => {
+            navigation.removeListener("beforeRemove", openFeedbackForm);
+        };
     }, []);
 };
 
-function PaywallPage() {
+function PostOnboardingPaywall() {
     const [selected, setSelected] = useState<string>("pro_annual_1:p1a");
     const [loading, setLoading] = useState(false);
 
@@ -37,7 +59,7 @@ function PaywallPage() {
     const { open } = useContext(HandleAlertContext);
 
     useEffect(() => {
-        mixpanel.track("Paywall view v1.0");
+        mixpanel.track("Post onboarding paywall view v1.0");
     }, []);
 
     const openSuccessAlert = () =>
@@ -48,10 +70,24 @@ function PaywallPage() {
     return (
         <View style={style.container}>
             {currentOffering && (
-                <View style={{ flex: 1, width: "100%", padding: 15 }}>
+                <View style={{ flex: 1, width: "100%" }}>
                     <ScrollView showsVerticalScrollIndicator={false}>
                         <View style={{ flex: 1, height: "100%" }}>
-                            <AppText children={"How your free trial works"} fontSize={35} style={{ textAlign: "center" }} />
+                            <View>
+                                <Logo />
+                                <AppText
+                                    children={"Go Premium!"}
+                                    fontSize={42}
+                                    style={{ textAlign: "center", marginBottom: 10, fontFamily: "helveticaBold" }}
+                                />
+                                <AppText
+                                    children={"Unlock the full potential of Skill Trees."}
+                                    fontSize={24}
+                                    style={{ textAlign: "center", marginBottom: 25, opacity: 0.8 }}
+                                />
+                            </View>
+
+                            <Checklist />
                         </View>
                         <DropdownProductSelector
                             state={[selected, setSelected]}
@@ -59,28 +95,6 @@ function PaywallPage() {
                             setLoading={setLoading}
                             openSuccessAlert={openSuccessAlert}
                         />
-
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                gap: 5,
-                                borderWidth: 1,
-                                borderColor: colors.line,
-                                padding: 5,
-                                width: 220,
-                                justifyContent: "center",
-                                alignItems: "center",
-                                borderRadius: 5,
-                                alignSelf: "center",
-                                marginVertical: 30,
-                            }}>
-                            <FontAwesome name={"shield"} size={14} color={colors.line} />
-                            <AppText
-                                children={`SECURED WITH ${Platform.OS === "android" ? "PLAY STORE" : "APPLE STORE"}`}
-                                fontSize={12}
-                                style={{ color: colors.line }}
-                            />
-                        </View>
                     </ScrollView>
                     <View style={{ paddingTop: 10 }}>
                         <AppButton
@@ -91,7 +105,7 @@ function PaywallPage() {
                                 currentOffering.availablePackages.find((p) => p.identifier === selected)!,
                                 openSuccessAlert,
                                 setLoading,
-                                "Pre onboarding paywall subscription v1.0"
+                                "Post onboarding paywall subscription v1.0"
                             )}
                             text={{ idle: getSubscribeButtonText(selected) }}
                             style={{ backgroundColor: colors.accent, height: 60 }}
@@ -104,4 +118,58 @@ function PaywallPage() {
     );
 }
 
-export default PaywallPage;
+const Checklist = () => {
+    return (
+        <View style={{ gap: 25, flex: 1, justifyContent: "center", marginBottom: 25 }}>
+            <View style={{ flexDirection: "row", gap: 20 }}>
+                <FontAwesome name={"check-circle"} size={24} color={colors.softPurle} />
+                <View style={{ gap: 4 }}>
+                    <AppText children={"Organize your whole life"} fontSize={18} style={{ fontFamily: "helveticaBold" }} />
+                    <AppText
+                        children={"Give shape to your objectives. Express your creativity and visualize your path forward"}
+                        fontSize={16}
+                        style={{ opacity: 0.5 }}
+                    />
+                </View>
+            </View>
+            <View style={{ flexDirection: "row", gap: 20 }}>
+                <FontAwesome name={"check-circle"} size={24} color={colors.softPurle} />
+                <View style={{ gap: 4 }}>
+                    <AppText children={"Easy to stay on track"} fontSize={18} style={{ fontFamily: "helveticaBold" }} />
+                    <AppText children={"You immediately know what to work on next. It only takes a glance"} fontSize={16} style={{ opacity: 0.5 }} />
+                </View>
+            </View>
+            <View style={{ flexDirection: "row", gap: 20 }}>
+                <FontAwesome name={"check-circle"} size={24} color={colors.softPurle} />
+                <View style={{ gap: 4 }}>
+                    <AppText children={"See the progress as it happens"} fontSize={18} style={{ fontFamily: "helveticaBold" }} />
+                    <AppText
+                        children={"Take a look at your home tree and feel proud of how far you've come"}
+                        fontSize={16}
+                        style={{ opacity: 0.5 }}
+                    />
+                </View>
+            </View>
+        </View>
+    );
+};
+
+export default PostOnboardingPaywall;
+
+const Logo = (props: SvgProps) => (
+    <View style={{ alignSelf: "center", marginBottom: 20 }}>
+        <Svg width={91} height={70} fill="none" {...props}>
+            <Path
+                stroke="#fff"
+                strokeWidth={3.568}
+                d="M88.716 58.758a9.38 9.38 0 1 1-18.76 0 9.38 9.38 0 1 1 18.76 0ZM54.88 58.758a9.38 9.38 0 1 1-18.76 0 9.38 9.38 0 1 1 18.76 0ZM21.043 58.758a9.38 9.38 0 1 1-18.76 0 9.38 9.38 0 0 1 18.76 0ZM54.88 11.47a9.38 9.38 0 1 1-18.76 0 9.38 9.38 0 1 1 18.76 0Z"
+            />
+            <Path
+                stroke="#fff"
+                strokeWidth={3.223}
+                d="M45.629 22.463c0 26.125 33.836 3.043 33.836 26.125M45.371 22.55c0 25.971-33.814 3.025-33.814 25.971"
+            />
+            <Path fill="#fff" d="M43.889 20.663h3.222v28.888h-3.222z" />
+        </Svg>
+    </View>
+);

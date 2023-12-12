@@ -4,10 +4,11 @@ import ChevronRight from "@/components/Icons/ChevronRight";
 import CrownIcon from "@/components/Icons/CrownIcon";
 import TicketIcon from "@/components/Icons/TicketIcon";
 import { colors } from "@/parameters";
-import { useAppDispatch } from "@/redux/reduxHooks";
-import { setShouldWaitForClerkToLoad, updateLastBackupTime } from "@/redux/slices/syncSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
+import { selectSyncSlice, setShouldWaitForClerkToLoad, updateLastBackupTime } from "@/redux/slices/syncSlice";
 import useUpdateBackup from "@/useUpdateBackup";
 import { useAuth, useUser } from "@clerk/clerk-expo";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { SubscriptionContext, mixpanel } from "app/_layout";
 import * as Application from "expo-application";
 import { router } from "expo-router";
@@ -17,57 +18,56 @@ import LoadingIcon from "@/components/LoadingIcon";
 import { useContext, useState } from "react";
 
 const style = StyleSheet.create({
-    container: { flex: 1, padding: 10, gap: 20 },
+    container: { flex: 1, padding: 15, gap: 20 },
     settingContainer: { flex: 1, gap: 15 },
-    versionText: { textAlign: "center", color: colors.line, marginTop: 10 },
+    versionText: { textAlign: "center", color: colors.line, marginVertical: 10 },
 });
 
+const millisecondsToHours = 1000 * 60 * 60;
 function UserProfile() {
-    const { isSignedIn } = useAuth();
-    const { customerInfo } = useContext(SubscriptionContext);
+    const { isSignedIn, user } = useUser();
+    const { isProUser } = useContext(SubscriptionContext);
+
+    const { lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);
+
+    const hoursSinceLastUpdate = parseInt(`${(new Date().getTime() - lastUpdateUTC_Timestamp) / millisecondsToHours}`);
 
     const navigateToLogin = () => router.push("/logIn");
     const navigateToSignUp = () => router.push("/signUp");
 
     return (
         <View style={style.container}>
-            <UserCard />
+            <AppText fontSize={24} children={"Settings"} />
 
             <View style={style.settingContainer}>
-                <TouchableOpacity
-                    onPress={() => router.push("/(app)/backup")}
-                    style={{
-                        backgroundColor: colors.darkGray,
-                        borderRadius: 10,
-                        height: 45,
-                        paddingHorizontal: 10,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                    }}>
-                    <AppText fontSize={14} children={"Backup Settings"} />
-                    <ChevronRight color={colors.unmarkedText} />
-                </TouchableOpacity>
-
-                {customerInfo && (
-                    <TouchableOpacity
-                        onPress={() => router.push("/(app)/subscriptionDetails")}
-                        style={{
-                            backgroundColor: colors.darkGray,
-                            borderRadius: 10,
-                            height: 45,
-                            paddingHorizontal: 10,
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                        }}>
-                        <AppText fontSize={14} children={"Membership Plan"} />
-                        <ChevronRight color={colors.unmarkedText} />
-                    </TouchableOpacity>
-                )}
+                <SettingLink
+                    icon={"user"}
+                    href={isSignedIn ? "/(app)/account" : "/signUp"}
+                    title={"Account"}
+                    subtitle={user ? user.emailAddresses[0].emailAddress : "No active account"}
+                    warning={!isSignedIn}
+                />
+                <SettingLink
+                    icon={"cloud-upload"}
+                    href={isSignedIn ? "/(app)/backup" : "/signUp"}
+                    title={"Cloud Sync"}
+                    subtitle={
+                        isSignedIn ? `Last updated ${hoursSinceLastUpdate} ${hoursSinceLastUpdate === 1 ? "hour" : "hours"} ago` : "Log in to backup"
+                    }
+                    warning={!isSignedIn}
+                />
+                <SettingLink
+                    icon={"credit-card-alt"}
+                    href={isProUser ? "/(app)/subscriptionDetails" : "/(app)/postOnboardingPaywall"}
+                    title={"Subscription"}
+                    subtitle={"No active subscription"}
+                    warning={!isProUser}
+                />
             </View>
 
             <View>
+                <AppText fontSize={14} children={`Version ${Application.nativeBuildVersion}`} style={style.versionText} />
+
                 {!isSignedIn && (
                     <>
                         <AppButton
@@ -89,11 +89,78 @@ function UserProfile() {
                     </>
                 )}
                 {isSignedIn && <SignOutButton />}
-                <AppText fontSize={14} children={`Version ${Application.nativeBuildVersion}`} style={style.versionText} />
             </View>
         </View>
     );
 }
+
+const SettingLink = ({
+    href,
+    icon,
+    subtitle,
+    title,
+    warning,
+}: {
+    href: string;
+    icon: React.ComponentProps<typeof FontAwesome>["name"];
+    title: string;
+    subtitle: string;
+    warning: boolean;
+}) => {
+    //@ts-ignore
+    const redirect = () => router.push(href);
+
+    return (
+        <TouchableOpacity
+            onPress={redirect}
+            style={{
+                height: 70,
+                paddingHorizontal: 10,
+                flexDirection: "row",
+                borderBottomWidth: 1,
+                borderColor: `${colors.line}40`,
+                alignItems: "center",
+                position: "relative",
+                justifyContent: "space-between",
+            }}>
+            <View style={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
+                <View
+                    style={{
+                        backgroundColor: colors.softPurle,
+                        width: 40,
+                        height: 40,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderRadius: 10,
+                    }}>
+                    {/* @ts-ignore */}
+                    <FontAwesome name={icon} size={22} color={colors.darkGray} />
+                </View>
+                <View style={{ gap: 6 }}>
+                    <AppText fontSize={18} children={title} />
+                    <AppText fontSize={12} children={subtitle} style={{ opacity: 0.7 }} />
+                </View>
+            </View>
+            <ChevronRight color={colors.line} />
+            {warning && (
+                <View
+                    style={{
+                        position: "absolute",
+                        top: 5,
+                        left: 40,
+                        backgroundColor: colors.darkGray,
+                        width: 20,
+                        height: 20,
+                        borderRadius: 7,
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}>
+                    <FontAwesome name={"exclamation"} size={14} color={colors.unmarkedText} />
+                </View>
+            )}
+        </TouchableOpacity>
+    );
+};
 
 export default UserProfile;
 

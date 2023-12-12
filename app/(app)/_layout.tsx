@@ -183,7 +183,7 @@ export default function RootLayout() {
                                     <TouchableOpacity
                                         onPress={navigation.goBack}
                                         style={{ position: "absolute", left: 0, flexDirection: "row", alignItems: "center", height: 45, width: 100 }}>
-                                        <ChevronLeft height={30} width={30} color={colors.accent} />
+                                        <ChevronLeft height={30} width={30} color={colors.line} />
                                     </TouchableOpacity>
 
                                     <AppText fontSize={16} children={options.title} style={{ textTransform: "capitalize" }} />
@@ -193,12 +193,13 @@ export default function RootLayout() {
                     }}
                     screenListeners={trackScreenNavigation}>
                     <Stack.Screen
-                        name={routes.illustrationCredits.name}
+                        name={routes.postOnboardingPaywall.name}
                         options={{
-                            title: "Illustration Credits",
+                            title: "Subscription",
                             headerShown: true,
                         }}
                     />
+
                     <Stack.Screen
                         name={routes.subscriptionDetails.name}
                         options={{
@@ -244,40 +245,40 @@ export default function RootLayout() {
                         <Pressable
                             style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6 }}
                             onPress={() => router.replace("/home")}>
-                            <TabBarIcon name="home" color={pathname.includes("home") ? colors.accent : colors.unmarkedText} />
-                            <AppText style={{ color: pathname.includes("home") ? colors.accent : colors.unmarkedText }} fontSize={12}>
+                            <TabBarIcon name="home" color={pathname.includes("home") ? colors.accent : colors.line} />
+                            <AppText style={{ color: pathname.includes("home") ? colors.accent : colors.line }} fontSize={12}>
                                 Home
                             </AppText>
                         </Pressable>
                         <Pressable
                             style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6 }}
                             onPress={() => router.replace("/(app)/myTrees")}>
-                            <TabBarIcon name="tree" color={pathname.includes("myTrees") ? colors.accent : colors.unmarkedText} />
-                            <AppText style={{ color: pathname.includes("myTrees") ? colors.accent : colors.unmarkedText }} fontSize={12}>
+                            <TabBarIcon name="tree" color={pathname.includes("myTrees") ? colors.accent : colors.line} />
+                            <AppText style={{ color: pathname.includes("myTrees") ? colors.accent : colors.line }} fontSize={12}>
                                 My Trees
                             </AppText>
                         </Pressable>
                         {/* <Pressable
                         style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                         onPress={() => router.replace("/(app)/userProgress")}>
-                        <TabBarIcon name="check-circle" color={pathname.includes("userProgress") ? colors.accent : colors.unmarkedText} />
-                        <AppText style={{ color: pathname.includes("userProgress") ? colors.accent : colors.unmarkedText }} fontSize={12}>
+                        <TabBarIcon name="check-circle" color={pathname.includes("userProgress") ? colors.accent : colors.line} />
+                        <AppText style={{ color: pathname.includes("userProgress") ? colors.accent : colors.line }} fontSize={12}>
                             Habits
                         </AppText>
                     </Pressable> */}
                         <Pressable
                             style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                             onPress={() => router.replace("/(app)/feedback")}>
-                            <TabBarIcon name="group" color={pathname.includes("feedback") ? colors.accent : colors.unmarkedText} />
-                            <AppText style={{ color: pathname.includes("feedback") ? colors.accent : colors.unmarkedText }} fontSize={12}>
+                            <TabBarIcon name="group" color={pathname.includes("feedback") ? colors.accent : colors.line} />
+                            <AppText style={{ color: pathname.includes("feedback") ? colors.accent : colors.line }} fontSize={12}>
                                 Community
                             </AppText>
                         </Pressable>
                         <Pressable
                             style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                             onPress={() => router.replace("/(app)/userProfile")}>
-                            <TabBarIcon name="user" color={pathname.includes("userProfile") ? colors.accent : colors.unmarkedText} />
-                            <AppText style={{ color: pathname.includes("userProfile") ? colors.accent : colors.unmarkedText }} fontSize={12}>
+                            <TabBarIcon name="user" color={pathname.includes("userProfile") ? colors.accent : colors.line} />
+                            <AppText style={{ color: pathname.includes("userProfile") ? colors.accent : colors.line }} fontSize={12}>
                                 Profile
                             </AppText>
                         </Pressable>
