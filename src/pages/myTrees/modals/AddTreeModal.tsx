@@ -1,7 +1,9 @@
 import AppEmojiPicker, { Emoji } from "@/components/AppEmojiPicker";
 import { generateMongoCompliantId, toggleEmoji } from "@/functions/misc";
 import { TreeData, addUserTrees } from "@/redux/slices/userTreesSlice";
+import { selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import analytics from "@react-native-firebase/analytics";
+import { HandleModalsContext } from "app/(app)/_layout";
 import { mixpanel } from "app/_layout";
 import { useContext, useEffect, useState } from "react";
 import { Alert, Pressable, View } from "react-native";
@@ -13,8 +15,6 @@ import { colors, nodeGradients } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { close, selectAddTree } from "../../../redux/slices/addTreeModalSlice";
 import { ColorGradient } from "../../../types";
-import { selectUserVariables } from "@/redux/slices/userVariablesSlice";
-import { HandleOnboardingModalContext } from "app/(app)/_layout";
 
 const useClearStateOnOpen = (open: boolean, cleanup: () => void) => {
     useEffect(() => {
@@ -34,7 +34,7 @@ function AddTreeModal() {
     const { onboardingStep } = useAppSelector(selectUserVariables);
     const dispatch = useAppDispatch();
 
-    const setShowOnboarding = useContext(HandleOnboardingModalContext);
+    const { modal: setShowOnboarding } = useContext(HandleModalsContext);
 
     useClearStateOnOpen(open, cleanup);
 

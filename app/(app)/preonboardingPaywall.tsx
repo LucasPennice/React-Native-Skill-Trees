@@ -9,7 +9,7 @@ import * as NavigationBar from "expo-navigation-bar";
 import { router, useNavigation } from "expo-router";
 import { useContext, useEffect, useState } from "react";
 import { Dimensions, Platform, ScrollView, StyleSheet, View } from "react-native";
-import { HandleOnboardingModalContext } from "./_layout";
+import { HandleModalsContext } from "./_layout";
 
 const { height } = Dimensions.get("window");
 
@@ -197,7 +197,7 @@ const Header = () => {
         },
     });
 
-    const setShowOnboarding = useContext(HandleOnboardingModalContext);
+    const { modal: setShowOnboarding } = useContext(HandleModalsContext);
 
     const redirectToLogin = () => router.push("/logIn");
     const redirectToHome = () => {

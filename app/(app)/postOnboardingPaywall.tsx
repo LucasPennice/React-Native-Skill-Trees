@@ -3,6 +3,8 @@ import AppText from "@/components/AppText";
 import DropdownProductSelector from "@/components/subscription/DropdownProductSelector";
 import { BACKGROUND_COLOR, getSubscribeButtonText, handlePurchase } from "@/components/subscription/functions";
 import { colors } from "@/parameters";
+import { useAppSelector } from "@/redux/reduxHooks";
+import { selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { EventArg } from "@react-navigation/native";
 import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
@@ -10,6 +12,7 @@ import { useNavigation } from "expo-router";
 import { useContext, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import Svg, { Path, SvgProps } from "react-native-svg";
+import { HandleModalsContext } from "./_layout";
 
 const style = StyleSheet.create({
     container: {
@@ -36,11 +39,17 @@ type GoBackEvent = EventArg<
 
 const useBlockGoBack = () => {
     const navigation = useNavigation();
+    const { exitPaywallSurvey } = useAppSelector(selectUserVariables);
+    const { openPaywallSurvey } = useContext(HandleModalsContext);
 
     useEffect(() => {
         const openFeedbackForm = (e: GoBackEvent) => {
             e.preventDefault();
             navigation.dispatch(e.data.action);
+
+            if (exitPaywallSurvey === true) return;
+
+            openPaywallSurvey();
         };
 
         navigation.addListener("beforeRemove", openFeedbackForm);

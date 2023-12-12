@@ -1,6 +1,7 @@
 import OnboardingModal from "@/OnboardingModal";
 import AppText from "@/components/AppText";
 import ChevronLeft from "@/components/Icons/ChevronLeft";
+import DismissPaywallSurvey from "@/components/surveys/DismissPaywallSurvey";
 import MarketFitSurvey from "@/components/surveys/MarketFitSurvey";
 import PostOnboardingSurvey from "@/components/surveys/PostOnboardingSurvey";
 import { NAV_HEGIHT, colors } from "@/parameters";
@@ -20,6 +21,8 @@ import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router
 import { createContext, useContext, useEffect, useState } from "react";
 import { Dimensions, KeyboardAvoidingView, Platform, Pressable, Text, TouchableOpacity, View } from "react-native";
 import { routes, routesToHideNavBar } from "routes";
+
+const { width, height } = Dimensions.get("window");
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string; size?: number }) {
     return <FontAwesome size={props.size ?? 24} style={{ marginBottom: -3 }} {...props} />;
@@ -50,6 +53,7 @@ const useInitialRedirect = (readyToRedirect: boolean, redirectToWelcomeScreen: b
 const useHandleSurveyModals = () => {
     const [postOnboarding, setPostOnboarding] = useState(false);
     const [marketFit, setMarketFit] = useState(false);
+    const [paywallDismiss, setPaywallDismiss] = useState(false);
 
     const openPostOnboardingModal = () => setPostOnboarding(true);
     const closePostOnboardingModal = () => {
@@ -59,6 +63,9 @@ const useHandleSurveyModals = () => {
 
     const openMarketFitModal = () => setMarketFit(true);
     const closeMarketFitModal = () => setMarketFit(false);
+
+    const openPaywallDismissModal = () => setPaywallDismiss(true);
+    const closePaywallDismissModal = () => setPaywallDismiss(false);
 
     return {
         postOnboarding: {
@@ -71,29 +78,36 @@ const useHandleSurveyModals = () => {
             open: openMarketFitModal,
             close: closeMarketFitModal,
         },
+        paywallDismiss: {
+            state: paywallDismiss,
+            open: openPaywallDismissModal,
+            close: closePaywallDismissModal,
+        },
     };
 };
 
-export const HandleOnboardingModalContext = createContext<(v: boolean) => void>(() => {});
+export const HandleModalsContext = createContext<{ modal: (v: boolean) => void; openPaywallSurvey: () => void }>({
+    modal: () => {},
+    openPaywallSurvey: () => {},
+});
 
 export default function RootLayout() {
     const [showOnboarding, setShowOnboarding] = useState(false);
-    const deepLinkOpenedApp = Linking.useURL() !== null;
-
-    const { postOnboarding, marketFit } = useHandleSurveyModals();
-    useIdentifyMixPanelUserId();
     const { shouldWaitForClerkToLoad } = useAppSelector(selectSyncSlice);
     const { onboardingStep } = useAppSelector(selectUserVariables);
     const { isSignedIn, isLoaded } = useUser();
-    useRunDailyBackup(isSignedIn);
-    const isClerkLoaded = deepLinkOpenedApp ? isLoaded : shouldWaitForClerkToLoad === false ? true : isLoaded;
-
     const { isProUser, onFreeTrial, currentOffering } = useContext(SubscriptionContext);
-
-    const { width, height } = Dimensions.get("window");
-
     const pathname = usePathname();
     const router = useRouter();
+    const { postOnboarding, marketFit, paywallDismiss } = useHandleSurveyModals();
+
+    const deepLinkOpenedApp = Linking.useURL() !== null;
+
+    useIdentifyMixPanelUserId();
+    useRunDailyBackup(isSignedIn);
+    const trackScreenNavigation = useTrackNavigationEvents();
+
+    const isClerkLoaded = deepLinkOpenedApp ? isLoaded : shouldWaitForClerkToLoad === false ? true : isLoaded;
 
     const [fontsLoaded, error] = useFonts({
         helvetica: require("../../assets/Helvetica.ttf"),
@@ -109,8 +123,6 @@ export default function RootLayout() {
     useEffect(() => {
         if (fontsLoaded && isClerkLoaded) SplashScreen.hideAsync();
     }, [fontsLoaded, isClerkLoaded]);
-
-    const trackScreenNavigation = useTrackNavigationEvents();
 
     const readyToRedirect = !(!fontsLoaded || !isClerkLoaded);
 
@@ -165,7 +177,7 @@ export default function RootLayout() {
     const closeOnboarding = () => setShowOnboarding(false);
 
     return (
-        <HandleOnboardingModalContext.Provider value={setShowOnboarding}>
+        <HandleModalsContext.Provider value={{ modal: setShowOnboarding, openPaywallSurvey: paywallDismiss.open }}>
             <View style={{ flex: 1, minHeight: Platform.OS === "android" ? height - NAV_HEGIHT : "auto" }}>
                 <Stack
                     screenOptions={{
@@ -235,6 +247,8 @@ export default function RootLayout() {
 
                 {marketFit.state && <MarketFitSurvey open={marketFit.state} close={marketFit.close} />}
 
+                {paywallDismiss.state && <DismissPaywallSurvey open={paywallDismiss.state} close={paywallDismiss.close} />}
+
                 <OnboardingModal close={closeOnboarding} open={showOnboarding} openPostOnboardingModal={postOnboarding.open} />
 
                 {hide && (
@@ -285,6 +299,6 @@ export default function RootLayout() {
                     </KeyboardAvoidingView>
                 )}
             </View>
-        </HandleOnboardingModalContext.Provider>
+        </HandleModalsContext.Provider>
     );
 }

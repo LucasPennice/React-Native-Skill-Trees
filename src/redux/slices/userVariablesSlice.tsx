@@ -56,6 +56,9 @@ export const userVariablesSlice = createSlice({
         completeCustomizeHomeTree: (state) => {
             state.onboardingStep = 3;
         },
+        completeDismissPaywallSurvey: (state) => {
+            state.exitPaywallSurvey = true;
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(addUserTrees, (state, action) => {
@@ -70,8 +73,14 @@ export const userVariablesSlice = createSlice({
     },
 });
 
-export const { completeMarkeyFitSurvey, completeCustomizeHomeTree, completeOnboardingExperienceSurvey, increaseAppOpenAccum, updateLaunchVersion } =
-    userVariablesSlice.actions;
+export const {
+    completeMarkeyFitSurvey,
+    completeCustomizeHomeTree,
+    completeDismissPaywallSurvey,
+    completeOnboardingExperienceSurvey,
+    increaseAppOpenAccum,
+    updateLaunchVersion,
+} = userVariablesSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectUserVariables = (state: RootState) => state.userVariables;

@@ -32,7 +32,7 @@ import { batch } from "react-redux";
 import { RoutesParams } from "routes";
 import { Contact } from "./feedback";
 import { OnboardingSteps, completeCustomizeHomeTree, selectUserVariables } from "@/redux/slices/userVariablesSlice";
-import { HandleOnboardingModalContext } from "./_layout";
+import { HandleModalsContext } from "./_layout";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();
@@ -77,7 +77,7 @@ function useCanvasSettingsState() {
     const [canvasSettings, setCanvasSettings] = useState(false);
     const { onboardingStep } = useAppSelector(selectUserVariables);
     const dispatch = useAppDispatch();
-    const setShowOnboarding = useContext(HandleOnboardingModalContext);
+    const { modal: setShowOnboarding } = useContext(HandleModalsContext);
 
     const openCanvasSettingsModal = useCallback(() => setCanvasSettings(true), []);
 

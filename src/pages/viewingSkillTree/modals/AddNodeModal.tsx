@@ -4,7 +4,7 @@ import { generateMongoCompliantId, toggleEmoji } from "@/functions/misc";
 import { useAppSelector } from "@/redux/reduxHooks";
 import { selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { HandleOnboardingModalContext } from "app/(app)/_layout";
+import { HandleModalsContext } from "app/(app)/_layout";
 import { mixpanel } from "app/_layout";
 import { useContext, useEffect, useState } from "react";
 import { Alert, Keyboard, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
@@ -40,7 +40,7 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
     }
 
     const { onboardingStep } = useAppSelector(selectUserVariables);
-    const setShowOnboarding = useContext(HandleOnboardingModalContext);
+    const { modal: setShowOnboarding } = useContext(HandleModalsContext);
 
     const [nodesToAdd, setNodesToAdd] = useState<Tree<Skill>[]>([]);
     const [currentNode, setCurrentNode] = useState<Tree<Skill>>(getInitialCurrentSkillValue());
