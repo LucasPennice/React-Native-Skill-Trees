@@ -9,7 +9,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
 import { router } from "expo-router";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import Svg, { Path, SvgProps } from "react-native-svg";
 import { HandleModalsContext } from "./_layout";
 
@@ -23,6 +23,8 @@ const style = StyleSheet.create({
         paddingTop: 0,
     },
 });
+
+const { height } = Dimensions.get("window");
 
 const useHandleGoBack = () => {
     const { exitPaywallSurvey, nthAppOpen } = useAppSelector(selectUserVariables);
@@ -89,9 +91,8 @@ function PostOnboardingPaywall() {
             {currentOffering && (
                 <View style={{ flex: 1, width: "100%" }}>
                     <ScrollView showsVerticalScrollIndicator={false}>
-                        <View style={{ flex: 1, height: "100%" }}>
+                        <View style={{ flex: 1, height: height - 300 }}>
                             <View>
-                                <Logo />
                                 <AppText
                                     children={"Go Premium!"}
                                     fontSize={42}
@@ -134,7 +135,7 @@ const Checklist = () => {
     return (
         <View style={{ gap: 25, flex: 1, justifyContent: "center", marginBottom: 25 }}>
             <View style={{ flexDirection: "row", gap: 20 }}>
-                <FontAwesome name={"check-circle"} size={24} color={colors.softPurle} />
+                <FontAwesome name={"check-circle"} size={24} color={colors.unmarkedText} />
                 <View style={{ gap: 4 }}>
                     <AppText children={"Organize your whole life"} fontSize={18} style={{ fontFamily: "helveticaBold" }} />
                     <AppText
@@ -145,14 +146,14 @@ const Checklist = () => {
                 </View>
             </View>
             <View style={{ flexDirection: "row", gap: 20 }}>
-                <FontAwesome name={"check-circle"} size={24} color={colors.softPurle} />
+                <FontAwesome name={"check-circle"} size={24} color={colors.unmarkedText} />
                 <View style={{ gap: 4 }}>
                     <AppText children={"Easy to stay on track"} fontSize={18} style={{ fontFamily: "helveticaBold" }} />
                     <AppText children={"You immediately know what to work on next. It only takes a glance"} fontSize={16} style={{ opacity: 0.5 }} />
                 </View>
             </View>
             <View style={{ flexDirection: "row", gap: 20 }}>
-                <FontAwesome name={"check-circle"} size={24} color={colors.softPurle} />
+                <FontAwesome name={"check-circle"} size={24} color={colors.unmarkedText} />
                 <View style={{ gap: 4 }}>
                     <AppText children={"See the progress as it happens"} fontSize={18} style={{ fontFamily: "helveticaBold" }} />
                     <AppText

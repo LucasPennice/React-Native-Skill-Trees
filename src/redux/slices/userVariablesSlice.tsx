@@ -21,6 +21,8 @@ export type UserVariablesSlice = {
     launchVersion: { prev: string; current: string };
     nthAppOpen: number;
     onboardingStep: number;
+    appNumberWhenFinishedOnboarding: null | number;
+    lastPaywallShowDate: null | number;
 };
 
 // Define the initial state using that type
@@ -31,6 +33,8 @@ const initialState: UserVariablesSlice = {
     launchVersion: { prev: "foo", current: "doo" },
     nthAppOpen: 0,
     onboardingStep: 0,
+    appNumberWhenFinishedOnboarding: null,
+    lastPaywallShowDate: null,
 };
 
 export const userVariablesSlice = createSlice({
@@ -55,6 +59,7 @@ export const userVariablesSlice = createSlice({
         },
         completeCustomizeHomeTree: (state) => {
             state.onboardingStep = 3;
+            state.appNumberWhenFinishedOnboarding = state.nthAppOpen;
         },
         completeDismissPaywallSurvey: (state) => {
             state.exitPaywallSurvey = true;

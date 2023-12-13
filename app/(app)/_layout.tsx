@@ -56,10 +56,7 @@ const useHandleSurveyModals = () => {
     const [paywallDismiss, setPaywallDismiss] = useState(false);
 
     const openPostOnboardingModal = () => setPostOnboarding(true);
-    const closePostOnboardingModal = () => {
-        setPostOnboarding(false);
-        router.push("/(app)/postOnboardingPaywall");
-    };
+    const closePostOnboardingModal = () => setPostOnboarding(false);
 
     const openMarketFitModal = () => setMarketFit(true);
     const closeMarketFitModal = () => setMarketFit(false);
@@ -84,6 +81,23 @@ const useHandleSurveyModals = () => {
             close: closePaywallDismissModal,
         },
     };
+};
+
+const useHandleShowPostOnboardingPaywall = (readyToRedirect: boolean) => {
+    const { onboardingStep, appNumberWhenFinishedOnboarding, nthAppOpen } = useAppSelector(selectUserVariables);
+    const { isProUser } = useContext(SubscriptionContext);
+
+    useEffect(() => {
+        if (!readyToRedirect) return;
+        if (isProUser === true || isProUser === null) return;
+        //This does not inclues signIn/Up
+        if (appNumberWhenFinishedOnboarding === null) return;
+        if (nthAppOpen === appNumberWhenFinishedOnboarding) return;
+
+        console.log(readyToRedirect, isProUser, onboardingStep, appNumberWhenFinishedOnboarding, nthAppOpen);
+
+        router.push("/(app)/postOnboardingPaywall");
+    }, [readyToRedirect, isProUser, onboardingStep, appNumberWhenFinishedOnboarding, nthAppOpen]);
 };
 
 export const HandleModalsContext = createContext<{ modal: (v: boolean) => void; openPaywallSurvey: () => void }>({
@@ -136,20 +150,13 @@ export default function RootLayout() {
 
     useHandleDeepLinking(shouldHandleDeepLink);
 
+    useHandleShowPostOnboardingPaywall(readyToRedirect);
+
     useEffect(() => {
         const userDidFirstOnboardingStep = onboardingStep > 0;
         const userDidntFinishOnboarding = onboardingStep < LAST_ONBOARDING_STEP;
         if (userDidFirstOnboardingStep && userDidntFinishOnboarding) setShowOnboarding(true);
     }, []);
-
-    useEffect(() => {
-        if (!readyToRedirect) return;
-        if (process.env.NODE_ENV === "development") return;
-
-        const userFinishOnboarding = onboardingStep >= LAST_ONBOARDING_STEP;
-
-        if (userFinishOnboarding && isProUser === false) router.push("/(app)/postOnboardingPaywall");
-    }, [readyToRedirect, isProUser]);
 
     // const dispatch = useAppDispatch();
     // useEffect(() => {
