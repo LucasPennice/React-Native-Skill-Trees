@@ -1,21 +1,17 @@
 import AppButton from "@/components/AppButton";
 import AppText from "@/components/AppText";
 import ChevronRight from "@/components/Icons/ChevronRight";
-import CrownIcon from "@/components/Icons/CrownIcon";
-import TicketIcon from "@/components/Icons/TicketIcon";
 import { colors } from "@/parameters";
-import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
-import { selectSyncSlice, setShouldWaitForClerkToLoad, updateLastBackupTime } from "@/redux/slices/syncSlice";
-import useUpdateBackup from "@/useUpdateBackup";
-import { useAuth, useUser } from "@clerk/clerk-expo";
+import { useAppSelector } from "@/redux/reduxHooks";
+import { selectSyncSlice } from "@/redux/slices/syncSlice";
+import { useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { SubscriptionContext, mixpanel } from "app/_layout";
+import { SubscriptionContext } from "app/_layout";
 import * as Application from "expo-application";
 import { router } from "expo-router";
-import { Alert, Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 
-import LoadingIcon from "@/components/LoadingIcon";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { CustomerInfo } from "react-native-purchases";
 
 const style = StyleSheet.create({
@@ -89,7 +85,6 @@ function UserProfile() {
                         />
                     </>
                 )}
-                {isSignedIn && <SignOutButton />}
             </View>
         </View>
     );
@@ -164,106 +159,6 @@ const SettingLink = ({
 };
 
 export default UserProfile;
-
-const UserCard = () => {
-    const { user } = useUser();
-
-    const [showLoading, setShowLoading] = useState(false);
-
-    const style = StyleSheet.create({
-        container: { flexDirection: "row", gap: 15, alignItems: "center" },
-        photo: { height: 60, width: 60, borderRadius: 30, backgroundColor: colors.darkGray },
-        photoContainer: { position: "relative", justifyContent: "center", alignItems: "center" },
-        loadingIndicator: { position: "absolute" },
-        premiumStatus: { flexDirection: "row", gap: 5 },
-    });
-
-    const freeTrial = true;
-
-    return (
-        <View style={style.container}>
-            <View style={style.photoContainer}>
-                <Image
-                    style={style.photo}
-                    source={{ uri: user?.imageUrl }}
-                    onLoadStart={() => setShowLoading(true)}
-                    onLoadEnd={() => setShowLoading(false)}
-                />
-                {showLoading && (
-                    <View style={style.loadingIndicator}>
-                        <LoadingIcon size={30} />
-                    </View>
-                )}
-            </View>
-            <View style={{ gap: 5 }}>
-                <AppText fontSize={20} children={user?.username ?? "Username"} />
-
-                {freeTrial && (
-                    <View style={style.premiumStatus}>
-                        <TicketIcon width={14} height={14} fill={colors.gold} />
-                        <AppText fontSize={14} children={"Free Trial"} style={{ color: colors.gold, paddingTop: 1 }} />
-                    </View>
-                )}
-                {!freeTrial && (
-                    <View style={style.premiumStatus}>
-                        <CrownIcon width={15} height={15} fill={colors.gold} />
-                        <AppText fontSize={14} children={"Premium Member"} style={{ color: colors.gold, paddingTop: 2 }} />
-                    </View>
-                )}
-            </View>
-        </View>
-    );
-};
-
-const SignOutButton = () => {
-    const { signOut, isLoaded } = useAuth();
-
-    const dispatch = useAppDispatch();
-
-    const { backupState, handleUserBackup } = useUpdateBackup();
-
-    const runOnSignOut = () => {
-        mixpanel.reset();
-        dispatch(setShouldWaitForClerkToLoad(true));
-    };
-
-    const handleSignOut = async () => {
-        try {
-            await handleUserBackup();
-
-            runOnSignOut();
-
-            dispatch(updateLastBackupTime());
-
-            signOut();
-        } catch (error) {
-            mixpanel.track(`appError`, { message: error, stack: error });
-            Alert.alert("Error creating a backup", `All progress after ${new Date().toString()} will be lost\nQuit anyway?`, [
-                { text: "No", style: "default", isPreferred: true },
-                {
-                    text: "Yes",
-                    style: "destructive",
-                    onPress: () => {
-                        runOnSignOut();
-
-                        signOut();
-                    },
-                },
-            ]);
-        }
-    };
-
-    return (
-        <AppButton
-            disabled={!isLoaded}
-            onPress={handleSignOut}
-            text={{ idle: "Sign Out", success: "Backup Successful", error: "Error Backing Up Data" }}
-            color={{ idle: colors.line }}
-            state={backupState}
-            style={{ backgroundColor: colors.background }}
-        />
-    );
-};
 
 const getProString = (customerInfo: CustomerInfo) => {
     const identifier = customerInfo.activeSubscriptions[0];

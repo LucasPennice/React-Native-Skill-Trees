@@ -252,40 +252,40 @@ export default function RootLayout() {
                         <Pressable
                             style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6 }}
                             onPress={() => router.replace("/home")}>
-                            <TabBarIcon name="home" color={pathname.includes("home") ? colors.accent : colors.line} />
-                            <AppText style={{ color: pathname.includes("home") ? colors.accent : colors.line }} fontSize={12}>
+                            <TabBarIcon name="home" color={pathname.includes("home") ? colors.white : colors.line} />
+                            <AppText style={{ color: pathname.includes("home") ? colors.white : colors.line }} fontSize={10}>
                                 Home
                             </AppText>
                         </Pressable>
                         <Pressable
                             style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6 }}
                             onPress={() => router.replace("/(app)/myTrees")}>
-                            <TabBarIcon name="tree" color={pathname.includes("myTrees") ? colors.accent : colors.line} />
-                            <AppText style={{ color: pathname.includes("myTrees") ? colors.accent : colors.line }} fontSize={12}>
+                            <TabBarIcon name="tree" color={pathname.includes("myTrees") ? colors.white : colors.line} />
+                            <AppText style={{ color: pathname.includes("myTrees") ? colors.white : colors.line }} fontSize={10}>
                                 My Trees
                             </AppText>
                         </Pressable>
                         {/* <Pressable
                         style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                         onPress={() => router.replace("/(app)/userProgress")}>
-                        <TabBarIcon name="check-circle" color={pathname.includes("userProgress") ? colors.accent : colors.line} />
-                        <AppText style={{ color: pathname.includes("userProgress") ? colors.accent : colors.line }} fontSize={12}>
+                        <TabBarIcon name="check-circle" color={pathname.includes("userProgress") ? colors.white : colors.line} />
+                        <AppText style={{ color: pathname.includes("userProgress") ? colors.white : colors.line }} fontSize={10}>
                             Habits
                         </AppText>
                     </Pressable> */}
                         <Pressable
                             style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                             onPress={() => router.replace("/(app)/feedback")}>
-                            <TabBarIcon name="group" color={pathname.includes("feedback") ? colors.accent : colors.line} />
-                            <AppText style={{ color: pathname.includes("feedback") ? colors.accent : colors.line }} fontSize={12}>
+                            <TabBarIcon name="group" color={pathname.includes("feedback") ? colors.white : colors.line} />
+                            <AppText style={{ color: pathname.includes("feedback") ? colors.white : colors.line }} fontSize={10}>
                                 Community
                             </AppText>
                         </Pressable>
                         <Pressable
                             style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                             onPress={() => router.replace("/(app)/userProfile")}>
-                            <TabBarIcon name="user-circle-o" color={pathname.includes("userProfile") ? colors.accent : colors.line} />
-                            <AppText style={{ color: pathname.includes("userProfile") ? colors.accent : colors.line }} fontSize={12}>
+                            <TabBarIcon name="user-circle-o" color={pathname.includes("userProfile") ? colors.white : colors.line} />
+                            <AppText style={{ color: pathname.includes("userProfile") ? colors.white : colors.line }} fontSize={10}>
                                 Settings
                             </AppText>
                         </Pressable>
