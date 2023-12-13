@@ -13,8 +13,10 @@ import { open } from "@/redux/slices/addTreeModalSlice";
 import { selectNodeById, selectNodesOfTree } from "@/redux/slices/nodesSlice";
 import { TreeData, selectAllTrees } from "@/redux/slices/userTreesSlice";
 import { ColorGradient, NormalizedNode } from "@/types";
+import { useUser } from "@clerk/clerk-expo";
+import { HandleAlertContext } from "app/_layout";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { RoutesParams } from "routes";
@@ -44,13 +46,28 @@ const useHandleShareTrees = () => {
     const [selectionMode, setSelectionMode] = useState(false);
     const [selectedTreeIds, setSelectedTreeIds] = useState<string[]>([]);
     const [generateLinkModal, setGenerateLinkModal] = useState(false);
+    const { isSignedIn } = useUser();
+
+    const { open } = useContext(HandleAlertContext);
 
     const cancelSelection = () => {
         setSelectionMode(false);
         setSelectedTreeIds([]);
     };
 
-    const startSelectionMode = () => setSelectionMode(true);
+    const navigateToSignUp = () => router.push("/(app)/auth/signUp");
+
+    const startSelectionMode = () => {
+        if (isSignedIn === undefined || isSignedIn === false)
+            return open({
+                title: "Create an account to share",
+                state: "error",
+                subtitle: "",
+                buttonAction: navigateToSignUp,
+                buttonText: "Sign Up",
+            });
+        setSelectionMode(true);
+    };
 
     const toggleSelection = (selectedTreeId: string) => {
         setSelectedTreeIds((prev) => {

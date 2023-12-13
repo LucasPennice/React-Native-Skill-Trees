@@ -78,6 +78,11 @@ function AlertModal({ open, state, subtitle, title, buttonAction, buttonText }: 
 
     const animationRef = useHandleLottiePlay(open);
 
+    const actionAndClose = (fn?: () => void) => () => {
+        if (fn) fn();
+        close();
+    };
+
     return (
         <Modal animationType="fade" transparent={true} visible={open} onRequestClose={close} presentationStyle={"overFullScreen"}>
             <View style={styles.container}>
@@ -92,7 +97,7 @@ function AlertModal({ open, state, subtitle, title, buttonAction, buttonText }: 
                         <AppText children={title} fontSize={32} style={{ fontFamily: "helveticaBold", textAlign: "center" }} />
                         <AppText children={subtitle} fontSize={20} style={{ opacity: 0.8, textAlign: "center" }} />
                         <AppButton
-                            onPress={buttonAction ?? close}
+                            onPress={actionAndClose(buttonAction)}
                             pressableStyle={{ width: "100%" }}
                             text={{ idle: buttonText ?? "Confirm" }}
                             style={{ backgroundColor: colors.softPurle }}
