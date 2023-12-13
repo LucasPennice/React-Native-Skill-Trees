@@ -206,14 +206,6 @@ export default function RootLayout() {
                     }}
                     screenListeners={trackScreenNavigation}>
                     <Stack.Screen
-                        name={routes.postOnboardingPaywall.name}
-                        options={{
-                            title: "Subscription",
-                            headerShown: true,
-                        }}
-                    />
-
-                    <Stack.Screen
                         name={routes.subscriptionDetails.name}
                         options={{
                             title: "Membership Plan",

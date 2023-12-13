@@ -6,11 +6,10 @@ import { colors } from "@/parameters";
 import { useAppSelector } from "@/redux/reduxHooks";
 import { selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { EventArg } from "@react-navigation/native";
 import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
-import { router, useNavigation } from "expo-router";
+import { router } from "expo-router";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import Svg, { Path, SvgProps } from "react-native-svg";
 import { HandleModalsContext } from "./_layout";
 
@@ -21,44 +20,24 @@ const style = StyleSheet.create({
         alignItems: "center",
         position: "relative",
         padding: 20,
+        paddingTop: 0,
     },
 });
 
-type GoBackEvent = EventArg<
-    "beforeRemove",
-    true,
-    {
-        action: Readonly<{
-            type: string;
-            payload?: object | undefined;
-            source?: string | undefined;
-            target?: string | undefined;
-        }>;
-    }
->;
-
-const useBlockGoBack = () => {
-    const navigation = useNavigation();
+const useHandleGoBack = () => {
     const { exitPaywallSurvey, nthAppOpen } = useAppSelector(selectUserVariables);
     const { openPaywallSurvey } = useContext(HandleModalsContext);
 
-    useEffect(() => {
-        const openFeedbackForm = (e: GoBackEvent) => {
-            e.preventDefault();
-            navigation.dispatch(e.data.action);
+    const goBack = useCallback(() => {
+        router.push("/(app)/home");
 
-            if (exitPaywallSurvey === true) return;
-            if (nthAppOpen === 0) return;
+        if (exitPaywallSurvey === true) return;
+        if (nthAppOpen === 0) return;
 
-            openPaywallSurvey();
-        };
+        openPaywallSurvey();
+    }, [exitPaywallSurvey, nthAppOpen]);
 
-        navigation.addListener("beforeRemove", openFeedbackForm);
-
-        return () => {
-            navigation.removeListener("beforeRemove", openFeedbackForm);
-        };
-    }, []);
+    return goBack;
 };
 
 function PostOnboardingPaywall() {
@@ -75,7 +54,7 @@ function PostOnboardingPaywall() {
     const openSuccessAlert = () =>
         open({ state: "success", subtitle: "To check your membership details visit your profile", title: "Congratulations" });
 
-    useBlockGoBack();
+    const back = useHandleGoBack();
 
     const purchase = useCallback(() => {
         if (currentOffering === null) return;
@@ -90,6 +69,23 @@ function PostOnboardingPaywall() {
 
     return (
         <View style={style.container}>
+            <TouchableOpacity
+                style={{ flexDirection: "row", alignItems: "center", height: 40, justifyContent: "flex-start", width: "100%", paddingTop: 10 }}
+                onPress={back}>
+                <View
+                    style={{
+                        height: 30,
+                        width: 30,
+                        borderRadius: 30,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        backgroundColor: colors.clearGray,
+                        opacity: 0.8,
+                    }}>
+                    <FontAwesome name={"close"} size={18} color={colors.background} />
+                </View>
+            </TouchableOpacity>
+
             {currentOffering && (
                 <View style={{ flex: 1, width: "100%" }}>
                     <ScrollView showsVerticalScrollIndicator={false}>

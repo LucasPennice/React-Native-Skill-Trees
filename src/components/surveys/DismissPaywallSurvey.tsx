@@ -12,6 +12,7 @@ import AppText from "../AppText";
 import AppTextInput from "../AppTextInput";
 import { useAppDispatch } from "@/redux/reduxHooks";
 import { completeDismissPaywallSurvey } from "@/redux/slices/userVariablesSlice";
+import { BACKGROUND_COLOR } from "../subscription/functions";
 
 const MODAL_HEIGHT = 500;
 const ICON_HEIGHT = 90;
@@ -46,11 +47,12 @@ const styles = StyleSheet.create({
     },
     pressable: {
         borderWidth: 1,
-        borderColor: colors.line,
+        borderColor: colors.clearGray,
         height: 60,
         justifyContent: "center",
         alignItems: "center",
         borderBottomWidth: 0,
+        backgroundColor: BACKGROUND_COLOR,
     },
 });
 
