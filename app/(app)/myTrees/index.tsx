@@ -1,6 +1,7 @@
 import AppText from "@/components/AppText";
 import PlusIcon from "@/components/Icons/PlusIcon";
 import ShareIcon from "@/components/Icons/ShareIcon";
+import { ProgressBar } from "@/components/ProgressBarAndIndicator";
 import { countCompleteNodes } from "@/functions/extractInformationFromTree";
 import TreeCard, { TreeCardProps } from "@/pages/myTrees/TreeCard";
 import AddTreeModal from "@/pages/myTrees/modals/AddTreeModal";
@@ -11,8 +12,9 @@ import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { open } from "@/redux/slices/addTreeModalSlice";
 import { selectNodeById, selectNodesOfTree } from "@/redux/slices/nodesSlice";
-import { TreeData, selectAllTrees } from "@/redux/slices/userTreesSlice";
+import { TreeData, selectAllTrees, selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
 import { ColorGradient, NormalizedNode } from "@/types";
+import useSubscriptionHandler from "@/useSubscriptionHandler";
 import { useUser } from "@clerk/clerk-expo";
 import { HandleAlertContext } from "app/_layout";
 import { router, useLocalSearchParams } from "expo-router";
@@ -135,6 +137,7 @@ const useHandleImportTreesModal = () => {
 
 function MyTrees() {
     const { closeEditTreeModal, editTree, editingTreeId } = useHandleEditingTreeId();
+    const { isProUser } = useSubscriptionHandler();
 
     const handleShareTrees = useHandleShareTrees();
     const { selectionMode, toggleSelection, selectedTreeIds, closeGenerateLinkModal, generateLinkModal } = handleShareTrees;
@@ -157,6 +160,10 @@ function MyTrees() {
                 <HeaderButtons handleShareTrees={handleShareTrees} />
             </View>
             <View style={{ flex: 1 }}>
+                {true && (
+                    // {isProUser === false && (
+                    <RemainingFreeTrees />
+                )}
                 <ScrollView>
                     {userTrees.length > 0 &&
                         userTrees.map((element, idx) => {
@@ -218,6 +225,41 @@ const TreeCardWrapper = ({
             animationDelay={animationDelay}
             selected={selected}
         />
+    );
+};
+
+const RemainingFreeTrees = () => {
+    const style = StyleSheet.create({
+        container: {
+            backgroundColor: colors.clearGray,
+            padding: 20,
+            gap: 10,
+            borderRadius: 10,
+            marginBottom: 20,
+        },
+        header: { flexDirection: "row", justifyContent: "space-between", opacity: 0.8 },
+    });
+
+    const navigateToPaywall = () => router.push("/(app)/postOnboardingPaywall");
+
+    const treeQty = useAppSelector(selectTotalTreeQty);
+
+    const percentage = (treeQty / 3) * 100;
+    const cappedPercentage = parseInt(percentage > 100 ? "100" : `${percentage}`);
+
+    return (
+        <TouchableOpacity style={style.container} onPress={navigateToPaywall}>
+            <View style={style.header}>
+                <AppText fontSize={18} children={"Skill Trees created"} />
+                <AppText fontSize={18} children={`${treeQty} / 3`} />
+            </View>
+
+            <ProgressBar progress={cappedPercentage} colorGrading={[colors.yellow, colors.orange, colors.red]} />
+
+            <View>
+                <AppText fontSize={18} children={"Upgrade to add more"} style={{ textAlign: "right", color: colors.softPurle }} />
+            </View>
+        </TouchableOpacity>
     );
 };
 

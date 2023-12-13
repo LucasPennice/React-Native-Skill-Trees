@@ -58,11 +58,13 @@ export const ProgressBar = ({
     barStyle,
     containerStyle,
     delay,
+    colorGrading = [colors.red, colors.orange, colors.green],
 }: {
     progress: number;
     containerStyle?: ViewStyle;
     barStyle?: ViewStyle;
     delay?: number;
+    colorGrading?: [string, string, string];
 }) => {
     const styles = StyleSheet.create({
         progressBar: { height: "100%", backgroundColor: "#EFEFEF", borderRadius: 10 },
@@ -79,7 +81,7 @@ export const ProgressBar = ({
     const animatedProgressBar = useAnimatedStyle(() => {
         return {
             width: width.value,
-            backgroundColor: withTiming(interpolateColor(progress, [0, 66, 100], [colors.red, colors.orange, colors.green])),
+            backgroundColor: withTiming(interpolateColor(progress, [0, 66, 100], colorGrading)),
         };
     });
 
