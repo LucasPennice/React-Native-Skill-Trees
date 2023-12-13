@@ -168,7 +168,7 @@ function SignUp() {
 
     const navigateToLogin = () => router.push("/(app)/auth/signIn");
 
-    const [showEmailAndPassword, setShowEmailAndPassword] = useState(true);
+    const [showEmailAndPassword, setShowEmailAndPassword] = useState(false);
     const back = () => {
         if (showEmailAndPassword) {
             setShowEmailAndPassword(false);

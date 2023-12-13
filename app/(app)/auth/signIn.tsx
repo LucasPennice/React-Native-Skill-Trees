@@ -1,27 +1,38 @@
 import AppButton from "@/components/AppButton";
 import AppText from "@/components/AppText";
 import AppTextInput from "@/components/AppTextInput";
-import Logo from "@/components/Logo";
 import PasswordInput from "@/components/PasswordInput";
-import Spacer from "@/components/Spacer";
-import RedirectToSupportPage from "@/components/auth/RedirectToSupportPage";
 import { SocialAuthDiscordButton } from "@/components/auth/SocialAuthDiscordButton";
+import { BACKGROUND_COLOR } from "@/components/subscription/functions";
 import { colors } from "@/parameters";
 import { useAppDispatch } from "@/redux/reduxHooks";
 import { updateFirstTimeOpeningApp } from "@/redux/slices/syncSlice";
 import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useSignIn } from "@clerk/clerk-expo";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { router } from "expo-router";
-import React from "react";
-import { Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
-import Animated, { FadeInRight } from "react-native-reanimated";
+import React, { useState } from "react";
+import { Dimensions, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View } from "react-native";
+import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { RoutesParams } from "routes";
 import { useHandleButtonState, useHandleClerkErrorMessages } from "./signUp";
 
 const { height } = Dimensions.get("window");
 
 const style = StyleSheet.create({
-    container: { alignItems: "center", height, padding: 15, position: "relative" },
+    container: { height, padding: 15, paddingTop: 0, position: "relative", backgroundColor: BACKGROUND_COLOR },
+    emailButton: {
+        width: "100%",
+        height: 55,
+        flexDirection: "row",
+        borderWidth: 1,
+        borderColor: colors.clearGray,
+        backgroundColor: colors.clearGray,
+        borderRadius: 10,
+        gap: 10,
+        justifyContent: "center",
+        alignItems: "center",
+    },
 });
 
 export default function SignInScreen() {
@@ -73,67 +84,106 @@ export default function SignInScreen() {
 
     const navigateToSignUp = () => router.push("/(app)/auth/signUp");
 
+    const [showEmailAndPassword, setShowEmailAndPassword] = useState(false);
+    const back = () => {
+        if (showEmailAndPassword) {
+            setShowEmailAndPassword(false);
+            setEmailAddress("");
+            setPassword("");
+
+            return;
+        }
+
+        router.back();
+    };
+
     return (
-        <View style={style.container}>
-            <View style={{ width: "100%", flex: 1, gap: 10, alignItems: "center" }}>
-                <Logo />
+        <Animated.View style={style.container} exiting={FadeOutLeft}>
+            <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", height: 40, justifyContent: "flex-start" }} onPress={back}>
+                <FontAwesome name={"chevron-left"} size={18} color={colors.softPurle} />
+                <AppText children={"Back"} fontSize={18} style={{ color: colors.softPurle, marginLeft: 10, paddingTop: 3 }} />
+            </TouchableOpacity>
 
-                <Animated.View style={{ width: "100%", gap: 10, marginTop: 20 }} entering={FadeInRight}>
-                    <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-evenly" }}>
-                        {/* <SocialAuthGoogleButton actingAs={"logIn"} /> */}
-                        <SocialAuthDiscordButton actingAs={"logIn"} />
+            {!showEmailAndPassword && (
+                <Animated.View style={{ flex: 1, justifyContent: "space-around", marginTop: 20, paddingHorizontal: 20 }} exiting={FadeOutLeft}>
+                    <View>
+                        <AppText children={"Sign In"} fontSize={42} style={{ textAlign: "center", marginBottom: 15, fontFamily: "helveticaBold" }} />
+                        <AppText
+                            children={"What did you use to access your Skill Trees account last time?"}
+                            fontSize={22}
+                            style={{ textAlign: "center", opacity: 0.8 }}
+                        />
                     </View>
 
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            marginVertical: 10,
-                            alignItems: "center",
-                        }}>
-                        <Spacer style={{ flex: 1 }} />
-                        <AppText children={`or`} fontSize={18} style={{ color: "#E6E8E680", marginBottom: 5, width: 150, textAlign: "center" }} />
-                        <Spacer style={{ flex: 1 }} />
+                    <View style={{ gap: 10 }}>
+                        <SocialAuthDiscordButton actingAs={"logIn"} text={"Sign in with Discord"} preferred />
+                        <TouchableOpacity style={style.emailButton} onPress={() => setShowEmailAndPassword(true)}>
+                            <FontAwesome name={"envelope"} size={18} color={colors.white} />
+                            <AppText children={"Email and Password"} fontSize={18} style={{ fontFamily: "helveticaBold" }} />
+                        </TouchableOpacity>
                     </View>
 
-                    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "position"} style={{ height: 250 }}>
+                    <AppButton
+                        onPress={navigateToSignUp}
+                        text={{ idle: "I need a new account" }}
+                        color={{ idle: colors.darkGray }}
+                        pressableStyle={{ alignItems: "center" }}
+                        style={{ paddingHorizontal: 15, borderRadius: 15, width: 180 }}
+                    />
+                </Animated.View>
+            )}
+
+            {showEmailAndPassword && (
+                <Animated.View
+                    style={{
+                        width: "100%",
+                        paddingHorizontal: 20,
+                        justifyContent: "center",
+                        flex: 1,
+                        position: "relative",
+                        alignItems: "center",
+                    }}
+                    entering={FadeInRight}
+                    exiting={FadeOutLeft}>
+                    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "position"} style={{ width: "100%" }}>
                         <AppTextInput
                             textState={[emailAddress, setEmailAddress]}
                             inputProps={{ autoCapitalize: "none", spellCheck: false }}
                             placeholder={"Username or Email"}
-                            containerStyles={{ marginBottom: 10 }}
+                            containerStyles={{
+                                borderRadius: 0,
+                                borderTopLeftRadius: 10,
+                                borderTopRightRadius: 10,
+                                borderBottomWidth: 1,
+                                borderColor: `${colors.clearGray}80`,
+                                height: 60,
+                            }}
                         />
-                        {error.identifier !== "" && (
-                            <AppText children={error.identifier} fontSize={14} style={{ color: colors.pink, marginBottom: 10 }} />
-                        )}
                         <PasswordInput
                             textState={[password, setPassword]}
                             inputProps={{ secureTextEntry: true }}
                             placeholder={"Password"}
                             onBlur={onSignInPress}
+                            containerStyles={{ borderRadius: 0, borderBottomLeftRadius: 10, borderBottomRightRadius: 10, height: 60 }}
                         />
-                        {error.password !== "" && <AppText children={error.password} fontSize={14} style={{ color: colors.pink }} />}
 
+                        {error.identifier !== "" && (
+                            <AppText children={error.identifier} fontSize={14} style={{ color: colors.pink, marginBottom: 10 }} />
+                        )}
+                        {error.password !== "" && <AppText children={error.password} fontSize={14} style={{ color: colors.pink }} />}
+                    </KeyboardAvoidingView>
+
+                    <View style={{ position: "absolute", bottom: 0, width: "100%" }}>
                         <AppButton
                             state={submitState}
                             onPress={onSignInPress}
-                            text={{ idle: "SIGN IN", error: "Please try again", success: "Success!" }}
-                            style={{ backgroundColor: colors.background, marginTop: 10 }}
-                            textStyle={{ fontFamily: "helveticaBold" }}
+                            text={{ idle: "Sign In", error: "Please try again", success: "Success!" }}
+                            style={{ backgroundColor: colors.softPurle, height: 60 }}
+                            textStyle={{ fontFamily: "helveticaBold", fontSize: 18, lineHeight: 18 }}
                         />
-
-                        <Pressable onPressIn={navigateToSignUp} style={{ flexDirection: "row", alignItems: "center", height: 45 }}>
-                            <AppText children={"No account?"} fontSize={14} />
-                            <AppText
-                                children={"Sign up"}
-                                fontSize={14}
-                                style={{ color: colors.accent, fontFamily: "helveticaBold", paddingLeft: 3 }}
-                            />
-                        </Pressable>
-                    </KeyboardAvoidingView>
+                    </View>
                 </Animated.View>
-            </View>
-
-            <RedirectToSupportPage />
-        </View>
+            )}
+        </Animated.View>
     );
 }
