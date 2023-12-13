@@ -16,6 +16,7 @@ import { Alert, Image, StyleSheet, TouchableOpacity, View } from "react-native";
 
 import LoadingIcon from "@/components/LoadingIcon";
 import { useContext, useState } from "react";
+import { CustomerInfo } from "react-native-purchases";
 
 const style = StyleSheet.create({
     container: { flex: 1, padding: 15, gap: 20 },
@@ -26,7 +27,7 @@ const style = StyleSheet.create({
 const millisecondsToHours = 1000 * 60 * 60;
 function UserProfile() {
     const { isSignedIn, user } = useUser();
-    const { isProUser } = useContext(SubscriptionContext);
+    const { isProUser, customerInfo } = useContext(SubscriptionContext);
 
     const { lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);
 
@@ -60,7 +61,7 @@ function UserProfile() {
                     icon={"credit-card-alt"}
                     href={isProUser ? "/(app)/subscriptionDetails" : "/(app)/postOnboardingPaywall"}
                     title={"Subscription"}
-                    subtitle={"No active subscription"}
+                    subtitle={isProUser && customerInfo ? getProString(customerInfo) : "No active subscription"}
                     warning={!isProUser}
                 />
             </View>
@@ -262,4 +263,19 @@ const SignOutButton = () => {
             style={{ backgroundColor: colors.background }}
         />
     );
+};
+
+const getProString = (customerInfo: CustomerInfo) => {
+    const identifier = customerInfo.activeSubscriptions[0];
+
+    switch (identifier) {
+        case "pro_annual_1:p1a":
+            return "Annual billing";
+        case "pro_monthly_1:p1m":
+            return "Monthly billing";
+        case "pro_lifetime":
+            return "Pro forever";
+        default:
+            return "Pro";
+    }
 };

@@ -27,6 +27,7 @@ export const CANVAS_VERTICAL_PADDING = 200;
 export const colors = {
     background: "#000000",
     darkGray: "#181A1C",
+    clearGray: "#2A2D2F",
     white: "#E6E8E6",
     line: "#515053",
     unmarkedText: "#B1B2B2",

@@ -16,7 +16,7 @@ const RadialInput = ({ selected, onPress, title }: { selected: boolean; onPress:
             borderRadius: 15,
             paddingHorizontal: 10,
             flexDirection: "row",
-            backgroundColor: "#2A2D2F",
+            backgroundColor: colors.clearGray,
             marginBottom: 10,
         },
         selectedIndicator: {

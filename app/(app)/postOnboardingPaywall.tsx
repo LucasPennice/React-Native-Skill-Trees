@@ -8,7 +8,7 @@ import { selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { EventArg } from "@react-navigation/native";
 import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
-import { useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import Svg, { Path, SvgProps } from "react-native-svg";

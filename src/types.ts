@@ -255,4 +255,4 @@ export type TreesToShift = { [key: string]: "overlap" | "halfOverlap" };
 
 export type SubTreeIdAndSubTreeRootId = { subTreeId: string; subTreeRootId: string };
 
-export type SocialAuthButton = { actingAs: "logIn" | "signUp" };
+export type SocialAuthButton = { actingAs: "logIn" | "signUp"; text: string; preferred?: true };

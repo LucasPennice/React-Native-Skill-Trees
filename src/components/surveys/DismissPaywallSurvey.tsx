@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
         height: ICON_HEIGHT,
         overflow: "hidden",
         borderRadius: ICON_HEIGHT,
-        backgroundColor: "#2A2D2F",
+        backgroundColor: colors.clearGray,
         position: "absolute",
         justifyContent: "center",
         alignItems: "center",
@@ -142,7 +142,7 @@ function DismissPaywallSurvey({ open, close }: { open: boolean; close: () => voi
                                     placeholder={"Your feedback :)"}
                                     textState={[longAnswer, setLongAnswer]}
                                     containerStyles={{
-                                        backgroundColor: "#2A2D2F",
+                                        backgroundColor: colors.clearGray,
                                         height: 150,
                                     }}
                                 />

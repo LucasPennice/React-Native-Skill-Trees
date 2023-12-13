@@ -8,22 +8,26 @@ import { RoutesParams } from "routes";
 import DiscordIcon from "../Icons/DiscordIcon";
 import { updateFirstTimeOpeningApp } from "@/redux/slices/syncSlice";
 import { useAppDispatch } from "@/redux/reduxHooks";
-
-const style = StyleSheet.create({
-    container: {
-        width: 70,
-        height: 70,
-        borderWidth: 1,
-        borderColor: `${colors.white}80`,
-        borderRadius: 10,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-});
+import AppText from "../AppText";
 
 // 🚨 the screen that calls this component should run useWarmUpBrowser 🚨
 
-export const SocialAuthDiscordButton = ({ actingAs }: SocialAuthButton) => {
+export const SocialAuthDiscordButton = ({ actingAs, text, preferred }: SocialAuthButton) => {
+    const style = StyleSheet.create({
+        container: {
+            width: "100%",
+            height: 55,
+            flexDirection: "row",
+            borderWidth: 1,
+            borderColor: preferred ? colors.white : colors.darkGray,
+            backgroundColor: preferred ? colors.white : colors.darkGray,
+            borderRadius: 10,
+            gap: 10,
+            justifyContent: "center",
+            alignItems: "center",
+        },
+    });
+
     const { startOAuthFlow } = useOAuth({ strategy: "oauth_discord" });
     const dispatch = useAppDispatch();
 
@@ -50,7 +54,8 @@ export const SocialAuthDiscordButton = ({ actingAs }: SocialAuthButton) => {
 
     return (
         <TouchableOpacity onPressIn={logInDiscord} style={style.container}>
-            <DiscordIcon width={35} height={35} fill={colors.white} pointerEvents={"none"} />
+            <DiscordIcon width={20} height={20} fill={preferred ? colors.darkGray : colors.white} pointerEvents={"none"} />
+            <AppText children={text} fontSize={18} style={{ color: preferred ? colors.darkGray : colors.white, fontFamily: "helveticaBold" }} />
         </TouchableOpacity>
     );
 };

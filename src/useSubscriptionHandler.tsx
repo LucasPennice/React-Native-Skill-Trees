@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import Purchases, { CustomerInfo, LOG_LEVEL, PurchasesOffering } from "react-native-purchases";
+import useMongoCompliantUserId from "./useMongoCompliantUserId";
 
 const APIKeys = {
     apple: "your_revenuecat_apple_api_key",
@@ -66,6 +67,7 @@ export type SubscriptionHandler = {
 
 function useSubscriptionHandler(): SubscriptionHandler {
     Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+    const userId = useMongoCompliantUserId();
 
     useEffect(() => {
         (async () => {
@@ -80,6 +82,14 @@ function useSubscriptionHandler(): SubscriptionHandler {
             }
         })();
     }, []);
+
+    useEffect(() => {
+        (async () => {
+            if (userId === null) return;
+
+            await Purchases.logIn(userId);
+        })();
+    }, [userId]);
 
     const currentOffering = useFetchOffers();
     const { isProUser, customerInfo } = useUserSubscriptionInformation();

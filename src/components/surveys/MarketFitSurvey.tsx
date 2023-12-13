@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
         height: ICON_HEIGHT,
         overflow: "hidden",
         borderRadius: ICON_HEIGHT,
-        backgroundColor: "#2A2D2F",
+        backgroundColor: colors.clearGray,
         position: "absolute",
         justifyContent: "center",
         alignItems: "center",
@@ -108,7 +108,7 @@ function MarketFitSurvey({ open, close }: { open: boolean; close: () => void }) 
                                 <AppTextInput
                                     placeholder={"... would benefit from using Skill Trees"}
                                     textState={[avatar, setAvatar]}
-                                    containerStyles={{ backgroundColor: "#2A2D2F", marginBottom: 20 }}
+                                    containerStyles={{ backgroundColor: colors.clearGray, marginBottom: 20 }}
                                 />
                                 <AppText
                                     children={"What is the main benefit you receive from Skill Trees?"}
@@ -118,7 +118,7 @@ function MarketFitSurvey({ open, close }: { open: boolean; close: () => void }) 
                                 <AppTextInput
                                     placeholder={"Your answer"}
                                     textState={[benefit, setBenefit]}
-                                    containerStyles={{ backgroundColor: "#2A2D2F", height: 100, marginBottom: 20 }}
+                                    containerStyles={{ backgroundColor: colors.clearGray, height: 100, marginBottom: 20 }}
                                 />
                                 <AppText
                                     children={"How can we improve Skill Trees for you?"}
@@ -129,7 +129,7 @@ function MarketFitSurvey({ open, close }: { open: boolean; close: () => void }) 
                                 <AppTextInput
                                     placeholder={"... would be a huge improvement"}
                                     textState={[improvements, setImprovements]}
-                                    containerStyles={{ backgroundColor: "#2A2D2F", height: 150, marginBottom: 20 }}
+                                    containerStyles={{ backgroundColor: colors.clearGray, height: 150, marginBottom: 20 }}
                                 />
 
                                 <AppButton
