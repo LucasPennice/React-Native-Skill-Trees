@@ -63,6 +63,9 @@ export const userVariablesSlice = createSlice({
         completeDismissPaywallSurvey: (state) => {
             state.exitPaywallSurvey = true;
         },
+        updateLastPaywallShowDate: (state) => {
+            state.lastPaywallShowDate = new Date().getTime();
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(addUserTrees, (state, action) => {
@@ -83,6 +86,7 @@ export const {
     completeOnboardingExperienceSurvey,
     increaseAppOpenAccum,
     updateLaunchVersion,
+    updateLastPaywallShowDate,
 } = userVariablesSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type

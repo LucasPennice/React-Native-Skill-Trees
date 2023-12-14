@@ -159,11 +159,13 @@ function useHandleSyncOnLoginOrSignUp(
             if (handleLogInSync === "true") {
                 setShowSyncModal(true);
                 logInSync(userExistsOnDB);
+                mixpanel.track("FEATURE User Sign In");
                 return;
             }
 
             if (handleSignUpSync === "true" && !userExistsOnDB) {
                 signUpSync();
+                mixpanel.track("FEATURE User Sign Up");
                 return;
             }
         })();

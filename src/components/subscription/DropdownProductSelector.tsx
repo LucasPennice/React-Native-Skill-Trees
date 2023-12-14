@@ -50,7 +50,9 @@ const DropdownProductSelector = ({
                     title={`Annual - ${annualPackage.product.priceString}`}
                     onPress={selectYear}
                     selected={selected === annualPackage.product.identifier}
-                    subtitle={`US$ ${(annualPackage.product.price / 12).toFixed(2).replace(".", ",")} per month, billed annually, 7 days free trial`}
+                    subtitle={`${annualPackage.product.currencyCode} ${(annualPackage.product.price / 12)
+                        .toFixed(2)
+                        .replace(".", ",")} per month, billed annually, 7 days free trial`}
                     bestValue
                     regionalPrice
                 />
@@ -67,7 +69,7 @@ const DropdownProductSelector = ({
                             title={`Lifetime - ${lifetimePackage.product.priceString}`}
                             onPress={selectLifetime}
                             selected={selected === lifetimePackage.product.identifier}
-                            subtitle={"One time payment, your forever"}
+                            subtitle={"One time payment, yours forever"}
                             border={false}
                         />
                     </Animated.View>

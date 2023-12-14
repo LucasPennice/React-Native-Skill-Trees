@@ -4,7 +4,7 @@ import ChevronLeft from "@/components/Icons/ChevronLeft";
 import DismissPaywallSurvey from "@/components/surveys/DismissPaywallSurvey";
 import MarketFitSurvey from "@/components/surveys/MarketFitSurvey";
 import PostOnboardingSurvey from "@/components/surveys/PostOnboardingSurvey";
-import { NAV_HEGIHT, colors } from "@/parameters";
+import { NAV_HEGIHT, colors, dayInMilliseconds } from "@/parameters";
 import { useAppSelector } from "@/redux/reduxHooks";
 import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import { LAST_ONBOARDING_STEP, selectUserVariables } from "@/redux/slices/userVariablesSlice";
@@ -84,17 +84,30 @@ const useHandleSurveyModals = () => {
 };
 
 const useHandleShowPostOnboardingPaywall = (readyToRedirect: boolean) => {
-    const { onboardingStep, appNumberWhenFinishedOnboarding, nthAppOpen } = useAppSelector(selectUserVariables);
+    const { onboardingStep, appNumberWhenFinishedOnboarding, nthAppOpen, lastPaywallShowDate } = useAppSelector(selectUserVariables);
     const { isProUser } = useContext(SubscriptionContext);
+
+    const DAYS_INTERVAL_TO_SHOW_PAYWALL = 3;
 
     useEffect(() => {
         if (!readyToRedirect) return;
-        if (isProUser === true || isProUser === null) return;
-        //This does not inclues signIn/Up
-        if (appNumberWhenFinishedOnboarding === null) return;
-        if (nthAppOpen === appNumberWhenFinishedOnboarding) return;
 
-        console.log(readyToRedirect, isProUser, onboardingStep, appNumberWhenFinishedOnboarding, nthAppOpen);
+        const notLoadedOrProUser = isProUser === true || isProUser === null;
+        if (notLoadedOrProUser) return;
+
+        //This does not inclues signIn/Up
+        const onboardingNotFinished = appNumberWhenFinishedOnboarding === null;
+        if (onboardingNotFinished) return;
+
+        const finishedOnboardingOnThisAppOpen = nthAppOpen === appNumberWhenFinishedOnboarding;
+        if (finishedOnboardingOnThisAppOpen) return;
+
+        const hasntShownPaywallYet = lastPaywallShowDate === null;
+        if (hasntShownPaywallYet) return router.push("/(app)/postOnboardingPaywall");
+
+        const daysSinceLastPaywallShown = (new Date().getTime() - (lastPaywallShowDate ?? 0)) / dayInMilliseconds;
+
+        if (daysSinceLastPaywallShown < DAYS_INTERVAL_TO_SHOW_PAYWALL) return;
 
         router.push("/(app)/postOnboardingPaywall");
     }, [readyToRedirect, isProUser, onboardingStep, appNumberWhenFinishedOnboarding, nthAppOpen]);

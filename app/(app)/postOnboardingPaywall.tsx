@@ -3,8 +3,8 @@ import AppText from "@/components/AppText";
 import DropdownProductSelector from "@/components/subscription/DropdownProductSelector";
 import { BACKGROUND_COLOR, getSubscribeButtonText, handlePurchase } from "@/components/subscription/functions";
 import { colors } from "@/parameters";
-import { useAppSelector } from "@/redux/reduxHooks";
-import { selectUserVariables } from "@/redux/slices/userVariablesSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
+import { selectUserVariables, updateLastPaywallShowDate } from "@/redux/slices/userVariablesSlice";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
 import { router } from "expo-router";
@@ -49,8 +49,11 @@ function PostOnboardingPaywall() {
     const { currentOffering } = useContext(SubscriptionContext);
     const { open } = useContext(HandleAlertContext);
 
+    const dispatch = useAppDispatch();
+
     useEffect(() => {
         mixpanel.track("PAYWALL Post Onboarding Paywall View <1.0>");
+        dispatch(updateLastPaywallShowDate());
     }, []);
 
     const openSuccessAlert = () =>
@@ -168,21 +171,3 @@ const Checklist = () => {
 };
 
 export default PostOnboardingPaywall;
-
-const Logo = (props: SvgProps) => (
-    <View style={{ alignSelf: "center", marginBottom: 20 }}>
-        <Svg width={91} height={70} fill="none" {...props}>
-            <Path
-                stroke="#fff"
-                strokeWidth={3.568}
-                d="M88.716 58.758a9.38 9.38 0 1 1-18.76 0 9.38 9.38 0 1 1 18.76 0ZM54.88 58.758a9.38 9.38 0 1 1-18.76 0 9.38 9.38 0 1 1 18.76 0ZM21.043 58.758a9.38 9.38 0 1 1-18.76 0 9.38 9.38 0 0 1 18.76 0ZM54.88 11.47a9.38 9.38 0 1 1-18.76 0 9.38 9.38 0 1 1 18.76 0Z"
-            />
-            <Path
-                stroke="#fff"
-                strokeWidth={3.223}
-                d="M45.629 22.463c0 26.125 33.836 3.043 33.836 26.125M45.371 22.55c0 25.971-33.814 3.025-33.814 25.971"
-            />
-            <Path fill="#fff" d="M43.889 20.663h3.222v28.888h-3.222z" />
-        </Svg>
-    </View>
-);
