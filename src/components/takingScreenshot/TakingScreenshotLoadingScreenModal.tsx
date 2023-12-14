@@ -48,7 +48,7 @@ function TakingScreenshotLoadingScreenModal({
     useEffect(() => {
         (async () => {
             if (takingScreenshot) {
-                await mixpanel.track(`takingScreenshot`);
+                await mixpanel.track(`FEATURE Taking Screenshot`);
 
                 await analytics().logEvent("takingScreenshot");
             }
@@ -88,7 +88,7 @@ const useHandleScreenshotCapture = (
             closeModal();
         } catch (error) {
             Alert.alert("Error onCapture");
-            mixpanel.track(`appError`, { message: error, stack: error });
+            mixpanel.track(`CRASH`, { message: error, stack: error });
         } finally {
             setLoadingShare(false);
         }

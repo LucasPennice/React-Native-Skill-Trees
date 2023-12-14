@@ -5,7 +5,6 @@ import { useAppSelector } from "@/redux/reduxHooks";
 import { selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { HandleModalsContext } from "app/(app)/_layout";
-import { mixpanel } from "app/_layout";
 import { useContext, useEffect, useState } from "react";
 import { Alert, Keyboard, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { Easing, FadeInDown, Layout, ZoomIn, ZoomOut, useAnimatedStyle, withTiming } from "react-native-reanimated";
@@ -175,18 +174,12 @@ function AddNodeModal({ closeModal, open, addNodes, selectedTree, dnDZone }: Pro
         const inputsEmpty = currentNode.data.name === "" && currentNode.data.icon.text === "";
 
         if (inputsEmpty) {
-            if (onboardingStep === 1) {
-                mixpanel.track("completeOnboardingStep 2 - Add Skills");
-                setShowOnboarding(true);
-            }
+            if (onboardingStep === 1) setShowOnboarding(true);
             return saveToTreeElementsOfArray(nodesToAdd);
         }
 
         if (checkIfInputsValid()) {
-            if (onboardingStep === 1) {
-                mixpanel.track("completeOnboardingStep 2 - Add Skills");
-                setShowOnboarding(true);
-            }
+            if (onboardingStep === 1) setShowOnboarding(true);
             return addNodeToListAndSave();
         }
 

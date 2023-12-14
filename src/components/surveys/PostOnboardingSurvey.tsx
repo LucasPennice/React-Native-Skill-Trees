@@ -51,7 +51,7 @@ function PostOnboardingSurvey({ open, close }: { open: boolean; close: () => voi
 
     const handleSubmit = async () => {
         await submit({ experienceAfterOnboarding: text });
-        mixpanel.track("postOnboardingSurvey v1.0", { experienceAfterOnboarding: text });
+        mixpanel.track("SURVEY Post Onboarding <1.0>", { experienceAfterOnboarding: text });
         close();
     };
 

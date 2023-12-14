@@ -50,7 +50,7 @@ function PostOnboardingPaywall() {
     const { open } = useContext(HandleAlertContext);
 
     useEffect(() => {
-        mixpanel.track("Post onboarding paywall view v1.0");
+        mixpanel.track("PAYWALL Post Onboarding Paywall View <1.0>");
     }, []);
 
     const openSuccessAlert = () =>
@@ -65,7 +65,7 @@ function PostOnboardingPaywall() {
             currentOffering.availablePackages.find((p) => p.product.identifier === selected)!,
             openSuccessAlert,
             setLoading,
-            "Post onboarding paywall subscription v1.0"
+            `PAYWALL Post Onboarding Paywall ${selected} Subscription <1.0>`
         )();
     }, [currentOffering, selected]);
 

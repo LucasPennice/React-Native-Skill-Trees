@@ -67,7 +67,7 @@ function DismissPaywallSurvey({ open, close }: { open: boolean; close: () => voi
 
     const handleSubmit = async (reason: string) => {
         close();
-        mixpanel.track("dismiss paywall survey v1.0", { reason, longAnswer });
+        mixpanel.track("SURVEY Dismiss Paywall Survey <1.0>", { reason, longAnswer });
         dispatch(completeDismissPaywallSurvey());
         await submit({ reason, longAnswer });
     };

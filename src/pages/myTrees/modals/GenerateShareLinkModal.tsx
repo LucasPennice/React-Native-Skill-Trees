@@ -54,7 +54,7 @@ function GenerateShareLinkModal({ closeModal, selectedTreeIds }: { closeModal: (
 
                 setMode("ShowLink");
             } catch (error) {
-                mixpanel.track(`appError`, { message: error, stack: error });
+                mixpanel.track(`CRASH`, { message: error, stack: error });
                 Alert.alert("There was an error updating your backup", "Please contact the developer");
             }
         })();
@@ -82,7 +82,7 @@ const UpdatingBackup = () => {
 const ShowLink = ({ selectedTreeIds, userId }: { selectedTreeIds: string[]; userId: string }) => {
     const copyShareLink = () => {
         Clipboard.setString(generateShareLink(userId, selectedTreeIds));
-        mixpanel.track("generateShareTreesLink");
+        mixpanel.track("FEATURE Generate Share Link");
     };
 
     const [copied, setCopied] = useState(false);

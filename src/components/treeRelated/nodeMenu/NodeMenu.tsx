@@ -54,7 +54,7 @@ const OS_CompatibleBorderStyle: ViewStyle["borderStyle"] = Platform.OS === "ios"
 function useTrackOpenNodeMenu() {
     useEffect(() => {
         (async () => {
-            await mixpanel.track("openNodeMenu");
+            await mixpanel.track("FEATURE Open Node Menu");
         })();
     }, []);
 }

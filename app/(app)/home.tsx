@@ -83,10 +83,8 @@ function useCanvasSettingsState() {
 
     const closeCanvasSettingsModal = useCallback(() => {
         if (onboardingStep === OnboardingSteps["CustomizeHomeTree"]) dispatch(completeCustomizeHomeTree());
-        if (onboardingStep === 2) {
-            mixpanel.track("completeOnboardingStep 3 - Customize Home Tree");
-            setShowOnboarding(true);
-        }
+        if (onboardingStep === 2) setShowOnboarding(true);
+
         setCanvasSettings(false);
     }, [onboardingStep]);
 
@@ -189,7 +187,7 @@ function useHandleSyncOnLoginOrSignUp(
                 return;
             } catch (error) {
                 Alert.alert("There was an error loading you backup", `Please contact the developer ${error}`);
-                mixpanel.track(`appError`, { message: error, stack: error });
+                mixpanel.track(`CRASH`, { message: error, stack: error });
 
                 setSyncError();
             }
@@ -210,7 +208,7 @@ function useHandleSyncOnLoginOrSignUp(
             dispatch(updateLastBackupTime());
         } catch (error) {
             Alert.alert("There was an error creating your backup", `Please contact the developer ${error}`);
-            mixpanel.track(`appError`, { message: error, stack: error });
+            mixpanel.track(`CRASH`, { message: error, stack: error });
         }
     };
 }

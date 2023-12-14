@@ -3,10 +3,8 @@ import AppText from "@/components/AppText";
 import { colors } from "@/parameters";
 import { useHandleLottiePlay } from "@/useHandleLottiePlay";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { mixpanel } from "app/_layout";
 import { router } from "expo-router";
 import LottieView from "lottie-react-native";
-import { useEffect } from "react";
 import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -51,10 +49,6 @@ function WelcomeNewUser() {
     const redirectToPreOnboardingPaywall = () => {
         router.push("/preOnboardingPaywall");
     };
-
-    useEffect(() => {
-        mixpanel.track("welcomeNewUser v1.0");
-    }, []);
 
     const animationRef = useHandleLottiePlay(true);
 

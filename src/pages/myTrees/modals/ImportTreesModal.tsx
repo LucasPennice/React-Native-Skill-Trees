@@ -73,7 +73,7 @@ function ImportTreesModal({
                 showTreesToImport(response);
             } catch (error) {
                 Alert.alert("There was an error importing your trees", "Please contact the developer");
-                mixpanel.track(`appError`, { message: error, stack: error });
+                mixpanel.track(`CRASH`, { message: error, stack: error });
                 closeModal();
             }
         })();

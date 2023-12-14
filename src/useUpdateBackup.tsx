@@ -37,7 +37,7 @@ function useUpdateBackup() {
             setSubmitSuccess();
         } catch (error) {
             setSubmitError();
-            mixpanel.track(`appError`, { message: error, stack: error });
+            mixpanel.track(`CRASH`, { message: error, stack: error });
             throw new Error(`${error}`);
         }
     };

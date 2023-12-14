@@ -178,7 +178,7 @@ const useShareTree = () => {
 
     const { mutate: sendTreeFeedback, status: treeFeedbackStatus } = useMutation({
         mutationFn: () => axiosClient.patch(`treeBug/${userId}`, { nodesTable, treeDataTable }),
-        onSuccess: (_, newEntry) => mixpanel.track(`treeBug`),
+        onSuccess: (_, newEntry) => mixpanel.track(`BUG REPORT - tree layout bug`),
     });
 
     return { sendTreeFeedback, treeFeedbackStatus };

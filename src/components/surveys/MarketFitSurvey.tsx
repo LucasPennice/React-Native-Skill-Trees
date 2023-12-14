@@ -54,7 +54,7 @@ function MarketFitSurvey({ open, close }: { open: boolean; close: () => void }) 
 
     const handleSubmit = async () => {
         await submit({ nps: selected, avatar, mainBenefit: benefit, improvements });
-        mixpanel.track("marketFitSurvey v1.0", { nps: selected, avatar, mainBenefit: benefit, improvements });
+        mixpanel.track("SURVEY Market Fit <1.0>", { nps: selected, avatar, mainBenefit: benefit, improvements });
         close();
     };
 

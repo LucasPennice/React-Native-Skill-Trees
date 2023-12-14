@@ -117,7 +117,7 @@ function OnboardingModal({ open, close, openPostOnboardingModal }: { open: boole
     useEffect(() => {
         if (open !== true) return;
 
-        mixpanel.track(`onboarding step ${onboardingStep + 1} viewed v1.0`, {
+        mixpanel.track(`ONBOARDING Step ${onboardingStep + 1} Viewed <1.0>`, {
             title: currentOnboardingData.title,
             subtitle: currentOnboardingData.subtitle,
         });

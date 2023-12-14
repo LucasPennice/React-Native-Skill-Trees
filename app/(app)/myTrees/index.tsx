@@ -160,10 +160,7 @@ function MyTrees() {
                 <HeaderButtons handleShareTrees={handleShareTrees} />
             </View>
             <View style={{ flex: 1 }}>
-                {true && (
-                    // {isProUser === false && (
-                    <RemainingFreeTrees />
-                )}
+                {isProUser === false && <RemainingFreeTrees />}
                 <ScrollView>
                     {userTrees.length > 0 &&
                         userTrees.map((element, idx) => {

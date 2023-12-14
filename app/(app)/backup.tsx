@@ -21,7 +21,7 @@ function BackupScreen() {
         try {
             await handleUserBackup();
         } catch (error) {
-            mixpanel.track(`appError`, { message: error, stack: error });
+            mixpanel.track(`CRASH`, { message: error, stack: error });
 
             Alert.alert(`There was an error creating your backup`, `Please contact the developer ${error}`);
         }

@@ -20,7 +20,7 @@ export const handlePurchase =
             router.push("/(app)/home");
         } catch (e) {
             //@ts-ignore
-            if (!e.userCancelled) mixpanel.track("purchaseError", { error: e });
+            if (!e.userCancelled) mixpanel.track("PAYWALL Purchase Error", { error: e });
         } finally {
             setLoading(false);
         }
@@ -35,13 +35,12 @@ export const restorePurchase = (setLoading: (v: boolean) => void, openSuccessAle
             openSuccessAlert();
 
             mixpanel.track(`${eventName}`);
-            // mixpanel.track(`Pre onboarding paywall restore subscription v1.0 `);
 
             router.push("/(app)/home");
         }
     } catch (error) {
         //@ts-ignore
-        mixpanel.track("purchaseError", { error });
+        mixpanel.track("PAYWALL Restore Error", { error });
     } finally {
         setLoading(false);
     }

@@ -1,8 +1,7 @@
-import { addNodes } from "./nodesSlice";
-import { addUserTrees } from "./userTreesSlice";
-import { mixpanel } from "app/_layout";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../reduxStore";
+import { addNodes } from "./nodesSlice";
+import { addUserTrees } from "./userTreesSlice";
 
 export enum OnboardingSteps {
     "CreateTree" = 0,
@@ -70,7 +69,6 @@ export const userVariablesSlice = createSlice({
             if (state.onboardingStep !== OnboardingSteps.CreateTree) return;
 
             state.onboardingStep = 1;
-            mixpanel.track(`onboarding step 0 (Create Tree) complete`);
         });
         builder.addCase(addNodes, (state, action) => {
             if (state.onboardingStep === OnboardingSteps.AddSkill) state.onboardingStep = 2;

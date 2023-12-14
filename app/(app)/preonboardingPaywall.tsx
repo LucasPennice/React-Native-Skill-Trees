@@ -44,7 +44,7 @@ function PreOnboardingPaywallPage() {
     const { open } = useContext(HandleAlertContext);
 
     useEffect(() => {
-        mixpanel.track("Pre onboarding paywall view v1.0");
+        mixpanel.track(`PAYWALL Pre Onboarding Paywall View <1.0>`);
         NavigationBar.setBackgroundColorAsync(BACKGROUND_COLOR);
     }, []);
 
@@ -60,7 +60,7 @@ function PreOnboardingPaywallPage() {
             currentOffering.availablePackages.find((p) => p.product.identifier === selected)!,
             openSuccessAlert,
             setLoading,
-            "Pre onboarding paywall subscription v1.0"
+            `PAYWALL Pre Onboarding Paywall ${selected} Subscription <1.0>`
         )();
     }, [currentOffering, selected]);
 

@@ -36,6 +36,6 @@ export async function sharePNG(fileName: string, data: string) {
     } catch (error) {
         console.error(error);
         Alert.alert("There was an error sharing your skill tree");
-        mixpanel.track(`appError`, { message: error, stack: error });
+        mixpanel.track(`CRASH`, { message: error, stack: error });
     }
 }

@@ -1,6 +1,6 @@
 import AppEmojiPicker, { Emoji } from "@/components/AppEmojiPicker";
 import { generateMongoCompliantId, toggleEmoji } from "@/functions/misc";
-import { TreeData, addUserTrees } from "@/redux/slices/userTreesSlice";
+import { TreeData, addUserTrees, selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
 import { selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import analytics from "@react-native-firebase/analytics";
 import { HandleModalsContext } from "app/(app)/_layout";
@@ -15,11 +15,25 @@ import { colors, nodeGradients } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { close, selectAddTree } from "../../../redux/slices/addTreeModalSlice";
 import { ColorGradient } from "../../../types";
+import useSubscriptionHandler from "@/useSubscriptionHandler";
+import { router } from "expo-router";
 
 const useClearStateOnOpen = (open: boolean, cleanup: () => void) => {
     useEffect(() => {
         cleanup();
     }, [open]);
+};
+
+const useHandleRedirectFreeUser = () => {
+    const treeQty = useAppSelector(selectTotalTreeQty);
+    const { isProUser } = useSubscriptionHandler();
+
+    useEffect(() => {
+        if (treeQty < 3) return;
+        if (isProUser === null || isProUser === true) return;
+
+        router.push("/(app)/postOnboardingPaywall");
+    }, [isProUser, treeQty]);
 };
 
 function AddTreeModal() {
@@ -34,13 +48,15 @@ function AddTreeModal() {
     const { onboardingStep } = useAppSelector(selectUserVariables);
     const dispatch = useAppDispatch();
 
+    useHandleRedirectFreeUser();
+
     const { modal: setShowOnboarding } = useContext(HandleModalsContext);
 
     useClearStateOnOpen(open, cleanup);
 
     const closeModal = () => dispatch(close());
 
-    const createNewTree = async () => {
+    const createNewTree = () => {
         if (treeName === "") return Alert.alert("Please give the tree a name");
         if (!selectedColorGradient) return Alert.alert("Please select a color");
 
@@ -61,13 +77,9 @@ function AddTreeModal() {
 
         dispatch(addUserTrees([newUserTree]));
 
-        if (onboardingStep === 0) {
-            await mixpanel.track("completeOnboardingStep 1 - Create Tree");
-            setShowOnboarding(true);
-        }
+        if (onboardingStep === 0) setShowOnboarding(true);
 
-        await analytics().logEvent("createTree", { treeName, isEmoji });
-        await mixpanel.track("userCreatedTree");
+        mixpanel.track("FEATURE Create Tree", { treeName, isEmoji });
 
         closeModal();
     };
