@@ -14,9 +14,8 @@ import { open } from "@/redux/slices/addTreeModalSlice";
 import { selectNodeById, selectNodesOfTree } from "@/redux/slices/nodesSlice";
 import { TreeData, selectAllTrees, selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
 import { ColorGradient, NormalizedNode } from "@/types";
-import useSubscriptionHandler from "@/useSubscriptionHandler";
 import { useUser } from "@clerk/clerk-expo";
-import { HandleAlertContext } from "app/_layout";
+import { HandleAlertContext, SubscriptionContext } from "app/_layout";
 import { router, useLocalSearchParams } from "expo-router";
 import { useContext, useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
@@ -137,7 +136,7 @@ const useHandleImportTreesModal = () => {
 
 function MyTrees() {
     const { closeEditTreeModal, editTree, editingTreeId } = useHandleEditingTreeId();
-    const { isProUser } = useSubscriptionHandler();
+    const { isProUser } = useContext(SubscriptionContext);
 
     const handleShareTrees = useHandleShareTrees();
     const { selectionMode, toggleSelection, selectedTreeIds, closeGenerateLinkModal, generateLinkModal } = handleShareTrees;

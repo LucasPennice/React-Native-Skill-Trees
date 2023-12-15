@@ -2,9 +2,9 @@ import AppEmojiPicker, { Emoji } from "@/components/AppEmojiPicker";
 import { generateMongoCompliantId, toggleEmoji } from "@/functions/misc";
 import { TreeData, addUserTrees, selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
 import { selectUserVariables } from "@/redux/slices/userVariablesSlice";
-import analytics from "@react-native-firebase/analytics";
 import { HandleModalsContext } from "app/(app)/_layout";
-import { mixpanel } from "app/_layout";
+import { SubscriptionContext, mixpanel } from "app/_layout";
+import { router } from "expo-router";
 import { useContext, useEffect, useState } from "react";
 import { Alert, Pressable, View } from "react-native";
 import AppText from "../../../components/AppText";
@@ -15,8 +15,6 @@ import { colors, nodeGradients } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { close, selectAddTree } from "../../../redux/slices/addTreeModalSlice";
 import { ColorGradient } from "../../../types";
-import useSubscriptionHandler from "@/useSubscriptionHandler";
-import { router } from "expo-router";
 
 const useClearStateOnOpen = (open: boolean, cleanup: () => void) => {
     useEffect(() => {
@@ -24,16 +22,22 @@ const useClearStateOnOpen = (open: boolean, cleanup: () => void) => {
     }, [open]);
 };
 
-const useHandleRedirectFreeUser = () => {
+const useHandleRedirectFreeUser = (open: boolean) => {
     const treeQty = useAppSelector(selectTotalTreeQty);
-    const { isProUser } = useSubscriptionHandler();
+    const { isProUser } = useContext(SubscriptionContext);
+
+    const dispatch = useAppDispatch();
+    const closeModal = () => dispatch(close());
 
     useEffect(() => {
+        if (!open) return;
+
         if (treeQty < 3) return;
         if (isProUser === null || isProUser === true) return;
 
+        closeModal();
         router.push("/(app)/postOnboardingPaywall");
-    }, [isProUser, treeQty]);
+    }, [isProUser, treeQty, open]);
 };
 
 function AddTreeModal() {
@@ -48,7 +52,7 @@ function AddTreeModal() {
     const { onboardingStep } = useAppSelector(selectUserVariables);
     const dispatch = useAppDispatch();
 
-    useHandleRedirectFreeUser();
+    useHandleRedirectFreeUser(open);
 
     const { modal: setShowOnboarding } = useContext(HandleModalsContext);
 
