@@ -4,13 +4,15 @@ import { useHandleLottiePlay } from "@/useHandleLottiePlay";
 import { useFormspark } from "@formspark/use-formspark";
 import { mixpanel } from "app/_layout";
 import LottieView from "lottie-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { Easing, FadeInDown, ZoomOut } from "react-native-reanimated";
 import AppButton from "../AppButton";
 import AppText from "../AppText";
 import AppTextInput from "../AppTextInput";
 import RadialInput from "../RadialInput";
+import { useAppDispatch } from "@/redux/reduxHooks";
+import { updateAppOpenSinceLastPMFSurvey } from "@/redux/slices/userVariablesSlice";
 
 const { height } = Dimensions.get("window");
 
@@ -57,6 +59,13 @@ function MarketFitSurvey({ open, close }: { open: boolean; close: () => void }) 
         mixpanel.track("SURVEY Market Fit <1.0>", { nps: selected, avatar, mainBenefit: benefit, improvements });
         close();
     };
+
+    const dispatch = useAppDispatch();
+    useEffect(() => {
+        if (!open) return;
+
+        dispatch(updateAppOpenSinceLastPMFSurvey());
+    }, [open]);
 
     const animationRef = useHandleLottiePlay(open);
 

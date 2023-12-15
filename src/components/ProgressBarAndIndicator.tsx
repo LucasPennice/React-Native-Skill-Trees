@@ -75,7 +75,7 @@ export const ProgressBar = ({
 
     useEffect(() => {
         width.value = delay ? withDelay(delay, withSpring(`${progress}%`, { dampingRatio: 0.7 })) : withSpring(`${progress}%`, { dampingRatio: 0.7 });
-    }, []);
+    }, [progress]);
 
     //@ts-ignore
     const animatedProgressBar = useAnimatedStyle(() => {

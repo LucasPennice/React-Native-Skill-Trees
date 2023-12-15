@@ -31,7 +31,7 @@ import { ErrorBoundaryProps, SplashScreen, Stack } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { Mixpanel } from "mixpanel-react-native";
 import { createContext, useEffect, useState } from "react";
-import { LogBox, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native";
+import { LogBox, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View, AppState } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { Provider } from "react-redux";
@@ -207,8 +207,15 @@ function useUpdateUserVariables() {
     //
 
     useEffect(() => {
-        dispatch(increaseAppOpenAccum());
         if (Platform.OS !== "web") dispatch(updateLaunchVersion(Application.nativeApplicationVersion!));
+
+        const subscription = AppState.addEventListener("change", (nextAppState) => {
+            if (nextAppState === "active") dispatch(increaseAppOpenAccum());
+        });
+
+        return () => {
+            subscription.remove();
+        };
     }, []);
 }
 

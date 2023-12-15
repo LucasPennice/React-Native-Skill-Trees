@@ -227,10 +227,10 @@ const TreeCardWrapper = ({
 const RemainingFreeTrees = () => {
     const style = StyleSheet.create({
         container: {
-            backgroundColor: colors.clearGray,
+            backgroundColor: colors.darkGray,
             padding: 20,
             gap: 10,
-            borderRadius: 10,
+            borderRadius: 15,
             marginBottom: 20,
         },
         header: { flexDirection: "row", justifyContent: "space-between", opacity: 0.8 },
@@ -250,11 +250,9 @@ const RemainingFreeTrees = () => {
                 <AppText fontSize={18} children={`${treeQty} / 3`} />
             </View>
 
-            <ProgressBar progress={cappedPercentage} colorGrading={[colors.yellow, colors.orange, colors.red]} />
+            <ProgressBar progress={cappedPercentage} colorGrading={[colors.yellow, colors.orange, "red"]} />
 
-            <View>
-                <AppText fontSize={18} children={"Upgrade to add more"} style={{ textAlign: "right", color: colors.softPurle }} />
-            </View>
+            <AppText fontSize={18} children={"Upgrade to add more"} style={{ textAlign: "right", color: colors.softPurle, marginTop: 3 }} />
         </TouchableOpacity>
     );
 };

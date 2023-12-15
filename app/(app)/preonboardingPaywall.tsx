@@ -10,6 +10,7 @@ import { router, useNavigation } from "expo-router";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Dimensions, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { HandleModalsContext } from "./_layout";
+import { useAuth } from "@clerk/clerk-expo";
 
 const { height } = Dimensions.get("window");
 
@@ -203,6 +204,8 @@ const Header = () => {
         },
     });
 
+    const { isSignedIn } = useAuth();
+
     const { modal: setShowOnboarding } = useContext(HandleModalsContext);
 
     const redirectToSignIn = () => router.push("/(app)/auth/signIn");
@@ -213,13 +216,15 @@ const Header = () => {
 
     return (
         <View style={style.container}>
-            <AppButton
-                onPress={redirectToSignIn}
-                text={{ idle: "Log In" }}
-                color={{ idle: "transparent" }}
-                style={{ width: 100, alignItems: "flex-start", backgroundColor: BACKGROUND_COLOR }}
-                textStyle={{ fontSize: 16, lineHeight: 16, opacity: 0.3 }}
-            />
+            {!isSignedIn && (
+                <AppButton
+                    onPress={redirectToSignIn}
+                    text={{ idle: "Log In" }}
+                    color={{ idle: "transparent" }}
+                    style={{ width: 100, alignItems: "flex-start", backgroundColor: BACKGROUND_COLOR }}
+                    textStyle={{ fontSize: 16, lineHeight: 16, opacity: 0.3 }}
+                />
+            )}
 
             <AppButton
                 onPress={redirectToHome}

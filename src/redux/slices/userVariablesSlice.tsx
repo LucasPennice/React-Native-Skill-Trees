@@ -23,6 +23,7 @@ export type UserVariablesSlice = {
     appNumberWhenFinishedOnboarding: null | number;
     lastPaywallShowDate: null | number;
     whatsNewLatestVersionShown: null | string;
+    appOpenSinceLastPMFSurvey: null | number;
 };
 
 // Define the initial state using that type
@@ -36,6 +37,7 @@ const initialState: UserVariablesSlice = {
     appNumberWhenFinishedOnboarding: null,
     lastPaywallShowDate: null,
     whatsNewLatestVersionShown: null,
+    appOpenSinceLastPMFSurvey: null,
 };
 
 export const userVariablesSlice = createSlice({
@@ -71,6 +73,9 @@ export const userVariablesSlice = createSlice({
         updateWhatsNewLatestVersionShown: (state, action: PayloadAction<string>) => {
             state.whatsNewLatestVersionShown = action.payload;
         },
+        updateAppOpenSinceLastPMFSurvey: (state) => {
+            state.appOpenSinceLastPMFSurvey = state.nthAppOpen;
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(addUserTrees, (state, action) => {
@@ -93,6 +98,7 @@ export const {
     updateLaunchVersion,
     updateLastPaywallShowDate,
     updateWhatsNewLatestVersionShown,
+    updateAppOpenSinceLastPMFSurvey,
 } = userVariablesSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
