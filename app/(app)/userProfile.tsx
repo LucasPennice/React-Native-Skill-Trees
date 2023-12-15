@@ -10,9 +10,9 @@ import { SubscriptionContext } from "app/_layout";
 import * as Application from "expo-application";
 import { router } from "expo-router";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-
 import { useContext } from "react";
 import { CustomerInfo } from "react-native-purchases";
+import { HandleModalsContext } from "./_layout";
 
 const style = StyleSheet.create({
     container: { flex: 1, padding: 15, gap: 20 },
@@ -24,6 +24,7 @@ const millisecondsToHours = 1000 * 60 * 60;
 function UserProfile() {
     const { isSignedIn, user } = useUser();
     const { isProUser, customerInfo } = useContext(SubscriptionContext);
+    const { openWhatsNewModal } = useContext(HandleModalsContext);
 
     const { lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);
 
@@ -60,10 +61,14 @@ function UserProfile() {
                     subtitle={isProUser && customerInfo ? getProString(customerInfo) : "No active subscription"}
                     warning={!isProUser}
                 />
+
+                <AppText fontSize={16} children={"DISCOVER"} style={{ marginTop: 10, opacity: 0.8 }} />
+
+                <InsightButton icon={"magic"} onPress={openWhatsNewModal} title={"What's new in Skill Trees"} />
             </View>
 
             <View>
-                <AppText fontSize={14} children={`Version ${Application.nativeBuildVersion}`} style={style.versionText} />
+                <AppText fontSize={14} children={`Version ${Application.nativeApplicationVersion}`} style={style.versionText} />
 
                 {!isSignedIn && (
                     <>
@@ -154,6 +159,50 @@ const SettingLink = ({
                     <FontAwesome name={"exclamation"} size={14} color={colors.unmarkedText} />
                 </View>
             )}
+        </TouchableOpacity>
+    );
+};
+
+const InsightButton = ({
+    onPress,
+    icon,
+    title,
+    isLink,
+}: {
+    onPress: () => void;
+    icon: React.ComponentProps<typeof FontAwesome>["name"];
+    title: string;
+    isLink?: true;
+}) => {
+    return (
+        <TouchableOpacity
+            onPress={onPress}
+            style={{
+                height: 50,
+                paddingHorizontal: 10,
+                flexDirection: "row",
+                borderBottomWidth: 1,
+                borderColor: `${colors.line}40`,
+                alignItems: "center",
+                position: "relative",
+                justifyContent: "space-between",
+            }}>
+            <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+                <View
+                    style={{
+                        backgroundColor: colors.clearGray,
+                        width: 35,
+                        height: 35,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderRadius: 10,
+                    }}>
+                    <FontAwesome name={icon} size={16} color={colors.white} />
+                </View>
+
+                <AppText fontSize={18} children={title} style={{ opacity: 0.9 }} />
+            </View>
+            {isLink && <ChevronRight color={colors.line} />}
         </TouchableOpacity>
     );
 };

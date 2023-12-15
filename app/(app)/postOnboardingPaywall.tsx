@@ -10,7 +10,6 @@ import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
 import { router } from "expo-router";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import Svg, { Path, SvgProps } from "react-native-svg";
 import { HandleModalsContext } from "./_layout";
 
 const style = StyleSheet.create({

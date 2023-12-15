@@ -1,6 +1,7 @@
 import OnboardingModal from "@/OnboardingModal";
 import AppText from "@/components/AppText";
 import ChevronLeft from "@/components/Icons/ChevronLeft";
+import WhatsNewModal from "@/components/WhatsNewModal";
 import DismissPaywallSurvey from "@/components/surveys/DismissPaywallSurvey";
 import MarketFitSurvey from "@/components/surveys/MarketFitSurvey";
 import PostOnboardingSurvey from "@/components/surveys/PostOnboardingSurvey";
@@ -21,6 +22,7 @@ import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router
 import { createContext, useContext, useEffect, useState } from "react";
 import { Dimensions, KeyboardAvoidingView, Platform, Pressable, Text, TouchableOpacity, View } from "react-native";
 import { routes, routesToHideNavBar } from "routes";
+import { whatsNewDataArray } from "whatsNewData";
 
 const { width, height } = Dimensions.get("window");
 
@@ -83,43 +85,60 @@ const useHandleSurveyModals = () => {
     };
 };
 
-const useHandleShowPostOnboardingPaywall = (readyToRedirect: boolean) => {
-    const { onboardingStep, appNumberWhenFinishedOnboarding, nthAppOpen, lastPaywallShowDate } = useAppSelector(selectUserVariables);
+const useHandleShowPostOnboardingPaywall = (readyToRedirect: boolean, openWhatsNewModal: () => void) => {
+    const { onboardingStep, appNumberWhenFinishedOnboarding, nthAppOpen, lastPaywallShowDate, whatsNewLatestVersionShown } =
+        useAppSelector(selectUserVariables);
     const { isProUser } = useContext(SubscriptionContext);
 
     const DAYS_INTERVAL_TO_SHOW_PAYWALL = 3;
 
+    const WHATS_NEW_LATEST_VERSION = whatsNewDataArray[whatsNewDataArray.length - 1].version;
+
+    const showWhatsNewModal = WHATS_NEW_LATEST_VERSION !== whatsNewLatestVersionShown;
+
     useEffect(() => {
         if (!readyToRedirect) return;
+        if (isProUser === null) return;
 
-        const notLoadedOrProUser = isProUser === true || isProUser === null;
-        if (notLoadedOrProUser) return;
+        let shouldOpenPaywall: boolean = getShouldOpenPaywall();
 
-        //This does not inclues signIn/Up
-        const onboardingNotFinished = appNumberWhenFinishedOnboarding === null;
-        if (onboardingNotFinished) return;
+        if (shouldOpenPaywall) return router.push("/(app)/postOnboardingPaywall");
 
-        const finishedOnboardingOnThisAppOpen = nthAppOpen === appNumberWhenFinishedOnboarding;
-        if (finishedOnboardingOnThisAppOpen) return;
+        if (showWhatsNewModal) return openWhatsNewModal();
 
-        const hasntShownPaywallYet = lastPaywallShowDate === null;
-        if (hasntShownPaywallYet) return router.push("/(app)/postOnboardingPaywall");
+        function getShouldOpenPaywall() {
+            if (!isProUser) return false;
 
-        const daysSinceLastPaywallShown = (new Date().getTime() - (lastPaywallShowDate ?? 0)) / dayInMilliseconds;
+            //This does not inclues signIn/Up
+            const onboardingNotFinished = appNumberWhenFinishedOnboarding === null;
+            if (onboardingNotFinished) return false;
 
-        if (daysSinceLastPaywallShown < DAYS_INTERVAL_TO_SHOW_PAYWALL) return;
+            const finishedOnboardingOnThisAppOpen = nthAppOpen === appNumberWhenFinishedOnboarding;
+            if (finishedOnboardingOnThisAppOpen) return false;
 
-        router.push("/(app)/postOnboardingPaywall");
+            const hasntShownPaywallYet = lastPaywallShowDate === null;
+            if (hasntShownPaywallYet) return true;
+
+            const daysSinceLastPaywallShown = (new Date().getTime() - (lastPaywallShowDate ?? 0)) / dayInMilliseconds;
+            const waitMoreTimeToShowPaywallAgain = daysSinceLastPaywallShown >= DAYS_INTERVAL_TO_SHOW_PAYWALL;
+
+            if (waitMoreTimeToShowPaywallAgain) return false;
+
+            return true;
+        }
     }, [readyToRedirect, isProUser, onboardingStep, appNumberWhenFinishedOnboarding, nthAppOpen]);
 };
 
-export const HandleModalsContext = createContext<{ modal: (v: boolean) => void; openPaywallSurvey: () => void }>({
+export const HandleModalsContext = createContext<{ modal: (v: boolean) => void; openPaywallSurvey: () => void; openWhatsNewModal: () => void }>({
     modal: () => {},
     openPaywallSurvey: () => {},
+    openWhatsNewModal: () => {},
 });
 
 export default function RootLayout() {
     const [showOnboarding, setShowOnboarding] = useState(false);
+    const [showWhatsNew, setShowWhatsNew] = useState(false);
+
     const { shouldWaitForClerkToLoad } = useAppSelector(selectSyncSlice);
     const { onboardingStep } = useAppSelector(selectUserVariables);
     const { isSignedIn, isLoaded } = useUser();
@@ -163,7 +182,11 @@ export default function RootLayout() {
 
     useHandleDeepLinking(shouldHandleDeepLink);
 
-    useHandleShowPostOnboardingPaywall(readyToRedirect);
+    const closeOnboarding = () => setShowOnboarding(false);
+    const openWhatsNewModal = () => setShowWhatsNew(true);
+    const closeShowWhatsNewModal = () => setShowWhatsNew(false);
+
+    useHandleShowPostOnboardingPaywall(readyToRedirect, openWhatsNewModal);
 
     useEffect(() => {
         const userDidFirstOnboardingStep = onboardingStep > 0;
@@ -193,12 +216,10 @@ export default function RootLayout() {
 
     if (!fontsLoaded || !isClerkLoaded) return <Text>Loading...</Text>;
 
-    const hide = !Boolean(pathname === "/" || routesToHideNavBar.find((route) => pathname.includes(route)));
-
-    const closeOnboarding = () => setShowOnboarding(false);
+    const showNavBar = !Boolean(pathname === "/" || routesToHideNavBar.find((route) => pathname.includes(route)));
 
     return (
-        <HandleModalsContext.Provider value={{ modal: setShowOnboarding, openPaywallSurvey: paywallDismiss.open }}>
+        <HandleModalsContext.Provider value={{ modal: setShowOnboarding, openPaywallSurvey: paywallDismiss.open, openWhatsNewModal }}>
             <View style={{ flex: 1, minHeight: Platform.OS === "android" ? height - NAV_HEGIHT : "auto" }}>
                 <Stack
                     screenOptions={{
@@ -256,15 +277,15 @@ export default function RootLayout() {
                     <Stack.Screen name={"index"} />
                 </Stack>
 
-                {postOnboarding.state && <PostOnboardingSurvey open={postOnboarding.state} close={postOnboarding.close} />}
-
-                {marketFit.state && <MarketFitSurvey open={marketFit.state} close={marketFit.close} />}
-
-                {paywallDismiss.state && <DismissPaywallSurvey open={paywallDismiss.state} close={paywallDismiss.close} />}
-
+                {/* MODALS 👇 */}
+                <PostOnboardingSurvey open={postOnboarding.state} close={postOnboarding.close} />
+                <MarketFitSurvey open={marketFit.state} close={marketFit.close} />
+                <DismissPaywallSurvey open={paywallDismiss.state} close={paywallDismiss.close} />
+                <WhatsNewModal open={showWhatsNew} close={closeShowWhatsNewModal} />
                 <OnboardingModal close={closeOnboarding} open={showOnboarding} openPostOnboardingModal={postOnboarding.open} />
+                {/* MODALS 👆 */}
 
-                {hide && (
+                {showNavBar && (
                     <KeyboardAvoidingView
                         behavior={Platform.OS === "ios" ? "padding" : "padding"}
                         enabled={false}
