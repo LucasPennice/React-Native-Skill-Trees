@@ -9,8 +9,8 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { SubscriptionContext } from "app/_layout";
 import * as Application from "expo-application";
 import { router } from "expo-router";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { useContext } from "react";
+import { Linking, StyleSheet, TouchableOpacity, View } from "react-native";
 import { CustomerInfo } from "react-native-purchases";
 import { HandleModalsContext } from "./_layout";
 
@@ -32,6 +32,11 @@ function UserProfile() {
 
     const navigateToSignIn = () => router.push("/(app)/auth/signIn");
     const navigateToSignUp = () => router.push("/(app)/auth/signUp");
+
+    const navigateToDiscordLink = async () => {
+        const DISCORD_SERVER_INVITE_LINK = "https://discord.com/invite/ZHENer9yAW";
+        Linking.openURL(DISCORD_SERVER_INVITE_LINK);
+    };
 
     return (
         <View style={style.container}>
@@ -65,6 +70,8 @@ function UserProfile() {
                 <AppText fontSize={16} children={"DISCOVER"} style={{ marginTop: 10, opacity: 0.8 }} />
 
                 <InsightButton icon={"magic"} onPress={openWhatsNewModal} title={"What's new in Skill Trees"} />
+
+                {isProUser === true && <InsightButton icon={"tree"} onPress={navigateToDiscordLink} title={"Join our Discord Server"} />}
             </View>
 
             <View>

@@ -11,6 +11,10 @@ import { router, useNavigation } from "expo-router";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Dimensions, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { HandleModalsContext } from "./_layout";
+import { useAuth } from "@clerk/clerk-expo";
+import { batch } from "react-redux";
+import { useAppDispatch } from "@/redux/reduxHooks";
+import { completeCustomizeHomeTree, completeOnboardingExperienceSurvey } from "@/redux/slices/userVariablesSlice";
 
 const { height } = Dimensions.get("window");
 
@@ -48,12 +52,14 @@ const useIfProRedirectHome = () => {
 
 function PreOnboardingPaywallPage() {
     const [loading, setLoading] = useState(false);
+
     useIfProRedirectHome();
 
     const [selected, setSelected] = useState<string>("pro_annual_1:p1a");
 
     const { modal: setShowOnboarding } = useContext(HandleModalsContext);
     const { currentOffering } = useContext(SubscriptionContext);
+    const { isSignedIn } = useAuth();
     const { open } = useContext(HandleAlertContext);
 
     useEffect(() => {
@@ -61,13 +67,24 @@ function PreOnboardingPaywallPage() {
         NavigationBar.setBackgroundColorAsync(BACKGROUND_COLOR);
     }, []);
 
-    const redirectHomeCongratulateAndStartOnboarding = () => {
-        open({ state: "success", subtitle: "To check your membership details visit your profile", title: "Congratulations" });
-        setShowOnboarding(true);
-        router.push("/home");
-    };
+    const dispatch = useAppDispatch();
 
-    const redirectHomeAndCongratulate = () => router.push("/auth/signIn");
+    const redirectHomeCongratulateAndStartOnboarding = useCallback(() => {
+        open({ state: "success", subtitle: "To check your membership details visit your profile", title: "Congratulations" });
+
+        if (isSignedIn === true) {
+            batch(() => {
+                dispatch(completeOnboardingExperienceSurvey());
+                dispatch(completeCustomizeHomeTree());
+            });
+        } else {
+            setShowOnboarding(true);
+        }
+
+        router.push("/home");
+    }, [isSignedIn]);
+
+    const redirectToSignIn = () => router.push("/auth/signIn");
 
     useBlockGoBack();
 
@@ -98,7 +115,7 @@ function PreOnboardingPaywallPage() {
                             state={[selected, setSelected]}
                             currentOffering={currentOffering}
                             setLoading={setLoading}
-                            onRestorePurchase={redirectHomeAndCongratulate}
+                            onRestorePurchase={redirectToSignIn}
                         />
 
                         <View
@@ -223,15 +240,27 @@ const Header = () => {
 
     const { modal: setShowOnboarding } = useContext(HandleModalsContext);
 
-    const redirectHomeAndStartOnboarding = () => {
-        setShowOnboarding(true);
+    const { isSignedIn } = useAuth();
+
+    const dispatch = useAppDispatch();
+
+    const redirectHome = useCallback(() => {
+        if (isSignedIn === true) {
+            batch(() => {
+                dispatch(completeOnboardingExperienceSurvey());
+                dispatch(completeCustomizeHomeTree());
+            });
+        } else {
+            setShowOnboarding(true);
+        }
+
         router.push("/home");
-    };
+    }, [isSignedIn]);
 
     return (
         <View style={style.container}>
             <AppButton
-                onPress={redirectHomeAndStartOnboarding}
+                onPress={redirectHome}
                 text={{ idle: "Close" }}
                 color={{ idle: "transparent" }}
                 style={{ width: 100, alignItems: "flex-start", backgroundColor: BACKGROUND_COLOR }}

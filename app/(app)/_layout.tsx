@@ -39,20 +39,6 @@ function useIdentifyMixPanelUserId() {
     }, [userId]);
 }
 
-// const useInitialRedirect = (readyToRedirect: boolean, redirectToWelcomeScreen: boolean, redirectToPaywall: boolean) => {
-//     const { nthAppOpen, onboardingStep } = useAppSelector(selectUserVariables);
-
-//     useEffect(() => {
-//         if (!readyToRedirect) return;
-
-//         // if (true) return router.push("/welcomeNewUser");
-//         if (nthAppOpen === 0 || onboardingStep === 0) return router.push("/welcomeNewUser");
-
-//         // if (redirectToWelcomeScreen) return router.push("/welcomeScreen");
-//         if (redirectToPaywall) return router.replace("/(app)/postOnboardingPaywall");
-//     }, [redirectToWelcomeScreen, readyToRedirect, redirectToPaywall]);
-// };
-
 const useHandleSurveyModals = () => {
     const [postOnboarding, setPostOnboarding] = useState(false);
     const [marketFit, setMarketFit] = useState(false);
@@ -86,7 +72,12 @@ const useHandleSurveyModals = () => {
     };
 };
 
-const useInitialRedirect = (readyToRedirect: boolean, openWhatsNewModal: () => void, openMarketFitModal: () => void) => {
+const useInitialRedirect = (
+    readyToRedirect: boolean,
+    openWhatsNewModal: () => void,
+    openMarketFitModal: () => void,
+    openOnboardingModal: () => void
+) => {
     const userVariables = useAppSelector(selectUserVariables);
     const {
         onboardingStep,
@@ -135,13 +126,16 @@ const useInitialRedirect = (readyToRedirect: boolean, openWhatsNewModal: () => v
 
         if (nthAppOpen === 0 && onboardingStep === 0) return router.push("/welcomeNewUser");
 
+        const userDidntFinishOnboarding = onboardingStep < LAST_ONBOARDING_STEP;
+
+        if (nthAppOpen !== 0 && userDidntFinishOnboarding) return openOnboardingModal();
+
         if (isProUser === null) return;
 
         if (deepLinkOpenedApp) return;
 
-        let shouldOpenPaywall: boolean = getShouldOpenPaywall();
-
         const onboardingNotFinished = appNumberWhenFinishedOnboarding === null;
+
         const WHATS_NEW_LATEST_VERSION = whatsNewDataArray[whatsNewDataArray.length - 1].version;
         const finishedOnboardingOnThisAppOpen = nthAppOpen === appNumberWhenFinishedOnboarding;
         const showWhatsNewModal =
@@ -151,6 +145,7 @@ const useInitialRedirect = (readyToRedirect: boolean, openWhatsNewModal: () => v
         const appsOpenSinceLastPMFShownGreaterThatThreshold = appOpenSinceLastPMFSurvey !== null && nthAppOpen - appOpenSinceLastPMFSurvey >= 3;
         if (treeQty >= 3 && marketFitSurvey !== true && appsOpenSinceLastPMFShownGreaterThatThreshold) return openMarketFitModal();
 
+        let shouldOpenPaywall: boolean = getShouldOpenPaywall();
         if (shouldOpenPaywall) return router.push("/(app)/postOnboardingPaywall");
     }, [
         readyToRedirect,
@@ -175,7 +170,6 @@ export default function RootLayout() {
     const [showWhatsNew, setShowWhatsNew] = useState(false);
 
     const { shouldWaitForClerkToLoad } = useAppSelector(selectSyncSlice);
-    const { onboardingStep } = useAppSelector(selectUserVariables);
     const { isSignedIn, isLoaded } = useUser();
     const pathname = usePathname();
     const router = useRouter();
@@ -207,16 +201,11 @@ export default function RootLayout() {
     useHandleDeepLinking(isLoaded);
 
     const closeOnboarding = () => setShowOnboarding(false);
+    const openOnboarding = () => setShowOnboarding(true);
     const openWhatsNewModal = () => setShowWhatsNew(true);
     const closeShowWhatsNewModal = () => setShowWhatsNew(false);
 
-    useInitialRedirect(readyToRedirect, openWhatsNewModal, marketFit.open);
-
-    useEffect(() => {
-        const userDidFirstOnboardingStep = onboardingStep > 0;
-        const userDidntFinishOnboarding = onboardingStep < LAST_ONBOARDING_STEP;
-        if (userDidFirstOnboardingStep && userDidntFinishOnboarding) setShowOnboarding(true);
-    }, []);
+    useInitialRedirect(readyToRedirect, openWhatsNewModal, marketFit.open, openOnboarding);
 
     // const dispatch = useAppDispatch();
     // useEffect(() => {
@@ -338,14 +327,14 @@ export default function RootLayout() {
                             Habits
                         </AppText>
                     </Pressable> */}
-                        <Pressable
+                        {/* <Pressable
                             style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                             onPress={() => router.replace("/(app)/feedback")}>
                             <TabBarIcon name="group" color={pathname.includes("feedback") ? colors.white : colors.line} />
                             <AppText style={{ color: pathname.includes("feedback") ? colors.white : colors.line }} fontSize={10}>
                                 Community
                             </AppText>
-                        </Pressable>
+                        </Pressable> */}
                         <Pressable
                             style={{ width: width / 4, flex: 1, justifyContent: "center", alignItems: "center", gap: 6, position: "relative" }}
                             onPress={() => router.replace("/(app)/userProfile")}>
