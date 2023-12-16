@@ -3,6 +3,7 @@ import AppText from "@/components/AppText";
 import DropdownProductSelector from "@/components/subscription/DropdownProductSelector";
 import { BACKGROUND_COLOR, PRICE_CARD_HEIGHT, getSubscribeButtonText, handlePurchase } from "@/components/subscription/functions";
 import { colors } from "@/parameters";
+import useSubscriptionHandler from "@/useSubscriptionHandler";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
 import * as NavigationBar from "expo-navigation-bar";
@@ -10,7 +11,6 @@ import { router, useNavigation } from "expo-router";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Dimensions, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { HandleModalsContext } from "./_layout";
-import { useAuth } from "@clerk/clerk-expo";
 
 const { height } = Dimensions.get("window");
 
@@ -36,11 +36,23 @@ const useBlockGoBack = () => {
 
 const SCROLLABLE_SCREEN_SIZE = height - 155 - PRICE_CARD_HEIGHT;
 
+const useIfProRedirectHome = () => {
+    const { isProUser } = useSubscriptionHandler();
+
+    useEffect(() => {
+        if (isProUser === null) return;
+
+        if (isProUser === true) router.push("/(app)/home");
+    }, [isProUser]);
+};
+
 function PreOnboardingPaywallPage() {
     const [loading, setLoading] = useState(false);
+    useIfProRedirectHome();
 
     const [selected, setSelected] = useState<string>("pro_annual_1:p1a");
 
+    const { modal: setShowOnboarding } = useContext(HandleModalsContext);
     const { currentOffering } = useContext(SubscriptionContext);
     const { open } = useContext(HandleAlertContext);
 
@@ -49,10 +61,13 @@ function PreOnboardingPaywallPage() {
         NavigationBar.setBackgroundColorAsync(BACKGROUND_COLOR);
     }, []);
 
-    const redirectHomeWithCongratulationsModal = () => {
+    const redirectHomeCongratulateAndStartOnboarding = () => {
         open({ state: "success", subtitle: "To check your membership details visit your profile", title: "Congratulations" });
-        router.push("/(app)/home");
+        setShowOnboarding(true);
+        router.push("/home");
     };
+
+    const redirectHomeAndCongratulate = () => router.push("/auth/signIn");
 
     useBlockGoBack();
 
@@ -61,7 +76,7 @@ function PreOnboardingPaywallPage() {
 
         handlePurchase(
             currentOffering.availablePackages.find((p) => p.product.identifier === selected)!,
-            redirectHomeWithCongratulationsModal,
+            redirectHomeCongratulateAndStartOnboarding,
             setLoading,
             `PAYWALL Pre Onboarding Paywall ${selected} Subscription <1.0>`
         )();
@@ -83,7 +98,7 @@ function PreOnboardingPaywallPage() {
                             state={[selected, setSelected]}
                             currentOffering={currentOffering}
                             setLoading={setLoading}
-                            onRestorePurchase={redirectHomeWithCongratulationsModal}
+                            onRestorePurchase={redirectHomeAndCongratulate}
                         />
 
                         <View
@@ -206,33 +221,20 @@ const Header = () => {
         },
     });
 
-    const { isSignedIn } = useAuth();
-
     const { modal: setShowOnboarding } = useContext(HandleModalsContext);
 
-    const redirectToSignIn = () => router.push("/(app)/auth/signIn");
-    const redirectToHome = () => {
+    const redirectHomeAndStartOnboarding = () => {
         setShowOnboarding(true);
         router.push("/home");
     };
 
     return (
         <View style={style.container}>
-            {!isSignedIn && (
-                <AppButton
-                    onPress={redirectToSignIn}
-                    text={{ idle: "Log In" }}
-                    color={{ idle: "transparent" }}
-                    style={{ width: 100, alignItems: "flex-start", backgroundColor: BACKGROUND_COLOR }}
-                    textStyle={{ fontSize: 16, lineHeight: 16, opacity: 0.3 }}
-                />
-            )}
-
             <AppButton
-                onPress={redirectToHome}
+                onPress={redirectHomeAndStartOnboarding}
                 text={{ idle: "Close" }}
                 color={{ idle: "transparent" }}
-                style={{ width: 100, alignItems: "flex-end", backgroundColor: BACKGROUND_COLOR }}
+                style={{ width: 100, alignItems: "flex-start", backgroundColor: BACKGROUND_COLOR }}
                 textStyle={{ fontSize: 16, lineHeight: 16, opacity: 0.3 }}
             />
         </View>

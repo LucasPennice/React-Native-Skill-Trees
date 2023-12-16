@@ -11,6 +11,7 @@ import { router } from "expo-router";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { HandleModalsContext } from "./_layout";
+import useSubscriptionHandler from "@/useSubscriptionHandler";
 
 const style = StyleSheet.create({
     container: {
@@ -41,6 +42,16 @@ const useHandleGoBack = () => {
     return goBack;
 };
 
+const useIfProRedirectHome = () => {
+    const { isProUser } = useSubscriptionHandler();
+
+    useEffect(() => {
+        if (isProUser === null) return;
+
+        if (isProUser === true) router.push("/(app)/home");
+    }, [isProUser]);
+};
+
 function PostOnboardingPaywall() {
     const [selected, setSelected] = useState<string>("pro_annual_1:p1a");
     const [loading, setLoading] = useState(false);
@@ -49,6 +60,8 @@ function PostOnboardingPaywall() {
     const { open } = useContext(HandleAlertContext);
 
     const dispatch = useAppDispatch();
+
+    useIfProRedirectHome();
 
     useEffect(() => {
         mixpanel.track("PAYWALL Post Onboarding Paywall View <1.0>");
