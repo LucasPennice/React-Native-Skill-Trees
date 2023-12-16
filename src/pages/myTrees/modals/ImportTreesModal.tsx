@@ -2,15 +2,17 @@ import AppText from "@/components/AppText";
 import FlingToDismissModal from "@/components/FlingToDismissModal";
 import PlusIcon from "@/components/Icons/PlusIcon";
 import LoadingIcon from "@/components/LoadingIcon";
+import { handlePurchase } from "@/components/subscription/functions";
 import { dictionaryToArray } from "@/functions/extractInformationFromTree";
 import { colors } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
-import { TreeData, importUserTrees, removeUserTrees, selectTreeIds } from "@/redux/slices/userTreesSlice";
+import { TreeData, importUserTrees, removeUserTrees, selectTotalTreeQty, selectTreeIds } from "@/redux/slices/userTreesSlice";
 import { ColorGradient, NormalizedNode } from "@/types";
+import useSubscriptionHandler from "@/useSubscriptionHandler";
 import { Dictionary } from "@reduxjs/toolkit";
-import { mixpanel } from "app/_layout";
+import { HandleAlertContext, mixpanel } from "app/_layout";
 import axiosClient from "axiosClient";
-import { useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { batch } from "react-redux";
@@ -56,6 +58,8 @@ function ImportTreesModal({
 }) {
     const { importTreeResponse, mode, showTreesToImport } = useHandleTreesToImport();
 
+    const { isProUser, currentOffering } = useSubscriptionHandler();
+
     const formattedTreesToImportIds = `[${data.treesToImportIds
         .split(",")
         .map((id) => `"${id}"`)
@@ -65,10 +69,11 @@ function ImportTreesModal({
 
     useEffect(() => {
         if (open === false) return;
+        if (isProUser === null) return;
+        if (currentOffering === null) return;
 
         (async () => {
             try {
-                // console.log(`backup/${data.userIdImport}?treesToImportIds=${formattedTreesToImportIds}`);
                 const { data: response } = await getTreesToImport();
                 showTreesToImport(response);
             } catch (error) {
@@ -77,7 +82,7 @@ function ImportTreesModal({
                 closeModal();
             }
         })();
-    }, [open]);
+    }, [open, isProUser, currentOffering]);
 
     return (
         <FlingToDismissModal closeModal={closeModal} open={open}>
@@ -105,15 +110,58 @@ const ImportTreesButton = ({ onPress, selectedQty }: { onPress: () => void; sele
 const useHandleSelectTreesToImport = () => {
     const [selectedTreeIds, setSelectedTreeIds] = useState<string[]>([]);
 
+    const treeQty = useAppSelector(selectTotalTreeQty);
+    const { isProUser, currentOffering } = useSubscriptionHandler();
+    const { open, close } = useContext(HandleAlertContext);
+
     const cancelSelection = () => setSelectedTreeIds([]);
 
-    const toggleSelection = (selectedTreeId: string) => {
-        setSelectedTreeIds((prev) => {
-            if (prev.includes(selectedTreeId)) return prev.filter((treeId) => treeId !== selectedTreeId);
+    const annualPackage = currentOffering?.availablePackages.find((p) => p.packageType === "ANNUAL");
 
-            return [...prev, selectedTreeId];
-        });
-    };
+    const purchase = useCallback(() => {
+        if (currentOffering === null) return;
+
+        handlePurchase(
+            currentOffering.availablePackages.find((p) => p.packageType === "ANNUAL")!,
+            close,
+            () => {},
+            `PAYWALL Tree Limit On Import Subscription <1.0>`
+        )();
+    }, [currentOffering]);
+
+    const toggleSelection = useCallback(
+        (selectedTreeId: string) => {
+            if (isProUser === null) return;
+
+            setSelectedTreeIds((prev) => {
+                const addingTreeCase = !prev.includes(selectedTreeId);
+
+                const block = isProUser === false && treeQty + prev.length + 1 > 3;
+
+                console.log(treeQty, prev.length);
+
+                if (addingTreeCase) {
+                    if (!block) return [...prev, selectedTreeId];
+
+                    if (annualPackage)
+                        open({
+                            title: `Unlimited trees for only ${annualPackage.product.priceString} per year`,
+                            subtitle: `Only ${annualPackage.product.currencyCode} ${(annualPackage.product.price / 12)
+                                .toFixed(2)
+                                .replace(".", ",")} per month, billed annually`,
+                            state: "success",
+                            buttonAction: purchase,
+                            buttonText: "Start your 7 days free trial",
+                        });
+
+                    return prev;
+                }
+
+                return prev.filter((treeId) => treeId !== selectedTreeId);
+            });
+        },
+        [isProUser, treeQty, selectTreeIds, annualPackage]
+    );
 
     return { cancelSelection, toggleSelection, selectedTreeIds };
 };

@@ -24,7 +24,6 @@ const manuallyParseParams = (url: string) => {
 const onUrlChange = (url: string | null, shouldHandle: boolean, userId: string | null) => {
     if (url === null || !url.includes("https://www.skilltreesapp.com")) return;
     if (!shouldHandle) return;
-    if (!userId) return Alert.alert("Please create an account or log in", "Before clicking a skill trees link");
 
     const { path: action } = Linking.parse(url);
 
