@@ -4,6 +4,7 @@ import { PayloadAction, Update, createEntityAdapter, createSlice } from "@reduxj
 import { RootState } from "../reduxStore";
 import { updateHomeIcon, updateHomeName } from "./homeTreeSlice";
 import { TreeData, addUserTrees, importUserTrees, removeUserTrees, updateUserTree } from "./userTreesSlice";
+import { mixpanel } from "app/_layout";
 
 const nodesAdapter = createEntityAdapter<NormalizedNode>({ selectId: (node) => node.nodeId });
 export const {
@@ -22,7 +23,22 @@ export const nodesSlice = createSlice({
     initialState,
     reducers: {
         createHomeRootNode: nodesAdapter.addOne,
-        updateNodes: nodesAdapter.updateMany,
+        updateNodes: (state, updates: PayloadAction<Update<NormalizedNode>[]>) => {
+            for (let i = 0; i < updates.payload.length; i++) {
+                const updatedNode = updates.payload[i];
+                if (updatedNode.changes.data === undefined) continue;
+
+                const nodeBeforeUpdate = state.entities[updatedNode.id];
+
+                if (nodeBeforeUpdate === undefined) continue;
+
+                const completionCase = nodeBeforeUpdate.data.isCompleted === false && updatedNode.changes.data.isCompleted === true;
+
+                if (completionCase) mixpanel.track("FEATURE Skill Completion");
+            }
+
+            nodesAdapter.updateMany(state, updates);
+        },
         addNodes: nodesAdapter.addMany,
         removeNodes: (state, action: PayloadAction<{ treeId: string; nodesToDelete: string[] }>) => {
             //Remove the nodeToDelete id from the parent node
