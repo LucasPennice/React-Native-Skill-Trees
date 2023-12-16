@@ -55,8 +55,10 @@ function PostOnboardingPaywall() {
         dispatch(updateLastPaywallShowDate());
     }, []);
 
-    const openSuccessAlert = () =>
+    const redirectHomeWithCongratulationsModal = () => {
         open({ state: "success", subtitle: "To check your membership details visit your profile", title: "Congratulations" });
+        router.push("/(app)/home");
+    };
 
     const back = useHandleGoBack();
 
@@ -65,7 +67,7 @@ function PostOnboardingPaywall() {
 
         handlePurchase(
             currentOffering.availablePackages.find((p) => p.product.identifier === selected)!,
-            openSuccessAlert,
+            redirectHomeWithCongratulationsModal,
             setLoading,
             `PAYWALL Post Onboarding Paywall ${selected} Subscription <1.0>`
         )();
@@ -113,7 +115,7 @@ function PostOnboardingPaywall() {
                             state={[selected, setSelected]}
                             currentOffering={currentOffering}
                             setLoading={setLoading}
-                            openSuccessAlert={openSuccessAlert}
+                            onRestorePurchase={redirectHomeWithCongratulationsModal}
                         />
                     </ScrollView>
                     <View style={{ paddingTop: 10 }}>

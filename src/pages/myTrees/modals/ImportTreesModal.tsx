@@ -116,6 +116,10 @@ const useHandleSelectTreesToImport = () => {
 
     const cancelSelection = () => setSelectedTreeIds([]);
 
+    const openCongratulationMessage = () => {
+        open({ state: "success", subtitle: "To check your membership details visit your profile", title: "Congratulations" });
+    };
+
     const annualPackage = currentOffering?.availablePackages.find((p) => p.packageType === "ANNUAL");
 
     const purchase = useCallback(() => {
@@ -124,7 +128,7 @@ const useHandleSelectTreesToImport = () => {
         handlePurchase(
             currentOffering.availablePackages.find((p) => p.packageType === "ANNUAL")!,
             close,
-            () => {},
+            openCongratulationMessage,
             `PAYWALL Tree Limit On Import Subscription <1.0>`
         )();
     }, [currentOffering]);

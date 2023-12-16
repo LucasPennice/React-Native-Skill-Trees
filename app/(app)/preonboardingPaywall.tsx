@@ -49,8 +49,10 @@ function PreOnboardingPaywallPage() {
         NavigationBar.setBackgroundColorAsync(BACKGROUND_COLOR);
     }, []);
 
-    const openSuccessAlert = () =>
+    const redirectHomeWithCongratulationsModal = () => {
         open({ state: "success", subtitle: "To check your membership details visit your profile", title: "Congratulations" });
+        router.push("/(app)/home");
+    };
 
     useBlockGoBack();
 
@@ -59,7 +61,7 @@ function PreOnboardingPaywallPage() {
 
         handlePurchase(
             currentOffering.availablePackages.find((p) => p.product.identifier === selected)!,
-            openSuccessAlert,
+            redirectHomeWithCongratulationsModal,
             setLoading,
             `PAYWALL Pre Onboarding Paywall ${selected} Subscription <1.0>`
         )();
@@ -81,7 +83,7 @@ function PreOnboardingPaywallPage() {
                             state={[selected, setSelected]}
                             currentOffering={currentOffering}
                             setLoading={setLoading}
-                            openSuccessAlert={openSuccessAlert}
+                            onRestorePurchase={redirectHomeWithCongratulationsModal}
                         />
 
                         <View

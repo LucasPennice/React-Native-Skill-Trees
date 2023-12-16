@@ -10,13 +10,13 @@ import { PRICE_CARD_HEIGHT, PRICE_CARD_SMALL_HEIGHT, restorePurchase } from "./f
 const DropdownProductSelector = ({
     state,
     currentOffering,
-    openSuccessAlert,
+    onRestorePurchase,
     setLoading,
 }: {
     state: [string, (v: string) => void];
     currentOffering: PurchasesOffering;
     setLoading: (v: boolean) => void;
-    openSuccessAlert: () => void;
+    onRestorePurchase: () => void;
 }) => {
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = state;
@@ -76,7 +76,7 @@ const DropdownProductSelector = ({
                 )}
             </Animated.View>
             <View style={style.footerContainer}>
-                <TouchableOpacity style={{ paddingVertical: 15 }} onPress={restorePurchase(setLoading, openSuccessAlert, "Restore subscription")}>
+                <TouchableOpacity style={{ paddingVertical: 15 }} onPress={restorePurchase(setLoading, onRestorePurchase, "Restore subscription")}>
                     <AppText fontSize={14} children={"Restore Purchase"} style={{ color: colors.softPurle }} />
                 </TouchableOpacity>
                 <TouchableOpacity style={{ paddingVertical: 15, flexDirection: "row", gap: 5 }} onPress={toggleOpen}>

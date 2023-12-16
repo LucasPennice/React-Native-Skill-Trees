@@ -16,12 +16,13 @@ import { NodeSlice, overwriteNodeSlice, selectAllNodeIds, selectAllNodes, select
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
 import { selectSyncSlice, setShouldWaitForClerkToLoad, updateLastBackupTime } from "@/redux/slices/syncSlice";
 import { TreeData, UserTreeSlice, overwriteUserTreesSlice, selectAllTreesEntities, selectTreeIds } from "@/redux/slices/userTreesSlice";
+import { OnboardingSteps, completeCustomizeHomeTree, selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import { NormalizedNode } from "@/types";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useCanvasRef } from "@shopify/react-native-skia";
-import { mixpanel } from "app/_layout";
 import { useHandleButtonState } from "app/(app)/auth/signUp";
+import { mixpanel } from "app/_layout";
 import axiosClient from "axiosClient";
 import * as ExpoNavigationBar from "expo-navigation-bar";
 import { useLocalSearchParams, useNavigation } from "expo-router";
@@ -30,9 +31,8 @@ import { Alert, Modal, Platform, StatusBar, StyleSheet, View } from "react-nativ
 import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
 import { batch } from "react-redux";
 import { RoutesParams } from "routes";
-import { Contact } from "./feedback";
-import { OnboardingSteps, completeCustomizeHomeTree, selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import { HandleModalsContext } from "./_layout";
+import { Contact } from "./feedback";
 
 function useHandleNavigationListener(clearSelectedNodeCoord: () => void) {
     const navigation = useNavigation();
