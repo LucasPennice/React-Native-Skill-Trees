@@ -9,7 +9,7 @@ import { NAV_HEGIHT, colors, dayInMilliseconds } from "@/parameters";
 import { useAppSelector } from "@/redux/reduxHooks";
 import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import { selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
-import { LAST_ONBOARDING_STEP, UserVariablesSlice, selectUserVariables } from "@/redux/slices/userVariablesSlice";
+import { LAST_ONBOARDING_STEP, selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import useHandleDeepLinking from "@/useHandleDeepLinking";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import useRunDailyBackup from "@/useRunDailyBackup";
