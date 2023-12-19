@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import Purchases, { CustomerInfo, LOG_LEVEL, PurchasesOffering } from "react-native-purchases";
 import useMongoCompliantUserId from "./useMongoCompliantUserId";
+import { useUser } from "@clerk/clerk-expo";
 
 const APIKeys = {
     apple: "your_revenuecat_apple_api_key",
@@ -90,6 +91,18 @@ function useSubscriptionHandler(): SubscriptionHandler {
             await Purchases.logIn(userId);
         })();
     }, [userId]);
+
+    const { user } = useUser();
+
+    useEffect(() => {
+        if (user === null) return;
+        if (user === undefined) return;
+        if (userId === null) return;
+
+        Purchases.setDisplayName(user.username);
+        Purchases.setEmail(user.primaryEmailAddress?.emailAddress ?? null);
+        Purchases.setMixpanelDistinctID(userId);
+    }, [user, userId]);
 
     const currentOffering = useFetchOffers();
     const { isProUser, customerInfo } = useUserSubscriptionInformation();

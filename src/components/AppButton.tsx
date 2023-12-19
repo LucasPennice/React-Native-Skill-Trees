@@ -69,7 +69,7 @@ const AppButton = ({
     });
 
     return (
-        <TouchableOpacity onPressIn={onPress} disabled={disabled} style={pressableStyle}>
+        <TouchableOpacity onPress={onPress} disabled={disabled} style={pressableStyle}>
             <Animated.View style={[styles.container, animatedContainerStyles, disabledStyles, style]}>
                 {state === "idle" && (
                     <Animated.View exiting={ZoomOut}>

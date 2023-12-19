@@ -3,6 +3,7 @@ import AppText from "@/components/AppText";
 import CrownIcon from "@/components/Icons/CrownIcon";
 import { colors } from "@/parameters";
 import { SubscriptionContext } from "app/_layout";
+import { Redirect } from "expo-router";
 import { useContext } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 import { PACKAGE_TYPE } from "react-native-purchases";
@@ -17,7 +18,7 @@ function SubscriptionDetailsPage() {
     const { customerInfo, currentOffering } = useContext(SubscriptionContext);
 
     if (!customerInfo) throw new Error("customer info is null");
-    if (customerInfo.managementURL === null) throw new Error("the user doesn't have an active subscription");
+    if (customerInfo.managementURL === null) return <Redirect href={"/(app)/postOnboardingPaywall"} />;
 
     const redirectToManageSubscription = () => Linking.openURL(customerInfo.managementURL!);
 

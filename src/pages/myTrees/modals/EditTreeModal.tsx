@@ -78,7 +78,7 @@ function EditTreeModal({ editingTreeId, closeModal }: { editingTreeId: string; c
         <FlingToDismissModal
             closeModal={closeModal}
             open={true}
-            leftHeaderButton={{ onPress: updateTree(selectedColor, treeName), title: "Save" }}
+            rightHeaderButton={{ onPress: updateTree(selectedColor, treeName), title: "Save" }}
             modalContainerStyles={{ backgroundColor: colors.background }}>
             <View style={{ flex: 1, paddingTop: 10 }}>
                 <AppText style={{ color: colors.white, marginBottom: 15 }} fontSize={18}>
