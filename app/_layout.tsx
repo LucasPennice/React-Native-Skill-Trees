@@ -20,7 +20,6 @@ import useSubscriptionHandler, { SubscriptionHandler } from "@/useSubscriptionHa
 import useTrackNavigationEvents from "@/useTrackNavigationEvents";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import Clipboard from "@react-native-clipboard/clipboard";
-import analytics from "@react-native-firebase/analytics";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { Update } from "@reduxjs/toolkit";
 import { SkFont, useFont } from "@shopify/react-native-skia";
@@ -285,11 +284,7 @@ export function ErrorBoundary(props: ErrorBoundaryProps) {
     });
 
     useEffect(() => {
-        (async () => {
-            await analytics().logEvent("CRASH", { message: props.error.message, stack: props.error.stack });
-
-            await mixpanel.track(`CRASH`, { message: props.error.message, stack: props.error.stack });
-        })();
+        mixpanel.track(`CRASH`, { message: props.error.message, stack: props.error.stack });
     }, []);
 
     const styles = StyleSheet.create({

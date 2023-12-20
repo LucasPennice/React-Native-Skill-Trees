@@ -7,7 +7,6 @@ import { useAppSelector } from "@/redux/reduxHooks";
 import { selectNodesOfTree } from "@/redux/slices/nodesSlice";
 import { TreeData, selectAllTreesEntities } from "@/redux/slices/userTreesSlice";
 import { CartesianCoordinate, NodeCoordinate, NormalizedNode } from "@/types";
-import analytics from "@react-native-firebase/analytics";
 import { Dictionary } from "@reduxjs/toolkit";
 import { mixpanel } from "app/_layout";
 import { SkiaAppFonts, SkiaFontContext } from "app/_layout";
@@ -46,13 +45,7 @@ function TakingScreenshotLoadingScreenModal({
     const [takingScreenshot, { closeTakingScreenshotModal }] = takingScreenshotState;
 
     useEffect(() => {
-        (async () => {
-            if (takingScreenshot) {
-                await mixpanel.track(`FEATURE Taking Screenshot`);
-
-                await analytics().logEvent("takingScreenshot");
-            }
-        })();
+        if (takingScreenshot) mixpanel.track(`FEATURE Taking Screenshot`);
     }, [takingScreenshot]);
 
     return (

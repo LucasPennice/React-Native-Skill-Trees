@@ -17,7 +17,6 @@ module.exports = {
     },
     assetBundlePatterns: ["**/*"],
     ios: {
-        googleServicesFile: "./GoogleService-Info.plist",
         supportsTablet: true,
         infoPlist: {
             NSPhotoLibraryUsageDescription: "Allow $(PRODUCT_NAME) to access your photos.",
@@ -29,7 +28,6 @@ module.exports = {
         },
     },
     android: {
-        googleServicesFile: "./google-services.json",
         adaptiveIcon: {
             foregroundImage: "./assets/adaptive-icon.png",
             backgroundImage: "./assets/backgroundImage.png",
@@ -75,9 +73,6 @@ module.exports = {
                 isAccessMediaLocationEnabled: true,
             },
         ],
-        "@react-native-firebase/app",
-        "@react-native-firebase/perf",
-        "@react-native-firebase/crashlytics",
         [
             "expo-build-properties",
             {
