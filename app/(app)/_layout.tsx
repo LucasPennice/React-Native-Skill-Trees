@@ -88,9 +88,23 @@ const useInitialRedirect = (
         marketFitSurvey,
         appOpenSinceLastPMFSurvey,
     } = userVariables;
+    const { isProUser, currentOffering } = useContext(SubscriptionContext);
+    // const { isSignedIn } = useAuth();
+
+    // const getIfUserOnboarded = useCallback(() => {
+    //     if (isProUser === null) return null;
+    //     if (isSignedIn === null) return null;
+    //     //Pro and Cleark loaded
+    //     if (appNumberWhenFinishedOnboarding === null) return false;
+    //     //User finished onboarding
+    //     if (isSignedIn === true) return true;
+    //     //User is not logged
+    //     if (isProUser === false) return true;
+    //     //User is not pro
+    //     return false;
+    // }, [isProUser, isSignedIn, appNumberWhenFinishedOnboarding]);
 
     const treeQty = useAppSelector(selectTotalTreeQty);
-    const { isProUser, currentOffering } = useContext(SubscriptionContext);
 
     const DAYS_INTERVAL_TO_SHOW_PAYWALL = 3;
 
@@ -157,6 +171,22 @@ const useInitialRedirect = (
         appOpenSinceLastPMFSurvey,
         getShouldOpenPaywall,
     ]);
+
+    //     const onboardedUser = getIfUserOnboarded()
+
+    // //HOOK mientras estoy en onboarding
+    //     useEffect(() => {
+    //         const userOnboarded = getIfUserOnboarded()
+    //         if (userOnboarded === true || userOnboarded === null) return;
+
+    //     }
+    //         , [getIfUserOnboarded]);
+    // //HOOK post onboarding
+    //     useEffect(() => {
+    //         const userOnboarded = getIfUserOnboarded();
+    //         if (userOnboarded === false || userOnboarded === null) return;
+
+    // }, [getIfUserOnboarded]);
 };
 
 export const HandleModalsContext = createContext<{ modal: (v: boolean) => void; openPaywallSurvey: () => void; openWhatsNewModal: () => void }>({
