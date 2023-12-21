@@ -44,6 +44,11 @@ export const userVariablesSlice = createSlice({
     name: "userVariables",
     initialState,
     reducers: {
+        runOnLogin: (state) => {
+            state.onboardingExperience = true;
+            state.onboardingStep = LAST_ONBOARDING_STEP;
+            if (state.appNumberWhenFinishedOnboarding === null) state.appNumberWhenFinishedOnboarding = state.nthAppOpen;
+        },
         completeMarkeyFitSurvey: (state) => {
             state.marketFitSurvey = true;
         },
@@ -99,6 +104,7 @@ export const {
     updateLastPaywallShowDate,
     updateWhatsNewLatestVersionShown,
     updateAppOpenSinceLastPMFSurvey,
+    runOnLogin,
 } = userVariablesSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type

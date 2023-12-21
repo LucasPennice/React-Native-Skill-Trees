@@ -16,7 +16,7 @@ import { NodeSlice, overwriteNodeSlice, selectAllNodeIds, selectAllNodes, select
 import { selectSafeScreenDimentions } from "@/redux/slices/screenDimentionsSlice";
 import { selectSyncSlice, setShouldWaitForClerkToLoad, updateLastBackupTime } from "@/redux/slices/syncSlice";
 import { TreeData, UserTreeSlice, overwriteUserTreesSlice, selectAllTreesEntities, selectTreeIds } from "@/redux/slices/userTreesSlice";
-import { OnboardingSteps, completeCustomizeHomeTree, selectUserVariables } from "@/redux/slices/userVariablesSlice";
+import { OnboardingSteps, completeCustomizeHomeTree, runOnLogin, selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import { NormalizedNode } from "@/types";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -119,7 +119,6 @@ function useHandleSyncOnLoginOrSignUp(
     const treesTable = useAppSelector(selectAllTreesEntities);
     const treesIds = useAppSelector(selectTreeIds);
     const homeTree = useAppSelector(selectHomeTree);
-    // const onboarding = useAppSelector(selectOnboarding);
     const { lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);
 
     const dispatch = useAppDispatch();
@@ -131,10 +130,8 @@ function useHandleSyncOnLoginOrSignUp(
     const getUserBackup = () => axiosClient.get<UserBackup>(`backup/${userId}`);
 
     const batchUpdateUserStore = (userBackup: UserBackup) => {
-        // should only result in one combined re-render, not four
         batch(() => {
-            Alert.alert("Calcular el paso del onboardign en base al backup que estoy metiendo");
-            // dispatch(overwriteOnboardingSlice(userBackup.onboarding));
+            dispatch(runOnLogin());
             dispatch(overwriteHomeTreeSlice(userBackup.homeTree));
             dispatch(overwriteUserTreesSlice(userBackup.userTreesSlice));
             dispatch(overwriteNodeSlice(userBackup.nodeSlice));
@@ -185,8 +182,6 @@ function useHandleSyncOnLoginOrSignUp(
                 setTimeout(() => setShowSyncModal(false), 1000);
 
                 dispatch(setShouldWaitForClerkToLoad(false));
-
-                return;
             } catch (error) {
                 Alert.alert("There was an error loading you backup", `Please contact the developer ${error}`);
                 mixpanel.track(`CRASH`, { message: error, stack: error });

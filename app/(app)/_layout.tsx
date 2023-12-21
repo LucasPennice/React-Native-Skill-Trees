@@ -128,10 +128,10 @@ const useRedirectOnAppFocus = (
 
         //PRE ONBOARDING 👆
         if (isProUser === null) return;
+        if (isSignedIn === null) return;
         //🚨 We have to show onboarding experience (or set the state as shown) for every way to finish the onboarding otherwise the app won't work correctly
         if (!onboardingExperience) return;
         if (deepLinkOpenedApp) return;
-
         //POST ONBOARDING 👇
         if (runSignUp) return router.push("/auth/signUp");
 
@@ -140,7 +140,7 @@ const useRedirectOnAppFocus = (
         if (runMarketFitModal) return openMarketFitModal();
 
         if (runPaywall) return router.push("/(app)/postOnboardingPaywall");
-    }, [readyToRedirect, isProUser, nthAppOpen]);
+    }, [readyToRedirect, isProUser, nthAppOpen, isSignedIn]);
 };
 
 export const HandleModalsContext = createContext<{
