@@ -6,10 +6,10 @@ import DismissPaywallSurvey from "@/components/surveys/DismissPaywallSurvey";
 import MarketFitSurvey from "@/components/surveys/MarketFitSurvey";
 import PostOnboardingSurvey from "@/components/surveys/PostOnboardingSurvey";
 import { NAV_HEGIHT, colors, dayInMilliseconds } from "@/parameters";
-import { useAppSelector } from "@/redux/reduxHooks";
+import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import { selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
-import { LAST_ONBOARDING_STEP, selectUserVariables } from "@/redux/slices/userVariablesSlice";
+import { LAST_ONBOARDING_STEP, completeOnboardingExperienceSurvey, selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import useHandleDeepLinking from "@/useHandleDeepLinking";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import useRunDailyBackup from "@/useRunDailyBackup";
@@ -20,7 +20,7 @@ import { SubscriptionContext, mixpanel } from "app/_layout";
 import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
 import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { Dimensions, KeyboardAvoidingView, Platform, Pressable, Text, TouchableOpacity, View } from "react-native";
 import { routes, routesToHideNavBar } from "routes";
 import { whatsNewDataArray } from "whatsNewData";
@@ -44,8 +44,13 @@ const useHandleSurveyModals = () => {
     const [marketFit, setMarketFit] = useState(false);
     const [paywallDismiss, setPaywallDismiss] = useState(false);
 
+    const dispatch = useAppDispatch();
+
     const openPostOnboardingModal = () => setPostOnboarding(true);
-    const closePostOnboardingModal = () => setPostOnboarding(false);
+    const closePostOnboardingModal = () => {
+        setPostOnboarding(false);
+        dispatch(completeOnboardingExperienceSurvey());
+    };
 
     const openMarketFitModal = () => setMarketFit(true);
     const closeMarketFitModal = () => setMarketFit(false);
@@ -72,11 +77,15 @@ const useHandleSurveyModals = () => {
     };
 };
 
+const DAYS_INTERVAL_TO_SHOW_PAYWALL = 3;
+
 const useInitialRedirect = (
     readyToRedirect: boolean,
     openWhatsNewModal: () => void,
     openMarketFitModal: () => void,
-    openOnboardingModal: () => void
+    openOnboardingModal: () => void,
+    openPostOnboardingModal: () => void,
+    showOnboarding: boolean
 ) => {
     const userVariables = useAppSelector(selectUserVariables);
     const {
@@ -87,108 +96,56 @@ const useInitialRedirect = (
         whatsNewLatestVersionShown,
         marketFitSurvey,
         appOpenSinceLastPMFSurvey,
+        onboardingExperience,
     } = userVariables;
+    const treeQty = useAppSelector(selectTotalTreeQty);
     const { isProUser, currentOffering } = useContext(SubscriptionContext);
     const { isSignedIn } = useAuth();
+    const pathname = usePathname();
 
-    // const getIfUserOnboarded = useCallback(() => {
-    //     if (isProUser === null) return null;
-    //     if (isSignedIn === null) return null;
-    //     //Pro and Cleark loaded
-    //     if (appNumberWhenFinishedOnboarding === null) return false;
-    //     //User finished onboarding
-    //     if (isSignedIn === true) return true;
-    //     //User is not logged
-    //     if (isProUser === false) return true;
-    //     //User is not pro
-    //     return false;
-    // }, [isProUser, isSignedIn, appNumberWhenFinishedOnboarding]);
+    const runWelcomeUser = nthAppOpen === 0 && onboardingStep === 0;
+    const finishOnboarding = onboardingStep === LAST_ONBOARDING_STEP;
+    const runOnboardingModal = nthAppOpen !== 0 && !finishOnboarding;
+    const runSignUp = isProUser === true && isSignedIn === false;
 
-    const treeQty = useAppSelector(selectTotalTreeQty);
+    const whatsNewLatestVersion = whatsNewDataArray[whatsNewDataArray.length - 1].version;
+    const finishedOnboardingOnThisAppOpen = nthAppOpen === appNumberWhenFinishedOnboarding;
+    const runWhatsNewModal = whatsNewLatestVersion !== whatsNewLatestVersionShown && finishOnboarding && !finishedOnboardingOnThisAppOpen;
 
-    const DAYS_INTERVAL_TO_SHOW_PAYWALL = 3;
+    const appsOpenSinceLastPMFShownGreaterThatThreshold = appOpenSinceLastPMFSurvey !== null && nthAppOpen - appOpenSinceLastPMFSurvey >= 3;
+    const runMarketFitModal = treeQty >= 3 && marketFitSurvey !== true && appsOpenSinceLastPMFShownGreaterThatThreshold;
 
     const deepLinkOpenedApp = Linking.useURL() !== null;
 
-    const getShouldOpenPaywall = useCallback(() => {
-        const onboardingNotFinished = appNumberWhenFinishedOnboarding === null;
-        const finishedOnboardingOnThisAppOpen = nthAppOpen === appNumberWhenFinishedOnboarding;
+    const hasntShownPaywallYet = lastPaywallShowDate === null;
+    const daysSinceLastPaywallShown = (new Date().getTime() - (lastPaywallShowDate ?? 0)) / dayInMilliseconds;
+    const paywallIntervalThreshold = daysSinceLastPaywallShown < DAYS_INTERVAL_TO_SHOW_PAYWALL;
+    const runPaywall = isProUser === false && finishOnboarding && currentOffering && (hasntShownPaywallYet || paywallIntervalThreshold);
 
-        if (isProUser === null) return false;
-        if (isProUser) return false;
-
-        //This does not inclues signIn/Up
-        if (onboardingNotFinished) return false;
-
-        if (finishedOnboardingOnThisAppOpen) return false;
-
-        if (currentOffering === null) return false;
-
-        const hasntShownPaywallYet = lastPaywallShowDate === null;
-        if (hasntShownPaywallYet) return true;
-
-        const daysSinceLastPaywallShown = (new Date().getTime() - (lastPaywallShowDate ?? 0)) / dayInMilliseconds;
-        const waitMoreTimeToShowPaywallAgain = daysSinceLastPaywallShown < DAYS_INTERVAL_TO_SHOW_PAYWALL;
-
-        if (waitMoreTimeToShowPaywallAgain) return false;
-
-        return true;
-    }, [userVariables, isProUser, currentOffering]);
+    const inAuthPage = pathname.includes("auth");
+    const runPostOnboardingSurvey = showOnboarding === false && finishOnboarding && !inAuthPage && !onboardingExperience;
 
     useEffect(() => {
         if (!readyToRedirect) return;
+        if (runWelcomeUser) return router.push("/welcomeNewUser");
 
-        if (nthAppOpen === 0 && onboardingStep === 0) return router.push("/welcomeNewUser");
+        if (runOnboardingModal) return openOnboardingModal();
 
-        const userDidntFinishOnboarding = onboardingStep < LAST_ONBOARDING_STEP;
+        if (runPostOnboardingSurvey) return openPostOnboardingModal();
 
-        if (nthAppOpen !== 0 && userDidntFinishOnboarding) return openOnboardingModal();
-
+        //PRE ONBOARDING 👆
         if (isProUser === null) return;
-
         if (deepLinkOpenedApp) return;
 
-        if (isProUser === true && isSignedIn === false) return router.push("/auth/signUp");
+        //POST ONBOARDING 👇
+        if (runSignUp) return router.push("/auth/signUp");
 
-        const onboardingNotFinished = appNumberWhenFinishedOnboarding === null;
+        if (runWhatsNewModal) return openWhatsNewModal();
 
-        const WHATS_NEW_LATEST_VERSION = whatsNewDataArray[whatsNewDataArray.length - 1].version;
-        const finishedOnboardingOnThisAppOpen = nthAppOpen === appNumberWhenFinishedOnboarding;
-        const showWhatsNewModal =
-            WHATS_NEW_LATEST_VERSION !== whatsNewLatestVersionShown && !onboardingNotFinished && !finishedOnboardingOnThisAppOpen;
-        if (showWhatsNewModal) return openWhatsNewModal();
+        if (runMarketFitModal) return openMarketFitModal();
 
-        const appsOpenSinceLastPMFShownGreaterThatThreshold = appOpenSinceLastPMFSurvey !== null && nthAppOpen - appOpenSinceLastPMFSurvey >= 3;
-        if (treeQty >= 3 && marketFitSurvey !== true && appsOpenSinceLastPMFShownGreaterThatThreshold) return openMarketFitModal();
-
-        let shouldOpenPaywall: boolean = getShouldOpenPaywall();
-        if (shouldOpenPaywall) return router.push("/(app)/postOnboardingPaywall");
-    }, [
-        readyToRedirect,
-        isProUser,
-        onboardingStep,
-        appNumberWhenFinishedOnboarding,
-        nthAppOpen,
-        marketFitSurvey,
-        appOpenSinceLastPMFSurvey,
-        getShouldOpenPaywall,
-    ]);
-
-    //     const onboardedUser = getIfUserOnboarded()
-
-    // //HOOK mientras estoy en onboarding
-    //     useEffect(() => {
-    //         const userOnboarded = getIfUserOnboarded()
-    //         if (userOnboarded === true || userOnboarded === null) return;
-
-    //     }
-    //         , [getIfUserOnboarded]);
-    // //HOOK post onboarding
-    //     useEffect(() => {
-    //         const userOnboarded = getIfUserOnboarded();
-    //         if (userOnboarded === false || userOnboarded === null) return;
-
-    // }, [getIfUserOnboarded]);
+        if (runPaywall) return router.push("/(app)/postOnboardingPaywall");
+    }, [readyToRedirect, isProUser, nthAppOpen]);
 };
 
 export const HandleModalsContext = createContext<{ modal: (v: boolean) => void; openPaywallSurvey: () => void; openWhatsNewModal: () => void }>({
@@ -237,7 +194,7 @@ export default function RootLayout() {
     const openWhatsNewModal = () => setShowWhatsNew(true);
     const closeShowWhatsNewModal = () => setShowWhatsNew(false);
 
-    useInitialRedirect(readyToRedirect, openWhatsNewModal, marketFit.open, openOnboarding);
+    useInitialRedirect(readyToRedirect, openWhatsNewModal, marketFit.open, openOnboarding, postOnboarding.open, showOnboarding);
 
     // const dispatch = useAppDispatch();
     // useEffect(() => {

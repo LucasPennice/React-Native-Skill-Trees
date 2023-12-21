@@ -15,6 +15,7 @@ import { selectAllTrees } from "./redux/slices/userTreesSlice";
 import { selectUserVariables } from "./redux/slices/userVariablesSlice";
 import { useHandleLottiePlay } from "./useHandleLottiePlay";
 import { RoutesParams } from "routes";
+import { useAuth } from "@clerk/clerk-expo";
 
 type OnboardingStep = {
     title: string;
@@ -62,6 +63,7 @@ function OnboardingModal({ open, close, openPostOnboardingModal }: { open: boole
     const resetAnimation = () => animationRef?.current?.play();
 
     const { onboardingStep } = useAppSelector(selectUserVariables);
+    const { isSignedIn } = useAuth();
 
     const userTrees = useAppSelector(selectAllTrees);
 
@@ -107,7 +109,8 @@ function OnboardingModal({ open, close, openPostOnboardingModal }: { open: boole
         {
             title: "Sign in to Skill Trees",
             subtitle: "To back up your progress. Click outside this message to close",
-            onActionButtonPress: () => Alert.alert("Log in to back up"),
+            //THE BUTTON DOESN'T SHOW FOR THIS ONBOARDING STEP
+            onActionButtonPress: () => {},
             optional: true,
         },
     ];
@@ -115,13 +118,15 @@ function OnboardingModal({ open, close, openPostOnboardingModal }: { open: boole
     const currentOnboardingData = ONBOARDING_STEPS[onboardingStep];
 
     useEffect(() => {
+        if (isSignedIn === null) return;
         if (open !== true) return;
+        if (isSignedIn === true) return close();
 
         mixpanel.track(`ONBOARDING Step ${onboardingStep + 1} Viewed <1.0>`, {
             title: currentOnboardingData.title,
             subtitle: currentOnboardingData.subtitle,
         });
-    }, [open, onboardingStep]);
+    }, [isSignedIn, open, onboardingStep]);
 
     const getLottieAnimation = () => {
         switch (onboardingStep) {
@@ -136,13 +141,16 @@ function OnboardingModal({ open, close, openPostOnboardingModal }: { open: boole
         }
     };
 
-    const navigateToSignIn = () => router.push("/(app)/auth/signIn");
-    const navigateToSignUp = () => router.push("/(app)/auth/signUp");
-
-    const ignoreAndOpenPostOnboardingModal = () => {
+    const navigateToSignIn = () => {
         close();
-        openPostOnboardingModal();
+        router.push("/(app)/auth/signIn");
     };
+    const navigateToSignUp = () => {
+        close();
+        router.push("/(app)/auth/signUp");
+    };
+
+    const ignoreAndOpenPostOnboardingModal = () => close();
 
     return (
         <Modal animationType="fade" transparent={true} visible={open} onRequestClose={close} presentationStyle={"overFullScreen"}>
