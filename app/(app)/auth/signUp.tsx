@@ -7,8 +7,10 @@ import { BACKGROUND_COLOR } from "@/components/subscription/functions";
 import { colors } from "@/parameters";
 import { useAppDispatch } from "@/redux/reduxHooks";
 import { updateFirstTimeOpeningApp } from "@/redux/slices/syncSlice";
+import useBlockGoBack from "@/useBlockGoBack";
+import useSubscriptionHandler from "@/useSubscriptionHandler";
 import { useWarmUpBrowser } from "@/useWarmUpBrowser";
-import { useSignUp } from "@clerk/clerk-expo";
+import { useAuth, useSignUp } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -63,7 +65,7 @@ export const useHandleButtonState = () => {
 const { height } = Dimensions.get("window");
 
 const style = StyleSheet.create({
-    container: { height, padding: 15, paddingTop: 0, position: "relative", backgroundColor: BACKGROUND_COLOR },
+    container: { height, padding: 15, paddingTop: 20, position: "relative", backgroundColor: BACKGROUND_COLOR },
     emailButton: {
         width: "100%",
         height: 55,
@@ -80,7 +82,12 @@ const style = StyleSheet.create({
 
 function SignUp() {
     useWarmUpBrowser();
-    // const { hideRedirectToLogin } = useLocalSearchParams<RoutesParams["signUp"]>();
+
+    const { isProUser } = useSubscriptionHandler();
+    const { isSignedIn } = useAuth();
+
+    const blockGoBack = isProUser === true && isSignedIn === false;
+    useBlockGoBack(blockGoBack);
 
     const dispatch = useAppDispatch();
 
@@ -184,10 +191,14 @@ function SignUp() {
 
     return (
         <Animated.View style={style.container} entering={FadeInRight} exiting={FadeOutLeft}>
-            <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", height: 40, justifyContent: "flex-start" }} onPress={back}>
-                <FontAwesome name={"chevron-left"} size={18} color={colors.softPurle} />
-                <AppText children={"Back"} fontSize={18} style={{ color: colors.softPurle, marginLeft: 10, paddingTop: 3 }} />
-            </TouchableOpacity>
+            {blockGoBack !== true && (
+                <TouchableOpacity
+                    style={{ flexDirection: "row", alignItems: "center", height: 40, justifyContent: "flex-start", position: "absolute", left: 15 }}
+                    onPress={back}>
+                    <FontAwesome name={"chevron-left"} size={18} color={colors.softPurle} />
+                    <AppText children={"Back"} fontSize={18} style={{ color: colors.softPurle, marginLeft: 10, paddingTop: 3 }} />
+                </TouchableOpacity>
+            )}
 
             {!showEmailAndPassword && (
                 <Animated.View style={{ flex: 1, justifyContent: "space-around", marginTop: 20, paddingHorizontal: 20 }} exiting={FadeOutLeft}>

@@ -14,7 +14,7 @@ import useHandleDeepLinking from "@/useHandleDeepLinking";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import useRunDailyBackup from "@/useRunDailyBackup";
 import useTrackNavigationEvents from "@/useTrackNavigationEvents";
-import { useUser } from "@clerk/clerk-expo";
+import { useAuth, useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { SubscriptionContext, mixpanel } from "app/_layout";
 import { useFonts } from "expo-font";
@@ -89,7 +89,7 @@ const useInitialRedirect = (
         appOpenSinceLastPMFSurvey,
     } = userVariables;
     const { isProUser, currentOffering } = useContext(SubscriptionContext);
-    // const { isSignedIn } = useAuth();
+    const { isSignedIn } = useAuth();
 
     // const getIfUserOnboarded = useCallback(() => {
     //     if (isProUser === null) return null;
@@ -147,6 +147,8 @@ const useInitialRedirect = (
         if (isProUser === null) return;
 
         if (deepLinkOpenedApp) return;
+
+        if (isProUser === true && isSignedIn === false) return router.push("/auth/signUp");
 
         const onboardingNotFinished = appNumberWhenFinishedOnboarding === null;
 

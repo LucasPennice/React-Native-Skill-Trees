@@ -3,18 +3,19 @@ import AppText from "@/components/AppText";
 import DropdownProductSelector from "@/components/subscription/DropdownProductSelector";
 import { BACKGROUND_COLOR, PRICE_CARD_HEIGHT, getSubscribeButtonText, handlePurchase } from "@/components/subscription/functions";
 import { colors } from "@/parameters";
+import { useAppDispatch } from "@/redux/reduxHooks";
+import { completeCustomizeHomeTree, completeOnboardingExperienceSurvey } from "@/redux/slices/userVariablesSlice";
+import useBlockGoBack from "@/useBlockGoBack";
 import useSubscriptionHandler from "@/useSubscriptionHandler";
+import { useAuth } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
 import * as NavigationBar from "expo-navigation-bar";
-import { router, useNavigation } from "expo-router";
+import { router } from "expo-router";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Dimensions, Platform, ScrollView, StyleSheet, View } from "react-native";
-import { HandleModalsContext } from "./_layout";
-import { useAuth } from "@clerk/clerk-expo";
 import { batch } from "react-redux";
-import { useAppDispatch } from "@/redux/reduxHooks";
-import { completeCustomizeHomeTree, completeOnboardingExperienceSurvey } from "@/redux/slices/userVariablesSlice";
+import { HandleModalsContext } from "./_layout";
 
 const { height } = Dimensions.get("window");
 
@@ -26,17 +27,6 @@ const style = StyleSheet.create({
         position: "relative",
     },
 });
-
-const useBlockGoBack = () => {
-    const navigation = useNavigation();
-
-    useEffect(() => {
-        navigation.addListener("beforeRemove", (e) => {
-            e.preventDefault();
-            navigation.dispatch(e.data.action);
-        });
-    }, []);
-};
 
 const SCROLLABLE_SCREEN_SIZE = height - 155 - PRICE_CARD_HEIGHT;
 

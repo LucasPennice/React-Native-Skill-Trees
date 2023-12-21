@@ -93,7 +93,4 @@ export type RoutesParams = {
         handleSignUpSync?: "true";
         openEditCanvasSettings?: "true";
     };
-    signUp: {
-        hideRedirectToLogin?: "true";
-    };
 };

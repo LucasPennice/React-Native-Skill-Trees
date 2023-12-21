@@ -12,6 +12,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { HandleModalsContext } from "./_layout";
 import useSubscriptionHandler from "@/useSubscriptionHandler";
+import { useAuth } from "@clerk/clerk-expo";
 
 const style = StyleSheet.create({
     container: {
@@ -58,6 +59,7 @@ function PostOnboardingPaywall() {
 
     const { currentOffering } = useContext(SubscriptionContext);
     const { open } = useContext(HandleAlertContext);
+    const { isSignedIn } = useAuth();
 
     const dispatch = useAppDispatch();
 
@@ -68,10 +70,12 @@ function PostOnboardingPaywall() {
         dispatch(updateLastPaywallShowDate());
     }, []);
 
-    const redirectHomeWithCongratulationsModal = () => {
+    const redirectHomeWithCongratulationsModal = useCallback(() => {
         open({ state: "success", subtitle: "To check your membership details visit your profile", title: "Congratulations" });
-        router.push("/(app)/home");
-    };
+        if (isSignedIn === null || isSignedIn === true) return router.push("/(app)/home");
+
+        return router.push("/(app)/auth/signUp");
+    }, [isSignedIn]);
 
     const back = useHandleGoBack();
 
@@ -84,7 +88,7 @@ function PostOnboardingPaywall() {
             setLoading,
             `PAYWALL Post Onboarding Paywall ${selected} Subscription <1.0>`
         )();
-    }, [currentOffering, selected]);
+    }, [currentOffering, selected, redirectHomeWithCongratulationsModal]);
 
     return (
         <View style={style.container}>
