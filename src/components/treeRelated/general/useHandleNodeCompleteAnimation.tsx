@@ -1,6 +1,6 @@
-import { rect, rrect, useComputedValue } from "@shopify/react-native-skia";
+import { rect, rrect } from "@shopify/react-native-skia";
 import { useEffect } from "react";
-import { useSharedValue, withDelay, withTiming } from "react-native-reanimated";
+import { useDerivedValue, useSharedValue, withDelay, withTiming } from "react-native-reanimated";
 import { CIRCLE_SIZE } from "../../../parameters";
 import useIsFirstRender from "../../../useIsFirstRender";
 
@@ -61,7 +61,7 @@ function useHandleNodeCompleteAnimation(coord: { cx: number; cy: number }, isCom
         outerRectSizeSharedValue.value = withDelay(delayAfterOvershoot, withTiming(size, { duration: remainingAnimationDuration }));
     }, [isComplete]);
 
-    const animatedOuterRect = useComputedValue(() => {
+    const animatedOuterRect = useDerivedValue(() => {
         return rrect(
             rect(outerRectXSharedValue.value, outerRectYSharedValue.value, outerRectSizeSharedValue.value, outerRectSizeSharedValue.value),
             outerRectSizeSharedValue.value,
@@ -86,7 +86,7 @@ function useHandleNodeCompleteAnimation(coord: { cx: number; cy: number }, isCom
         innerRectSizeSharedValue.value = withDelay(delayAfterOvershoot, withTiming(size, { duration: remainingAnimationDuration }));
     }, [isComplete, cx, cy]);
 
-    const animatedinnerRect = useComputedValue(() => {
+    const animatedinnerRect = useDerivedValue(() => {
         return rrect(
             rect(innerRectXSharedValue.value, innerRectYSharedValue.value, innerRectSizeSharedValue.value, innerRectSizeSharedValue.value),
             innerRectSizeSharedValue.value,

@@ -15,7 +15,7 @@ export const StaticRadialPathList = memo(function StaticRadialPathList({
     // Create picture
     const picture = useMemo(
         () =>
-            createPicture({ x: 0, y: 0, width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }, (canvas) => {
+            createPicture((canvas) => {
                 const rootNodeCoordinates = allNodes.find((c) => c.level === 0);
                 if (!rootNodeCoordinates) throw new Error("rootNodeCoordinates not found at StaticRadialPathList createPicture");
 

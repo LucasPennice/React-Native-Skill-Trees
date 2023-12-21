@@ -2,7 +2,7 @@ import { SkiaFontContext } from "app/_layout";
 import { memo, useContext } from "react";
 import { View } from "react-native";
 import Animated from "react-native-reanimated";
-import { Circle, Defs, LinearGradient, Stop, Svg } from "react-native-svg";
+import { Circle, Svg } from "react-native-svg";
 import { getWheelParams } from "../functions/misc";
 import { PURPLE_GRADIENT, centerFlex, colors } from "../parameters";
 import { ColorGradient, NodeCategory, Skill } from "../types";
@@ -43,12 +43,6 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
         return (
             <View>
                 <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
-                    <Defs>
-                        <LinearGradient id="progressColor" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <Stop offset="0%" stopColor={gradient.color1} stopOpacity="1" />
-                            <Stop offset="100%" stopColor={gradient.color2} stopOpacity="1" />
-                        </LinearGradient>
-                    </Defs>
                     <Circle
                         strokeWidth={progressWheelProps.strokeWidth}
                         cx={progressWheelProps.centerCoordinate}
@@ -61,7 +55,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                         cx={progressWheelProps.centerCoordinate}
                         cy={progressWheelProps.centerCoordinate}
                         r={progressWheelProps.radius}
-                        stroke={"url(#progressColor)"}
+                        stroke={gradient.color1}
                         fillOpacity={0}
                         strokeDasharray={progressWheelProps.circumference}
                         strokeLinecap="round"
@@ -91,18 +85,6 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
         return (
             <View>
                 <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
-                    <Defs>
-                        <LinearGradient id="progressColor" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <Stop offset="0%" stopColor={gradient.color1} stopOpacity="1" />
-                            <Stop offset="100%" stopColor={gradient.color2} stopOpacity="1" />
-                        </LinearGradient>
-                    </Defs>
-                    <Defs>
-                        <LinearGradient id="outerEdge" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <Stop offset="0%" stopColor={"#515053"} stopOpacity="1" />
-                            <Stop offset="100%" stopColor={"#2C2C2D"} stopOpacity="1" />
-                        </LinearGradient>
-                    </Defs>
                     {/* Background circle */}
                     <Circle
                         cx={progressWheelProps.centerCoordinate}
@@ -117,7 +99,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                         cy={progressWheelProps.centerCoordinate}
                         fillOpacity={0}
                         r={progressWheelProps.radius}
-                        stroke={"url(#outerEdge)"}
+                        stroke={"#515053"}
                     />
                     {completePercentage !== 0 && (
                         <Circle
@@ -126,7 +108,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                             cy={progressWheelProps.centerCoordinate}
                             r={progressWheelProps.radius}
                             fillOpacity={0}
-                            stroke={"url(#progressColor)"}
+                            stroke={gradient.color1}
                             strokeDasharray={progressWheelProps.circumference}
                             strokeLinecap="round"
                             strokeDashoffset={1 - result}
@@ -154,20 +136,6 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
         return (
             <View>
                 <Svg width={progressWheelProps.size} height={progressWheelProps.size}>
-                    <Defs>
-                        {skill.isCompleted && (
-                            <LinearGradient id="progressColor" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <Stop offset="0%" stopColor={gradient.color1} stopOpacity="1" />
-                                <Stop offset="100%" stopColor={gradient.color2} stopOpacity="1" />
-                            </LinearGradient>
-                        )}
-                        {!skill.isCompleted && (
-                            <LinearGradient id="progressColor" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <Stop offset="0%" stopColor={"#515053"} stopOpacity="1" />
-                                <Stop offset="100%" stopColor={"#2C2C2D"} stopOpacity="1" />
-                            </LinearGradient>
-                        )}
-                    </Defs>
                     <Circle
                         strokeWidth={progressWheelProps.strokeWidth}
                         cx={progressWheelProps.centerCoordinate}
@@ -180,7 +148,7 @@ function NodeView<T extends { data: Skill; accentColor: ColorGradient; category:
                         cx={progressWheelProps.centerCoordinate}
                         cy={progressWheelProps.centerCoordinate}
                         r={progressWheelProps.radius}
-                        stroke={"url(#progressColor)"}
+                        stroke={skill.isCompleted ? gradient.color1 : "#515053"}
                         fillOpacity={0}
                         strokeDasharray={progressWheelProps.circumference}
                         strokeLinecap="round"

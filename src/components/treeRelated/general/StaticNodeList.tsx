@@ -24,6 +24,12 @@ type PaintProps = {
     rootColor: ColorGradient;
 };
 
+const skiaBlack = Skia.Paint();
+skiaBlack.setColor(Skia.Color(colors.background));
+
+const skiaLine = Skia.Paint();
+skiaLine.setColor(Skia.Color(colors.line));
+
 export function StaticNodeList({ allNodes, staticNodes, settings, fonts, canvasDimensions }: Props) {
     const { oneColorPerTree, showIcons } = settings;
 
@@ -38,7 +44,7 @@ export function StaticNodeList({ allNodes, staticNodes, settings, fonts, canvasD
 
         const paintProps: PaintProps = { canvasDimensions, fonts, rootColor, settings };
 
-        return createPicture({ x: 0, y: 0, width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }, (canvas) => {
+        return createPicture((canvas) => {
             for (const nodeCoordinate of staticNodes) {
                 if (nodeCoordinate.category === "SKILL") paintSkillNode(canvas, nodeCoordinate, paintProps);
                 if (nodeCoordinate.category === "SKILL_TREE") paintSkillTreeNode(canvas, nodeCoordinate, paintProps, treeCompletionTable);
@@ -51,31 +57,29 @@ export function StaticNodeList({ allNodes, staticNodes, settings, fonts, canvasD
 }
 
 export function paintSkillNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProps) {
-    const { canvasDimensions, fonts, settings, rootColor } = props;
+    const { fonts, settings, rootColor } = props;
 
-    const backgroundPaint = Skia.Paint();
-    backgroundPaint.setColor(Skia.Color(colors.background));
     const outerEdge = Skia.Path.Make();
-
-    const grayColor = Skia.Paint();
-    grayColor.setColor(Skia.Color(colors.line));
 
     outerEdge.addCircle(node.x, node.y, CIRCLE_SIZE);
 
     outerEdge.stroke({ width: strokeWidth });
 
-    canvas.drawPath(outerEdge, grayColor);
+    canvas.drawPath(outerEdge, skiaLine);
 
-    const accentColor = settings.oneColorPerTree ? rootColor : node.accentColor;
+    const accentColor = settings.oneColorPerTree ? rootColor.color1 : node.accentColor.color1;
 
-    const gradient: ColorGradient = node.data.isCompleted ? accentColor : { color1: "#515053", color2: "#2C2C2D", label: "" };
-    //Completed indicator outer edge
-    const svg = getCircularPathSvgWithGradient(
-        { center: { x: node.x, y: node.y }, gradient, radius: CIRCLE_SIZE, strokeWidth: strokeWidth },
-        { width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }
-    );
+    const color = node.data.isCompleted ? accentColor : "#515053";
+    const completedPathPaintColor = Skia.Paint();
+    completedPathPaintColor.setColor(Skia.Color(color));
 
-    canvas.drawSvg(svg);
+    const svg = getCircularPathSvgWithGradient({ center: { x: node.x, y: node.y }, radius: CIRCLE_SIZE });
+
+    if (svg) {
+        svg.stroke({ width: strokeWidth });
+
+        canvas.drawPath(svg, completedPathPaintColor);
+    }
 
     if (settings.showIcons) {
         const textColor = Skia.Paint();
@@ -101,52 +105,36 @@ function paintSkillTreeNode(
         percentage: number;
     }>
 ) {
-    const { canvasDimensions, fonts, settings, rootColor } = props;
+    const { fonts, settings, rootColor } = props;
 
-    const backgroundPaint = Skia.Paint();
-    backgroundPaint.setColor(Skia.Color(colors.background));
-
-    canvas.drawCircle(node.x, node.y, CIRCLE_SIZE, backgroundPaint);
+    canvas.drawCircle(node.x, node.y, CIRCLE_SIZE, skiaBlack);
 
     const completionPercentage = treeCompletionTable[node.treeId]!.percentage;
 
-    const grayColor = Skia.Paint();
-    grayColor.setColor(Skia.Color(colors.line));
+    const path = getCircularPathSvgWithGradient({ center: { x: node.x, y: node.y }, radius: CIRCLE_SIZE });
 
-    const outerEdge = getCircularPathSvgWithGradient(
-        {
-            center: { x: node.x, y: node.y },
-            gradient: { color1: "#515053", color2: "#2C2C2D", label: "" },
-            radius: CIRCLE_SIZE,
-            strokeWidth: 2,
-            pathString: `fill-opacity='0'`,
-        },
-        { width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }
-    );
+    if (path) {
+        path.stroke({ width: 2 });
 
-    canvas.drawSvg(outerEdge);
+        canvas.drawPath(path, skiaLine);
+    }
 
-    const accentColor = settings.oneColorPerTree ? rootColor : node.accentColor;
-
+    const accentColor = settings.oneColorPerTree ? rootColor.color1 : node.accentColor.color1;
+    const completePathColor = Skia.Paint();
+    completePathColor.setColor(Skia.Color(accentColor));
     //Completed indicator outer edge
-    const completionOuterEdge = getCircularPathSvgWithGradient(
-        {
-            center: { x: node.x, y: node.y },
-            gradient: accentColor,
-            radius: CIRCLE_SIZE,
-            strokeWidth: strokeWidth,
-            pathString: `stroke-dasharray='${2 * Math.PI * CIRCLE_SIZE}' fill-opacity='0' stroke-dashoffset='${
-                2 * Math.PI * CIRCLE_SIZE - (2 * Math.PI * CIRCLE_SIZE * completionPercentage) / 100
-            }'`,
-        },
-        { width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }
-    );
+    const completePath = getCircularPathSvgWithGradient({ center: { x: node.x, y: node.y }, radius: CIRCLE_SIZE });
 
-    canvas.drawSvg(completionOuterEdge);
+    if (completePath) {
+        completePath.trim(0, completionPercentage / 100, false);
+        completePath.stroke({ width: 2 });
+
+        canvas.drawPath(completePath, completePathColor);
+    }
 
     if (settings.showIcons) {
         const textColor = Skia.Paint();
-        textColor.setColor(Skia.Color(accentColor.color1));
+        textColor.setColor(Skia.Color(accentColor));
 
         const text = node.data.icon.isEmoji ? node.data.icon.text : node.data.name[0];
 
@@ -159,29 +147,19 @@ function paintSkillTreeNode(
 }
 
 function paintUserNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProps) {
-    const { canvasDimensions, fonts, settings } = props;
+    const { fonts, settings } = props;
 
-    const backgroundPaint = Skia.Paint();
-    backgroundPaint.setColor(Skia.Color(colors.background));
-    const outerEdge = Skia.Path.Make();
+    canvas.drawCircle(node.x, node.y, 1.5 * CIRCLE_SIZE, skiaBlack);
 
-    const grayColor = Skia.Paint();
-    grayColor.setColor(Skia.Color(colors.line));
+    const completeColor = Skia.Paint();
+    completeColor.setColor(Skia.Color(node.accentColor.color1));
 
-    canvas.drawPath(outerEdge, grayColor);
+    const path = getCircularPathSvgWithGradient({ center: { x: node.x, y: node.y }, radius: 1.5 * CIRCLE_SIZE });
 
-    //Completed indicator outer edge
-    const svg = getCircularPathSvgWithGradient(
-        {
-            center: { x: node.x, y: node.y },
-            gradient: node.accentColor,
-            radius: 1.5 * CIRCLE_SIZE,
-            strokeWidth: strokeWidth,
-        },
-        { width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }
-    );
-
-    canvas.drawSvg(svg);
+    if (path) {
+        path.stroke({ width: strokeWidth });
+        canvas.drawPath(path, completeColor);
+    }
 
     if (settings.showIcons) {
         const textColor = Skia.Paint();
@@ -199,25 +177,14 @@ function paintUserNode(canvas: SkCanvas, node: NodeCoordinate, props: PaintProps
 
 export default StaticNodeList;
 
-export function getCircularPathSvgWithGradient<T extends { width: number; height: number }>(
-    props: { gradient: ColorGradient; center: CartesianCoordinate; strokeWidth: number; radius: number; pathString?: string },
-    svgDimensions: T
-) {
-    const { center, gradient, radius, strokeWidth, pathString = "" } = props;
-    const svg = Skia.SVG.MakeFromString(
-        `<svg viewBox='0 0 ${svgDimensions.width} ${svgDimensions.height}' xmlns='http://www.w3.org/2000/svg'>
-                <defs>
-                    <linearGradient id='grad1' x1='0%' y1='0%' x2='100%' y2='100%'>
-                        <stop offset='0%' style='stop-color:${gradient.color1};stop-opacity:1' />
-                        <stop offset='100%' style='stop-color:${gradient.color2};stop-opacity:1' />
-                    </linearGradient>
-                </defs>
-                <path stroke-linecap='round' d="M${center.x} ${center.y} m ${radius}, 0
+export function getCircularPathSvgWithGradient(props: { center: CartesianCoordinate; radius: number }) {
+    const { center, radius } = props;
+
+    const svg = Skia.Path.MakeFromSVGString(
+        `M${center.x} ${center.y} m ${radius}, 0
                 a ${radius},${radius} 0 1,0 ${-(radius * 2)},0
-                a ${radius},${radius} 0 1,0  ${radius * 2},0" stroke='url(#grad1)' stroke-width='${strokeWidth}' ${pathString}/>
-           
-        </svg>`
-    )!;
+                a ${radius},${radius} 0 1,0  ${radius * 2},0`
+    );
 
     return svg;
 }

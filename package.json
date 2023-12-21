@@ -20,7 +20,7 @@
     "@react-native-clipboard/clipboard": "^1.12.1",
     "@react-navigation/native": "^6.1.6",
     "@reduxjs/toolkit": "^1.9.3",
-    "@shopify/react-native-skia": "0.1.196",
+    "@shopify/react-native-skia": "^0.1.230",
     "@tanstack/react-query": "^4.29.7",
     "@types/react": "~18.2.14",
     "@types/react-redux": "^7.1.25",

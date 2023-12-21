@@ -76,7 +76,7 @@ const StaticHierarchicalPathList = memo(function StaticHierarchicalPathList({
 }) {
     const picture = useMemo(
         () =>
-            createPicture({ x: 0, y: 0, width: canvasDimensions.canvasWidth, height: canvasDimensions.canvasHeight }, (canvas) => {
+            createPicture((canvas) => {
                 const paint = Skia.Paint();
                 paint.setColor(Skia.Color("#1C1C1D"));
 

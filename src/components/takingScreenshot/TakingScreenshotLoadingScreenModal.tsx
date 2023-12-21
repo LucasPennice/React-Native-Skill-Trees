@@ -8,8 +8,7 @@ import { selectNodesOfTree } from "@/redux/slices/nodesSlice";
 import { TreeData, selectAllTreesEntities } from "@/redux/slices/userTreesSlice";
 import { CartesianCoordinate, NodeCoordinate, NormalizedNode } from "@/types";
 import { Dictionary } from "@reduxjs/toolkit";
-import { mixpanel } from "app/_layout";
-import { SkiaAppFonts, SkiaFontContext } from "app/_layout";
+import { SkiaAppFonts, SkiaFontContext, mixpanel } from "app/_layout";
 import { shareAsync } from "expo-sharing";
 import { Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Modal, Platform, Pressable, StatusBar, StyleSheet, View } from "react-native";
@@ -154,8 +153,6 @@ const useHandleGestures = (args: Props["sharedValues"], showBorder: SharedValue<
 const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coordinatesInsideCanvas, svgDimensions, rootNodeInsideCanvas }: Props) => {
     const { offsetX, offsetY, rotation, scale } = sharedValues;
 
-    const subTreesData = useAppSelector(selectAllTreesEntities);
-
     const showBorder = useSharedValue(false);
 
     const canvasGestures = useHandleGestures(sharedValues, showBorder);
@@ -191,21 +188,6 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
                 ]}>
                 <View style={{ width: svgDimensions.width, height: svgDimensions.height, position: "relative" }}>
                     <Svg width={svgDimensions.width} height={svgDimensions.height} style={{ backgroundColor: colors.background }}>
-                        <Defs>
-                            <LinearGradient id="gray" x1="0%" x2="100%" y1="0%" y2="100%">
-                                <Stop offset="0%" stopColor={"#515053"} stopOpacity={1} />
-                                <Stop offset="100%" stopColor={"#2C2C2D"} stopOpacity={1} />
-                            </LinearGradient>
-                        </Defs>
-                        <Defs>
-                            <LinearGradient id={`${HOMEPAGE_TREE_ID}`} x1="0%" x2="100%" y1="0%" y2="100%">
-                                <Stop offset="0%" stopColor={treeData.accentColor.color1} stopOpacity={1} />
-                                <Stop offset="100%" stopColor={treeData.accentColor.color2} stopOpacity={1} />
-                            </LinearGradient>
-                        </Defs>
-
-                        <DefineGradients subTreesData={subTreesData} />
-
                         {coordinatesInsideCanvas.map((node) => {
                             return (
                                 <Fragment key={node.nodeId}>
@@ -249,12 +231,19 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
 
                             return (
                                 <Fragment key={node.nodeId}>
-                                    <Path stroke={`url(#gray)`} strokeLinecap="round" strokeWidth={2} d={nodeToCircularPath(node, radius)} />
+                                    <Path
+                                        stroke={"#515053"}
+                                        strokeLinecap="round"
+                                        fillOpacity={1}
+                                        strokeWidth={2}
+                                        d={nodeToCircularPath(node, radius)}
+                                    />
 
                                     <Path
+                                        fillOpacity={0}
                                         stroke={
                                             (node.category === "SKILL" && node.data.isCompleted) || node.category !== "SKILL"
-                                                ? `url(#${node.treeId})`
+                                                ? node.accentColor.color1
                                                 : undefined
                                         }
                                         strokeLinecap="round"
@@ -299,7 +288,14 @@ const MovableSvg = gestureHandlerRootHOC(({ sharedValues, treeData, fonts, coord
                                 key={node.nodeId}
                                 fontSize={node.category === "USER" ? USER_ICON_FONT_SIZE : NODE_ICON_FONT_SIZE}
                                 children={text}
-                                style={{ fontFamily, position: "absolute", left: textX, top: textY - 20, color, lineHeight: 30 }}
+                                style={{
+                                    fontFamily,
+                                    position: "absolute",
+                                    left: textX - (node.category === "USER" ? 1 : 0),
+                                    top: textY - (node.category === "USER" ? 17 : 20),
+                                    color,
+                                    lineHeight: 30,
+                                }}
                             />
                         );
                     })}
