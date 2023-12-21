@@ -102,6 +102,8 @@ const SignOutButton = () => {
             dispatch(updateLastBackupTime());
 
             signOut();
+
+            router.push("/(app)/userProfile");
         } catch (error) {
             mixpanel.track(`CRASH`, { message: error, stack: error });
             Alert.alert("Error creating a backup", `All progress after ${new Date().toString()} will be lost\nQuit anyway?`, [
@@ -124,7 +126,7 @@ const SignOutButton = () => {
             disabled={!isLoaded || !isSignedIn}
             onPress={handleSignOut}
             text={{ idle: "Log Out", success: "Backup Successful", error: "Error Backing Up Data" }}
-            color={{ idle: colors.darkGray }}
+            color={{ idle: colors.darkGray, loading: colors.darkGray, success: colors.darkGray }}
             state={backupState}
             pressableStyle={{ width: "100%" }}
             textStyle={{ fontSize: 18, lineHeight: 18, color: colors.red }}
