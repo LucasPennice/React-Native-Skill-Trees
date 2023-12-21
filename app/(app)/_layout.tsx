@@ -79,13 +79,11 @@ const useHandleSurveyModals = () => {
 
 const DAYS_INTERVAL_TO_SHOW_PAYWALL = 3;
 
-const useInitialRedirect = (
+const useRedirectOnAppFocus = (
     readyToRedirect: boolean,
     openWhatsNewModal: () => void,
     openMarketFitModal: () => void,
-    openOnboardingModal: () => void,
-    openPostOnboardingModal: () => void,
-    showOnboarding: boolean
+    openOnboardingModal: () => void
 ) => {
     const userVariables = useAppSelector(selectUserVariables);
     const {
@@ -105,7 +103,7 @@ const useInitialRedirect = (
 
     const runWelcomeUser = nthAppOpen === 0 && onboardingStep === 0;
     const finishOnboarding = onboardingStep === LAST_ONBOARDING_STEP;
-    const runOnboardingModal = nthAppOpen !== 0 && !finishOnboarding;
+    const runOnboardingModal = pathname.includes("home") && !finishOnboarding;
     const runSignUp = isProUser === true && isSignedIn === false;
 
     const whatsNewLatestVersion = whatsNewDataArray[whatsNewDataArray.length - 1].version;
@@ -119,11 +117,8 @@ const useInitialRedirect = (
 
     const hasntShownPaywallYet = lastPaywallShowDate === null;
     const daysSinceLastPaywallShown = (new Date().getTime() - (lastPaywallShowDate ?? 0)) / dayInMilliseconds;
-    const paywallIntervalThreshold = daysSinceLastPaywallShown < DAYS_INTERVAL_TO_SHOW_PAYWALL;
+    const paywallIntervalThreshold = daysSinceLastPaywallShown >= DAYS_INTERVAL_TO_SHOW_PAYWALL;
     const runPaywall = isProUser === false && finishOnboarding && currentOffering && (hasntShownPaywallYet || paywallIntervalThreshold);
-
-    const inAuthPage = pathname.includes("auth");
-    const runPostOnboardingSurvey = showOnboarding === false && finishOnboarding && !inAuthPage && !onboardingExperience;
 
     useEffect(() => {
         if (!readyToRedirect) return;
@@ -131,10 +126,10 @@ const useInitialRedirect = (
 
         if (runOnboardingModal) return openOnboardingModal();
 
-        if (runPostOnboardingSurvey) return openPostOnboardingModal();
-
         //PRE ONBOARDING 👆
         if (isProUser === null) return;
+        //🚨 We have to show onboarding experience (or set the state as shown) for every way to finish the onboarding otherwise the app won't work correctly
+        if (!onboardingExperience) return;
         if (deepLinkOpenedApp) return;
 
         //POST ONBOARDING 👇
@@ -148,10 +143,16 @@ const useInitialRedirect = (
     }, [readyToRedirect, isProUser, nthAppOpen]);
 };
 
-export const HandleModalsContext = createContext<{ modal: (v: boolean) => void; openPaywallSurvey: () => void; openWhatsNewModal: () => void }>({
+export const HandleModalsContext = createContext<{
+    modal: (v: boolean) => void;
+    openPaywallSurvey: () => void;
+    openWhatsNewModal: () => void;
+    openOnboardingFeedbackModal: () => void;
+}>({
     modal: () => {},
     openPaywallSurvey: () => {},
     openWhatsNewModal: () => {},
+    openOnboardingFeedbackModal: () => {},
 });
 
 export default function RootLayout() {
@@ -194,7 +195,7 @@ export default function RootLayout() {
     const openWhatsNewModal = () => setShowWhatsNew(true);
     const closeShowWhatsNewModal = () => setShowWhatsNew(false);
 
-    useInitialRedirect(readyToRedirect, openWhatsNewModal, marketFit.open, openOnboarding, postOnboarding.open, showOnboarding);
+    useRedirectOnAppFocus(readyToRedirect, openWhatsNewModal, marketFit.open, openOnboarding);
 
     // const dispatch = useAppDispatch();
     // useEffect(() => {
@@ -221,7 +222,13 @@ export default function RootLayout() {
     const showNavBar = !Boolean(pathname === "/" || routesToHideNavBar.find((route) => pathname.includes(route)));
 
     return (
-        <HandleModalsContext.Provider value={{ modal: setShowOnboarding, openPaywallSurvey: paywallDismiss.open, openWhatsNewModal }}>
+        <HandleModalsContext.Provider
+            value={{
+                modal: setShowOnboarding,
+                openPaywallSurvey: paywallDismiss.open,
+                openWhatsNewModal,
+                openOnboardingFeedbackModal: postOnboarding.open,
+            }}>
             <View style={{ flex: 1, minHeight: Platform.OS === "android" ? height - NAV_HEGIHT : "auto" }}>
                 <Stack
                     screenOptions={{
@@ -280,11 +287,11 @@ export default function RootLayout() {
                 </Stack>
 
                 {/* MODALS 👇 */}
-                <PostOnboardingSurvey open={postOnboarding.state} close={postOnboarding.close} />
                 <MarketFitSurvey open={marketFit.state} close={marketFit.close} />
                 <DismissPaywallSurvey open={paywallDismiss.state} close={paywallDismiss.close} />
                 <WhatsNewModal open={showWhatsNew} close={closeShowWhatsNewModal} />
                 <OnboardingModal close={closeOnboarding} open={showOnboarding} openPostOnboardingModal={postOnboarding.open} />
+                <PostOnboardingSurvey open={postOnboarding.state} close={postOnboarding.close} />
                 {/* MODALS 👆 */}
 
                 {showNavBar && (

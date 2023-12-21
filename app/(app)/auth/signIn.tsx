@@ -7,6 +7,9 @@ import { BACKGROUND_COLOR } from "@/components/subscription/functions";
 import { colors } from "@/parameters";
 import { useAppDispatch } from "@/redux/reduxHooks";
 import { updateFirstTimeOpeningApp } from "@/redux/slices/syncSlice";
+import useBlockGoBack from "@/useBlockGoBack";
+import useRunOnAuth from "@/useRunOnAuth";
+import useSubscriptionHandler from "@/useSubscriptionHandler";
 import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useAuth, useSignIn } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -14,10 +17,7 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import { Dimensions, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
-import { RoutesParams } from "routes";
 import { useHandleButtonState, useHandleClerkErrorMessages } from "./signUp";
-import useSubscriptionHandler from "@/useSubscriptionHandler";
-import useBlockGoBack from "@/useBlockGoBack";
 
 const { height } = Dimensions.get("window");
 
@@ -50,6 +50,7 @@ export default function SignInScreen() {
 
     const blockGoBack = isProUser === true && isSignedIn === false;
     useBlockGoBack(blockGoBack);
+    const { runOnSignIn } = useRunOnAuth();
 
     const [emailAddress, setEmailAddress] = React.useState("");
     const [password, setPassword] = React.useState("");
@@ -67,9 +68,7 @@ export default function SignInScreen() {
 
             dispatch(updateFirstTimeOpeningApp());
 
-            const params: RoutesParams["home"] = { handleLogInSync: "true" };
-
-            router.push({ pathname: "/home", params });
+            return runOnSignIn();
         } catch (err: any) {
             const errors: { meta: { paramName: string }; longMessage: string }[] = err.errors;
 

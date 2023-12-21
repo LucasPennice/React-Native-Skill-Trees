@@ -150,7 +150,10 @@ function OnboardingModal({ open, close, openPostOnboardingModal }: { open: boole
         router.push("/(app)/auth/signUp");
     };
 
-    const ignoreAndOpenPostOnboardingModal = () => close();
+    const ignoreAndOpenPostOnboardingModal = () => {
+        close();
+        openPostOnboardingModal();
+    };
 
     return (
         <Modal animationType="fade" transparent={true} visible={open} onRequestClose={close} presentationStyle={"overFullScreen"}>

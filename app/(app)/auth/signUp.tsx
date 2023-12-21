@@ -8,6 +8,7 @@ import { colors } from "@/parameters";
 import { useAppDispatch } from "@/redux/reduxHooks";
 import { updateFirstTimeOpeningApp } from "@/redux/slices/syncSlice";
 import useBlockGoBack from "@/useBlockGoBack";
+import useRunOnAuth from "@/useRunOnAuth";
 import useSubscriptionHandler from "@/useSubscriptionHandler";
 import { useWarmUpBrowser } from "@/useWarmUpBrowser";
 import { useAuth, useSignUp } from "@clerk/clerk-expo";
@@ -16,7 +17,6 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { Dimensions, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
-import { RoutesParams } from "routes";
 
 export const useHandleClerkErrorMessages = () => {
     const [error, setState] = useState({ email: "", password: "", code: "", identifier: "", username: "" });
@@ -143,6 +143,7 @@ function SignUp() {
         }
     };
 
+    const { runOnSignUp } = useRunOnAuth();
     // This verifies the user using email code that is delivered.
     const onPressVerify = async (code: string) => {
         if (!isLoaded) return;
@@ -156,8 +157,7 @@ function SignUp() {
 
             dispatch(updateFirstTimeOpeningApp());
 
-            const params: RoutesParams["home"] = { handleSignUpSync: "true" };
-            router.push({ pathname: "/(app)/home", params });
+            return runOnSignUp();
         } catch (err: any) {
             const errors: { meta: { paramName: string }; longMessage: string }[] = err.errors;
 

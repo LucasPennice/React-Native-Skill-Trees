@@ -1,18 +1,19 @@
 import { colors } from "@/parameters";
+import { useAppDispatch } from "@/redux/reduxHooks";
+import { updateFirstTimeOpeningApp } from "@/redux/slices/syncSlice";
 import { SocialAuthButton } from "@/types";
+import useRunOnAuth from "@/useRunOnAuth";
 import { useOAuth } from "@clerk/clerk-expo";
-import { router } from "expo-router";
 import { useCallback } from "react";
 import { Alert, StyleSheet, TouchableOpacity } from "react-native";
-import { RoutesParams } from "routes";
-import DiscordIcon from "../Icons/DiscordIcon";
-import { updateFirstTimeOpeningApp } from "@/redux/slices/syncSlice";
-import { useAppDispatch } from "@/redux/reduxHooks";
 import AppText from "../AppText";
+import DiscordIcon from "../Icons/DiscordIcon";
 
 // 🚨 the screen that calls this component should run useWarmUpBrowser 🚨
 
 export const SocialAuthDiscordButton = ({ actingAs, text, preferred }: SocialAuthButton) => {
+    const { runOnSignIn, runOnSignUp } = useRunOnAuth();
+
     const style = StyleSheet.create({
         container: {
             width: "100%",
@@ -40,12 +41,8 @@ export const SocialAuthDiscordButton = ({ actingAs, text, preferred }: SocialAut
 
                 dispatch(updateFirstTimeOpeningApp());
 
-                let params: RoutesParams["home"] = {};
-
-                if (actingAs === "logIn") params.handleLogInSync = "true";
-                if (actingAs === "signUp") params.handleSignUpSync = "true";
-
-                router.push({ pathname: "/(app)/home", params });
+                if (actingAs === "logIn") return runOnSignIn();
+                if (actingAs === "signUp") return runOnSignUp();
             }
         } catch (err) {
             return Alert.alert("Navigator error", "Please reset the app and try again, if the issue persists please contact the developer");

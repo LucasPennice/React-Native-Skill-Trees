@@ -6,7 +6,6 @@ import { ColorGradient } from "../types";
 import AppText from "./AppText";
 
 function ColorOption({ data, isSelected, selectColor }: { data: ColorGradient; isSelected: boolean; selectColor: () => void }) {
-    console.log(Math.random());
     const width = useAnimatedStyle(() => {
         return {
             width: withSpring(isSelected ? 70 : 50, MENU_DAMPENING),
