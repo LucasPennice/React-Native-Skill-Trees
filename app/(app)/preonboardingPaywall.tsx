@@ -6,6 +6,7 @@ import { colors } from "@/parameters";
 import { useAppDispatch } from "@/redux/reduxHooks";
 import { completeCustomizeHomeTree, completeOnboardingExperienceSurvey } from "@/redux/slices/userVariablesSlice";
 import useBlockGoBack from "@/useBlockGoBack";
+import useSkipOnboarding from "@/useSkipOnboarding";
 import useSubscriptionHandler from "@/useSubscriptionHandler";
 import { useAuth } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -57,16 +58,13 @@ function PreOnboardingPaywallPage() {
         NavigationBar.setBackgroundColorAsync(BACKGROUND_COLOR);
     }, []);
 
-    const dispatch = useAppDispatch();
+    const skipOnboarding = useSkipOnboarding();
 
     const redirectHomeCongratulateAndStartOnboarding = useCallback(() => {
         open({ state: "success", subtitle: "To check your membership details visit your profile", title: "Congratulations" });
 
         if (isSignedIn === true) {
-            batch(() => {
-                dispatch(completeOnboardingExperienceSurvey());
-                dispatch(completeCustomizeHomeTree());
-            });
+            skipOnboarding();
         } else {
             setShowOnboarding(true);
         }

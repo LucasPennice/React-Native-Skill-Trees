@@ -112,3 +112,5 @@ export const TIME_TO_REORDER_TREE = 1000;
 export const USER_ICON_FONT_SIZE = 22;
 
 export const dayInMilliseconds = 1000 * 60 * 60 * 24;
+
+export const FREE_TREE_LIMIT = 3;

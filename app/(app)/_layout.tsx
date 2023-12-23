@@ -7,7 +7,6 @@ import MarketFitSurvey from "@/components/surveys/MarketFitSurvey";
 import PostOnboardingSurvey from "@/components/surveys/PostOnboardingSurvey";
 import { NAV_HEGIHT, colors, dayInMilliseconds } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
-import { selectSyncSlice } from "@/redux/slices/syncSlice";
 import { selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
 import { LAST_ONBOARDING_STEP, completeOnboardingExperienceSurvey, selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import useHandleDeepLinking from "@/useHandleDeepLinking";
@@ -167,8 +166,8 @@ export default function RootLayout() {
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [showWhatsNew, setShowWhatsNew] = useState(false);
 
-    const { shouldWaitForClerkToLoad } = useAppSelector(selectSyncSlice);
     const { isSignedIn, isLoaded } = useUser();
+    const { customerInfo } = useSubscriptionHandler();
     const pathname = usePathname();
     const router = useRouter();
     const { postOnboarding, marketFit, paywallDismiss } = useHandleSurveyModals();
@@ -176,8 +175,6 @@ export default function RootLayout() {
     useIdentifyMixPanelUserId();
     useRunDailyBackup(isSignedIn);
     const trackScreenNavigation = useTrackNavigationEvents();
-
-    const isClerkLoaded = shouldWaitForClerkToLoad === false ? true : isLoaded;
 
     const [fontsLoaded, error] = useFonts({
         helvetica: require("../../assets/Helvetica.ttf"),
@@ -191,10 +188,10 @@ export default function RootLayout() {
     }, [error]);
 
     useEffect(() => {
-        if (fontsLoaded && isClerkLoaded) SplashScreen.hideAsync();
-    }, [fontsLoaded, isClerkLoaded]);
+        if (fontsLoaded && isLoaded) SplashScreen.hideAsync();
+    }, [fontsLoaded, isLoaded]);
 
-    const readyToRedirect = !(!fontsLoaded || !isClerkLoaded);
+    const readyToRedirect = !(!fontsLoaded || !isLoaded || !customerInfo);
 
     useHandleDeepLinking(isLoaded);
 
@@ -225,7 +222,7 @@ export default function RootLayout() {
     //     })();
     // }, []);
 
-    if (!fontsLoaded || !isClerkLoaded) return <Text>Loading...</Text>;
+    if (!readyToRedirect) return <Text>Loading...</Text>;
 
     const showNavBar = !Boolean(pathname === "/" || routesToHideNavBar.find((route) => pathname.includes(route)));
 

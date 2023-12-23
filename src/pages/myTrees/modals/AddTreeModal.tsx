@@ -11,7 +11,7 @@ import AppText from "../../../components/AppText";
 import AppTextInput from "../../../components/AppTextInput";
 import ColorGradientSelector from "../../../components/ColorGradientSelector";
 import FlingToDismissModal from "../../../components/FlingToDismissModal";
-import { colors, nodeGradients } from "../../../parameters";
+import { FREE_TREE_LIMIT, colors, nodeGradients } from "../../../parameters";
 import { useAppDispatch, useAppSelector } from "../../../redux/reduxHooks";
 import { close, selectAddTree } from "../../../redux/slices/addTreeModalSlice";
 import { ColorGradient } from "../../../types";
@@ -32,7 +32,7 @@ const useHandleRedirectFreeUser = (open: boolean) => {
     useEffect(() => {
         if (!open) return;
 
-        if (treeQty < 3) return;
+        if (treeQty < FREE_TREE_LIMIT) return;
         if (isProUser === null || isProUser === true) return;
 
         closeModal();

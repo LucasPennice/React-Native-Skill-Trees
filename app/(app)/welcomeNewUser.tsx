@@ -1,10 +1,14 @@
 import WelcomeScreenAnimation from "@/../assets/lotties/welcomeScreen.json";
 import AppText from "@/components/AppText";
-import { colors } from "@/parameters";
+import { FREE_TREE_LIMIT, colors } from "@/parameters";
+import { useAppSelector } from "@/redux/reduxHooks";
+import { selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
 import { useHandleLottiePlay } from "@/useHandleLottiePlay";
+import useSkipOnboarding from "@/useSkipOnboarding";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { router } from "expo-router";
 import LottieView from "lottie-react-native";
+import { useCallback } from "react";
 import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -46,9 +50,14 @@ const style = StyleSheet.create({
     },
 });
 function WelcomeNewUser() {
-    const redirectToPreOnboardingPaywall = () => {
+    const treeQty = useAppSelector(selectTotalTreeQty);
+
+    const skipOnboarding = useSkipOnboarding();
+
+    const redirectToPreOnboardingPaywall = useCallback(() => {
+        if (treeQty >= FREE_TREE_LIMIT) skipOnboarding();
         router.push("/preOnboardingPaywall");
-    };
+    }, [treeQty]);
 
     const animationRef = useHandleLottiePlay(true);
 
