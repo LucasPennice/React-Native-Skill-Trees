@@ -13,6 +13,7 @@ import { LAST_ONBOARDING_STEP, completeOnboardingExperienceSurvey, selectUserVar
 import useHandleDeepLinking from "@/useHandleDeepLinking";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import useRunDailyBackup from "@/useRunDailyBackup";
+import useSubscriptionHandler from "@/useSubscriptionHandler";
 import useTrackNavigationEvents from "@/useTrackNavigationEvents";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -33,10 +34,17 @@ function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["nam
 
 function useIdentifyMixPanelUserId() {
     const userId = useMongoCompliantUserId();
+    const { user } = useUser();
+    const { isProUser } = useSubscriptionHandler();
 
     useEffect(() => {
         if (userId !== null) mixpanel.identify(userId);
-    }, [userId]);
+
+        if (user === null || user === undefined) return;
+        if (isProUser === null) return;
+
+        mixpanel.registerSuperProperties({ emailAddress: user.primaryEmailAddress?.emailAddress, username: user.username, isProUser });
+    }, [userId, user]);
 }
 
 const useHandleSurveyModals = () => {
