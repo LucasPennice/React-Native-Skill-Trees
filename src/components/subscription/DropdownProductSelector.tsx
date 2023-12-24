@@ -1,11 +1,58 @@
 import AppText from "@/components/AppText";
 import { colors } from "@/parameters";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useState } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { PurchasesOffering } from "react-native-purchases";
+import { useEffect, useState } from "react";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
+import { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
 import Animated, { FadeIn, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { PRICE_CARD_HEIGHT, PRICE_CARD_SMALL_HEIGHT, restorePurchase } from "./functions";
+
+const getDiscount = (puchasePackage: PurchasesPackage) => {
+    if (Platform.OS === "android") {
+        const subscriptionOptions = puchasePackage.product.subscriptionOptions;
+
+        if (subscriptionOptions === null || subscriptionOptions.length === 0) return 0;
+
+        const fullPrice = subscriptionOptions[0].fullPricePhase?.price.amountMicros;
+        const discountPrice = subscriptionOptions[0].introPhase?.price.amountMicros;
+
+        if (fullPrice === undefined || discountPrice === undefined || fullPrice === 0) return 0;
+
+        return discountPrice / fullPrice;
+    } else {
+        throw new Error("getDiscount Dropdown product selector ios");
+    }
+};
+
+const SECOND_IN_MILLISECONDS = 1000;
+
+const december27 = 1703701420526;
+
+function calculateTimeDifference(startingDate: number, limitDate: number) {
+    const timeDifference = Math.abs(limitDate - startingDate);
+
+    const hours = Math.floor(timeDifference / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+    return `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+}
+
+const useDiscountString = (discount: boolean) => {
+    const [remainingTime, setRemainingTime] = useState(calculateTimeDifference(new Date().getTime(), december27));
+
+    useEffect(() => {
+        if (!discount) return;
+
+        const interval = setInterval(() => {
+            setRemainingTime(calculateTimeDifference(new Date().getTime(), december27));
+        }, SECOND_IN_MILLISECONDS);
+
+        return () => clearInterval(interval);
+    }, [discount]);
+
+    return remainingTime;
+};
 
 const DropdownProductSelector = ({
     state,
@@ -28,10 +75,6 @@ const DropdownProductSelector = ({
 
     const toggleOpen = () => setOpen((p) => !p);
 
-    const animatedHeight = useAnimatedStyle(() => {
-        return { height: withTiming(open ? PRICE_CARD_HEIGHT + 2 * PRICE_CARD_SMALL_HEIGHT : PRICE_CARD_HEIGHT) };
-    });
-
     const monthlyPackage = currentOffering.availablePackages.find((p) => p.packageType === "MONTHLY");
     const annualPackage = currentOffering.availablePackages.find((p) => p.packageType === "ANNUAL");
     const lifetimePackage = currentOffering.availablePackages.find((p) => p.packageType === "LIFETIME");
@@ -42,28 +85,49 @@ const DropdownProductSelector = ({
     const selectYear = () => setSelected(annualPackage.product.identifier);
     const selectLifetime = () => setSelected(lifetimePackage.product.identifier);
 
+    const annualDiscount = getDiscount(annualPackage);
+    const annualDiscountPrice = (annualDiscount * annualPackage.product.price).toFixed(2);
+
+    const monthlyDiscount = getDiscount(monthlyPackage);
+    const monthlyDiscountPrice = (monthlyDiscount * monthlyPackage.product.price).toFixed(2);
+
+    const animatedHeight = useAnimatedStyle(() => {
+        const totalCards = 3;
+        //Annual card always says best value so we start with one
+        let largeCards = 1;
+
+        if (monthlyDiscount !== 0) largeCards += 1;
+
+        return {
+            height: withTiming(open ? largeCards * PRICE_CARD_HEIGHT + (totalCards - largeCards) * PRICE_CARD_SMALL_HEIGHT : PRICE_CARD_HEIGHT),
+        };
+    });
+
+    const remainingTime = useDiscountString(monthlyDiscount !== 0 || annualDiscount !== 0);
+
     return (
         <>
             <Animated.View style={[style.container, animatedHeight]}>
                 <RadialInput
                     border={open}
-                    title={`Annual - ${annualPackage.product.priceString}`}
+                    title={`Annual - ${annualPackage.product.currencyCode} ${annualDiscountPrice}`}
                     onPress={selectYear}
                     selected={selected === annualPackage.product.identifier}
-                    subtitle={`${annualPackage.product.currencyCode} ${(annualPackage.product.price / 12)
+                    subtitle={`${annualPackage.product.currencyCode} ${(parseFloat(annualDiscountPrice) / 12)
                         .toFixed(2)
                         .replace(".", ",")} per month, billed annually, 7 days free trial`}
                     bestValue
-                    regionalPrice
+                    discount={{ fullPrice: annualPackage.product.priceString, remainingTime }}
                 />
                 {open && (
                     <Animated.View entering={FadeIn}>
                         <RadialInput
-                            title={`Monthly - ${monthlyPackage.product.priceString}`}
+                            title={`Monthly - ${monthlyPackage.product.currencyCode} ${monthlyDiscountPrice}`}
                             onPress={selectMonth}
                             selected={selected === monthlyPackage.product.identifier}
                             subtitle={"Billed monthly"}
                             border={open}
+                            discount={{ fullPrice: annualPackage.product.priceString, remainingTime }}
                         />
                         <RadialInput
                             title={`Lifetime - ${lifetimePackage.product.priceString}`}
@@ -96,6 +160,7 @@ const RadialInput = ({
     subtitle,
     bestValue,
     border,
+    discount,
 }: {
     selected: boolean;
     onPress: () => void;
@@ -103,12 +168,17 @@ const RadialInput = ({
     border: boolean;
     subtitle: string;
     bestValue?: true;
-    regionalPrice?: true;
+    discount?: {
+        fullPrice: string;
+        remainingTime: string;
+    };
 }) => {
+    const displayTags = bestValue || discount;
+
     const style = StyleSheet.create({
         container: {
             width: "100%",
-            height: bestValue ? PRICE_CARD_HEIGHT : PRICE_CARD_SMALL_HEIGHT,
+            height: displayTags ? PRICE_CARD_HEIGHT : PRICE_CARD_SMALL_HEIGHT,
             alignItems: "center",
             gap: 8,
             paddingHorizontal: 15,
@@ -125,30 +195,43 @@ const RadialInput = ({
             justifyContent: "center",
             alignItems: "center",
         },
+        bestValue: {
+            backgroundColor: `${colors.gold}30`,
+            color: colors.gold,
+            width: 90,
+            paddingTop: 2,
+            height: 25,
+            textAlign: "center",
+            verticalAlign: "middle",
+            borderRadius: 5,
+        },
+        discount: {
+            backgroundColor: colors.clearGray,
+            flexDirection: "row",
+            paddingTop: 2,
+            paddingHorizontal: 8,
+            height: 25,
+            alignItems: "center",
+            gap: 5,
+            borderRadius: 5,
+        },
     });
-
-    const displayTags = bestValue;
 
     return (
         <TouchableOpacity style={style.container} onPress={onPress}>
             <View style={{ flex: 1, height: PRICE_CARD_HEIGHT, gap: 9, justifyContent: "center" }}>
                 {displayTags && (
                     <View style={{ flexDirection: "row", gap: 5 }}>
-                        {bestValue && (
-                            <AppText
-                                fontSize={12}
-                                style={{
-                                    backgroundColor: `${colors.gold}30`,
-                                    color: colors.gold,
-                                    width: 90,
-                                    paddingTop: 2,
-                                    height: 25,
-                                    textAlign: "center",
-                                    verticalAlign: "middle",
-                                    borderRadius: 5,
-                                }}
-                                children={"BEST VALUE"}
-                            />
+                        {bestValue && <AppText fontSize={12} style={style.bestValue} children={"BEST VALUE"} />}
+                        {discount && (
+                            <View style={style.discount}>
+                                <AppText
+                                    fontSize={12}
+                                    style={{ textDecorationStyle: "solid", textDecorationLine: "line-through", opacity: 0.7 }}
+                                    children={discount.fullPrice}
+                                />
+                                <AppText fontSize={14} children={discount.remainingTime} />
+                            </View>
                         )}
                     </View>
                 )}

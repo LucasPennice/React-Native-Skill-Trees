@@ -30,7 +30,7 @@ import { ErrorBoundaryProps, SplashScreen, Stack } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { Mixpanel } from "mixpanel-react-native";
 import { createContext, useEffect, useState } from "react";
-import { LogBox, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View, AppState } from "react-native";
+import { AppState, LogBox, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { Provider } from "react-redux";
@@ -105,11 +105,18 @@ export default function RootLayout() {
 
     const tokenCache = {
         async getToken(key: string) {
-            try {
-                return SecureStore.getItemAsync(key);
-            } catch (err) {
-                return null;
+            let attempts = 0;
+            while (attempts < 5) {
+                try {
+                    return await SecureStore.getItemAsync(key);
+                } catch (error) {
+                    attempts++;
+                }
             }
+
+            await SecureStore.deleteItemAsync(key);
+
+            return;
         },
         async saveToken(key: string, value: string) {
             try {

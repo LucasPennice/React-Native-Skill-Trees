@@ -8,6 +8,7 @@ import { useCallback } from "react";
 import { Alert, StyleSheet, TouchableOpacity } from "react-native";
 import AppText from "../AppText";
 import DiscordIcon from "../Icons/DiscordIcon";
+import { mixpanel } from "app/_layout";
 
 // 🚨 the screen that calls this component should run useWarmUpBrowser 🚨
 
@@ -45,6 +46,7 @@ export const SocialAuthDiscordButton = ({ actingAs, text, preferred }: SocialAut
                 if (actingAs === "signUp") return runOnSignUp();
             }
         } catch (err) {
+            mixpanel.track("ERROR Discord Auth", { err });
             return Alert.alert("Navigator error", "Please reset the app and try again, if the issue persists please contact the developer");
         }
     }, []);
