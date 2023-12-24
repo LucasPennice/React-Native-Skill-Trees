@@ -8,7 +8,12 @@ import PostOnboardingSurvey from "@/components/surveys/PostOnboardingSurvey";
 import { NAV_HEGIHT, colors, dayInMilliseconds } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
-import { LAST_ONBOARDING_STEP, completeOnboardingExperienceSurvey, selectUserVariables } from "@/redux/slices/userVariablesSlice";
+import {
+    LAST_ONBOARDING_STEP,
+    completeOnboardingExperienceSurvey,
+    selectUserVariables,
+    updateTrialAboutToEndShown,
+} from "@/redux/slices/userVariablesSlice";
 import useHandleDeepLinking from "@/useHandleDeepLinking";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import useRunDailyBackup from "@/useRunDailyBackup";
@@ -16,12 +21,13 @@ import useSubscriptionHandler from "@/useSubscriptionHandler";
 import useTrackNavigationEvents from "@/useTrackNavigationEvents";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { SubscriptionContext, mixpanel } from "app/_layout";
+import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
 import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
 import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Dimensions, KeyboardAvoidingView, Platform, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { useDispatch } from "react-redux";
 import { routes, routesToHideNavBar } from "routes";
 import { whatsNewDataArray } from "whatsNewData";
 
@@ -85,6 +91,8 @@ const useHandleSurveyModals = () => {
 };
 
 const DAYS_INTERVAL_TO_SHOW_PAYWALL = 3;
+//This means at 85% of the trial or more
+const NOTIFY_TRIAL_THRESHOLD = 0.85;
 
 const useRedirectOnAppFocus = (
     readyToRedirect: boolean,
@@ -102,11 +110,24 @@ const useRedirectOnAppFocus = (
         marketFitSurvey,
         appOpenSinceLastPMFSurvey,
         onboardingExperience,
+        trialAboutToEndShown,
     } = userVariables;
     const treeQty = useAppSelector(selectTotalTreeQty);
-    const { isProUser, currentOffering } = useContext(SubscriptionContext);
+    const { isProUser, currentOffering, customerInfo } = useContext(SubscriptionContext);
     const { isSignedIn } = useAuth();
     const pathname = usePathname();
+    const { open } = useContext(HandleAlertContext);
+    const dispatch = useDispatch();
+
+    const openTrialAboutToEnd = () => {
+        open({
+            title: "Your trial ends in a day",
+            state: "idle",
+            subtitle: "You don't need to do anything. Just letting you know :)",
+            buttonText: "Thanks",
+        });
+        dispatch(updateTrialAboutToEndShown());
+    };
 
     const runWelcomeUser = nthAppOpen === 0 && onboardingStep === 0;
     const finishOnboarding = onboardingStep === LAST_ONBOARDING_STEP;
@@ -127,6 +148,15 @@ const useRedirectOnAppFocus = (
     const paywallIntervalThreshold = daysSinceLastPaywallShown >= DAYS_INTERVAL_TO_SHOW_PAYWALL;
     const runPaywall = isProUser === false && finishOnboarding && currentOffering && (hasntShownPaywallYet || paywallIntervalThreshold);
 
+    const onTrial = customerInfo?.entitlements.active["Pro"].periodType === "TRIAL";
+    const timeSinceTrialStarted = new Date().getTime() - (customerInfo?.entitlements.active["Pro"].originalPurchaseDateMillis ?? 0);
+    const trialDuration =
+        (customerInfo?.entitlements.active["Pro"].expirationDateMillis ?? 0) -
+        (customerInfo?.entitlements.active["Pro"].originalPurchaseDateMillis ?? 0);
+    const trialCompletion = trialDuration === 0 ? 0 : timeSinceTrialStarted / trialDuration;
+
+    const runTrialAboutToEnd = onTrial === true && trialAboutToEndShown === false && trialCompletion >= NOTIFY_TRIAL_THRESHOLD;
+
     useEffect(() => {
         if (!readyToRedirect) return;
         if (runWelcomeUser) return router.push("/welcomeNewUser");
@@ -140,6 +170,8 @@ const useRedirectOnAppFocus = (
         if (!onboardingExperience) return;
         if (deepLinkOpenedApp) return;
         //POST ONBOARDING 👇
+        if (runTrialAboutToEnd) return openTrialAboutToEnd();
+
         if (runSignUp) return router.push("/auth/signUp");
 
         if (runWhatsNewModal) return openWhatsNewModal();

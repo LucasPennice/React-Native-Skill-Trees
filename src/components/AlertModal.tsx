@@ -1,6 +1,7 @@
 import Error from "@/../assets/lotties/error.json";
 import Loading from "@/../assets/lotties/loading.json";
 import Success from "@/../assets/lotties/success.json";
+import Logo from "@/../assets/lotties/logo.json";
 import { useHandleLottiePlay } from "@/useHandleLottiePlay";
 import { HandleAlertContext } from "app/_layout";
 import LottieView from "lottie-react-native";
@@ -68,6 +69,8 @@ const getLottieSource = (state: ButtonState) => {
             return Success;
         case "loading":
             return Loading;
+        case "idle":
+            return Logo;
         default:
             return Loading;
     }
@@ -76,7 +79,7 @@ const getLottieSource = (state: ButtonState) => {
 function AlertModal({ open, state, subtitle, title, buttonAction, buttonText }: AlertProps) {
     const { close } = useContext(HandleAlertContext);
 
-    const animationRef = useHandleLottiePlay(open);
+    const animationRef = useHandleLottiePlay(open, state === "idle" ? 1500 : undefined);
 
     const actionAndClose = (fn?: () => void) => () => {
         if (fn) fn();
