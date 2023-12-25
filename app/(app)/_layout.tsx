@@ -27,6 +27,7 @@ import * as Linking from "expo-linking";
 import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Dimensions, KeyboardAvoidingView, Platform, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { CustomerInfo } from "react-native-purchases";
 import { useDispatch } from "react-redux";
 import { routes, routesToHideNavBar } from "routes";
 import { whatsNewDataArray } from "whatsNewData";
@@ -90,6 +91,34 @@ const useHandleSurveyModals = () => {
     };
 };
 
+const getOnTrial = (customerInfo: CustomerInfo | null) => {
+    if (!customerInfo) return false;
+    if (!customerInfo.entitlements) return false;
+    if (!customerInfo.entitlements.active["Pro"]) return false;
+    if (customerInfo.entitlements.active["Pro"].periodType !== "TRIAL") return false;
+    return true;
+};
+
+const getTrialCompletion = (trial: boolean, customerInfo: CustomerInfo | null) => {
+    if (!trial) return 0;
+    if (!customerInfo) return 0;
+    if (!customerInfo.entitlements) return 0;
+    if (!customerInfo.entitlements.active["Pro"]) return 0;
+    if (
+        !customerInfo.entitlements.active["Pro"].originalPurchaseDateMillis ||
+        !customerInfo.entitlements.active["Pro"].expirationDateMillis ||
+        !customerInfo.entitlements.active["Pro"].originalPurchaseDateMillis
+    )
+        return 0;
+
+    const timeSinceTrialStarted = new Date().getTime() - customerInfo.entitlements.active["Pro"].originalPurchaseDateMillis;
+    const trialDuration =
+        customerInfo.entitlements.active["Pro"].expirationDateMillis - customerInfo.entitlements.active["Pro"].originalPurchaseDateMillis;
+    const trialCompletion = trialDuration === 0 ? 0 : timeSinceTrialStarted / trialDuration;
+
+    return trialCompletion;
+};
+
 const DAYS_INTERVAL_TO_SHOW_PAYWALL = 3;
 //This means at 85% of the trial or more
 const NOTIFY_TRIAL_THRESHOLD = 0.85;
@@ -148,12 +177,9 @@ const useRedirectOnAppFocus = (
     const paywallIntervalThreshold = daysSinceLastPaywallShown >= DAYS_INTERVAL_TO_SHOW_PAYWALL;
     const runPaywall = isProUser === false && finishOnboarding && currentOffering && (hasntShownPaywallYet || paywallIntervalThreshold);
 
-    const onTrial = customerInfo?.entitlements.active["Pro"].periodType === "TRIAL";
-    const timeSinceTrialStarted = new Date().getTime() - (customerInfo?.entitlements.active["Pro"].originalPurchaseDateMillis ?? 0);
-    const trialDuration =
-        (customerInfo?.entitlements.active["Pro"].expirationDateMillis ?? 0) -
-        (customerInfo?.entitlements.active["Pro"].originalPurchaseDateMillis ?? 0);
-    const trialCompletion = trialDuration === 0 ? 0 : timeSinceTrialStarted / trialDuration;
+    const onTrial = getOnTrial(customerInfo);
+
+    const trialCompletion = getTrialCompletion(onTrial, customerInfo);
 
     const runTrialAboutToEnd = onTrial === true && trialAboutToEndShown === false && trialCompletion >= NOTIFY_TRIAL_THRESHOLD;
 
