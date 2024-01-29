@@ -47,7 +47,6 @@ export const SocialAuthDiscordButton = ({ actingAs, text, preferred }: SocialAut
                 if (actingAs === "signUp") return runOnSignUp();
             }
         } catch (err) {
-            console.error(JSON.stringify(err));
             mixpanel.track("ERROR Discord Auth", { err });
             return Alert.alert("Navigator error", "Please reset the app and try again, if the issue persists please contact the developer");
         }

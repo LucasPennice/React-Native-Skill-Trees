@@ -3,20 +3,20 @@
         "development": {
             "developmentClient": true,
             "distribution": "internal",
-            "env": { "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_YnJpZWYtbWFuLTYxLmNsZXJrLmFjY291bnRzLmRldiQ" }
+            "env": { "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsuc2tpbGx0cmVlc2FwcC5jb20k" }
         },
         "preview": {
             "distribution": "internal",
             "ios": {
                 "simulator": true
             },
-            "env": { "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_YnJpZWYtbWFuLTYxLmNsZXJrLmFjY291bnRzLmRldiQ" },
+            "env": { "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsuc2tpbGx0cmVlc2FwcC5jb20k" },
             "android": {
                 "buildType": "apk"
             }
         },
         "production": {
-            "env": { "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_YnJpZWYtbWFuLTYxLmNsZXJrLmFjY291bnRzLmRldiQ" }
+            "env": { "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsuc2tpbGx0cmVlc2FwcC5jb20k" }
         }
     },
     "submit": {
