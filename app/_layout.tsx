@@ -201,12 +201,7 @@ const useGuaranteeHomeRootTree = () => {
     dispatch(createHomeRootNode(homeNode));
 };
 
-export const SubscriptionContext = createContext<SubscriptionHandler>({
-    currentOffering: null,
-    isProUser: null,
-    onFreeTrial: null,
-    customerInfo: null,
-});
+export const SubscriptionContext = createContext<SubscriptionHandler>({ currentOffering: null, isProUser: null, customerInfo: null });
 
 function useUpdateUserVariables() {
     const dispatch = useAppDispatch();

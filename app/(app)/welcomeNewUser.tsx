@@ -1,15 +1,13 @@
 import WelcomeScreenAnimation from "@/../assets/lotties/welcomeScreen.json";
 import AppText from "@/components/AppText";
-import { FREE_TREE_LIMIT, colors } from "@/parameters";
-import { useAppSelector } from "@/redux/reduxHooks";
-import { selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
+import { colors } from "@/parameters";
 import { useHandleLottiePlay } from "@/useHandleLottiePlay";
-import useSkipOnboarding from "@/useSkipOnboarding";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { router } from "expo-router";
 import LottieView from "lottie-react-native";
-import { useCallback } from "react";
+import { useCallback, useContext } from "react";
 import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
+import { HandleModalsContext } from "./_layout";
 
 const { width, height } = Dimensions.get("window");
 const TEXT_CONTAINER_HEIGHT = 400;
@@ -50,14 +48,20 @@ const style = StyleSheet.create({
     },
 });
 function WelcomeNewUser() {
-    const treeQty = useAppSelector(selectTotalTreeQty);
+    // const treeQty = useAppSelector(selectTotalTreeQty);
 
-    const skipOnboarding = useSkipOnboarding();
+    // const skipOnboarding = useSkipOnboarding();
 
-    const redirectToPreOnboardingPaywall = useCallback(() => {
-        if (treeQty >= FREE_TREE_LIMIT) skipOnboarding();
-        router.push("/preOnboardingPaywall");
-    }, [treeQty]);
+    // const redirectToPreOnboardingPaywall = useCallback(() => {
+    //     if (treeQty >= FREE_TREE_LIMIT) skipOnboarding();
+    //     router.push("/preOnboardingPaywall");
+    // }, [treeQty]);
+    const { modal: setShowOnboarding } = useContext(HandleModalsContext);
+
+    const redirectHomeAndStartOnboarding = useCallback(() => {
+        setShowOnboarding(true);
+        router.push("/home");
+    }, []);
 
     const animationRef = useHandleLottiePlay(true);
 
@@ -82,7 +86,8 @@ function WelcomeNewUser() {
                     fontSize={18}
                 />
             </View>
-            <TouchableOpacity onPress={redirectToPreOnboardingPaywall} style={style.continueButton}>
+            <TouchableOpacity onPress={redirectHomeAndStartOnboarding} style={style.continueButton}>
+                {/* <TouchableOpacity onPress={redirectToPreOnboardingPaywall} style={style.continueButton}> */}
                 <FontAwesome name={"arrow-right"} size={20} color={colors.darkGray} />
             </TouchableOpacity>
         </View>

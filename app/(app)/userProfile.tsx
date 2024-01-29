@@ -11,7 +11,6 @@ import * as Application from "expo-application";
 import { router } from "expo-router";
 import { useContext } from "react";
 import { Linking, StyleSheet, TouchableOpacity, View } from "react-native";
-import { CustomerInfo } from "react-native-purchases";
 import { HandleModalsContext } from "./_layout";
 
 const style = StyleSheet.create({
@@ -21,9 +20,10 @@ const style = StyleSheet.create({
 });
 
 const millisecondsToHours = 1000 * 60 * 60;
+
 function UserProfile() {
     const { isSignedIn, user } = useUser();
-    const { isProUser, customerInfo } = useContext(SubscriptionContext);
+    const { isProUser } = useContext(SubscriptionContext);
     const { openWhatsNewModal } = useContext(HandleModalsContext);
 
     const { lastUpdateUTC_Timestamp } = useAppSelector(selectSyncSlice);
@@ -59,13 +59,15 @@ function UserProfile() {
                     }
                     warning={!isSignedIn}
                 />
-                <SettingLink
+
+                {/* WHEN TURNING SUBSCRIPTIONS ON AGAIN UNCOMMENT THIS 👇 */}
+                {/* <SettingLink
                     icon={"credit-card-alt"}
                     href={isProUser ? "/(app)/subscriptionDetails" : "/(app)/postOnboardingPaywall"}
                     title={"Subscription"}
                     subtitle={isProUser && customerInfo ? getProString(customerInfo) : "No active subscription"}
                     warning={!isProUser}
-                />
+                /> */}
 
                 <AppText fontSize={16} children={"DISCOVER"} style={{ marginTop: 10, opacity: 0.8 }} />
 
@@ -216,17 +218,17 @@ const InsightButton = ({
 
 export default UserProfile;
 
-const getProString = (customerInfo: CustomerInfo) => {
-    const identifier = customerInfo.activeSubscriptions[0];
+// const getProString = (customerInfo: CustomerInfo) => {
+//     const identifier = customerInfo.activeSubscriptions[0];
 
-    switch (identifier) {
-        case "pro_annual_1:p1a":
-            return "Annual billing";
-        case "pro_monthly_1:p1m":
-            return "Monthly billing";
-        case "pro_lifetime":
-            return "Pro forever";
-        default:
-            return "Pro";
-    }
-};
+//     switch (identifier) {
+//         case "pro_annual_1:p1a":
+//             return "Annual billing";
+//         case "pro_monthly_1:p1m":
+//             return "Monthly billing";
+//         case "pro_lifetime":
+//             return "Pro forever";
+//         default:
+//             return "Pro";
+//     }
+// };

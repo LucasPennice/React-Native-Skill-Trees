@@ -8,12 +8,7 @@ import PostOnboardingSurvey from "@/components/surveys/PostOnboardingSurvey";
 import { NAV_HEGIHT, colors, dayInMilliseconds } from "@/parameters";
 import { useAppDispatch, useAppSelector } from "@/redux/reduxHooks";
 import { selectTotalTreeQty } from "@/redux/slices/userTreesSlice";
-import {
-    LAST_ONBOARDING_STEP,
-    completeOnboardingExperienceSurvey,
-    selectUserVariables,
-    updateTrialAboutToEndShown,
-} from "@/redux/slices/userVariablesSlice";
+import { LAST_ONBOARDING_STEP, completeOnboardingExperienceSurvey, selectUserVariables } from "@/redux/slices/userVariablesSlice";
 import useHandleDeepLinking from "@/useHandleDeepLinking";
 import useMongoCompliantUserId from "@/useMongoCompliantUserId";
 import useRunDailyBackup from "@/useRunDailyBackup";
@@ -21,14 +16,12 @@ import useSubscriptionHandler from "@/useSubscriptionHandler";
 import useTrackNavigationEvents from "@/useTrackNavigationEvents";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { HandleAlertContext, SubscriptionContext, mixpanel } from "app/_layout";
+import { SubscriptionContext, mixpanel } from "app/_layout";
 import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
 import { SplashScreen, Stack, router, usePathname, useRouter } from "expo-router";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Dimensions, KeyboardAvoidingView, Platform, Pressable, Text, TouchableOpacity, View } from "react-native";
-import { CustomerInfo } from "react-native-purchases";
-import { useDispatch } from "react-redux";
 import { routes, routesToHideNavBar } from "routes";
 import { whatsNewDataArray } from "whatsNewData";
 
@@ -91,37 +84,37 @@ const useHandleSurveyModals = () => {
     };
 };
 
-const getOnTrial = (customerInfo: CustomerInfo | null) => {
-    if (!customerInfo) return false;
-    if (!customerInfo.entitlements) return false;
-    if (!customerInfo.entitlements.active["Pro"]) return false;
-    if (customerInfo.entitlements.active["Pro"].periodType !== "TRIAL") return false;
-    return true;
-};
+// const getOnTrial = (customerInfo: CustomerInfo | null) => {
+//     if (!customerInfo) return false;
+//     if (!customerInfo.entitlements) return false;
+//     if (!customerInfo.entitlements.active["Pro"]) return false;
+//     if (customerInfo.entitlements.active["Pro"].periodType !== "TRIAL") return false;
+//     return true;
+// };
 
-const getTrialCompletion = (trial: boolean, customerInfo: CustomerInfo | null) => {
-    if (!trial) return 0;
-    if (!customerInfo) return 0;
-    if (!customerInfo.entitlements) return 0;
-    if (!customerInfo.entitlements.active["Pro"]) return 0;
-    if (
-        !customerInfo.entitlements.active["Pro"].originalPurchaseDateMillis ||
-        !customerInfo.entitlements.active["Pro"].expirationDateMillis ||
-        !customerInfo.entitlements.active["Pro"].originalPurchaseDateMillis
-    )
-        return 0;
+// const getTrialCompletion = (trial: boolean, customerInfo: CustomerInfo | null) => {
+//     if (!trial) return 0;
+//     if (!customerInfo) return 0;
+//     if (!customerInfo.entitlements) return 0;
+//     if (!customerInfo.entitlements.active["Pro"]) return 0;
+//     if (
+//         !customerInfo.entitlements.active["Pro"].originalPurchaseDateMillis ||
+//         !customerInfo.entitlements.active["Pro"].expirationDateMillis ||
+//         !customerInfo.entitlements.active["Pro"].originalPurchaseDateMillis
+//     )
+//         return 0;
 
-    const timeSinceTrialStarted = new Date().getTime() - customerInfo.entitlements.active["Pro"].originalPurchaseDateMillis;
-    const trialDuration =
-        customerInfo.entitlements.active["Pro"].expirationDateMillis - customerInfo.entitlements.active["Pro"].originalPurchaseDateMillis;
-    const trialCompletion = trialDuration === 0 ? 0 : timeSinceTrialStarted / trialDuration;
+//     const timeSinceTrialStarted = new Date().getTime() - customerInfo.entitlements.active["Pro"].originalPurchaseDateMillis;
+//     const trialDuration =
+//         customerInfo.entitlements.active["Pro"].expirationDateMillis - customerInfo.entitlements.active["Pro"].originalPurchaseDateMillis;
+//     const trialCompletion = trialDuration === 0 ? 0 : timeSinceTrialStarted / trialDuration;
 
-    return trialCompletion;
-};
+//     return trialCompletion;
+// };
 
 const DAYS_INTERVAL_TO_SHOW_PAYWALL = 3;
 //This means at 85% of the trial or more
-const NOTIFY_TRIAL_THRESHOLD = 0.85;
+// const NOTIFY_TRIAL_THRESHOLD = 0.85;
 
 const useRedirectOnAppFocus = (
     readyToRedirect: boolean,
@@ -139,24 +132,24 @@ const useRedirectOnAppFocus = (
         marketFitSurvey,
         appOpenSinceLastPMFSurvey,
         onboardingExperience,
-        trialAboutToEndShown,
     } = userVariables;
     const treeQty = useAppSelector(selectTotalTreeQty);
-    const { isProUser, currentOffering, customerInfo } = useContext(SubscriptionContext);
+    const { isProUser, currentOffering } = useContext(SubscriptionContext);
     const { isSignedIn } = useAuth();
     const pathname = usePathname();
-    const { open } = useContext(HandleAlertContext);
-    const dispatch = useDispatch();
 
-    const openTrialAboutToEnd = () => {
-        open({
-            title: "Your trial ends in a day",
-            state: "idle",
-            subtitle: "You don't need to do anything. Just letting you know :)",
-            buttonText: "Thanks",
-        });
-        dispatch(updateTrialAboutToEndShown());
-    };
+    // const { open } = useContext(HandleAlertContext);
+    // const dispatch = useDispatch();
+
+    // const openTrialAboutToEnd = () => {
+    //     open({
+    //         title: "Your trial ends in a day",
+    //         state: "idle",
+    //         subtitle: "You don't need to do anything. Just letting you know :)",
+    //         buttonText: "Thanks",
+    //     });
+    //     dispatch(updateTrialAboutToEndShown());
+    // };
 
     const runWelcomeUser = nthAppOpen === 0 && onboardingStep === 0;
     const finishOnboarding = onboardingStep === LAST_ONBOARDING_STEP;
@@ -177,26 +170,24 @@ const useRedirectOnAppFocus = (
     const paywallIntervalThreshold = daysSinceLastPaywallShown >= DAYS_INTERVAL_TO_SHOW_PAYWALL;
     const runPaywall = isProUser === false && finishOnboarding && currentOffering && (hasntShownPaywallYet || paywallIntervalThreshold);
 
-    const onTrial = getOnTrial(customerInfo);
+    // const onTrial = getOnTrial(customerInfo);
 
-    const trialCompletion = getTrialCompletion(onTrial, customerInfo);
+    // const trialCompletion = getTrialCompletion(onTrial, customerInfo);
 
-    const runTrialAboutToEnd = onTrial === true && trialAboutToEndShown === false && trialCompletion >= NOTIFY_TRIAL_THRESHOLD;
+    // const runTrialAboutToEnd = onTrial === true && trialAboutToEndShown === false && trialCompletion >= NOTIFY_TRIAL_THRESHOLD;
 
     useEffect(() => {
         if (!readyToRedirect) return;
         if (runWelcomeUser) return router.push("/welcomeNewUser");
-
         if (runOnboardingModal) return openOnboardingModal();
 
         //PRE ONBOARDING 👆
         if (isProUser === null) return;
         if (isSignedIn === null) return;
         //🚨 We have to show onboarding experience (or set the state as shown) for every way to finish the onboarding otherwise the app won't work correctly
-        if (!onboardingExperience) return;
         if (deepLinkOpenedApp) return;
         //POST ONBOARDING 👇
-        if (runTrialAboutToEnd) return openTrialAboutToEnd();
+        // if (runTrialAboutToEnd) return openTrialAboutToEnd();
 
         if (runSignUp) return router.push("/auth/signUp");
 
@@ -249,7 +240,9 @@ export default function RootLayout() {
         if (fontsLoaded && isLoaded) SplashScreen.hideAsync();
     }, [fontsLoaded, isLoaded]);
 
-    const readyToRedirect = !(!fontsLoaded || !isLoaded || !customerInfo);
+    //  WHEN TURNING SUBSCRIPTIONS ON AGAIN UNCOMMENT THIS 👇
+    const readyToRedirect = !(!fontsLoaded || !isLoaded);
+    // const readyToRedirect = !(!fontsLoaded || !isLoaded || !customerInfo);
 
     useHandleDeepLinking(isLoaded);
 

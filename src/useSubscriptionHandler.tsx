@@ -61,12 +61,13 @@ export type SubscriptionHandler = {
     currentOffering: PurchasesOffering | null;
     customerInfo: CustomerInfo | null;
     isProUser: boolean | null;
-    onFreeTrial: boolean | null;
 };
 
 //🚨 Ideally we only run this hook once and pass it's value to the context provider
 
 function useSubscriptionHandler(): SubscriptionHandler {
+    return { currentOffering: null, isProUser: true, customerInfo: null };
+
     Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
     const userId = useMongoCompliantUserId();
 
@@ -107,9 +108,7 @@ function useSubscriptionHandler(): SubscriptionHandler {
     const currentOffering = useFetchOffers();
     const { isProUser, customerInfo } = useUserSubscriptionInformation();
 
-    const onFreeTrial: boolean | null = false;
-
-    return { currentOffering, isProUser, customerInfo, onFreeTrial };
+    return { currentOffering, isProUser, customerInfo };
 }
 
 export default useSubscriptionHandler;

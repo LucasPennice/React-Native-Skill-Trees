@@ -114,3 +114,5 @@ export const USER_ICON_FONT_SIZE = 22;
 export const dayInMilliseconds = 1000 * 60 * 60 * 24;
 
 export const FREE_TREE_LIMIT = 3;
+
+export const CLERK_DISCORD_AUTHORIZED_REDIRECT_URI = "https://clerk.skilltreesapp.com/v1/oauth_callback";

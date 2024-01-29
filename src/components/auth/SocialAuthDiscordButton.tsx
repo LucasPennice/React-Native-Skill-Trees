@@ -1,4 +1,4 @@
-import { colors } from "@/parameters";
+import { CLERK_DISCORD_AUTHORIZED_REDIRECT_URI, colors } from "@/parameters";
 import { useAppDispatch } from "@/redux/reduxHooks";
 import { updateFirstTimeOpeningApp } from "@/redux/slices/syncSlice";
 import { SocialAuthButton } from "@/types";
@@ -36,6 +36,7 @@ export const SocialAuthDiscordButton = ({ actingAs, text, preferred }: SocialAut
     const logInDiscord = useCallback(async () => {
         try {
             const { createdSessionId, setActive } = await startOAuthFlow();
+            // const { createdSessionId, setActive } = await startOAuthFlow({ redirectUrl: CLERK_DISCORD_AUTHORIZED_REDIRECT_URI });
 
             if (createdSessionId && setActive) {
                 await setActive({ session: createdSessionId });
@@ -46,6 +47,7 @@ export const SocialAuthDiscordButton = ({ actingAs, text, preferred }: SocialAut
                 if (actingAs === "signUp") return runOnSignUp();
             }
         } catch (err) {
+            console.error(JSON.stringify(err));
             mixpanel.track("ERROR Discord Auth", { err });
             return Alert.alert("Navigator error", "Please reset the app and try again, if the issue persists please contact the developer");
         }
